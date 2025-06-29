@@ -33,7 +33,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     .WithArguments("int", "string")
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Not_Flagged_When_Matches_Parameter_Type()
     {
@@ -59,7 +59,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Not_Flagged_When_Enumerable_Inner_Type_Matches_Parameter_Type()
     {
@@ -88,7 +88,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Not_Flagged_When_List_Inner_Type_Matches_Parameter_Type()
     {
@@ -117,7 +117,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Flagged_When_Argument_Missing()
     {
@@ -143,7 +143,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Not_Flagged_When_Data_Within_Another_Class()
     {
@@ -172,7 +172,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Not_Flagged_When_Data_Within_Another_Class_GenericAttribute()
     {
@@ -201,7 +201,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Flagged_When_MethodNotFound_GenericAttribute()
     {
@@ -232,7 +232,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Not_Flagged_When_Timeout_CancellationToken()
     {
@@ -263,7 +263,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     [Arguments(true)]
     [Arguments(false)]
@@ -292,7 +292,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             """
         );
     }
-    
+
     [Test]
     [Arguments(true)]
     [Arguments(false)]
@@ -319,13 +319,13 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 }
             }
             """,
-        
+
             Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
             .WithLocation(0)
                 .WithArguments("int, string, bool", "int, string")
         );
     }
-    
+
     [Test]
     [Arguments(true)]
     [Arguments(false)]
@@ -352,13 +352,13 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 }
             }
             """,
-        
+
             Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
             .WithLocation(0)
                 .WithArguments("int, string, bool", "int, string, string")
         );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Flagged_When_Does_Not_Match_Property_Type()
     {
@@ -390,7 +390,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     .WithArguments("int", "string")
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Not_Flagged_When_Does_Match_Property_Type()
     {
@@ -418,7 +418,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Flagged_When_Does_Not_Match_Property_Type_Enumerable()
     {
@@ -449,12 +449,12 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
                     .WithArguments("System.Collections.Generic.IEnumerable<System.Func<int>>", "int"),
-                
+
                 Verifier.Diagnostic(Rules.ReturnFunc)
                     .WithLocation(1)
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Flagged_When_Does_Not_Match_Property_Type_Tuple()
     {
@@ -486,7 +486,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                     .WithArguments("(string, int)", "(string, string)")
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Not_Flagged_When_Does_Match_Property_Type_Tuple()
     {
@@ -514,7 +514,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Arguments_Are_Flagged_When_Does_Not_Match_Parameter_Type()
     {
@@ -664,7 +664,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                                            }
                                            """);
     }
-    
+
     [Test]
     public async Task Bug_1538()
     {
@@ -697,7 +697,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Flagged_When_Instance_Method_And_Wrong_Attribute()
     {

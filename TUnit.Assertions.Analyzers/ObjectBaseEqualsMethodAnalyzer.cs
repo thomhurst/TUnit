@@ -20,7 +20,7 @@ public class ObjectBaseEqualsMethodAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         context.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation);
     }
-    
+
     private void AnalyzeOperation(OperationAnalysisContext context)
     {
         if (context.Operation is not IInvocationOperation invocationOperation)
@@ -32,7 +32,7 @@ public class ObjectBaseEqualsMethodAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-        
+
         if ((invocationOperation.Instance?.Type as INamedTypeSymbol)
             ?.AllInterfaces
             .Select(x => x.GloballyQualifiedNonGeneric())

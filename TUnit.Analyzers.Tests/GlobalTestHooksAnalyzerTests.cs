@@ -30,7 +30,7 @@ public class GlobalTestHooksAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     [Arguments("TestDiscovery", "TestDiscoveryContext context")]
     [Arguments("TestDiscovery", "")]
@@ -57,7 +57,7 @@ public class GlobalTestHooksAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task BeforeEvery_Test_Error()
     {
@@ -79,7 +79,7 @@ public class GlobalTestHooksAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task BeforeEvery_Class_Error()
     {
@@ -101,7 +101,7 @@ public class GlobalTestHooksAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task BeforeEvery_Assembly_Error()
     {
@@ -123,7 +123,7 @@ public class GlobalTestHooksAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task AfterEvery_Test_Error()
     {
@@ -145,7 +145,7 @@ public class GlobalTestHooksAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task AfterEvery_Class_Error()
     {
@@ -167,7 +167,7 @@ public class GlobalTestHooksAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task AfterEvery_Assembly_Error()
     {
@@ -189,7 +189,7 @@ public class GlobalTestHooksAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     [Arguments("TestDiscovery", "BeforeTestDiscoveryContext")]
     [Arguments("TestSession", "TestSessionContext")]
@@ -221,7 +221,7 @@ public class GlobalTestHooksAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     [Arguments("TestDiscovery", "TestDiscoveryContext")]
     [Arguments("TestSession", "TestSessionContext")]
@@ -253,7 +253,7 @@ public class GlobalTestHooksAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     [Arguments("TestDiscovery", "BeforeTestDiscoveryContext")]
     [Arguments("TestSession", "TestSessionContext")]
@@ -283,7 +283,7 @@ public class GlobalTestHooksAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     [Arguments("TestDiscovery", "TestDiscoveryContext")]
     [Arguments("TestSession", "TestSessionContext")]

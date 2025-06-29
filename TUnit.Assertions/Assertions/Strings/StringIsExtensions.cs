@@ -15,15 +15,15 @@ public static class StringIsExtensions
     {
         return IsEqualTo(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue1, null);
     }
-    
+
     public static StringEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         var assertionBuilder = valueSource.RegisterAssertion(new StringEqualsExpectedValueAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
-        
+
         return new StringEqualToAssertionBuilderWrapper(assertionBuilder);
     }
-    
+
     public static InvokableValueAssertionBuilder<string> IsEmpty(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
@@ -34,26 +34,29 @@ public static class StringIsExtensions
                     self.FailWithMessage("Actual string is null");
                     return false;
                 }
-                
+
                 return value == string.Empty;
             },
             (s, _, _) => $"'{s}' was not empty with {s.Length} characters",
             $"to be empty")
-            , []); }
-    
+            , []);
+    }
+
     public static InvokableValueAssertionBuilder<string> IsNullOrEmpty(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
             (value, _, _) => string.IsNullOrEmpty(value),
             (s, _, _) => $"'{s}' is not null or empty",
             $"to be null or empty")
-            , []); }
-    
+            , []);
+    }
+
     public static InvokableValueAssertionBuilder<string> IsNullOrWhitespace(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
             (value, _, _) => string.IsNullOrWhiteSpace(value),
             (s, _, _) => $"'{s}' is not null or whitespace",
             $"to be null or whitespace")
-            , []); }
+            , []);
+    }
 }

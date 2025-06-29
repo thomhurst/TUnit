@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._2085;
 
@@ -13,7 +11,7 @@ public class Tests
     {
         await Assert.That(d).IsNotEqualTo(0);
     }
-    
+
     [Test]
     [MatrixDataSource]
     public async Task Float_SpecialConsts([Matrix(float.NaN, float.PositiveInfinity, float.NegativeInfinity)] float d)

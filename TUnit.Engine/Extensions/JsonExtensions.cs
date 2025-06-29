@@ -1,5 +1,4 @@
 ﻿using TUnit.Core;
-using TUnit.Core.Extensions;
 using TUnit.Engine.Json;
 
 namespace TUnit.Engine.Extensions;
@@ -13,7 +12,7 @@ public static class JsonExtensions
             Assemblies = context.Assemblies.Select(x => x.ToJsonModel()).ToArray()
         };
     }
-    
+
     public static TestAssemblyJson ToJsonModel(this AssemblyHookContext context)
     {
         return new TestAssemblyJson
@@ -34,28 +33,36 @@ public static class JsonExtensions
 
     public static TestJson ToJsonModel(this TestContext context)
     {
+        var testDetails = context.TestDetails;
+        if (testDetails == null)
+        {
+            throw new InvalidOperationException("TestDetails is null");
+        }
+
         return new TestJson
         {
-            Categories = context.TestDetails.Categories,
-            ClassType = context.TestDetails.TestClass.Type.FullName,
+            Categories = testDetails.Categories,
+            ClassType = testDetails.ClassMetadata?.Type.FullName ?? testDetails.ClassType?.FullName ?? "Unknown",
             Result = context.Result?.ToJsonModel(),
-            Timeout = context.TestDetails.Timeout,
-            CustomProperties = context.TestDetails.CustomProperties,
+            Timeout = testDetails.Timeout,
+            CustomProperties = testDetails.CustomProperties.ToDictionary(
+                kvp => kvp.Key,
+                kvp => (IReadOnlyList<string>) kvp.Value.AsReadOnly()),
             DisplayName = context.GetTestDisplayName(),
             ObjectBag = context.ObjectBag,
-            RetryLimit = context.TestDetails.RetryLimit,
-            ReturnType = context.TestDetails.ReturnType.FullName,
-            TestId = context.TestDetails.TestId,
-            TestName = context.TestDetails.TestName,
-            TestClassArguments = context.TestDetails.TestClassArguments,
-            TestFilePath = context.TestDetails.TestFilePath,
-            TestLineNumber = context.TestDetails.TestLineNumber,
-            TestMethodArguments = context.TestDetails.TestMethodArguments,
-            TestClassParameterTypes = context.TestDetails.TestClassParameterTypes.Select(x => x.FullName).ToArray(),
-            TestMethodParameterTypes = context.TestDetails.TestMethodParameterTypes.Select(x => x.FullName).ToArray(),
+            RetryLimit = testDetails.RetryLimit,
+            ReturnType = testDetails.ReturnType?.FullName ?? "void",
+            TestId = testDetails.TestId,
+            TestName = testDetails.TestName,
+            TestClassArguments = testDetails.TestClassArguments,
+            TestFilePath = testDetails.TestFilePath,
+            TestLineNumber = testDetails.TestLineNumber,
+            TestMethodArguments = testDetails.TestMethodArguments,
+            TestClassParameterTypes = testDetails.TestClassParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? [],
+            TestMethodParameterTypes = testDetails.TestMethodParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? [],
         };
     }
-    
+
     public static TestResultJson ToJsonModel(this TestResult result)
     {
         return new TestResultJson
@@ -69,7 +76,7 @@ public static class JsonExtensions
             ComputerName = result.ComputerName
         };
     }
-    
+
     public static ExceptionJson ToJsonModel(this Exception exception)
     {
         return new ExceptionJson

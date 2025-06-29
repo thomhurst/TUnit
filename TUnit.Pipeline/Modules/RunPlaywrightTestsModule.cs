@@ -1,9 +1,6 @@
 ﻿using ModularPipelines.Attributes;
 using ModularPipelines.Context;
-using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Models;
-using ModularPipelines.Modules;
 using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
@@ -14,7 +11,7 @@ public class RunPlaywrightTestsModule : TestBaseModule
     protected override Task<DotNetRunOptions> GetTestOptions(IPipelineContext context, string framework, CancellationToken cancellationToken)
     {
         var project = Sourcy.DotNet.Projects.TUnit_Templates__content__TUnit_Playwright__TestProject;
-        
+
         return Task.FromResult(new DotNetRunOptions
         {
             Project = project.FullName,

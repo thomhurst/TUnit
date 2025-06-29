@@ -12,13 +12,13 @@ public class GenericHooks<T>(T arg)
     {
         Console.WriteLine(arg);
     }
-    
+
     [After(HookType.Test)]
     public void After()
     {
         Console.WriteLine(arg);
     }
-    
+
     [Test]
     public void Test()
     {

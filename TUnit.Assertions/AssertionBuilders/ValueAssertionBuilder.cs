@@ -9,7 +9,7 @@ public class ValueAssertionBuilder<TActual> : AssertionBuilder, IValueSource<TAc
     internal ValueAssertionBuilder(TActual value, string? expressionBuilder) : base(value.AsAssertionData(expressionBuilder), expressionBuilder)
     {
     }
-    
+
     public ValueAssertionBuilder(ISource source) : base(source)
     {
     }

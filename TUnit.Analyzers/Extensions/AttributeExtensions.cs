@@ -14,17 +14,17 @@ public static class AttributeExtensions
         {
             fullyQualifiedName = $"global::{fullyQualifiedName}";
         }
-        
+
         return attributeDatas.FirstOrDefault(x =>
             x.AttributeClass?.GloballyQualifiedNonGeneric()
             == fullyQualifiedName);
     }
-    
+
     public static Location? GetLocation(this AttributeData attributeData)
     {
         return attributeData.ApplicationSyntaxReference?.GetSyntax().GetLocation();
     }
-    
+
     public static bool IsStandardHook(this AttributeData attributeData, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
         if (
@@ -34,17 +34,17 @@ public static class AttributeExtensions
         {
             hookType = HookType.Before;
             type = attributeData.AttributeClass!;
-            hookLevel = (HookLevel?)Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last()); 
+            hookLevel = (HookLevel?) Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
             return true;
         }
-        
+
         if (SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
                 compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.AfterAttribute
                     .WithoutGlobalPrefix)))
         {
             hookType = HookType.After;
             type = attributeData.AttributeClass!;
-            hookLevel = (HookLevel?)Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last()); 
+            hookLevel = (HookLevel?) Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
             return true;
         }
 
@@ -53,7 +53,7 @@ public static class AttributeExtensions
         hookLevel = null;
         return false;
     }
-    
+
     public static bool IsEveryHook(this AttributeData attributeData, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
         if (
@@ -63,8 +63,8 @@ public static class AttributeExtensions
         {
             hookType = HookType.Before;
             type = attributeData.AttributeClass!;
-            hookLevel = (HookLevel?)Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
-            
+            hookLevel = (HookLevel?) Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+
             return true;
         }
 
@@ -74,38 +74,38 @@ public static class AttributeExtensions
         {
             hookType = HookType.After;
             type = attributeData.AttributeClass!;
-            hookLevel = (HookLevel?)Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
-            
+            hookLevel = (HookLevel?) Enum.Parse(typeof(HookLevel), attributeData.ConstructorArguments.First().ToCSharpString().Split('.').Last());
+
             return true;
         }
-        
+
         hookType = null;
         type = null;
         hookLevel = null;
         return false;
     }
-    
+
     public static bool IsMatrixAttribute(this AttributeData attributeData, Compilation compilation)
     {
         return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
                    compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.Matrix
                        .WithoutGlobalPrefix));
     }
-    
+
     public static bool IsMatrixDataSourceAttribute(this AttributeData attributeData, Compilation compilation)
     {
         return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
             compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.MatrixDataSourceAttribute
                 .WithoutGlobalPrefix));
     }
-    
+
     public static bool IsDataSourceAttribute(this AttributeData? attributeData, Compilation compilation)
     {
         if (attributeData?.AttributeClass is null)
         {
             return false;
         }
-        
+
         var dataAttributeInterface = compilation
             .GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataAttribute.WithoutGlobalPrefix);
 

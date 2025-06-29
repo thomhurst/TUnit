@@ -38,7 +38,7 @@ public class ClassConstructorDataSourceAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Assembly_Attribute_No_Error()
     {

@@ -14,9 +14,9 @@ public class DateTimeEqualToAssertionBuilderWrapper : InvokableValueAssertionBui
         var assertion = (DateTimeEqualsExpectedValueAssertCondition) Assertions.Peek();
 
         assertion.SetTolerance(tolerance);
-        
+
         AppendCallerMethod([doNotPopulateThis]);
-        
+
         return this;
     }
 }

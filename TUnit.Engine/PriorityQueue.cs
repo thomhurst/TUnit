@@ -37,7 +37,7 @@ namespace TUnit.Engine
 
             return element.Value;
         }
-        
+
         public bool TryDequeue([NotNullWhen(true)] out TElement? value, [NotNullWhen(true)] out TPriority? priority)
         {
             if (_elements.Count == 0)

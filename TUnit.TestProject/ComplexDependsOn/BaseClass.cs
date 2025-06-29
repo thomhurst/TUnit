@@ -10,25 +10,25 @@ public class BaseClass
     {
         await Task.Delay(TimeSpan.FromMilliseconds(50));
     }
-    
+
     [Test]
     public async Task Test2()
     {
         await Task.Delay(TimeSpan.FromMilliseconds(50));
     }
-    
+
     [Test]
     public async Task Test3()
     {
         await Task.Delay(TimeSpan.FromMilliseconds(50));
     }
-    
+
     [Test]
     public async Task Test4()
     {
         await Task.Delay(TimeSpan.FromMilliseconds(50));
     }
-    
+
     [Test]
     public async Task Test5()
     {

@@ -10,7 +10,7 @@ public class InvokableValueDelegateAssertionBuilder<TActual> : InvokableAssertio
     }
 
     public AssertionBuilder AssertionBuilder => this;
-    
+
     public ValueDelegateAnd<TActual> And => new(AssertionBuilder.AppendConnector(ChainType.And));
     public ValueDelegateOr<TActual> Or => new(AssertionBuilder.AppendConnector(ChainType.Or));
 }

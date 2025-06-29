@@ -20,7 +20,7 @@ internal class DetailedStacktraceCommandProvider(IExtension extension) : IComman
     public string DisplayName => extension.DisplayName;
 
     public string Description => extension.Description;
-    
+
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     {
         return

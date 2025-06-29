@@ -15,7 +15,7 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         {
             yield return "net9.0";
             yield return "net8.0";
-        
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 yield return "net472";
@@ -32,10 +32,10 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
             var testResult = await SubModule(framework, async () =>
             {
                 var testOptions = SetDefaults(await GetTestOptions(context, framework, cancellationToken));
-                
+
                 return await context.DotNet().Run(testOptions, cancellationToken);
             });
-            
+
             results.Add(testResult);
         }
 
@@ -44,7 +44,7 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 
     private DotNetRunOptions SetDefaults(DotNetRunOptions testOptions)
     {
-        if(testOptions.Arguments?.Any(x => x == "--fail-fast") != true)
+        if (testOptions.Arguments?.Any(x => x == "--fail-fast") != true)
         {
             testOptions = testOptions with
             {
@@ -55,8 +55,8 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
                 ]
             };
         }
-        
-        if(testOptions.EnvironmentVariables?.Any(x => x.Key == "NET_VERSION") != true)
+
+        if (testOptions.EnvironmentVariables?.Any(x => x.Key == "NET_VERSION") != true)
         {
             testOptions = testOptions with
             {

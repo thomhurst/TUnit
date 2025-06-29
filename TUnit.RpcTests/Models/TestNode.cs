@@ -2,7 +2,6 @@
 
 namespace TUnit.RpcTests.Models;
 
-// TODO: complete the object model
 public sealed record TestNode
 (
     [property: JsonPropertyName("uid")]

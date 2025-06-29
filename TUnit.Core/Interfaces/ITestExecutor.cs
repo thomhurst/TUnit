@@ -57,7 +57,7 @@ public interface ITestExecutor
     /// </returns>
     /// <remarks>
     /// <para>
-    /// This method is called by the test framework to execute a test. The implementation of this method 
+    /// Called by the test framework to execute a test. The implementation 
     /// defines how the test is executed, such as on which thread or with what synchronization context.
     /// </para>
     /// <para>

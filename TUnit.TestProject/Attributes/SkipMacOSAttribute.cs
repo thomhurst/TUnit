@@ -1,11 +1,13 @@
 ﻿using System.Runtime.InteropServices;
+using TUnit.Core;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject.Attributes;
 
 [Obsolete("Use `[ExcludeOnAttribute(OS.MacOS)]` instead.")]
 public class SkipMacOSAttribute(string reason) : SkipAttribute(reason)
 {
-    public override Task<bool> ShouldSkip(BeforeTestContext context)
+    public override Task<bool> ShouldSkip(TestRegisteredContext context)
     {
         return Task.FromResult(RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
     }

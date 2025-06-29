@@ -13,7 +13,7 @@ public static class ImmutableArrayExtensions
 
         return immutableArray.First();
     }
-    
+
     public static T? SafeFirstOrDefault<T>(this ImmutableArray<T> immutableArray, Func<T, bool> predicate)
     {
         if (immutableArray.IsDefaultOrEmpty)
@@ -23,7 +23,7 @@ public static class ImmutableArrayExtensions
 
         return immutableArray.FirstOrDefault(predicate);
     }
-    
+
     public static T? SafeFirstOrDefault<T>(this IEnumerable<T> enumerable)
     {
         if (enumerable is ImmutableArray<T> immutableArray)

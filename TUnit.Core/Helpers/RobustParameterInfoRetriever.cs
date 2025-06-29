@@ -78,7 +78,7 @@ public static class RobustParameterInfoRetriever
     /// <returns>The ParameterInfo for the specified parameter</returns>
     /// <exception cref="InvalidOperationException">Thrown when no suitable method is found</exception>
     public static ParameterInfo GetMethodParameterInfo(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type type,
         string methodName,
         int parameterIndex,
         Type[] parameterTypes,
@@ -172,7 +172,9 @@ public static class RobustParameterInfoRetriever
     private static bool ParameterTypesMatch(ParameterInfo[] parameters, Type[] expectedTypes)
     {
         if (parameters.Length != expectedTypes.Length)
+        {
             return false;
+        }
 
         for (int i = 0; i < parameters.Length; i++)
         {
@@ -181,22 +183,30 @@ public static class RobustParameterInfoRetriever
 
             // Exact match
             if (paramType == expectedType)
+            {
                 continue;
+            }
 
             // Handle generic parameters and open generic types
             if (paramType.IsGenericParameter || expectedType.IsGenericParameter)
+            {
                 continue;
+            }
 
             // Handle nullable types
             var underlyingParamType = Nullable.GetUnderlyingType(paramType) ?? paramType;
             var underlyingExpectedType = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
 
             if (underlyingParamType == underlyingExpectedType)
+            {
                 continue;
+            }
 
             // Check assignability
             if (expectedType.IsAssignableFrom(paramType) || paramType.IsAssignableFrom(expectedType))
+            {
                 continue;
+            }
 
             return false;
         }

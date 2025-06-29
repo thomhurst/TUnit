@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Assertions.Generics.Conditions;
 using TUnit.Assertions.Extensions;
 
@@ -41,8 +40,8 @@ public class ConvertedValueSource<TFromType, TToType> : IValueSource<TToType?>
     private static async ValueTask<AssertionData> ConvertAsync(IValueSource<TFromType> valueSource, ConvertToAssertCondition<TFromType, TToType> convertToAssertCondition)
     {
         var invokableAssertionBuilder = valueSource.RegisterAssertion(convertToAssertCondition, [], null);
-        
-        return await invokableAssertionBuilder.ProcessAssertionsAsync(assertionData => 
+
+        return await invokableAssertionBuilder.ProcessAssertionsAsync(assertionData =>
             Task.FromResult(assertionData with { Result = convertToAssertCondition.ConvertedValue, End = DateTimeOffset.Now }));
 
     }

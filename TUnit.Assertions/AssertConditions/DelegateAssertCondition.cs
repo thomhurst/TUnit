@@ -37,7 +37,7 @@ public abstract class DelegateAssertCondition<TActual, TException> : BaseAssertC
                     return FailWithMessage(failDecision.Message);
             }
         }
-        
+
         return AssertionResult.Passed;
     }
 

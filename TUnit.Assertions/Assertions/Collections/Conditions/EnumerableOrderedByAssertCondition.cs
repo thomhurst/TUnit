@@ -3,8 +3,8 @@ using TUnit.Assertions.Enums;
 namespace TUnit.Assertions.AssertConditions.Collections;
 
 public class EnumerableOrderedByAssertCondition<TActual, TInner, TComparisonItem>(
-    IComparer<TComparisonItem?> comparer, 
-    Func<TInner, TComparisonItem> comparisonItemSelector, 
+    IComparer<TComparisonItem?> comparer,
+    Func<TInner, TComparisonItem> comparisonItemSelector,
     Order order)
     : BaseAssertCondition<TActual> where TActual : IEnumerable<TInner>
 {
@@ -12,7 +12,7 @@ public class EnumerableOrderedByAssertCondition<TActual, TInner, TComparisonItem
     {
         return $"to be in {order} order";
     }
-    
+
     protected override ValueTask<AssertionResult> GetResult(
         TActual? actualValue, Exception? exception,
         AssertionMetadata assertionMetadata

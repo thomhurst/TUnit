@@ -8,7 +8,7 @@ public abstract class ConcurrentDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-            
+
         InitializeInternal(context);
     }
 

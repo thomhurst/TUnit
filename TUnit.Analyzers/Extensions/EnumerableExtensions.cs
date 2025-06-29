@@ -4,12 +4,12 @@ public static class EnumerableExtensions
 {
     public static IEnumerable<T> ZipAll<T1, T2, T>(
         this IEnumerable<T1> first,
-        IEnumerable<T2> second, 
+        IEnumerable<T2> second,
         Func<T1?, T2?, T> operation)
     {
         using var iter1 = first.GetEnumerator();
         using var iter2 = second.GetEnumerator();
-        
+
         while (iter1.MoveNext())
         {
             if (iter2.MoveNext())
@@ -26,7 +26,7 @@ public static class EnumerableExtensions
             yield return operation(default, iter2.Current);
         }
     }
-    
+
     public static T? FirstOrNull<T>(this IEnumerable<T> enumerable, Func<T, bool> predicate) where T : struct
     {
         if (enumerable is null)

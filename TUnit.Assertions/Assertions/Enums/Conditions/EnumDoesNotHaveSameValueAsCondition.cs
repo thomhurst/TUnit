@@ -2,7 +2,7 @@
 
 namespace TUnit.Assertions.Assertions.Enums.Conditions;
 
-public class EnumDoesNotHaveSameValueAsCondition<TEnum, TExpected>(TExpected expected) : BaseAssertCondition<TEnum> 
+public class EnumDoesNotHaveSameValueAsCondition<TEnum, TExpected>(TExpected expected) : BaseAssertCondition<TEnum>
     where TEnum : Enum
     where TExpected : Enum
 {

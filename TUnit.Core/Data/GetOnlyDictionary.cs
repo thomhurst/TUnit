@@ -22,7 +22,7 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
             return InnerDictionary.GetOrAdd(key, func);
         }
     }
-    
+
     public bool TryGetValue(TKey key, [NotNullWhen(true)] out TValue? value)
     {
         lock (Lock)
@@ -30,7 +30,7 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
             return InnerDictionary.TryGetValue(key, out value!);
         }
     }
-    
+
     public TValue GetOrAdd(TKey key, Func<TKey, TValue> func, out bool previouslyExisted)
     {
         lock (Lock)
@@ -40,7 +40,7 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
                 previouslyExisted = true;
                 return foundValue;
             }
-            
+
             previouslyExisted = false;
             return InnerDictionary.GetOrAdd(key, func);
         }
@@ -58,6 +58,6 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
             return default;
         }
     }
-    
+
     public TValue this[TKey key] => InnerDictionary[key];
 }

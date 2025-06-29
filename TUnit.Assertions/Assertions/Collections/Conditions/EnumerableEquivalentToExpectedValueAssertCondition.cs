@@ -19,7 +19,7 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
         {
             return "to match";
         }
-        
+
         return $"to be equivalent to {(ExpectedValue != null ? Formatter.Format(ExpectedValue) : null)}";
     }
 
@@ -32,7 +32,7 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
 
         var enumeratedActual = actualValue?.ToArray();
         var enumeratedExpected = expectedValue?.ToArray();
-        
+
         return AssertionResult
             .FailIf(enumeratedActual is null,
                 "it is null")
@@ -45,7 +45,7 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
     private static bool EqualsAnyOrder(TInner[] actualValue, TInner[] expectedValue,
         IEqualityComparer<TInner?> equalityComparer)
     {
-        return actualValue.Length == expectedValue.Length && !actualValue.Except(expectedValue, equalityComparer).Any(); 
+        return actualValue.Length == expectedValue.Length && !actualValue.Except(expectedValue, equalityComparer).Any();
     }
 
     private string FailureMessage(IEnumerable<TInner>? orderedActual)
@@ -55,7 +55,7 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
         {
             return equivalentToEqualityComparer.GetFailureMessages();
         }
-        
+
         return $"it is {string.Join(",", Formatter.Format(orderedActual!))}";
     }
 }

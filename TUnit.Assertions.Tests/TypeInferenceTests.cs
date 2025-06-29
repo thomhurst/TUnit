@@ -6,7 +6,7 @@ public class TypeInferenceTests
     public async Task Enumerables()
     {
         IEnumerable<int> enumerable = [];
-        
+
         try
         {
             await Assert.That(enumerable)

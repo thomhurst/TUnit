@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1836;
@@ -27,7 +25,7 @@ public class TestDbContext : IAsyncInitializer, IAsyncDisposable, ITestEndEventR
         return Task.CompletedTask;
     }
 
-    public ValueTask OnTestEnd(AfterTestContext testContext)
+    public ValueTask OnTestEnd(TestContext testContext)
     {
         if (!_isConnectionOpen)
         {

@@ -9,7 +9,7 @@ public class ConvertExceptionToValueAssertCondition<TException> : BaseAssertCond
     {
         return $"to throw {typeof(TException).Name}";
     }
-    
+
     public TException? ConvertedExceptionValue { get; private set; }
 
     protected override sealed ValueTask<AssertionResult> GetResult(object? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
@@ -18,14 +18,14 @@ public class ConvertExceptionToValueAssertCondition<TException> : BaseAssertCond
         {
             return FailWithMessage("No exception was thrown");
         }
-        
+
         if (exception is not TException castException)
         {
             return FailWithMessage($"Expected {typeof(TException).Name} but received {exception.GetType().Name}");
         }
-        
+
         ConvertedExceptionValue = castException;
-        
+
         return AssertionResult.Passed;
     }
 }

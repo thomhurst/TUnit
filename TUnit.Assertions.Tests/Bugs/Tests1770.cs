@@ -11,7 +11,7 @@ public class Tests1770
 
         await Assert.That(guid.ToByteArray()).IsNotEmpty();
     }
-    
+
     [Test]
     public async Task Throws_Nothing_Keeps_Type_Async_Delegate()
     {

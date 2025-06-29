@@ -10,25 +10,24 @@ namespace TUnit.Analyzers;
 public class ConsoleOutAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create
-        (
-            Rules.OverwriteConsole
-        );
+    [
+        Rules.OverwriteConsole
+    ];
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterOperationAction(AnalyzeInvocation, OperationKind.Invocation);
     }
-    
+
     private void AnalyzeInvocation(OperationAnalysisContext context)
-    { 
+    {
         if (context.Operation is not IInvocationOperation invocationOperation)
         {
             return;
         }
 
         var methodSymbol = invocationOperation.TargetMethod;
-        
+
         if (methodSymbol.Name is not "SetOut" and not "SetError")
         {
             return;

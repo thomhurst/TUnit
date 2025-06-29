@@ -22,12 +22,12 @@ public class MappableResultAssertionBuilder<TActual, TExpected> : InvokableValue
         var data = await ProcessAssertionsAsync();
 
         var tActual = data.Result is TActual actual ? actual : default;
-        
+
         return _mapper(tActual);
     }
 }
 
-public class MappableResultAssertionBuilder<TActual, TAssertCondition, TExpected> : InvokableValueAssertionBuilder<TActual> 
+public class MappableResultAssertionBuilder<TActual, TAssertCondition, TExpected> : InvokableValueAssertionBuilder<TActual>
     where TAssertCondition : BaseAssertCondition<TActual>
 {
     private readonly TAssertCondition _assertCondition;
@@ -49,7 +49,7 @@ public class MappableResultAssertionBuilder<TActual, TAssertCondition, TExpected
         var data = await ProcessAssertionsAsync();
 
         var tActual = data.Result is TActual actual ? actual : default;
-        
+
         return _mapper(tActual, _assertCondition);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
@@ -18,7 +17,7 @@ public static class TestSourceDataModelRetriever
         {
             yield break;
         }
-        
+
         var testAttribute = methodSymbol.GetRequiredTestAttribute();
 
         var constructorParameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
@@ -26,29 +25,34 @@ public static class TestSourceDataModelRetriever
                 context,
                 constructorParameters,
                 null,
-                constructorParameters.Select(x => x.Type).ToImmutableArray(),
-                GetClassAttributes(namedTypeSymbol)
-                    .Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute()))
-                    .ToImmutableArray(),
+                [
+                    ..constructorParameters.Select(x => x.Type)
+                ],
+                [
+                    ..GetClassAttributes(namedTypeSymbol)
+                        .Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute()))
+                ],
                 namedTypeSymbol,
                 methodSymbol,
                 ArgumentsType.ClassConstructor)
             .ToArray();
-        
+
         var methodParametersWithoutCancellationToken = methodSymbol.Parameters.WithoutCancellationTokenParameter();
 
         var testArgumentsContainers = ArgumentsRetriever.GetArguments(
             context,
             methodParametersWithoutCancellationToken,
             null,
-            methodParametersWithoutCancellationToken.Select(x => x.Type).ToImmutableArray(),
+            [
+                ..methodParametersWithoutCancellationToken.Select(x => x.Type)
+            ],
             methodSymbol.GetAttributes(),
             namedTypeSymbol,
             methodSymbol,
             ArgumentsType.Method);
-        
+
         var propertyArgumentsContainer = ArgumentsRetriever.GetProperties(context, namedTypeSymbol, methodSymbol);
-        
+
         var repeatCount =
             TestInformationRetriever.GetRepeatCount(methodSymbol.GetAttributesIncludingClass(namedTypeSymbol));
 
@@ -101,17 +105,16 @@ public static class TestSourceDataModelRetriever
     {
         for (var i = 0; i < runCount; i++)
         {
-            yield return GetTestSourceDataModel(new TestGenerationContext
-            {
-                Context = context,
-                MethodSymbol = methodSymbol,
-                ClassSymbol = namedTypeSymbol,
-                ClassArguments = new EmptyArgumentsContainer(),
-                TestArguments = testArguments,
-                CurrentRepeatAttempt = i,
-                TestAttribute = testAttribute,
-                PropertyArguments = classPropertiesContainer
-            });
+            yield return GetTestSourceDataModel(new TestGenerationContext(
+                context,
+                methodSymbol,
+                namedTypeSymbol,
+                new EmptyArgumentsContainer(),
+                testArguments,
+                i,
+                testAttribute,
+                classPropertiesContainer
+            ));
         }
     }
 
@@ -123,17 +126,16 @@ public static class TestSourceDataModelRetriever
     {
         for (var i = 0; i < runCount; i++)
         {
-            yield return GetTestSourceDataModel(new TestGenerationContext
-            {
-                Context = context,
-                MethodSymbol = methodSymbol,
-                ClassSymbol = namedTypeSymbol,
-                ClassArguments = classArguments,
-                TestArguments = testArguments,
-                CurrentRepeatAttempt = i,
-                TestAttribute = testAttribute,
-                PropertyArguments = classPropertiesContainer
-            });
+            yield return GetTestSourceDataModel(new TestGenerationContext(
+                context,
+                methodSymbol,
+                namedTypeSymbol,
+                classArguments,
+                testArguments,
+                i,
+                testAttribute,
+                classPropertiesContainer
+            ));
         }
     }
 
@@ -148,14 +150,14 @@ public static class TestSourceDataModelRetriever
         var testAttributes = methodSymbol.GetAttributes().ExcludingSystemAttributes();
         var classAttributes = namedTypeSymbol.GetAttributesIncludingBaseTypes().ExcludingSystemAttributes();
         var assemblyAttributes = namedTypeSymbol.ContainingAssembly.GetAttributes().ExcludingSystemAttributes();
-        
+
         AttributeData[] allAttributes =
         [
             ..testAttributes,
             ..classAttributes,
             ..assemblyAttributes
         ];
-        
+
         return new TestSourceDataModel
         {
             TestGenerationContext = testGenerationContext,
@@ -163,15 +165,15 @@ public static class TestSourceDataModelRetriever
             MethodName = methodSymbol.Name,
             FullyQualifiedTypeName = namedTypeSymbol.GloballyQualified(),
             MinimalTypeName = namedTypeSymbol.Name,
-            TestClass = namedTypeSymbol,
-            TestMethod = methodSymbol,
+            ClassMetadata = namedTypeSymbol,
+            MethodMetadata = methodSymbol,
             RepeatLimit = TestInformationRetriever.GetRepeatCount(allAttributes),
             CurrentRepeatAttempt = testGenerationContext.CurrentRepeatAttempt,
             ClassArguments = classArguments,
             MethodArguments = testArguments,
             FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? string.Empty,
             LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
-            MethodArgumentTypes = [..GetParameterTypes(methodSymbol, testArguments.GetArgumentTypes())],
+            MethodArgumentTypes = [.. GetParameterTypes(methodSymbol, testArguments.GetArgumentTypes())],
             MethodGenericTypeCount = methodSymbol.TypeParameters.Length,
             PropertyArguments = testGenerationContext.PropertyArguments,
             GenericSubstitutions = GetGenericSubstitutions(methodSymbol, testArguments.GetArgumentTypes())
@@ -180,13 +182,13 @@ public static class TestSourceDataModelRetriever
 
     private static IDictionary<string, string>? GetGenericSubstitutions(IMethodSymbol methodSymbol, string[] argumentTypes)
     {
-        if(methodSymbol.Parameters.Length is 0 || methodSymbol.TypeParameters.Length is 0)
+        if (methodSymbol.Parameters.Length is 0 || methodSymbol.TypeParameters.Length is 0)
         {
             return null;
         }
 
         var dictionary = new Dictionary<string, string>();
-        
+
         for (var index = 0; index < methodSymbol.Parameters.Length; index++)
         {
             var parameter = methodSymbol.Parameters[index];
@@ -217,3 +219,14 @@ public static class TestSourceDataModelRetriever
         }
     }
 }
+
+public record TestGenerationContext(
+    GeneratorAttributeSyntaxContext Context,
+    IMethodSymbol MethodSymbol,
+    INamedTypeSymbol ClassSymbol,
+    BaseContainer ClassArguments,
+    BaseContainer TestArguments,
+    int CurrentRepeatAttempt,
+    AttributeData TestAttribute,
+    ClassPropertiesContainer PropertyArguments
+);

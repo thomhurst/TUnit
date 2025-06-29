@@ -1,91 +1,42 @@
-﻿using TUnit.Core;
-using TUnit.Core.Extensions;
-using TUnit.Core.Helpers;
-using TUnit.Engine.Exceptions;
-using TUnit.Engine.Extensions;
-using TUnit.Engine.Helpers;
-using TUnit.Engine.Hooks;
+using System.Reflection;
 
-namespace TUnit.Engine.Services;
+namespace TUnit.Engine;
 
-internal class TestInvoker(TestHookOrchestrator testHookOrchestrator, Disposer disposer)
+/// <summary>
+/// Implementation of test invoker
+/// </summary>
+public class TestInvoker : ITestInvoker
 {
-    private readonly SemaphoreSlim _consoleStandardOutLock = new(1, 1);
-
-    public async Task Invoke(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
+    public async Task InvokeTestMethod(object instance, MethodInfo method, object?[] arguments)
     {
-        try
-        {
-            foreach (var onInitializeObject in discoveredTest.TestContext.GetOnInitializeObjects())
-            {
-                await onInitializeObject.InitializeAsync();
-            }
+        var result = method.Invoke(instance, arguments);
 
-            await testHookOrchestrator.ExecuteBeforeHooks(discoveredTest, cancellationToken);
-            
-            discoveredTest.TestContext.RestoreExecutionContext();
-            
-            foreach (var testStartEventsObject in discoveredTest.TestContext.GetTestStartEventObjects())
-            {
-                await testStartEventsObject.OnTestStart(new BeforeTestContext(discoveredTest));
-            }
-            
-            await Timings.Record("Test Body", discoveredTest.TestContext,
-                () => discoveredTest.ExecuteTest(cancellationToken));
-            
-            discoveredTest.TestContext.SetResult(null);
-        }
-        catch (Exception ex)
+        if (result is Task task)
         {
-            discoveredTest.TestContext.SetResult(ex);
-            throw;
+            await task;
         }
-        finally
+        else if (result is ValueTask valueTask)
         {
-            await DisposeTest(discoveredTest.TestContext, cleanupExceptions);
+            await valueTask.AsTask();
         }
     }
-    
-    private async ValueTask DisposeTest(TestContext testContext, List<Exception> cleanUpExceptions)
-    {
-        var afterHooks = testHookOrchestrator.CollectAfterHooks(testContext.TestDetails.ClassInstance, testContext.InternalDiscoveredTest, cleanUpExceptions);
-            
-        foreach (var executableHook in afterHooks)
-        {
-            await Timings.Record($"After(Test): {executableHook.Name}", testContext, () =>
-            {
-                try
-                {
-                    return executableHook.ExecuteAsync(testContext, CancellationToken.None);
-                }
-                catch (Exception e)
-                {
-                    throw new HookFailedException($"Error executing [After(Test)] hook: {executableHook.MethodInfo.Type.FullName}.{executableHook.Name}", e);
-                }
-            });
-        }
-        
-        foreach (var testEndEventsObject in testContext.GetTestEndEventObjects())
-        {
-            await RunHelpers.RunValueTaskSafelyAsync(() => testEndEventsObject.OnTestEnd(new AfterTestContext(testContext.InternalDiscoveredTest)),
-                cleanUpExceptions);
-        }
-        
-        foreach (var disposableObject in testContext.GetOnDisposeObjects())
-        {
-            await RunHelpers.RunValueTaskSafelyAsync(() => disposer.DisposeAsync(disposableObject),
-                cleanUpExceptions);
-        }
-        
-        await _consoleStandardOutLock.WaitAsync();
 
-        try
+    public async Task InvokeTestAsync(object instance, MethodInfo method, object?[] arguments)
+    {
+        var result = method.Invoke(instance, arguments);
+
+        if (result is Task task)
         {
-            await disposer.DisposeAsync(testContext);
+            await task;
         }
-        finally
+        else if (result is ValueTask valueTask)
         {
-            _consoleStandardOutLock.Release();
+            await valueTask.AsTask();
         }
+    }
+
+    public async Task InvokeTestAsync(object instance, Func<object, object?[], Task> testInvoker, object?[] arguments)
+    {
+        await testInvoker(instance, arguments);
     }
 }

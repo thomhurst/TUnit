@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Interfaces;
+﻿using System.Threading.Tasks;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -27,15 +28,16 @@ public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventR
         {
             throw new ArgumentException("Duplicate constraint keys are not allowed.");
         }
-        
+
         ConstraintKeys = constraintKeys;
     }
 
-    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        discoveredTestContext.SetParallelConstraint(new NotInParallelConstraint(ConstraintKeys)
+        context.SetParallelConstraint(new NotInParallelConstraint(ConstraintKeys)
         {
             Order = Order
         });
+        return default;
     }
 }

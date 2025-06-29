@@ -7,7 +7,7 @@ public class BaseClass
 {
     [ClassDataSource<DataClass>(Shared = SharedType.Keyed, Key = "🔑")]
     public required DataClass Data { get; init; }
-    
+
     [Test]
     [Arguments(1)]
     [Arguments(2)]

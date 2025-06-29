@@ -27,7 +27,7 @@ public class PropertySetterTests
     [ClassDataSource<InnerModel>(Shared = SharedType.Keyed, Key = "Key")]
     public required InnerModel Property6 { get; init; }
 
-    [DataSourceGeneratorTests.AutoFixtureGenerator<string>]
+    [AutoFixtureGenerator<string>]
     public required string Property7 { get; init; }
 
     [ClassDataSource<StaticInnerModel>(Shared = SharedType.PerTestSession)]
@@ -75,7 +75,7 @@ public class PropertySetterTests
         await Assert.That(StaticProperty).IsNotNull();
         await Assert.That(StaticProperty.IsInitialized).IsTrue();
         await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
-        
+
         await Assert.That(Property3.IsInitialized).IsTrue();
         await Assert.That(Property4.IsInitialized).IsTrue();
         await Assert.That(Property5.IsInitialized).IsTrue();

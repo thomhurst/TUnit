@@ -7,7 +7,7 @@ public static class MethodExtensions
     public static AttributeData? GetTestAttribute(this IMethodSymbol methodSymbol)
     {
         return methodSymbol.GetAttributes()
-            .SafeFirstOrDefault(x => x.AttributeClass?.BaseType?.GloballyQualified() 
+            .SafeFirstOrDefault(x => x.AttributeClass?.BaseType?.GloballyQualified()
                                  == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix);
     }
 
@@ -21,7 +21,7 @@ public static class MethodExtensions
     {
         return methodSymbol.GetTestAttribute() != null;
     }
-    
+
     public static bool IsHook(this IMethodSymbol methodSymbol, Compilation compilation)
     {
         return methodSymbol.GetAttributes().Any(x => x.IsNonGlobalHook(compilation) || x.IsGlobalHook(compilation));
@@ -31,7 +31,7 @@ public static class MethodExtensions
     {
         return GetAttributesIncludingClassEnumerable(methodSymbol, namedTypeSymbol).ToArray();
     }
-    
+
     public static IEnumerable<AttributeData> GetAttributesIncludingClassEnumerable(this IMethodSymbol methodSymbol, INamedTypeSymbol namedTypeSymbol)
     {
         foreach (var attributeData in methodSymbol.GetAttributes())
@@ -47,7 +47,7 @@ public static class MethodExtensions
             {
                 yield return attributeData;
             }
-            
+
             type = type.BaseType;
         }
     }

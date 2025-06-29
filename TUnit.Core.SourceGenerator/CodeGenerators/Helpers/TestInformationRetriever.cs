@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
@@ -19,89 +18,90 @@ public static class TestInformationRetriever
 
     public static string GetTestId(TestGenerationContext testGenerationContext)
     {
-        var stringBuilder = new StringBuilder();
+        using var writer = new CodeWriter("", includeHeader: false);
+        writer.SetIndentLevel(1); // For inline expression
 
         if (testGenerationContext.ClassArguments is DataSourceAttributeContainer { Attribute.AttributeClass: not null } classDataAttributeContainer)
         {
-            stringBuilder.Append($"{classDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.ClassDataIndex}}}:");
+            writer.Append($"{classDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.ClassDataIndex}}}:");
         }
 
         if (testGenerationContext.ClassArguments is MethodDataSourceAttributeContainer classLevelMethodDataSourceAttributeContainer)
         {
-            stringBuilder.Append(classLevelMethodDataSourceAttributeContainer.IsExpandableEnumerable
+            writer.Append(classLevelMethodDataSourceAttributeContainer.IsExpandableEnumerable
                 ? $"CL-EMDS{classLevelMethodDataSourceAttributeContainer.AttributeIndex}:{{{VariableNames.ClassDataIndex}}}:"
                 : $"CL-MDS{classLevelMethodDataSourceAttributeContainer.AttributeIndex}:");
         }
 
         if (testGenerationContext.ClassArguments is ArgumentsAttributeContainer classLevelArgumentsContainer)
         {
-            stringBuilder.Append($"CL-ARGS{classLevelArgumentsContainer.AttributeIndex}:");
+            writer.Append($"CL-ARGS{classLevelArgumentsContainer.AttributeIndex}:");
         }
-        
+
         if (testGenerationContext.ClassArguments is ClassConstructorAttributeContainer classLevelClassConstructorAttribute)
         {
-            stringBuilder.Append($"CL-CCA{classLevelClassConstructorAttribute.AttributeIndex}:");
+            writer.Append($"CL-CCA{classLevelClassConstructorAttribute.AttributeIndex}:");
         }
-        
-        if (testGenerationContext.ClassArguments is DataSourceGeneratorContainer classLevelGeneratedArgumentsContainer)
+
+        if (testGenerationContext.ClassArguments is AsyncDataSourceGeneratorContainer classLevelGeneratedArgumentsContainer)
         {
-            stringBuilder.Append($"CL-GAC{classLevelGeneratedArgumentsContainer.AttributeIndex}:");
+            writer.Append($"CL-GAC{classLevelGeneratedArgumentsContainer.AttributeIndex}:");
         }
-        
+
         if (testGenerationContext.TestArguments is DataSourceAttributeContainer { Attribute.AttributeClass: not null } testMethodDataAttributeContainer)
         {
-            stringBuilder.Append($"{testMethodDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.TestMethodDataIndex}}}:");
+            writer.Append($"{testMethodDataAttributeContainer.Attribute.AttributeClass?.GloballyQualified()}:{{{VariableNames.TestMethodDataIndex}}}:");
         }
 
         if (testGenerationContext.TestArguments is MethodDataSourceAttributeContainer testLevelMethodDataSourceAttributeContainer)
         {
-            stringBuilder.Append(testLevelMethodDataSourceAttributeContainer.IsExpandableEnumerable
+            writer.Append(testLevelMethodDataSourceAttributeContainer.IsExpandableEnumerable
                 ? $"TL-EMDS{testLevelMethodDataSourceAttributeContainer.AttributeIndex}:{{{VariableNames.TestMethodDataIndex}}}:"
                 : $"TL-MDS{testLevelMethodDataSourceAttributeContainer.AttributeIndex}:");
         }
 
         if (testGenerationContext.TestArguments is ArgumentsAttributeContainer testLevelArgumentsContainer)
         {
-            stringBuilder.Append($"TL-ARGS{testLevelArgumentsContainer.AttributeIndex}:");
+            writer.Append($"TL-ARGS{testLevelArgumentsContainer.AttributeIndex}:");
         }
-        
-        if (testGenerationContext.TestArguments is DataSourceGeneratorContainer testLevelGeneratedArgumentsContainer)
+
+        if (testGenerationContext.TestArguments is AsyncDataSourceGeneratorContainer testLevelGeneratedArgumentsContainer)
         {
-            stringBuilder.Append($"TL-GAC{testLevelGeneratedArgumentsContainer.AttributeIndex}:");
+            writer.Append($"TL-GAC{testLevelGeneratedArgumentsContainer.AttributeIndex}:");
         }
-        
+
         var fullyQualifiedClassName =
             testGenerationContext.ClassSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
 
-        stringBuilder.Append(fullyQualifiedClassName);
-        
+        writer.Append(fullyQualifiedClassName);
+
         var classParameters = testGenerationContext.ClassSymbol.Constructors.SafeFirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
-        
+
         var classParameterTypes = GetTypes(classParameters);
 
         if (!string.IsNullOrEmpty(classParameterTypes))
         {
-            stringBuilder.Append(classParameterTypes);
+            writer.Append(classParameterTypes);
         }
-        
-        stringBuilder.Append('.');
-        
+
+        writer.Append(".");
+
         var testName = testGenerationContext.MethodSymbol.Name;
-        
-        stringBuilder.Append(testName);
+
+        writer.Append(testName);
 
         var methodParameterTypes = GetTypes(testGenerationContext.MethodSymbol.Parameters);
 
         if (!string.IsNullOrEmpty(methodParameterTypes))
         {
-            stringBuilder.Append(methodParameterTypes);
+            writer.Append(methodParameterTypes);
         }
-        
-        stringBuilder.Append(':');
-        
-        stringBuilder.Append(testGenerationContext.CurrentRepeatAttempt);
-        
-        return stringBuilder.ToString();
+
+        writer.Append(":");
+
+        writer.Append(testGenerationContext.CurrentRepeatAttempt.ToString());
+
+        return writer.ToString().Trim();
     }
 
     public static string GetTypes(ImmutableArray<IParameterSymbol> parameters)
@@ -113,7 +113,7 @@ public static class TestInformationRetriever
 
         var parameterTypesFullyQualified = parameters.Select(x => x.Type)
             .Select(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix));
-        
+
         return $"({string.Join(",", parameterTypesFullyQualified)})";
     }
 }

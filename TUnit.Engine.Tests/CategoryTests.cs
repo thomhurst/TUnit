@@ -17,7 +17,7 @@ public class CategoryTests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
-        
+
         await RunTestsWithFilter(
             "/*/*/CategoryTests/*[Category=B]",
             [
@@ -27,7 +27,7 @@ public class CategoryTests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
-        
+
         await RunTestsWithFilter(
             "/*/*/CategoryTests/*[(Category=A)&(Category=B)]",
             [

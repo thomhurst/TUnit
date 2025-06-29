@@ -11,8 +11,8 @@ public class STAThreadExecutorAttribute : TUnitAttribute, ITestRegisteredEventRe
 
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
-        context.DiscoveredTest.TestExecutor = new STAThreadExecutor();
-
+        var executor = new STAThreadExecutor();
+        context.SetTestExecutor(executor);
         return default;
     }
 }

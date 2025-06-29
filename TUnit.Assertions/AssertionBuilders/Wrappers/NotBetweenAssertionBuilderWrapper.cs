@@ -13,20 +13,20 @@ public class NotBetweenAssertionBuilderWrapper<TActual> : InvokableValueAssertio
         var assertion = (NotBetweenAssertCondition<TActual>) Assertions.Peek();
 
         assertion.Inclusive();
-        
+
         AppendCallerMethod([]);
-        
+
         return this;
     }
-    
+
     public NotBetweenAssertionBuilderWrapper<TActual> WithExclusiveBounds()
     {
         var assertion = (NotBetweenAssertCondition<TActual>) Assertions.Peek();
 
         assertion.Exclusive();
-        
+
         AppendCallerMethod([]);
-        
+
         return this;
     }
 }

@@ -11,10 +11,10 @@ namespace TUnit.Analyzers;
 public class BeforeHookAsyncLocalAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.AsyncLocalCallFlowValues);
+        [Rules.AsyncLocalCallFlowValues];
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterOperationAction(AnalyzeOperation, OperationKind.SimpleAssignment);
     }
 
@@ -31,7 +31,7 @@ public class BeforeHookAsyncLocalAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         var propertyContainingType = propertyReferenceOperation.Property.ContainingType;
-        
+
         if (!propertyContainingType.IsGenericType
             || !SymbolEqualityComparer.Default.Equals(propertyContainingType.OriginalDefinition,
                 context.Compilation.GetTypeByMetadataName(typeof(AsyncLocal<object>).GetMetadataName())))
@@ -45,7 +45,7 @@ public class BeforeHookAsyncLocalAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-        
+
         CheckMethod(context, methodBodyOperation);
     }
 
@@ -90,7 +90,7 @@ public class BeforeHookAsyncLocalAnalyzer : ConcurrentDiagnosticAnalyzer
         var invocations = syntax
             .DescendantNodes()
             .OfType<InvocationExpressionSyntax>();
-        
+
         foreach (var invocationExpressionSyntax in invocations)
         {
             var operation = methodBodyOperation.SemanticModel.GetOperation(invocationExpressionSyntax);
@@ -99,7 +99,7 @@ public class BeforeHookAsyncLocalAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 continue;
             }
-            
+
             if (invocationOperation.TargetMethod.Name == "AddAsyncLocalValues")
             {
                 return;

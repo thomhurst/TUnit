@@ -9,15 +9,15 @@ namespace TUnit.Analyzers;
 public class PropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.TooManyDataAttributes);
+        [Rules.TooManyDataAttributes];
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Property);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IPropertySymbol propertySymbol)
         {
             return;
@@ -27,7 +27,7 @@ public class PropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.TooManyDataAttributes,
                 propertySymbol.Locations.FirstOrDefault())
-            );   
+            );
         }
     }
 }

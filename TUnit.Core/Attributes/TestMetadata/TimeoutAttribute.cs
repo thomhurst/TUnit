@@ -43,10 +43,11 @@ public class TimeoutAttribute(int timeoutInMilliseconds) : TUnitAttribute, ITest
     /// </summary>
     /// <value>A <see cref="TimeSpan"/> representing the maximum allowed execution time.</value>
     public TimeSpan Timeout { get; } = TimeSpan.FromMilliseconds(timeoutInMilliseconds);
-    
+
     /// <inheritdoc />
-    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        discoveredTestContext.TestDetails.Timeout = Timeout;
+        context.TestDetails.Timeout = Timeout;
+        return default;
     }
 }

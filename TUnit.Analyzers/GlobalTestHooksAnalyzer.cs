@@ -11,8 +11,7 @@ namespace TUnit.Analyzers;
 public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-    ImmutableArray.Create
-    (
+    [
         Rules.MethodMustNotBeAbstract,
         Rules.MethodMustBeStatic,
         Rules.MethodMustBePublic,
@@ -20,15 +19,15 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         Rules.SingleTestContextParameterRequired,
         Rules.SingleClassHookContextParameterRequired,
         Rules.SingleAssemblyHookContextParameterRequired
-    );
+    ];
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
@@ -44,7 +43,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-        
+
         if (!methodSymbol.IsStatic)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBeStatic,
@@ -58,30 +57,30 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 context.Symbol.Locations.FirstOrDefault())
             );
         }
-        
+
         if (methodSymbol.DeclaredAccessibility != Accessibility.Public)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBePublic,
                 context.Symbol.Locations.FirstOrDefault())
             );
         }
-        
+
         foreach (var attributeData in globalHooks)
         {
             IsGlobalHook(context, attributeData, out var hookLevel);
-            
+
             if (hookLevel == HookLevel.Test
                 && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.TestContext.WithGlobalPrefix))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
             }
-            
+
             else if (hookLevel == HookLevel.Class
                 && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.ClassHookContext.WithGlobalPrefix))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleClassHookContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
             }
-            
+
             else if (hookLevel == HookLevel.Assembly
                 && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext.WithGlobalPrefix)
                 && attributeData.IsEveryHook(context.Compilation, out _, out _, out _))
@@ -89,7 +88,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleAssemblyHookContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
             }
         }
-        
+
         if (methodSymbol.ContainingType.IsTestClass(context.Compilation))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.GlobalHooksSeparateClass,
@@ -105,7 +104,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return true;
         }
-        
+
         return x.IsEveryHook(context.Compilation, out _, out hookLevel, out _);
     }
 

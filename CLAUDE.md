@@ -36,7 +36,8 @@ dotnet run -- --list-tests                    # List all tests
 dotnet run -- --fail-fast                     # Stop on first failure
 dotnet run -- --maximum-parallel-tests 10     # Control parallelism
 dotnet run -- --report-trx --coverage         # Generate reports
-dotnet run -- --treenode-filter "TestName"    # Run specific test
+dotnet run -- --treenode-filter "TestName"    # Run specific test by exact name
+dotnet run -- --treenode-filter/*/*/*PartialName*/*  # Filter tests by partial name pattern
 
 # Build NuGet packages
 dotnet pack -c Release
@@ -58,20 +59,27 @@ npm run build    # Build static site
 
 ## High-Level Architecture
 
-### Core Components
+**Note: TUnit now uses a simplified architecture. See [SIMPLIFIED_ARCHITECTURE.md](docs/SIMPLIFIED_ARCHITECTURE.md) for details.**
+
+### Core Components (Simplified Architecture)
 
 1. **TUnit.Core.SourceGenerator**: Source generators that discover tests at compile-time
-   - Entry: Multiple `IIncrementalGenerator` implementations
-   - Generates static test registrations avoiding runtime reflection
+   - Entry: `UnifiedTestMetadataGenerator` - generates test metadata and registration
+   - Generates `TestMetadata` instances with AOT-friendly invokers
+   - Creates compile-time test registry for zero-reflection discovery
 
 2. **TUnit.Core**: Core abstractions and attributes
    - Test attributes: `[Test]`, `[Arguments]`, `[Before]`, `[After]`
-   - Interfaces: `IDataAttribute`, `ITestExecutor`, `IHookExecutor`
-   - Context objects: `TestContext`, test state management
+   - **TestMetadata**: Unified compile-time test representation
+   - **TestContext**: Simplified context for test execution
+   - Interfaces for extensibility: `ITestMetadataSource`, `IDataAttribute`
 
-3. **TUnit.Engine**: Test execution engine
-   - Entry: `TestingPlatformBuilderHook` integrates with Microsoft.Testing.Platform
-   - Discovery: `TUnitTestDiscoverer` → `BaseTestsConstructor`
+3. **TUnit.Engine**: Simplified test execution engine
+   - Entry: `SimplifiedTUnitTestFramework` integrates with Microsoft.Testing.Platform
+   - Discovery: `TestDiscoveryService` → `TestFactory` → `ExecutableTest`
+   - Execution: `UnifiedTestExecutor` with clear parallel/serial paths
+   - Single test execution: `DefaultSingleTestExecutor`
+   - Test Building: `TestMetadataSource` → `TestBuilder` → `TestDefinition`
    - Execution: `TestsExecutor` → `SingleTestExecutor` → `TestInvoker`
    - Parallel execution management with dependency resolution
 
@@ -83,18 +91,23 @@ npm run build    # Build static site
 
 ### Key Architectural Patterns
 
+- **Clean Separation**: Source generators emit only data (TestMetadata), runtime handles all logic
 - **Compile-Time Discovery**: Source generators create static test metadata during build
+- **Runtime Expansion**: TestBuilder expands metadata into executable tests with data variations
 - **Parallel-First**: Tests run in parallel by default with smart scheduling
 - **Context-Driven**: Rich context objects flow through execution pipeline
 - **Extensible**: Custom executors, data sources, hooks, and assertions
 
-### Dual Mode Support: Source Generation and Reflection
+### Clean Architecture Approach
 
-TUnit supports two modes of operation:
-- **Source Generation Mode** (default): Uses compile-time source generators for optimal performance
-- **Reflection Mode**: Falls back to runtime reflection when source generation is not available
-
-**Important**: When implementing new features or fixing bugs, you MUST implement the functionality in BOTH modes to ensure consistent behavior for all users. The `BaseTestsConstructor` class chooses between `SourceGeneratedTestsConstructor` and `ReflectionTestsConstructor` based on availability.
+TUnit uses a clean architecture with clear separation of concerns:
+- **Source Generation Phase**: Only emits TestMetadata data structures
+- **Runtime Phase**: TestBuilder handles all complex logic including:
+  - Data source enumeration and expansion
+  - Tuple unwrapping for method arguments
+  - Property injection with data sources
+  - Test instance creation and lifecycle
+  - Expression compilation for performance
 
 ### Extension Projects
 
@@ -107,13 +120,17 @@ TUnit supports two modes of operation:
 
 When working on TUnit:
 
-1. **Dual Implementation**: All features must work in both source generation AND reflection modes
-2. **Source Generators**: Changes to attributes or test discovery require updating source generators
+1. **Clean Architecture**: Maintain separation between source generation (data only) and runtime (logic)
+2. **Source Generators**: TestMetadataGenerator should only emit data structures, never execution logic
 3. **Testing**: Use `TUnit.UnitTests` for framework tests, `TUnit.TestProject` for integration tests
 4. **Analyzers**: Add corresponding analyzer rules when adding new features
 5. **Platform Integration**: Ensure compatibility with Microsoft.Testing.Platform capabilities
-6. **Performance**: TUnit prioritizes performance - avoid runtime reflection where possible
+6. **Performance**: TUnit prioritizes performance - use expression compilation and caching in TestBuilder
 7. **Async Support**: All public APIs should support async operations properly
+8. **Async Best Practices**:
+   - Never use `GetAwaiter().GetResult()` or `.Result` on tasks - always use proper async/await to avoid deadlocks
+   - When in a sync context that needs async functionality, refactor method signatures to be async rather than trying to execute async code synchronously
+   - TUnit supports async all the way through the stack - embrace it!
 
 ## Key Files and Locations
 
@@ -123,3 +140,9 @@ When working on TUnit:
 - CI/CD: `.github/workflows/`
 - Documentation source: `docs/`
 - Pipeline automation: `TUnit.Pipeline/`
+
+## Memories
+
+- Remember to use the test filter syntax from the claude instructions, including slashes.
+- Remember to not add redundant comments and instead write self descriptive code.
+- Don't add unnecessary comments

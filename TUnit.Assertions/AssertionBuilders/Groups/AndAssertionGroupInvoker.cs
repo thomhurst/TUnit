@@ -2,7 +2,7 @@
 
 namespace TUnit.Assertions.AssertionBuilders.Groups;
 
-public class AndAssertionGroupInvoker<TActual, TAssertionBuilder> 
+public class AndAssertionGroupInvoker<TActual, TAssertionBuilder>
     where TAssertionBuilder : AssertionBuilder
 {
     private readonly List<AssertionGroup<TActual, TAssertionBuilder>> _assertionGroups = [];
@@ -18,7 +18,7 @@ public class AndAssertionGroupInvoker<TActual, TAssertionBuilder>
         _assertionGroups.Add(group);
         return this;
     }
-    
+
     public TaskAwaiter<TActual?> GetAwaiter()
     {
         return Process().GetAwaiter();
@@ -29,7 +29,7 @@ public class AndAssertionGroupInvoker<TActual, TAssertionBuilder>
         for (var i = 0; i < _assertionGroups.Count; i++)
         {
             var result = await _assertionGroups[i];
-            
+
             if (i == _assertionGroups.Count - 1)
             {
                 return result;

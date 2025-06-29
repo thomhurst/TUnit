@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.Core.Extensions;
+﻿using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
@@ -73,14 +71,15 @@ public class CustomDisplayNameTests
 
     public class MyGenerator : DataSourceGeneratorAttribute<string>, ITestDiscoveryEventReceiver
     {
-        public override IEnumerable<Func<string>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+        protected override IEnumerable<Func<string>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
             yield return () => "Super Secret Password";
         }
 
-        public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+        public ValueTask OnTestDiscovered(DiscoveredTestContext context)
         {
-            discoveredTestContext.SetDisplayName($"{discoveredTestContext.TestDetails.TestName}(REDACTED)");
+            context.SetDisplayName($"{context.TestDetails.TestName}(REDACTED)");
+            return default;
         }
 
         public int Order => 0;

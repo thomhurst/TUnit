@@ -16,7 +16,7 @@ internal static class GenericTypeHelper
         foreach (var syntaxTree in compilation.SyntaxTrees)
         {
             var semanticModel = compilation.GetSemanticModel(syntaxTree);
-            
+
             var serviceProvider = syntaxTree.GetRoot();
 
             var typeNodes = serviceProvider.DescendantNodes().OfType<TypeSyntax>();
@@ -28,7 +28,7 @@ internal static class GenericTypeHelper
                 {
                     continue;
                 }
-                
+
                 if (SymbolEqualityComparer.Default.Equals(typeSymbol.OriginalDefinition, originalGenericDefinition))
                 {
                     yield return typeSymbol;
@@ -47,7 +47,7 @@ internal static class GenericTypeHelper
     {
         if (typeSymbol.GetBaseTypes()
             .FirstOrDefault(x => SymbolEqualityComparer.Default.Equals(x.OriginalDefinition, genericTypeDefinition))
-            is not {} matchingType)
+            is not { } matchingType)
         {
             foundMatch = null;
             return false;
@@ -58,7 +58,7 @@ internal static class GenericTypeHelper
             foundMatch = null;
             return false;
         }
-        
+
         foundMatch = namedMatchingType;
         return true;
     }

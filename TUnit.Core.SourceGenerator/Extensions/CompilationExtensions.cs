@@ -15,12 +15,12 @@ public static class CompilationExtensions
             {
                 return false;
             }
-            
+
             var conversion = compilation.ClassifyConversion(argumentType, parameterType);
-            
+
             return conversion.IsImplicit || conversion.IsNumeric;
         }
-        
+
         if (parameterType is INamedTypeSymbol { IsGenericType: true, TypeArguments: [{ TypeKind: TypeKind.TypeParameter }] } namedType)
         {
             // `IEnumerable<>`
@@ -36,7 +36,7 @@ public static class CompilationExtensions
                 return compilation.HasImplicitConversion(argumentType, specializedSuper);
             }
         }
-        
+
         return compilation.HasImplicitConversion(argumentType?.OriginalDefinition, parameterType?.OriginalDefinition);
     }
 }

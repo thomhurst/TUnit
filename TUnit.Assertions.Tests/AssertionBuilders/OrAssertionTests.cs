@@ -33,7 +33,7 @@ public sealed class OrAssertionTests
 
         await Assert.That(action).ThrowsNothing();
     }
-    
+
     [Test]
     public async Task Short_Circuits_When_First_Assertion_Succeeds()
     {
@@ -41,7 +41,7 @@ public sealed class OrAssertionTests
         await Assert.That(exception)
                     .IsNotAssignableTo<ArgumentOutOfRangeException>()
                     .Or
-                    .Satisfies(x => (ArgumentOutOfRangeException)x,
+                    .Satisfies(x => (ArgumentOutOfRangeException) x,
                                x => x.HasMember(y => y!.ActualValue).EqualTo("foo"));
     }
 }

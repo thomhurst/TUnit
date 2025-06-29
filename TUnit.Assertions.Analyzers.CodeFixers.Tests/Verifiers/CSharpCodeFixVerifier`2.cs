@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using TUnit.Assertions.Analyzers.CodeFixers.Tests.Extensions;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Core;
 
 namespace TUnit.Assertions.Analyzers.CodeFixers.Tests.Verifiers;
 
@@ -85,7 +84,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         };
 
         test.ExpectedDiagnostics.AddRange(expected);
-        
+
         await test.RunAsync(CancellationToken.None);
     }
 }

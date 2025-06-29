@@ -30,24 +30,24 @@ public class AndAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TAct
 
     private async Task<TActual?> GetResult()
     {
-        ((ISource)AssertionBuilder).Assertions.Clear();
-        
+        ((ISource) AssertionBuilder).Assertions.Clear();
+
         foreach (var condition in _assertConditions)
         {
-            ((ISource)AssertionBuilder).Assertions.Push(condition);
+            ((ISource) AssertionBuilder).Assertions.Push(condition);
         }
-        
+
         return (TActual?) await _invokableAssertionBuilder!.ProcessAssertionsAsync(x => Task.FromResult(x.Result));
     }
 
     private void Push(TAssertionBuilder assertionBuilder, Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> assert)
     {
         InvokableAssertionBuilder<TActual> invokableAssertionBuilder;
-        
+
         if (_assertConditions.Count > 0)
         {
             invokableAssertionBuilder = assert(assertionBuilder);
-            var assertion2 = ((ISource)invokableAssertionBuilder).Assertions.Pop();
+            var assertion2 = ((ISource) invokableAssertionBuilder).Assertions.Pop();
             _assertConditions.Push(new AndAssertCondition(_assertConditions.Pop(), assertion2));
         }
         else
@@ -55,7 +55,7 @@ public class AndAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TAct
             invokableAssertionBuilder = assert(assertionBuilder);
             assertionBuilder.AppendConnector(ChainType.And);
             _invokableAssertionBuilder = invokableAssertionBuilder;
-            _assertConditions.Push(((ISource)_invokableAssertionBuilder).Assertions.Pop());
+            _assertConditions.Push(((ISource) _invokableAssertionBuilder).Assertions.Pop());
         }
     }
 }

@@ -20,24 +20,24 @@ public static class Compare
 
     public static IEnumerable<ComparisonFailure> CheckEquivalent<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
-        TActual,
+    TActual,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
-        TExpected>(TActual actual,
-        TExpected expected, CompareOptions options, 
+    TExpected>(TActual actual,
+        TExpected expected, CompareOptions options,
         int? index)
     {
         var initialMemberName = InitialMemberName<TActual>(actual, index);
-        
+
         string[] memberNames = string.IsNullOrEmpty(initialMemberName) ? [] : [initialMemberName];
-        
+
         return CheckEquivalent(actual, expected, options, memberNames, MemberType.Value, []);
     }
-    
+
     private static IEnumerable<ComparisonFailure> CheckEquivalent<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
-        TActual,
+    TActual,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
-        TExpected>(TActual actual,
+    TExpected>(TActual actual,
         TExpected expected, CompareOptions options,
         string[] memberNames, MemberType memberType, HashSet<object> visited)
     {
@@ -81,8 +81,8 @@ public static class Compare
         {
             yield break;
         }
-        
-        if(actual is IDictionary actualDictionary && expected is IDictionary expectedDictionary)
+
+        if (actual is IDictionary actualDictionary && expected is IDictionary expectedDictionary)
         {
             var keys = actualDictionary.Keys.Cast<object>()
                 .Concat(expectedDictionary.Keys.Cast<object>())
@@ -98,12 +98,12 @@ public static class Compare
                         Type = MemberType.DictionaryItem,
                         Actual = $"No entry with key: {key}",
                         Expected = $"[{key}] = {expectedDictionary[key]}",
-                        NestedMemberNames = [..memberNames, $"[{key}]"]
+                        NestedMemberNames = [.. memberNames, $"[{key}]"]
                     };
 
                     yield break;
                 }
-                
+
                 if (!expectedDictionary.Contains(key))
                 {
                     yield return new ComparisonFailure
@@ -111,17 +111,17 @@ public static class Compare
                         Type = MemberType.DictionaryItem,
                         Actual = $"[{key}] = {actualDictionary[key]}",
                         Expected = $"No entry with key: {key}",
-                        NestedMemberNames = [..memberNames, $"[{key}]"]
+                        NestedMemberNames = [.. memberNames, $"[{key}]"]
                     };
 
                     yield break;
                 }
-                
+
                 var actualObject = actualDictionary[key];
                 var expectedObject = expectedDictionary[key];
 
                 foreach (var comparisonFailure in CheckEquivalent(actualObject, expectedObject, options,
-                             [..memberNames, $"[{key}]"], MemberType.EnumerableItem, visited))
+                             [.. memberNames, $"[{key}]"], MemberType.EnumerableItem, visited))
                 {
                     yield return comparisonFailure;
                 }
@@ -136,7 +136,7 @@ public static class Compare
 
             for (var i = 0; i < Math.Max(actualObjects.Length, expectedObjects.Length); i++)
             {
-                string?[] readOnlySpan = [..memberNames.Skip(1), $"[{i}]"];
+                string?[] readOnlySpan = [.. memberNames.Skip(1), $"[{i}]"];
 
                 if (options.MembersToIgnore.Contains(string.Join(".", readOnlySpan)))
                 {
@@ -147,12 +147,12 @@ public static class Compare
                 var expectedObject = expectedObjects.ElementAtOrDefault(i);
 
                 foreach (var comparisonFailure in CheckEquivalent(actualObject, expectedObject, options,
-                             [..memberNames, $"[{i}]"], MemberType.EnumerableItem, visited))
+                             [.. memberNames, $"[{i}]"], MemberType.EnumerableItem, visited))
                 {
                     yield return comparisonFailure;
                 }
             }
-            
+
             yield break;
         }
 
@@ -161,7 +161,7 @@ public static class Compare
                      .Select(x => x.Name)
                      .Distinct())
         {
-            string?[] readOnlySpan = [..memberNames.Skip(1), fieldName];
+            string?[] readOnlySpan = [.. memberNames.Skip(1), fieldName];
 
             if (options.MembersToIgnore.Contains(string.Join(".", readOnlySpan)))
             {
@@ -175,7 +175,7 @@ public static class Compare
             {
                 continue;
             }
-            
+
             var actualFieldValue = actualFieldInfo?.GetValue(actual);
             var expectedFieldValue = expectedFieldInfo?.GetValue(expected);
 
@@ -199,7 +199,7 @@ public static class Compare
             }
 
             foreach (var comparisonFailure in CheckEquivalent(actualFieldValue, expectedFieldValue, options,
-                         [..memberNames, fieldName], MemberType.Field, visited))
+                         [.. memberNames, fieldName], MemberType.Field, visited))
             {
                 yield return comparisonFailure;
             }
@@ -210,7 +210,7 @@ public static class Compare
                      .Select(x => x.Name)
                      .Distinct())
         {
-            string?[] readOnlySpan = [..memberNames.Skip(1), propertyName];
+            string?[] readOnlySpan = [.. memberNames.Skip(1), propertyName];
 
             if (options.MembersToIgnore.Contains(string.Join(".", readOnlySpan)))
             {
@@ -224,7 +224,7 @@ public static class Compare
             {
                 continue;
             }
-            
+
             var actualPropertyValue = actualPropertyInfo?.GetValue(actual);
             var expectedPropertyValue = expectedPropertyInfo?.GetValue(expected);
 
@@ -248,7 +248,7 @@ public static class Compare
             }
 
             foreach (var comparisonFailure in CheckEquivalent(actualPropertyValue, expectedPropertyValue, options,
-                         [..memberNames, propertyName], MemberType.Property, visited))
+                         [.. memberNames, propertyName], MemberType.Property, visited))
             {
                 yield return comparisonFailure;
             }
@@ -261,14 +261,14 @@ public static class Compare
         {
             return string.Empty;
         }
-        
+
         var type = actual?.GetType().Name ?? typeof(TActual).Name;
-        
+
         if (index is null)
         {
             return type;
         }
-        
+
         return $"{type}[{index}]";
     }
 }

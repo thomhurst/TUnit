@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using TUnit.Assertions.Analyzers.CodeFixers.Extensions;
 using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers.CodeFixers;
@@ -32,7 +31,7 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
             {
                 return;
             }
-            
+
             context.RegisterCodeFix(
                 CodeAction.Create(
                     title: Resources.TUnitAssertions0009Title,
@@ -41,23 +40,23 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
                 diagnostic);
         }
     }
-    
+
     private static async Task<Document> ConvertAssertionAsync(CodeFixContext context, InvocationExpressionSyntax expressionSyntax, CancellationToken cancellationToken)
     {
         var document = context.Document;
-        
+
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 
         if (root is not CompilationUnitSyntax compilationUnit)
         {
             return document;
         }
-        
+
         if (expressionSyntax.Expression is not MemberAccessExpressionSyntax memberAccessExpressionSyntax)
         {
             return document;
         }
-        
+
         var expected = expressionSyntax.ArgumentList.Arguments.ElementAtOrDefault(0);
         var actual = expressionSyntax.ArgumentList.Arguments.ElementAtOrDefault(1) ?? expressionSyntax.ArgumentList.Arguments.ElementAtOrDefault(0);
 
@@ -66,12 +65,12 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         var genericArgs = GetGenericArguments(memberAccessExpressionSyntax.Name);
 
         var newExpression = await GetNewExpression(context, memberAccessExpressionSyntax, methodName, actual, expected, genericArgs, expressionSyntax.ArgumentList.Arguments);
-        
+
         if (newExpression != null)
         {
             compilationUnit = compilationUnit.ReplaceNode(expressionSyntax, newExpression.WithTriviaFrom(expressionSyntax));
         }
-        
+
         return document.WithSyntaxRoot(compilationUnit);
     }
 
@@ -85,73 +84,73 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         return method switch
         {
             "Equal" => await IsEqualTo(context, argumentListArguments, actual, expected),
-            
+
             "NotEqual" => await IsNotEqualTo(context, argumentListArguments, actual, expected),
-            
+
             "Contains" => await Contains(context, memberAccessExpressionSyntax, actual, expected),
-            
+
             "DoesNotContain" => SyntaxFactory.ParseExpression($"Assert.That({actual}).DoesNotContain({expected})"),
-            
+
             "StartsWith" => SyntaxFactory.ParseExpression($"Assert.That({actual}).StartsWith({expected})"),
-            
+
             "EndsWith" => SyntaxFactory.ParseExpression($"Assert.That({actual}).EndsWith({expected})"),
-            
+
             "NotNull" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotNull()"),
-            
+
             "Null" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNull()"),
-            
+
             "True" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsTrue()"),
-            
+
             "False" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsFalse()"),
-            
+
             "Same" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsSameReferenceAs({expected})"),
-            
+
             "NotSame" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotSameReferenceAs({expected})"),
-            
+
             "IsAssignableTo" => isGeneric
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsAssignableTo<{genericArgs}>()")
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsAssignableTo({expected})"),
-            
+
             "IsNotAssignableTo" => isGeneric
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotAssignableTo<{genericArgs}>()")
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotAssignableTo({expected})"),
-            
+
             "IsAssignableFrom" => isGeneric
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsAssignableFrom<{genericArgs}>()")
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsAssignableFrom({expected})"),
-            
+
             "IsNotAssignableFrom" => isGeneric
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotAssignableFrom<{genericArgs}>()")
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotAssignableFrom({expected})"),
-            
+
             "All" => SyntaxFactory.ParseExpression($"Assert.That({actual}).All().Satisfy({expected})"),
-            
+
             "Single" => SyntaxFactory.ParseExpression($"Assert.That({actual}).HasSingleItem()"),
-            
+
             "IsType" => isGeneric
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsTypeOf<{genericArgs}>()")
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsTypeOf({expected})"),
-            
+
             "IsNotType" => isGeneric
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotTypeOf<{genericArgs}>()")
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotTypeOf({expected})"),
-            
+
             "Empty" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsEmpty()"),
-            
+
             "NotEmpty" => SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotEmpty()"),
-            
+
             "Fail" => SyntaxFactory.ParseExpression("Fail.Test()"),
-            
+
             "Skip" => SyntaxFactory.ParseExpression("Skip.Test()"),
-            
+
             "Throws" or "ThrowsAsync" => isGeneric
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).ThrowsExactly<{genericArgs}>()")
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).ThrowsExactly({expected})"),
-            
+
             "ThrowsAny" or "ThrowsAnyAsync" => isGeneric
                 ? SyntaxFactory.ParseExpression($"Assert.That({actual}).Throws<{genericArgs}>()")
                 : SyntaxFactory.ParseExpression($"Assert.That({actual}).Throws({expected})"),
-            
+
             _ => null
         };
     }
@@ -166,9 +165,9 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
             return SyntaxFactory.ParseExpression(
                 $"Assert.That({actual}).IsNotEqualTo({expected}).Within({literalExpressionSyntax})");
         }
-        
+
         var semanticModel = await context.Document.GetSemanticModelAsync();
-        
+
         var actualSymbol = semanticModel.GetSymbolInfo(actual!.Expression).Symbol;
         var expectedSymbol = semanticModel.GetSymbolInfo(expected!.Expression).Symbol;
 
@@ -180,7 +179,7 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         {
             return SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotEquivalentTo({expected})");
         }
-        
+
         return SyntaxFactory.ParseExpression($"Assert.That({actual}).IsNotEqualTo({expected})");
     }
 
@@ -194,9 +193,9 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
             return SyntaxFactory.ParseExpression(
                 $"Assert.That({actual}).IsEqualTo({expected}).Within({literalExpressionSyntax})");
         }
-        
+
         var semanticModel = await context.Document.GetSemanticModelAsync();
-        
+
         var actualSymbol = semanticModel.GetSymbolInfo(actual!.Expression).Symbol;
         var expectedSymbol = semanticModel.GetSymbolInfo(expected!.Expression).Symbol;
 
@@ -218,12 +217,12 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         {
             return typeSymbol;
         }
-        
+
         if (symbol is IPropertySymbol propertySymbol)
         {
             return propertySymbol.Type;
         }
-        
+
         if (symbol is IFieldSymbol fieldSymbol)
         {
             return fieldSymbol.Type;
@@ -243,13 +242,13 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
         {
             return true;
         }
-        
+
         if (typeSymbol is INamedTypeSymbol namedTypeSymbol
             && namedTypeSymbol.GloballyQualifiedNonGeneric() is "global::System.Collections.IEnumerable" or "global::System.Collections.Generic.IEnumerable")
         {
             return true;
         }
-        
+
         return typeSymbol.AllInterfaces.Any(i => i.GloballyQualified() == "global::System.Collections.IEnumerable");
     }
 
@@ -266,7 +265,7 @@ public class XUnitAssertionCodeFixProvider : CodeFixProvider
             // Swap them - This overload is the other way around to the other ones.
             (actual, expected) = (expected, actual);
         }
-        
+
         return SyntaxFactory.ParseExpression($"Assert.That({actual}).Contains({expected})");
     }
 

@@ -14,14 +14,14 @@ public static class EnumHasExtensions
         return valueSource.RegisterAssertion(new EnumHasFlagAssertCondition<TEnum>(expected),
             [doNotPopulateThisValue1]);
     }
-    
+
     public static InvokableValueAssertionBuilder<TEnum> DoesNotHaveFlag<TEnum>(this IValueSource<TEnum> valueSource, TEnum expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue1 = null)
         where TEnum : Enum
     {
         return valueSource.RegisterAssertion(new EnumDoesNotHaveFlagAssertCondition<TEnum>(expected),
             [doNotPopulateThisValue1]);
     }
-    
+
     public static InvokableValueAssertionBuilder<TEnum> HasSameNameAs<TEnum, TExpected>(this IValueSource<TEnum> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue1 = null)
         where TEnum : Enum
         where TExpected : Enum
@@ -29,7 +29,7 @@ public static class EnumHasExtensions
         return valueSource.RegisterAssertion(new EnumHasSameNameAsCondition<TEnum, TExpected>(expected),
             [doNotPopulateThisValue1]);
     }
-    
+
     public static InvokableValueAssertionBuilder<TEnum> DoesNotHaveSameNameAs<TEnum, TExpected>(this IValueSource<TEnum> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue1 = null)
         where TEnum : Enum
         where TExpected : Enum
@@ -37,19 +37,19 @@ public static class EnumHasExtensions
         return valueSource.RegisterAssertion(new EnumDoesNotHaveSameNameAsCondition<TEnum, TExpected>(expected),
             [doNotPopulateThisValue1]);
     }
-    
+
     public static InvokableValueAssertionBuilder<TEnum> IsDefined<TEnum>(this IValueSource<TEnum> valueSource)
         where TEnum : Enum
     {
         return valueSource.RegisterAssertion(new EnumIsDefinedAssertCondition<TEnum>(), []);
     }
-    
+
     public static InvokableValueAssertionBuilder<TEnum> IsNotDefined<TEnum>(this IValueSource<TEnum> valueSource)
         where TEnum : Enum
     {
         return valueSource.RegisterAssertion(new EnumIsNotDefinedAssertCondition<TEnum>(), []);
     }
-    
+
     public static InvokableValueAssertionBuilder<TEnum> HasSameValueAs<TEnum, TExpected>(this IValueSource<TEnum> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue1 = null)
         where TEnum : Enum
         where TExpected : Enum
@@ -57,7 +57,7 @@ public static class EnumHasExtensions
         return valueSource.RegisterAssertion(new EnumHasSameValueAsCondition<TEnum, TExpected>(expected),
             [doNotPopulateThisValue1]);
     }
-    
+
     public static InvokableValueAssertionBuilder<TEnum> DoesNotHaveSameValueAs<TEnum, TExpected>(this IValueSource<TEnum> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue1 = null)
         where TEnum : Enum
         where TExpected : Enum

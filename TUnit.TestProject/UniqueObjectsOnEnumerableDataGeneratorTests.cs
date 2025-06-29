@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -17,7 +15,7 @@ public class UniqueObjectsOnEnumerableDataGeneratorTests(object classValue)
 
 public class UniqueObjectsOnEnumerableDataGeneratorTestsGenerator : DataSourceGeneratorAttribute<object>
 {
-    public override IEnumerable<Func<object>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<object>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () => new object();
         yield return () => new object();

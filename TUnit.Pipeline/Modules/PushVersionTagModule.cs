@@ -1,8 +1,7 @@
 ﻿using ModularPipelines.Attributes;
 using ModularPipelines.Context;
-using ModularPipelines.Extensions;
-using ModularPipelines.Git.Extensions;
 using ModularPipelines.Git.Attributes;
+using ModularPipelines.Git.Extensions;
 using ModularPipelines.Git.Options;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;

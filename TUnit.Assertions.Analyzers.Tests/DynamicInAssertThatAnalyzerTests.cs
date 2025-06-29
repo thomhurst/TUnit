@@ -29,7 +29,7 @@ public class DynamicInAssertThatAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task Assert_That_Is_Flagged_When_Using_Nullable_Dynamic()
     {

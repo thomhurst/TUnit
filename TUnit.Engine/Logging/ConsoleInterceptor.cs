@@ -11,10 +11,10 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
     public override Encoding Encoding => RedirectedOut?.Encoding ?? Encoding.UTF8;
 
     protected abstract TextWriter? RedirectedOut { get; }
-    
-    protected private abstract TextWriter GetOriginalOut();
-    
-    protected private abstract void ResetDefault();
+
+    private protected abstract TextWriter GetOriginalOut();
+
+    private protected abstract void ResetDefault();
 
 #if NET
     public override ValueTask DisposeAsync()
@@ -367,7 +367,7 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
         set
         {
             GetOriginalOut().NewLine = value;
-            
+
             if (RedirectedOut != null)
             {
                 RedirectedOut.NewLine = value;

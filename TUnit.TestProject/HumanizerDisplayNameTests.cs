@@ -17,9 +17,9 @@ public class HumanizerDisplayNameTests
 
     public class HumanizerDisplayNameAttribute : DisplayNameFormatterAttribute
     {
-        protected override string FormatDisplayName(TestContext testContext)
+        protected override string FormatDisplayName(DiscoveredTestContext context)
         {
-            return testContext.TestDetails.TestName.Humanize();
+            return context.TestDetails.TestName.Humanize();
         }
     }
 }

@@ -18,7 +18,7 @@ public class PlaywrightTest : WorkerAwareTest
         Playwright = await PlaywrightTask.ConfigureAwait(false);
         Playwright.Selectors.SetTestIdAttribute("data-testid");
     }
-    
+
     [After(HookType.TestSession, "", 0)]
     public static void PlaywrightCleanup()
     {

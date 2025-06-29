@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Templates.Tests
 {
-    public class AspireTemplateTests:TemplateTestBase
+    public class AspireTemplateTests : TemplateTestBase
     {
         protected override string TemplateShortName { get; set; } = "TUnit.Aspire.Test";
 

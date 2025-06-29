@@ -34,9 +34,9 @@ public class MatrixMethodAttribute<[DynamicallyAccessedMembers(DynamicallyAccess
 
         if (result is IEnumerable enumerable)
         {
-            return [..enumerable];
+            return [.. enumerable];
         }
-        
+
         return [result];
     }
 }

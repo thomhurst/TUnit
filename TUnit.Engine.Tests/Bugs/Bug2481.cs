@@ -18,7 +18,7 @@ public class Bug2481(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
     }
-    
+
     [Test]
     public async Task Test2()
     {
@@ -32,7 +32,7 @@ public class Bug2481(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
     }
-    
+
     [Test]
     public async Task Test3()
     {

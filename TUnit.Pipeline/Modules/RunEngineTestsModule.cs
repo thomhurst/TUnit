@@ -28,7 +28,7 @@ public class RunEngineTestsModule : Module<CommandResult>
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Engine.Tests.csproj").AssertExists();
-        
+
         return await context.DotNet().Run(new DotNetRunOptions
         {
             Project = project.Name,

@@ -1,6 +1,4 @@
-﻿using Polyfills;
-
-namespace TUnit.TestProject.BeforeTests;
+﻿namespace TUnit.TestProject.BeforeTests;
 
 public class TestDiscoveryBeforeHooks
 {

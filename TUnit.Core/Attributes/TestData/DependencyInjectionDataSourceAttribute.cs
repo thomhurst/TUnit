@@ -1,10 +1,12 @@
-﻿using TUnit.Core.Interfaces;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
 
-public abstract class DependencyInjectionDataSourceAttribute<TScope> : NonTypedDataSourceGeneratorAttribute
+[RequiresDynamicCode("DependencyInjectionDataSourceAttribute requires dynamic code generation for dependency injection container access. This attribute is inherently incompatible with AOT compilation.")]
+[RequiresUnreferencedCode("DependencyInjectionDataSourceAttribute may require unreferenced code for dependency injection container access. This attribute is inherently incompatible with AOT compilation.")]
+public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDataSourceGeneratorAttribute
 {
-    public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var scope = CreateScope(dataGeneratorMetadata);
 
@@ -22,24 +24,14 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : NonTypedD
 
         yield return () =>
         {
-            var objects = dataGeneratorMetadata.MembersToGenerate
+            return dataGeneratorMetadata.MembersToGenerate
                 .Select(m => m.Type)
                 .Select(x => Create(scope, x))
                 .ToArray();
-            
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize += async (_, _) =>
-            {
-                foreach (var asyncInitializer in objects.OfType<IAsyncInitializer>())
-                {
-                    await asyncInitializer.InitializeAsync();
-                }
-            };
-            
-            return objects;
         };
     }
 
     public abstract TScope CreateScope(DataGeneratorMetadata dataGeneratorMetadata);
-    
+
     public abstract object? Create(TScope scope, Type type);
 }

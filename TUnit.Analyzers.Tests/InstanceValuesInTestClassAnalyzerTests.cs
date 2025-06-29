@@ -53,7 +53,7 @@ public class InstanceValuesInTestClassAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Do_Not_Flag_When_Not_Assigning_To_New_Class()
     {

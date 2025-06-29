@@ -18,7 +18,7 @@ public class ThrowsOfTypeAssertCondition(Type type) : DelegateAssertCondition<ob
             );
 }
 
-public class ThrowsOfTypeAssertCondition<TActual, TExpectedException> : DelegateAssertCondition<TActual, TExpectedException> 
+public class ThrowsOfTypeAssertCondition<TActual, TExpectedException> : DelegateAssertCondition<TActual, TExpectedException>
     where TExpectedException : Exception
 {
     internal protected override string GetExpectation()

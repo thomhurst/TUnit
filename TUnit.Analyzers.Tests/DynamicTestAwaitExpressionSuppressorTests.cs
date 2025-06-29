@@ -6,7 +6,7 @@ namespace TUnit.Analyzers.Tests;
 public class DynamicTestAwaitExpressionSuppressorTests
 {
     private static readonly DiagnosticResult CS4014 = new("CS4014", DiagnosticSeverity.Warning);
-    
+
     [Test]
     public async Task WarningsInTUnitAreSuppressed() =>
         await AnalyzerTestHelpers

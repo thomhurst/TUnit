@@ -21,7 +21,7 @@ public static class ParameterExtensions
 
         return parameterSymbols;
     }
-    
+
     public static ImmutableArray<ITypeSymbol> WithoutCancellationTokenParameter(this ImmutableArray<ITypeSymbol> typeSymbols)
     {
         if (typeSymbols.IsDefaultOrEmpty)
@@ -37,7 +37,7 @@ public static class ParameterExtensions
 
         return typeSymbols;
     }
-    
+
     public static bool HasMatrixAttribute(this IParameterSymbol parameterSymbol, Compilation compilation)
     {
         return parameterSymbol.GetAttributes().Any(x => x.IsMatrixAttribute(compilation));
