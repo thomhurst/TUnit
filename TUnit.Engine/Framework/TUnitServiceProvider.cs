@@ -9,6 +9,7 @@ using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
+using TUnit.Engine.Building;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
@@ -24,8 +25,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     // Core services
     public TUnitFrameworkLogger Logger { get; }
     public ICommandLineOptions CommandLineOptions { get; }
-    public TestDiscoveryService DiscoveryService { get; }
-    public TestFactory TestFactory { get; }
+    public TestDiscoveryServiceV2 DiscoveryService { get; }
+    public UnifiedTestBuilderPipeline TestBuilderPipeline { get; }
     public UnifiedTestExecutor TestExecutor { get; }
     public TUnitMessageBus MessageBus { get; }
     public EngineCancellationToken CancellationToken { get; }
@@ -62,27 +63,39 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         CancellationToken = Register(new EngineCancellationToken());
 
-        // Create test services using new architecture
+        // Create test services using unified architecture
         var testInvoker = Register<ITestInvoker>(new TestInvoker());
         var hookInvoker = Register<IHookInvoker>(new HookInvoker());
-        var dataSourceResolver = Register<IDataSourceResolver>(new DataSourceResolver());
-        var genericTypeResolver = Register<IGenericTypeResolver>(new GenericTypeResolver());
-
-        TestFactory = Register(new TestFactory(testInvoker, hookInvoker, dataSourceResolver, genericTypeResolver));
-
-        // Initialize the test registry singleton
-        TestRegistry.Initialize(TestFactory);
 
         // Get test metadata sources from registry
         var sources = TestMetadataRegistry.GetSources();
+        var metadataSource = new SourceGeneratedTestMetadataSource(() => 
+            sources.SelectMany(s => s.GetTestMetadata().GetAwaiter().GetResult()).ToList());
 
         // Check if reflection discovery is enabled
         var enableDynamicDiscovery = IsReflectionScannerEnabled(CommandLineOptions);
 
-        DiscoveryService = Register(new TestDiscoveryService(
-            sources,
-            TestFactory,
-            enableDynamicDiscovery));
+        // Create the unified pipeline based on mode
+        if (enableDynamicDiscovery)
+        {
+            // Use reflection mode
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(a => !a.IsDynamic && !a.FullName?.StartsWith("System") == true)
+                .ToArray();
+
+            TestBuilderPipeline = Register(
+                UnifiedTestBuilderPipelineFactory.CreateReflectionPipeline(
+                    assemblies, testInvoker, hookInvoker));
+        }
+        else
+        {
+            // Use AOT mode
+            TestBuilderPipeline = Register(
+                UnifiedTestBuilderPipelineFactory.CreateAotPipeline(
+                    metadataSource, testInvoker, hookInvoker));
+        }
+
+        DiscoveryService = Register(new TestDiscoveryServiceV2(TestBuilderPipeline, enableDynamicDiscovery));
 
         // Create single test executor with ExecutionContext support
         var singleTestExecutor = Register<ISingleTestExecutor>(

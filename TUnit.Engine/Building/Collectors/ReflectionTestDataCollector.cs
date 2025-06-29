@@ -1,7 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core;
-using TUnit.Core.Attributes.TestData;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Building.Interfaces;
 
 namespace TUnit.Engine.Building.Collectors;
@@ -55,7 +56,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         
         // Get test information
         var testId = GenerateTestId(testClass, testMethod);
-        var displayName = testAttribute.DisplayName ?? testMethod.Name;
+        var displayName = testMethod.Name;
         
         // Collect data sources
         var methodDataSources = CollectMethodDataSources(testMethod);
@@ -85,10 +86,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             Categories = categories,
             IsSkipped = skipAttribute != null,
             SkipReason = skipAttribute?.Reason,
-            TimeoutMs = timeoutAttribute?.TimeoutMs,
+            TimeoutMs = (int?)timeoutAttribute?.Timeout.TotalMilliseconds,
             RetryCount = retryAttribute?.Times ?? 0,
             CanRunInParallel = notInParallelAttribute == null,
-            DependsOn = dependsOnAttributes.Select(d => d.TestName).ToArray(),
+            DependsOn = dependsOnAttributes.Select(d => d.TestName!).ToArray(),
             DataSources = methodDataSources,
             ClassDataSources = classDataSources,
             PropertyDataSources = propertyDataSources,
@@ -113,18 +114,17 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         var argumentsAttributes = method.GetCustomAttributes<ArgumentsAttribute>();
         foreach (var args in argumentsAttributes)
         {
-            dataSources.Add(new StaticTestDataSource(args.Arguments));
+            dataSources.Add(new StaticTestDataSource(new object?[][] { args.Values }));
         }
         
         // Method data source attributes
         var methodDataSources = method.GetCustomAttributes<MethodDataSourceAttribute>();
         foreach (var mds in methodDataSources)
         {
-            dataSources.Add(new DynamicTestDataSource
+            dataSources.Add(new DynamicTestDataSource(false)
             {
-                SourceType = mds.Type ?? method.DeclaringType!,
-                SourceMemberName = mds.MethodName,
-                IsShared = mds.IsShared
+                SourceType = mds.ClassProvidingDataSource ?? method.DeclaringType!,
+                SourceMemberName = mds.MethodNameProvidingDataSource
             });
         }
         
@@ -157,17 +157,16 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 var argumentsAttr = param.GetCustomAttribute<ArgumentsAttribute>();
                 if (argumentsAttr != null)
                 {
-                    dataSources.Add(new StaticTestDataSource(argumentsAttr.Arguments));
+                    dataSources.Add(new StaticTestDataSource(new object?[][] { argumentsAttr.Values }));
                 }
                 
                 var methodDataSource = param.GetCustomAttribute<MethodDataSourceAttribute>();
                 if (methodDataSource != null)
                 {
-                    dataSources.Add(new DynamicTestDataSource
+                    dataSources.Add(new DynamicTestDataSource(false)
                     {
-                        SourceType = methodDataSource.Type ?? testClass,
-                        SourceMemberName = methodDataSource.MethodName,
-                        IsShared = methodDataSource.IsShared
+                        SourceType = methodDataSource.ClassProvidingDataSource ?? testClass,
+                        SourceMemberName = methodDataSource.MethodNameProvidingDataSource
                     });
                 }
             }

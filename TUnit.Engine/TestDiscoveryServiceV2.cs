@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
@@ -71,25 +73,7 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
             }
         }
         
-        // Register all discovered tests with the registry
-        TestRegistry registry;
-        try
-        {
-            registry = TestRegistry.Instance;
-        }
-        catch (InvalidOperationException ex)
-        {
-            throw new InvalidOperationException(
-                "TestRegistry has not been initialized. This usually indicates the test framework " +
-                "has not been properly set up. Ensure TUnit framework initialization completes " +
-                "before running discovery.", ex);
-        }
-        
-        foreach (var test in allTests)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            registry.RegisterTest(test);
-        }
+        // No longer using TestRegistry - tests are managed directly
         
         // Resolve dependencies between tests
         ResolveDependencies(allTests);
@@ -155,12 +139,13 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
     /// <summary>
     /// ITestDiscoverer implementation for Microsoft.Testing.Platform
     /// </summary>
-    public async Task DiscoverTestsAsync(
+    public async Task<IEnumerable<TestNode>> DiscoverTestsAsync(
         DiscoverTestExecutionRequest discoverTestExecutionRequest,
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
         var tests = await DiscoverTests();
+        var testNodes = new List<TestNode>();
         
         foreach (var test in tests)
         {
@@ -170,48 +155,54 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
                 testNode);
             
             await messageBus.PublishAsync(this, message);
+            testNodes.Add(testNode);
         }
+        
+        return testNodes;
     }
     
     private static TestNode CreateTestNode(ExecutableTest test)
     {
-        var properties = new List<IProperty>();
+        var propertyList = new List<IProperty>();
         
-        // Add standard properties
-        properties.Add(new Property<string>("TestClass", test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name));
-        properties.Add(new Property<string>("TestMethod", test.Metadata.TestMethodName));
-        
-        if (test.Metadata.FilePath != null)
+        // Add file location if available
+        if (test.Metadata.FilePath != null && test.Metadata.LineNumber.HasValue)
         {
-            properties.Add(new Property<string>("FilePath", test.Metadata.FilePath));
+            propertyList.Add(new TestFileLocationProperty(
+                test.Metadata.FilePath,
+                new LinePositionSpan(
+                    new LinePosition(test.Metadata.LineNumber.Value, 0),
+                    new LinePosition(test.Metadata.LineNumber.Value, 0)
+                )));
         }
         
-        if (test.Metadata.LineNumber.HasValue)
-        {
-            properties.Add(new Property<int>("LineNumber", test.Metadata.LineNumber.Value));
-        }
+        // Add test method identifier
+        propertyList.Add(new TestMethodIdentifierProperty(
+            Namespace: test.Metadata.TestClassType.Namespace ?? "GlobalNamespace",
+            AssemblyFullName: test.Metadata.TestClassType.Assembly.FullName ?? "UnknownAssembly",
+            TypeName: test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name,
+            MethodName: test.Metadata.TestMethodName,
+            ParameterTypeFullNames: test.Metadata.ParameterTypes?.Select(t => t.FullName ?? "unknown").ToArray() ?? Array.Empty<string>(),
+            ReturnTypeFullName: "void",
+            MethodArity: 0
+        ));
         
-        // Add categories
+        // Add categories as metadata
         foreach (var category in test.Metadata.Categories)
         {
-            properties.Add(new Property<string>("Category", category));
+            propertyList.Add(new TestMetadataProperty(category));
         }
         
-        // Add skip information
-        if (test.Metadata.IsSkipped)
-        {
-            properties.Add(new Property<bool>("IsSkipped", true));
-            if (!string.IsNullOrEmpty(test.Metadata.SkipReason))
-            {
-                properties.Add(new Property<string>("SkipReason", test.Metadata.SkipReason));
-            }
-        }
+        // Add TRX properties
+        propertyList.Add(new TrxFullyQualifiedTypeNameProperty(
+            test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name));
+        propertyList.Add(new TrxCategoriesProperty(test.Metadata.Categories.ToArray()));
         
         return new TestNode
         {
             Uid = new TestNodeUid(test.TestId),
             DisplayName = test.DisplayName,
-            Properties = properties.ToArray()
+            Properties = new PropertyBag(propertyList)
         };
     }
 }

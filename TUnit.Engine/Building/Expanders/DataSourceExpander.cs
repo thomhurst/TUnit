@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Helpers;
@@ -36,7 +37,7 @@ public sealed class DataSourceExpander : IDataSourceExpander
         var combinations = GenerateTestCombinations(
             classDataFactories,
             methodDataFactories,
-            propertyFactories);
+            new List<Dictionary<string, List<Func<object?>>>> { propertyFactories });
         
         foreach (var combination in combinations)
         {
@@ -352,6 +353,8 @@ public sealed class DataSourceExpander : IDataSourceExpander
 /// </summary>
 public interface IDynamicDataSourceResolver
 {
+    [RequiresDynamicCode("Dynamic data source resolution requires reflection")]
+    [RequiresUnreferencedCode("Dynamic data source resolution may access types not preserved by trimming")]
     Task<IEnumerable<Func<object?[]>>> ResolveAsync(DynamicTestDataSource dataSource, DataSourceLevel level);
 }
 

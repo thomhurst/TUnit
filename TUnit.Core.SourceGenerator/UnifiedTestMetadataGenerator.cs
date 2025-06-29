@@ -389,7 +389,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
     
     private static void GenerateStaticDataSourceForArguments(CodeWriter writer, AttributeData argumentsAttribute)
     {
-        writer.Append("new StaticTestDataSource(new object?[] { ");
+        writer.Append("new StaticTestDataSource(new object?[][] { new object?[] { ");
         
         var args = new List<string>();
         foreach (var arg in argumentsAttribute.ConstructorArguments)
@@ -409,7 +409,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
         
         writer.Append(string.Join(", ", args));
-        writer.AppendLine(" })");
+        writer.AppendLine(" } })");
     }
     
     private static ITypeSymbol[]? ExtractArgumentTypes(AttributeData attributeData)
@@ -907,7 +907,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         
         var isShared = attr.NamedArguments.FirstOrDefault(a => a.Key == "IsShared").Value.Value as bool? ?? true;
         
-        return $"new DynamicTestDataSource {{ SourceType = typeof({sourceType.ToDisplayString()}), SourceMemberName = \"{memberName}\", IsShared = {isShared.ToString().ToLower()} }}";
+        return $"new DynamicTestDataSource({isShared.ToString().ToLower()}) {{ SourceType = typeof({sourceType.ToDisplayString()}), SourceMemberName = \"{memberName}\" }}";
     }
     
     private static void GenerateDynamicDataSource(CodeWriter writer, AttributeData attr)

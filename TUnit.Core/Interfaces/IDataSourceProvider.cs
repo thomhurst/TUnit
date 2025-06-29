@@ -17,13 +17,3 @@ public interface IDataSourceProvider
     /// </summary>
     bool IsCacheable { get; }
 }
-
-/// <summary>
-/// Marker interface for providers that are compatible with AOT compilation.
-/// A provider implementing this interface must not use reflection or other dynamic
-/// features that prevent AOT compilation within its GetData() method.
-/// </summary>
-public interface IAotCompatibleDataSource : IDataSourceProvider 
-{
-    // Marker interface - no additional members
-}

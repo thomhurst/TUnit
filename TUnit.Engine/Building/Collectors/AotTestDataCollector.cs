@@ -19,7 +19,7 @@ public sealed class AotTestDataCollector : ITestDataCollector
     {
         // In AOT mode, all test metadata is pre-generated and registered
         // We simply retrieve it from the metadata source
-        var metadata = await _metadataSource.GetTestMetadataAsync();
+        var metadata = await _metadataSource.GetTestMetadata();
         
         // Filter out any tests that should be handled by specialized generators
         var filteredMetadata = metadata.Where(m => 

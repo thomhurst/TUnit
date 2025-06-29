@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -56,47 +57,21 @@ public record DynamicTestMetadata : ITestDescriptor
     /// Data sources for class constructor arguments.
     /// Each data source provides an enumerable of argument arrays.
     /// </summary>
-    public required IReadOnlyList<IDataSourceProvider> ClassDataSources { get; init; }
+    public required IReadOnlyList<IDataSource> ClassDataSources { get; init; }
 
     /// <summary>
     /// Data sources for test method arguments.
     /// Each data source provides an enumerable of argument arrays.
     /// </summary>
-    public required IReadOnlyList<IDataSourceProvider> MethodDataSources { get; init; }
+    public required IReadOnlyList<IDataSource> MethodDataSources { get; init; }
 
     /// <summary>
     /// Properties to be set on the test instance with their data sources.
     /// </summary>
-    public required IReadOnlyDictionary<PropertyInfo, IDataSourceProvider> PropertyDataSources { get; init; }
+    public required IReadOnlyDictionary<PropertyInfo, IDataSource> PropertyDataSources { get; init; }
 
     /// <summary>
     /// Display name template for the test. Can contain placeholders like {0}, {1} for arguments.
     /// </summary>
     public required string DisplayNameTemplate { get; init; }
-}
-
-/// <summary>
-/// Provides data for test arguments from various sources (method, property, inline data, etc.).
-/// </summary>
-public interface IDataSourceProvider
-{
-    /// <summary>
-    /// Gets the data synchronously. Returns an enumerable of argument arrays.
-    /// </summary>
-    IEnumerable<object?[]> GetData();
-
-    /// <summary>
-    /// Gets the data asynchronously. Returns an async enumerable of argument arrays.
-    /// </summary>
-    IAsyncEnumerable<object?[]> GetDataAsync();
-
-    /// <summary>
-    /// Whether this data source is async.
-    /// </summary>
-    bool IsAsync { get; }
-
-    /// <summary>
-    /// Whether the data should be shared across test instances.
-    /// </summary>
-    bool IsShared { get; }
 }

@@ -137,8 +137,10 @@ public sealed class TestBuilder : ITestBuilder
     
     private async Task InjectPropertiesAsync(object instance, Dictionary<string, Func<object?>> propertyFactories)
     {
-        foreach (var (propertyName, valueFactory) in propertyFactories)
+        foreach (var kvp in propertyFactories)
         {
+            var propertyName = kvp.Key;
+            var valueFactory = kvp.Value;
             var value = valueFactory();
             
             #pragma warning disable IL2075 // Properties come from test metadata

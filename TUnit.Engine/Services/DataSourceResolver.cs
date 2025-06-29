@@ -17,7 +17,9 @@ public class DataSourceResolver : IDataSourceResolver
     {
         if (dataSource is StaticTestDataSource staticSource)
         {
-            return await Task.FromResult(staticSource.GetData());
+            // Get data factories and execute them to get the actual data
+            var factories = staticSource.GetDataFactories();
+            return await Task.FromResult(factories.Select(f => f()).ToArray());
         }
         
         if (dataSource is DynamicTestDataSource dynamicSource)

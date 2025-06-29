@@ -8,7 +8,7 @@ namespace TUnit.Core;
 /// <summary>
 /// Base class for test data sources that provide data through factories
 /// </summary>
-public abstract class TestDataSource
+public abstract class TestDataSource : IDataSource
 {
     /// <summary>
     /// Gets factory functions that produce test data when invoked
@@ -18,7 +18,15 @@ public abstract class TestDataSource
     /// <summary>
     /// Indicates whether this data source is shared across tests
     /// </summary>
-    public virtual bool IsShared => false;
+    public abstract bool IsShared { get; }
+    
+    /// <summary>
+    /// Implementation of IDataSource interface
+    /// </summary>
+    public IEnumerable<Func<object?[]>> GenerateDataFactories(DataSourceContext context)
+    {
+        return GetDataFactories();
+    }
 }
 
 /// <summary>
@@ -27,6 +35,8 @@ public abstract class TestDataSource
 public sealed class StaticTestDataSource : TestDataSource
 {
     private readonly object?[][] _data;
+    
+    public override bool IsShared => false;
     
     public StaticTestDataSource(params object?[][] data)
     {
@@ -56,7 +66,14 @@ public sealed class DynamicTestDataSource : TestDataSource
 {
     public required Type SourceType { get; init; }
     public required string SourceMemberName { get; init; }
-    public override bool IsShared { get; init; }
+    private readonly bool _isShared;
+    
+    public override bool IsShared => _isShared;
+    
+    public DynamicTestDataSource(bool isShared = false)
+    {
+        _isShared = isShared;
+    }
     
     public override IEnumerable<Func<object?[]>> GetDataFactories()
     {

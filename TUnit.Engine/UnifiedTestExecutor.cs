@@ -4,7 +4,9 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.TestHost;
+using TUnit.Core;
 using TUnit.Core.Services;
+using TUnit.Engine.Building;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
 using TUnit.Engine.CommandLineProviders;
@@ -167,16 +169,17 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
-        // Get tests from discovery using source generation
-        var discoveryService = new TestDiscoveryService(
-            TestMetadataRegistry.GetSources(),
-            new TestFactory(
-                new TestInvoker(),
-                new HookInvoker(),
-                new DataSourceResolver(),
-                new NoOpGenericTypeResolver()), // AOT-safe: no runtime generic resolution
-            enableDynamicDiscovery: false);
+        // Create unified pipeline for AOT mode
+        var sources = TestMetadataRegistry.GetSources();
+        var metadataSource = new SourceGeneratedTestMetadataSource(() => 
+            sources.SelectMany(s => s.GetTestMetadata().GetAwaiter().GetResult()).ToList());
 
+        var pipeline = UnifiedTestBuilderPipelineFactory.CreateAotPipeline(
+            metadataSource,
+            new TestInvoker(),
+            new HookInvoker());
+
+        var discoveryService = new TestDiscoveryServiceV2(pipeline, enableDynamicDiscovery: false);
         var tests = await discoveryService.DiscoverTests();
 
         // Execute tests
@@ -193,16 +196,17 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
-        // Get tests from discovery using reflection
-        var discoveryService = new TestDiscoveryService(
-            TestMetadataRegistry.GetSources(),
-            new TestFactory(
-                new TestInvoker(),
-                new HookInvoker(),
-                new DataSourceResolver(),
-                new GenericTypeResolver()),
-            enableDynamicDiscovery: true);
+        // Create unified pipeline for reflection mode
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(a => !a.IsDynamic && !a.FullName?.StartsWith("System") == true)
+            .ToArray();
 
+        var pipeline = UnifiedTestBuilderPipelineFactory.CreateReflectionPipeline(
+            assemblies,
+            new TestInvoker(),
+            new HookInvoker());
+
+        var discoveryService = new TestDiscoveryServiceV2(pipeline, enableDynamicDiscovery: true);
         var tests = await discoveryService.DiscoverTests();
 
         // Execute tests
