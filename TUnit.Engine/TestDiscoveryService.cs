@@ -116,8 +116,18 @@ public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
         foreach (var metadata in allMetadata)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var executableTests = await _testFactory.CreateTests(metadata);
-            allTests.AddRange(executableTests);
+            
+            try
+            {
+                var executableTests = await _testFactory.CreateTests(metadata);
+                allTests.AddRange(executableTests);
+            }
+            catch (Exception ex)
+            {
+                // Create a failed test that will report the construction error
+                var failedTest = CreateFailedTest(metadata, ex);
+                allTests.Add(failedTest);
+            }
             
             if (allTests.Count > MaxTestsPerDiscovery)
             {
@@ -181,8 +191,18 @@ public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
         foreach (var metadata in allMetadata)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var executableTests = await _testFactory.CreateTests(metadata);
-            allTests.AddRange(executableTests);
+            
+            try
+            {
+                var executableTests = await _testFactory.CreateTests(metadata);
+                allTests.AddRange(executableTests);
+            }
+            catch (Exception ex)
+            {
+                // Create a failed test that will report the construction error
+                var failedTest = CreateFailedTest(metadata, ex);
+                allTests.Add(failedTest);
+            }
             
             if (allTests.Count > MaxTestsPerDiscovery)
             {
@@ -305,6 +325,46 @@ public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
             
             test.Dependencies = dependencies.ToArray();
         }
+    }
+    
+    /// <summary>
+    /// Creates a failed test entry for tests that couldn't be constructed
+    /// </summary>
+    private ExecutableTest CreateFailedTest(TestMetadata metadata, Exception constructionException)
+    {
+        var testId = metadata.TestId ?? $"{metadata.TestClassType.FullName}.{metadata.TestMethodName}";
+        var displayName = metadata.TestName ?? testId;
+        
+        // Add error information to the display name
+        displayName = $"{displayName} [FAILED TO CONSTRUCT]";
+        
+        return new ExecutableTest
+        {
+            TestId = testId,
+            DisplayName = displayName,
+            Metadata = metadata,
+            Arguments = Array.Empty<object?>(),
+            CreateInstance = () => 
+            {
+                // Return a dummy instance - we won't actually use it
+                return Task.FromResult<object>(new object());
+            },
+            InvokeTest = (instance) => 
+            {
+                // This test always fails with the construction error
+                throw new InvalidOperationException(
+                    $"Test construction failed: {constructionException.Message}", 
+                    constructionException);
+            },
+            Hooks = new TestLifecycleHooks
+            {
+                BeforeClass = Array.Empty<Func<HookContext, Task>>(),
+                AfterClass = Array.Empty<Func<object, HookContext, Task>>(),
+                BeforeTest = Array.Empty<Func<object, HookContext, Task>>(),
+                AfterTest = Array.Empty<Func<object, HookContext, Task>>()
+            },
+            PropertyValues = new Dictionary<string, object?>()
+        };
     }
     
     private Task<IEnumerable<TestMetadata>> DiscoverTestsDynamically()
