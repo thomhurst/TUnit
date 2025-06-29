@@ -127,6 +127,13 @@ public class DataSourceResolver : IDataSourceResolver
             return result;
         }
         
+        // Special case: strings should be treated as single values, not char collections
+        if (rawData is string stringValue)
+        {
+            result.Add(new[] { stringValue });
+            return result;
+        }
+        
         if (rawData is System.Collections.IEnumerable enumerable)
         {
             foreach (var item in enumerable)
