@@ -1,12 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Interfaces;
@@ -24,7 +17,7 @@ public sealed class TestFactory
     private readonly IHookInvoker _hookInvoker;
     private readonly IDataSourceResolver _dataSourceResolver;
     private readonly IGenericTypeResolver _genericTypeResolver;
-    
+
     public TestFactory(
         ITestInvoker testInvoker,
         IHookInvoker hookInvoker,
@@ -36,7 +29,7 @@ public sealed class TestFactory
         _dataSourceResolver = dataSourceResolver;
         _genericTypeResolver = genericTypeResolver;
     }
-    
+
     /// <summary>
     /// Creates executable tests from metadata, expanding data-driven tests
     /// </summary>
@@ -51,7 +44,7 @@ public sealed class TestFactory
             #pragma warning restore IL2026
             #pragma warning restore IL3050
         }
-        
+
         // Check if we're using runtime generic resolution
         if (_genericTypeResolver.GetType().Name == "GenericTypeResolver")
         {
@@ -61,37 +54,37 @@ public sealed class TestFactory
             #pragma warning restore IL2026
             #pragma warning restore IL3050
         }
-        
+
         // AOT-safe path
         return await CreateTestsAotSafe(metadata);
     }
-    
+
     /// <summary>
     /// AOT-safe test creation (source generation path)
     /// </summary>
     private async Task<IEnumerable<ExecutableTest>> CreateTestsAotSafe(TestMetadata metadata)
     {
         var tests = new List<ExecutableTest>();
-        
+
         // Get all test data combinations
         var testDataSets = await ExpandTestData(metadata);
-        
+
         // Get property data if any
         var propertyDataSets = await ExpandPropertyData(metadata);
-        
+
         // Create executable test for each data combination
         foreach (var (arguments, argumentsDisplayText) in testDataSets)
         {
             foreach (var propertyData in propertyDataSets.DefaultIfEmpty(new Dictionary<string, object?>()))
             {
-                var executableTest = CreateExecutableTestAotSafe(metadata, arguments, argumentsDisplayText, propertyData);
+                var executableTest = await CreateExecutableTestAotSafe(metadata, arguments, argumentsDisplayText, propertyData);
                 tests.Add(executableTest);
             }
         }
-        
+
         return tests;
     }
-    
+
     /// <summary>
     /// Reflection-based test creation
     /// </summary>
@@ -100,29 +93,29 @@ public sealed class TestFactory
     private async Task<IEnumerable<ExecutableTest>> CreateTestsWithReflection(TestMetadata metadata)
     {
         var tests = new List<ExecutableTest>();
-        
+
         // Get all test data combinations
         var testDataSets = await ExpandTestData(metadata);
-        
+
         // Get property data if any
         var propertyDataSets = await ExpandPropertyData(metadata);
-        
+
         // Create executable test for each data combination
         foreach (var (arguments, argumentsDisplayText) in testDataSets)
         {
             foreach (var propertyData in propertyDataSets.DefaultIfEmpty(new Dictionary<string, object?>()))
             {
-                var executableTest = CreateExecutableTest(metadata, arguments, argumentsDisplayText, propertyData);
+                var executableTest = await CreateExecutableTest(metadata, arguments, argumentsDisplayText, propertyData);
                 tests.Add(executableTest);
             }
         }
-        
+
         return tests;
     }
-    
+
     [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
     [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
-    private ExecutableTest CreateExecutableTest(
+    private async Task<ExecutableTest> CreateExecutableTest(
         TestMetadata metadata,
         object?[] arguments,
         string argumentsDisplayText,
@@ -130,16 +123,16 @@ public sealed class TestFactory
     {
         var testId = GenerateTestId(metadata, arguments, propertyValues);
         var displayName = GenerateDisplayName(metadata, argumentsDisplayText, propertyValues);
-        
+
         // Create instance factory
         var createInstance = CreateInstanceFactory(metadata, propertyValues);
-        
+
         // Create test invoker
         var invokeTest = CreateTestInvoker(metadata, arguments);
-        
+
         // Create hooks
         var hooks = CreateHooks(metadata);
-        
+
         var executableTest = new ExecutableTest
         {
             TestId = testId,
@@ -151,17 +144,17 @@ public sealed class TestFactory
             PropertyValues = propertyValues,
             Hooks = hooks
         };
-        
+
         // Create test context for discovery
-        executableTest.Context = CreateTestContext(executableTest);
-        
+        executableTest.Context = await CreateTestContext(executableTest);
+
         return executableTest;
     }
-    
+
     /// <summary>
     /// AOT-safe executable test creation
     /// </summary>
-    private ExecutableTest CreateExecutableTestAotSafe(
+    private async Task<ExecutableTest> CreateExecutableTestAotSafe(
         TestMetadata metadata,
         object?[] arguments,
         string argumentsDisplayText,
@@ -169,24 +162,24 @@ public sealed class TestFactory
     {
         var testId = GenerateTestId(metadata, arguments, propertyValues);
         var displayName = GenerateDisplayName(metadata, argumentsDisplayText, propertyValues);
-        
+
         // Use pre-compiled invokers from source generation
-        var createInstance = metadata.InstanceFactory != null 
+        var createInstance = metadata.InstanceFactory != null
             ? async () => {
                 var instance = metadata.InstanceFactory();
                 await InjectProperties(instance, propertyValues);
                 return instance;
               }
             : CreateInstanceFactoryAotSafe(metadata, propertyValues);
-        
+
         // Use pre-compiled test invoker from source generation
         var invokeTest = metadata.TestInvoker != null
             ? (Func<object, Task>)(instance => metadata.TestInvoker(instance, arguments))
             : CreateTestInvokerAotSafe(metadata, arguments);
-        
+
         // Create hooks
         var hooks = CreateHooks(metadata);
-        
+
         var executableTest = new ExecutableTest
         {
             TestId = testId,
@@ -198,24 +191,24 @@ public sealed class TestFactory
             PropertyValues = propertyValues,
             Hooks = hooks
         };
-        
+
         // Create test context for discovery
-        executableTest.Context = CreateTestContext(executableTest);
-        
+        executableTest.Context = await CreateTestContext(executableTest);
+
         return executableTest;
     }
-    
+
     private async Task<List<(object?[] arguments, string displayText)>> ExpandTestData(TestMetadata metadata)
     {
         var results = new List<(object?[], string)>();
-        
+
         if (metadata.DataSources.Length == 0)
         {
             // No data sources, single test with no arguments
             results.Add((Array.Empty<object?>(), string.Empty));
             return results;
         }
-        
+
         // Resolve all data sources
         var allDataSets = new List<IEnumerable<object?[]>>();
         foreach (var dataSource in metadata.DataSources)
@@ -223,33 +216,33 @@ public sealed class TestFactory
             var data = await _dataSourceResolver.ResolveDataSource(dataSource);
             allDataSets.Add(data);
         }
-        
+
         // Generate cartesian product for matrix/combinatorial tests
         DiscoveryDiagnostics.RecordDataSourceStart($"{metadata.TestName}", allDataSets.Count);
         var combinations = CartesianProduct(allDataSets);
-        
+
         foreach (var combination in combinations)
         {
             var flattened = combination.SelectMany(x => x).ToArray();
             var displayText = GenerateArgumentsDisplayText(flattened);
             results.Add((flattened, displayText));
         }
-        
+
         DiscoveryDiagnostics.RecordTestExpansion(metadata.TestName, results.Count);
         DiscoveryDiagnostics.RecordDataSourceEnd($"{metadata.TestName}", results.Count);
-        
+
         return results;
     }
-    
+
     private async Task<List<Dictionary<string, object?>>> ExpandPropertyData(TestMetadata metadata)
     {
         var results = new List<Dictionary<string, object?>>();
-        
+
         if (metadata.PropertyDataSources.Length == 0)
         {
             return results;
         }
-        
+
         // Resolve property data sources
         var propertyDataMap = new Dictionary<string, List<object?>>();
         foreach (var propSource in metadata.PropertyDataSources)
@@ -258,14 +251,14 @@ public sealed class TestFactory
             var values = data.Select(args => args.Length > 0 ? args[0] : null).ToList();
             propertyDataMap[propSource.PropertyName] = values;
         }
-        
+
         // Generate all combinations
         var combinations = GeneratePropertyCombinations(propertyDataMap);
         results.AddRange(combinations);
-        
+
         return results;
     }
-    
+
     [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
     [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
     private Func<Task<object>> CreateInstanceFactory(TestMetadata metadata, Dictionary<string, object?> propertyValues)
@@ -280,11 +273,11 @@ public sealed class TestFactory
                 return instance;
             };
         }
-        
+
         // Reflection fallback
         return CreateReflectionInstanceFactory(metadata, propertyValues);
     }
-    
+
     [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
     [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
     private Func<Task<object>> CreateReflectionInstanceFactory(TestMetadata metadata, Dictionary<string, object?> propertyValues)
@@ -292,7 +285,7 @@ public sealed class TestFactory
         return async () =>
         {
             var classType = metadata.TestClassType;
-            
+
             // Handle generic classes (shouldn't happen if CreateGenericTests worked correctly)
             if (classType.IsGenericTypeDefinition)
             {
@@ -300,16 +293,16 @@ public sealed class TestFactory
                     $"Generic test class '{metadata.TestClassType.Name}' reached instance factory without type resolution. " +
                     "This indicates a bug in generic test expansion.");
             }
-            
+
             #pragma warning disable IL2072 // Test class types are known at compile time through source generation
-            var instance = Activator.CreateInstance(classType) 
+            var instance = Activator.CreateInstance(classType)
                 ?? throw new InvalidOperationException($"Failed to create instance of {classType}");
             #pragma warning restore IL2072
             await InjectProperties(instance, propertyValues);
             return instance;
         };
     }
-    
+
     [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
     [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
     private Func<object, Task> CreateTestInvoker(TestMetadata metadata, object?[] arguments)
@@ -319,11 +312,11 @@ public sealed class TestFactory
             // AOT-safe path - source generated
             return instance => metadata.TestInvoker(instance, arguments);
         }
-        
+
         // Reflection fallback
         return CreateReflectionTestInvoker(metadata, arguments);
     }
-    
+
     [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
     [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
     private Func<object, Task> CreateReflectionTestInvoker(TestMetadata metadata, object?[] arguments)
@@ -332,9 +325,9 @@ public sealed class TestFactory
         {
             throw new InvalidOperationException($"No invoker or MethodInfo available for test {metadata.TestName}");
         }
-        
+
         var methodInfo = metadata.MethodInfo;
-        
+
         // Handle generic methods
         if (methodInfo.IsGenericMethodDefinition)
         {
@@ -348,11 +341,11 @@ public sealed class TestFactory
                 throw new InvalidOperationException($"Failed to resolve generic types for test {metadata.TestName}: {ex.Message}", ex);
             }
         }
-        
+
         var concreteMethodInfo = methodInfo;
         return instance => _testInvoker.InvokeTestMethod(instance, concreteMethodInfo, arguments);
     }
-    
+
     /// <summary>
     /// AOT-safe instance factory creation
     /// </summary>
@@ -365,14 +358,14 @@ public sealed class TestFactory
                 $"Test class '{metadata.TestClassType.Name}' does not have a pre-compiled instance invoker. " +
                 "Ensure source generation has run correctly.");
         }
-        
+
         return async () => {
             var instance = metadata.InstanceFactory();
             await InjectProperties(instance, propertyValues);
             return instance;
         };
     }
-    
+
     /// <summary>
     /// AOT-safe test invoker creation
     /// </summary>
@@ -385,10 +378,10 @@ public sealed class TestFactory
                 $"Test method '{metadata.TestName}' does not have a pre-compiled test invoker. " +
                 "Ensure source generation has run correctly.");
         }
-        
+
         return instance => metadata.TestInvoker(instance, arguments);
     }
-    
+
     private TestLifecycleHooks CreateHooks(TestMetadata metadata)
     {
         return new TestLifecycleHooks
@@ -399,7 +392,7 @@ public sealed class TestFactory
             AfterTest = CreateInstanceHookInvokers(metadata.Hooks.AfterTest)
         };
     }
-    
+
     private Func<HookContext, Task>[] CreateBeforeClassHookInvokers(HookMetadata[] hooks)
     {
         return hooks.Select(h => new Func<HookContext, Task>(async context =>
@@ -414,7 +407,7 @@ public sealed class TestFactory
             }
         })).ToArray();
     }
-    
+
     private Func<object, HookContext, Task>[] CreateInstanceHookInvokers(HookMetadata[] hooks)
     {
         return hooks.Select(h => new Func<object, HookContext, Task>(async (instance, context) =>
@@ -429,8 +422,8 @@ public sealed class TestFactory
             }
         })).ToArray();
     }
-    
-    
+
+
     private Task InjectProperties(object instance, Dictionary<string, object?> propertyValues)
     {
         foreach (var kvp in propertyValues)
@@ -445,48 +438,48 @@ public sealed class TestFactory
         }
         return Task.CompletedTask;
     }
-    
+
     private static string GenerateTestId(TestMetadata metadata, object?[] arguments, Dictionary<string, object?> propertyValues)
     {
         var parts = new List<string> { metadata.TestId };
-        
+
         if (arguments.Length > 0)
         {
             parts.Add($"[{string.Join(",", arguments.Select(FormatArgument))}]");
         }
-        
+
         if (propertyValues.Count > 0)
         {
             parts.Add($"<{string.Join(",", propertyValues.Select(kv => $"{kv.Key}={FormatArgument(kv.Value)}"))}>");
         }
-        
+
         return string.Join("_", parts);
     }
-    
+
     private static string GenerateDisplayName(TestMetadata metadata, string argumentsDisplayText, Dictionary<string, object?> propertyValues)
     {
         var displayName = metadata.TestName;
-        
+
         if (!string.IsNullOrEmpty(argumentsDisplayText))
         {
             displayName += $"({argumentsDisplayText})";
         }
-        
+
         if (propertyValues.Count > 0)
         {
             var propDisplay = string.Join(", ", propertyValues.Select(kv => $"{kv.Key}: {FormatArgument(kv.Value)}"));
             displayName += $" [{propDisplay}]";
         }
-        
+
         return displayName;
     }
-    
+
     private static string GenerateArgumentsDisplayText(object?[] arguments)
     {
         if (arguments.Length == 0) return string.Empty;
         return string.Join(", ", arguments.Select(FormatArgument));
     }
-    
+
     private static string FormatArgument(object? arg)
     {
         return arg switch
@@ -498,49 +491,31 @@ public sealed class TestFactory
             _ => arg.ToString() ?? "null"
         };
     }
-    
 
-    private void ProcessTestDiscoveryAttributes(ExecutableTest test, TestContext context)
+
+    private async Task ProcessTestDiscoveryAttributes(ExecutableTest test, TestContext context)
     {
         if (test.Metadata.MethodInfo == null)
         {
             // Can't process attributes without reflection info
             return;
         }
-        
+
         // Create a DiscoveredTestContext wrapper to allow attributes to add properties
         var discoveredContext = new DiscoveredTestContext(
             context.TestName,
             context.DisplayName,
             context.TestDetails
         );
-        
+
         // Process class-level attributes
         var classAttributes = test.Metadata.TestClassType.GetCustomAttributes(true);
-        
-        foreach (var attribute in classAttributes)
+
+        foreach (var receiver in classAttributes.OfType<ITestDiscoveryEventReceiver>())
         {
-            if (attribute is ITestDiscoveryEventReceiver receiver)
-            {
-                try
-                {
-                    var task = receiver.OnTestDiscovered(discoveredContext);
-                    if (task.IsCompletedSuccessfully)
-                    {
-                        task.GetAwaiter().GetResult();
-                    }
-                    else
-                    {
-                        task.AsTask().GetAwaiter().GetResult();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Ignore attribute processing errors
-                }
-            }
+            await receiver.OnTestDiscovered(discoveredContext);
         }
-        
+
         // Process method-level attributes
         var methodAttributes = test.Metadata.MethodInfo.GetCustomAttributes(true);
         foreach (var attribute in methodAttributes)
@@ -566,8 +541,8 @@ public sealed class TestFactory
             }
         }
     }
-    
-    private TestContext CreateTestContext(ExecutableTest test)
+
+    private async Task<TestContext> CreateTestContext(ExecutableTest test)
     {
         // Create ClassMetadata
         var classMetadata = ClassMetadata.GetOrAdd(test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name, () => new ClassMetadata
@@ -586,7 +561,7 @@ public sealed class TestFactory
             Parent = null, // TODO: Get base type if needed
             Attributes = Array.Empty<AttributeMetadata>() // TODO: Get from type attributes if needed
         });
-        
+
         // Create MethodMetadata
         MethodMetadata methodMetadata;
         if (test.Metadata.MethodInfo != null)
@@ -629,7 +604,7 @@ public sealed class TestFactory
                 Attributes = Array.Empty<AttributeMetadata>()
             };
         }
-        
+
         var testDetails = new TestDetails
         {
             TestId = test.TestId,
@@ -647,98 +622,98 @@ public sealed class TestFactory
             ClassMetadata = classMetadata,
             MethodMetadata = methodMetadata
         };
-        
+
         // Add categories
         foreach (var category in test.Metadata.Categories)
         {
             testDetails.Categories.Add(category);
         }
-        
+
         var context = new TestContext(test.Metadata.TestName, test.DisplayName)
         {
             TestDetails = testDetails,
             CancellationToken = CancellationToken.None,
             InternalDiscoveredTest = null // Will be set by TestDiscoveryService when needed
         };
-        
+
         // Process attributes that implement ITestDiscoveryEventReceiver
-        ProcessTestDiscoveryAttributes(test, context);
-        
+        await ProcessTestDiscoveryAttributes(test, context);
+
         return context;
     }
-    
+
     private static IEnumerable<List<object?[]>> CartesianProduct(List<IEnumerable<object?[]>> sets)
     {
         return CartesianProductWithLimits(sets, 0, new CartesianProductState());
     }
-    
+
     private static IEnumerable<List<object?[]>> CartesianProductWithLimits(
-        List<IEnumerable<object?[]>> sets, 
+        List<IEnumerable<object?[]>> sets,
         int depth,
         CartesianProductState state)
     {
         var maxDepth = DiscoveryConfiguration.MaxCartesianDepth;
         var maxTotalCombinations = DiscoveryConfiguration.MaxCartesianCombinations;
-        
+
         // Record diagnostics
         DiscoveryDiagnostics.RecordCartesianProductDepth(depth, sets.Count);
-        
+
         if (depth > maxDepth)
         {
             throw new InvalidOperationException(
                 $"Cartesian product exceeded maximum recursion depth of {maxDepth}. " +
                 "This may indicate an excessive number of data source combinations.");
         }
-        
+
         if (!sets.Any())
         {
             yield return new List<object?[]>();
             yield break;
         }
-        
+
         var first = sets.First();
         var rest = sets.Skip(1).ToList();
         var restProduct = CartesianProductWithLimits(rest, depth + 1, state).ToList();
-        
+
         foreach (var item in first)
         {
             foreach (var restItem in restProduct)
             {
                 state.TotalCombinations++;
-                
+
                 if (state.TotalCombinations > maxTotalCombinations)
                 {
                     throw new InvalidOperationException(
                         $"Cartesian product exceeded maximum combinations limit of {maxTotalCombinations:N0}. " +
                         "Consider reducing the number of data sources or their sizes.");
                 }
-                
+
                 var result = new List<object?[]> { item };
                 result.AddRange(restItem);
                 yield return result;
             }
         }
     }
-    
+
     private class CartesianProductState
     {
         public int TotalCombinations { get; set; }
     }
-    
+
     private static List<Dictionary<string, object?>> GeneratePropertyCombinations(Dictionary<string, List<object?>> propertyDataMap)
     {
         if (!propertyDataMap.Any())
         {
             return new List<Dictionary<string, object?>>();
         }
-        
+
         var results = new List<Dictionary<string, object?>>();
         var properties = propertyDataMap.Keys.ToList();
         var indices = new int[properties.Count];
-        
+
         const int maxIterations = 1_000_000;
         int iterationCount = 0;
-        
+
         while (iterationCount < maxIterations)
         {
             var combination = new Dictionary<string, object?>();
@@ -749,7 +724,7 @@ public sealed class TestFactory
                 combination[prop] = values[indices[i]];
             }
             results.Add(combination);
-            
+
             int position = properties.Count - 1;
             while (position >= 0)
             {
@@ -761,19 +736,19 @@ public sealed class TestFactory
                 indices[position] = 0;
                 position--;
             }
-            
+
             if (position < 0) break;
             iterationCount++;
         }
-        
+
         if (iterationCount >= maxIterations)
         {
             throw new InvalidOperationException($"Property data combination generation exceeded maximum iterations ({maxIterations}). This may indicate an infinite loop or excessively large data set.");
         }
-        
+
         return results;
     }
-    
+
     /// <summary>
     /// Creates tests for generic types by resolving type parameters from test data
     /// </summary>
@@ -782,31 +757,24 @@ public sealed class TestFactory
     private async Task<IEnumerable<ExecutableTest>> CreateGenericTests(TestMetadata metadata)
     {
         var tests = new List<ExecutableTest>();
-        
+
         // Get all test data combinations
         var testDataSets = await ExpandTestData(metadata);
-        
+
         // For each data set, try to resolve generic types
         foreach (var (arguments, argumentsDisplayText) in testDataSets)
         {
-            try
-            {
-                // Create a specialized metadata for this specific generic instantiation
-                var specializedMetadata = CreateSpecializedMetadata(metadata, arguments);
-                
-                // Create tests with the specialized metadata
-                var specializedTests = await CreateTestsWithReflection(specializedMetadata);
-                tests.AddRange(specializedTests);
-            }
-            catch (GenericTypeResolutionException ex)
-            {
-                // Skip this combination if types can't be resolved
-            }
+            // Create a specialized metadata for this specific generic instantiation
+            var specializedMetadata = CreateSpecializedMetadata(metadata, arguments);
+
+            // Create tests with the specialized metadata
+            var specializedTests = await CreateTestsWithReflection(specializedMetadata);
+            tests.AddRange(specializedTests);
         }
-        
+
         return tests;
     }
-    
+
     /// <summary>
     /// Creates specialized metadata with resolved generic types
     /// </summary>
@@ -816,20 +784,20 @@ public sealed class TestFactory
     {
         var testClassType = metadata.TestClassType;
         var methodInfo = metadata.MethodInfo;
-        
+
         // Resolve generic method types first (they might inform class types)
         if (methodInfo?.IsGenericMethodDefinition == true && metadata.GenericMethodInfo != null)
         {
             var genericArguments = _genericTypeResolver.ResolveGenericMethodArguments(methodInfo, arguments);
             methodInfo = methodInfo.MakeGenericMethod(genericArguments);
         }
-        
+
         // Resolve generic class types
         if (testClassType.IsGenericTypeDefinition && metadata.GenericTypeInfo != null)
         {
             // Try to infer from method parameters if available
             Type[] classGenericArgs;
-            
+
             if (methodInfo != null)
             {
                 // Extract type arguments from resolved method parameter types
@@ -840,9 +808,9 @@ public sealed class TestFactory
                 // Fall back to constructor-based resolution
                 classGenericArgs = _genericTypeResolver.ResolveGenericClassArguments(testClassType, Array.Empty<object?>());
             }
-            
+
             testClassType = testClassType.MakeGenericType(classGenericArgs);
-            
+
             // Update method info to be from the constructed type
             if (methodInfo != null)
             {
@@ -851,7 +819,7 @@ public sealed class TestFactory
                 methodInfo = testClassType.GetMethod(methodName, paramTypes);
             }
         }
-        
+
         // Create new metadata with resolved types
         return new TestMetadata
         {
@@ -880,7 +848,7 @@ public sealed class TestFactory
             GenericMethodInfo = null // No longer generic
         };
     }
-    
+
     /// <summary>
     /// Infers generic class type arguments from a resolved method and its arguments
     /// </summary>
@@ -889,7 +857,7 @@ public sealed class TestFactory
         var classTypeParams = genericClassType.GetGenericArguments();
         var resolvedTypes = new Type[classTypeParams.Length];
         var typeMapping = new Dictionary<string, Type>();
-        
+
         // Build mapping from method parameter types and arguments
         var parameters = resolvedMethod.GetParameters();
         for (int i = 0; i < parameters.Length && i < arguments.Length; i++)
@@ -898,12 +866,12 @@ public sealed class TestFactory
             {
                 var paramType = parameters[i].ParameterType;
                 var argType = arguments[i]!.GetType();
-                
+
                 // If parameter type contains generic parameters from the class, map them
                 ExtractTypeMapping(paramType, argType, genericClassType, typeMapping);
             }
         }
-        
+
         // Resolve each class type parameter
         for (int i = 0; i < classTypeParams.Length; i++)
         {
@@ -918,10 +886,10 @@ public sealed class TestFactory
                     $"Could not resolve generic type parameter '{param.Name}' for class '{genericClassType.Name}'");
             }
         }
-        
+
         return resolvedTypes;
     }
-    
+
     /// <summary>
     /// Extracts type mappings from parameter and argument types
     /// </summary>
@@ -936,7 +904,7 @@ public sealed class TestFactory
         {
             var paramGenericArgs = paramType.GetGenericArguments();
             var argGenericArgs = argType.GetGenericArguments();
-            
+
             for (int i = 0; i < paramGenericArgs.Length && i < argGenericArgs.Length; i++)
             {
                 ExtractTypeMapping(paramGenericArgs[i], argGenericArgs[i], genericClassType, mapping);

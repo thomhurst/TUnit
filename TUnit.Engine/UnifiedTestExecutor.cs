@@ -1,21 +1,10 @@
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Extensions;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.TestHost;
-using TUnit.Core;
 using TUnit.Core.Services;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
 using TUnit.Engine.CommandLineProviders;
@@ -36,7 +25,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     private readonly ILoggerFactory _loggerFactory;
     private SessionUid? _sessionUid;
     private readonly CancellationTokenSource _failFastCancellationSource = new();
-    
+
     public UnifiedTestExecutor(
         ISingleTestExecutor singleTestExecutor,
         ICommandLineOptions commandLineOptions,
@@ -48,20 +37,20 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         _commandLineOptions = commandLineOptions;
         _logger = logger;
         _loggerFactory = loggerFactory ?? new NullLoggerFactory();
-        
+
         // Use provided scheduler or create default
         _testScheduler = testScheduler ?? CreateDefaultScheduler();
     }
-    
+
     // IDataProducer implementation
     public string Uid => "TUnit.UnifiedTestExecutor";
     public string Version => "1.0.0";
     public string DisplayName => "TUnit Test Executor";
     public string Description => "Unified test executor for TUnit";
     public Type[] DataTypesProduced => new[] { typeof(TestNodeUpdateMessage) };
-    
+
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
-    
+
     /// <summary>
     /// Sets the session ID for test reporting
     /// </summary>
@@ -69,7 +58,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     {
         _sessionUid = sessionUid;
     }
-    
+
     /// <summary>
     /// Executes a collection of tests with proper parallelization and dependency handling
     /// </summary>
@@ -80,17 +69,17 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         CancellationToken cancellationToken)
     {
         var testList = tests.ToList();
-        
+
         // Apply filter if provided
         if (filter != null)
         {
             var beforeCount = testList.Count;
             testList = ApplyFilter(testList, filter);
         }
-        
+
         // Check if fail-fast is enabled
         var isFailFastEnabled = IsFailFastEnabled();
-        
+
         // Create executor adapter with fail-fast support
         var executorAdapter = new FailFastTestExecutorAdapter(
             _singleTestExecutor,
@@ -99,35 +88,35 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             isFailFastEnabled,
             _failFastCancellationSource,
             _logger);
-        
+
         // Combine cancellation tokens
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            cancellationToken, 
+            cancellationToken,
             _failFastCancellationSource.Token);
-        
+
         // Schedule and execute tests
         await _testScheduler.ScheduleAndExecuteAsync(testList, executorAdapter, linkedCts.Token);
     }
-    
+
     private bool IsFailFastEnabled()
     {
         return _commandLineOptions.TryGetOptionArgumentList(
-            FailFastCommandProvider.FailFast, 
+            FailFastCommandProvider.FailFast,
             out _);
     }
-    
+
     private ITestScheduler CreateDefaultScheduler()
     {
         return TestSchedulerFactory.CreateDefault(_logger);
     }
-    
+
     private List<ExecutableTest> ApplyFilter(List<ExecutableTest> tests, ITestExecutionFilter filter)
     {
         // Debug: Applying filter to {tests.Count} tests of type {filter.GetType().Name}
-        
+
         // Use TestFilterService to apply the filter
         var filterService = new TestFilterService(_loggerFactory);
-        
+
         // Filter tests directly - TestFilterService handles the request internally
         var filteredTests = new List<ExecutableTest>();
         foreach (var test in tests)
@@ -137,14 +126,14 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
                 filteredTests.Add(test);
             }
         }
-        
+
         // Debug: Filter matched {filteredTests.Count} tests
-        
+
         return filteredTests;
     }
-    
 
-    
+
+
     /// <summary>
     /// Implementation of ITestExecutor for Microsoft.Testing.Platform
     /// </summary>
@@ -155,7 +144,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     {
         // Check if we're using reflection or source generation
         bool enableDynamicDiscovery = IsReflectionScannerEnabled();
-        
+
         if (enableDynamicDiscovery)
         {
             #pragma warning disable IL3050 // Calling method with RequiresDynamicCodeAttribute
@@ -169,7 +158,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             await ExecuteAsyncAotSafe(request, messageBus, cancellationToken);
         }
     }
-    
+
     /// <summary>
     /// AOT-safe test execution (source generation path)
     /// </summary>
@@ -187,13 +176,13 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
                 new DataSourceResolver(),
                 new NoOpGenericTypeResolver()), // AOT-safe: no runtime generic resolution
             enableDynamicDiscovery: false);
-        
+
         var tests = await discoveryService.DiscoverTests();
-        
+
         // Execute tests
         await ExecuteTests(tests, request.Filter, messageBus, cancellationToken);
     }
-    
+
     /// <summary>
     /// Reflection-based test execution
     /// </summary>
@@ -213,13 +202,13 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
                 new DataSourceResolver(),
                 new GenericTypeResolver()),
             enableDynamicDiscovery: true);
-        
+
         var tests = await discoveryService.DiscoverTests();
-        
+
         // Execute tests
         await ExecuteTests(tests, request.Filter, messageBus, cancellationToken);
     }
-    
+
     private bool IsReflectionScannerEnabled()
     {
         // Check command line options for reflection scanner flag

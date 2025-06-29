@@ -1,6 +1,3 @@
-using System.Diagnostics;
-using TUnit.Core;
-
 namespace TUnit.Engine.Helpers;
 
 /// <summary>

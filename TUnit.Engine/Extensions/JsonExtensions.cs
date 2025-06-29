@@ -1,5 +1,4 @@
 ﻿using TUnit.Core;
-using TUnit.Core.Extensions;
 using TUnit.Engine.Json;
 
 namespace TUnit.Engine.Extensions;

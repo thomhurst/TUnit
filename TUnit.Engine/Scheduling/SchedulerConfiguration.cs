@@ -1,5 +1,3 @@
-using System;
-
 namespace TUnit.Engine.Scheduling;
 
 /// <summary>
