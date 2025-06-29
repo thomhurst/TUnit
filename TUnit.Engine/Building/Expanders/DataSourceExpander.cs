@@ -115,6 +115,8 @@ public sealed class DataSourceExpander : IDataSourceExpander
         return propertyFactories;
     }
     
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "DynamicTestDataSource is only used as fallback when AOT-friendly resolution isn't possible. Source generator preferentially creates AotFriendlyTestDataSource.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "DynamicTestDataSource is only used as fallback when AOT-friendly resolution isn't possible. Source generator preferentially creates AotFriendlyTestDataSource.")]
     private async Task<IEnumerable<Func<object?[]>>> GetDataFactoriesAsync(
         TestDataSource dataSource, 
         DataSourceLevel level)
@@ -125,9 +127,16 @@ public sealed class DataSourceExpander : IDataSourceExpander
             return dataSource.GetDataFactories();
         }
         
+        if (dataSource is AotFriendlyTestDataSource aotFriendlySource)
+        {
+            // AOT-friendly sources use direct method invocation, no reflection needed
+            return aotFriendlySource.GetDataFactories();
+        }
+        
         if (dataSource is DynamicTestDataSource dynamicSource)
         {
-            // Dynamic sources need resolution
+            // Dynamic sources need resolution - these are only used when AOT-friendly resolution isn't possible
+            // The source generator now preferentially creates AotFriendlyTestDataSource when possible
             return await _dynamicResolver.ResolveAsync(dynamicSource, level);
         }
         

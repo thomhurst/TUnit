@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -453,6 +454,15 @@ internal static class CodeGenerationHelpers
         var methodName = attr.ConstructorArguments[0].Value?.ToString() ?? "";
         var isShared = attr.NamedArguments.FirstOrDefault(na => na.Key == "Shared").Value.Value as bool? ?? false;
 
+        // Try to determine if this can be optimized for AOT
+        var method = FindDataSourceMethod(methodName, containingType);
+        if (method != null && ShouldUseAotOptimizedDataSource(method))
+        {
+            // Generate code that uses a more AOT-friendly approach
+            return GenerateAotOptimizedDataSource(methodName, containingType, isShared);
+        }
+
+        // Fall back to DynamicTestDataSource for complex cases
         return $"new global::TUnit.Core.DynamicTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ SourceType = typeof({containingType.GloballyQualified()}), SourceMemberName = \"{methodName}\" }}";
     }
 
@@ -492,6 +502,16 @@ internal static class CodeGenerationHelpers
 
         var isShared = attr.NamedArguments.FirstOrDefault(na => na.Key == "Shared").Value.Value as bool? ?? false;
 
+        // Check if we can use AOT-friendly approach for class data sources
+        if (dataSourceType is INamedTypeSymbol namedType)
+        {
+            var getDataMethod = FindDataSourceMethod("GetData", namedType);
+            if (getDataMethod != null && ShouldUseAotOptimizedDataSource(getDataMethod))
+            {
+                return GenerateAotOptimizedClassDataSource("GetData", namedType, isShared);
+            }
+        }
+
         return $"new global::TUnit.Core.DynamicTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ SourceType = typeof({dataSourceType.GloballyQualified()}), SourceMemberName = \"GetData\" }}";
     }
 
@@ -505,13 +525,21 @@ internal static class CodeGenerationHelpers
         var propertyName = attr.ConstructorArguments[0].Value?.ToString() ?? "";
         var isShared = attr.NamedArguments.FirstOrDefault(na => na.Key == "Shared").Value.Value as bool? ?? false;
 
+        // Check if we can use AOT-friendly approach for property data sources
+        var property = containingType.GetMembers(propertyName).OfType<IPropertySymbol>().FirstOrDefault();
+        if (property != null && ShouldUseAotOptimizedPropertyDataSource(property))
+        {
+            return GenerateAotOptimizedPropertyDataSource(propertyName, containingType, isShared);
+        }
+
         return $"new global::TUnit.Core.DynamicTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ SourceType = typeof({containingType.GloballyQualified()}), SourceMemberName = \"{propertyName}\" }}";
     }
 
     private static string GenerateCustomDataProvider(AttributeData attr)
     {
-        // For custom data attributes, create a DynamicTestDataSource
-        // This is a simplified approach - may need more sophisticated handling
+        // For custom data attributes, we need to be more careful about AOT compatibility
+        // Most custom data attributes will require dynamic code, so they should use DynamicTestDataSource
+        // with appropriate warning attributes on the attribute class itself
         return $"new global::TUnit.Core.DynamicTestDataSource(false) {{ SourceType = typeof({attr.AttributeClass!.GloballyQualified()}), SourceMemberName = \"GetData\" }}";
     }
 
@@ -705,4 +733,114 @@ internal static class CodeGenerationHelpers
 
         return $"{typeName}, {typeSymbol.ContainingAssembly.Name}";
     }
+
+    #region Compile-Time Data Source Resolution
+
+    /// <summary>
+    /// Finds a data source method in the containing type.
+    /// </summary>
+    private static IMethodSymbol? FindDataSourceMethod(string methodName, INamedTypeSymbol containingType)
+    {
+        return containingType.GetMembers(methodName)
+            .OfType<IMethodSymbol>()
+            .FirstOrDefault(m => m.Parameters.Length == 0);
+    }
+
+    /// <summary>
+    /// Determines if a method should use AOT-optimized data source generation.
+    /// </summary>
+    private static bool ShouldUseAotOptimizedDataSource(IMethodSymbol method)
+    {
+        // For now, we'll use a conservative approach and only optimize static methods
+        // with simple return types that are clearly data sources
+        if (!method.IsStatic) return false;
+        if (method.Parameters.Length > 0) return false;
+
+        var returnType = method.ReturnType;
+        
+        // Check for common data source return types
+        if (returnType is INamedTypeSymbol namedType)
+        {
+            var typeString = namedType.ToDisplayString();
+            
+            // Look for IEnumerable patterns that are commonly used for test data
+            return typeString.Contains("IEnumerable<") || 
+                   typeString.Contains("ICollection<") ||
+                   typeString.Contains("List<") ||
+                   typeString == "object[][]" ||
+                   typeString.Contains("object[]");
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Generates AOT-optimized data source code that avoids reflection.
+    /// </summary>
+    private static string GenerateAotOptimizedDataSource(string methodName, INamedTypeSymbol containingType, bool isShared)
+    {
+        // For AOT compatibility, we'll use a compile-time generated data source
+        // that calls the method directly without reflection
+        return $"new global::TUnit.Core.AotFriendlyTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ " +
+               $"MethodInvoker = () => {containingType.GloballyQualified()}.{methodName}(), " +
+               $"SourceType = typeof({containingType.GloballyQualified()}), " +
+               $"SourceMemberName = \"{methodName}\" }}";
+    }
+
+    /// <summary>
+    /// Generates AOT-optimized class data source code that avoids reflection.
+    /// </summary>
+    private static string GenerateAotOptimizedClassDataSource(string methodName, INamedTypeSymbol containingType, bool isShared)
+    {
+        // For class data sources, instantiate the class and call the method
+        return $"new global::TUnit.Core.AotFriendlyTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ " +
+               $"MethodInvoker = () => new {containingType.GloballyQualified()}().{methodName}(), " +
+               $"SourceType = typeof({containingType.GloballyQualified()}), " +
+               $"SourceMemberName = \"{methodName}\" }}";
+    }
+
+    /// <summary>
+    /// Generates AOT-optimized property data source code that avoids reflection.
+    /// </summary>
+    private static string GenerateAotOptimizedPropertyDataSource(string propertyName, INamedTypeSymbol containingType, bool isShared)
+    {
+        // For property data sources, instantiate the class and access the property
+        return $"new global::TUnit.Core.AotFriendlyTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ " +
+               $"MethodInvoker = () => new {containingType.GloballyQualified()}().{propertyName}, " +
+               $"SourceType = typeof({containingType.GloballyQualified()}), " +
+               $"SourceMemberName = \"{propertyName}\" }}";
+    }
+
+    /// <summary>
+    /// Determines if a property should use AOT-optimized data source generation.
+    /// </summary>
+    private static bool ShouldUseAotOptimizedPropertyDataSource(IPropertySymbol property)
+    {
+        // For properties, check if they are static and have suitable return types
+        if (!property.IsStatic) 
+        {
+            // For instance properties, check if the containing type has a parameterless constructor
+            var containingType = property.ContainingType;
+            var hasParameterlessConstructor = containingType.Constructors.Any(c => c.Parameters.Length == 0);
+            if (!hasParameterlessConstructor) return false;
+        }
+
+        var returnType = property.Type;
+        
+        if (returnType is INamedTypeSymbol namedType)
+        {
+            var typeString = namedType.ToDisplayString();
+            
+            // Look for common data source return types
+            return typeString.Contains("IEnumerable<") || 
+                   typeString.Contains("ICollection<") ||
+                   typeString.Contains("List<") ||
+                   typeString == "object[][]" ||
+                   typeString.Contains("object[]");
+        }
+
+        return false;
+    }
+
+    #endregion
 }
