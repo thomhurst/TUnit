@@ -13,8 +13,8 @@ internal sealed class TestRequestHandler : IRequestHandler
     {
         switch (request)
         {
-            case DiscoverTestExecutionRequest discoverRequest:
-                await HandleDiscoveryRequestAsync(serviceProvider, discoverRequest, context);
+            case DiscoverTestExecutionRequest:
+                await HandleDiscoveryRequestAsync(serviceProvider, context);
                 break;
 
             case RunTestExecutionRequest runRequest:
@@ -31,16 +31,13 @@ internal sealed class TestRequestHandler : IRequestHandler
 
     private async Task HandleDiscoveryRequestAsync(
         TUnitServiceProvider serviceProvider,
-        DiscoverTestExecutionRequest request,
         ExecuteRequestContext context)
     {
         var allTests = await serviceProvider.DiscoveryService.DiscoverTests();
 
         foreach (var test in allTests)
         {
-            if (context.CancellationToken.IsCancellationRequested)
-                break;
-
+            context.CancellationToken.ThrowIfCancellationRequested();
             await serviceProvider.MessageBus.Discovered(test.Context!);
         }
     }
@@ -50,25 +47,14 @@ internal sealed class TestRequestHandler : IRequestHandler
         RunTestExecutionRequest request,
         ExecuteRequestContext context)
     {
-        var allTests = await serviceProvider.DiscoveryService.DiscoverTests();
+        var allTests = (await serviceProvider.DiscoveryService.DiscoverTests()).ToArray();
 
-        // Apply filter to tests before reporting discovery
-        var testsToRun = allTests;
-        if (request.Filter != null)
-        {
-            // Create a null logger factory for now - filtering will still work
-            var loggerFactory = new NullLoggerFactory();
-            var filterService = new TestFilterService(loggerFactory);
-            testsToRun = filterService.FilterTests(request, allTests.ToArray()).ToList();
-            
-        }
+        var filteredTests = serviceProvider.TestFilterService.FilterTests(request, allTests);
 
         // Report only the tests that will actually run
-        foreach (var test in testsToRun)
+        foreach (var test in filteredTests)
         {
-            if (context.CancellationToken.IsCancellationRequested)
-                break;
-
+            context.CancellationToken.ThrowIfCancellationRequested();
             await serviceProvider.MessageBus.Discovered(test.Context!);
         }
 

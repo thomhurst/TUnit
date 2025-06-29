@@ -18,12 +18,6 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
         {
             _logger.LogTrace("No test filter found.");
 
-            if (testExecutionRequest is RunTestExecutionRequest)
-            {
-                // Return all tests since we don't have Attributes on TestDetails
-                return testNodes.ToArray();
-            }
-
             return testNodes;
         }
 
@@ -59,10 +53,36 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
         return $"/{assembly.Name ?? assembly.FullName}/{metadata.TestClassType.Namespace}/{classTypeName}/{metadata.TestMethodName}";
     }
 
+    private bool CheckTreeNodeFilter(
+#pragma warning disable TPEXP
+        TreeNodeFilter treeNodeFilter,
+#pragma warning restore TPEXP
+        ExecutableTest executableTest)
+    {
+        var path = BuildPath(executableTest);
+        var propertyBag = BuildPropertyBag(executableTest);
+        _logger.LogDebug($"Checking TreeNodeFilter for path: {path}");
+
+        var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
+        _logger.LogDebug($"Filter match result: {matches}");
+
+        return matches;
+    }
+
+    private bool UnhandledFilter(ITestExecutionFilter testExecutionFilter)
+    {
+        _logger.LogWarning($"Filter is Unhandled Type: {testExecutionFilter.GetType().FullName}");
+        return true;
+    }
+
     private PropertyBag BuildPropertyBag(ExecutableTest test)
     {
         var properties = new List<IProperty>();
 
+        if (test.Context?.TestDetails.ClassMetadata.Name == "ArgumentsWithClassDataSourceTests")
+        {
+            Console.WriteLine("Debugging ArgumentsWithClassDataSourceTests");
+        }
 
         // Add categories
         foreach (var category in test.Metadata.Categories)
@@ -93,27 +113,5 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
         _logger.LogDebug($"Total properties in bag: {properties.Count}");
 
         return new PropertyBag(properties);
-    }
-
-    private bool CheckTreeNodeFilter(
-#pragma warning disable TPEXP
-        TreeNodeFilter treeNodeFilter,
-#pragma warning restore TPEXP
-        ExecutableTest executableTest)
-    {
-        var path = BuildPath(executableTest);
-        var propertyBag = BuildPropertyBag(executableTest);
-        _logger.LogDebug($"Checking TreeNodeFilter for path: {path}");
-
-        var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
-        _logger.LogDebug($"Filter match result: {matches}");
-
-        return matches;
-    }
-
-    private bool UnhandledFilter(ITestExecutionFilter testExecutionFilter)
-    {
-        _logger.LogWarning($"Filter is Unhandled Type: {testExecutionFilter.GetType().FullName}");
-        return true;
     }
 }
