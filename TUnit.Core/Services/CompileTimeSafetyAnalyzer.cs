@@ -276,12 +276,14 @@ public sealed class CompileTimeSafetyAnalysis
     /// <summary>
     /// Issues found during analysis.
     /// </summary>
-    public IReadOnlyList<CompileTimeSafetyIssue> Issues { get; init; } = Array.Empty<CompileTimeSafetyIssue>();
+    public IReadOnlyList<CompileTimeSafetyIssue> Issues { get; init; } = [
+    ];
 
     /// <summary>
     /// Recommendations for improving AOT safety.
     /// </summary>
-    public IReadOnlyList<string> Recommendations { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Recommendations { get; init; } = [
+    ];
 
     /// <summary>
     /// The method that was analyzed (if applicable).

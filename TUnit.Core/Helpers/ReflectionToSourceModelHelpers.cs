@@ -69,7 +69,8 @@ internal class ReflectionToSourceModelHelpers
         return _classCache.GetOrAdd(testClassType, _ =>
         {
             // Initialize thread-local set if needed
-            _typesBeingProcessed ??= new HashSet<Type>();
+            _typesBeingProcessed ??=
+            [];
 
             // Check if we're already processing this type
             if (!_typesBeingProcessed.Add(testClassType))

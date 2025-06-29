@@ -46,12 +46,14 @@ public sealed class CompileTimeResolvedData
     /// <summary>
     /// Class-level data combinations resolved at compile-time.
     /// </summary>
-    public IReadOnlyList<object?[]> ClassData { get; init; } = Array.Empty<object?[]>();
+    public IReadOnlyList<object?[]> ClassData { get; init; } = [
+    ];
 
     /// <summary>
     /// Method-level data combinations resolved at compile-time.
     /// </summary>
-    public IReadOnlyList<object?[]> MethodData { get; init; } = Array.Empty<object?[]>();
+    public IReadOnlyList<object?[]> MethodData { get; init; } = [
+    ];
 
     /// <summary>
     /// Property values resolved at compile-time.
@@ -62,7 +64,8 @@ public sealed class CompileTimeResolvedData
     /// Data attributes that could not be resolved at compile-time.
     /// These will need to be handled at runtime in reflection mode.
     /// </summary>
-    public IReadOnlyList<IDataAttribute> UnresolvedAttributes { get; init; } = Array.Empty<IDataAttribute>();
+    public IReadOnlyList<IDataAttribute> UnresolvedAttributes { get; init; } = [
+    ];
 
     /// <summary>
     /// Total number of test variations this data will produce.

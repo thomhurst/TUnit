@@ -78,7 +78,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     public string Version => _extension.Version;
     public string DisplayName => _extension.DisplayName;
     public string Description => _extension.Description;
-    public Type[] DataTypesProduced => new[] { typeof(TestNodeUpdateMessage) };
+    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage)];
 
     public Task<bool> IsEnabledAsync() => _extension.IsEnabledAsync();
 

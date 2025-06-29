@@ -10,7 +10,8 @@ namespace TUnit.Analyzers;
 public class AssemblyTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic, Rules.UnknownParameters, Rules.GlobalHooksSeparateClass);
+        [Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic, Rules.UnknownParameters, Rules.GlobalHooksSeparateClass
+        ];
 
     protected override void InitializeInternal(AnalysisContext context)
     {

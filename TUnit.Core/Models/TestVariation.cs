@@ -86,12 +86,14 @@ public sealed class TestVariation
     /// <summary>
     /// Category tags for this test.
     /// </summary>
-    public IReadOnlyList<string> Categories { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Categories { get; init; } = [
+    ];
 
     /// <summary>
     /// Attributes applied to this test method.
     /// </summary>
-    public IReadOnlyList<AttributeMetadata> Attributes { get; init; } = Array.Empty<AttributeMetadata>();
+    public IReadOnlyList<AttributeMetadata> Attributes { get; init; } = [
+    ];
 
     /// <summary>
     /// Source generation specific data (only populated in source generation mode).

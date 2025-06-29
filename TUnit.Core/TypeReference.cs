@@ -41,7 +41,9 @@ public sealed class TypeReference
     /// For constructed generic types (e.g., List&lt;int&gt;, Dictionary&lt;string, T&gt;).
     /// Contains TypeReference instances for the generic arguments.
     /// </summary>
-    public List<TypeReference> GenericArguments { get; set; } = new();
+    public List<TypeReference> GenericArguments { get; set; } =
+    [
+    ];
 
     /// <summary>
     /// True if this represents an array type.

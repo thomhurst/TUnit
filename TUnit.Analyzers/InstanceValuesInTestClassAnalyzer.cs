@@ -11,7 +11,7 @@ namespace TUnit.Analyzers;
 public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.InstanceAssignmentInTestClass);
+        [Rules.InstanceAssignmentInTestClass];
 
     protected override void InitializeInternal(AnalysisContext context)
     {

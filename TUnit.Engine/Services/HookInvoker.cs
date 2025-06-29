@@ -29,11 +29,11 @@ public class HookInvoker : IHookInvoker
 
         if (parameters.Length == 0)
         {
-            args = Array.Empty<object>();
+            args = [];
         }
         else if (parameters.Length == 1 && parameters[0].ParameterType == typeof(HookContext))
         {
-            args = new object[] { context };
+            args = [context];
         }
         else
         {

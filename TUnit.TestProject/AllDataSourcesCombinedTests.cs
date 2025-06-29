@@ -11,7 +11,9 @@ namespace TUnit.TestProject;
 [ClassDataSource(typeof(DataSource3))]
 public class AllDataSourcesCombinedTests(int classValue)
 {
-    private static readonly ConcurrentBag<string> ExecutedTests = new();
+    private static readonly ConcurrentBag<string> ExecutedTests =
+    [
+    ];
 
     [Test]
     [Arguments("A")]

@@ -42,7 +42,7 @@ public static class GeneratedAotAsyncDataSourceExample
                 yield return async () =>
             {
                 var result = await dataSourceFunc();
-                return new object?[] { result };
+                return [result];
             };  // ✅ Direct async enumeration!
             }
         }

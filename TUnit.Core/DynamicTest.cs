@@ -18,7 +18,9 @@ public class DynamicDiscoveryResult : DiscoveryResult
     public Expression? TestMethod { get; set; }
     public object?[]? TestClassArguments { get; set; }
     public object?[]? TestMethodArguments { get; set; }
-    public List<Attribute> Attributes { get; set; } = new List<Attribute>();
+    public List<Attribute> Attributes { get; set; } =
+    [
+    ];
     public Type? TestClassType { get; set; }
 }
 
@@ -45,7 +47,9 @@ public class DynamicTestInstance<T> : DynamicTest<T> where T : class
     public Expression<Action<T>>? TestMethod { get; set; }
     public object?[]? TestClassArguments { get; set; }
     public object?[]? TestMethodArguments { get; set; }
-    public List<Attribute> Attributes { get; set; } = new List<Attribute>();
+    public List<Attribute> Attributes { get; set; } =
+    [
+    ];
 
     public override IEnumerable<DiscoveryResult> GetTests()
     {

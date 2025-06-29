@@ -133,7 +133,7 @@ public static class ReflectionExtensions
         else
         {
             // Fallback for any other ICustomAttributeProvider
-            return Array.Empty<Attribute>();
+            return [];
         }
 
         // Filter by attribute type if specified

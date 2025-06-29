@@ -138,7 +138,9 @@ public class TestContext : Context
     /// <summary>
     /// Argument display formatters
     /// </summary>
-    public List<Func<object?, string?>> ArgumentDisplayFormatters { get; } = new();
+    public List<Func<object?, string?>> ArgumentDisplayFormatters { get; } =
+    [
+    ];
 
     /// <summary>
     /// Test context events
@@ -232,7 +234,9 @@ public class TestContext : Context
     /// <summary>
     /// Test timings
     /// </summary>
-    public List<Timing> Timings { get; } = new();
+    public List<Timing> Timings { get; } =
+    [
+    ];
 
     /// <summary>
     /// Test artifacts
@@ -364,7 +368,7 @@ public class TestContext : Context
                     var reregisterMethod = registryType.GetMethod("ReregisterTestWithArguments");
                     if (reregisterMethod != null)
                     {
-                        await (Task) reregisterMethod.Invoke(registry, new object?[] { this, methodArguments, objectBag })!;
+                        await (Task) reregisterMethod.Invoke(registry, [this, methodArguments, objectBag])!;
                     }
                 }
             }
@@ -379,7 +383,9 @@ public class TestContext : Context
     /// <summary>
     /// Gets the dependencies for this test
     /// </summary>
-    public List<string> Dependencies { get; } = new List<string>();
+    public List<string> Dependencies { get; } =
+    [
+    ];
 
     /// <summary>
     /// Gets tests matching the criteria
@@ -401,7 +407,7 @@ public class TestContext : Context
                     var getTestsMethod = registryType.GetMethod("GetTests");
                     if (getTestsMethod != null)
                     {
-                        registryResult = (IEnumerable<TestContext>) getTestsMethod.Invoke(registry, new object[] { predicate })!;
+                        registryResult = (IEnumerable<TestContext>) getTestsMethod.Invoke(registry, [predicate])!;
                     }
                 }
             }
@@ -446,7 +452,7 @@ public class TestContext : Context
                     var getTestsByNameMethod = registryType.GetMethod("GetTestsByName");
                     if (getTestsByNameMethod != null)
                     {
-                        return (List<TestContext>) getTestsByNameMethod.Invoke(registry, new object[] { testName })!;
+                        return (List<TestContext>) getTestsByNameMethod.Invoke(registry, [testName])!;
                     }
                 }
             }

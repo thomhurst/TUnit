@@ -119,7 +119,9 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
     internal sealed class DedicatedThreadTaskScheduler : TaskScheduler
     {
         private readonly Thread _dedicatedThread = Thread.CurrentThread;
-        private readonly List<Task> _taskQueue = new();
+        private readonly List<Task> _taskQueue =
+        [
+        ];
         private readonly Lock _queueLock = new();
 
         protected override void QueueTask(Task task)

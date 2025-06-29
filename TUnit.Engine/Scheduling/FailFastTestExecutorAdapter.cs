@@ -25,7 +25,7 @@ internal sealed class FailFastTestExecutorAdapter : ITestExecutor, IDataProducer
     public string Version => "1.0.0";
     public string DisplayName => "Fail-Fast Test Executor Adapter";
     public string Description => "Test executor adapter with fail-fast support";
-    public Type[] DataTypesProduced => new[] { typeof(TestNodeUpdateMessage) };
+    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage)];
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
     public FailFastTestExecutorAdapter(

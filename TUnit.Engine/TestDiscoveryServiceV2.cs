@@ -22,7 +22,7 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
     public string Version => "2.0.0";
     public string DisplayName => "TUnit Test Discovery";
     public string Description => "TUnit Unified Test Discovery Service";
-    public Type[] DataTypesProduced => new[] { typeof(TestNodeUpdateMessage) };
+    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage)];
 
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
@@ -182,7 +182,7 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
             AssemblyFullName: test.Metadata.TestClassType.Assembly.FullName ?? "UnknownAssembly",
             TypeName: test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name,
             MethodName: test.Metadata.TestMethodName,
-            ParameterTypeFullNames: test.Metadata.ParameterTypes?.Select(t => t.FullName ?? "unknown").ToArray() ?? Array.Empty<string>(),
+            ParameterTypeFullNames: test.Metadata.ParameterTypes?.Select(t => t.FullName ?? "unknown").ToArray() ?? [],
             ReturnTypeFullName: "void",
             MethodArity: 0
         ));

@@ -9,10 +9,9 @@ namespace TUnit.Analyzers;
 public class InstanceTestMethodAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create
-        (
-            Rules.InstanceTestMethod
-        );
+    [
+        Rules.InstanceTestMethod
+    ];
 
     protected override void InitializeInternal(AnalysisContext context)
     {

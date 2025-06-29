@@ -60,13 +60,13 @@ public class AsyncUntypedDataSource : AsyncUntypedDataSourceGeneratorAttribute
         yield return async () =>
         {
             await Task.Delay(10);
-            return new object?[] { 42, "Answer", true };
+            return [42, "Answer", true];
         };
 
         yield return async () =>
         {
             await Task.Delay(10);
-            return new object?[] { 100, "Century", false };
+            return [100, "Century", false];
         };
     }
 }

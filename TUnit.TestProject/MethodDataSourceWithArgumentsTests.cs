@@ -6,7 +6,9 @@ namespace TUnit.TestProject;
 [EngineTest(ExpectedResult.Pass)]
 public class MethodDataSourceWithArgumentsTests
 {
-    private static readonly ConcurrentBag<string> ExecutedTests = new();
+    private static readonly ConcurrentBag<string> ExecutedTests =
+    [
+    ];
 
     [Test]
     [Arguments("A")]

@@ -49,7 +49,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     public string Version => "1.0.0";
     public string DisplayName => "TUnit Test Executor";
     public string Description => "Unified test executor for TUnit";
-    public Type[] DataTypesProduced => new[] { typeof(TestNodeUpdateMessage) };
+    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage)];
 
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 

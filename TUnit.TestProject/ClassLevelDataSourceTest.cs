@@ -16,5 +16,5 @@ public class ClassLevelDataSourceTest
         Console.WriteLine("Test executed");
     }
 
-    public static int[] ClassData() => new[] { 1, 2, 3 };
+    public static int[] ClassData() => [1, 2, 3];
 }

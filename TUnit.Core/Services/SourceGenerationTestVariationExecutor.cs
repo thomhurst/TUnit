@@ -59,7 +59,7 @@ public class SourceGenerationTestVariationExecutor : ITestVariationExecutor
         var invoker = _registry.GetMethodInvoker(variation.TestId);
         if (invoker != null)
         {
-            var args = variation.MethodArguments ?? Array.Empty<object?>();
+            var args = variation.MethodArguments ?? [];
             return await invoker(instance, args);
         }
 
@@ -67,7 +67,7 @@ public class SourceGenerationTestVariationExecutor : ITestVariationExecutor
         var sourceData = variation.SourceGeneratedData;
         if (sourceData?.MethodInvoker != null)
         {
-            var args = variation.MethodArguments ?? Array.Empty<object?>();
+            var args = variation.MethodArguments ?? [];
             return await sourceData.MethodInvoker(instance, args);
         }
 

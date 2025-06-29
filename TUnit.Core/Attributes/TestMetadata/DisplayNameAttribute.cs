@@ -12,7 +12,7 @@ namespace TUnit.Core;
 /// This attribute can be applied to test methods to provide more descriptive names than the default method name.
 /// </para>
 /// <para>
-/// The display name can include parameter placeholders in the format of "$parameterName" which will be 
+/// The display name can include parameter placeholders in the format of "$parameterName" which will be
 /// replaced with the actual parameter values during test execution. For example:
 /// <code>
 /// [Test]
@@ -42,7 +42,7 @@ public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormat
             ?.MethodMetadata
             ?.Parameters
             ?.Zip(testDetails.TestMethodArguments, (parameterInfo, testArgument) => (ParameterInfo: parameterInfo, TestArgument: testArgument))
-            ?? Enumerable.Empty<(ParameterMetadata ParameterInfo, object? TestArgument)>();
+            ?? [];
 
         foreach (var parameter in parameters)
         {

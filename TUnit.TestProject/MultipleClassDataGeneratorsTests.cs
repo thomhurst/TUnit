@@ -8,7 +8,9 @@ namespace TUnit.TestProject;
 [AutoFixtureGenerator]                     // Generator 2
 public class MultipleClassDataGeneratorsTests(int value1, string value2, bool value3)
 {
-    private static readonly ConcurrentBag<string> ExecutedTests = new();
+    private static readonly ConcurrentBag<string> ExecutedTests =
+    [
+    ];
 
     [Test]
     public async Task TestWithMultipleClassGenerators()

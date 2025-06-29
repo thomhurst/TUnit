@@ -66,7 +66,8 @@ public sealed class DynamicTestDataSource : TestDataSource
 {
     public required Type SourceType { get; init; }
     public required string SourceMemberName { get; init; }
-    public object?[] Arguments { get; init; } = Array.Empty<object?>();
+    public object?[] Arguments { get; init; } = [
+    ];
     private readonly bool _isShared;
 
     public override bool IsShared => _isShared;
@@ -125,7 +126,7 @@ public sealed class AotFriendlyTestDataSource : TestDataSource
             IEnumerable<object?[]> enumerable => enumerable.ToArray(),
             IEnumerable<object> objects => objects.Select(obj => new object?[] { obj }).ToArray(),
             System.Collections.IEnumerable enumerable => enumerable.Cast<object?>().Select(obj => new object?[] { obj }).ToArray(),
-            _ => new[] { new object?[] { result } }
+            _ => [[result]]
         };
     }
 

@@ -58,8 +58,8 @@ public static class JsonExtensions
             TestFilePath = testDetails.TestFilePath,
             TestLineNumber = testDetails.TestLineNumber,
             TestMethodArguments = testDetails.TestMethodArguments,
-            TestClassParameterTypes = testDetails.TestClassParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? Array.Empty<string>(),
-            TestMethodParameterTypes = testDetails.TestMethodParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? Array.Empty<string>(),
+            TestClassParameterTypes = testDetails.TestClassParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? [],
+            TestMethodParameterTypes = testDetails.TestMethodParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? [],
         };
     }
 

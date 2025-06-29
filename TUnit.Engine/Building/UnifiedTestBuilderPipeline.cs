@@ -77,8 +77,8 @@ public sealed class UnifiedTestBuilderPipeline
             TestId = testId,
             DisplayName = displayName,
             Metadata = metadata,
-            Arguments = Array.Empty<object?>(),
-            ClassArguments = Array.Empty<object?>(),
+            Arguments = [],
+            ClassArguments = [],
             // Create instance that throws the exception
             CreateInstance = () => throw new InvalidOperationException(
                 $"Failed to expand data source for test '{displayName}': {exception.Message}", exception),
@@ -87,10 +87,14 @@ public sealed class UnifiedTestBuilderPipeline
                 $"Failed to expand data source for test '{displayName}': {exception.Message}", exception),
             Hooks = new TestLifecycleHooks
             {
-                BeforeClass = Array.Empty<Func<HookContext, Task>>(),
-                AfterClass = Array.Empty<Func<object, HookContext, Task>>(),
-                BeforeTest = Array.Empty<Func<object, HookContext, Task>>(),
-                AfterTest = Array.Empty<Func<object, HookContext, Task>>()
+                BeforeClass = [
+                ],
+                AfterClass = [
+                ],
+                BeforeTest = [
+                ],
+                AfterTest = [
+                ]
             },
             State = TestState.Failed,
             Result = new TestResult

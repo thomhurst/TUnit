@@ -177,7 +177,7 @@ public class TestClass
         };
 
         var compilation = CSharpCompilation.Create("TestAssembly",
-            new[] { CSharpSyntaxTree.ParseText(source) },
+            [CSharpSyntaxTree.ParseText(source)],
             references,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 

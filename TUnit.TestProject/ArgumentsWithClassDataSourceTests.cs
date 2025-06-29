@@ -10,7 +10,9 @@ namespace TUnit.TestProject;
 [ClassDataSource(typeof(IntDataSource2))]
 public class ArgumentsWithClassDataSourceTests(int classArg)
 {
-    private static readonly ConcurrentBag<string> ExecutedTests = new();
+    private static readonly ConcurrentBag<string> ExecutedTests =
+    [
+    ];
 
     [Test]
     public async Task TestWithArgumentsAndClassDataSource()

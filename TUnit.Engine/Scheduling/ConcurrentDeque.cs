@@ -7,7 +7,9 @@ namespace TUnit.Engine.Scheduling;
 /// </summary>
 internal sealed class ConcurrentDeque<T> where T : class
 {
-    private readonly ConcurrentBag<T> _items = new ConcurrentBag<T>();
+    private readonly ConcurrentBag<T> _items =
+    [
+    ];
     private int _count;
 
     public void PushBottom(T item)

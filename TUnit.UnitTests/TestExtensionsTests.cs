@@ -60,7 +60,7 @@ public class TestExtensionsTests
             .With(x => x.ClassType, typeof(T))
             .With(x => x.MethodName, "DummyMethod")
             .With(x => x.ClassInstance, null)
-            .With(x => x.TestMethodArguments, Array.Empty<object?>())
+            .With(x => x.TestMethodArguments, [])
             .With(x => x.TestClassArguments, [])
             .With(x => x.ReturnType, typeof(void))
             .With(x => x.ClassMetadata, classMetadata)

@@ -6,7 +6,7 @@ namespace TUnit.TestProject;
 public class MethodDataSourceWithParametersTest
 {
     [Test]
-    [MethodDataSource(nameof(GetDataWithParameters), Arguments = new object[] { 5, "test" })]
+    [MethodDataSource(nameof(GetDataWithParameters), Arguments = [5, "test"])]
     public async Task TestWithParameterizedDataSource(int value, string text)
     {
         await Assert.That(value).IsGreaterThan(0);
@@ -15,13 +15,13 @@ public class MethodDataSourceWithParametersTest
 
     public static IEnumerable<object[]> GetDataWithParameters(int multiplier, string prefix)
     {
-        yield return new object[] { 1 * multiplier, $"{prefix}_1" };
-        yield return new object[] { 2 * multiplier, $"{prefix}_2" };
-        yield return new object[] { 3 * multiplier, $"{prefix}_3" };
+        yield return [1 * multiplier, $"{prefix}_1"];
+        yield return [2 * multiplier, $"{prefix}_2"];
+        yield return [3 * multiplier, $"{prefix}_3"];
     }
 
     [Test]
-    [MethodDataSource(typeof(DataProviders), nameof(DataProviders.GetDataWithThreeParams), Arguments = new object[] { 10, "hello", true })]
+    [MethodDataSource(typeof(DataProviders), nameof(DataProviders.GetDataWithThreeParams), Arguments = [10, "hello", true])]
     public async Task TestWithExternalParameterizedDataSource(int number, string message, bool flag)
     {
         await Assert.That(number).IsEqualTo(10);
@@ -36,11 +36,11 @@ public static class DataProviders
     {
         if (baseFlag)
         {
-            yield return new object[] { baseNumber, $"{baseText}_modified", baseFlag };
+            yield return [baseNumber, $"{baseText}_modified", baseFlag];
         }
         else
         {
-            yield return new object[] { baseNumber * 2, $"{baseText}_doubled", baseFlag };
+            yield return [baseNumber * 2, $"{baseText}_doubled", baseFlag];
         }
     }
 }

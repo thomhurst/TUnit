@@ -77,9 +77,9 @@ public class MyTests
 
     public static IEnumerable<object[]> GetTestData()
     {
-        yield return new object[] { "test1", 1 };
-        yield return new object[] { "test2", 2 };
-        yield return new object[] { "async_test", 42 };
+        yield return ["test1", 1];
+        yield return ["test2", 2];
+        yield return ["async_test", 42];
     }
 }
 

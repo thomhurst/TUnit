@@ -22,7 +22,9 @@ public sealed class TestExecutionState
         Test = test;
         State = TestState.NotStarted;
         RemainingDependencies = test.Dependencies.Length;
-        Dependents = new HashSet<string>();
+        Dependents =
+        [
+        ];
         EnqueueTime = DateTime.UtcNow;
     }
 

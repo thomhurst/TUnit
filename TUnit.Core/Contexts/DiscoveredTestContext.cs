@@ -7,8 +7,12 @@ namespace TUnit.Core;
 /// </summary>
 public class DiscoveredTestContext
 {
-    private readonly List<string> _categories = new();
-    private readonly List<Func<object?, string?>> _argumentDisplayFormatters = new();
+    private readonly List<string> _categories =
+    [
+    ];
+    private readonly List<Func<object?, string?>> _argumentDisplayFormatters =
+    [
+    ];
 
     // Typed fields for known configuration
     private Type? _displayNameFormatter;
@@ -43,7 +47,8 @@ public class DiscoveredTestContext
     {
         if (!TestDetails.CustomProperties.TryGetValue(key, out var values))
         {
-            values = new List<string>();
+            values =
+            [];
             TestDetails.CustomProperties[key] = values;
         }
 

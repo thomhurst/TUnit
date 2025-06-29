@@ -32,7 +32,8 @@ public class ReflectionTestVariationExecutor : ITestVariationExecutor
         }
 
         var classType = variation.ClassMetadata.Type;
-        var classArgs = variation.ClassArguments ?? Array.Empty<object?>();
+        var classArgs = variation.ClassArguments ?? [
+        ];
 
         // Use the test instance factory to create the instance via reflection
         var instance = await _testInstanceFactory.CreateInstanceAsync(classType, classArgs);
@@ -54,7 +55,8 @@ public class ReflectionTestVariationExecutor : ITestVariationExecutor
 
         // Get the method info from metadata
         var methodInfo = GetMethodInfo(variation.MethodMetadata);
-        var methodArgs = variation.MethodArguments ?? Array.Empty<object?>();
+        var methodArgs = variation.MethodArguments ?? [
+        ];
 
         // Use the test instance factory to invoke the method via reflection
         return await _testInstanceFactory.InvokeMethodAsync(instance, methodInfo, methodArgs);

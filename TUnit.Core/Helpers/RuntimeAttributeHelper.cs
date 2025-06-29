@@ -25,7 +25,8 @@ public static class RuntimeAttributeHelper
         try
         {
             // Create instance with constructor arguments
-            var instance = Activator.CreateInstance(attributeType, constructorArgs ?? Array.Empty<object?>()) as Attribute
+            var instance = Activator.CreateInstance(attributeType, constructorArgs ?? [
+                ]) as Attribute
                 ?? throw new InvalidOperationException($"Failed to create instance of {attributeType}");
 
             // Set named arguments (properties)

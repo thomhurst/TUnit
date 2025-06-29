@@ -38,7 +38,9 @@ public sealed class DataSourceExpander : IDataSourceExpander
         var combinations = GenerateTestCombinations(
             classDataFactories,
             methodDataFactories,
-            new List<Dictionary<string, List<Func<object?>>>> { propertyFactories });
+            [
+                propertyFactories
+            ]);
 
         foreach (var combination in combinations)
         {
@@ -65,14 +67,17 @@ public sealed class DataSourceExpander : IDataSourceExpander
         if (dataSources.Length == 0)
         {
             // No data sources - single test with no arguments
-            return new List<DataSourceFactorySet>
-            {
+            return
+            [
                 new DataSourceFactorySet
                 {
-                    Factories = new[] { () => Array.Empty<object?>() },
+                    Factories =
+                    [
+                        () => []
+                    ],
                     SourceIndex = -1
                 }
-            };
+            ];
         }
 
         var allFactorySets = new List<DataSourceFactorySet>();
@@ -151,10 +156,11 @@ public sealed class DataSourceExpander : IDataSourceExpander
             // If data source resolution fails, return a factory that captures the error
             // This allows the test to still be discovered but fail when executed
             var errorMessage = $"Failed to resolve data source: {ex.Message}";
-            return new[]
-            {
-                new Func<object?[]>(() => throw new InvalidOperationException(errorMessage, ex))
-            };
+
+            return
+            [
+                () => throw new InvalidOperationException(errorMessage, ex)
+            ];
         }
     }
 
@@ -170,7 +176,7 @@ public sealed class DataSourceExpander : IDataSourceExpander
         var methodProduct = CartesianProduct(methodDataSets);
         var propertyProduct = propertyDataSets.Any()
             ? GeneratePropertyCombinations(propertyDataSets.First())
-            : new[] { new Dictionary<string, Func<object?>>() };
+            : [new Dictionary<string, Func<object?>>()];
 
         foreach (var (classFactories, classIndices) in classProduct)
         {
@@ -192,7 +198,7 @@ public sealed class DataSourceExpander : IDataSourceExpander
                     {
                         // If we can't generate display text, use a fallback
                         displayText = $"[Data Source Error: {ex.Message}]";
-                        
+
                         // Replace the factories with ones that throw the error
                         var errorMessage = $"Data source failed during test discovery: {ex.Message}";
                         classFactory = () => throw new InvalidOperationException(errorMessage, ex);
@@ -222,7 +228,7 @@ public sealed class DataSourceExpander : IDataSourceExpander
     {
         if (!dataSets.Any())
         {
-            yield return (new List<Func<object?[]>>(), new List<int>());
+            yield return ([], []);
             yield break;
         }
 
@@ -500,7 +506,7 @@ public sealed class DynamicDataSourceResolver : IDynamicDataSourceResolver
         if (rawData is string stringValue)
         {
             // Special case: strings should be treated as single values
-            factories.Add(() => new[] { stringValue });
+            factories.Add(() => [stringValue]);
             return factories;
         }
 
@@ -529,7 +535,7 @@ public sealed class DynamicDataSourceResolver : IDynamicDataSourceResolver
                 {
                     // Single value - wrap in array
                     var capturedItem = item;
-                    factories.Add(() => new[] { capturedItem });
+                    factories.Add(() => [capturedItem]);
                 }
             }
             return factories;
@@ -556,13 +562,13 @@ public sealed class DynamicDataSourceResolver : IDynamicDataSourceResolver
                genericTypeDef == typeof(ValueTuple<,,,,,,,>);
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", 
+    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern",
         Justification = "Tuple field access is safe for AOT as tuple types are well-known")]
     private static object?[] GetTupleValues(object tuple)
     {
         var type = tuple.GetType();
         if (!IsTupleType(type))
-            return new[] { tuple };
+            return [tuple];
 
 #if NETSTANDARD2_0
         // For netstandard2.0, use reflection to access tuple fields

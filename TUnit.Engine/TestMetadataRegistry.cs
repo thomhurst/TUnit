@@ -5,7 +5,9 @@ namespace TUnit.Engine;
 /// </summary>
 public static class TestMetadataRegistry
 {
-    private static readonly List<ITestMetadataSource> _sources = new();
+    private static readonly List<ITestMetadataSource> _sources =
+    [
+    ];
     private static readonly object _lock = new();
 
     /// <summary>

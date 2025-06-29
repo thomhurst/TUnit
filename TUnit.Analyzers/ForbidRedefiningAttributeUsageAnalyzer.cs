@@ -10,9 +10,9 @@ namespace TUnit.Analyzers;
 public class ForbidRedefiningAttributeUsageAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(
-            Rules.DoNotOverrideAttributeUsageMetadata
-            );
+    [
+        Rules.DoNotOverrideAttributeUsageMetadata
+    ];
 
     protected override void InitializeInternal(AnalysisContext context)
     {

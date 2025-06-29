@@ -49,7 +49,8 @@ public sealed class DataSourceContext
         Level = level;
         TargetMember = targetMember;
         TargetParameter = targetParameter;
-        Attributes = attributes ?? Array.Empty<Attribute>();
+        Attributes = attributes ?? [
+        ];
         ServiceProvider = serviceProvider;
     }
 }

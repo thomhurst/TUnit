@@ -54,7 +54,7 @@ public static class TestContextExtensions
                     if (addDynamicTestMethod != null)
                     {
                         var genericMethod = addDynamicTestMethod.MakeGenericMethod(typeof(T));
-                        await (Task) genericMethod.Invoke(registry, new object[] { context, dynamicTest })!;
+                        await (Task) genericMethod.Invoke(registry, [context, dynamicTest])!;
                         return;
                     }
                 }

@@ -20,7 +20,7 @@ public sealed class TestExecutorAdapter : ITestExecutor, IDataProducer
     public string Version => "1.0.0";
     public string DisplayName => "Test Executor Adapter";
     public string Description => "Adapts single test executor to scheduler interface";
-    public Type[] DataTypesProduced => new[] { typeof(TestNodeUpdateMessage) };
+    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage)];
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
     public TestExecutorAdapter(

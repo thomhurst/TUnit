@@ -46,8 +46,8 @@ public sealed class TestBuilder : ITestBuilder
             TestId = testId,
             DisplayName = displayName,
             Metadata = metadata,
-            Arguments = Array.Empty<object?>(), // Will be populated by factory
-            ClassArguments = Array.Empty<object?>(), // Will be populated by factory
+            Arguments = [], // Will be populated by factory
+            ClassArguments = [], // Will be populated by factory
             CreateInstance = createInstance,
             InvokeTest = invokeTest,
             PropertyValues = new Dictionary<string, object?>(), // Will be populated by factory
@@ -275,12 +275,13 @@ public sealed class TestBuilder : ITestBuilder
             Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.FullName ?? "Unknown", () => new AssemblyMetadata
             {
                 Name = type.Assembly.GetName().Name ?? "Unknown",
-                Attributes = Array.Empty<AttributeMetadata>()
+                Attributes = [
+                ]
             }),
-            Parameters = Array.Empty<ParameterMetadata>(),
-            Properties = Array.Empty<PropertyMetadata>(),
+            Parameters = [],
+            Properties = [],
             Parent = null,
-            Attributes = Array.Empty<AttributeMetadata>()
+            Attributes = []
         });
     }
 
@@ -301,13 +302,15 @@ public sealed class TestBuilder : ITestBuilder
                 {
                     Name = p.Name ?? "param" + p.Position,
                     TypeReference = TypeReference.CreateConcrete(p.ParameterType.AssemblyQualifiedName ?? p.ParameterType.FullName ?? p.ParameterType.Name),
-                    Attributes = Array.Empty<AttributeMetadata>(),
+                    Attributes = [
+                    ],
                     ReflectionInfo = p
                 }).ToArray(),
                 GenericTypeCount = methodInfo.IsGenericMethodDefinition ? methodInfo.GetGenericArguments().Length : 0,
                 ReturnTypeReference = TypeReference.CreateConcrete(methodInfo.ReturnType.AssemblyQualifiedName ?? methodInfo.ReturnType.FullName ?? methodInfo.ReturnType.Name),
                 ReturnType = methodInfo.ReturnType,
-                Attributes = Array.Empty<AttributeMetadata>()
+                Attributes = [
+                ]
             };
         }
 
@@ -318,11 +321,11 @@ public sealed class TestBuilder : ITestBuilder
             Type = metadata.TestClassType,
             TypeReference = TypeReference.CreateConcrete(metadata.TestClassType.AssemblyQualifiedName ?? metadata.TestClassType.FullName ?? metadata.TestClassType.Name),
             Class = CreateClassMetadata(metadata),
-            Parameters = Array.Empty<ParameterMetadata>(),
+            Parameters = [],
             GenericTypeCount = 0,
             ReturnTypeReference = TypeReference.CreateConcrete(typeof(Task).AssemblyQualifiedName ?? typeof(Task).FullName ?? "System.Threading.Tasks.Task"),
             ReturnType = typeof(Task),
-            Attributes = Array.Empty<AttributeMetadata>()
+            Attributes = []
         };
     }
 }

@@ -69,7 +69,7 @@ public class AsyncMethodDataSourceDrivenTests
 
     public static IEnumerable<int> AsyncEnumerableDataMethod()
     {
-        return new[] { 1, 2, 3 };
+        return [1, 2, 3];
     }
 
     public static int[] AsyncFuncDataMethod()

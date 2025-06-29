@@ -10,7 +10,8 @@ public class ArgumentsDataProvider : IDataProvider
     /// <param name="arguments">The arguments for the test data.</param>
     public ArgumentsDataProvider(params object?[] arguments)
     {
-        _arguments = arguments ?? Array.Empty<object?>();
+        _arguments = arguments ?? [
+        ];
     }
 
     /// <inheritdoc />

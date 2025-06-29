@@ -259,7 +259,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             ParameterNames = genericArgs.Select(a => a.Name).ToArray(),
             Constraints = genericArgs.Select(CreateGenericConstraints).ToArray(),
-            ParameterPositions = new int[0] // Would need more analysis to determine
+            ParameterPositions = [] // Would need more analysis to determine
         };
     }
 

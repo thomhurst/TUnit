@@ -62,7 +62,8 @@ public class StronglyTypedFactoryDispatcher
     private object CreateInstanceUsingStronglyTypedFactory(TestVariation testVariation)
     {
         var testId = testVariation.TestId;
-        var classArgs = testVariation.ClassArguments ?? Array.Empty<object?>();
+        var classArgs = testVariation.ClassArguments ?? [
+        ];
 
         // Try to get the appropriate strongly typed factory based on argument count
         if (classArgs.Length == 0)
@@ -95,7 +96,8 @@ public class StronglyTypedFactoryDispatcher
     private object CreateInstanceUsingWeaklyTypedFactory(TestVariation testVariation)
     {
         var testId = testVariation.TestId;
-        var classArgs = testVariation.ClassArguments ?? Array.Empty<object?>();
+        var classArgs = testVariation.ClassArguments ?? [
+        ];
 
         if (classArgs.Length == 0)
         {
@@ -124,7 +126,8 @@ public class StronglyTypedFactoryDispatcher
     private async Task<object?> InvokeMethodUsingStronglyTypedInvoker(TestVariation testVariation, object instance)
     {
         var testId = testVariation.TestId;
-        var methodArgs = testVariation.MethodArguments ?? Array.Empty<object?>();
+        var methodArgs = testVariation.MethodArguments ?? [
+        ];
 
         // Get the strongly typed method invoker
         var invoker = _registry.GetStronglyTypedMethodInvoker<Delegate>(testId);
@@ -180,7 +183,8 @@ public class StronglyTypedFactoryDispatcher
     private async Task<object?> InvokeMethodUsingWeaklyTypedInvoker(TestVariation testVariation, object instance)
     {
         var testId = testVariation.TestId;
-        var methodArgs = testVariation.MethodArguments ?? Array.Empty<object?>();
+        var methodArgs = testVariation.MethodArguments ?? [
+        ];
 
         var invoker = _registry.GetMethodInvoker(testId);
         if (invoker == null)

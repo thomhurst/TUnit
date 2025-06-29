@@ -13,7 +13,7 @@ public class MethodDataProvider : IDataProvider
     /// <param name="valueProvider">A function that provides a single test value.</param>
     public MethodDataProvider(Func<object?> valueProvider)
     {
-        _dataFactory = () => Task.FromResult<IEnumerable<object?[]>>(new[] { new[] { valueProvider() } });
+        _dataFactory = () => Task.FromResult<IEnumerable<object?[]>>([[valueProvider()]]);
     }
 
     /// <summary>
@@ -25,7 +25,7 @@ public class MethodDataProvider : IDataProvider
         _dataFactory = async () =>
         {
             var value = await valueProvider();
-            return new[] { new[] { value } };
+            return [[value]];
         };
     }
 

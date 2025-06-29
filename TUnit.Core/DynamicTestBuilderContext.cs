@@ -5,7 +5,9 @@ namespace TUnit.Core;
 /// </summary>
 public class DynamicTestBuilderContext
 {
-    private readonly List<DynamicTest> _tests = new();
+    private readonly List<DynamicTest> _tests =
+    [
+    ];
 
     public DynamicTestBuilderContext(string filePath, int lineNumber)
     {

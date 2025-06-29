@@ -20,7 +20,9 @@ public class DefaultLogger(Context context) : TUnitLogger
 
     public void PushProperty(string name, object? value)
     {
-        var list = _values.GetOrAdd(name, _ => new());
+        var list = _values.GetOrAdd(name, _ =>
+        [
+        ]);
         var formattedValue = FormatValue(value);
         list.Add(formattedValue);
     }

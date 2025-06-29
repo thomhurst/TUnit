@@ -24,7 +24,9 @@ public class TestDetails
     public required Type ReturnType { get; set; }
     public IDictionary<string, object?> TestClassInjectedPropertyArguments { get; init; } = new Dictionary<string, object?>();
     public Type[]? TestMethodParameterTypes { get; set; }
-    public List<string> Categories { get; } = new List<string>();
+    public List<string> Categories { get; } =
+    [
+    ];
     public Dictionary<string, List<string>> CustomProperties { get; } = new Dictionary<string, List<string>>();
     public Type[]? TestClassParameterTypes { get; set; }
 

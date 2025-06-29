@@ -8,7 +8,9 @@ namespace TUnit.TestProject;
 [Arguments(2)]
 public class MultipleDataSourcesTests(int classArg)
 {
-    private static readonly ConcurrentBag<string> ExecutedTests = new();
+    private static readonly ConcurrentBag<string> ExecutedTests =
+    [
+    ];
 
     [Test]
     [Arguments("A")]

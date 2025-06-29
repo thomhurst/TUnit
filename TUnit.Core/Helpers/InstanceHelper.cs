@@ -111,14 +111,15 @@ internal static class InstanceHelper
         // Try to get cached creator
         if (CachedCreators.TryGetValue(cacheKey, out var cachedCreator))
         {
-            return cachedCreator(castedArgs ?? Array.Empty<object?>(), testClassProperties);
+            return cachedCreator(castedArgs ?? [], testClassProperties);
         }
 
         // Build expression tree for object creation with property initialization
         var creator = BuildObjectCreator(type, constructor, testClassProperties.Keys);
         CachedCreators.TryAdd(cacheKey, creator);
 
-        return creator(castedArgs ?? Array.Empty<object?>(), testClassProperties);
+        return creator(castedArgs ?? [
+        ], testClassProperties);
     }
 
     private static Func<object?[], IDictionary<string, object?>, object> BuildObjectCreator(Type type, ConstructorInfo constructor, ICollection<string> propertyNames)
@@ -153,8 +154,8 @@ internal static class InstanceHelper
 
             // Create expression to get value from dictionary
             var propNameExpr = Expression.Constant(prop.Name);
-            var hasValueExpr = Expression.Call(propsParam, typeof(IDictionary<string, object?>).GetMethod("ContainsKey", new Type[] { typeof(string) })!, propNameExpr);
-            var getValueExpr = Expression.Call(propsParam, typeof(IDictionary<string, object?>).GetMethod("get_Item", new Type[] { typeof(string) })!, propNameExpr);
+            var hasValueExpr = Expression.Call(propsParam, typeof(IDictionary<string, object?>).GetMethod("ContainsKey", [typeof(string)])!, propNameExpr);
+            var getValueExpr = Expression.Call(propsParam, typeof(IDictionary<string, object?>).GetMethod("get_Item", [typeof(string)])!, propNameExpr);
             var defaultValueExpr = Expression.Default(prop.PropertyType);
 
             // Use conditional to handle missing values

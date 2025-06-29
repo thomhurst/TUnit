@@ -101,7 +101,7 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
             ArgumentsAttribute argsAttr => ResolveArgumentsAttribute(argsAttr),
             MethodDataSourceAttribute methodDataAttr => await ResolveMethodDataSourceAttributeAsync(methodDataAttr, contextType),
             IAsyncDataSourceGeneratorAttribute asyncDataAttr => await ResolveAsyncDataSourceAttributeAsync(asyncDataAttr, contextType),
-            _ => Array.Empty<object?[]>()
+            _ => []
         };
     }
 
@@ -118,7 +118,7 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
     private Task<IEnumerable<object?[]>> ResolveMethodDataSourceAttributeAsync(MethodDataSourceAttribute methodDataAttr, Type contextType)
     {
         // For MethodDataSource, we don't resolve the data at compile-time.
-        // Instead, we mark it as resolvable and the source generator will emit 
+        // Instead, we mark it as resolvable and the source generator will emit
         // AOT-safe factory code that calls the method directly.
 
         // Should not be called during actual compilation,
@@ -135,7 +135,7 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
     private Task<IEnumerable<object?[]>> ResolveAsyncDataSourceAttributeAsync(IAsyncDataSourceGeneratorAttribute asyncDataAttr, Type contextType)
     {
         // For AsyncDataSourceGenerator, we don't resolve the data at compile-time.
-        // Instead, we mark it as resolvable and the source generator will emit 
+        // Instead, we mark it as resolvable and the source generator will emit
         // AOT-safe factory code that instantiates and calls the generator directly.
 
         // Should not be called during actual compilation,

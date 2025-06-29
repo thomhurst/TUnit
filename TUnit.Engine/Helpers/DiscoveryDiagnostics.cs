@@ -6,7 +6,9 @@ namespace TUnit.Engine.Helpers;
 internal static class DiscoveryDiagnostics
 {
     private static readonly object _lock = new();
-    private static readonly List<DiscoveryEvent> _events = new();
+    private static readonly List<DiscoveryEvent> _events =
+    [
+    ];
 
     public static bool IsEnabled { get; set; } = Environment.GetEnvironmentVariable("TUNIT_DISCOVERY_DIAGNOSTICS") == "1";
 

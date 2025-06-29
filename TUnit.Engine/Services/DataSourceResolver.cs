@@ -85,7 +85,7 @@ public class DataSourceResolver : IDataSourceResolver
         var rawDataTask = Task.Run(() => member switch
         {
             PropertyInfo property => property.GetValue(instance),
-            MethodInfo method => method.Invoke(instance, Array.Empty<object>()),
+            MethodInfo method => method.Invoke(instance, []),
             FieldInfo field => field.GetValue(instance),
             _ => throw new InvalidOperationException($"Unsupported member type: {member.GetType().Name}")
         }, cancellationToken);
@@ -132,7 +132,7 @@ public class DataSourceResolver : IDataSourceResolver
         // Special case: strings should be treated as single values, not char collections
         if (rawData is string stringValue)
         {
-            result.Add(new[] { stringValue });
+            result.Add([stringValue]);
             return result;
         }
 
@@ -148,7 +148,7 @@ public class DataSourceResolver : IDataSourceResolver
                 }
                 else
                 {
-                    result.Add(new[] { item });
+                    result.Add([item]);
                 }
 
                 if (result.Count > MaxDataSourceItems)

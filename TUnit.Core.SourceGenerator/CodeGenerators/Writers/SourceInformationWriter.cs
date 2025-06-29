@@ -34,7 +34,9 @@ public static class SourceInformationWriter
         sourceCodeWriter.Append($"Namespace = \"{namedTypeSymbol.ContainingNamespace.ToDisplayString()}\",");
 
         sourceCodeWriter.Append("Attributes = ");
-        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(type => type.GetAttributes()).ToImmutableArray(), "Class", namedTypeSymbol.Name, namedTypeSymbol.ToDisplayString());
+        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, [
+            ..namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(type => type.GetAttributes())
+        ], "Class", namedTypeSymbol.Name, namedTypeSymbol.ToDisplayString());
 
         sourceCodeWriter.Append("Parameters = ");
         var parameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters
