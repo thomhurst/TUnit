@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
@@ -314,34 +313,4 @@ public sealed class TestDiscoveryService : ITestDiscoverer, IDataProducer
         // Only used for dynamic scenarios where source generation isn't available
         return Task.FromResult<IEnumerable<TestMetadata>>(Array.Empty<TestMetadata>());
     }
-}
-
-
-
-/// <summary>
-/// Assembly-based test metadata source for dynamic discovery
-/// </summary>
-public sealed class AssemblyTestMetadataSource : ITestMetadataSource
-{
-    private readonly Assembly _assembly;
-    private readonly ITestMetadataScanner _scanner;
-    
-    public AssemblyTestMetadataSource(Assembly assembly, ITestMetadataScanner scanner)
-    {
-        _assembly = assembly;
-        _scanner = scanner;
-    }
-    
-    public async Task<IEnumerable<TestMetadata>> GetTestMetadata()
-    {
-        return await _scanner.ScanAssembly(_assembly);
-    }
-}
-
-/// <summary>
-/// Scans assemblies for test metadata (reflection-based)
-/// </summary>
-public interface ITestMetadataScanner
-{
-    Task<IEnumerable<TestMetadata>> ScanAssembly(Assembly assembly);
 }

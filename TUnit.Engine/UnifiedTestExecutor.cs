@@ -216,24 +216,3 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         return false;
     }
 }
-
-/// <summary>
-/// Null logger factory implementation for testing
-/// </summary>
-internal class NullLoggerFactory : ILoggerFactory
-{
-    public ILogger<T> CreateLogger<T>() => new NullLogger<T>();
-    public ILogger CreateLogger(string categoryName) => new NullLogger<object>();
-}
-
-internal class NullLogger<T> : ILogger<T>
-{
-    public Task LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
-        => Task.CompletedTask;
-
-    public void Log<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
-    {
-    }
-
-    public bool IsEnabled(LogLevel logLevel) => false;
-}
