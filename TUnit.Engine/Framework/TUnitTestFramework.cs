@@ -241,9 +241,6 @@ internal sealed class TestRequestHandler : IRequestHandler
             var filterService = new TestFilterService(loggerFactory);
             testsToRun = filterService.FilterTests(request, allTests.ToArray()).ToList();
             
-            // Debug logging
-            System.IO.File.AppendAllText("/tmp/tunit-framework-debug.log", 
-                $"TUnitTestFramework: Filtered {testsToRun.Count()} tests from {allTests.Count()} total\n");
         }
 
         // Report only the tests that will actually run

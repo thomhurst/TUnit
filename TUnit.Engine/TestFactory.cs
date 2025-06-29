@@ -24,7 +24,6 @@ public sealed class TestFactory
     private readonly IHookInvoker _hookInvoker;
     private readonly IDataSourceResolver _dataSourceResolver;
     private readonly IGenericTypeResolver _genericTypeResolver;
-    private static readonly string DebugLogPath = Path.Combine(Path.GetTempPath(), "tunit-debug-process.log");
     
     public TestFactory(
         ITestInvoker testInvoker,
@@ -500,32 +499,12 @@ public sealed class TestFactory
         };
     }
     
-    private static void WriteDebugLog(string message)
-    {
-        try
-        {
-            var debugLogDir = Path.GetDirectoryName(DebugLogPath);
-            if (debugLogDir != null && !Directory.Exists(debugLogDir))
-            {
-                Directory.CreateDirectory(debugLogDir);
-            }
-            File.AppendAllText(DebugLogPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} - {message}\n");
-        }
-        catch
-        {
-            // Ignore debug logging errors
-        }
-    }
 
     private void ProcessTestDiscoveryAttributes(ExecutableTest test, TestContext context)
     {
-        // Debug output
-        WriteDebugLog($"Processing attributes for test: {test.TestId}");
-        
         if (test.Metadata.MethodInfo == null)
         {
             // Can't process attributes without reflection info
-            WriteDebugLog("  No MethodInfo available");
             return;
         }
         
@@ -538,16 +517,13 @@ public sealed class TestFactory
         
         // Process class-level attributes
         var classAttributes = test.Metadata.TestClassType.GetCustomAttributes(true);
-        WriteDebugLog($"  Found {classAttributes.Length} class attributes");
         
         foreach (var attribute in classAttributes)
         {
-            WriteDebugLog($"    Attribute: {attribute.GetType().Name}");
             if (attribute is ITestDiscoveryEventReceiver receiver)
             {
                 try
                 {
-                    WriteDebugLog("      Processing ITestDiscoveryEventReceiver");
                     var task = receiver.OnTestDiscovered(discoveredContext);
                     if (task.IsCompletedSuccessfully)
                     {
@@ -557,12 +533,10 @@ public sealed class TestFactory
                     {
                         task.AsTask().GetAwaiter().GetResult();
                     }
-                    WriteDebugLog($"      Properties after processing: {context.TestDetails.CustomProperties.Count}");
                 }
                 catch (Exception ex)
                 {
-                    // Log the error
-                    WriteDebugLog($"      Error processing attribute: {ex.Message}");
+                    // Ignore attribute processing errors
                 }
             }
         }
@@ -826,8 +800,7 @@ public sealed class TestFactory
             }
             catch (GenericTypeResolutionException ex)
             {
-                // Log and skip this combination if types can't be resolved
-                File.AppendAllText(DebugLogPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Failed to resolve generic types for {metadata.TestName} with arguments [{argumentsDisplayText}]: {ex.Message}{Environment.NewLine}");
+                // Skip this combination if types can't be resolved
             }
         }
         

@@ -86,8 +86,6 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         {
             var beforeCount = testList.Count;
             testList = ApplyFilter(testList, filter);
-            System.IO.File.AppendAllText("/tmp/tunit-framework-debug.log", 
-                $"UnifiedTestExecutor: Filtered {testList.Count} tests from {beforeCount} total\n");
         }
         
         // Check if fail-fast is enabled
