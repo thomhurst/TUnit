@@ -18,6 +18,8 @@ public sealed class GenericTypeResolver : IGenericTypeResolver
         _isAotMode = isAotMode;
     }
     
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling", Justification = "Calls to ExpandGenericTestAsync are guarded by _isAotMode check and only occur in reflection mode")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when trimming application code", Justification = "Generic expansion in reflection mode requires dynamic type access which is expected in this mode")]
     public async Task<IEnumerable<TestMetadata>> ResolveGenericsAsync(IEnumerable<TestMetadata> metadata)
     {
         var resolvedTests = new List<TestMetadata>();

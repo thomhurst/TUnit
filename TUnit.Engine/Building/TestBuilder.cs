@@ -60,6 +60,8 @@ public sealed class TestBuilder : ITestBuilder
         return executableTest;
     }
     
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling", Justification = "Calls to reflection methods are guarded by isAotMode check and only occur when AOT factories are not available")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when trimming application code", Justification = "Calls to reflection methods are fallbacks when trimming-safe pre-compiled factories are not available")]
     private Func<Task<object>> CreateInstanceFactory(TestMetadata metadata, ExpandedTestData expandedData)
     {
         if (_isAotMode && metadata.InstanceFactory != null)
@@ -101,6 +103,8 @@ public sealed class TestBuilder : ITestBuilder
         };
     }
     
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling", Justification = "Calls to reflection methods are guarded by isAotMode check and only occur when AOT invokers are not available")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when trimming application code", Justification = "Calls to reflection methods are fallbacks when trimming-safe pre-compiled invokers are not available")]
     private Func<object, Task> CreateTestInvoker(TestMetadata metadata, ExpandedTestData expandedData)
     {
         if (_isAotMode && metadata.TestInvoker != null)

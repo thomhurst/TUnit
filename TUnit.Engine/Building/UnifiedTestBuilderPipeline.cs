@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Engine.Building.Interfaces;
@@ -86,6 +87,8 @@ public static class UnifiedTestBuilderPipelineFactory
     /// <summary>
     /// Creates a pipeline configured for reflection mode
     /// </summary>
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling", Justification = "This method is only called in reflection mode, not in AOT scenarios")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when trimming application code", Justification = "This method is only called in reflection mode where dynamic code access is expected")]
     public static UnifiedTestBuilderPipeline CreateReflectionPipeline(
         Assembly[] assemblies,
         ITestInvoker testInvoker,
