@@ -97,7 +97,7 @@ public static class MethodDataSourceRetriever
             && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(dataSourceMethod.ReturnType,
                 parameterOrPropertyTypes[0]))
         {
-            return [dataSourceMethod.ReturnType];
+            return ImmutableArray.Create(dataSourceMethod.ReturnType);
         }
 
         var type = dataSourceMethod.ReturnType;
@@ -115,13 +115,13 @@ public static class MethodDataSourceRetriever
 
         if (type is not INamedTypeSymbol)
         {
-            return [dataSourceMethod.ReturnType];
+            return ImmutableArray.Create(dataSourceMethod.ReturnType);
         }
 
         if (parameterOrPropertyTypes.Length == 1
             && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(type, parameterOrPropertyTypes[0]))
         {
-            return [type];
+            return ImmutableArray.Create(type);
         }
 
         var genericFunc = context.SemanticModel.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName());
@@ -137,18 +137,16 @@ public static class MethodDataSourceRetriever
         if (parameterOrPropertyTypes.Length == 1
             && context.SemanticModel.Compilation.HasImplicitConversionOrGenericParameter(type, parameterOrPropertyTypes[0]))
         {
-            return [type];
+            return ImmutableArray.Create(type);
         }
 
         if (type.IsTupleType && type is INamedTypeSymbol namedTupleType)
         {
             isExpandableTuples = true;
-            return [
-                ..namedTupleType.TupleElements.Select(x => x.Type)
-            ];
+            return namedTupleType.TupleElements.Select(x => x.Type).ToImmutableArray();
         }
 
-        return [type];
+        return ImmutableArray.Create(type);
     }
 
     private static ITypeSymbol GetTypeOrTuplesType(Compilation compilation, ImmutableArray<ITypeSymbol> parameterOrPropertyTypes)

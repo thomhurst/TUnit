@@ -9,9 +9,10 @@ namespace TUnit.Analyzers;
 public class SingleTUnitAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-    [
-        Rules.DuplicateSingleAttribute
-    ];
+        new()
+        {
+            Rules.DuplicateSingleAttribute
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
     {

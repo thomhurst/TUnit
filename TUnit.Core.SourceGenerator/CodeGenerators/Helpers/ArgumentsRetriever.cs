@@ -144,7 +144,7 @@ public static class ArgumentsRetriever
                 var args = GetArguments(context,
                     ImmutableArray<IParameterSymbol>.Empty,
                     propertySymbol,
-                    [propertySymbol.Type],
+                    ImmutableArray.Create(propertySymbol.Type),
                     dataSourceAttributes,
                     namedTypeSymbol,
                     methodSymbol,

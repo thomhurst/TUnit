@@ -9,9 +9,10 @@ namespace TUnit.Analyzers;
 public class PublicMethodMissingTestAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-    [
-        Rules.PublicMethodMissingTestAttribute
-    ];
+        new()
+        {
+            Rules.PublicMethodMissingTestAttribute
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
     {

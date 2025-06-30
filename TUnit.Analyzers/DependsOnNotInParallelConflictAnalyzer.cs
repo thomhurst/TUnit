@@ -10,9 +10,10 @@ namespace TUnit.Analyzers;
 public class DependsOnNotInParallelConflictAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-    [
-        Rules.DependsOnNotInParallelConflict
-    ];
+        new()
+        {
+            Rules.DependsOnNotInParallelConflict
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
     {

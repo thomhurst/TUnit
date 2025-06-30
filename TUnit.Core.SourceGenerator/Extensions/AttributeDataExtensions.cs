@@ -61,9 +61,8 @@ public static class AttributeDataExtensions
     public static ImmutableArray<AttributeData> ExcludingSystemAttributes(
         this IEnumerable<AttributeData> attributeDatas)
     {
-        return [
-            ..attributeDatas
+        return attributeDatas
                 .Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime")
-        ];
+                .ToImmutableArray();
     }
 }

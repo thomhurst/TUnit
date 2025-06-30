@@ -8,9 +8,10 @@ namespace TUnit.Analyzers;
 public class AsyncVoidAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-    [
-        Rules.AsyncVoidMethod
-    ];
+        new()
+        {
+            Rules.AsyncVoidMethod
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
     {

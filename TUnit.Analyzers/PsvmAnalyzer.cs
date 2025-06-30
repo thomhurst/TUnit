@@ -8,9 +8,10 @@ namespace TUnit.Analyzers;
 public class PsvmAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-    [
-        Rules.NoMainMethod
-    ];
+        new()
+        {
+            Rules.NoMainMethod
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
     {
@@ -52,12 +53,13 @@ public class PsvmAnalyzer : ConcurrentDiagnosticAnalyzer
     private static bool HasKnownReturnType(SymbolAnalysisContext context, IMethodSymbol methodSymbol)
     {
         IEnumerable<INamedTypeSymbol> knownReturnTypes =
-        [
-            context.Compilation.GetSpecialType(SpecialType.System_Void),
-            context.Compilation.GetSpecialType(SpecialType.System_Int32),
-            context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.Task")!,
-            context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.Task`1")!.Construct(context.Compilation.GetSpecialType(SpecialType.System_Int32))
-        ];
+            new List<INamedTypeSymbol>
+            {
+                context.Compilation.GetSpecialType(SpecialType.System_Void),
+                context.Compilation.GetSpecialType(SpecialType.System_Int32),
+                context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.Task")!,
+                context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.Task`1")!.Construct(context.Compilation.GetSpecialType(SpecialType.System_Int32))
+            }.AsReadOnly();
 
         return knownReturnTypes.Any(x => x.Equals(methodSymbol.ReturnType, SymbolEqualityComparer.Default));
     }

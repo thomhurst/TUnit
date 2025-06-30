@@ -10,7 +10,10 @@ namespace TUnit.Analyzers;
 public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        [Rules.ConflictingExplicitAttributes];
+        new()
+        {
+            Rules.ConflictingExplicitAttributes
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
     {

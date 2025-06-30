@@ -8,7 +8,9 @@ namespace TUnit.Analyzers;
 
 public record Chain(IMethodSymbol OriginalMethod)
 {
-    public List<IMethodSymbol> Dependencies { get; } = [];
+    public List<IMethodSymbol> Dependencies { get; } = new()
+    {
+    };
 
     public bool MethodTraversed(IMethodSymbol method) => Dependencies.Contains(method, SymbolEqualityComparer.Default);
 
@@ -33,7 +35,10 @@ public record Chain(IMethodSymbol OriginalMethod)
 public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        [Rules.DependsOnConflicts, Rules.NoMethodFound];
+        new()
+        {
+            Rules.DependsOnConflicts, Rules.NoMethodFound
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
     {

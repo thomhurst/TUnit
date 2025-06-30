@@ -10,10 +10,10 @@ namespace TUnit.Analyzers;
 public class MatrixAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-    [
-        Rules.MatrixDataSourceAttributeRequired,
-            Rules.WrongArgumentTypeTestData
-    ];
+        new()
+        {
+            Rules.MatrixDataSourceAttributeRequired, Rules.WrongArgumentTypeTestData
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
     {

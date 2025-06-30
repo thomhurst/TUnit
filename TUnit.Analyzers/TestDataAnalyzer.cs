@@ -11,8 +11,9 @@ namespace TUnit.Analyzers;
 public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-    [
-        Rules.WrongArgumentTypeTestData,
+        new()
+        {
+            Rules.WrongArgumentTypeTestData,
             Rules.NoTestDataProvided,
             Rules.MethodParameterBadNullability,
             Rules.MethodMustBeParameterless,
@@ -27,7 +28,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.MatrixDataSourceAttributeRequired,
             Rules.TooManyArguments,
             Rules.InstanceMethodSource
-    ];
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
     {
@@ -55,9 +56,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var attributes = methodSymbol.GetAttributes();
 
-        Analyze(context, attributes, [
-            ..methodSymbol.Parameters.WithoutCancellationTokenParameter()
-        ], null, methodSymbol.ContainingType);
+        Analyze(context, attributes, methodSymbol.Parameters.WithoutCancellationTokenParameter().ToImmutableArray(), null, methodSymbol.ContainingType);
     }
 
     private void AnalyzeProperty(SymbolAnalysisContext context)
@@ -193,7 +192,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         var arguments = argumentsAttribute.ConstructorArguments.First().IsNull
-            ? [default(TypedConstant)]
+            ? new ImmutableArray<TypedConstant>
+            {
+                default(TypedConstant)
+            }
             : argumentsAttribute.ConstructorArguments.First().Values;
 
         var cancellationTokenType = context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!);
@@ -502,7 +504,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (testParameterTypes.Length == 1
             && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
-            return [type];
+            return new ImmutableArray<ITypeSymbol>
+            {
+                type
+            };
         }
 
         if (context.Symbol is IPropertySymbol)
@@ -516,12 +521,18 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 type = propertyFuncType.TypeArguments[0];
             }
 
-            return [type];
+            return new ImmutableArray<ITypeSymbol>
+            {
+                type
+            };
         }
 
         if (methodContainingTestData.ReturnType is not INamedTypeSymbol and not IArrayTypeSymbol)
         {
-            return [methodContainingTestData.ReturnType];
+            return new ImmutableArray<ITypeSymbol>
+            {
+                methodContainingTestData.ReturnType
+            };
         }
 
         if (methodContainingTestData.ReturnType.IsIEnumerable(context.Compilation, out var enumerableInnerType))
@@ -532,7 +543,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (testParameterTypes.Length == 1
             && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
-            return [type];
+            return new ImmutableArray<ITypeSymbol>
+            {
+                type
+            };
         }
 
         if (type is INamedTypeSymbol { IsGenericType: true } genericType
@@ -547,15 +561,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (testParameterTypes.Length == 1
             && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
-            return [type];
+            return new ImmutableArray<ITypeSymbol>
+            {
+                type
+            };
         }
 
         if (type is INamedTypeSymbol { IsTupleType: true } tupleType)
         {
             isTuples = true;
-            return [
-                ..tupleType.TupleElements.Select(x => x.Type)
-            ];
+            return tupleType.TupleElements.Select(x => x.Type).ToImmutableArray();
         }
 
         // Handle object[] case - when a data source returns IEnumerable<object[]>,
@@ -568,14 +583,19 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return ImmutableArray<ITypeSymbol>.Empty;
         }
 
-        return [type];
+        return new ImmutableArray<ITypeSymbol>
+        {
+            type
+        };
     }
 
     private void CheckDataGenerator(SymbolAnalysisContext context,
         AttributeData attribute,
         ImmutableArray<ITypeSymbol> testDataTypes)
     {
-        var selfAndBaseTypes = attribute.AttributeClass?.GetSelfAndBaseTypes() ?? [];
+        var selfAndBaseTypes = attribute.AttributeClass?.GetSelfAndBaseTypes() ?? new List<INamedTypeSymbol>
+        {
+        }.AsReadOnly();
 
         var baseGeneratorAttribute = selfAndBaseTypes
             .FirstOrDefault(x => x.Interfaces.Any(i => i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IAsyncDataSourceGeneratorAttribute.WithGlobalPrefix));

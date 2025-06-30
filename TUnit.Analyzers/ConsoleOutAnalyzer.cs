@@ -10,9 +10,10 @@ namespace TUnit.Analyzers;
 public class ConsoleOutAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-    [
-        Rules.OverwriteConsole
-    ];
+        new()
+        {
+            Rules.OverwriteConsole
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
     {

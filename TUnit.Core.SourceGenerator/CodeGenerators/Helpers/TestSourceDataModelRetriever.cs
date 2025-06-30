@@ -25,13 +25,10 @@ public static class TestSourceDataModelRetriever
                 context,
                 constructorParameters,
                 null,
-                [
-                    ..constructorParameters.Select(x => x.Type)
-                ],
-                [
-                    ..GetClassAttributes(namedTypeSymbol)
+                constructorParameters.Select(x => x.Type).ToImmutableArray(),
+                    GetClassAttributes(namedTypeSymbol)
                         .Concat(namedTypeSymbol.ContainingAssembly.GetAttributes().Where(x => x.IsDataSourceAttribute()))
-                ],
+                        .ToImmutableArray(),
                 namedTypeSymbol,
                 methodSymbol,
                 ArgumentsType.ClassConstructor)
@@ -43,9 +40,7 @@ public static class TestSourceDataModelRetriever
             context,
             methodParametersWithoutCancellationToken,
             null,
-            [
-                ..methodParametersWithoutCancellationToken.Select(x => x.Type)
-            ],
+            methodParametersWithoutCancellationToken.Select(x => x.Type).ToImmutableArray(),
             methodSymbol.GetAttributes(),
             namedTypeSymbol,
             methodSymbol,
