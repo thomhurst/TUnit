@@ -656,7 +656,15 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         
         writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine();
+        writer.AppendLine("catch (Exception ex)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("Console.Error.WriteLine($\"Warning: Assembly loading failed: {ex.Message}\");");
+        writer.Unindent();
+        writer.AppendLine("}");
+        
+        writer.Unindent();
+        writer.AppendLine("}");
     }
 
     private void GenerateGenericTestRegistrationMethod(CodeWriter writer)
