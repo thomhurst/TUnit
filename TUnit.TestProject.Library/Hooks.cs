@@ -7,7 +7,7 @@ public class Hooks
     {
         testContext.ObjectBag.Add("BeforeHit", true);
     }
-    
+
     [After(Test)]
     public void AfterTests(TestContext testContext)
     {

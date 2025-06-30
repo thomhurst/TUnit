@@ -27,7 +27,7 @@ public class AsyncVoidAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task Async_Task_Raises_No_Error()
     {

@@ -1,15 +1,18 @@
-﻿using TUnit.Core.Enums;
+﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Enums;
 
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttribute
+[RequiresDynamicCode("MatrixDataSourceAttribute requires dynamic code generation for runtime matrix generation and enum reflection. This attribute is inherently incompatible with AOT compilation.")]
+[RequiresUnreferencedCode("MatrixDataSourceAttribute may require unreferenced code for enum reflection and matrix generation. This attribute is inherently incompatible with AOT compilation.")]
+public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttribute
 {
-    public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var parameterInformation = dataGeneratorMetadata
             .MembersToGenerate
-            .OfType<SourceGeneratedParameterInformation>()
+            .OfType<ParameterMetadata>()
             .ToArray();
 
         if (parameterInformation.Length != dataGeneratorMetadata.MembersToGenerate.Length
@@ -17,36 +20,41 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
         {
             throw new Exception("[MatrixDataSource] only supports parameterised tests");
         }
-        
+
         var exclusions = GetExclusions(dataGeneratorMetadata.Type == DataGeneratorType.TestParameters
         ? dataGeneratorMetadata.TestInformation.Attributes : dataGeneratorMetadata.TestInformation.Class.Attributes);
-        
+
         foreach (var row in GetMatrixValues(parameterInformation.Select(p => GetAllArguments(dataGeneratorMetadata, p))))
         {
             if (exclusions.Any(e => e.SequenceEqual(row)))
             {
                 continue;
             }
-            
+
             yield return () => row.ToArray();
         }
     }
 
-    private object?[][] GetExclusions(Attribute[] attributes)
+    private object?[][] GetExclusions(AttributeMetadata[] attributes)
     {
-        return attributes.OfType<MatrixExclusionAttribute>()
+        return attributes
+            .Select(a => a.Instance)
+            .OfType<MatrixExclusionAttribute>()
             .Select(x => x.Objects)
             .ToArray();
     }
 
     private IReadOnlyList<object?> GetAllArguments(DataGeneratorMetadata dataGeneratorMetadata,
-        SourceGeneratedParameterInformation sourceGeneratedParameterInformation)
+        ParameterMetadata sourceGeneratedParameterInformation)
     {
-        var matrixAttribute = sourceGeneratedParameterInformation.Attributes.OfType<MatrixAttribute>().FirstOrDefault();
+        var matrixAttribute = sourceGeneratedParameterInformation.Attributes
+            .Select(a => a.Instance)
+            .OfType<MatrixAttribute>()
+            .FirstOrDefault();
 
         var objects = matrixAttribute?.GetObjects(dataGeneratorMetadata.TestClassInstance);
 
-        if (matrixAttribute is not null && objects is {Length: > 0})
+        if (matrixAttribute is not null && objects is { Length: > 0 })
         {
             return matrixAttribute.Excluding is not null
                        ? objects.Except(matrixAttribute.Excluding).ToArray()
@@ -67,7 +75,7 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
             {
                 throw new InvalidOperationException("Do not exclude values from a boolean.");
             }
-            
+
             return underlyingType is null ? [true, false] : [true, false, null];
         }
 
@@ -95,7 +103,7 @@ public sealed class MatrixDataSourceAttribute : NonTypedDataSourceGeneratorAttri
 #endif
                .ToArray();
     }
-    
+
     private readonly IEnumerable<IEnumerable<object?>> _seed = [[]];
 
     private IEnumerable<IEnumerable<object?>> GetMatrixValues(IEnumerable<IReadOnlyList<object?>> elements)

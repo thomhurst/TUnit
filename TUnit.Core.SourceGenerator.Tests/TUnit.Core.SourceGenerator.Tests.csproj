@@ -11,8 +11,20 @@
     <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" />
     <PackageReference Include="NuGet.Protocol" />
-    <PackageReference Include="Sourcy.Git" />
-    <PackageReference Include="Verify.TUnit" />
+    <PackageReference Include="Sourcy.DotNet">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Sourcy.Git">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Verify" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

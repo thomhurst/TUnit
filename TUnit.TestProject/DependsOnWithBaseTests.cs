@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -13,7 +11,7 @@ public class DependsOnWithBaseTests : DependsOnBase
     [Test, DependsOn(nameof(BaseTest))]
     public async Task SubTypeTest()
     {
-        _subTypeTestStart = TestContext.Current!.TestStart!.Value.DateTime;
+        _subTypeTestStart = TestContext.Current!.TestStart.DateTime;
         await Task.CompletedTask;
     }
 
@@ -32,7 +30,7 @@ public abstract class DependsOnBase
     [Test]
     public async Task BaseTest()
     {
-        BaseTestStart = TestContext.Current!.TestStart!.Value.DateTime;
+        BaseTestStart = TestContext.Current!.TestStart.DateTime;
         await Task.Delay(TimeSpan.FromSeconds(5));
     }
 }

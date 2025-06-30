@@ -4,7 +4,8 @@
     <Import Project="$(MSBuildThisFileDirectory)TUnit.Engine\TUnit.Engine.props" />
     <Import Project="$(MSBuildThisFileDirectory)TUnit.Assertions\TUnit.Assertions.props" />
 
-    <Import Project="$(MSBuildThisFileDirectory)TUnit.Assertions.FSharp\TUnit.Assertions.FSharp.props"
+    <Import
+        Project="$(MSBuildThisFileDirectory)TUnit.Assertions.FSharp\TUnit.Assertions.FSharp.props"
         Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
 
     <PropertyGroup>
@@ -20,4 +21,22 @@
         <IsTestProject>true</IsTestProject>
 
     </PropertyGroup>
+
+    <Target Name="CleanSourceGeneratedViewer" BeforeTargets="BeforeBuild">
+        <ItemGroup>
+            <FilesToDelete Include="$(ProjectDir)SourceGeneratedViewer\**\*" />
+        </ItemGroup>
+        <Delete Files="@(FilesToDelete)" ContinueOnError="true" />
+    </Target>
+
+    <PropertyGroup>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="SourceGeneratedViewer\**" />
+        <None Include="SourceGeneratedViewer\**" />
+    </ItemGroup>
+
 </Project>

@@ -20,7 +20,7 @@ public class XUnitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         context.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation);
     }
-    
+
     private void AnalyzeOperation(OperationAnalysisContext context)
     {
         if (context.Operation is not IInvocationOperation invocationOperation)
@@ -36,7 +36,7 @@ public class XUnitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             context.ReportDiagnostic(
                 Diagnostic.Create(Rules.XUnitAssertion, context.Operation.Syntax.GetLocation())
-            );   
+            );
         }
     }
 }

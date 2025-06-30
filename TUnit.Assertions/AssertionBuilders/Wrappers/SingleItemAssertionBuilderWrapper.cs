@@ -7,7 +7,7 @@ public class SingleItemAssertionBuilderWrapper<TActual, TInner> : InvokableValue
     internal SingleItemAssertionBuilderWrapper(InvokableAssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
-    
+
     public new TaskAwaiter<TInner?> GetAwaiter()
     {
         var task = ProcessAssertionsAsync(d =>
@@ -19,7 +19,7 @@ public class SingleItemAssertionBuilderWrapper<TActual, TInner> : InvokableValue
 
             return Task.FromResult<TInner?>(default)!;
         });
-        
+
         return task.GetAwaiter()!;
     }
 }

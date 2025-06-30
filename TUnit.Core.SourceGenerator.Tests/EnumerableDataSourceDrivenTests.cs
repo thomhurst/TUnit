@@ -1,8 +1,7 @@
-using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class EnumerableDataSourceDrivenTests : TestsBase<TestsGenerator>
+internal class EnumerableDataSourceDrivenTests : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -10,6 +9,6 @@ internal class EnumerableDataSourceDrivenTests : TestsBase<TestsGenerator>
             "EnumerableDataSourceDrivenTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(3);
+            await Assert.That(generatedFiles.Length).IsEqualTo(1);
         });
 }

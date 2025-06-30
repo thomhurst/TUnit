@@ -18,7 +18,7 @@ public interface IAsyncInitializer
     /// </returns>
     /// <remarks>
     /// <para>
-    /// This method is called by the TUnit framework to initialize the instance before it is used
+    /// Called by the TUnit framework to initialize the instance before it is used
     /// in test execution. The framework guarantees that this method will be called exactly once
     /// per instance lifecycle.
     /// </para>

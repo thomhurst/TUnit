@@ -7,19 +7,19 @@ public class DoubleEqualsToAssertionTests
     {
         var double1 = 1.1d;
         var double2 = 1.1d;
-        
+
         await TUnitAssert.That(double1).IsEqualTo(double2);
     }
-    
+
     [Test]
     public async Task Double_EqualsTo_Failure()
     {
         var double1 = 1.1d;
         var double2 = 1.2d;
-        
+
         await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(double1).IsEqualTo(double2));
     }
-    
+
 #if NET
     [Test]
     public async Task Double_EqualsTo__With_Tolerance_Success()

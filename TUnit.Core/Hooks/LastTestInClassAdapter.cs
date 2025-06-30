@@ -8,29 +8,34 @@ public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClas
     public string Name => nameof(lastTestInClassEventReceiver.OnLastTestInClass);
 
     [field: AllowNull, MaybeNull]
-    public SourceGeneratedMethodInformation MethodInfo => field ??= new SourceGeneratedMethodInformation
+    public MethodMetadata MethodInfo => field ??= new MethodMetadata
     {
         Type = typeof(ILastTestInClassEventReceiver),
+        TypeReference = TypeReference.CreateConcrete(typeof(ILastTestInClassEventReceiver).AssemblyQualifiedName!),
         Attributes = [],
         Name = nameof(lastTestInClassEventReceiver.OnLastTestInClass),
-        Parameters = [new SourceGeneratedParameterInformation<ClassHookContext>
+        Parameters = [new ParameterMetadata<ClassHookContext>
         {
+            TypeReference = TypeReference.CreateConcrete(typeof(ClassHookContext).AssemblyQualifiedName!),
             Attributes = [],
             Name = "context",
             ReflectionInfo = typeof(ILastTestInClassEventReceiver).GetMethod(nameof(ILastTestInClassEventReceiver.OnLastTestInClass))!.GetParameters()[0],
-        }, new SourceGeneratedParameterInformation<TestContext>
+        }, new ParameterMetadata<TestContext>
         {
+            TypeReference = TypeReference.CreateConcrete(typeof(TestContext).AssemblyQualifiedName!),
             Attributes = [],
             Name = "testContext",
             ReflectionInfo = typeof(ILastTestInClassEventReceiver).GetMethod(nameof(ILastTestInClassEventReceiver.OnLastTestInClass))!.GetParameters()[0],
         }],
         GenericTypeCount = 0,
         ReturnType = typeof(ValueTask),
-        Class = new SourceGeneratedClassInformation
+        ReturnTypeReference = TypeReference.CreateConcrete(typeof(ValueTask).AssemblyQualifiedName!),
+        Class = new ClassMetadata
         {
             Parent = null,
             Type = typeof(ILastTestInClassEventReceiver),
-            Assembly = new SourceGeneratedAssemblyInformation
+            TypeReference = TypeReference.CreateConcrete(typeof(ILastTestInClassEventReceiver).AssemblyQualifiedName!),
+            Assembly = new AssemblyMetadata
             {
                 Name = "TUnit.Core",
                 Attributes = [],

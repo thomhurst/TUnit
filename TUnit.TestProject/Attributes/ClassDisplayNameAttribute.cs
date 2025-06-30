@@ -7,9 +7,10 @@ namespace TUnit.TestProject.Attributes;
 
 public class ClassDisplayNameAttribute : Attribute, ITestDiscoveryEventReceiver
 {
-    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        discoveredTestContext.SetDisplayName($"{discoveredTestContext.TestDetails.TestClass.Name}.{discoveredTestContext.TestContext.GetTestDisplayName()}");
+        context.SetDisplayName($"{context.TestDetails.ClassMetadata.Name}.{context.GetTestDisplayName()}");
+        return default;
     }
 
     public int Order => 0;

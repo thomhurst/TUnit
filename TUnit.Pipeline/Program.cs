@@ -8,7 +8,7 @@ using TUnit.Pipeline;
 
 var fileOption = new Option<string[]>(
     name: "--categories",
-    description: "The categories to run.", 
+    description: "The categories to run.",
     getDefaultValue: () => [])
 {
     Arity = ArgumentArity.ZeroOrMore,
@@ -40,7 +40,7 @@ rootCommand.SetHandler((categories) =>
         {
             pipelineHostBuilder.IgnoreCategories("ReadMe");
         }
-        
+
         pipelineHostBuilder
             .ExecutePipelineAsync()
             .GetAwaiter()

@@ -20,14 +20,14 @@ public static class DataSourceGeneratorRetriever
         string? propertyName,
         bool isStronglyTyped)
     {
-        return new DataSourceGeneratorContainer
+        return new AsyncDataSourceGeneratorContainer
         (
             Context: context,
             AttributeData: attributeData,
             ArgumentsType: argumentsType,
             ParameterOrPropertyTypes: parameterOrPropertyTypes,
-            TestClass: testClass,
-            TestMethod: testMethod,
+            ClassMetadata: testClass,
+            MethodMetadata: testMethod,
             Property: property,
             Parameters: parameters,
             GenericArguments: GetDataGeneratorAttributeBaseClass(attributeData.AttributeClass)?.TypeArguments.Select(x => x.GloballyQualified()).ToArray() ?? []
@@ -58,6 +58,7 @@ public static class DataSourceGeneratorRetriever
 
     private static bool HasGeneratorInterface(ITypeSymbol t)
     {
-        return t.Interfaces.Select(i => i.GloballyQualified()).Contains(WellKnownFullyQualifiedClassNames.IDataSourceGeneratorAttribute.WithGlobalPrefix);
+        var interfaces = t.Interfaces.Select(i => i.GloballyQualified()).ToList();
+        return interfaces.Contains(WellKnownFullyQualifiedClassNames.IAsyncDataSourceGeneratorAttribute.WithGlobalPrefix);
     }
 }

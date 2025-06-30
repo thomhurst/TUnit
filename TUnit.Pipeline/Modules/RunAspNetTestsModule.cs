@@ -15,7 +15,7 @@ public class RunAspNetTestsModule : Module<CommandResult>
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Example.Asp.Net.TestProject.csproj").AssertExists();
-        
+
         return await context.DotNet().Run(new DotNetRunOptions
         {
             Project = project.Name,

@@ -9,7 +9,9 @@ public static class TypedConstantExtensions
         if (typedConstant.IsNull
             || typedConstant.Kind == TypedConstantKind.Error)
         {
-            return [];
+            return new List<object?>
+            {
+            }.AsReadOnly();
         }
 
         if (typedConstant.Kind == TypedConstantKind.Array)
@@ -17,6 +19,9 @@ public static class TypedConstantExtensions
             return typedConstant.Values.SelectMany(x => x.SafeGetValues());
         }
 
-        return [typedConstant.Value];
+        return new List<object?>
+        {
+            typedConstant.Value
+        }.AsReadOnly();
     }
 }

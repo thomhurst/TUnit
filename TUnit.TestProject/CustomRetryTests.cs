@@ -1,7 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 [RetryOperationCancelledException(3), NotInParallel(nameof(CustomRetryTests), Order = 1)]
 public class CustomRetryTests

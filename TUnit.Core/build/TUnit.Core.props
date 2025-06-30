@@ -1,0 +1,44 @@
+<!-- 
+  TUnit.Core MSBuild properties
+  Automatically imported when TUnit.Core package is referenced
+-->
+<Project>
+  
+  <!-- Default TUnit configuration -->
+  <PropertyGroup>
+    <!-- Diagnostic settings -->
+    <TUnitEnableDiagnostics Condition="'$(TUnitEnableDiagnostics)' == ''">false</TUnitEnableDiagnostics>
+    <TUnitEnableTelemetry Condition="'$(TUnitEnableTelemetry)' == ''">false</TUnitEnableTelemetry>
+    
+    <!-- Performance settings -->
+    <TUnitMaxConcurrency Condition="'$(TUnitMaxConcurrency)' == ''">$([System.Environment]::ProcessorCount)</TUnitMaxConcurrency>
+    <TUnitBuildTimeout Condition="'$(TUnitBuildTimeout)' == ''">30000</TUnitBuildTimeout>
+    
+    <!-- Error handling -->
+    <TUnitContinueOnError Condition="'$(TUnitContinueOnError)' == ''">true</TUnitContinueOnError>
+    <TUnitMaxErrors Condition="'$(TUnitMaxErrors)' == ''">100</TUnitMaxErrors>
+    <TUnitLogErrors Condition="'$(TUnitLogErrors)' == ''">true</TUnitLogErrors>
+    
+    <!-- Caching -->
+    <TUnitEnableCaching Condition="'$(TUnitEnableCaching)' == ''">true</TUnitEnableCaching>
+  </PropertyGroup>
+
+  <!-- Make properties visible to source generator -->
+  <ItemGroup>
+    <CompilerVisibleProperty Include="TUnitEnableDiagnostics" />
+    <CompilerVisibleProperty Include="TUnitEnableTelemetry" />
+    <CompilerVisibleProperty Include="TUnitMaxConcurrency" />
+    <CompilerVisibleProperty Include="TUnitBuildTimeout" />
+    <CompilerVisibleProperty Include="TUnitContinueOnError" />
+    <CompilerVisibleProperty Include="TUnitMaxErrors" />
+    <CompilerVisibleProperty Include="TUnitLogErrors" />
+    <CompilerVisibleProperty Include="TUnitEnableCaching" />
+  </ItemGroup>
+
+  <!-- Analyzer configuration -->
+  <PropertyGroup>
+    <EnableTUnitAnalyzers Condition="'$(EnableTUnitAnalyzers)' == ''">true</EnableTUnitAnalyzers>
+    <TUnitAnalyzerSeverity Condition="'$(TUnitAnalyzerSeverity)' == ''">Warning</TUnitAnalyzerSeverity>
+  </PropertyGroup>
+
+</Project>

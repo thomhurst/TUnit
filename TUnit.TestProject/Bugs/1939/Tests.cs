@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1939;
 
@@ -23,7 +21,7 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
     {
         await dataClass.CalledOnTestClassDisposal();
     }
-    
+
     [After(TestSession)]
 #pragma warning disable TUnit0042
     public static async Task AssertAllDataClassesDisposed(TestSessionContext context)
@@ -37,27 +35,27 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
         {
             return;
         }
-        
+
         var dataClasses = tests
-            .SelectMany(x => x.TestDetails.TestClassArguments)
+            .SelectMany(x => x.TestDetails.ClassMetadataArguments)
             .OfType<DataClass>()
             .ToArray();
 
         using var _ = Assert.Multiple();
-        
+
         await Assert.That(dataClasses).HasCount().EqualTo(6);
         await Assert.That(dataClasses.Where(x => x.Disposed)).HasCount().EqualTo(6);
-        
+
         foreach (var test in tests)
         {
-            var dataClass = test.TestDetails.TestClassArguments.OfType<DataClass>().First();
+            var dataClass = test.TestDetails.ClassMetadataArguments.OfType<DataClass>().First();
 
             if (!dataClass.Disposed)
             {
                 var classDataSourceAttribute =
                     test.TestDetails.DataAttributes.OfType<ClassDataSourceAttribute<DataClass>>()
                         .First();
-                
+
                 throw new Exception($"Not Disposed: {classDataSourceAttribute.Shared}");
             }
         }

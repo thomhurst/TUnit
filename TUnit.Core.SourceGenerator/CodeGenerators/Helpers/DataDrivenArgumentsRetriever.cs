@@ -1,7 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Analyzers.Extensions;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -40,7 +40,7 @@ public static class DataDrivenArgumentsRetriever
         if (attributeSyntax is null)
         {
             var fallbackArgs = GetArgumentsFallback(constructorArgument.Values, parameterOrPropertyTypeSymbols);
-            return new ArgumentsAttributeContainer(argumentsType, [..fallbackArgs])
+            return new ArgumentsAttributeContainer(argumentsType, [.. fallbackArgs])
             {
                 Attribute = argumentAttribute,
                 AttributeIndex = dataAttributeIndex,
@@ -81,7 +81,7 @@ public static class DataDrivenArgumentsRetriever
                     .Select((x, i) => TypedConstantParser.GetTypedConstantValue(context.SemanticModel, (x, arguments.Skip(index).ElementAt(i)), x.Type));
 
                 var globallyQualified = parameterOrPropertyTypeSymbols[index].GloballyQualifiedOrFallback(objectArray.Skip(index).SafeFirstOrDefault());
-                
+
                 yield return
                     new Argument(globallyQualified, $"[{string.Join(", ", paramArgs)}]");
 
@@ -130,7 +130,7 @@ public static class DataDrivenArgumentsRetriever
 
         return parameterSymbols.ElementAtOrDefault(index);
     }
-    
+
     private static bool CanConvert(GeneratorAttributeSyntaxContext context, ITypeSymbol? argumentType, ITypeSymbol? methodParameterType)
     {
         if (argumentType is not null

@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
@@ -20,7 +18,7 @@ public class MicrosoftDependencyInjectionDataSourceAttribute : DependencyInjecti
     {
         return scope.ServiceProvider.GetService(type);
     }
-    
+
     private static IServiceProvider CreateServiceProvider()
     {
         return new ServiceCollection()
@@ -58,7 +56,7 @@ public class MEDITest(MEDIClass mediClass)
         {
             return;
         }
-        
+
         await Assert.That(mediClass.IsDisposed).IsTrue();
     }
 }
@@ -67,7 +65,7 @@ public class MEDIClass : IAsyncInitializer, IAsyncDisposable
 {
     public bool IsInitialized { get; private set; }
     public bool IsDisposed { get; private set; }
-   
+
     public Task InitializeAsync()
     {
         IsInitialized = true;

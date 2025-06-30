@@ -13,7 +13,7 @@ public static class AttributeDataExtensions
         WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix,
         WellKnownFullyQualifiedClassNames.DataSourceGeneratorAttribute.WithGlobalPrefix,
     ];
-    
+
     public static string? GetFullyQualifiedAttributeTypeName(this AttributeData? attributeData)
     {
         return attributeData?.AttributeClass?.GloballyQualifiedNonGeneric();
@@ -30,14 +30,14 @@ public static class AttributeDataExtensions
 
         return false;
     }
-    
+
     public static bool IsDataSourceAttribute(this AttributeData? attributeData)
     {
         return attributeData?.AttributeClass?.AllInterfaces.Any(x =>
                    x.GloballyQualified() == WellKnownFullyQualifiedClassNames.IDataAttribute.WithGlobalPrefix)
                == true;
     }
-    
+
     public static bool IsNonGlobalHook(this AttributeData attributeData, Compilation compilation)
     {
         return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
@@ -47,7 +47,7 @@ public static class AttributeDataExtensions
                    compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.AfterAttribute
                        .WithoutGlobalPrefix));
     }
-    
+
     public static bool IsGlobalHook(this AttributeData attributeData, Compilation compilation)
     {
         return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
@@ -62,7 +62,7 @@ public static class AttributeDataExtensions
         this IEnumerable<AttributeData> attributeDatas)
     {
         return attributeDatas
-            .Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime")
-            .ToImmutableArray();
+                .Where(x => x.AttributeClass?.ContainingAssembly.Name != "System.Runtime")
+                .ToImmutableArray();
     }
 }

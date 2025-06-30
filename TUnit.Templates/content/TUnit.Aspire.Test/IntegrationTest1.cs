@@ -1,5 +1,3 @@
-using ExampleNamespace.Data;
-
 namespace ExampleNamespace
 {
     public class IntegrationTest1

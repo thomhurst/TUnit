@@ -35,7 +35,7 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
                     compilationOptions =
                         cSharpCompilationOptions.WithNullableContextOptions(NullableContextOptions.Enable);
                 }
-                
+
                 if (project.ParseOptions is not CSharpParseOptions parseOptions)
                 {
                     return solution;
@@ -43,7 +43,7 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
 
                 compilationOptions = compilationOptions
                     .WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
-                
+
                 solution = solution.WithProjectCompilationOptions(projectId, compilationOptions)
                     .WithProjectParseOptions(projectId, parseOptions
                         .WithLanguageVersion(LanguageVersion.Preview));

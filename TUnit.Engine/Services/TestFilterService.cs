@@ -3,8 +3,6 @@
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
-using TUnit.Core;
-using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Services;
 
@@ -12,89 +10,103 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
 {
     private readonly ILogger<TestFilterService> _logger = loggerFactory.CreateLogger<TestFilterService>();
 
-    public IReadOnlyCollection<DiscoveredTest> FilterTests(TestExecutionRequest? testExecutionRequest, IReadOnlyCollection<DiscoveredTest> testNodes)
+    public IReadOnlyCollection<ExecutableTest> FilterTests(TestExecutionRequest? testExecutionRequest, IReadOnlyCollection<ExecutableTest> testNodes)
     {
         var testExecutionFilter = testExecutionRequest?.Filter;
-        
+
         if (testExecutionFilter is null or NopFilter)
         {
             _logger.LogTrace("No test filter found.");
 
-            if (testExecutionRequest is RunTestExecutionRequest)
-            {
-                return testNodes
-                    .Where(x => !x.TestDetails.Attributes.OfType<ExplicitAttribute>().Any())
-                    .ToArray();
-            }
-
             return testNodes;
         }
-        
+
         _logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
 
         var filteredTests = testNodes.Where(x => MatchesTest(testExecutionFilter, x)).ToArray();
-        
-        var testsWithExplicitAttributeCount = filteredTests.Count(x => x.TestDetails.Attributes.OfType<ExplicitAttribute>().Any());
-        
-        if (testsWithExplicitAttributeCount > 0 && testsWithExplicitAttributeCount < filteredTests.Length)
-        {
-            return testNodes
-                .Where(x => !x.TestDetails.Attributes.OfType<ExplicitAttribute>().Any())
-                .ToArray();
-        }
 
         return filteredTests;
     }
 
-    public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, DiscoveredTest discoveredTest)
+    public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, ExecutableTest executableTest)
     {
 #pragma warning disable TPEXP
         var shouldRunTest = testExecutionFilter switch
         {
             null => true,
             NopFilter => true,
-            TestNodeUidListFilter testNodeUidListFilter => testNodeUidListFilter.TestNodeUids.Contains(new TestNodeUid(discoveredTest.TestDetails.TestId)),
-            TreeNodeFilter treeNodeFilter => treeNodeFilter.MatchesFilter(BuildPath(discoveredTest.TestDetails), BuildPropertyBag(discoveredTest.TestDetails)),
+            TestNodeUidListFilter testNodeUidListFilter => testNodeUidListFilter.TestNodeUids.Contains(new TestNodeUid(executableTest.TestId)),
+            TreeNodeFilter treeNodeFilter => CheckTreeNodeFilter(treeNodeFilter, executableTest),
             _ => UnhandledFilter(testExecutionFilter)
         };
-
-        if (!shouldRunTest)
-        {
-            discoveredTest.TestContext.ClassContext.RemoveTest(discoveredTest.TestContext);
-        }
 
         return shouldRunTest;
 #pragma warning restore TPEXP
     }
 
-    private string BuildPath(TestDetails testDetails)
+    private string BuildPath(ExecutableTest test)
     {
-        var assembly = testDetails.TestClass.Type.Assembly.GetName();
+        var metadata = test.Metadata;
+        var assembly = metadata.TestClassType.Assembly.GetName();
+        var classTypeName = metadata.TestClassType.Name;
 
-        var classTypeName = testDetails.TestClass.Type.Name;
-        
-        return
-            $"/{assembly.Name ?? assembly.FullName}/{testDetails.TestClass.Type.Namespace}/{classTypeName}/{testDetails.TestMethod.Name}";
+        return $"/{assembly.Name ?? assembly.FullName}/{metadata.TestClassType.Namespace}/{classTypeName}/{metadata.TestMethodName}";
     }
 
-    private PropertyBag BuildPropertyBag(TestDetails testDetails)
+    private bool CheckTreeNodeFilter(
+#pragma warning disable TPEXP
+        TreeNodeFilter treeNodeFilter,
+#pragma warning restore TPEXP
+        ExecutableTest executableTest)
     {
-        var properties = testDetails.ExtractProperties();
+        var path = BuildPath(executableTest);
+        var propertyBag = BuildPropertyBag(executableTest);
+        _logger.LogDebug($"Checking TreeNodeFilter for path: {path}");
 
-        var categories = testDetails.Categories.Select(x => new TestMetadataProperty(x));
-        
-        return new PropertyBag(
-            [
-                ..properties,
-                ..categories,
-                ..testDetails.Categories.Select(x => new KeyValuePairStringProperty("Category", x))
-            ]
-        );
+        var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
+        _logger.LogDebug($"Filter match result: {matches}");
+
+        return matches;
     }
 
     private bool UnhandledFilter(ITestExecutionFilter testExecutionFilter)
     {
         _logger.LogWarning($"Filter is Unhandled Type: {testExecutionFilter.GetType().FullName}");
         return true;
+    }
+
+    private PropertyBag BuildPropertyBag(ExecutableTest test)
+    {
+        var properties = new List<IProperty>();
+
+        // Add categories
+        foreach (var category in test.Metadata.Categories)
+        {
+            properties.Add(new TestMetadataProperty(category));
+            properties.Add(new KeyValuePairStringProperty("Category", category));
+        }
+
+        // Add custom properties from TestContext if available
+        if (test.Context?.TestDetails.CustomProperties != null)
+        {
+            _logger.LogDebug($"Found {test.Context.TestDetails.CustomProperties.Count} custom properties");
+            foreach (var propertyEntry in test.Context.TestDetails.CustomProperties)
+            {
+                // CustomProperties is Dictionary<string, List<string>>
+                foreach (var value in propertyEntry.Value)
+                {
+                    _logger.LogDebug($"Adding property: {propertyEntry.Key}={value}");
+                    properties.Add(new KeyValuePairStringProperty(propertyEntry.Key, value));
+                }
+            }
+        }
+        else
+        {
+            _logger.LogDebug("No custom properties found in test context");
+        }
+
+        _logger.LogDebug($"Total properties in bag: {properties.Count}");
+
+        return new PropertyBag(properties);
     }
 }

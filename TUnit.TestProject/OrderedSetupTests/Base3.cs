@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.OrderedSetupTests;
 

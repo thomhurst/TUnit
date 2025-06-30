@@ -21,12 +21,12 @@ public class AssertMultipleTests
         });
 
         var aggregateException = (AggregateException) assertionException!.InnerException!;
-        
-        var exception1 = (TUnitAssertionException)aggregateException!.InnerExceptions[0];
-        var exception2 = (TUnitAssertionException)aggregateException.InnerExceptions[1];
-        var exception3 = (TUnitAssertionException)aggregateException.InnerExceptions[2];
-        var exception4 = (TUnitAssertionException)aggregateException.InnerExceptions[3];
-        var exception5 = (TUnitAssertionException)aggregateException.InnerExceptions[4];
+
+        var exception1 = (TUnitAssertionException) aggregateException!.InnerExceptions[0];
+        var exception2 = (TUnitAssertionException) aggregateException.InnerExceptions[1];
+        var exception3 = (TUnitAssertionException) aggregateException.InnerExceptions[2];
+        var exception4 = (TUnitAssertionException) aggregateException.InnerExceptions[3];
+        var exception5 = (TUnitAssertionException) aggregateException.InnerExceptions[4];
 
         await TUnitAssert.That(exception1.Message).IsEqualTo("""
                                                         Expected 1 to be equal to 2
@@ -68,7 +68,7 @@ public class AssertMultipleTests
                                                         at Assert.That(5).IsEqualTo(6)
                                                         """);
     }
-    
+
     [Test]
     public async Task MultipleFailures_With_Connectors()
     {
@@ -83,14 +83,14 @@ public class AssertMultipleTests
                 await TUnitAssert.That(5).IsEqualTo(6).Or.IsEqualTo(7);
             }
         });
-        
+
         var aggregateException = (AggregateException) assertionException!.InnerException!;
 
-        var exception1 = (TUnitAssertionException)aggregateException!.InnerExceptions[0];
-        var exception2 = (TUnitAssertionException)aggregateException.InnerExceptions[1];
-        var exception3 = (TUnitAssertionException)aggregateException.InnerExceptions[2];
-        var exception4 = (TUnitAssertionException)aggregateException.InnerExceptions[3];
-        var exception5 = (TUnitAssertionException)aggregateException.InnerExceptions[4];
+        var exception1 = (TUnitAssertionException) aggregateException!.InnerExceptions[0];
+        var exception2 = (TUnitAssertionException) aggregateException.InnerExceptions[1];
+        var exception3 = (TUnitAssertionException) aggregateException.InnerExceptions[2];
+        var exception4 = (TUnitAssertionException) aggregateException.InnerExceptions[3];
+        var exception5 = (TUnitAssertionException) aggregateException.InnerExceptions[4];
 
         await TUnitAssert.That(exception1.Message).IsEqualTo("""
                                                         Expected 1 to be equal to 2
@@ -137,8 +137,8 @@ public class AssertMultipleTests
                                                         at Assert.That(5).IsEqualTo(6).Or.IsEqualTo(7)
                                                         """);
     }
-    
-      [Test]
+
+    [Test]
     public async Task Nested_Multiples()
     {
         var assertionException = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
@@ -153,7 +153,7 @@ public class AssertMultipleTests
                 {
                     await TUnitAssert.That(4).IsEqualTo(5);
                     await TUnitAssert.That(5).IsEqualTo(6);
-                    
+
                     using (TUnitAssert.Multiple())
                     {
                         await TUnitAssert.That(6).IsEqualTo(7);
@@ -162,9 +162,9 @@ public class AssertMultipleTests
                 }
             }
         });
-        
+
         var aggregateException = (AggregateException) assertionException!.InnerException!;
-        
+
         await TUnitAssert.That(aggregateException!.InnerExceptions[0]).IsTypeOf<TUnitAssertionException>();
         await TUnitAssert.That(aggregateException.InnerExceptions[1]).IsTypeOf<TUnitAssertionException>();
         await TUnitAssert.That(aggregateException.InnerExceptions[2]).IsTypeOf<TUnitAssertionException>();
@@ -173,14 +173,14 @@ public class AssertMultipleTests
         await TUnitAssert.That(aggregateException.InnerExceptions[5]).IsTypeOf<TUnitAssertionException>();
         await TUnitAssert.That(aggregateException.InnerExceptions[6]).IsTypeOf<TUnitAssertionException>();
 
-        var assertionException1 = (TUnitAssertionException)aggregateException.InnerExceptions[0];
-        var assertionException2 = (TUnitAssertionException)aggregateException.InnerExceptions[1];
-        var assertionException3 = (TUnitAssertionException)aggregateException.InnerExceptions[2];
-        var assertionException4 = (TUnitAssertionException)aggregateException.InnerExceptions[3];
-        var assertionException5 = (TUnitAssertionException)aggregateException.InnerExceptions[4];
-        var assertionException6 = (TUnitAssertionException)aggregateException.InnerExceptions[5];
-        var assertionException7 = (TUnitAssertionException)aggregateException.InnerExceptions[6];
-        
+        var assertionException1 = (TUnitAssertionException) aggregateException.InnerExceptions[0];
+        var assertionException2 = (TUnitAssertionException) aggregateException.InnerExceptions[1];
+        var assertionException3 = (TUnitAssertionException) aggregateException.InnerExceptions[2];
+        var assertionException4 = (TUnitAssertionException) aggregateException.InnerExceptions[3];
+        var assertionException5 = (TUnitAssertionException) aggregateException.InnerExceptions[4];
+        var assertionException6 = (TUnitAssertionException) aggregateException.InnerExceptions[5];
+        var assertionException7 = (TUnitAssertionException) aggregateException.InnerExceptions[6];
+
         await TUnitAssert.That(assertionException1.Message).IsEqualTo("""
                                                         Expected 1 to be equal to 2
                                                         
@@ -188,7 +188,7 @@ public class AssertMultipleTests
                                                         
                                                         at Assert.That(1).IsEqualTo(2)
                                                         """);
-            
+
         await TUnitAssert.That(assertionException2.Message).IsEqualTo("""
                                                         Expected 2 to be equal to 3
                                                         
@@ -196,7 +196,7 @@ public class AssertMultipleTests
                                                         
                                                         at Assert.That(2).IsEqualTo(3)
                                                         """);
-            
+
         await TUnitAssert.That(assertionException3.Message).IsEqualTo("""
                                                         Expected 3 to be equal to 4
                                                         
@@ -204,7 +204,7 @@ public class AssertMultipleTests
                                                         
                                                         at Assert.That(3).IsEqualTo(4)
                                                         """);
-        
+
         await TUnitAssert.That(assertionException4.Message).IsEqualTo("""
                                                         Expected 4 to be equal to 5
                                                         
@@ -212,7 +212,7 @@ public class AssertMultipleTests
                                                         
                                                         at Assert.That(4).IsEqualTo(5)
                                                         """);
-            
+
         await TUnitAssert.That(assertionException5.Message).IsEqualTo("""
                                                         Expected 5 to be equal to 6
                                                         
@@ -228,7 +228,7 @@ public class AssertMultipleTests
                                                         
                                                         at Assert.That(6).IsEqualTo(7)
                                                         """);
-        
+
         await TUnitAssert.That(assertionException7.Message).IsEqualTo("""
                                                         Expected 7 to be equal to 8
                                                         

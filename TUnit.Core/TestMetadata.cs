@@ -1,155 +1,276 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace TUnit.Core;
 
 /// <summary>
-/// Represents the metadata for a test.
+/// Unified metadata for a test, supporting both AOT (via delegates) and reflection scenarios
 /// </summary>
-/// <typeparam name="TClassType">The type of the test class.</typeparam>
-public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TClassType> : TestMetadata where TClassType : class
+public sealed class TestMetadata
 {
     /// <summary>
-    /// Gets or sets the resettable class factory.
+    /// Unique identifier for the test
     /// </summary>
-    public required ResettableLazy<TClassType> ResettableClassFactory { get; init; }
+    public required string TestId { get; init; }
 
     /// <summary>
-    /// Gets or sets the test method factory.
+    /// Display name for the test
     /// </summary>
-    public required Func<TClassType, CancellationToken, ValueTask> TestMethodFactory { get; init; }
+    public required string TestName { get; init; }
 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-    public override Type TestClassType => typeof(TClassType);
+    /// <summary>
+    /// The type containing the test method
+    /// </summary>
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)]
+    public required Type TestClassType { get; init; }
 
-    /// <inheritdoc />
-    public override TestDetails BuildTestDetails()
-    {
-		var testId = TestId;
-		
-		var testDetails = new TestDetails<TClassType>
-		{
-			TestId = testId,
-			LazyClassInstance = ResettableClassFactory,
-			TestClassArguments = TestClassArguments,
-			TestMethodArguments = TestMethodArguments,
-			TestClassInjectedPropertyArguments = TestClassProperties,
-			CurrentRepeatAttempt = CurrentRepeatAttempt,
-			RepeatLimit = RepeatLimit,
-			TestMethod = TestMethod,
-			TestName = TestMethod.Name,
-			ReturnType = TestMethod.ReturnType,
-			TestFilePath = TestFilePath,
-			TestLineNumber = TestLineNumber,
-			DynamicAttributes = DynamicAttributes,
-			DataAttributes = TestBuilderContext.DataAttributes.OfType<Attribute>().ToArray()
-		};
+    /// <summary>
+    /// The test method name
+    /// </summary>
+    public required string TestMethodName { get; init; }
 
-		return testDetails;
-    }
+    /// <summary>
+    /// Test categories for filtering
+    /// </summary>
+    public string[] Categories { get; init; } = [];
 
-    /// <inheritdoc />
-    internal override DiscoveredTest BuildDiscoveredTest(TestContext testContext)
-    {
-	    return new DiscoveredTest<TClassType>(ResettableClassFactory)
-	    {
-		    TestContext = testContext,
-		    TestBody = (classInstance, cancellationToken) => TestMethodFactory(classInstance, cancellationToken),
-	    };
-    }
+    /// <summary>
+    /// Whether this test should be skipped
+    /// </summary>
+    public bool IsSkipped { get; init; }
 
-    /// <inheritdoc />
-    public override TestMetadata CloneWithNewMethodFactory(Func<object, CancellationToken, ValueTask> testMethodFactory)
-    {
-	    return this with
-	    {
-		    TestMethodFactory = testMethodFactory.Invoke,
-		    ResettableClassFactory = ResettableClassFactory.Clone()
-	    };
-    }
+    /// <summary>
+    /// Skip reason if IsSkipped is true
+    /// </summary>
+    public string? SkipReason { get; init; }
+
+    /// <summary>
+    /// Test timeout in milliseconds (null for no timeout)
+    /// </summary>
+    public int? TimeoutMs { get; init; }
+
+    /// <summary>
+    /// Number of retry attempts allowed
+    /// </summary>
+    public int RetryCount { get; init; }
+
+    /// <summary>
+    /// Whether this test can run in parallel
+    /// </summary>
+    public bool CanRunInParallel { get; init; } = true;
+
+    /// <summary>
+    /// Tests that must run before this one
+    /// </summary>
+    public string[] DependsOn { get; init; } = [];
+
+    /// <summary>
+    /// Test data for parameterized tests
+    /// </summary>
+    public TestDataSource[] DataSources { get; init; } = [];
+
+    /// <summary>
+    /// Class-level data sources for constructor arguments
+    /// </summary>
+    public TestDataSource[] ClassDataSources { get; init; } = [];
+
+    /// <summary>
+    /// Properties that require data injection
+    /// </summary>
+    public PropertyDataSource[] PropertyDataSources { get; init; } = [];
+
+    /// <summary>
+    /// AOT-safe factory to create test class instance (null for reflection-based)
+    /// Accepts constructor arguments array (empty array for parameterless constructors)
+    /// </summary>
+    public Func<object?[], object>? InstanceFactory { get; init; }
+
+    /// <summary>
+    /// AOT-safe test method invoker (null for reflection-based)
+    /// Returns Task, ValueTask, or void (as Task.CompletedTask)
+    /// </summary>
+    public Func<object, object?[], Task>? TestInvoker { get; init; }
+
+    /// <summary>
+    /// Number of parameters the test method expects
+    /// </summary>
+    public int ParameterCount { get; init; }
+
+    /// <summary>
+    /// Parameter types for validation
+    /// </summary>
+    public Type[] ParameterTypes { get; init; } = [];
+
+    /// <summary>
+    /// Hooks to run at various test lifecycle points
+    /// </summary>
+    public TestHooks Hooks { get; init; } = new();
+
+    /// <summary>
+    /// For reflection scenarios - the MethodInfo (when AOT invoker not available)
+    /// </summary>
+    public MethodInfo? MethodInfo { get; init; }
+
+    /// <summary>
+    /// Source file path where test is defined
+    /// </summary>
+    public string? FilePath { get; init; }
+
+    /// <summary>
+    /// Line number where test is defined
+    /// </summary>
+    public int? LineNumber { get; init; }
+
+    /// <summary>
+    /// Generic type information if the test class is generic
+    /// </summary>
+    public GenericTypeInfo? GenericTypeInfo { get; init; }
+
+    /// <summary>
+    /// Generic method information if the test method is generic
+    /// </summary>
+    public GenericMethodInfo? GenericMethodInfo { get; init; }
+}
+
+// TestDataSource classes have been moved to TestDataSources.cs
+// Import the classes from the new location
+
+/// <summary>
+/// Test lifecycle hooks
+/// </summary>
+public sealed class TestHooks
+{
+    /// <summary>
+    /// Hooks to run before the test class is instantiated
+    /// </summary>
+    public HookMetadata[] BeforeClass { get; init; } = [];
+
+    /// <summary>
+    /// Hooks to run after the test class is instantiated
+    /// </summary>
+    public HookMetadata[] AfterClass { get; init; } = [];
+
+    /// <summary>
+    /// Hooks to run before each test
+    /// </summary>
+    public HookMetadata[] BeforeTest { get; init; } = [];
+
+    /// <summary>
+    /// Hooks to run after each test
+    /// </summary>
+    public HookMetadata[] AfterTest { get; init; } = [];
 }
 
 /// <summary>
-/// Represents the base metadata for a test.
+/// Metadata for a lifecycle hook
 /// </summary>
-public abstract record TestMetadata
+public sealed class HookMetadata
 {
-    /// <summary>
-    /// Gets or sets the test ID.
-    /// </summary>
-    public required string TestId { get; init; }
-    
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-    public abstract Type TestClassType { get; }
-    
-    /// <summary>
-    /// Gets or sets the test method information.
-    /// </summary>
-    public required SourceGeneratedMethodInformation TestMethod { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the repeat limit for the test.
-    /// </summary>
-    public required int RepeatLimit { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the current repeat attempt for the test.
-    /// </summary>
-    public required int CurrentRepeatAttempt { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the file path of the test.
-    /// </summary>
-    public required string TestFilePath { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the line number of the test.
-    /// </summary>
-    public required int TestLineNumber { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the arguments for the test class.
-    /// </summary>
-    public required object?[] TestClassArguments { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the arguments for the test method.
-    /// </summary>
-    public required object?[] TestMethodArguments { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the properties for the test class.
-    /// </summary>
-    public required IDictionary<string, object?> TestClassProperties { get; init; }
-    
-    public Attribute[] DynamicAttributes { get; init; } = [];
-    
-    /// <summary>
-    /// Gets or sets the test builder context.
-    /// </summary>
-    public required TestBuilderContext TestBuilderContext { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the discovery exception, if any.
-    /// </summary>
-    public Exception? DiscoveryException { get; init; }
-    
-    /// <summary>
-    /// Builds the test details.
-    /// </summary>
-    /// <returns>The test details.</returns>
-    public abstract TestDetails BuildTestDetails();
-    
-    /// <summary>
-    /// Builds the discovered test.
-    /// </summary>
-    /// <param name="testContext">The test context.</param>
-    /// <returns>The discovered test.</returns>
-    internal abstract DiscoveredTest BuildDiscoveredTest(TestContext testContext);
+    public required string Name { get; init; }
+    public required HookLevel Level { get; init; }
+    public int Order { get; init; }
 
     /// <summary>
-    /// Clones the test metadata with a new method factory.
+    /// AOT-safe hook invoker (null for reflection-based)
     /// </summary>
-    /// <param name="testMethodFactory">The new test method factory.</param>
-    /// <returns>The cloned test metadata.</returns>
-    public abstract TestMetadata CloneWithNewMethodFactory(Func<object, CancellationToken, ValueTask> testMethodFactory);
+    public Func<object?, HookContext, Task>? Invoker { get; init; }
+
+    /// <summary>
+    /// For reflection scenarios
+    /// </summary>
+    public MethodInfo? MethodInfo { get; init; }
+    public Type? DeclaringType { get; init; }
+    public bool IsStatic { get; init; }
+}
+
+public enum HookLevel
+{
+    Assembly,
+    Class,
+    Test
+}
+
+/// <summary>
+/// Information about generic type parameters on a test class
+/// </summary>
+public sealed class GenericTypeInfo
+{
+    /// <summary>
+    /// Names of the generic type parameters (e.g., ["T", "U"])
+    /// </summary>
+    public string[] ParameterNames { get; init; } = [];
+
+    /// <summary>
+    /// Constraints for each generic parameter
+    /// </summary>
+    public GenericParameterConstraints[] Constraints { get; init; } = [];
+}
+
+/// <summary>
+/// Information about generic type parameters on a test method
+/// </summary>
+public sealed class GenericMethodInfo
+{
+    /// <summary>
+    /// Names of the generic type parameters (e.g., ["T", "U"])
+    /// </summary>
+    public string[] ParameterNames { get; init; } = [];
+
+    /// <summary>
+    /// Constraints for each generic parameter
+    /// </summary>
+    public GenericParameterConstraints[] Constraints { get; init; } = [];
+
+    /// <summary>
+    /// Maps generic parameters to method argument positions for type inference
+    /// </summary>
+    public int[] ParameterPositions { get; init; } = [];
+}
+
+/// <summary>
+/// Constraints for a generic type parameter
+/// </summary>
+public sealed class GenericParameterConstraints
+{
+    /// <summary>
+    /// The generic parameter name
+    /// </summary>
+    public required string ParameterName { get; init; }
+
+    /// <summary>
+    /// Base type constraint (if any)
+    /// </summary>
+    public Type? BaseTypeConstraint { get; init; }
+
+    /// <summary>
+    /// Interface constraints
+    /// </summary>
+    public Type[] InterfaceConstraints { get; init; } = [];
+
+    /// <summary>
+    /// Whether the parameter has a new() constraint
+    /// </summary>
+    public bool HasDefaultConstructorConstraint { get; init; }
+
+    /// <summary>
+    /// Whether the parameter has a class constraint
+    /// </summary>
+    public bool HasReferenceTypeConstraint { get; init; }
+
+    /// <summary>
+    /// Whether the parameter has a struct constraint
+    /// </summary>
+    public bool HasValueTypeConstraint { get; init; }
+
+    /// <summary>
+    /// Whether the parameter has a notnull constraint
+    /// </summary>
+    public bool HasNotNullConstraint { get; init; }
 }

@@ -7,7 +7,7 @@ public class EnumerableContainsExpectedFuncAssertCondition<TActual, TInner>(
 {
     private bool _wasFound;
     internal protected override string GetExpectation() => $"to contain an entry matching {matcherString ?? "null"}";
-    
+
     protected override ValueTask<AssertionResult> GetResult(
         TActual? actualValue, Exception? exception,
         AssertionMetadata assertionMetadata
@@ -27,7 +27,7 @@ public class EnumerableContainsExpectedFuncAssertCondition<TActual, TInner>(
                 break;
             }
         }
-        
+
         return AssertionResult
             .FailIf(_wasFound is false, "there was no match found in the collection");
     }

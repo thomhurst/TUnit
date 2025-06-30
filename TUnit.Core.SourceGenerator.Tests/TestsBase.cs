@@ -2,16 +2,38 @@ using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Core.SourceGenerator.CodeGenerators;
+using TUnit.Core.SourceGenerator.Tests.Extensions;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new()
+public class TestsBase
 {
     protected TestsBase()
     {
     }
 
+    public TestsBase<UnifiedTestMetadataGenerator> TestMetadataGenerator = new();
+    public TestsBase<TestHooksGenerator> HooksGenerator = new();
+    public TestsBase<AssemblyLoaderGenerator> AssemblyLoaderGenerator = new();
+    public TestsBase<DisableReflectionScannerGenerator> DisableReflectionScannerGenerator = new();
+    public TestsBase<DynamicTestsGenerator> DynamicTestsGenerator = new();
+    public TestsBase<PolyfillGenerator> PolyfillGenerator = new();
+
+    public Task RunTest(string inputFile, Func<string[], Task> assertions)
+    {
+        return TestMetadataGenerator.RunTest(inputFile, new RunTestOptions(), assertions);
+    }
+
+    public Task RunTest(string inputFile, RunTestOptions runTestOptions, Func<string[], Task> assertions)
+    {
+        return TestMetadataGenerator.RunTest(inputFile, runTestOptions, assertions);
+    }
+}
+
+public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new()
+{
     public Task RunTest(string inputFile, Func<string[], Task> assertions)
     {
         return RunTest(inputFile, new RunTestOptions(), assertions);
@@ -24,6 +46,19 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
 #else
         var source = File.ReadAllText(inputFile);
 #endif
+
+        var customAttributes = Sourcy.Git.RootDirectory
+            .GetDirectory("TUnit.TestProject")
+            .GetDirectory("Attributes")
+            .GetFiles("*.cs")
+            .Select(x => x.FullName)
+            .ToArray();
+
+        runTestOptions.AdditionalFiles =
+        [
+            ..runTestOptions.AdditionalFiles,
+            ..customAttributes
+        ];
 
         string[] additionalSources =
         [
@@ -38,6 +73,16 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
             global using global::System.Threading.Tasks;
             global using global::TUnit.Core;
             global using static global::TUnit.Core.HookType;
+            """,
+            """
+            namespace System.Diagnostics.CodeAnalysis;
+
+            public class ExcludeFromCodeCoverageAttribute : Attribute;
+            """,
+            """
+            namespace System.Diagnostics.CodeAnalysis;
+
+            public class UnconditionalSuppressMessageAttribute : Attribute;
             """,
 #if NET
             ..await Task.WhenAll(runTestOptions.AdditionalFiles.Select(x => File.ReadAllTextAsync(x))),
@@ -60,7 +105,7 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
                 )
             );
         }
-        
+
         // To run generators, we can use an empty compilation.
 
         var compilation = CSharpCompilation.Create(
@@ -76,10 +121,10 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
         foreach (var additionalPackage in runTestOptions.AdditionalPackages)
         {
             var downloaded = await NuGetDownloader.DownloadPackageAsync(additionalPackage.Id, additionalPackage.Version);
-            
+
             compilation = compilation.AddReferences(downloaded);
         }
-        
+
         // Run generators. Don't forget to use the new compilation rather than the previous one.
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out var diagnostics);
 
@@ -88,11 +133,11 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
             throw new Exception
             (
                 $"""
-                  There was an error with the compilation. 
+                  There was an error with the compilation.
                   Have you added required references and additional files?
-                  
+
                   {error}
-                  
+
                   {string.Join(Environment.NewLine, newCompilation.SyntaxTrees.Select(x => x.GetText()))}
                  """
             );
@@ -125,7 +170,7 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
             {
                 var received = await FilePolyfill.ReadAllTextAsync(pair.ReceivedPath);
                 var verified = await FilePolyfill.ReadAllTextAsync(pair.VerifiedPath);
-                
+
                 // Better diff message since original one is too large
                 await Assert.That(Scrub(received)).IsEqualTo(Scrub(verified));
             });
@@ -148,12 +193,12 @@ internal class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, n
 
         return false;
     }
-    
+
     private StringBuilder Scrub(StringBuilder text)
     {
         return text.Replace("\r\n", "\n");
     }
-    
+
     private string Scrub(string text)
     {
         return Scrub(new StringBuilder(text)).ToString();

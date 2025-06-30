@@ -1,8 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1577;
@@ -50,7 +48,7 @@ public partial class Tests
 
     private T RoundTripSerialize<T>(T original)
     {
-        var jsonTypeInfo = (JsonTypeInfo<T>)SourceGenerationContext.Default.GetTypeInfo(original!.GetType())!;
+        var jsonTypeInfo = (JsonTypeInfo<T>) SourceGenerationContext.Default.GetTypeInfo(original!.GetType())!;
         return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(original, jsonTypeInfo), jsonTypeInfo)!;
     }
 

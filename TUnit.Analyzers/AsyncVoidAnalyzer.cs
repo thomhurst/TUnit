@@ -8,16 +8,18 @@ namespace TUnit.Analyzers;
 public class AsyncVoidAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(
-            Rules.AsyncVoidMethod);
+        new()
+        {
+            Rules.AsyncVoidMethod
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSyntax, SymbolKind.Method);
     }
-    
+
     private void AnalyzeSyntax(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;

@@ -64,7 +64,7 @@ public static class TypeExtensions
 
     public static IEnumerable<INamedTypeSymbol> GetSelfAndBaseTypes(this INamedTypeSymbol namedTypeSymbol)
     {
-        return [namedTypeSymbol, ..GetBaseTypes(namedTypeSymbol)];
+        return [namedTypeSymbol, .. GetBaseTypes(namedTypeSymbol)];
     }
 
     public static IEnumerable<INamedTypeSymbol> GetBaseTypes(this ITypeSymbol namedTypeSymbol)
@@ -105,7 +105,7 @@ public static class TypeExtensions
     public static bool IsIEnumerable(this ITypeSymbol namedTypeSymbol, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)
     {
         var interfaces = namedTypeSymbol.TypeKind == TypeKind.Interface
-            ? [(INamedTypeSymbol)namedTypeSymbol, ..namedTypeSymbol.AllInterfaces]
+            ? [(INamedTypeSymbol) namedTypeSymbol, .. namedTypeSymbol.AllInterfaces]
             : namedTypeSymbol.AllInterfaces.AsEnumerable();
 
         foreach (var enumerable in interfaces
@@ -174,7 +174,7 @@ public static class TypeExtensions
             return true;
         }
 
-        if (!enumerableInnerType.IsTupleType && firstParameterType is INamedTypeSymbol { IsGenericType:true })
+        if (!enumerableInnerType.IsTupleType && firstParameterType is INamedTypeSymbol { IsGenericType: true })
         {
             return true;
         }
@@ -257,7 +257,7 @@ public static class TypeExtensions
 
         if (typeSymbol.AllInterfaces
                 .FirstOrDefault(x => SymbolEqualityComparer.Default.Equals(x.OriginalDefinition, enumerableT))
-            is {} enumerableType)
+            is { } enumerableType)
         {
             innerType = enumerableType.TypeArguments[0];
             return true;

@@ -6,7 +6,7 @@ public class EnumerableCountNotEqualToExpectedValueAssertCondition<TActual, TInn
     : ExpectedValueAssertCondition<TActual, int>(expected) where TActual : IEnumerable<TInner>
 {
     internal protected override string GetExpectation() => $"to have a count different to {ExpectedValue}";
-    
+
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, int count)
     {
         var actualCount = GetCount(actualValue);
@@ -24,7 +24,7 @@ public class EnumerableCountNotEqualToExpectedValueAssertCondition<TActual, TInn
         {
             return collection.Count;
         }
-        
+
         return actualValue?.Cast<object>().Count() ?? 0;
     }
 }

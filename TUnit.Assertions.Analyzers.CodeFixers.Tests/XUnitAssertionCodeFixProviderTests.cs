@@ -36,7 +36,7 @@ public class XUnitAssertionCodeFixProviderTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Xunit_Contains_Predicate_Overload()
     {
@@ -68,7 +68,7 @@ public class XUnitAssertionCodeFixProviderTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Xunit_Collection_Equivalent()
     {
@@ -108,7 +108,7 @@ public class XUnitAssertionCodeFixProviderTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Xunit_Within_Tolerance()
     {

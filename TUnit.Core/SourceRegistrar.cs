@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces.SourceGenerator;
@@ -97,20 +96,20 @@ public class SourceRegistrar
     }
 
     /// <summary>
-    /// Registers a property initializer for a specific type that takes a DataGeneratorMetadata parameter.
+    /// Registers a global initializer.
     /// </summary>
-    /// <typeparam name="T">The type to register the initializer for.</typeparam>
-    public static void RegisterProperty<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
+    /// <param name="initializer">The initializer to register.</param>
+    public static void RegisterGlobalInitializer(Func<Task> initializer)
     {
-        var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-            .Where(p => p.CanWrite && p.IsDefined(typeof(IDataSourceGeneratorAttribute), true))
-            .ToArray();
+        Sources.GlobalInitializers.Enqueue(initializer);
+    }
 
-        if (properties.Length == 0)
-        {
-            return;
-        }
-
-        Sources.DataGeneratorProperties.TryAdd(typeof(T), properties);
+    /// <summary>
+    /// Registers a property source (for property injection).
+    /// </summary>
+    /// <param name="propertySource">The property source to register.</param>
+    public static void RegisterProperty(IPropertySource propertySource)
+    {
+        Sources.PropertySources.Enqueue(propertySource);
     }
 }

@@ -11,10 +11,10 @@ public class NullabilityInferenceTests
         string? nullableValue = "Hello World!";
 
         var notNullValue = await Assert.That(nullableValue).IsNotNull();
-        
+
         Console.WriteLine(notNullValue.Clone());
     }
-    
+
     [Test]
     public async Task NotNull_ValueType()
     {
@@ -24,7 +24,7 @@ public class NullabilityInferenceTests
         int? nullableValue = 1;
 
         var notNullValue = await Assert.That(nullableValue).IsNotNull();
-        
+
         Console.WriteLine(notNullValue.ToString());
     }
 }

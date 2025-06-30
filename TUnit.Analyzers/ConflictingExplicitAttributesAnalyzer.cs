@@ -10,15 +10,18 @@ namespace TUnit.Analyzers;
 public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.ConflictingExplicitAttributes);
+        new()
+        {
+            Rules.ConflictingExplicitAttributes
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
@@ -32,16 +35,16 @@ public class ConflictingExplicitAttributesAnalyzer : ConcurrentDiagnosticAnalyze
         {
             return;
         }
-        
+
         var classExplicitAttribute = methodSymbol.ContainingType.GetAttributes()
             .FirstOrDefault(x => x.AttributeClass?.GloballyQualifiedNonGeneric()
                                  == WellKnown.AttributeFullyQualifiedClasses.Explicit.WithGlobalPrefix);
-        
+
         if (classExplicitAttribute == null)
         {
             return;
         }
-        
+
         context.ReportDiagnostic(
                 Diagnostic.Create(Rules.ConflictingExplicitAttributes,
                     methodExplicitAttribute.GetLocation()

@@ -7,12 +7,12 @@ public class NotNullAssertionBuilderWrapper<TActual> : InvokableValueAssertionBu
     internal NotNullAssertionBuilderWrapper(InvokableAssertionBuilder<TActual?> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
-    
+
     public new TaskAwaiter<TActual> GetAwaiter()
     {
         return Process().GetAwaiter();
     }
-    
+
     private async Task<TActual> Process()
     {
         var data = await ProcessAssertionsAsync();
@@ -28,12 +28,12 @@ public class NotNullStructAssertionBuilderWrapper<TActual> : InvokableValueAsser
     internal NotNullStructAssertionBuilderWrapper(InvokableAssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
-    
+
     public new TaskAwaiter<TActual> GetAwaiter()
     {
         return Process().GetAwaiter();
     }
-    
+
     private async Task<TActual> Process()
     {
         var data = await ProcessAssertionsAsync();

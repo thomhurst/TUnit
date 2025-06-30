@@ -22,7 +22,7 @@ public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActu
         Push(AssertionBuilder, assert);
         return this;
     }
-    
+
     public override TaskAwaiter<TActual?> GetAwaiter()
     {
         return GetResult().GetAwaiter();
@@ -30,13 +30,13 @@ public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActu
 
     private async Task<TActual?> GetResult()
     {
-        ((ISource)AssertionBuilder).Assertions.Clear();
-        
+        ((ISource) AssertionBuilder).Assertions.Clear();
+
         foreach (var condition in _assertConditions)
         {
-            ((ISource)AssertionBuilder).Assertions.Push(condition);
+            ((ISource) AssertionBuilder).Assertions.Push(condition);
         }
-        
+
         return (TActual?) await _invokableAssertionBuilder!.ProcessAssertionsAsync(x => Task.FromResult(x.Result));
     }
 
@@ -44,14 +44,14 @@ public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActu
     {
         if (_assertConditions.Count > 0)
         {
-            _assertConditions.Push(new OrAssertCondition(_assertConditions.Pop(), ((ISource)assert(assertionBuilder)).Assertions.Pop()));
+            _assertConditions.Push(new OrAssertCondition(_assertConditions.Pop(), ((ISource) assert(assertionBuilder)).Assertions.Pop()));
         }
         else
         {
             var invokableAssertionBuilder = assert(assertionBuilder);
             assertionBuilder.AppendConnector(ChainType.Or);
             _invokableAssertionBuilder = invokableAssertionBuilder;
-            _assertConditions.Push(((ISource)_invokableAssertionBuilder).Assertions.Pop());
+            _assertConditions.Push(((ISource) _invokableAssertionBuilder).Assertions.Pop());
         }
     }
 }

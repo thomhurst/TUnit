@@ -8,8 +8,8 @@ public class DependsOnNotInParallelConflictAnalyzerTests
     public async Task Conflict_Raises_Error()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using System.Threading.Tasks;
                 using TUnit.Core;
                             

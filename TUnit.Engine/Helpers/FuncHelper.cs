@@ -7,7 +7,7 @@ internal class FuncHelper
 {
     public static bool TryInvokeFunc(object? func, out object? result)
     {
-        if (func?.GetType().GetMethod("Invoke") is {} method)
+        if (func?.GetType().GetMethod("Invoke") is { } method)
         {
             result = method.Invoke(func, []);
             return true;
@@ -16,7 +16,7 @@ internal class FuncHelper
         result = null;
         return false;
     }
-    
+
     public static object? InvokeFunc(object func)
     {
         return func.GetType().GetMethod("Invoke")!.Invoke(func, []);

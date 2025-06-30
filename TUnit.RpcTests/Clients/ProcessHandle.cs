@@ -7,7 +7,7 @@ public class ProcessHandle(CommandTask<CommandResult> commandTask, Stream output
     public int Id { get; } = commandTask.ProcessId;
     public string ProcessName { get; } = "dotnet";
     public int ExitCode { get; private set; }
-    public TextWriter StandardInput  => new StringWriter();
+    public TextWriter StandardInput => new StringWriter();
     public TextReader StandardOutput => new StreamReader(output);
     public void Dispose()
     {
@@ -16,7 +16,7 @@ public class ProcessHandle(CommandTask<CommandResult> commandTask, Stream output
 
     public void Kill()
     {
-       Dispose(); 
+        Dispose();
     }
 
     public Task<int> StopAsync()

@@ -22,7 +22,7 @@ public class InstanceTestMethodAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Static_Error()
     {

@@ -27,7 +27,7 @@ public class GenerateReadMeModule : Module<File>
             .FindFile(x => x.Name == "README_Template.md")
             .AssertExists()
             .ReadAsync(cancellationToken);
-        
+
         var readme = context.Git()
             .RootDirectory
             .AssertExists()
@@ -94,9 +94,9 @@ public class GenerateReadMeModule : Module<File>
         {
             return null;
         }
-        
+
         await readme.WriteAsync(newContents, cancellationToken);
-        
+
         return readme;
     }
 
@@ -106,7 +106,7 @@ public class GenerateReadMeModule : Module<File>
         {
             return "Building the test project";
         }
-        
+
         return fileName.Split("_").Last() switch
         {
             "BasicTest" => "A single test that completes instantly (including spawning a new process and initialising the test framework)",

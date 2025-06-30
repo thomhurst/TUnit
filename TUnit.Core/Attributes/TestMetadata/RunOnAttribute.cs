@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using TUnit.Core.Enums;
 
 namespace TUnit.Core;
@@ -48,7 +48,7 @@ namespace TUnit.Core;
 public sealed class RunOnAttribute(OS OperatingSystem) : SkipAttribute($"Test is restricted to run on the following operating systems: `{OperatingSystem}`.")
 {
     /// <inheritdoc />
-    public override Task<bool> ShouldSkip(BeforeTestContext context)
+    public override Task<bool> ShouldSkip(TestRegisteredContext context)
     {
         // Check if the current platform matches any of the allowed operating systems
         bool shouldRun =

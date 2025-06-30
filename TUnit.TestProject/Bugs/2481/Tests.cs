@@ -1,6 +1,4 @@
-﻿using TUnit.TestProject.Attributes;
-
-namespace TUnit.TestProject.Bugs._2481;
+﻿namespace TUnit.TestProject.Bugs._2481;
 
 public class Tests
 {
@@ -11,7 +9,7 @@ public class Tests
     public async Task Test()
     {
         var properties = TestContext.Current!.TestDetails.CustomProperties;
-        
+
         var array = properties["Group"].ToArray();
 
         await Assert.That(array).HasCount().EqualTo(3)

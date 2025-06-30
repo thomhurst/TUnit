@@ -1,0 +1,13 @@
+{
+  "id": "unified-test-builder",
+  "started": "2025-01-29T23:40:00Z",
+  "lastUpdated": "2025-01-29T23:40:00Z",
+  "status": "complete",
+  "phase": "complete",
+  "progress": {
+    "discovery": { "answered": 5, "total": 5 },
+    "detail": { "answered": 6, "total": 6 }
+  },
+  "contextFiles": [],
+  "relatedFeatures": []
+}

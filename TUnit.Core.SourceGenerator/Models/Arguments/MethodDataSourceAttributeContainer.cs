@@ -17,30 +17,31 @@ public record MethodDataSourceAttributeContainer(
     string MethodName,
     bool IsStatic,
     ITypeSymbol MethodReturnType,
-    string ArgumentsExpression)
+    string ArgumentsExpression,
+    bool IsAsync = false)
     : ArgumentsContainer(ArgumentsType)
 {
-    public override void OpenScope(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    public override void OpenScope(ICodeWriter sourceCodeWriter, ref int variableIndex)
     {
         if (!IsExpandableEnumerable)
         {
             return;
         }
-        
+
         var enumerableIndexName = ArgumentsType == ArgumentsType.ClassConstructor
             ? CodeGenerators.VariableNames.ClassDataIndex
             : CodeGenerators.VariableNames.TestMethodDataIndex;
-        
+
         var dataName = ArgumentsType == ArgumentsType.ClassConstructor
             ? CodeGenerators.VariableNames.ClassData
             : CodeGenerators.VariableNames.MethodData;
-            
-        sourceCodeWriter.WriteLine($"foreach (var {dataName}Accessor in {GetMethodInvocation()})");
-        sourceCodeWriter.WriteLine("{");
-        sourceCodeWriter.WriteLine($"{enumerableIndexName}++;");
+
+        sourceCodeWriter.Append($"foreach (var {dataName}Accessor in {GetMethodInvocation()})");
+        sourceCodeWriter.Append("{");
+        sourceCodeWriter.Append($"{enumerableIndexName}++;");
     }
 
-    public override void WriteVariableAssignments(SourceCodeWriter sourceCodeWriter, ref int variableIndex)
+    public override void WriteVariableAssignments(ICodeWriter sourceCodeWriter, ref int variableIndex)
     {
         if (IsExpandableEnumerable)
         {
@@ -52,31 +53,31 @@ public record MethodDataSourceAttributeContainer(
         }
         else
         {
-            sourceCodeWriter.WriteLine(GenerateVariable(TypesToInject[0].GloballyQualified(), $"{GetMethodInvocation()}{FuncParenthesis()}", ref variableIndex).ToString());
+            sourceCodeWriter.Append(GenerateVariable(TypesToInject[0].GloballyQualified(), $"{GetMethodInvocation()}{FuncParenthesis()}", ref variableIndex).ToString());
         }
     }
 
-    private void WriteTuples(SourceCodeWriter sourceCodeWriter)
+    private void WriteTuples(ICodeWriter sourceCodeWriter)
     {
         var tupleVariableName = $"{VariableNamePrefix}Tuples";
-        
+
         if (ArgumentsType == ArgumentsType.Property)
         {
             tupleVariableName += Guid.NewGuid().ToString("N");
         }
 
-        sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TypesToInject.Select(x => x.GloballyQualified()))}>({GetMethodInvocation()}{FuncParenthesis()});");
-            
+        sourceCodeWriter.Append($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TypesToInject.Select(x => x.GloballyQualified()))}>({GetMethodInvocation()}{FuncParenthesis()});");
+
         for (var index = 0; index < TypesToInject.Length; index++)
         {
             WriteTuples(sourceCodeWriter, ref index, tupleVariableName);
         }
     }
 
-    private void WriteTuples(SourceCodeWriter sourceCodeWriter, ref int index, string tupleVariableName)
+    private void WriteTuples(ICodeWriter sourceCodeWriter, ref int index, string tupleVariableName)
     {
         var tupleType = TypesToInject[index];
-            
+
         var accessorIndex = index + 1;
 
         string accessor;
@@ -93,30 +94,30 @@ public record MethodDataSourceAttributeContainer(
             {
                 newIndex++;
             }
-            
+
             var restAccessor = string.Join(".", Enumerable.Repeat("Rest", repeatCount));
-            
+
             accessor = $"{tupleVariableName}.{restAccessor}.Item{newIndex}";
         }
 
         var refIndex = index;
-        
-        sourceCodeWriter.WriteLine(GenerateVariable(tupleType.GloballyQualified(), accessor, ref refIndex).ToString());
+
+        sourceCodeWriter.Append(GenerateVariable(tupleType.GloballyQualified(), accessor, ref refIndex).ToString());
     }
 
-    private void WriteEnumerable(SourceCodeWriter sourceCodeWriter)
+    private void WriteEnumerable(ICodeWriter sourceCodeWriter)
     {
         if (ArgumentsType == ArgumentsType.Property)
         {
             throw new Exception("Property Injection is not supported with Enumerable data");
         }
-            
+
         var dataName = ArgumentsType == ArgumentsType.ClassConstructor
             ? CodeGenerators.VariableNames.ClassData
             : CodeGenerators.VariableNames.MethodData;
-            
-        sourceCodeWriter.WriteLine($"var {dataName} = {dataName}Accessor{FuncParenthesis()};");
-            
+
+        sourceCodeWriter.Append($"var {dataName} = {dataName}Accessor{FuncParenthesis()};");
+
         if (IsExpandableTuples)
         {
             var tupleVariableName = $"{VariableNamePrefix}Tuples";
@@ -124,8 +125,8 @@ public record MethodDataSourceAttributeContainer(
             {
                 tupleVariableName += Guid.NewGuid().ToString("N");
             }
-                
-            sourceCodeWriter.WriteLine($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TypesToInject.Select(x => x.GloballyQualified()))}>({dataName});");
+
+            sourceCodeWriter.Append($"var {tupleVariableName} = global::System.TupleExtensions.ToTuple<{string.Join(", ", TypesToInject.Select(x => x.GloballyQualified()))}>({dataName});");
 
             for (var index = 0; index < TypesToInject.Length; index++)
             {
@@ -136,8 +137,8 @@ public record MethodDataSourceAttributeContainer(
         {
             AddVariable(new Variable
             {
-                Type = "var", 
-                Name = $"{dataName}", 
+                Type = "var",
+                Name = $"{dataName}",
                 Value = $"{GetMethodInvocation()}"
             });
         }
@@ -145,30 +146,32 @@ public record MethodDataSourceAttributeContainer(
 
     private string GetMethodInvocation()
     {
+        var awaitPrefix = IsAsync ? "await " : "";
+
         if (IsStatic)
         {
-            return $"{Type.GloballyQualified()}.{MethodName}({ArgumentsExpression})";
+            return $"{awaitPrefix}{Type.GloballyQualified()}.{MethodName}({ArgumentsExpression})";
         }
-        
+
         if (Type is INamedTypeSymbol namedTypeSymbol &&
             namedTypeSymbol.Constructors.Any(x => x.Parameters.IsDefaultOrEmpty))
         {
-            return $"new {Type.GloballyQualified()}().{MethodName}({ArgumentsExpression})";
+            return $"{awaitPrefix}new {Type.GloballyQualified()}().{MethodName}({ArgumentsExpression})";
         }
-        
+
         if (SymbolEqualityComparer.Default.Equals(Type, TestClassType) && ArgumentsType == ArgumentsType.Method)
         {
-            return $"classInstance.{MethodName}({ArgumentsExpression})";
+            return $"{awaitPrefix}classInstance.{MethodName}({ArgumentsExpression})";
         }
-        
+
         throw new ArgumentException("Only test arguments can reference non-static MethodDataSources");
     }
 
-    public override void CloseScope(SourceCodeWriter sourceCodeWriter)
+    public override void CloseScope(ICodeWriter sourceCodeWriter)
     {
         if (IsExpandableEnumerable)
-        { 
-            sourceCodeWriter.WriteLine("}");
+        {
+            sourceCodeWriter.Append("}");
         }
     }
 

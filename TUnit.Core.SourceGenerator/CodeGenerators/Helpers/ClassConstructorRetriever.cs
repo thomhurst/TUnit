@@ -11,7 +11,6 @@ public class ClassConstructorRetriever
     {
         var type = dataAttribute.AttributeClass!.TypeArguments.First();
 
-        // TODO: Property injection?
         return new ClassConstructorAttributeContainer(ArgumentsType.ClassConstructor)
         {
             AttributeIndex = index,

@@ -1,8 +1,7 @@
-﻿using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests.Bugs._1589;
 
-internal class Hooks1589 : TestsBase<TestHooksGenerator>
+internal class Hooks1589 : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,

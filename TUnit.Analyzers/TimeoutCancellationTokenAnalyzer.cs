@@ -9,15 +9,18 @@ namespace TUnit.Analyzers;
 public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.MissingTimeoutCancellationTokenAttributes);
+        new()
+        {
+            Rules.MissingTimeoutCancellationTokenAttributes
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
@@ -44,9 +47,9 @@ public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
             );
             return;
         }
-        
+
         var lastParameter = parameters.Last();
-        
+
         if (!SymbolEqualityComparer.Default.Equals(lastParameter.Type,
                 context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!)))
         {

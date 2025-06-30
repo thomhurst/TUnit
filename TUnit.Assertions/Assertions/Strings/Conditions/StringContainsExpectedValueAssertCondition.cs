@@ -8,7 +8,7 @@ public class StringContainsExpectedValueAssertCondition(string expected, StringC
     : ExpectedValueAssertCondition<string, string>(expected)
 {
     internal bool IgnoreWhitespace { get; set; }
-    
+
     internal protected override string GetExpectation()
         => $"to contain {Formatter.Format(ExpectedValue).TruncateWithEllipsis(100)}";
 
@@ -34,10 +34,10 @@ public class StringContainsExpectedValueAssertCondition(string expected, StringC
         }
 
         var closestSubstring = StringUtils.FindClosestSubstring(ActualValue!, ExpectedValue, stringComparison, IgnoreWhitespace, out var differIndexOnActual, out var differIndexOnExpected);
-        
+
         var expectedStartDisplayIndex = Math.Max(0, differIndexOnExpected - 25);
         var actualStartDisplayIndex = Math.Max(0, differIndexOnActual - 25);
-        
+
         var expectedValue = ExpectedValue?.Substring(expectedStartDisplayIndex, Math.Min(ExpectedValue.Length - expectedStartDisplayIndex, 50));
         var actualValue = ActualValue?.Substring(actualStartDisplayIndex, Math.Min(ActualValue.Length - actualStartDisplayIndex, 50));
 

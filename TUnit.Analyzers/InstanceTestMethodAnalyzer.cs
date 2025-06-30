@@ -9,18 +9,18 @@ namespace TUnit.Analyzers;
 public class InstanceTestMethodAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create
-        (
+        new()
+        {
             Rules.InstanceTestMethod
-        );
+        };
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;

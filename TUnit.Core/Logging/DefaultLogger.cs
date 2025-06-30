@@ -20,7 +20,9 @@ public class DefaultLogger(Context context) : TUnitLogger
 
     public void PushProperty(string name, object? value)
     {
-        var list = _values.GetOrAdd(name, _ => new());
+        var list = _values.GetOrAdd(name, _ =>
+        [
+        ]);
         var formattedValue = FormatValue(value);
         list.Add(formattedValue);
     }
@@ -44,7 +46,7 @@ public class DefaultLogger(Context context) : TUnitLogger
     public override async ValueTask LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
         var message = GenerateMessage(formatter(state, exception), exception, logLevel);
-        
+
         if (logLevel >= LogLevel.Error)
         {
             await context.ErrorOutputWriter.WriteLineAsync(message);
@@ -60,7 +62,7 @@ public class DefaultLogger(Context context) : TUnitLogger
     public override void Log<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
         var message = GenerateMessage(formatter(state, exception), exception, logLevel);
-        
+
         if (logLevel >= LogLevel.Error)
         {
             context.ErrorOutputWriter.WriteLine(message);

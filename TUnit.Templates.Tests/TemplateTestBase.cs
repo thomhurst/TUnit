@@ -38,7 +38,7 @@ public abstract partial class TemplateTestBase : IDisposable
     {
         var original = sb.ToString();
         var matches = VersionRegex().Matches(original);
-            
+
         foreach (Match match in matches.Where(m => m.Success))
         {
             var line = match.Groups[0].Value.Replace(match.Groups[1].Value, "1.0.0");

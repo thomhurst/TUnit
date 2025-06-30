@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Assertions.Generics.Conditions;
 using TUnit.Assertions.Extensions;
 
@@ -10,9 +9,9 @@ public class ConvertedDelegateSource<TToType> : IValueSource<TToType?> where TTo
     public ConvertedDelegateSource(IDelegateSource source)
     {
         var convertToAssertCondition = new ConvertExceptionToValueAssertCondition<TToType>();
-        
+
         ActualExpression = source.ActualExpression;
-        Assertions = new Stack<BaseAssertCondition>([new DelegateConversionAssertionCondition<TToType>(source, (BaseAssertCondition<object?>)source.Assertions.Peek())]);
+        Assertions = new Stack<BaseAssertCondition>([new DelegateConversionAssertionCondition<TToType>(source, (BaseAssertCondition<object?>) source.Assertions.Peek())]);
         AssertionDataTask = ConvertAsync(source, convertToAssertCondition);
         ExpressionBuilder = source.ExpressionBuilder;
     }
@@ -43,8 +42,8 @@ public class ConvertedDelegateSource<TToType> : IValueSource<TToType?> where TTo
     private static async ValueTask<AssertionData> ConvertAsync(IDelegateSource delegateSource, ConvertExceptionToValueAssertCondition<TToType> convertToAssertCondition)
     {
         var invokableAssertionBuilder = delegateSource.RegisterAssertion(convertToAssertCondition, [], null);
-        
-        return await invokableAssertionBuilder.ProcessAssertionsAsync(assertionData => 
+
+        return await invokableAssertionBuilder.ProcessAssertionsAsync(assertionData =>
             Task.FromResult(assertionData with { Result = convertToAssertCondition.ConvertedExceptionValue, Exception = null, End = DateTimeOffset.Now }));
 
     }

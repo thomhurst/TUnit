@@ -8,8 +8,8 @@ public class DisposableFieldPropertyAnalyzerTests
     public async Task New_Disposable_Flags_Issue()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using System.Net.Http;
                 using TUnit.Core;
 
@@ -35,7 +35,7 @@ public class DisposableFieldPropertyAnalyzerTests
                     .WithArguments("_httpClient")
             );
     }
-    
+
     [Test]
     public async Task New_Disposable__Static_Flags_Issue()
     {
@@ -67,7 +67,7 @@ public class DisposableFieldPropertyAnalyzerTests
                     .WithArguments("_httpClient")
             );
     }
-    
+
     [Test]
     [Arguments("Class", "Assembly")]
     [Arguments("Class", "TestSession")]
@@ -111,7 +111,7 @@ public class DisposableFieldPropertyAnalyzerTests
                     .WithArguments("_httpClient")
             );
     }
-    
+
     [Test]
     [Arguments("Class")]
     [Arguments("Assembly")]
@@ -148,7 +148,7 @@ public class DisposableFieldPropertyAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task New_Disposable_No_Issue_When_Cleaned_Up_Nullable()
     {
@@ -254,7 +254,7 @@ public class DisposableFieldPropertyAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task New_IAsyncDisposable_No_Issue_When_Cleaned_Up_Nullable()
     {
@@ -291,7 +291,7 @@ public class DisposableFieldPropertyAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task New_IAsyncDisposable__Static_No_Issue_When_Cleaned_Up_Nullable()
     {
@@ -328,7 +328,7 @@ public class DisposableFieldPropertyAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task New_Disposable_No_Issue_When_Cleaned_Up()
     {
@@ -362,7 +362,7 @@ public class DisposableFieldPropertyAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task New_Disposable__Static_No_Issue_When_Cleaned_Up()
     {
@@ -396,7 +396,7 @@ public class DisposableFieldPropertyAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task New_IAsyncDisposable_No_Issue_When_Cleaned_Up()
     {
@@ -431,7 +431,7 @@ public class DisposableFieldPropertyAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task New_IAsyncDisposable__Static_No_Issue_When_Cleaned_Up()
     {
@@ -466,7 +466,7 @@ public class DisposableFieldPropertyAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Not_Flagged_When_InjectedClassData()
     {

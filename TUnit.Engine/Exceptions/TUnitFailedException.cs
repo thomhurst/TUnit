@@ -15,14 +15,14 @@ public abstract class TUnitFailedException : TUnitException
     }
 
     public override string StackTrace { get; }
-    
+
     private static string FilterStackTrace(string? stackTrace)
     {
         if (string.IsNullOrEmpty(stackTrace))
         {
             return string.Empty;
         }
-        
+
         var lines = stackTrace!.Split([Environment.NewLine], StringSplitOptions.None);
 
         return string.Join(Environment.NewLine,

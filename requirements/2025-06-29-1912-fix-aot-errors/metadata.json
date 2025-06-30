@@ -1,0 +1,13 @@
+{
+  "id": "fix-aot-errors",
+  "started": "2025-06-29T19:12:00.000Z",
+  "lastUpdated": "2025-06-29T19:20:00.000Z",
+  "status": "active",
+  "phase": "complete",
+  "progress": {
+    "discovery": { "answered": 5, "total": 5 },
+    "detail": { "answered": 7, "total": 7 }
+  },
+  "contextFiles": [],
+  "relatedFeatures": []
+}

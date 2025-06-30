@@ -1,8 +1,7 @@
-﻿using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class ClassDataSourceDrivenTests2 : TestsBase<TestsGenerator>
+internal class ClassDataSourceDrivenTests2 : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,

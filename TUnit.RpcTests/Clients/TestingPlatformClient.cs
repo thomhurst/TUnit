@@ -233,5 +233,5 @@ public sealed class TestNodeUpdatesResponseListener(Guid requestId, Func<TestNod
     : ResponseListener(requestId)
 {
     public override async Task OnMessageReceiveAsync(object message)
-        => await action((TestNodeUpdate[])message);
+        => await action((TestNodeUpdate[]) message);
 }

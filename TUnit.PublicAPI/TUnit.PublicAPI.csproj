@@ -8,7 +8,11 @@
 
     <ItemGroup>
       <PackageReference Include="PublicApiGenerator" />
-      <PackageReference Include="Verify.TUnit" />
+      <PackageReference Include="Sourcy.DotNet">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Verify" />
     </ItemGroup>
 
     <ItemGroup>

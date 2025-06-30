@@ -21,7 +21,7 @@ public class EnumerableNotEquivalentToExpectedValueAssertCondition<TActual, TInn
 
         var enumeratedActual = actualValue?.ToArray();
         var enumeratedExpected = expectedValue?.ToArray();
-        
+
         return AssertionResult
             .FailIf(actualValue is null && expectedValue is null,
                 "it is null")
@@ -32,6 +32,6 @@ public class EnumerableNotEquivalentToExpectedValueAssertCondition<TActual, TInn
     private static bool EqualsAnyOrder(TInner[] actualValue, TInner[] expectedValue,
         IEqualityComparer<TInner?> equalityComparer)
     {
-        return actualValue.Length == expectedValue.Length && !actualValue.Except(expectedValue, equalityComparer).Any(); 
+        return actualValue.Length == expectedValue.Length && !actualValue.Except(expectedValue, equalityComparer).Any();
     }
 }

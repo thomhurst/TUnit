@@ -3,7 +3,7 @@ using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertionBuilders.Groups;
 
-public class OrAssertionGroupInvoker<TActual, TAssertionBuilder> 
+public class OrAssertionGroupInvoker<TActual, TAssertionBuilder>
     where TAssertionBuilder : AssertionBuilder
 {
     private readonly List<AssertionGroup<TActual, TAssertionBuilder>> _assertionGroups = [];
@@ -19,7 +19,7 @@ public class OrAssertionGroupInvoker<TActual, TAssertionBuilder>
         _assertionGroups.Add(group);
         return this;
     }
-    
+
     public TaskAwaiter<TActual?> GetAwaiter()
     {
         return Process().GetAwaiter();
@@ -28,7 +28,7 @@ public class OrAssertionGroupInvoker<TActual, TAssertionBuilder>
     private async Task<TActual?> Process()
     {
         var exceptions = new List<AssertionException>();
-        
+
         foreach (var assertionGroup in _assertionGroups)
         {
             try

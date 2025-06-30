@@ -21,9 +21,9 @@ public class PolyfillGenerator : IIncrementalGenerator
             {
                 return;
             }
-            
+
             var compilation = tuple.Left;
-            
+
             if (compilation.GetTypeByMetadataName("System.Runtime.CompilerServices.ModuleInitializerAttribute") == null)
             {
                 productionContext.AddSource("ModuleInitializerAttribute.g.cs",

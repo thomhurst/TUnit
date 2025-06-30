@@ -12,7 +12,7 @@ internal class StandardErrorConsoleInterceptor : ConsoleInterceptor
     public static TextWriter DefaultError { get; }
 
     protected override TextWriter? RedirectedOut => Context.Current.ErrorOutputWriter;
-    
+
     static StandardErrorConsoleInterceptor()
     {
         DefaultError = Console.Error;
@@ -22,7 +22,7 @@ internal class StandardErrorConsoleInterceptor : ConsoleInterceptor
     {
         Instance = this;
     }
-    
+
     public void Initialize()
     {
         Console.SetError(this);

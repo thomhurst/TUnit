@@ -6,7 +6,7 @@ public class EnumerableAllExpectedFuncAssertCondition<TActual, TInner>(
     where TActual : IEnumerable<TInner>
 {
     internal protected override string GetExpectation() => $"to contain only entries matching {matcherString ?? "null"}";
-    
+
     protected override ValueTask<AssertionResult> GetResult(
         TActual? actualValue, Exception? exception,
         AssertionMetadata assertionMetadata
@@ -34,7 +34,7 @@ public class EnumerableAllExpectedFuncAssertCondition<TActual, TInner>(
             }
             i++;
         }
-        return AssertionResult.Passed; 
+        return AssertionResult.Passed;
     }
-    
+
 }

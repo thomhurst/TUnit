@@ -25,6 +25,6 @@ public class ThrowsWithinAssertCondition<TActual, TExpectedException>(TimeSpan t
         )
         .OrFailIf(assertionMetadata.Duration > timeSpan,
             $"it threw after {assertionMetadata.Duration.PrettyPrint()}");
-    
+
     public override TimeSpan? WaitFor => timeSpan;
 }

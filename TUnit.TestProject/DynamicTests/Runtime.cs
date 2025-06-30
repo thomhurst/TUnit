@@ -17,15 +17,15 @@ public class Runtime(int a, int b, int c)
         Console.WriteLine($@"Class args: {a}, {b}, {c}");
         Console.WriteLine($@"Method args: {arg1}, {arg2}, {arg3}");
     }
-    
+
     [Test]
     [Arguments(4, 5, 6)]
     [Arguments(404, 505, 606)]
     public async Task BuildTests(int d, int e, int f)
     {
         var context = TestContext.Current!;
-        
-        await context.AddDynamicTest(new DynamicTest<Runtime>
+
+        await context.AddDynamicTest(new DynamicTestInstance<Runtime>
         {
             TestMethod = @class => @class.SomeMethod(0, 0, 0),
             TestClassArguments = [a + 10, b + 10, c + 10],

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Extensions;
 
@@ -8,28 +9,47 @@ namespace TUnit.Core.Helpers;
 [RequiresUnreferencedCode("Reflection")]
 internal class ReflectionToSourceModelHelpers
 {
-    public static SourceGeneratedMethodInformation BuildTestMethod([DynamicallyAccessedMembers(
+    private static readonly ConcurrentDictionary<Assembly, AssemblyMetadata> _assemblyCache = new();
+    private static readonly ConcurrentDictionary<Type, ClassMetadata> _classCache = new();
+    private static readonly ConcurrentDictionary<MethodInfo, MethodMetadata> _methodCache = new();
+    private static readonly ConcurrentDictionary<PropertyInfo, PropertyMetadata> _propertyCache = new();
+    private static readonly ConcurrentDictionary<ParameterInfo, ParameterMetadata> _parameterCache = new();
+
+    // Track types currently being processed to prevent infinite recursion
+    [ThreadStatic]
+    private static HashSet<Type>? _typesBeingProcessed;
+
+    public static MethodMetadata BuildTestMethod([DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType, MethodInfo methodInfo, string? testName)
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClassType, MethodInfo methodInfo, string? testName)
     {
-        return new SourceGeneratedMethodInformation
+        return BuildTestMethod(GenerateClass(testClassType), methodInfo, testName);
+    }
+
+    public static MethodMetadata BuildTestMethod(ClassMetadata classInformation, MethodInfo methodInfo, string? testName)
+    {
+        return _methodCache.GetOrAdd(methodInfo, _ => new MethodMetadata
         {
-            Attributes = methodInfo.GetCustomAttributes().ToArray(),
-            Class = GenerateClass(testClassType),
+            Attributes = GetAttributeMetadatas(methodInfo.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Method, testName ?? methodInfo.Name, classInformation.Type),
+            Class = classInformation,
             Name = testName ?? methodInfo.Name,
             GenericTypeCount = methodInfo.IsGenericMethod ? methodInfo.GetGenericArguments().Length : 0,
             Parameters = GetParameters(methodInfo.GetParameters()),
-            Type = testClassType,
+            Type = classInformation.Type,
+            TypeReference = TypeReference.CreateConcrete(classInformation.Type.AssemblyQualifiedName ?? classInformation.Type.FullName ?? classInformation.Type.Name),
             ReflectionInformation = methodInfo,
-            ReturnType = methodInfo.ReturnType
-        };
+            ReturnType = methodInfo.ReturnType,
+            ReturnTypeReference = TypeReference.CreateConcrete(methodInfo.ReturnType.AssemblyQualifiedName ?? methodInfo.ReturnType.FullName ?? methodInfo.ReturnType.Name)
+        });
     }
 
-    public static SourceGeneratedClassInformation? GetParent(
+    public static ClassMetadata? GetParent(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.PublicMethods
-            | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type)
+            | DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         if (type.DeclaringType is null)
         {
@@ -39,58 +59,128 @@ internal class ReflectionToSourceModelHelpers
         return GenerateClass(type.DeclaringType);
     }
 
-    public static SourceGeneratedClassInformation GenerateClass(
+    public static ClassMetadata GenerateClass(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType)
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClassType)
     {
-        return new SourceGeneratedClassInformation
+        return _classCache.GetOrAdd(testClassType, _ =>
         {
-            Parent = GetParent(testClassType),
-            Assembly = GenerateAssembly(testClassType),
-            Attributes = testClassType.GetCustomAttributes().ToArray(),
-            Name = testClassType.GetFormattedName(),
-            Namespace = testClassType.Namespace,
-            Parameters = GetParameters(testClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
-            Properties = testClassType.GetProperties().Select(GenerateProperty).ToArray(),
-            Type = testClassType
-        };
+            // Initialize thread-local set if needed
+            _typesBeingProcessed ??=
+            [];
+
+            // Check if we're already processing this type
+            if (!_typesBeingProcessed.Add(testClassType))
+            {
+                // Return a minimal metadata to break the cycle
+                return new ClassMetadata
+                {
+                    Parent = null,
+                    Assembly = GenerateAssembly(testClassType),
+                    Attributes = [],
+                    Name = testClassType.GetFormattedName(),
+                    Namespace = testClassType.Namespace,
+                    Parameters = [],
+                    Properties = [], // Empty to prevent recursion
+                    Type = testClassType,
+                    TypeReference = TypeReference.CreateConcrete(testClassType.AssemblyQualifiedName ?? testClassType.FullName ?? testClassType.Name)
+                };
+            }
+
+            try
+            {
+                return new ClassMetadata
+                {
+                    Parent = GetParent(testClassType),
+                    Assembly = GenerateAssembly(testClassType),
+                    Attributes = GetAttributeMetadatas(testClassType.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Class, testClassType.Name, testClassType),
+                    Name = testClassType.GetFormattedName(),
+                    Namespace = testClassType.Namespace,
+                    Parameters = GetParameters(testClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
+                    Properties = testClassType.GetProperties().Select(GenerateProperty).ToArray(),
+                    Type = testClassType,
+                    TypeReference = TypeReference.CreateConcrete(testClassType.AssemblyQualifiedName ?? testClassType.FullName ?? testClassType.Name)
+                };
+            }
+            finally
+            {
+                _typesBeingProcessed.Remove(testClassType);
+            }
+        });
     }
 
-    public static SourceGeneratedAssemblyInformation GenerateAssembly(Type testClassType)
+    public static AssemblyMetadata GenerateAssembly(Type testClassType)
     {
-        return new SourceGeneratedAssemblyInformation
+        return _assemblyCache.GetOrAdd(testClassType.Assembly, _ => new AssemblyMetadata
         {
-            Attributes = testClassType.Assembly.GetCustomAttributes().ToArray(),
+            Attributes = GetAttributeMetadatas(testClassType.Assembly.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Assembly, testClassType.Assembly.GetName().Name),
             Name = testClassType.Assembly.GetName().Name ??
                    testClassType.Assembly.GetName().FullName,
-        };
+        });
     }
 
-    public static SourceGeneratedPropertyInformation GenerateProperty(PropertyInfo property)
+    public static PropertyMetadata GenerateProperty(PropertyInfo property)
     {
-        return new SourceGeneratedPropertyInformation
+        return _propertyCache.GetOrAdd(property, _ => new PropertyMetadata
         {
-            Attributes = property.GetCustomAttributes().ToArray(),
+            Attributes = GetAttributeMetadatas(property.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Property, property.Name, property.DeclaringType),
+            ReflectionInfo = property,
             Name = property.Name,
             Type = property.PropertyType,
             IsStatic = property.GetMethod?.IsStatic is true
                 || property.SetMethod?.IsStatic is true,
-        };
+            Getter = property.GetValue,
+            ClassMetadata = ShouldGenerateClassMetadataForType(property.PropertyType, property.GetCustomAttributesSafe().ToArray())
+                ? GenerateClass(property.PropertyType)
+                : null
+        });
     }
 
-    public static SourceGeneratedParameterInformation[] GetParameters(ParameterInfo[] parameters)
+    private static bool ShouldGenerateClassMetadataForType(Type type, Attribute[] propertyAttributes)
+    {
+        // Check if the type itself implements IDataAttribute
+        if (typeof(IDataAttribute).IsAssignableFrom(type))
+        {
+            return true;
+        }
+
+        // Check if any of the property's attributes implement IDataAttribute
+        if (propertyAttributes.Any(attr => attr is IDataAttribute))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static ParameterMetadata[] GetParameters(ParameterInfo[] parameters)
     {
         return parameters.Select(GenerateParameter).ToArray();
     }
 
-    public static SourceGeneratedParameterInformation GenerateParameter(ParameterInfo parameter)
+    public static ParameterMetadata GenerateParameter(ParameterInfo parameter)
     {
-        return new SourceGeneratedParameterInformation(parameter.ParameterType)
+        return _parameterCache.GetOrAdd(parameter, _ => new ParameterMetadata(parameter.ParameterType)
         {
-            Attributes = parameter.GetCustomAttributes().ToArray(),
+            Attributes = GetAttributeMetadatas(parameter.GetCustomAttributesSafe().ToArray(), TestAttributeTarget.Parameter, parameter.Name, parameter.Member.DeclaringType),
             Name = parameter.Name ?? string.Empty,
             ReflectionInfo = parameter,
-        };
+            TypeReference = TypeReference.CreateConcrete(parameter.ParameterType.AssemblyQualifiedName ?? parameter.ParameterType.FullName ?? parameter.ParameterType.Name)
+        });
+    }
+
+
+    private static AttributeMetadata[] GetAttributeMetadatas(Attribute[] attributes, TestAttributeTarget target, string? memberName = null, Type? type = null)
+    {
+        return attributes.Select(attr => new AttributeMetadata
+        {
+            Instance = attr,
+            TargetElement = target,
+            TargetMemberName = memberName,
+            TargetType = type
+        }).ToArray();
     }
 }

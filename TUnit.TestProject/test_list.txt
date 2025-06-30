@@ -1,0 +1,5 @@
+Unhandled exception. System.TypeInitializationException: The type initializer for '<Module>' threw an exception.
+ ---> System.NullReferenceException: Object reference not set to an instance of an object.
+   at TUnit.Generated.TestMetadataRegistry_TUnit_TestProject_AllDataSourcesCombinedTests_TestWithAllDataSources_aeba5acac322473a95a2b7f6f059a987.Initialize() in /home/thomh/dev/TUnit/TUnit.TestProject/SourceGeneratedViewer/TUnit.Core.SourceGenerator/TUnit.Core.SourceGenerator.TestMetadataGenerator/TestMetadata_TUnit_TestProject_AllDataSourcesCombinedTests_TestWithAllDataSources_aeba5acac322473a95a2b7f6f059a987.g.cs:line 21
+   at .cctor()
+   --- End of inner exception stack trace ---

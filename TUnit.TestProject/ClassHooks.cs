@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.Core.Enums;
+﻿using TUnit.Core.Enums;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;

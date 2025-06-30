@@ -20,17 +20,17 @@ public class AssertionResult
         {
             return Passed;
         }
-        
+
         return new AssertionResult(false, message);
     }
-    
+
     public static AssertionResult FailIf(bool isFailed, [InterpolatedStringHandlerArgument("isFailed")] InterpolatedStringHandler stringHandler)
     {
         if (!isFailed)
         {
             return Passed;
         }
-        
+
         return new AssertionResult(false, stringHandler.GetFormattedText());
     }
 
@@ -60,8 +60,8 @@ public class AssertionResult
         {
             return Fail(other.Message);
         }
-        
-        if(string.IsNullOrEmpty(other.Message))
+
+        if (string.IsNullOrEmpty(other.Message))
         {
             return Fail(Message);
         }
@@ -77,7 +77,7 @@ public class AssertionResult
         }
 
         var other = await otherResult();
-        
+
         if (other.IsPassed)
         {
             return Passed;
@@ -92,8 +92,8 @@ public class AssertionResult
         {
             return Fail(other.Message);
         }
-        
-        if(string.IsNullOrEmpty(other.Message))
+
+        if (string.IsNullOrEmpty(other.Message))
         {
             return Fail(Message);
         }
@@ -107,17 +107,17 @@ public class AssertionResult
         {
             return this;
         }
-        
+
         return new AssertionResult(false, message);
     }
-    
+
     public AssertionResult OrFailIf(bool isFailed, [InterpolatedStringHandlerArgument("isFailed")] InterpolatedStringHandler stringHandler)
     {
         if (!IsPassed || !isFailed)
         {
             return this;
         }
-        
+
         return new AssertionResult(false, stringHandler.GetFormattedText());
     }
 
@@ -125,7 +125,7 @@ public class AssertionResult
         => new(false, message);
 
     public static AssertionResult Passed { get; } = new(true, string.Empty);
-    
+
     public static implicit operator Task<AssertionResult>(AssertionResult result) => Task.FromResult(result);
     public static implicit operator ValueTask<AssertionResult>(AssertionResult result) => new(result);
 
@@ -137,10 +137,10 @@ public class AssertionResult
         public InterpolatedStringHandler(int literalLength, int formattedCount, bool isFailed, out bool enabled)
         {
             enabled = isFailed;
-            
+
             _builder = enabled ? new StringBuilder(literalLength) : null!;
         }
-        
+
         public void AppendLiteral(string s)
         {
             _builder.Append(s);
@@ -150,7 +150,7 @@ public class AssertionResult
         {
             _builder.Append(t);
         }
-        
+
         public void AppendFormatted<T>(T? t, string format) where T : IFormattable
         {
             _builder.Append(t?.ToString(format, null));
