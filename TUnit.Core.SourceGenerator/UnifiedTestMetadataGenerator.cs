@@ -147,8 +147,8 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             
             var diagnosticContext = new DiagnosticContext(context);
             
-            // Initialize generic type resolver with configured depth
-            var genericResolver = new GenericTypeResolver(configuration.GenericDepthLimit);
+            // Initialize generic type resolver with unlimited depth (no longer configurable)
+            var genericResolver = new GenericTypeResolver(int.MaxValue);
             
             // Process generic types
             var testsByClass = validTests.GroupBy(t => t.TypeSymbol, SymbolEqualityComparer.Default);
@@ -168,7 +168,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 diagnosticContext.ReportInfo(
                     "TUNIT_CONFIG_001",
                     "TUnit Configuration",
-                    $"Source generation running with: AOT-only={configuration.AotOnlyMode}, PropertyInjection={configuration.EnablePropertyInjection}, ValueTask={configuration.EnableValueTaskHooks}");
+                    $"Source generation running with optimal defaults: AOT-only=true, PropertyInjection=true, ValueTask=true, UnlimitedGenericDepth=true");
             }
 
             // Write file header
@@ -753,9 +753,8 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         // Generate data source factories using the new generator
         GenerateDataSourceFactoriesV2(writer, classSymbol, testMethods, configuration);
         
-        // Generate property injection if needed and enabled
-        var hasPropertyInjection = configuration.EnablePropertyInjection && 
-                                   GeneratePropertyInjection(writer, classSymbol, diagnosticContext);
+        // Generate property injection (always enabled)
+        var hasPropertyInjection = GeneratePropertyInjection(writer, classSymbol, diagnosticContext);
         
         // Generate hook invokers (including property injection hooks if needed)
         GenerateHookInvokers(writer, classSymbol, hasPropertyInjection, configuration);
@@ -1005,8 +1004,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
     
     private static void RegisterPropertyInjectionHooks(CodeWriter writer, List<TestMethodMetadata> validTests, TUnitConfiguration configuration)
     {
-        if (!configuration.EnablePropertyInjection)
-            return;
+        // Property injection is always enabled (no longer configurable)
             
         // Group tests by class to avoid duplicate registrations
         var testClasses = validTests.GroupBy(t => t.TypeSymbol, SymbolEqualityComparer.Default);
@@ -1736,17 +1734,15 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         
         if (dataSources.Any())
         {
-            // Limit the number of data sources if configuration specifies a limit
-            var limitedDataSources = dataSources.Take(configuration.MaxGenericInstantiations).ToList();
-            
+            // No limits on data sources (unlimited for optimal performance)
             var generator = new DataSourceFactoryGenerator();
-            var code = generator.GenerateDataSourceFactories(limitedDataSources);
+            var code = generator.GenerateDataSourceFactories(dataSources);
             writer.Append(code);
             
-            // Report if data sources were limited
-            if (configuration.EnableVerboseDiagnostics && limitedDataSources.Count < dataSources.Count)
+            // Report data source count if verbose diagnostics enabled
+            if (configuration.EnableVerboseDiagnostics)
             {
-                writer.AppendLine($"// Note: Limited to {limitedDataSources.Count} data sources (configured max: {configuration.MaxGenericInstantiations})");
+                writer.AppendLine($"// Generated {dataSources.Count} data source factories (no limits)");
             }
         }
     }

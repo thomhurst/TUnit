@@ -26,13 +26,15 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.AddTreeNodeFilterService(extension);
         testApplicationBuilder.AddMaximumFailedTestsService(extension);
 
-        testApplicationBuilder.CommandLine.AddProvider(() => new HideTestOutputCommandProvider(extension));
+        // Core functionality command providers
         testApplicationBuilder.CommandLine.AddProvider(() => new MaximumParallelTestsCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ParametersCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new FailFastCommandProvider(extension));
-        testApplicationBuilder.CommandLine.AddProvider(() => new DisableLogoCommandProvider(extension));
-        testApplicationBuilder.CommandLine.AddProvider(() => new DetailedStacktraceCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionScannerCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionModeCommandProvider(extension));
+        
+        // Unified verbosity control (replaces HideTestOutput, DisableLogo, DetailedStacktrace)
+        testApplicationBuilder.CommandLine.AddProvider(() => new VerbosityCommandProvider(extension));
 
         testApplicationBuilder.TestHost.AddDataConsumer(_ => githubReporter);
         testApplicationBuilder.TestHost.AddTestApplicationLifecycleCallbacks(_ => githubReporter);

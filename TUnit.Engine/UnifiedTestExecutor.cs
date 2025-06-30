@@ -109,7 +109,20 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
 
     private ITestScheduler CreateDefaultScheduler()
     {
-        return TestSchedulerFactory.CreateDefault(_logger);
+        var config = SchedulerConfiguration.Default;
+        
+        // Check for command line override of maximum parallel tests
+        if (_commandLineOptions.TryGetOptionArgumentList(
+            MaximumParallelTestsCommandProvider.MaximumParallelTests, 
+            out var args) && args.Length > 0)
+        {
+            if (int.TryParse(args[0], out var maxParallelTests) && maxParallelTests > 0)
+            {
+                config.MaxParallelism = maxParallelTests;
+            }
+        }
+        
+        return TestSchedulerFactory.Create(config, _logger);
     }
 
     private List<ExecutableTest> ApplyFilter(List<ExecutableTest> tests, ITestExecutionFilter filter)

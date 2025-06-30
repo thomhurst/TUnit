@@ -4,9 +4,9 @@ using Microsoft.Testing.Platform.Extensions.CommandLine;
 
 namespace TUnit.Engine.CommandLineProviders;
 
-internal class MaximumParallelTestsCommandProvider(IExtension extension) : ICommandLineOptionsProvider
+internal class ReflectionModeCommandProvider(IExtension extension) : ICommandLineOptionsProvider
 {
-    public const string MaximumParallelTests = "maximum-parallel-tests";
+    public const string ReflectionMode = "reflection";
 
     public Task<bool> IsEnabledAsync()
     {
@@ -25,22 +25,12 @@ internal class MaximumParallelTestsCommandProvider(IExtension extension) : IComm
     {
         return
         [
-            new CommandLineOption(MaximumParallelTests, "Override maximum parallel tests (defaults to auto-detected optimal value)", ArgumentArity.ExactlyOne, false)
+            new CommandLineOption(ReflectionMode, "Enable reflection mode (defaults to AOT-optimized mode)", ArgumentArity.Zero, false)
         ];
     }
 
     public Task<ValidationResult> ValidateOptionArgumentsAsync(CommandLineOption commandOption, string[] arguments)
     {
-        if (commandOption.Name == MaximumParallelTests && arguments.Length != 1)
-        {
-            return ValidationResult.InvalidTask("A single number must be provided for maximum parallel tests");
-        }
-
-        if (commandOption.Name == MaximumParallelTests && (!int.TryParse(arguments[0], out var maximumParallelTests) || maximumParallelTests < 1))
-        {
-            return ValidationResult.InvalidTask("Maximum parallel tests value was not a positive integer");
-        }
-
         return ValidationResult.ValidTask;
     }
 
