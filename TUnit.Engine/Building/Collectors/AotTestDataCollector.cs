@@ -33,14 +33,15 @@ public sealed class AotTestDataCollector : ITestDataCollector
     {
         // Check if any data sources are from AsyncDataSourceGenerator attributes
         // These are handled by specialized generators
+        // In AOT mode, async data sources are identified by their factory key pattern
         return metadata.DataSources.Any(ds => ds is DynamicTestDataSource dts &&
-            dts.SourceType.Name.Contains("AsyncDataSourceGenerator"));
+            dts.FactoryKey.Contains("AsyncDataSource"));
     }
 
     private static bool IsGenericTypeDefinition(TestMetadata metadata)
     {
         // Generic type definitions are handled separately through inheritance
         return metadata.TestClassType.IsGenericTypeDefinition ||
-               (metadata.MethodInfo?.IsGenericMethodDefinition ?? false);
+               (metadata.GenericMethodInfo != null);
     }
 }

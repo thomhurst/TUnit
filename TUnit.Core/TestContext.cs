@@ -156,6 +156,11 @@ public class TestContext : Context
     /// Service provider (simplified)
     /// </summary>
     private IServiceProvider? _serviceProvider;
+    
+    /// <summary>
+    /// Gets the service provider for dependency injection
+    /// </summary>
+    public IServiceProvider? ServiceProvider => _serviceProvider;
 
     public TestContext(string testName, string displayName) : base(null)
     {

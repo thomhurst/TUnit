@@ -1,13 +1,10 @@
-using System.Reflection;
-
 namespace TUnit.Engine;
 
 /// <summary>
-/// Interface for invoking test methods
+/// Interface for invoking test methods without reflection
 /// </summary>
 public interface ITestInvoker
 {
-    Task InvokeTestMethod(object instance, MethodInfo method, object?[] arguments);
-    Task InvokeTestAsync(object instance, MethodInfo method, object?[] arguments);
     Task InvokeTestAsync(object instance, Func<object, object?[], Task> testInvoker, object?[] arguments);
+    Task InvokeTestAsync(string testMethodKey, object instance, object?[] arguments);
 }

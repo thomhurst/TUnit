@@ -132,6 +132,19 @@ public static class Rules
     public static readonly DiagnosticDescriptor InstanceMethodSource =
         CreateDescriptor("TUnit0056", UsageCategory, DiagnosticSeverity.Error);
 
+    // AOT Compatibility Rules
+    public static readonly DiagnosticDescriptor ReflectionPatternNotAotCompatible =
+        CreateDescriptor("TUnit0057", UsageCategory, DiagnosticSeverity.Error);
+
+    public static readonly DiagnosticDescriptor GenericTestMissingExplicitInstantiation =
+        CreateDescriptor("TUnit0058", UsageCategory, DiagnosticSeverity.Error);
+
+    public static readonly DiagnosticDescriptor DynamicDataSourceNotAotCompatible =
+        CreateDescriptor("TUnit0059", UsageCategory, DiagnosticSeverity.Error);
+
+    public static readonly DiagnosticDescriptor OpenGenericTypeNotAotCompatible =
+        CreateDescriptor("TUnit0060", UsageCategory, DiagnosticSeverity.Error);
+
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(

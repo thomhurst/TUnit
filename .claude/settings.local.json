@@ -91,7 +91,9 @@
       "Bash(./debug_discovery.sh:*)",
       "Bash(/dev/null)",
       "Bash(cat:*)",
-      "Bash(dotnet:*)"
+      "Bash(dotnet:*)",
+      "mcp__desktop-commander__create_directory",
+      "mcp__desktop-commander__write_file"
     ],
     "deny": []
   }

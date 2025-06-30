@@ -1,0 +1,218 @@
+using System.Collections.Immutable;
+using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Analyzers.Extensions;
+using TUnit.Analyzers.Helpers;
+
+namespace TUnit.Analyzers;
+
+/// <summary>
+/// Analyzer that detects patterns incompatible with AOT compilation and provides actionable error messages
+/// </summary>
+[DiagnosticAnalyzer(LanguageNames.CSharp)]
+public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
+{
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
+        ImmutableArray.Create(
+            Rules.ReflectionPatternNotAotCompatible,
+            Rules.GenericTestMissingExplicitInstantiation,
+            Rules.DynamicDataSourceNotAotCompatible,
+            Rules.OpenGenericTypeNotAotCompatible);
+
+    protected override void InitializeInternal(AnalysisContext context)
+    {
+        context.RegisterSyntaxNodeAction(AnalyzeGenericTestMethods, SyntaxKind.MethodDeclaration);
+        context.RegisterSyntaxNodeAction(AnalyzeGenericTestClasses, SyntaxKind.ClassDeclaration);
+        context.RegisterSyntaxNodeAction(AnalyzeReflectionUsage, SyntaxKind.InvocationExpression);
+        context.RegisterSyntaxNodeAction(AnalyzeDataSourceAttributes, SyntaxKind.Attribute);
+    }
+
+    private static void AnalyzeGenericTestMethods(SyntaxNodeAnalysisContext context)
+    {
+        var methodDeclaration = (MethodDeclarationSyntax)context.Node;
+        var methodSymbol = context.SemanticModel.GetDeclaredSymbol(methodDeclaration);
+
+        if (methodSymbol == null || !IsTestMethod(methodSymbol))
+            return;
+
+        // Check for generic test methods without explicit instantiation
+        if (methodSymbol.IsGenericMethod)
+        {
+            var hasGenerateGenericTestAttribute = HasGenerateGenericTestAttribute(methodSymbol) ||
+                                                   HasGenerateGenericTestAttribute(methodSymbol.ContainingType);
+
+            if (!hasGenerateGenericTestAttribute)
+            {
+                var diagnostic = Diagnostic.Create(
+                    Rules.GenericTestMissingExplicitInstantiation,
+                    methodDeclaration.Identifier.GetLocation(),
+                    methodSymbol.Name);
+
+                context.ReportDiagnostic(diagnostic);
+            }
+        }
+
+        // Check for generic containing type without explicit instantiation
+        if (methodSymbol.ContainingType.IsGenericType && methodSymbol.ContainingType.TypeParameters.Length > 0)
+        {
+            var hasGenerateGenericTestAttribute = HasGenerateGenericTestAttribute(methodSymbol.ContainingType);
+
+            if (!hasGenerateGenericTestAttribute)
+            {
+                var diagnostic = Diagnostic.Create(
+                    Rules.GenericTestMissingExplicitInstantiation,
+                    methodDeclaration.Identifier.GetLocation(),
+                    $"{methodSymbol.ContainingType.Name}.{methodSymbol.Name}");
+
+                context.ReportDiagnostic(diagnostic);
+            }
+        }
+    }
+
+    private static void AnalyzeGenericTestClasses(SyntaxNodeAnalysisContext context)
+    {
+        var classDeclaration = (ClassDeclarationSyntax)context.Node;
+        var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclaration);
+
+        if (classSymbol == null || !classSymbol.IsGenericType)
+            return;
+
+        // Check if this class contains test methods
+        var hasTestMethods = classSymbol.GetMembers()
+            .OfType<IMethodSymbol>()
+            .Any(IsTestMethod);
+
+        if (!hasTestMethods)
+            return;
+
+        // Check for generic test class without explicit instantiation
+        if (classSymbol.TypeParameters.Length > 0)
+        {
+            var hasGenerateGenericTestAttribute = HasGenerateGenericTestAttribute(classSymbol);
+
+            if (!hasGenerateGenericTestAttribute)
+            {
+                var diagnostic = Diagnostic.Create(
+                    Rules.GenericTestMissingExplicitInstantiation,
+                    classDeclaration.Identifier.GetLocation(),
+                    classSymbol.Name);
+
+                context.ReportDiagnostic(diagnostic);
+            }
+        }
+    }
+
+    private static void AnalyzeReflectionUsage(SyntaxNodeAnalysisContext context)
+    {
+        var invocation = (InvocationExpressionSyntax)context.Node;
+        var memberAccess = invocation.Expression as MemberAccessExpressionSyntax;
+
+        if (memberAccess == null)
+            return;
+
+        var memberName = memberAccess.Name.Identifier.ValueText;
+
+        // Check for common reflection patterns that are AOT-incompatible
+        var reflectionMethods = new[]
+        {
+            "GetType", "GetMethod", "GetProperty", "GetField", "GetConstructor",
+            "GetMethods", "GetProperties", "GetFields", "GetConstructors",
+            "Invoke", "GetValue", "SetValue", "CreateInstance"
+        };
+
+        if (reflectionMethods.Contains(memberName))
+        {
+            // Check if this is in a test context (exclude source generators)
+            if (IsInTestContext(context))
+            {
+                var diagnostic = Diagnostic.Create(
+                    Rules.ReflectionPatternNotAotCompatible,
+                    invocation.GetLocation(),
+                    $"{memberAccess.Expression}.{memberName}()");
+
+                context.ReportDiagnostic(diagnostic);
+            }
+        }
+    }
+
+    private static void AnalyzeDataSourceAttributes(SyntaxNodeAnalysisContext context)
+    {
+        var attribute = (AttributeSyntax)context.Node;
+        var attributeSymbol = context.SemanticModel.GetSymbolInfo(attribute).Symbol;
+
+        if (attributeSymbol?.ContainingType == null)
+            return;
+
+        var attributeTypeName = attributeSymbol.ContainingType.Name;
+
+        // Check for data source attributes that might use dynamic resolution
+        var dynamicDataSourceAttributes = new[]
+        {
+            "ClassDataSourceAttribute",
+            "MethodDataSourceAttribute" // Only if using reflection-based patterns
+        };
+
+        if (dynamicDataSourceAttributes.Contains(attributeTypeName))
+        {
+            // For now, we'll be conservative and flag all dynamic data sources
+            // In a more sophisticated implementation, we could analyze if they use static patterns
+            var diagnostic = Diagnostic.Create(
+                Rules.DynamicDataSourceNotAotCompatible,
+                attribute.GetLocation(),
+                attributeTypeName);
+
+            context.ReportDiagnostic(diagnostic);
+        }
+    }
+
+    private static bool IsTestMethod(IMethodSymbol method)
+    {
+        return method.GetAttributes().Any(attr =>
+            attr.AttributeClass?.Name == "TestAttribute" ||
+            attr.AttributeClass?.Name == "Test");
+    }
+
+    private static bool HasGenerateGenericTestAttribute(ISymbol symbol)
+    {
+        return symbol.GetAttributes().Any(attr =>
+            attr.AttributeClass?.Name == "GenerateGenericTestAttribute");
+    }
+
+    private static bool IsInTestContext(SyntaxNodeAnalysisContext context)
+    {
+        // Check if we're in a test project or test class
+        var root = context.Node.SyntaxTree.GetRoot();
+        
+        // Look for test-related using statements or attributes in the file
+        var compilationUnit = root as CompilationUnitSyntax;
+        if (compilationUnit != null)
+        {
+            var hasTestUsings = compilationUnit.Usings.Any(u => 
+                u.Name?.ToString().Contains("TUnit") == true ||
+                u.Name?.ToString().Contains("Test") == true);
+
+            if (hasTestUsings)
+                return true;
+        }
+
+        // Check if we're in a class with test methods
+        var containingClass = context.Node.FirstAncestorOrSelf<ClassDeclarationSyntax>();
+        if (containingClass != null)
+        {
+            var classSymbol = context.SemanticModel.GetDeclaredSymbol(containingClass);
+            if (classSymbol != null)
+            {
+                var hasTestMethods = classSymbol.GetMembers()
+                    .OfType<IMethodSymbol>()
+                    .Any(IsTestMethod);
+
+                return hasTestMethods;
+            }
+        }
+
+        return false;
+    }
+}

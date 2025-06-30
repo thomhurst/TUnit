@@ -7,6 +7,7 @@ namespace TUnit.Core.Helpers;
 
 [RequiresDynamicCode("Reflection")]
 [RequiresUnreferencedCode("Reflection")]
+[Obsolete("This class uses reflection and is not compatible with AOT. Use source generators instead.")]
 internal class ReflectionToSourceModelHelpers
 {
     private static readonly ConcurrentDictionary<Assembly, AssemblyMetadata> _assemblyCache = new();

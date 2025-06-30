@@ -8,6 +8,7 @@ namespace TUnit.Core.Helpers;
 /// </summary>
 [RequiresUnreferencedCode("Uses reflection to retrieve parameter information")]
 [RequiresDynamicCode("Uses reflection to retrieve parameter information")]
+[Obsolete("This class uses reflection and is not compatible with AOT. Use source generators instead.")]
 public static class RobustParameterInfoRetriever
 {
     private static readonly BindingFlags RobustBindingFlags =

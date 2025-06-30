@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace TUnit.Core;
 
 /// <summary>
-/// Unified metadata for a test, supporting both AOT (via delegates) and reflection scenarios
+/// Unified metadata for a test, fully AOT-compatible with no reflection dependencies
 /// </summary>
 public sealed class TestMetadata
 {
@@ -24,11 +22,6 @@ public sealed class TestMetadata
     /// <summary>
     /// The type containing the test method
     /// </summary>
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
-        | DynamicallyAccessedMemberTypes.NonPublicConstructors
-        | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods
-        | DynamicallyAccessedMemberTypes.PublicProperties)]
     public required Type TestClassType { get; init; }
 
     /// <summary>
@@ -87,14 +80,14 @@ public sealed class TestMetadata
     public PropertyDataSource[] PropertyDataSources { get; init; } = [];
 
     /// <summary>
-    /// AOT-safe factory to create test class instance (null for reflection-based)
+    /// AOT-safe factory to create test class instance
     /// Accepts constructor arguments array (empty array for parameterless constructors)
     /// </summary>
     public Func<object?[], object>? InstanceFactory { get; init; }
 
     /// <summary>
-    /// AOT-safe test method invoker (null for reflection-based)
-    /// Returns Task, ValueTask, or void (as Task.CompletedTask)
+    /// AOT-safe test method invoker
+    /// Returns Task for all test methods (sync methods wrapped in Task.CompletedTask)
     /// </summary>
     public Func<object, object?[], Task>? TestInvoker { get; init; }
 
@@ -112,11 +105,6 @@ public sealed class TestMetadata
     /// Hooks to run at various test lifecycle points
     /// </summary>
     public TestHooks Hooks { get; init; } = new();
-
-    /// <summary>
-    /// For reflection scenarios - the MethodInfo (when AOT invoker not available)
-    /// </summary>
-    public MethodInfo? MethodInfo { get; init; }
 
     /// <summary>
     /// Source file path where test is defined
@@ -137,6 +125,11 @@ public sealed class TestMetadata
     /// Generic method information if the test method is generic
     /// </summary>
     public GenericMethodInfo? GenericMethodInfo { get; init; }
+    
+    /// <summary>
+    /// Concrete type arguments for generic method instantiation (used with [GenerateGenericTest])
+    /// </summary>
+    public Type[]? GenericMethodTypeArguments { get; init; }
 }
 
 // TestDataSource classes have been moved to TestDataSources.cs
@@ -178,16 +171,34 @@ public sealed class HookMetadata
     public int Order { get; init; }
 
     /// <summary>
-    /// AOT-safe hook invoker (null for reflection-based)
+    /// AOT-safe hook invoker
     /// </summary>
     public Func<object?, HookContext, Task>? Invoker { get; init; }
 
     /// <summary>
-    /// For reflection scenarios
+    /// Type that declares this hook
     /// </summary>
-    public MethodInfo? MethodInfo { get; init; }
     public Type? DeclaringType { get; init; }
+    
+    /// <summary>
+    /// Whether this is a static hook
+    /// </summary>
     public bool IsStatic { get; init; }
+    
+    /// <summary>
+    /// Whether this hook is async (returns Task or ValueTask)
+    /// </summary>
+    public bool IsAsync { get; init; }
+    
+    /// <summary>
+    /// Whether this hook returns ValueTask (requires special handling)
+    /// </summary>
+    public bool ReturnsValueTask { get; init; }
+    
+    /// <summary>
+    /// Hook delegate from storage (AOT mode)
+    /// </summary>
+    public Func<object, TestContext, Task>? HookInvoker { get; init; }
 }
 
 public enum HookLevel

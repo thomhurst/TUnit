@@ -87,12 +87,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         return Task.FromResult(new CreateTestSessionResult { IsSuccess = true });
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL3051:RequiresDynamicCodeAttribute",
-        Justification = "The interface doesn't have the attribute, but we handle AOT-safe paths internally")]
-    [UnconditionalSuppressMessage("Trimming", "IL2046:RequiresUnreferencedCodeAttribute",
-        Justification = "The interface doesn't have the attribute, but we handle AOT-safe paths internally")]
-    [RequiresDynamicCode("Generic type resolution requires runtime type generation.")]
-    [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming.")]
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
         var serviceProvider = GetOrCreateServiceProvider(context);
@@ -137,8 +131,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         return new CloseTestSessionResult { IsSuccess = true };
     }
 
-    [RequiresDynamicCode("Generic type resolution requires runtime type generation.")]
-    [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming.")]
     private TUnitServiceProvider GetOrCreateServiceProvider(ExecuteRequestContext context)
     {
         return _serviceProvidersPerSession.GetOrAdd(

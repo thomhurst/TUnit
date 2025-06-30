@@ -127,6 +127,45 @@ csharp_space_between_square_brackets = false
 [*.{cs,vb}]
 dotnet_diagnostic.TUnitAssertions0003.severity=silent
 
+# TUnit Configuration
+# For more information about TUnit configuration options, see:
+# https://github.com/thomhurst/TUnit/docs/configuration
+
+# Generic Type Resolution
+# Controls the maximum depth for generic type resolution in AOT scenarios
+# Default: 5
+# tunit.generic_depth_limit = 5
+
+# AOT-Only Mode
+# Enforces AOT-only mode, disabling all reflection fallbacks
+# Default: false (will become true in future versions)
+# tunit.aot_only_mode = true
+
+# Property Injection
+# Enables dependency injection via property setters in test classes
+# Default: true
+# tunit.enable_property_injection = true
+
+# ValueTask Hook Support
+# Enables ValueTask return types in hook methods for better performance
+# Default: true
+# tunit.enable_valuetask_hooks = true
+
+# Verbose Diagnostics
+# Enables verbose diagnostic messages from the source generator
+# Default: false
+# tunit.enable_verbose_diagnostics = false
+
+# Maximum Generic Instantiations
+# Controls the maximum number of generic instantiations per type
+# Default: 10
+# tunit.max_generic_instantiations = 10
+
+# Automatic Generic Discovery
+# Enables automatic discovery of generic test instantiations
+# Default: true
+# tunit.enable_auto_generic_discovery = true
+
 # Verify
 [*.{received,verified}.{txt}]
 charset = "utf-8-bom"

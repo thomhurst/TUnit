@@ -122,13 +122,14 @@ public static class UnifiedTestBuilderPipelineFactory
     public static UnifiedTestBuilderPipeline CreateAotPipeline(
         ITestMetadataSource metadataSource,
         ITestInvoker testInvoker,
-        IHookInvoker hookInvoker)
+        IHookInvoker hookInvoker,
+        IServiceProvider? serviceProvider = null)
     {
         var dataCollector = new Collectors.AotTestDataCollector(metadataSource);
         var genericResolver = new Resolvers.AotGenericTypeResolver();
-        var dynamicResolver = new Expanders.DynamicDataSourceResolver();
+        var dynamicResolver = new Services.DataSourceResolver();
         var dataSourceExpander = new Expanders.DataSourceExpander(dynamicResolver);
-        var testBuilder = new TestBuilder(testInvoker, hookInvoker, isAotMode: true);
+        var testBuilder = new TestBuilder(serviceProvider);
 
         return new UnifiedTestBuilderPipeline(
             dataCollector,
@@ -139,24 +140,16 @@ public static class UnifiedTestBuilderPipelineFactory
 
     /// <summary>
     /// Creates a pipeline configured for reflection mode
+    /// NOTE: Reflection mode has been removed in favor of AOT-only source generation.
+    /// Use CreateAotPipeline instead.
     /// </summary>
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling", Justification = "This method is only called in reflection mode, not in AOT scenarios")]
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when trimming application code", Justification = "This method is only called in reflection mode where dynamic code access is expected")]
+    [Obsolete("Reflection mode has been removed for AOT compatibility. Use CreateAotPipeline instead.")]
     public static UnifiedTestBuilderPipeline CreateReflectionPipeline(
         Assembly[] assemblies,
         ITestInvoker testInvoker,
         IHookInvoker hookInvoker)
     {
-        var dataCollector = new Collectors.ReflectionTestDataCollector(assemblies);
-        var genericResolver = new Resolvers.GenericTypeResolver(isAotMode: false);
-        var dynamicResolver = new Expanders.DynamicDataSourceResolver();
-        var dataSourceExpander = new Expanders.DataSourceExpander(dynamicResolver);
-        var testBuilder = new TestBuilder(testInvoker, hookInvoker, isAotMode: false);
-
-        return new UnifiedTestBuilderPipeline(
-            dataCollector,
-            genericResolver,
-            dataSourceExpander,
-            testBuilder);
+        throw new NotSupportedException(
+            "Reflection mode has been removed for AOT compatibility. Use CreateAotPipeline instead.");
     }
 }

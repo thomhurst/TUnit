@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -60,15 +62,17 @@ public sealed class StaticTestDataSource : TestDataSource
 }
 
 /// <summary>
-/// Dynamic test data source that resolves data at runtime (e.g., from method or property)
+/// Dynamic test data source that uses pre-compiled factories (AOT-only)
 /// </summary>
 public sealed class DynamicTestDataSource : TestDataSource
 {
-    public required Type SourceType { get; init; }
-    public required string SourceMemberName { get; init; }
-    public object?[] Arguments { get; init; } = [
-    ];
+    /// <summary>
+    /// Factory key for looking up the pre-compiled data source factory
+    /// </summary>
+    public required string FactoryKey { get; init; }
+    
     private readonly bool _isShared;
+    private IEnumerable<Func<object?[]>>? _cachedFactories;
 
     public override bool IsShared => _isShared;
 
@@ -79,60 +83,120 @@ public sealed class DynamicTestDataSource : TestDataSource
 
     public override IEnumerable<Func<object?[]>> GetDataFactories()
     {
-        // This will be resolved by the data source expander
-        throw new NotImplementedException(
-            "Dynamic data sources must be resolved through IDataSourceExpander");
+        if (_isShared && _cachedFactories != null)
+        {
+            return _cachedFactories;
+        }
+
+        var factory = TestDelegateStorage.GetDataSourceFactory(FactoryKey);
+        if (factory == null)
+        {
+            throw new InvalidOperationException($"No data source factory registered with key '{FactoryKey}'");
+        }
+
+        var dataArrays = factory().ToArray();
+        var factories = dataArrays.Select(args => new Func<object?[]>(() => CloneArguments(args))).ToList();
+
+        if (_isShared)
+        {
+            _cachedFactories = factories;
+        }
+
+        return factories;
+    }
+
+    private static object?[] CloneArguments(object?[] args)
+    {
+        var cloned = new object?[args.Length];
+        Array.Copy(args, cloned, args.Length);
+        return cloned;
     }
 }
 
 /// <summary>
-/// AOT-friendly test data source that uses direct method invocation instead of reflection
+/// Async dynamic test data source that uses pre-compiled async factories (AOT-only)
+/// Supports cancellation and async enumeration
 /// </summary>
-public sealed class AotFriendlyTestDataSource : TestDataSource
+public sealed class AsyncDynamicTestDataSource : TestDataSource
 {
-    public required Func<object> MethodInvoker { get; init; }
-    public required Type SourceType { get; init; }
-    public required string SourceMemberName { get; init; }
+    /// <summary>
+    /// Factory key for looking up the pre-compiled async data source factory
+    /// </summary>
+    public required string FactoryKey { get; init; }
+    
     private readonly bool _isShared;
+    private IEnumerable<Func<object?[]>>? _cachedFactories;
 
     public override bool IsShared => _isShared;
 
-    public AotFriendlyTestDataSource(bool isShared = false)
+    public AsyncDynamicTestDataSource(bool isShared = false)
     {
         _isShared = isShared;
     }
 
     public override IEnumerable<Func<object?[]>> GetDataFactories()
     {
-        try
+        if (_isShared && _cachedFactories != null)
         {
-            var result = MethodInvoker();
-            var dataArrays = ConvertToObjectArrays(result);
+            return _cachedFactories;
+        }
 
-            return dataArrays.Select(args => new Func<object?[]>(() => CloneArguments(args)));
-        }
-        catch (Exception ex)
+        var asyncFactory = TestDelegateStorage.GetAsyncDataSourceFactory(FactoryKey);
+        if (asyncFactory == null)
         {
-            throw new InvalidOperationException(
-                $"Failed to invoke data source method '{SourceMemberName}' on type '{SourceType.Name}'", ex);
+            throw new InvalidOperationException($"No async data source factory registered with key '{FactoryKey}'");
         }
+
+        // Convert async enumerable to sync for compatibility
+        // This is a bridge until the entire system supports async
+        var dataArrays = ConvertToSync(asyncFactory).ToArray();
+        var factories = dataArrays.Select(args => new Func<object?[]>(() => CloneArguments(args))).ToList();
+
+        if (_isShared)
+        {
+            _cachedFactories = factories;
+        }
+
+        return factories;
     }
 
-    private static object?[][] ConvertToObjectArrays(object result)
+    private static IEnumerable<object?[]> ConvertToSync(Func<CancellationToken, IAsyncEnumerable<object?[]>> asyncFactory)
     {
-        return result switch
+        // Use a reasonable timeout for data source generation
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+        
+        var asyncEnumerable = asyncFactory(cts.Token);
+        var enumerator = asyncEnumerable.GetAsyncEnumerator(cts.Token);
+        
+        try
         {
-            object?[][] arrays => arrays,
-            IEnumerable<object?[]> enumerable => enumerable.ToArray(),
-            IEnumerable<object> objects => objects.Select(obj => new object?[] { obj }).ToArray(),
-            System.Collections.IEnumerable enumerable => enumerable.Cast<object?>().Select(obj => new object?[] { obj }).ToArray(),
-            _ => [[result]]
-        };
+            while (true)
+            {
+                var moveNextTask = enumerator.MoveNextAsync().AsTask();
+                try
+                {
+                    moveNextTask.Wait(cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw new TimeoutException("Data source generation timed out");
+                }
+                
+                if (!moveNextTask.Result)
+                    break;
+                    
+                yield return enumerator.Current;
+            }
+        }
+        finally
+        {
+            var disposeTask = enumerator.DisposeAsync().AsTask();
+            disposeTask.Wait(TimeSpan.FromSeconds(30));
+        }
     }
 
     private static object?[] CloneArguments(object?[] args)
     {
-        // Create a new array to ensure isolation
         var cloned = new object?[args.Length];
         Array.Copy(args, cloned, args.Length);
         return cloned;

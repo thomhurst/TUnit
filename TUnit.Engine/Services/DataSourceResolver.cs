@@ -1,165 +1,43 @@
-using System.Reflection;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using TUnit.Core;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Services;
 
 /// <summary>
-/// Implementation of data source resolver
+/// AOT-safe service for resolving dynamic test data sources using pre-compiled factories
 /// </summary>
-public class DataSourceResolver : IDataSourceResolver
+public class DataSourceResolver : IDynamicTestDataResolver
 {
-    public async Task<IEnumerable<object?[]>> ResolveDataSource(TestDataSource dataSource)
+    /// <summary>
+    /// Resolves dynamic data sources using pre-compiled AOT factories only
+    /// </summary>
+    public async Task<IEnumerable<object?[]>> ResolveDynamicDataSourceAsync(
+        DynamicTestDataSource dynamicSource,
+        CancellationToken cancellationToken = default)
     {
-        return await ResolveDataAsync(dataSource);
-    }
-
-    public async Task<IEnumerable<object?[]>> ResolveDataAsync(TestDataSource dataSource)
-    {
-        if (dataSource is StaticTestDataSource staticSource)
-        {
-            // Get data factories and execute them to get the actual data
-            var factories = staticSource.GetDataFactories();
-            return await Task.FromResult(factories.Select(f => f()).ToArray());
-        }
-
-        if (dataSource is DynamicTestDataSource dynamicSource)
-        {
-            return await ResolveDynamicDataAsync(dynamicSource);
-        }
-
-        throw new NotSupportedException($"Unsupported data source type: {dataSource.GetType().Name}");
-    }
-
-    public async Task<object?> ResolvePropertyDataAsync(PropertyDataSource propertyDataSource)
-    {
-        var data = await ResolveDataAsync(propertyDataSource.DataSource);
-        var firstSet = data.FirstOrDefault();
-        return firstSet?.FirstOrDefault();
-    }
-
-    private async Task<IEnumerable<object?[]>> ResolveDynamicDataAsync(DynamicTestDataSource dynamicSource)
-    {
-        const int DataSourceTimeoutSeconds = 30;
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(DataSourceTimeoutSeconds));
-
+        // In AOT mode, use only the pre-compiled factory
         try
         {
-            return await ResolveDynamicDataWithTimeoutAsync(dynamicSource, cts.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            throw new TimeoutException(
-                $"Data source '{dynamicSource.SourceMemberName}' on type '{dynamicSource.SourceType.FullName}' " +
-                $"timed out after {DataSourceTimeoutSeconds} seconds. " +
-                "Consider optimizing the data source or using cached data.");
-        }
-    }
-
-    private async Task<IEnumerable<object?[]>> ResolveDynamicDataWithTimeoutAsync(
-        DynamicTestDataSource dynamicSource,
-        CancellationToken cancellationToken)
-    {
-        // Create instance if needed
-        object? instance = null;
-        if (!dynamicSource.IsShared)
-        {
-#pragma warning disable IL2072 // Dynamic data source types are specified by user
-            instance = Activator.CreateInstance(dynamicSource.SourceType);
-#pragma warning restore IL2072
-        }
-
-        // Find the member
-#pragma warning disable IL2075 // Dynamic data source types are specified by user
-        var member = dynamicSource.SourceType.GetMember(
-            dynamicSource.SourceMemberName,
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
-            .FirstOrDefault();
-#pragma warning restore IL2075
-
-        if (member == null)
-        {
-            throw new InvalidOperationException($"Could not find member '{dynamicSource.SourceMemberName}' on type '{dynamicSource.SourceType.FullName}'");
-        }
-
-        // Execute member access with timeout
-        var rawDataTask = Task.Run(() => member switch
-        {
-            PropertyInfo property => property.GetValue(instance),
-            MethodInfo method => method.Invoke(instance, []),
-            FieldInfo field => field.GetValue(instance),
-            _ => throw new InvalidOperationException($"Unsupported member type: {member.GetType().Name}")
-        }, cancellationToken);
-
-        var rawData = await rawDataTask.ConfigureAwait(false);
-
-        // Handle async results
-        if (rawData is Task task)
-        {
-            // Add timeout for async data sources
-            var completedTask = await Task.WhenAny(task, Task.Delay(Timeout.Infinite, cancellationToken));
-            if (completedTask != task)
+            var factories = dynamicSource.GetDataFactories();
+            var results = new List<object?[]>();
+            
+            foreach (var factory in factories)
             {
-                throw new OperationCanceledException();
+                results.Add(factory());
             }
-
-            await task;
-#pragma warning disable IL2075 // Task<T> types are known
-            var resultProperty = task.GetType().GetProperty("Result");
-#pragma warning restore IL2075
-            rawData = resultProperty?.GetValue(task);
+            
+            return await Task.FromResult(results);
         }
-
-        // Convert to object?[][] with size limits
-        const int MaxDataSourceItems = 10_000;
-        var result = new List<object?[]>();
-
-        if (rawData is IEnumerable<object?[]> objectArrays)
+        catch (InvalidOperationException ex) when (ex.Message.Contains("No data source factory registered"))
         {
-            foreach (var item in objectArrays)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                result.Add(item);
-
-                if (result.Count > MaxDataSourceItems)
-                {
-                    throw new InvalidOperationException(
-                        $"Data source '{dynamicSource.SourceMemberName}' exceeded maximum item count of {MaxDataSourceItems:N0}");
-                }
-            }
-            return result;
+            // AOT mode requires all data sources to be pre-compiled via source generators
+            throw new NotSupportedException(
+                $"No data source factory registered for '{dynamicSource.FactoryKey}'. " +
+                "In AOT mode, all data sources must be pre-compiled via source generators. " +
+                "Ensure your test project uses source generation and not reflection-based data sources.", ex);
         }
-
-        // Special case: strings should be treated as single values, not char collections
-        if (rawData is string stringValue)
-        {
-            result.Add([stringValue]);
-            return result;
-        }
-
-        if (rawData is System.Collections.IEnumerable enumerable)
-        {
-            foreach (var item in enumerable)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                if (item is object?[] array)
-                {
-                    result.Add(array);
-                }
-                else
-                {
-                    result.Add([item]);
-                }
-
-                if (result.Count > MaxDataSourceItems)
-                {
-                    throw new InvalidOperationException(
-                        $"Data source '{dynamicSource.SourceMemberName}' exceeded maximum item count of {MaxDataSourceItems:N0}");
-                }
-            }
-            return result;
-        }
-
-        throw new InvalidOperationException($"Data source '{dynamicSource.SourceMemberName}' did not return a valid collection");
     }
 }

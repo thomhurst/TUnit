@@ -21,6 +21,7 @@ public record MethodMetadata : MemberMetadata
 
     [field: AllowNull, MaybeNull]
     [JsonIgnore]
+    [Obsolete("ReflectionInformation is not compatible with AOT. Use source-generated metadata instead.")]
     public MethodInfo ReflectionInformation
     {
         get => field ??=

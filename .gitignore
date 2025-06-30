@@ -405,3 +405,6 @@ FodyWeavers.xsd
 *.received/
 
 SourceGeneratedViewer
+
+# Requirements gathering folder
+requirements/

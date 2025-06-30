@@ -32,8 +32,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public EngineCancellationToken CancellationToken { get; }
     public TestFilterService TestFilterService { get; }
 
-    [RequiresDynamicCode("Generic type resolution requires runtime type generation.")]
-    [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming.")]
     public TUnitServiceProvider(
         IExtension extension,
         ExecuteRequestContext context,
@@ -72,28 +70,13 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var metadataSource = new SourceGeneratedTestMetadataSource(() =>
             sources.SelectMany(s => s.GetTestMetadata().GetAwaiter().GetResult()).ToList());
 
-        // Check if reflection discovery is enabled
-        var enableDynamicDiscovery = IsReflectionScannerEnabled(CommandLineOptions);
-
-        // Create the unified pipeline based on mode
-        if (enableDynamicDiscovery)
-        {
-            // Use reflection mode
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(a => !a.IsDynamic && !a.FullName?.StartsWith("System") == true)
-                .ToArray();
-
-            TestBuilderPipeline = Register(
-                UnifiedTestBuilderPipelineFactory.CreateReflectionPipeline(
-                    assemblies, testInvoker, hookInvoker));
-        }
-        else
-        {
-            // Use AOT mode
-            TestBuilderPipeline = Register(
-                UnifiedTestBuilderPipelineFactory.CreateAotPipeline(
-                    metadataSource, testInvoker, hookInvoker));
-        }
+        // AOT-only mode: Reflection discovery is no longer supported
+        var enableDynamicDiscovery = false;
+        
+        // Always use AOT mode for maximum performance and compatibility
+        TestBuilderPipeline = Register(
+            UnifiedTestBuilderPipelineFactory.CreateAotPipeline(
+                metadataSource, testInvoker, hookInvoker, this));
 
         DiscoveryService = Register(new TestDiscoveryServiceV2(TestBuilderPipeline, enableDynamicDiscovery));
 
@@ -124,11 +107,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         return service;
     }
 
-    private bool IsReflectionScannerEnabled(ICommandLineOptions commandLineOptions)
-    {
-        // Default to false since GetOptionValue may not be available
-        return false;
-    }
 
     public async ValueTask DisposeAsync()
     {

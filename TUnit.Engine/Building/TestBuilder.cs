@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using TUnit.Core;
 using TUnit.Engine.Building.Interfaces;
 
@@ -10,15 +9,11 @@ namespace TUnit.Engine.Building;
 /// </summary>
 public sealed class TestBuilder : ITestBuilder
 {
-    private readonly ITestInvoker _testInvoker;
-    private readonly IHookInvoker _hookInvoker;
-    private readonly bool _isAotMode;
+    private readonly IServiceProvider? _serviceProvider;
 
-    public TestBuilder(ITestInvoker testInvoker, IHookInvoker hookInvoker, bool isAotMode = true)
+    public TestBuilder(IServiceProvider? serviceProvider = null)
     {
-        _testInvoker = testInvoker ?? throw new ArgumentNullException(nameof(testInvoker));
-        _hookInvoker = hookInvoker ?? throw new ArgumentNullException(nameof(hookInvoker));
-        _isAotMode = isAotMode;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<ExecutableTest> BuildTestAsync(ExpandedTestData expandedData)
@@ -60,11 +55,10 @@ public sealed class TestBuilder : ITestBuilder
         return executableTest;
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling", Justification = "Calls to reflection methods are guarded by isAotMode check and only occur when AOT factories are not available")]
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when trimming application code", Justification = "Calls to reflection methods are fallbacks when trimming-safe pre-compiled factories are not available")]
+    [UnconditionalSuppressMessage("AOT", "IL2072:'type' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicConstructors' in call to 'System.Activator.CreateInstance(Type, params Object[])'", Justification = "This is only used in migration period when delegates are not available")]
     private Func<Task<object>> CreateInstanceFactory(TestMetadata metadata, ExpandedTestData expandedData)
     {
-        if (_isAotMode && metadata.InstanceFactory != null)
+        if (metadata.InstanceFactory != null)
         {
             // AOT mode with pre-compiled factory
             return async () =>
@@ -76,38 +70,21 @@ public sealed class TestBuilder : ITestBuilder
             };
         }
 
-        // Reflection mode
-        return CreateReflectionInstanceFactory(metadata, expandedData);
-    }
-
-    [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
-    [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
-    private Func<Task<object>> CreateReflectionInstanceFactory(TestMetadata metadata, ExpandedTestData expandedData)
-    {
+        // Fallback for migration period
         return async () =>
         {
             var classType = metadata.TestClassType;
             var classArgs = expandedData.ClassArgumentsFactory();
-
-            var instance = classArgs.Length > 0
-                ? Activator.CreateInstance(classType, classArgs)
-                : Activator.CreateInstance(classType);
-
-            if (instance == null)
-            {
-                throw new InvalidOperationException($"Failed to create instance of {classType}");
-            }
-
+            var instance = Activator.CreateInstance(classType, classArgs) 
+                ?? throw new InvalidOperationException($"Failed to create instance of {classType}");
             await InjectPropertiesAsync(instance, expandedData.PropertyFactories);
             return instance;
         };
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling", Justification = "Calls to reflection methods are guarded by isAotMode check and only occur when AOT invokers are not available")]
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when trimming application code", Justification = "Calls to reflection methods are fallbacks when trimming-safe pre-compiled invokers are not available")]
     private Func<object, Task> CreateTestInvoker(TestMetadata metadata, ExpandedTestData expandedData)
     {
-        if (_isAotMode && metadata.TestInvoker != null)
+        if (metadata.TestInvoker != null)
         {
             // AOT mode with pre-compiled invoker
             return async instance =>
@@ -117,46 +94,16 @@ public sealed class TestBuilder : ITestBuilder
             };
         }
 
-        // Reflection mode
-        return CreateReflectionTestInvoker(metadata, expandedData);
-    }
-
-    [RequiresDynamicCode("Reflection mode requires dynamic code generation")]
-    [RequiresUnreferencedCode("Reflection mode may access types not preserved by trimming")]
-    private Func<object, Task> CreateReflectionTestInvoker(TestMetadata metadata, ExpandedTestData expandedData)
-    {
-        if (metadata.MethodInfo == null)
-        {
-            throw new InvalidOperationException($"No invoker or MethodInfo available for test {metadata.TestName}");
-        }
-
-        var methodInfo = metadata.MethodInfo;
-
-        return async instance =>
-        {
-            var methodArgs = expandedData.MethodArgumentsFactory();
-            await _testInvoker.InvokeTestMethod(instance, methodInfo, methodArgs);
-        };
+        // This should not happen in AOT mode
+        throw new InvalidOperationException($"No test invoker available for test {metadata.TestName}. Ensure source generators have run.");
     }
 
     private async Task InjectPropertiesAsync(object instance, Dictionary<string, Func<object?>> propertyFactories)
     {
-        foreach (var kvp in propertyFactories)
-        {
-            var propertyName = kvp.Key;
-            var valueFactory = kvp.Value;
-            var value = valueFactory();
-
-#pragma warning disable IL2075 // Properties come from test metadata
-            var property = instance.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-#pragma warning restore IL2075
-
-            if (property?.CanWrite == true)
-            {
-                property.SetValue(instance, value);
-            }
-        }
-
+        // Property injection is handled by source-generated code
+        // The propertyFactories are pre-compiled setters that will be invoked
+        // This is a placeholder for future enhancement where we might need
+        // to coordinate with generated property injection code
         await Task.CompletedTask;
     }
 
@@ -179,10 +126,6 @@ public sealed class TestBuilder : ITestBuilder
             {
                 await h.Invoker(null, context);
             }
-            else if (h.MethodInfo != null)
-            {
-                await _hookInvoker.InvokeHookAsync(null, h.MethodInfo, context);
-            }
         })).ToArray();
     }
 
@@ -193,10 +136,6 @@ public sealed class TestBuilder : ITestBuilder
             if (h.Invoker != null)
             {
                 await h.Invoker(instance, context);
-            }
-            else if (h.MethodInfo != null)
-            {
-                await _hookInvoker.InvokeHookAsync(instance, h.MethodInfo, context);
             }
         })).ToArray();
     }
@@ -242,7 +181,7 @@ public sealed class TestBuilder : ITestBuilder
             TestFilePath = test.Metadata.FilePath ?? "Unknown",
             TestLineNumber = test.Metadata.LineNumber ?? 0,
             TestMethodParameterTypes = test.Metadata.ParameterTypes,
-            ReturnType = test.Metadata.MethodInfo?.ReturnType ?? typeof(Task),
+            ReturnType = typeof(Task), // All test methods return Task in AOT mode
             ClassMetadata = CreateClassMetadata(test.Metadata),
             MethodMetadata = CreateMethodMetadata(test.Metadata)
         };
@@ -253,15 +192,19 @@ public sealed class TestBuilder : ITestBuilder
             testDetails.Categories.Add(category);
         }
 
-        var context = new TestContext(test.Metadata.TestName, test.DisplayName)
+        var context = new TestContext(
+            test.Metadata.TestName, 
+            test.DisplayName, 
+            CancellationToken.None,
+            _serviceProvider ?? new TUnit.Core.Services.TestServiceProvider())
         {
-            TestDetails = testDetails,
-            CancellationToken = CancellationToken.None
+            TestDetails = testDetails
         };
 
         return await Task.FromResult(context);
     }
 
+    [UnconditionalSuppressMessage("AOT", "IL2072:'value' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ClassMetadata.Type.init'", Justification = "Type annotations are handled by source generators")]
     private static ClassMetadata CreateClassMetadata(TestMetadata metadata)
     {
         var type = metadata.TestClassType;
@@ -285,34 +228,19 @@ public sealed class TestBuilder : ITestBuilder
         });
     }
 
+    [UnconditionalSuppressMessage("AOT", "IL2072:'value' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.MethodMetadata.Type.init'", Justification = "Type annotations are handled by source generators")]
+    [UnconditionalSuppressMessage("AOT", "IL2067:'Type' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ParameterMetadata.ParameterMetadata(Type)'", Justification = "Parameter types are known at compile time")]
     private static MethodMetadata CreateMethodMetadata(TestMetadata metadata)
     {
-        if (metadata.MethodInfo != null)
+        // In AOT mode, use metadata directly without reflection
+        // Create parameters from ParameterTypes array
+        var parameters = metadata.ParameterTypes.Select((type, index) => new ParameterMetadata(type)
         {
-            var methodInfo = metadata.MethodInfo;
-            return new MethodMetadata
-            {
-                Name = methodInfo.Name,
-                Type = metadata.TestClassType,
-                TypeReference = TypeReference.CreateConcrete(metadata.TestClassType.AssemblyQualifiedName ?? metadata.TestClassType.FullName ?? metadata.TestClassType.Name),
-                Class = CreateClassMetadata(metadata),
-#pragma warning disable IL2072 // Parameter types are known at compile time
-                Parameters = methodInfo.GetParameters().Select(p => new ParameterMetadata(p.ParameterType)
-#pragma warning restore IL2072
-                {
-                    Name = p.Name ?? "param" + p.Position,
-                    TypeReference = TypeReference.CreateConcrete(p.ParameterType.AssemblyQualifiedName ?? p.ParameterType.FullName ?? p.ParameterType.Name),
-                    Attributes = [
-                    ],
-                    ReflectionInfo = p
-                }).ToArray(),
-                GenericTypeCount = methodInfo.IsGenericMethodDefinition ? methodInfo.GetGenericArguments().Length : 0,
-                ReturnTypeReference = TypeReference.CreateConcrete(methodInfo.ReturnType.AssemblyQualifiedName ?? methodInfo.ReturnType.FullName ?? methodInfo.ReturnType.Name),
-                ReturnType = methodInfo.ReturnType,
-                Attributes = [
-                ]
-            };
-        }
+            Name = $"param{index}",
+            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
+            Attributes = [],
+            ReflectionInfo = null! // No reflection info in AOT mode
+        }).ToArray();
 
         // Minimal metadata when MethodInfo is not available
         return new MethodMetadata

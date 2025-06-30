@@ -1,55 +1,38 @@
-using System.Reflection;
 using TUnit.Core;
 
 namespace TUnit.Engine;
 
 /// <summary>
-/// Implementation of hook invoker
+/// AOT-safe implementation of hook invoker using strongly-typed delegates
 /// </summary>
 public class HookInvoker : IHookInvoker
 {
     public async Task InvokeHook(HookMetadata hook, HookContext context)
     {
-        if (hook.MethodInfo != null)
-        {
-            var instance = hook.IsStatic ? null : context.TestInstance;
-            await InvokeHookAsync(instance, hook.MethodInfo, context);
-        }
-        else if (hook.Invoker != null)
+        // Use AOT-compiled delegates only
+        if (hook.Invoker != null)
         {
             var instance = hook.IsStatic ? null : context.TestInstance;
             await hook.Invoker(instance, context);
         }
-    }
-
-    public async Task InvokeHookAsync(object? instance, MethodInfo method, HookContext context)
-    {
-        var parameters = method.GetParameters();
-        object?[] args;
-
-        if (parameters.Length == 0)
-        {
-            args = [];
-        }
-        else if (parameters.Length == 1 && parameters[0].ParameterType == typeof(HookContext))
-        {
-            args = [context];
-        }
         else
         {
-            throw new InvalidOperationException($"Hook method {method.Name} has invalid parameters. Expected no parameters or single HookContext parameter.");
+            throw new InvalidOperationException($"Hook {hook.Name} does not have a pre-compiled invoker. Ensure source generators have run.");
         }
+    }
 
-        var result = method.Invoke(instance, args);
-
-        if (result is Task task)
+    public async Task InvokeHookAsync(string hookKey, object? instance, HookContext context)
+    {
+        // Try to get hook from storage
+        var hookInvoker = HookDelegateStorage.GetHook(hookKey);
+        if (hookInvoker != null)
         {
-            await task;
+            await hookInvoker(instance, context);
+            return;
         }
-        else if (result is ValueTask valueTask)
-        {
-            await valueTask.AsTask();
-        }
+        
+        throw new InvalidOperationException(
+            $"No hook invoker found for {hookKey}. Ensure source generators have run and hook is properly registered.");
     }
 
     public async Task InvokeHookAsync(object? instance, Func<object?, HookContext, Task> hookInvoker, HookContext context)

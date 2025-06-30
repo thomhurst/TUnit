@@ -1,221 +1,137 @@
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
+using TUnit.Engine.Services;
 using TUnit.Engine.Building.Interfaces;
-using TUnit.Engine.Configuration;
-using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Building.Expanders;
 
 /// <summary>
-/// Expands data sources into test variations
+/// Expands test data sources into executable test data
 /// </summary>
 public sealed class DataSourceExpander : IDataSourceExpander
 {
-    private readonly IDynamicDataSourceResolver _dynamicResolver;
+    private const int DataSourceTimeoutSeconds = 30;
+    private readonly IDynamicTestDataResolver _dynamicDataResolver;
 
-    public DataSourceExpander(IDynamicDataSourceResolver dynamicResolver)
+    public DataSourceExpander(IDynamicTestDataResolver dynamicDataResolver)
     {
-        _dynamicResolver = dynamicResolver ?? throw new ArgumentNullException(nameof(dynamicResolver));
+        _dynamicDataResolver = dynamicDataResolver ?? throw new ArgumentNullException(nameof(dynamicDataResolver));
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<ExpandedTestData>> ExpandDataSourcesAsync(TestMetadata metadata)
     {
-        var expandedTests = new List<ExpandedTestData>();
+        var expanded = new List<ExpandedTestData>();
 
-        // Expand class data sources
-        var classDataFactories = await ExpandDataSourcesAsync(metadata.ClassDataSources, DataSourceLevel.Class);
+        // Get all data source combinations
+        var combinations = await GetDataSourceCombinationsAsync(metadata, CancellationToken.None);
 
-        // Expand method data sources
-        var methodDataFactories = await ExpandDataSourcesAsync(metadata.DataSources, DataSourceLevel.Method);
-
-        // Expand property data sources
-        var propertyFactories = await ExpandPropertyDataSourcesAsync(metadata.PropertyDataSources);
-
-        // Generate cartesian product of all combinations
-        var combinations = GenerateTestCombinations(
-            classDataFactories,
-            methodDataFactories,
-            [
-                propertyFactories
-            ]);
-
-        foreach (var combination in combinations)
+        // Create expanded test data for each combination
+        foreach (var (classArgs, methodArgs, properties, indices) in combinations)
         {
             var expandedData = new ExpandedTestData
             {
                 Metadata = metadata,
-                ClassArgumentsFactory = combination.ClassArgumentsFactory,
-                MethodArgumentsFactory = combination.MethodArgumentsFactory,
-                PropertyFactories = combination.PropertyFactories,
-                ArgumentsDisplayText = combination.DisplayText,
-                DataSourceIndices = combination.DataSourceIndices
+                DataSourceIndices = indices,
+                ClassArgumentsFactory = classArgs,
+                MethodArgumentsFactory = methodArgs,
+                PropertyFactories = properties,
+                ArgumentsDisplayText = GenerateDisplayText(classArgs(), methodArgs())
             };
 
-            expandedTests.Add(expandedData);
+            expanded.Add(expandedData);
         }
 
-        return expandedTests;
-    }
-
-    private async Task<List<DataSourceFactorySet>> ExpandDataSourcesAsync(
-        TestDataSource[] dataSources,
-        DataSourceLevel level)
-    {
-        if (dataSources.Length == 0)
+        // If no data sources, create a single test without arguments
+        if (expanded.Count == 0)
         {
-            // No data sources - single test with no arguments
-            return
-            [
-                new DataSourceFactorySet
-                {
-                    Factories =
-                    [
-                        () => []
-                    ],
-                    SourceIndex = -1
-                }
-            ];
-        }
-
-        var allFactorySets = new List<DataSourceFactorySet>();
-
-        for (int i = 0; i < dataSources.Length; i++)
-        {
-            var dataSource = dataSources[i];
-            var factories = await GetDataFactoriesAsync(dataSource, level);
-
-            allFactorySets.Add(new DataSourceFactorySet
+            expanded.Add(new ExpandedTestData
             {
-                Factories = factories.ToArray(),
-                SourceIndex = i
+                Metadata = metadata,
+                DataSourceIndices = Array.Empty<int>(),
+                ClassArgumentsFactory = () => Array.Empty<object?>(),
+                MethodArgumentsFactory = () => Array.Empty<object?>(),
+                PropertyFactories = new Dictionary<string, Func<object?>>(),
+                ArgumentsDisplayText = string.Empty
             });
         }
 
-        return allFactorySets;
+        return expanded;
     }
 
-    private async Task<Dictionary<string, List<Func<object?>>>> ExpandPropertyDataSourcesAsync(
-        PropertyDataSource[] propertyDataSources)
+    private async Task<List<(Func<object?[]> ClassArgs, Func<object?[]> MethodArgs, Dictionary<string, Func<object?>> Properties, int[] Indices)>>
+        GetDataSourceCombinationsAsync(TestMetadata metadata, CancellationToken cancellationToken)
     {
-        var propertyFactories = new Dictionary<string, List<Func<object?>>>();
+        var combinations = new List<(Func<object?[]>, Func<object?[]>, Dictionary<string, Func<object?>>, int[])>();
 
-        foreach (var propSource in propertyDataSources)
+        // Resolve all data sources
+        var classDataFactories = await ResolveDataSourcesAsync(
+            metadata.ClassDataSources,
+            DataSourceLevel.Class,
+            cancellationToken);
+
+        var methodDataFactories = await ResolveDataSourcesAsync(
+            metadata.DataSources,
+            DataSourceLevel.Method,
+            cancellationToken);
+
+        var propertyDataFactories = await ResolvePropertyDataSourcesAsync(
+            metadata.PropertyDataSources,
+            cancellationToken);
+
+        // Handle the case where there are no data sources
+        if (!classDataFactories.Any() && !methodDataFactories.Any() && !propertyDataFactories.Any())
         {
-            var factories = await GetDataFactoriesAsync(propSource.DataSource, DataSourceLevel.Property);
+            return combinations;
+        }
 
-            // For properties, we only use the first value from each factory
-            var propertyValueFactories = factories
-                .Select(factory => new Func<object?>(() =>
+        // Ensure we have at least one item in each collection
+        if (!classDataFactories.Any()) classDataFactories = new List<IEnumerable<Func<object?[]>>> { Array.Empty<Func<object?[]>>() };
+        if (!methodDataFactories.Any()) methodDataFactories = new List<IEnumerable<Func<object?[]>>> { Array.Empty<Func<object?[]>>() };
+        if (!propertyDataFactories.Any()) propertyDataFactories = new List<Dictionary<string, List<Func<object?>>>> { new Dictionary<string, List<Func<object?>>>() };
+
+        // Generate all combinations
+        var indices = new List<int>();
+        var currentIndex = 0;
+
+        foreach (var classData in classDataFactories)
+        {
+            foreach (var methodData in methodDataFactories)
+            {
+                foreach (var propData in propertyDataFactories)
                 {
-                    var args = factory();
-                    return args.Length > 0 ? args[0] : null;
-                }))
-                .ToList();
+                    // Convert class data
+                    var classArgsFactory = classData.Any()
+                        ? () => ConvertToFactories(classData).First()()
+                        : (Func<object?[]>)(() => Array.Empty<object?>());
 
-            propertyFactories[propSource.PropertyName] = propertyValueFactories;
-        }
+                    // Convert method data
+                    var methodArgsFactory = methodData.Any()
+                        ? () => ConvertToFactories(methodData).First()()
+                        : (Func<object?[]>)(() => Array.Empty<object?>());
 
-        return propertyFactories;
-    }
-
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "DynamicTestDataSource is only used as fallback when AOT-friendly resolution isn't possible. Source generator preferentially creates AotFriendlyTestDataSource.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "DynamicTestDataSource is only used as fallback when AOT-friendly resolution isn't possible. Source generator preferentially creates AotFriendlyTestDataSource.")]
-    private async Task<IEnumerable<Func<object?[]>>> GetDataFactoriesAsync(
-        TestDataSource dataSource,
-        DataSourceLevel level)
-    {
-        try
-        {
-            if (dataSource is StaticTestDataSource)
-            {
-                // Static data sources can return their factories directly
-                return dataSource.GetDataFactories();
-            }
-
-            if (dataSource is AotFriendlyTestDataSource aotFriendlySource)
-            {
-                // AOT-friendly sources use direct method invocation, no reflection needed
-                return aotFriendlySource.GetDataFactories();
-            }
-
-            if (dataSource is DynamicTestDataSource dynamicSource)
-            {
-                // Dynamic sources need resolution - these are only used when AOT-friendly resolution isn't possible
-                // The source generator now preferentially creates AotFriendlyTestDataSource when possible
-                return await _dynamicResolver.ResolveAsync(dynamicSource, level);
-            }
-
-            // Handle other data source types (e.g., AttributeDataSource)
-            return dataSource.GetDataFactories();
-        }
-        catch (Exception ex)
-        {
-            // If data source resolution fails, return a factory that captures the error
-            // This allows the test to still be discovered but fail when executed
-            var errorMessage = $"Failed to resolve data source: {ex.Message}";
-
-            return
-            [
-                () => throw new InvalidOperationException(errorMessage, ex)
-            ];
-        }
-    }
-
-    private IEnumerable<TestCombination> GenerateTestCombinations(
-        List<DataSourceFactorySet> classDataSets,
-        List<DataSourceFactorySet> methodDataSets,
-        List<Dictionary<string, List<Func<object?>>>> propertyDataSets)
-    {
-        var combinations = new List<TestCombination>();
-
-        // Generate cartesian product
-        var classProduct = CartesianProduct(classDataSets);
-        var methodProduct = CartesianProduct(methodDataSets);
-        var propertyProduct = propertyDataSets.Any()
-            ? GeneratePropertyCombinations(propertyDataSets.First())
-            : [new Dictionary<string, Func<object?>>()];
-
-        foreach (var (classFactories, classIndices) in classProduct)
-        {
-            foreach (var (methodFactories, methodIndices) in methodProduct)
-            {
-                foreach (var propertyFactories in propertyProduct)
-                {
-                    // Combine all factories into a single factory for each level
-                    var classFactory = CombineFactories(classFactories);
-                    var methodFactory = CombineFactories(methodFactories);
-
-                    // Generate display text
-                    string displayText;
-                    try
+                    // Convert property data
+                    var propertyFactories = new Dictionary<string, Func<object?>>();
+                    foreach (var kvp in propData)
                     {
-                        displayText = GenerateDisplayText(classFactory(), methodFactory());
-                    }
-                    catch (Exception ex)
-                    {
-                        // If we can't generate display text, use a fallback
-                        displayText = $"[Data Source Error: {ex.Message}]";
-
-                        // Replace the factories with ones that throw the error
-                        var errorMessage = $"Data source failed during test discovery: {ex.Message}";
-                        classFactory = () => throw new InvalidOperationException(errorMessage, ex);
-                        methodFactory = () => throw new InvalidOperationException(errorMessage, ex);
+                        if (kvp.Value.Any())
+                        {
+                            var factory = kvp.Value.First();
+                            propertyFactories[kvp.Key] = factory;
+                        }
                     }
 
-                    // Combine indices
-                    var indices = CombineIndices(classIndices, methodIndices);
-
-                    combinations.Add(new TestCombination
-                    {
-                        ClassArgumentsFactory = classFactory,
-                        MethodArgumentsFactory = methodFactory,
-                        PropertyFactories = propertyFactories,
-                        DisplayText = displayText,
-                        DataSourceIndices = indices
-                    });
+                    indices.Add(currentIndex++);
+                    combinations.Add((classArgsFactory, methodArgsFactory, propertyFactories, indices.ToArray()));
+                    indices.Clear();
                 }
             }
         }
@@ -223,155 +139,96 @@ public sealed class DataSourceExpander : IDataSourceExpander
         return combinations;
     }
 
-    private IEnumerable<(List<Func<object?[]>> factories, List<int> indices)> CartesianProduct(
-        List<DataSourceFactorySet> dataSets)
+    private async Task<List<IEnumerable<Func<object?[]>>>> ResolveDataSourcesAsync(
+        TestDataSource[] dataSources,
+        DataSourceLevel level,
+        CancellationToken cancellationToken)
     {
-        if (!dataSets.Any())
+        if (dataSources.Length == 0)
         {
-            yield return ([], []);
-            yield break;
+            return new List<IEnumerable<Func<object?[]>>>();
         }
 
-        // Early exit if any dimension has zero length
-        var lengths = dataSets.Select(ds => ds.Factories.Length).ToArray();
-        if (lengths.Any(l => l == 0))
+        var resolved = new List<IEnumerable<Func<object?[]>>>();
+
+        foreach (var dataSource in dataSources)
         {
-            yield break;
+            var factories = await ResolveDataSourceAsync(dataSource, level, cancellationToken);
+            resolved.Add(factories);
         }
 
-        var maxCombinations = DiscoveryConfiguration.MaxCartesianCombinations;
-        var combinationCount = 0;
+        return resolved;
+    }
 
-        // Delegate index generation to a dedicated helper method
-        foreach (var currentIndices in GenerateCartesianIndices(lengths))
+    private async Task<IEnumerable<Func<object?[]>>> ResolveDataSourceAsync(
+        TestDataSource dataSource,
+        DataSourceLevel level,
+        CancellationToken cancellationToken)
+    {
+        switch (dataSource)
         {
-            combinationCount++;
-            if (combinationCount > maxCombinations)
-            {
-                throw new InvalidOperationException(
-                    $"Cartesian product exceeded maximum combinations limit of {maxCombinations:N0}");
-            }
+            case StaticTestDataSource staticSource:
+                return staticSource.GetDataFactories();
 
-            // Build current combination
-            var factories = new List<Func<object?[]>>();
-            var resultIndices = new List<int>();
+            case DynamicTestDataSource dynamicSource:
+                return await ResolveDynamicDataSourceAsync(dynamicSource, level, cancellationToken);
 
-            for (int i = 0; i < dataSets.Count; i++)
-            {
-                factories.Add(dataSets[i].Factories[currentIndices[i]]);
-                resultIndices.Add(dataSets[i].SourceIndex);
-                resultIndices.Add(currentIndices[i]);
-            }
-
-            yield return (factories, resultIndices);
+            default:
+                throw new NotSupportedException($"Data source type {dataSource.GetType()} is not supported");
         }
     }
 
-    private static IEnumerable<int[]> GenerateCartesianIndices(int[] lengths)
+    private async Task<IEnumerable<Func<object?[]>>> ResolveDynamicDataSourceAsync(
+        DynamicTestDataSource dataSource,
+        DataSourceLevel level,
+        CancellationToken cancellationToken)
     {
-        if (lengths == null || lengths.Length == 0)
-        {
-            yield break;
-        }
-
-        var indices = new int[lengths.Length];
-        var hasMore = true;
-
-        while (hasMore)
-        {
-            yield return (int[])indices.Clone();
-
-            // Increment indices from right to left
-            hasMore = false;
-            for (int i = lengths.Length - 1; i >= 0; i--)
-            {
-                indices[i]++;
-                if (indices[i] < lengths[i])
-                {
-                    hasMore = true;
-                    break;
-                }
-                indices[i] = 0;
-            }
-        }
+        // In AOT mode, use the pre-compiled factory
+        return await Task.Run(() => dataSource.GetDataFactories(), cancellationToken);
     }
 
-    private IEnumerable<Dictionary<string, Func<object?>>> GeneratePropertyCombinations(
-        Dictionary<string, List<Func<object?>>> propertyDataMap)
+
+    private async Task<List<Dictionary<string, List<Func<object?>>>>> ResolvePropertyDataSourcesAsync(
+        PropertyDataSource[] propertyDataSources,
+        CancellationToken cancellationToken)
     {
-        if (!propertyDataMap.Any())
+        if (propertyDataSources.Length == 0)
         {
-            yield return new Dictionary<string, Func<object?>>();
-            yield break;
+            return new List<Dictionary<string, List<Func<object?>>>>();
         }
 
-        var properties = propertyDataMap.Keys.ToList();
-        var indices = new int[properties.Count];
-        var done = false;
+        var result = new Dictionary<string, List<Func<object?>>>();
 
-        while (!done)
+        foreach (var propSource in propertyDataSources)
         {
-            var combination = new Dictionary<string, Func<object?>>();
+            var factories = await ResolveDataSourceAsync(
+                propSource.DataSource,
+                DataSourceLevel.Property,
+                cancellationToken);
 
-            for (int i = 0; i < properties.Count; i++)
-            {
-                var prop = properties[i];
-                var factories = propertyDataMap[prop];
-                combination[prop] = factories[indices[i]];
-            }
-
-            yield return combination;
-
-            // Increment indices
-            for (int i = properties.Count - 1; i >= 0; i--)
-            {
-                indices[i]++;
-                if (indices[i] < propertyDataMap[properties[i]].Count)
-                {
-                    break;
-                }
-                indices[i] = 0;
-                if (i == 0)
-                {
-                    done = true;
-                }
-            }
-        }
-    }
-
-    private static Func<object?[]> CombineFactories(List<Func<object?[]>> factories)
-    {
-        return () =>
-        {
-            var allArgs = new List<object?>();
+            var propFactories = new List<Func<object?>>();
             foreach (var factory in factories)
             {
-                allArgs.AddRange(factory());
+                propFactories.Add(() => factory()[0]); // Properties expect single values
             }
-            return allArgs.ToArray();
-        };
+
+            result[propSource.PropertyName] = propFactories;
+        }
+
+        // For now, return a single dictionary wrapped in a list
+        // TODO: Support multiple property value combinations
+        return new List<Dictionary<string, List<Func<object?>>>>{ result };
     }
 
     private static string GenerateDisplayText(object?[] classArgs, object?[] methodArgs)
     {
-        var parts = new List<string>();
-
-        if (classArgs.Length > 0)
+        var allArgs = classArgs.Concat(methodArgs).ToArray();
+        if (allArgs.Length == 0)
         {
-            parts.Add(FormatArguments(classArgs));
+            return string.Empty;
         }
 
-        if (methodArgs.Length > 0)
-        {
-            parts.Add(FormatArguments(methodArgs));
-        }
-
-        return string.Join(", ", parts);
-    }
-
-    private static string FormatArguments(object?[] args)
-    {
-        return string.Join(", ", args.Select(FormatArgument));
+        return string.Join(", ", allArgs.Select(FormatArgument));
     }
 
     private static string FormatArgument(object? arg)
@@ -379,234 +236,64 @@ public sealed class DataSourceExpander : IDataSourceExpander
         return arg switch
         {
             null => "null",
-            string s => $"\"{s}\"",
-            char c => $"'{c}'",
-            bool b => b.ToString().ToLower(),
+            string str => $"\"{str}\"",
+            char ch => $"'{ch}'",
+            bool b => b.ToString().ToLowerInvariant(),
             _ => arg.ToString() ?? "null"
         };
     }
 
-    private static int[] CombineIndices(List<int> classIndices, List<int> methodIndices)
+    /// <summary>
+    /// Converts raw factories to the expected format
+    /// </summary>
+    private static IEnumerable<Func<object?[]>> ConvertToFactories(IEnumerable<Func<object?[]>> factories)
     {
-        var combined = new List<int>(classIndices);
-        combined.AddRange(methodIndices);
-        return combined.ToArray();
-    }
-
-    private class DataSourceFactorySet
-    {
-        public required Func<object?[]>[] Factories { get; init; }
-        public required int SourceIndex { get; init; }
-    }
-
-    private class TestCombination
-    {
-        public required Func<object?[]> ClassArgumentsFactory { get; init; }
-        public required Func<object?[]> MethodArgumentsFactory { get; init; }
-        public required Dictionary<string, Func<object?>> PropertyFactories { get; init; }
-        public required string DisplayText { get; init; }
-        public required int[] DataSourceIndices { get; init; }
-    }
-}
-
-/// <summary>
-/// Interface for resolving dynamic data sources
-/// </summary>
-public interface IDynamicDataSourceResolver
-{
-    [RequiresDynamicCode("Dynamic data source resolution requires reflection")]
-    [RequiresUnreferencedCode("Dynamic data source resolution may access types not preserved by trimming")]
-    Task<IEnumerable<Func<object?[]>>> ResolveAsync(DynamicTestDataSource dataSource, DataSourceLevel level);
-}
-
-/// <summary>
-/// Implementation of dynamic data source resolver
-/// </summary>
-public sealed class DynamicDataSourceResolver : IDynamicDataSourceResolver
-{
-    [RequiresDynamicCode("Dynamic data source resolution requires reflection")]
-    [RequiresUnreferencedCode("Dynamic data source resolution may access types not preserved by trimming")]
-    public async Task<IEnumerable<Func<object?[]>>> ResolveAsync(DynamicTestDataSource dataSource, DataSourceLevel level)
-    {
-        const int DataSourceTimeoutSeconds = 30;
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(DataSourceTimeoutSeconds));
-
-        try
+        // Handle tuple unwrapping for AOT scenarios
+        foreach (var factory in factories)
         {
-            return await ResolveWithTimeoutAsync(dataSource, level, cts.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            throw new TimeoutException(
-                $"Data source '{dataSource.SourceMemberName}' on type '{dataSource.SourceType.FullName}' " +
-                $"timed out after {DataSourceTimeoutSeconds} seconds.");
-        }
-    }
-
-    [RequiresDynamicCode("Dynamic data source resolution requires reflection")]
-    [RequiresUnreferencedCode("Dynamic data source resolution may access types not preserved by trimming")]
-    private async Task<IEnumerable<Func<object?[]>>> ResolveWithTimeoutAsync(
-        DynamicTestDataSource dataSource,
-        DataSourceLevel level,
-        CancellationToken cancellationToken)
-    {
-        // Find the member
-        var member = dataSource.SourceType.GetMember(
-            dataSource.SourceMemberName,
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
-            .FirstOrDefault();
-
-        if (member == null)
-        {
-            throw new InvalidOperationException(
-                $"Could not find member '{dataSource.SourceMemberName}' on type '{dataSource.SourceType.FullName}'");
-        }
-
-        // Create instance if needed
-        object? instance = null;
-        if (!dataSource.IsShared && member is not MethodInfo { IsStatic: true })
-        {
-            instance = Activator.CreateInstance(dataSource.SourceType);
-        }
-
-        // Get the raw data
-        var rawDataTask = Task.Run(() => member switch
-        {
-            PropertyInfo property => property.GetValue(instance),
-            MethodInfo method => method.Invoke(instance, dataSource.Arguments),
-            FieldInfo field => field.GetValue(instance),
-            _ => throw new InvalidOperationException($"Unsupported member type: {member.GetType().Name}")
-        }, cancellationToken);
-
-        var rawData = await rawDataTask.ConfigureAwait(false);
-
-        // Handle async results
-        if (rawData is Task task)
-        {
-            await task.ConfigureAwait(false);
-            var resultProperty = task.GetType().GetProperty("Result");
-            rawData = resultProperty?.GetValue(task);
-        }
-
-        // Convert to factory functions
-        return ConvertToFactories(rawData, dataSource.SourceMemberName);
-    }
-
-    private IEnumerable<Func<object?[]>> ConvertToFactories(object? rawData, string sourceName)
-    {
-        var factories = new List<Func<object?[]>>();
-
-        // Handle IDataSource implementations
-        if (rawData is IDataSource dataSource)
-        {
-            var context = new DataSourceContext(
-                GetType(), // Should be test class type
-                DataSourceLevel.Method,
-                null, null, null, null);
-            return dataSource.GenerateDataFactories(context);
-        }
-
-        // Handle collections of factories
-        if (rawData is IEnumerable<Func<object?[]>> funcEnumerable)
-        {
-            return funcEnumerable;
-        }
-
-        // Handle single tuple - check this before IEnumerable since tuples implement IEnumerable
-        if (rawData != null && IsTupleType(rawData.GetType()))
-        {
-            var tupleValues = GetTupleValues(rawData);
-            factories.Add(() => tupleValues);
-            return factories;
-        }
-
-        // Handle regular collections
-        if (rawData is string stringValue)
-        {
-            // Special case: strings should be treated as single values
-            factories.Add(() => [stringValue]);
-            return factories;
-        }
-
-        if (rawData is System.Collections.IEnumerable enumerable)
-        {
-            foreach (var item in enumerable)
+            yield return () =>
             {
-                if (item is object?[] array)
+                var args = factory();
+                return UnwrapTuples(args);
+            };
+        }
+    }
+
+    /// <summary>
+    /// Unwraps tuples in arguments for proper parameter matching
+    /// </summary>
+    [UnconditionalSuppressMessage("AOT", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicFields' in call to 'System.Type.GetFields()'", Justification = "Tuple fields are always public and available")]
+    private static object?[] UnwrapTuples(object?[] args)
+    {
+        if (args.Length == 1 && args[0] != null)
+        {
+            var argType = args[0]!.GetType();
+            if (argType.IsValueType && argType.Name.StartsWith("ValueTuple`"))
+            {
+                // Use reflection to access tuple elements for compatibility
+                var fields = argType.GetFields();
+                if (fields.Length > 0)
                 {
-                    // Create factory that returns a copy of the array
-                    var capturedArray = array;
-                    factories.Add(() =>
+                    var unwrapped = new object?[fields.Length];
+                    for (int i = 0; i < fields.Length; i++)
                     {
-                        var copy = new object?[capturedArray.Length];
-                        Array.Copy(capturedArray, copy, capturedArray.Length);
-                        return copy;
-                    });
-                }
-                else if (item != null && IsTupleType(item.GetType()))
-                {
-                    // Handle tuple items in collections
-                    var tupleValues = GetTupleValues(item);
-                    factories.Add(() => tupleValues);
-                }
-                else
-                {
-                    // Single value - wrap in array
-                    var capturedItem = item;
-                    factories.Add(() => [capturedItem]);
+                        unwrapped[i] = fields[i].GetValue(args[0]);
+                    }
+                    return unwrapped;
                 }
             }
-            return factories;
         }
-
-        throw new InvalidOperationException(
-            $"Data source '{sourceName}' did not return a valid collection or IDataSource implementation");
+        
+        return args;
     }
+}
 
-    private static bool IsTupleType(Type type)
-    {
-        if (!type.IsGenericType)
-            return false;
-
-        var genericTypeDef = type.GetGenericTypeDefinition();
-        return genericTypeDef == typeof(ValueTuple<>) ||
-               genericTypeDef == typeof(ValueTuple<,>) ||
-               genericTypeDef == typeof(ValueTuple<,,>) ||
-               genericTypeDef == typeof(ValueTuple<,,,>) ||
-               genericTypeDef == typeof(ValueTuple<,,,,>) ||
-               genericTypeDef == typeof(ValueTuple<,,,,,>) ||
-               genericTypeDef == typeof(ValueTuple<,,,,,,>) ||
-               genericTypeDef == typeof(ValueTuple<,,,,,,,>) ||
-               genericTypeDef == typeof(ValueTuple<,,,,,,,>);
-    }
-
-    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern",
-        Justification = "Tuple field access is safe for AOT as tuple types are well-known")]
-    private static object?[] GetTupleValues(object tuple)
-    {
-        var type = tuple.GetType();
-        if (!IsTupleType(type))
-            return [tuple];
-
-#if NETSTANDARD2_0
-        // For netstandard2.0, use reflection to access tuple fields
-        var fields = type.GetFields();
-        return fields.Select(f => f.GetValue(tuple)).ToArray();
-#else
-        // Use ITuple interface to access tuple values (available in .NET Core 2.1+)
-        if (tuple is ITuple iTuple)
-        {
-            var values = new object?[iTuple.Length];
-            for (int i = 0; i < iTuple.Length; i++)
-            {
-                values[i] = iTuple[i];
-            }
-            return values;
-        }
-
-        // Fallback: use reflection
-        var fields = type.GetFields();
-        return fields.Select(f => f.GetValue(tuple)).ToArray();
-#endif
-    }
+/// <summary>
+/// Level at which a data source is applied
+/// </summary>
+public enum DataSourceLevel
+{
+    Class,
+    Method,
+    Property
 }

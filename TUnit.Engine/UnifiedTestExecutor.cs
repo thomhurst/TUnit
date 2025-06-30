@@ -144,21 +144,8 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
-        // Check if we're using reflection or source generation
-        bool enableDynamicDiscovery = IsReflectionScannerEnabled();
-
-        if (enableDynamicDiscovery)
-        {
-#pragma warning disable IL3050 // Calling method with RequiresDynamicCodeAttribute
-#pragma warning disable IL2026 // Calling method with RequiresUnreferencedCodeAttribute
-            await ExecuteAsyncWithReflection(request, messageBus, cancellationToken);
-#pragma warning restore IL2026
-#pragma warning restore IL3050
-        }
-        else
-        {
-            await ExecuteAsyncAotSafe(request, messageBus, cancellationToken);
-        }
+        // AOT-only mode: Always use source generation
+        await ExecuteAsyncAotSafe(request, messageBus, cancellationToken);
     }
 
     /// <summary>
@@ -187,36 +174,18 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     }
 
     /// <summary>
-    /// Reflection-based test execution
+    /// Reflection-based test execution (OBSOLETE - throws NotSupportedException)
     /// </summary>
+    [Obsolete("Reflection mode has been removed for AOT compatibility. Use ExecuteAsyncWithSourceGeneration instead.")]
     [RequiresDynamicCode("Generic type resolution requires runtime type generation.")]
     [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming.")]
-    private async Task ExecuteAsyncWithReflection(
+    private Task ExecuteAsyncWithReflection(
         RunTestExecutionRequest request,
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
-        // Create unified pipeline for reflection mode
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(a => !a.IsDynamic && !a.FullName?.StartsWith("System") == true)
-            .ToArray();
-
-        var pipeline = UnifiedTestBuilderPipelineFactory.CreateReflectionPipeline(
-            assemblies,
-            new TestInvoker(),
-            new HookInvoker());
-
-        var discoveryService = new TestDiscoveryServiceV2(pipeline, enableDynamicDiscovery: true);
-        var tests = await discoveryService.DiscoverTests();
-
-        // Execute tests
-        await ExecuteTests(tests, request.Filter, messageBus, cancellationToken);
+        throw new NotSupportedException(
+            "Reflection mode has been removed for AOT compatibility. Use source generation mode only.");
     }
 
-    private bool IsReflectionScannerEnabled()
-    {
-        // Check command line options for reflection scanner flag
-        // Default to false (use source generation)
-        return false;
-    }
 }

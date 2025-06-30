@@ -3,6 +3,7 @@ using System.Reflection;
 
 namespace TUnit.Core.Helpers;
 
+[Obsolete("This class uses reflection and is not compatible with AOT. Use source generators instead.")]
 public class MethodInfoRetriever
 {
     private static readonly BindingFlags BindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy;
