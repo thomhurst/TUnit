@@ -93,6 +93,10 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         if (containingType == null)
             return null;
 
+        // Skip abstract classes (cannot be instantiated)
+        if (containingType.IsAbstract)
+            return null;
+
         // Skip generic types without explicit instantiation
         if (containingType.IsGenericType && containingType.TypeParameters.Length > 0)
             return null;
@@ -121,6 +125,9 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             // Get all generic test methods in the class
             var namedTypeSymbol = classSymbol as INamedTypeSymbol;
             if (namedTypeSymbol == null) return null;
+            
+            // Skip abstract classes (cannot be instantiated)
+            if (namedTypeSymbol.IsAbstract) return null;
             
             var genericMethods = namedTypeSymbol.GetMembers()
                 .OfType<IMethodSymbol>()

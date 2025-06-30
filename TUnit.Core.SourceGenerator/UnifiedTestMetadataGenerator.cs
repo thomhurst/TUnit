@@ -139,7 +139,11 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         try
         {
             var (testMethods, configuration) = input;
-            var validTests = testMethods.Where(t => t != null).Cast<TestMethodMetadata>().ToList();
+            var validTests = testMethods
+                .Where(t => t != null)
+                .Cast<TestMethodMetadata>()
+                .Where(t => !t.TypeSymbol.IsAbstract) // Filter out abstract classes
+                .ToList();
             if (!validTests.Any())
             {
                 return;
