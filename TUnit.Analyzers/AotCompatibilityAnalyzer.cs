@@ -119,7 +119,10 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
                 // Check if types can be inferred from any test method's data sources
                 var canInferTypes = testMethods.Any(CanInferGenericTypes);
                 
-                if (!canInferTypes)
+                // Check if this generic class is used as a base class for InheritsTests pattern
+                var isUsedAsInheritsTestsBase = IsUsedAsInheritsTestsBase(classSymbol, context.Compilation);
+                
+                if (!canInferTypes && !isUsedAsInheritsTestsBase)
                 {
                     var diagnostic = Diagnostic.Create(
                         Rules.GenericTestMissingExplicitInstantiation,
@@ -235,6 +238,42 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             return true; // AsyncDataSourceGenerator attributes can provide type inference
         }
         
+        // For generic classes, also check class-level Arguments attributes
+        if (method.ContainingType.IsGenericType)
+        {
+            var hasClassLevelArguments = method.ContainingType.GetAttributes()
+                .Any(a => a.AttributeClass?.Name == "ArgumentsAttribute" || a.AttributeClass?.Name == "Arguments");
+                
+            if (hasClassLevelArguments)
+            {
+                return true; // Class-level Arguments attributes can provide type inference
+            }
+        }
+        
+        return false;
+    }
+
+    /// <summary>
+    /// Checks if a generic class is used as a base class for InheritsTests pattern
+    /// </summary>
+    private static bool IsUsedAsInheritsTestsBase(INamedTypeSymbol genericClass, Compilation compilation)
+    {
+        // Get all types in the compilation
+        var allTypes = compilation.GetSymbolsWithName(_ => true, SymbolFilter.Type)
+            .OfType<INamedTypeSymbol>();
+
+        // Check if any type inherits from this generic class and has InheritsTests attribute
+        foreach (var type in allTypes)
+        {
+            if (type.BaseType != null && 
+                SymbolEqualityComparer.Default.Equals(type.BaseType.OriginalDefinition, genericClass) &&
+                type.GetAttributes().Any(a => a.AttributeClass?.Name == "InheritsTestsAttribute" || 
+                                             a.AttributeClass?.Name == "InheritsTests"))
+            {
+                return true;
+            }
+        }
+
         return false;
     }
 
