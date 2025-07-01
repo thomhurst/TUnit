@@ -43,11 +43,20 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             .Where(static m => m is not null)
             .SelectMany(static (m, _) => m!);
 
+        // Find all generic test methods/classes that could benefit from type inference
+        var inferredGenericTestsProvider = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => IsGenericTestMethodOrClass(node),
+                transform: static (ctx, _) => GetInferredGenericTestMetadata(ctx))
+            .Where(static m => m is not null)
+            .SelectMany(static (m, _) => m!);
+
         // Combine all test methods
         var allTestMethods = testMethodsProvider
             .Collect()
             .Combine(genericTestsProvider.Collect())
-            .Select(static (combined, _) => combined.Left.Concat(combined.Right));
+            .Combine(inferredGenericTestsProvider.Collect())
+            .Select(static (combined, _) => combined.Left.Left.Concat(combined.Left.Right).Concat(combined.Right));
 
         // Generate the unified test registry
         context.RegisterSourceOutput(allTestMethods, GenerateTestRegistry);
@@ -76,6 +85,32 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             return methodDecl.AttributeLists.Any(al =>
                 al.Attributes.Any(a =>
                     a.Name.ToString().Contains("GenerateGenericTest")));
+        }
+
+        return false;
+    }
+
+    private static bool IsGenericTestMethodOrClass(SyntaxNode node)
+    {
+        if (node is ClassDeclarationSyntax classDecl)
+        {
+            // Check if it's a generic class with test methods
+            return classDecl.TypeParameterList != null &&
+                   classDecl.Members.OfType<MethodDeclarationSyntax>()
+                       .Any(m => m.AttributeLists.Any(al =>
+                           al.Attributes.Any(a =>
+                               a.Name.ToString().EndsWith("Test") ||
+                               a.Name.ToString().EndsWith("TestAttribute"))));
+        }
+
+        if (node is MethodDeclarationSyntax methodDecl)
+        {
+            // Check if it's a generic test method
+            return methodDecl.TypeParameterList != null &&
+                   methodDecl.AttributeLists.Any(al =>
+                       al.Attributes.Any(a =>
+                           a.Name.ToString().EndsWith("Test") ||
+                           a.Name.ToString().EndsWith("TestAttribute")));
         }
 
         return false;
@@ -156,6 +191,116 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
                         MethodSyntax = null, // Will need to handle this differently
                         GenericTypeArguments = typeArgs
                     });
+                }
+            }
+        }
+
+        return results.Any() ? results : null;
+    }
+
+    private static IEnumerable<TestMethodMetadata>? GetInferredGenericTestMetadata(GeneratorSyntaxContext context)
+    {
+        var results = new List<TestMethodMetadata>();
+        var resolver = new GenericTypeResolver();
+
+        if (context.Node is ClassDeclarationSyntax classDecl)
+        {
+            var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
+            if (classSymbol == null || classSymbol.IsAbstract) return null;
+
+            // Skip if explicit GenerateGenericTest attributes are present
+            if (classSymbol.GetAttributes().Any(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute"))
+                return null;
+
+            // Analyze generic test methods
+            var genericMethods = classSymbol.GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where(m => m.IsGenericMethod && HasTestAttribute(m));
+
+            foreach (var method in genericMethods)
+            {
+                var inferredTypes = resolver.InferGenericTypesFromDataSources(method);
+                
+                foreach (var typeArgs in inferredTypes)
+                {
+                    if (typeArgs.Length == method.TypeParameters.Length)
+                    {
+                        var constructedMethod = method.Construct(typeArgs);
+                        results.Add(new TestMethodMetadata
+                        {
+                            MethodSymbol = constructedMethod,
+                            TypeSymbol = classSymbol,
+                            MethodSyntax = null,
+                            GenericTypeArguments = typeArgs
+                        });
+                    }
+                }
+            }
+
+            // Handle generic classes
+            if (classSymbol.IsGenericType)
+            {
+                var testMethods = classSymbol.GetMembers()
+                    .OfType<IMethodSymbol>()
+                    .Where(HasTestAttribute);
+
+                foreach (var method in testMethods)
+                {
+                    var inferredTypes = resolver.InferGenericTypesFromDataSources(method);
+                    
+                    foreach (var typeArgs in inferredTypes)
+                    {
+                        if (typeArgs.Length == classSymbol.TypeParameters.Length)
+                        {
+                            var constructedClass = classSymbol.Construct(typeArgs);
+                            var constructedMethod = constructedClass.GetMembers(method.Name)
+                                .OfType<IMethodSymbol>()
+                                .FirstOrDefault();
+
+                            if (constructedMethod != null)
+                            {
+                                results.Add(new TestMethodMetadata
+                                {
+                                    MethodSymbol = constructedMethod,
+                                    TypeSymbol = constructedClass,
+                                    MethodSyntax = null,
+                                    GenericTypeArguments = typeArgs
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else if (context.Node is MethodDeclarationSyntax methodDecl)
+        {
+            var methodSymbol = context.SemanticModel.GetDeclaredSymbol(methodDecl) as IMethodSymbol;
+            if (methodSymbol?.ContainingType == null) return null;
+
+            var containingType = methodSymbol.ContainingType as INamedTypeSymbol;
+            if (containingType == null || containingType.IsAbstract) return null;
+
+            // Skip if explicit GenerateGenericTest attributes are present
+            if (methodSymbol.GetAttributes().Any(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute"))
+                return null;
+
+            if (methodSymbol.IsGenericMethod && HasTestAttribute(methodSymbol))
+            {
+                var inferredTypes = resolver.InferGenericTypesFromDataSources(methodSymbol);
+                
+                foreach (var typeArgs in inferredTypes)
+                {
+                    if (typeArgs.Length == methodSymbol.TypeParameters.Length)
+                    {
+                        var constructedMethod = methodSymbol.Construct(typeArgs);
+                        results.Add(new TestMethodMetadata
+                        {
+                            MethodSymbol = constructedMethod,
+                            TypeSymbol = containingType,
+                            MethodSyntax = methodDecl,
+                            GenericTypeArguments = typeArgs
+                        });
+                    }
                 }
             }
         }

@@ -16,7 +16,7 @@ public class GenericTestExample<T>
     [Arguments("hello")]
     public void GenericTestWithArguments<TArg>(TArg value)
     {
-        // This is a generic method with arguments
+        // This is a generic method with arguments - types should be inferred from Arguments
         Console.WriteLine($"Running test with value: {value} of type: {typeof(TArg).Name}");
     }
 }

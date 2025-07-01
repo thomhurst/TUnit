@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -136,11 +137,239 @@ internal sealed class GenericTypeResolver
         {
             if (member.IsGenericMethod && HasTestAttribute(member))
             {
-                // For generic methods, we need explicit type arguments
-                // This would require more complex analysis of call sites
-                // For now, we rely on explicit attributes
+                // Try to infer generic types from data sources
+                var inferredTypes = InferGenericTypesFromDataSources(member);
+                
+                foreach (var typeArgs in inferredTypes)
+                {
+                    if (typeArgs.Length <= _maxGenericDepth)
+                    {
+                        RegisterGenericTestInstantiation(classSymbol, typeArgs, GenericTestSource.DataSourceInference);
+                    }
+                }
+            }
+            else if (HasTestAttribute(member) && classSymbol.IsGenericType)
+            {
+                // For non-generic methods in generic classes, try to infer class type parameters
+                var inferredTypes = InferGenericTypesFromDataSources(member);
+                
+                foreach (var typeArgs in inferredTypes)
+                {
+                    if (typeArgs.Length <= _maxGenericDepth)
+                    {
+                        RegisterGenericTestInstantiation(classSymbol, typeArgs, GenericTestSource.DataSourceInference);
+                    }
+                }
             }
         }
+    }
+
+    /// <summary>
+    /// Infers generic type arguments from test data sources
+    /// </summary>
+    public IEnumerable<ITypeSymbol[]> InferGenericTypesFromDataSources(IMethodSymbol testMethod)
+    {
+        var inferredTypes = new HashSet<ITypeSymbol[]>(TypeArrayComparer.Instance);
+
+        // Infer from Arguments attributes
+        var argumentsTypes = InferTypesFromArgumentsAttributes(testMethod);
+        foreach (var types in argumentsTypes)
+        {
+            inferredTypes.Add(types);
+        }
+
+        // Infer from MethodDataSource attributes
+        var methodDataSourceTypes = InferTypesFromMethodDataSourceAttributes(testMethod);
+        foreach (var types in methodDataSourceTypes)
+        {
+            inferredTypes.Add(types);
+        }
+
+        // Infer from AsyncDataSourceGenerator attributes
+        var asyncDataSourceTypes = InferTypesFromAsyncDataSourceGeneratorAttributes(testMethod);
+        foreach (var types in asyncDataSourceTypes)
+        {
+            inferredTypes.Add(types);
+        }
+
+        return inferredTypes;
+    }
+
+    /// <summary>
+    /// Infers generic types from [Arguments] attributes
+    /// </summary>
+    private IEnumerable<ITypeSymbol[]> InferTypesFromArgumentsAttributes(IMethodSymbol testMethod)
+    {
+        var argumentsAttributes = testMethod.GetAttributes()
+            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute" || a.AttributeClass?.Name == "Arguments");
+
+        var inferredTypes = new HashSet<ITypeSymbol[]>(TypeArrayComparer.Instance);
+
+        foreach (var attribute in argumentsAttributes)
+        {
+            var types = ExtractTypesFromArgumentsAttribute(attribute, testMethod);
+            if (types.Length > 0)
+            {
+                inferredTypes.Add(types);
+            }
+        }
+
+        return inferredTypes;
+    }
+
+    /// <summary>
+    /// Infers generic types from [MethodDataSource] attributes
+    /// </summary>
+    private IEnumerable<ITypeSymbol[]> InferTypesFromMethodDataSourceAttributes(IMethodSymbol testMethod)
+    {
+        var methodDataSourceAttributes = testMethod.GetAttributes()
+            .Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
+
+        var inferredTypes = new HashSet<ITypeSymbol[]>(TypeArrayComparer.Instance);
+
+        foreach (var attribute in methodDataSourceAttributes)
+        {
+            var types = ExtractTypesFromMethodDataSourceAttribute(attribute, testMethod);
+            if (types.Length > 0)
+            {
+                inferredTypes.Add(types);
+            }
+        }
+
+        return inferredTypes;
+    }
+
+    /// <summary>
+    /// Infers generic types from AsyncDataSourceGenerator attributes
+    /// </summary>
+    private IEnumerable<ITypeSymbol[]> InferTypesFromAsyncDataSourceGeneratorAttributes(IMethodSymbol testMethod)
+    {
+        var asyncDataSourceAttributes = testMethod.GetAttributes()
+            .Where(a => a.AttributeClass?.Name.Contains("AsyncDataSourceGeneratorAttribute") == true);
+
+        var inferredTypes = new HashSet<ITypeSymbol[]>(TypeArrayComparer.Instance);
+
+        foreach (var attribute in asyncDataSourceAttributes)
+        {
+            var types = ExtractTypesFromAsyncDataSourceGeneratorAttribute(attribute);
+            if (types.Length > 0)
+            {
+                inferredTypes.Add(types);
+            }
+        }
+
+        return inferredTypes;
+    }
+
+    /// <summary>
+    /// Extracts type arguments from an Arguments attribute
+    /// </summary>
+    private ITypeSymbol[] ExtractTypesFromArgumentsAttribute(AttributeData attribute, IMethodSymbol testMethod)
+    {
+        if (attribute.ConstructorArguments.IsDefaultOrEmpty)
+        {
+            return Array.Empty<ITypeSymbol>();
+        }
+
+        var typeParameters = testMethod.TypeParameters;
+        var methodParameters = testMethod.Parameters;
+        
+        // For simple cases, map argument types to generic type parameters
+        var argumentTypes = new List<ITypeSymbol>();
+        var constructorArgs = attribute.ConstructorArguments;
+
+        for (int i = 0; i < constructorArgs.Length && i < methodParameters.Length; i++)
+        {
+            var argType = constructorArgs[i].Type;
+            var paramType = methodParameters[i].Type;
+
+            // If the parameter is a generic type parameter, use the argument's type
+            if (paramType is ITypeParameterSymbol typeParam && argType != null)
+            {
+                // Find the corresponding type parameter in the method's type parameters
+                var typeParamIndex = Array.IndexOf(typeParameters.ToArray(), typeParam);
+                if (typeParamIndex >= 0)
+                {
+                    // Ensure we have enough space in our list
+                    while (argumentTypes.Count <= typeParamIndex)
+                    {
+                        argumentTypes.Add(null!);
+                    }
+                    argumentTypes[typeParamIndex] = argType;
+                }
+            }
+        }
+
+        // Remove null entries and return
+        return argumentTypes.Where(t => t != null).ToArray();
+    }
+
+    /// <summary>
+    /// Extracts type arguments from a MethodDataSource attribute
+    /// </summary>
+    private ITypeSymbol[] ExtractTypesFromMethodDataSourceAttribute(AttributeData attribute, IMethodSymbol testMethod)
+    {
+        var methodName = attribute.ConstructorArguments.FirstOrDefault().Value?.ToString();
+        if (string.IsNullOrEmpty(methodName))
+            return Array.Empty<ITypeSymbol>();
+
+        var containingType = testMethod.ContainingType;
+        var dataSourceMethod = containingType.GetMembers(methodName!)
+            .OfType<IMethodSymbol>()
+            .FirstOrDefault();
+
+        if (dataSourceMethod?.ReturnType is not INamedTypeSymbol returnType)
+            return Array.Empty<ITypeSymbol>();
+
+        // Extract type from IEnumerable<T> or similar
+        return ExtractGenericTypesFromEnumerableReturnType(returnType, testMethod);
+    }
+
+    /// <summary>
+    /// Extracts type arguments from an AsyncDataSourceGenerator attribute
+    /// </summary>
+    private ITypeSymbol[] ExtractTypesFromAsyncDataSourceGeneratorAttribute(AttributeData attribute)
+    {
+        var attributeClass = attribute.AttributeClass;
+        if (attributeClass?.BaseType == null)
+            return Array.Empty<ITypeSymbol>();
+
+        // The base type should be AsyncDataSourceGeneratorAttribute<T1, T2, ...>
+        var baseType = attributeClass.BaseType;
+        while (baseType != null)
+        {
+            if (baseType.Name.StartsWith("AsyncDataSourceGeneratorAttribute") && baseType.IsGenericType)
+            {
+                return baseType.TypeArguments.ToArray();
+            }
+            baseType = baseType.BaseType;
+        }
+
+        return Array.Empty<ITypeSymbol>();
+    }
+
+    /// <summary>
+    /// Extracts generic types from enumerable return types like IEnumerable&lt;T&gt;
+    /// </summary>
+    private ITypeSymbol[] ExtractGenericTypesFromEnumerableReturnType(INamedTypeSymbol returnType, IMethodSymbol testMethod)
+    {
+        // Look for IEnumerable<T>, IEnumerable<(T1, T2)>, etc.
+        var enumerableInterface = returnType.AllInterfaces
+            .FirstOrDefault(i => i.Name == "IEnumerable" && i.IsGenericType);
+
+        if (enumerableInterface?.TypeArguments.FirstOrDefault() is ITypeSymbol elementType)
+        {
+            // Handle tuple types like (T1, T2)
+            if (elementType is INamedTypeSymbol namedType && namedType.IsTupleType)
+            {
+                return namedType.TupleElements.Select(e => e.Type).ToArray();
+            }
+            
+            // Handle single type T
+            return new[] { elementType };
+        }
+
+        return Array.Empty<ITypeSymbol>();
     }
 
     private void RegisterGenericTestInstantiation(INamedTypeSymbol originalType, ITypeSymbol[] typeArgs, GenericTestSource source)
@@ -334,5 +563,6 @@ internal enum GenericTestSource
 {
     ExplicitAttribute,
     ConcreteInheritance,
-    CallSiteAnalysis
+    CallSiteAnalysis,
+    DataSourceInference
 }

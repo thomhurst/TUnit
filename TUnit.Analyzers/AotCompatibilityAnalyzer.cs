@@ -46,12 +46,18 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (!hasGenerateGenericTestAttribute)
             {
-                var diagnostic = Diagnostic.Create(
-                    Rules.GenericTestMissingExplicitInstantiation,
-                    methodDeclaration.Identifier.GetLocation(),
-                    methodSymbol.Name);
+                // Check if types can be inferred from data sources
+                var canInferTypes = CanInferGenericTypes(methodSymbol);
+                
+                if (!canInferTypes)
+                {
+                    var diagnostic = Diagnostic.Create(
+                        Rules.GenericTestMissingExplicitInstantiation,
+                        methodDeclaration.Identifier.GetLocation(),
+                        methodSymbol.Name);
 
-                context.ReportDiagnostic(diagnostic);
+                    context.ReportDiagnostic(diagnostic);
+                }
             }
         }
 
@@ -62,12 +68,18 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (!hasGenerateGenericTestAttribute)
             {
-                var diagnostic = Diagnostic.Create(
-                    Rules.GenericTestMissingExplicitInstantiation,
-                    methodDeclaration.Identifier.GetLocation(),
-                    $"{methodSymbol.ContainingType.Name}.{methodSymbol.Name}");
+                // Check if types can be inferred from data sources
+                var canInferTypes = CanInferGenericTypes(methodSymbol);
+                
+                if (!canInferTypes)
+                {
+                    var diagnostic = Diagnostic.Create(
+                        Rules.GenericTestMissingExplicitInstantiation,
+                        methodDeclaration.Identifier.GetLocation(),
+                        $"{methodSymbol.ContainingType.Name}.{methodSymbol.Name}");
 
-                context.ReportDiagnostic(diagnostic);
+                    context.ReportDiagnostic(diagnostic);
+                }
             }
         }
     }
@@ -81,11 +93,12 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
 
         // Check if this class contains test methods
-        var hasTestMethods = classSymbol.GetMembers()
+        var testMethods = classSymbol.GetMembers()
             .OfType<IMethodSymbol>()
-            .Any(IsTestMethod);
+            .Where(IsTestMethod)
+            .ToList();
 
-        if (!hasTestMethods)
+        if (!testMethods.Any())
             return;
 
         // Check for generic test class without explicit instantiation
@@ -95,12 +108,18 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (!hasGenerateGenericTestAttribute)
             {
-                var diagnostic = Diagnostic.Create(
-                    Rules.GenericTestMissingExplicitInstantiation,
-                    classDeclaration.Identifier.GetLocation(),
-                    classSymbol.Name);
+                // Check if types can be inferred from any test method's data sources
+                var canInferTypes = testMethods.Any(CanInferGenericTypes);
+                
+                if (!canInferTypes)
+                {
+                    var diagnostic = Diagnostic.Create(
+                        Rules.GenericTestMissingExplicitInstantiation,
+                        classDeclaration.Identifier.GetLocation(),
+                        classSymbol.Name);
 
-                context.ReportDiagnostic(diagnostic);
+                    context.ReportDiagnostic(diagnostic);
+                }
             }
         }
     }
@@ -179,6 +198,41 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         return symbol.GetAttributes().Any(attr =>
             attr.AttributeClass?.Name == "GenerateGenericTestAttribute");
+    }
+
+    /// <summary>
+    /// Checks if generic types can be inferred from test method data sources
+    /// </summary>
+    private static bool CanInferGenericTypes(IMethodSymbol method)
+    {
+        // Check for Arguments attributes that could provide type inference
+        var hasArgumentsAttributes = method.GetAttributes()
+            .Any(a => a.AttributeClass?.Name == "ArgumentsAttribute" || a.AttributeClass?.Name == "Arguments");
+        
+        if (hasArgumentsAttributes)
+        {
+            return true; // Arguments attributes can provide type inference
+        }
+        
+        // Check for MethodDataSource attributes
+        var hasMethodDataSourceAttributes = method.GetAttributes()
+            .Any(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
+        
+        if (hasMethodDataSourceAttributes)
+        {
+            return true; // MethodDataSource attributes can provide type inference
+        }
+        
+        // Check for AsyncDataSourceGenerator attributes
+        var hasAsyncDataSourceGeneratorAttributes = method.GetAttributes()
+            .Any(a => a.AttributeClass?.Name.Contains("AsyncDataSourceGeneratorAttribute") == true);
+        
+        if (hasAsyncDataSourceGeneratorAttributes)
+        {
+            return true; // AsyncDataSourceGenerator attributes can provide type inference
+        }
+        
+        return false;
     }
 
     private static bool IsInTestContext(SyntaxNodeAnalysisContext context)
