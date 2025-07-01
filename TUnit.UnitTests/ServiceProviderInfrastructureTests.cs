@@ -1,3 +1,4 @@
+using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Core;
 using TUnit.Core.Services;
 
@@ -33,7 +34,7 @@ public class ServiceProviderInfrastructureTests
         var factoryCallCount = 0;
 
         // Act
-        serviceProvider.RegisterFactory<ITestService>(() => 
+        serviceProvider.RegisterFactory<ITestService>(() =>
         {
             factoryCallCount++;
             return new TestService { Name = $"Factory Service {factoryCallCount}" };
@@ -59,9 +60,9 @@ public class ServiceProviderInfrastructureTests
         // Act & Assert
         await Assert.That(() => serviceProvider.GetRequiredService<ITestService>())
             .Throws<InvalidOperationException>()
-            .WithMessage().Containing("Service of type")
-            .And.Containing("ITestService")
-            .And.Containing("is not registered");
+            .WithMessageContaining("Service of type")
+            .And.HasMessageContaining("ITestService")
+            .And.HasMessageContaining("is not registered");
     }
 
     [Test]
