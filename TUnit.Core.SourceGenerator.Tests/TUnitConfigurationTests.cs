@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Core.SourceGenerator.Configuration;
 
 namespace TUnit.Core.SourceGenerator.Tests;

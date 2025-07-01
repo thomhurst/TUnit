@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.Exceptions;
 
 namespace TUnit.Core.Interfaces;
 

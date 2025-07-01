@@ -7,7 +7,7 @@ public static class FilePolyfill
 #if NETFRAMEWORK
         return await Task.Run(() => File.ReadAllText(path));
 #else
-        return await File.ReadAllTextAsync(path);
+        return await FilePolyfill.ReadAllTextAsync(path);
 #endif
     }
 
