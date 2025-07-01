@@ -64,7 +64,7 @@ internal class UnifiedReflectionFreeTests : TestsBase<UnifiedTestMetadataGenerat
             """);
         }
 
-        var source = await File.ReadAllTextAsync(classFile);
+        var source = await FilePolyfill.ReadAllTextAsync(classFile);
 
         var (compilation, diagnostics) = await Verifier.GetGeneratedOutput<UnifiedTestMetadataGenerator>(
             source,

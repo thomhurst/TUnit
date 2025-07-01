@@ -42,7 +42,7 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
     public async Task RunTest(string inputFile, RunTestOptions runTestOptions, Func<string[], Task> assertions)
     {
 #if NET
-        var source = await File.ReadAllTextAsync(inputFile);
+        var source = await FilePolyfill.ReadAllTextAsync(inputFile);
 #else
         var source = File.ReadAllText(inputFile);
 #endif
@@ -85,7 +85,7 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
             public class UnconditionalSuppressMessageAttribute : Attribute;
             """,
 #if NET
-            ..await Task.WhenAll(runTestOptions.AdditionalFiles.Select(x => File.ReadAllTextAsync(x))),
+            ..await Task.WhenAll(runTestOptions.AdditionalFiles.Select(x => FilePolyfill.ReadAllTextAsync(x))),
 #else
             ..runTestOptions.AdditionalFiles.Select(x => File.ReadAllText(x)),
 #endif
