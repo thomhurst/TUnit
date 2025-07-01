@@ -98,7 +98,7 @@ public class AotCompatibilityAnalyzerTests
 
 
     [Test]
-    public async Task ClassDataSourceAttribute_ShowsError()
+    public async Task ClassDataSourceAttribute_WithTypeof_NoError()
     {
         var source = """
             using TUnit.Core;
@@ -107,15 +107,100 @@ public class AotCompatibilityAnalyzerTests
 
             public class TestClass
             {
-                [{|TUnit0059:ClassDataSource(typeof(DataProvider))|}, Test]
-                public void TestMethod(int value)
+                [ClassDataSource(typeof(DataProvider)), Test]
+                public void TestMethod(DataProvider value)
                 {
                 }
             }
 
             public class DataProvider
             {
-                public static IEnumerable<int> GetData() => [1, 2, 3];
+                public string Name { get; set; }
+            }
+            """;
+
+        await CSharpAnalyzerVerifier<AotCompatibilityAnalyzer>.VerifyAnalyzerAsync(source);
+    }
+
+    [Test]
+    public async Task ClassDataSourceAttribute_WithParamsArray_ShowsError()
+    {
+        var source = """
+            using TUnit.Core;
+
+            namespace TestProject;
+
+            public class TestClass
+            {
+                [{|TUnit0059:ClassDataSource(new[] { typeof(DataProvider), typeof(DataProvider2) })|}, Test]
+                public void TestMethod(object[] values)
+                {
+                }
+            }
+
+            public class DataProvider
+            {
+                public string Name { get; set; }
+            }
+
+            public class DataProvider2
+            {
+                public int Id { get; set; }
+            }
+            """;
+
+        await CSharpAnalyzerVerifier<AotCompatibilityAnalyzer>.VerifyAnalyzerAsync(source);
+    }
+
+    [Test]
+    public async Task ClassDataSourceAttribute_WithMultipleTypeof_NoError()
+    {
+        var source = """
+            using TUnit.Core;
+
+            namespace TestProject;
+
+            public class TestClass
+            {
+                [ClassDataSource(typeof(DataProvider), typeof(DataProvider2)), Test]
+                public void TestMethod(DataProvider value1, DataProvider2 value2)
+                {
+                }
+            }
+
+            public class DataProvider
+            {
+                public string Name { get; set; }
+            }
+
+            public class DataProvider2
+            {
+                public int Id { get; set; }
+            }
+            """;
+
+        await CSharpAnalyzerVerifier<AotCompatibilityAnalyzer>.VerifyAnalyzerAsync(source);
+    }
+
+    [Test]
+    public async Task GenericClassDataSourceAttribute_NoError()
+    {
+        var source = """
+            using TUnit.Core;
+
+            namespace TestProject;
+
+            public class TestClass
+            {
+                [ClassDataSource<DataProvider>(), Test]
+                public void TestMethod(DataProvider value)
+                {
+                }
+            }
+
+            public class DataProvider
+            {
+                public string Name { get; set; }
             }
             """;
 

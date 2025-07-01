@@ -158,7 +158,29 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         }
         else if (attributeTypeName == "ClassDataSourceAttribute")
         {
-            // ClassDataSource is always dynamic since it uses Type parameters
+            // Check if it's the generic version ClassDataSourceAttribute<T> which is AOT-compatible
+            if (attributeSymbol.ContainingType.IsGenericType)
+            {
+                // Generic version inherits from AsyncDataSourceGeneratorAttribute<T> and is AOT-compatible
+                return;
+            }
+            
+            // For non-generic version, check if it's using one of the specific constructors (1-5 parameters)
+            // which have proper DynamicallyAccessedMembers attributes and are AOT-compatible
+            if (attribute.ArgumentList?.Arguments.Count >= 1 && attribute.ArgumentList?.Arguments.Count <= 5)
+            {
+                // Check if all arguments are typeof() expressions (compile-time constants)
+                var allArgumentsAreTypeOf = attribute.ArgumentList.Arguments.All(arg =>
+                    arg.Expression is TypeOfExpressionSyntax);
+                
+                if (allArgumentsAreTypeOf)
+                {
+                    // Using specific constructors with typeof() - these are AOT-compatible
+                    return;
+                }
+            }
+            
+            // Using params constructor or dynamic types - not AOT-compatible
             var diagnostic = Diagnostic.Create(
                 Rules.DynamicDataSourceNotAotCompatible,
                 attribute.GetLocation(),

@@ -22,8 +22,8 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-[RequiresDynamicCode("ClassDataSourceAttribute requires dynamic code generation for runtime type instantiation and reflection. This attribute is inherently incompatible with AOT compilation.")]
-[RequiresUnreferencedCode("ClassDataSourceAttribute may require unreferenced code for type reflection and instantiation. This attribute is inherently incompatible with AOT compilation.")]
+[UnconditionalSuppressMessage("Trimming", "IL2109:Type derives from type with 'RequiresUnreferencedCodeAttribute' which can break functionality when trimming application code", 
+    Justification = "The specific constructors (1-5 parameters) are AOT-compatible when used with typeof() expressions. Only the params constructor is incompatible.")]
 public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribute, ISharedDataSourceAttribute
 {
     private readonly Type[] _types;
