@@ -50,7 +50,7 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             if (!hasGenerateGenericTestAttribute)
             {
                 // Check if types can be inferred from data sources
-                var canInferTypes = CanInferGenericTypes(methodSymbol);
+                var canInferTypes = CanInferGenericTypes(methodSymbol, context.Compilation);
                 
                 if (!canInferTypes)
                 {
@@ -72,7 +72,7 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             if (!hasGenerateGenericTestAttribute)
             {
                 // Check if types can be inferred from data sources
-                var canInferTypes = CanInferGenericTypes(methodSymbol);
+                var canInferTypes = CanInferGenericTypes(methodSymbol, context.Compilation);
                 
                 if (!canInferTypes)
                 {
@@ -117,7 +117,7 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             if (!hasGenerateGenericTestAttribute)
             {
                 // Check if types can be inferred from any test method's data sources
-                var canInferTypes = testMethods.Any(CanInferGenericTypes);
+                var canInferTypes = testMethods.Any(m => CanInferGenericTypes(m, context.Compilation));
                 
                 // Check if this generic class is used as a base class for InheritsTests pattern
                 var isUsedAsInheritsTestsBase = IsUsedAsInheritsTestsBase(classSymbol, context.Compilation);
@@ -209,24 +209,33 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
     /// <summary>
     /// Checks if generic types can be inferred from test method data sources
     /// </summary>
-    private static bool CanInferGenericTypes(IMethodSymbol method)
+    private static bool CanInferGenericTypes(IMethodSymbol method, Compilation compilation)
     {
+
         // Check for Arguments attributes that could provide type inference
-        var hasArgumentsAttributes = method.GetAttributes()
-            .Any(a => a.AttributeClass?.Name == "ArgumentsAttribute" || a.AttributeClass?.Name == "Arguments");
-        
-        if (hasArgumentsAttributes)
+        var argumentsType = compilation.GetTypeByMetadataName("TUnit.Core.ArgumentsAttribute");
+        if (argumentsType != null)
         {
-            return true; // Arguments attributes can provide type inference
+            var hasArgumentsAttributes = method.GetAttributes()
+                .Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, argumentsType));
+            
+            if (hasArgumentsAttributes)
+            {
+                return true; // Arguments attributes can provide type inference
+            }
         }
         
         // Check for MethodDataSource attributes
-        var hasMethodDataSourceAttributes = method.GetAttributes()
-            .Any(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
-        
-        if (hasMethodDataSourceAttributes)
+        var methodDataSourceType = compilation.GetTypeByMetadataName("TUnit.Core.MethodDataSourceAttribute");
+        if (methodDataSourceType != null)
         {
-            return true; // MethodDataSource attributes can provide type inference
+            var hasMethodDataSourceAttributes = method.GetAttributes()
+                .Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, methodDataSourceType));
+            
+            if (hasMethodDataSourceAttributes)
+            {
+                return true; // MethodDataSource attributes can provide type inference
+            }
         }
         
         // Check for AsyncDataSourceGenerator attributes
@@ -239,10 +248,10 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         }
         
         // For generic classes, also check class-level Arguments attributes
-        if (method.ContainingType.IsGenericType)
+        if (method.ContainingType.IsGenericType && argumentsType != null)
         {
             var hasClassLevelArguments = method.ContainingType.GetAttributes()
-                .Any(a => a.AttributeClass?.Name == "ArgumentsAttribute" || a.AttributeClass?.Name == "Arguments");
+                .Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, argumentsType));
                 
             if (hasClassLevelArguments)
             {
