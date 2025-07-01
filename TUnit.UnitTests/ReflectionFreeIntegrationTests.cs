@@ -1,4 +1,5 @@
 using TUnit.Core;
+using TUnit.Core.Services;
 
 namespace TUnit.UnitTests;
 
