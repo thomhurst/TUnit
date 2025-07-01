@@ -50,7 +50,7 @@ internal sealed class DelegateGenerator
     private void GenerateInstanceFactoryRegistration(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        var safeClassName = testInfo.TypeSymbol.Name.Replace(".", "_");
+        var safeFactoryName = GetSafeFactoryMethodName(testInfo.TypeSymbol);
         
         // Safety check: don't generate if type contains type parameters
         if (ContainsTypeParameter(testInfo.TypeSymbol))
@@ -59,7 +59,20 @@ internal sealed class DelegateGenerator
             return;
         }
         
-        writer.AppendLine($"TestDelegateStorage.RegisterInstanceFactory(\"{className}\", args => new {className}({GenerateConstructorArgs(testInfo)}));");
+        // Check if the class has required properties with data source attributes
+        var hasRequiredPropertiesWithDataSource = HasRequiredPropertiesWithDataSource(testInfo.TypeSymbol);
+        
+        if (hasRequiredPropertiesWithDataSource)
+        {
+            // For classes with required properties that will be populated by data sources,
+            // we need to generate a factory that provides default values
+            writer.AppendLine($"TestDelegateStorage.RegisterInstanceFactory(\"{className}\", {safeFactoryName}_Factory);");
+        }
+        else
+        {
+            // Standard instantiation
+            writer.AppendLine($"TestDelegateStorage.RegisterInstanceFactory(\"{className}\", args => new {className}({GenerateConstructorArgs(testInfo)}));");
+        }
     }
 
     private void GenerateTestInvokerRegistration(CodeWriter writer, TestMethodMetadata testInfo)
@@ -160,7 +173,7 @@ internal sealed class DelegateGenerator
         return string.Join(", ", argList);
     }
     
-    private static bool ContainsTypeParameter(ITypeSymbol type)
+    internal static bool ContainsTypeParameter(ITypeSymbol type)
     {
         if (type is ITypeParameterSymbol)
         {
@@ -178,5 +191,101 @@ internal sealed class DelegateGenerator
         }
 
         return false;
+    }
+    
+    private bool HasRequiredPropertiesWithDataSource(ITypeSymbol typeSymbol)
+    {
+        foreach (var member in typeSymbol.GetMembers().OfType<IPropertySymbol>())
+        {
+            // Check if it's a required property
+            if (!member.IsRequired)
+                continue;
+                
+            // Check if it has any data source attributes
+            var hasDataSourceAttr = member.GetAttributes().Any(a => 
+                a.AttributeClass?.Name == "ClassDataSourceAttribute" ||
+                a.AttributeClass?.Name == "MethodDataSourceAttribute" ||
+                a.AttributeClass?.Name == "DataSourceForAttribute" ||
+                a.AttributeClass?.AllInterfaces.Any(i => i.Name == "IDataAttribute") == true);
+                
+            if (hasDataSourceAttr)
+                return true;
+        }
+        
+        return false;
+    }
+    
+    private string GetSafeFactoryMethodName(ITypeSymbol typeSymbol)
+    {
+        // Use the full namespace and class name to ensure uniqueness
+        var fullName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        
+        // Remove global:: prefix and replace invalid characters
+        var safeName = fullName
+            .Replace("global::", "")
+            .Replace(".", "_")
+            .Replace("<", "_")
+            .Replace(">", "_")
+            .Replace(",", "_")
+            .Replace(" ", "")
+            .Replace("::", "_");
+            
+        return safeName;
+    }
+    
+    /// <summary>
+    /// Generates factory methods for classes with required properties
+    /// </summary>
+    public void GenerateRequiredPropertyFactories(CodeWriter writer, IEnumerable<TestMethodMetadata> testMethods)
+    {
+        var processedTypes = new HashSet<string>();
+        
+        foreach (var testInfo in testMethods)
+        {
+            if (!HasRequiredPropertiesWithDataSource(testInfo.TypeSymbol))
+                continue;
+                
+            var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var safeFactoryName = GetSafeFactoryMethodName(testInfo.TypeSymbol);
+            
+            if (!processedTypes.Add(className))
+                continue;
+                
+            writer.AppendLine($"private static object {safeFactoryName}_Factory(object?[] args)");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            // Generate constructor arguments
+            var ctorArgs = GenerateConstructorArgs(testInfo);
+            
+            writer.AppendLine($"return new {className}({ctorArgs})");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            // Initialize required properties with default values
+            foreach (var member in testInfo.TypeSymbol.GetMembers().OfType<IPropertySymbol>())
+            {
+                if (!member.IsRequired)
+                    continue;
+                    
+                var hasDataSourceAttr = member.GetAttributes().Any(a => 
+                    a.AttributeClass?.Name == "ClassDataSourceAttribute" ||
+                    a.AttributeClass?.Name == "MethodDataSourceAttribute" ||
+                    a.AttributeClass?.Name == "DataSourceForAttribute" ||
+                    a.AttributeClass?.AllInterfaces.Any(i => i.Name == "IDataAttribute") == true);
+                    
+                if (hasDataSourceAttr)
+                {
+                    // Provide a default value - the runtime will replace it with the actual value
+                    writer.AppendLine($"{member.Name} = default!,");
+                }
+            }
+            
+            writer.Unindent();
+            writer.AppendLine("};");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine();
+        }
     }
 }

@@ -163,6 +163,11 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         // Skip generic methods without explicit instantiation
         if (methodSymbol is IMethodSymbol method && method.IsGenericMethod)
             return null;
+            
+        // Also skip if method has parameters with unresolved type parameters
+        if (methodSymbol is IMethodSymbol methodWithParams && 
+            methodWithParams.Parameters.Any(p => DelegateGenerator.ContainsTypeParameter(p.Type)))
+            return null;
 
         return new TestMethodMetadata
         {
@@ -576,6 +581,11 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             writer.AppendLine();
             writer.AppendLine("// Helper methods");
             GenerateHelperMethods(writer, dataSourceGenerator, testMethods);
+            
+            // Generate factory methods for classes with required properties
+            writer.AppendLine();
+            writer.AppendLine("// Factory methods for classes with required properties");
+            delegateGenerator.GenerateRequiredPropertyFactories(writer, testMethods);
 
             // Generate delegate implementations
             writer.AppendLine();
@@ -625,6 +635,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("using System.Runtime.CompilerServices;");
         writer.AppendLine("using System.Threading;");
         writer.AppendLine("using System.Threading.Tasks;");
+        writer.AppendLine("using System.Runtime;");
         writer.AppendLine("using global::TUnit.Core;");
         writer.AppendLine("using global::TUnit.Core.Services;");
         writer.AppendLine($"namespace {GeneratedNamespace};");
@@ -750,6 +761,9 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         {
             GenerateConvertToSyncHelper(writer);
         }
+        
+        // Always generate the conversion helper for data sources
+        dataSourceGenerator.GenerateConversionHelpers(writer);
     }
 
     private void GenerateConvertToSyncHelper(CodeWriter writer)

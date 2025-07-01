@@ -44,6 +44,7 @@ internal sealed class MetadataGenerator
         GenerateBasicMetadata(writer, testInfo);
         GenerateTestAttributes(writer, testInfo);
         _dataSourceGenerator.GenerateDataSourceMetadata(writer, testInfo);
+        GeneratePropertyDataSources(writer, testInfo);
         GenerateParameterTypes(writer, testInfo);
         _hookGenerator.GenerateHookMetadata(writer, testInfo);
         GenerateDelegateReferences(writer, testInfo);
@@ -225,6 +226,15 @@ internal sealed class MetadataGenerator
             return;
         }
 
+        // Check if any parameter contains unresolved type parameters
+        var hasUnresolvedTypeParameters = parameters.Any(p => DelegateGenerator.ContainsTypeParameter(p.Type));
+        if (hasUnresolvedTypeParameters)
+        {
+            // For methods with unresolved type parameters, we can't generate typeof() at compile time
+            writer.AppendLine("ParameterTypes = Type.EmptyTypes, // Method has unresolved type parameters");
+            return;
+        }
+
         writer.AppendLine("ParameterTypes = new Type[]");
         writer.AppendLine("{");
         writer.Indent();
@@ -246,5 +256,111 @@ internal sealed class MetadataGenerator
 
         writer.AppendLine($"InstanceFactory = TestDelegateStorage.GetInstanceFactory(\"{className}\"),");
         writer.AppendLine($"TestInvoker = TestDelegateStorage.GetTestInvoker(\"{className}.{methodName}\"),");
+    }
+
+    private void GeneratePropertyDataSources(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        var propertyDataSources = new List<(string name, ITypeSymbol type, AttributeData attr)>();
+        
+        // Find all properties with data source attributes
+        foreach (var member in testInfo.TypeSymbol.GetMembers().OfType<IPropertySymbol>())
+        {
+            // Check for ClassDataSource attribute
+            var classDataSourceAttr = member.GetAttributes()
+                .FirstOrDefault(a => a.AttributeClass?.Name == "ClassDataSourceAttribute");
+            if (classDataSourceAttr != null)
+            {
+                propertyDataSources.Add((member.Name, member.Type, classDataSourceAttr));
+                continue;
+            }
+            
+            // Check for MethodDataSource attribute on properties
+            var methodDataSourceAttr = member.GetAttributes()
+                .FirstOrDefault(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
+            if (methodDataSourceAttr != null)
+            {
+                propertyDataSources.Add((member.Name, member.Type, methodDataSourceAttr));
+                continue;
+            }
+            
+            // Check for other data source attributes (e.g., custom attributes)
+            var dataSourceAttrs = member.GetAttributes()
+                .Where(a => a.AttributeClass?.AllInterfaces.Any(i => i.Name == "IDataAttribute") == true)
+                .ToList();
+            foreach (var attr in dataSourceAttrs)
+            {
+                propertyDataSources.Add((member.Name, member.Type, attr));
+            }
+        }
+
+        if (!propertyDataSources.Any())
+        {
+            writer.AppendLine("PropertyDataSources = Array.Empty<PropertyDataSource>(),");
+            return;
+        }
+
+        writer.AppendLine("PropertyDataSources = new PropertyDataSource[]");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        foreach (var (propName, propType, attr) in propertyDataSources)
+        {
+            writer.AppendLine("new PropertyDataSource");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            writer.AppendLine($"PropertyName = \"{propName}\",");
+            writer.AppendLine($"PropertyType = typeof({propType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
+            
+            // Generate the appropriate data source based on attribute type
+            GeneratePropertyDataSourceInstance(writer, attr, testInfo.TypeSymbol, propName);
+            
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
+
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+
+    private void GeneratePropertyDataSourceInstance(CodeWriter writer, AttributeData attr, ITypeSymbol classType, string propertyName)
+    {
+        if (attr.AttributeClass?.Name == "ClassDataSourceAttribute")
+        {
+            // ClassDataSource typically creates a single instance
+            var factoryKey = $"{classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{propertyName}_ClassDataSource";
+            var sharedType = GetSharedTypeFromAttribute(attr);
+            var isShared = sharedType != "None";
+            
+            writer.AppendLine($"DataSource = new DynamicTestDataSource({isShared.ToString().ToLower()}) {{ FactoryKey = \"{factoryKey}\" }}");
+        }
+        else if (attr.AttributeClass?.Name == "MethodDataSourceAttribute")
+        {
+            // MethodDataSource references a method
+            var methodName = attr.ConstructorArguments.FirstOrDefault().Value?.ToString();
+            if (!string.IsNullOrEmpty(methodName))
+            {
+                var factoryKey = $"{classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{methodName}";
+                writer.AppendLine($"DataSource = new DynamicTestDataSource(false) {{ FactoryKey = \"{factoryKey}\" }}");
+            }
+        }
+        else
+        {
+            // For custom data attributes, use a generic approach
+            var factoryKey = $"{classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{propertyName}_DataSource";
+            writer.AppendLine($"DataSource = new DynamicTestDataSource(false) {{ FactoryKey = \"{factoryKey}\" }}");
+        }
+    }
+
+    private string GetSharedTypeFromAttribute(AttributeData attr)
+    {
+        // Look for Shared property in named arguments
+        var sharedArg = attr.NamedArguments.FirstOrDefault(na => na.Key == "Shared");
+        if (sharedArg.Key != null)
+        {
+            var value = sharedArg.Value.Value?.ToString();
+            return value ?? "None";
+        }
+        return "None";
     }
 }

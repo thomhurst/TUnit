@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -123,12 +124,22 @@ internal sealed class DataSourceGenerator
         if (methodSymbol == null)
             return null;
 
+        // Extract Arguments property if present
+        var argumentsValue = attribute.NamedArguments
+            .FirstOrDefault(na => na.Key == "Arguments")
+            .Value;
+            
+        var methodArguments = argumentsValue.Kind == TypedConstantKind.Array 
+            ? argumentsValue.Values 
+            : default(ImmutableArray<TypedConstant>);
+
         return new DataSourceInfo
         {
             FactoryKey = $"{sourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{methodName}",
             MethodSymbol = methodSymbol,
             SourceType = sourceType,
-            IsAsync = IsAsyncDataSource(methodSymbol)
+            IsAsync = IsAsyncDataSource(methodSymbol),
+            MethodArguments = methodArguments
         };
     }
 
@@ -167,11 +178,17 @@ internal sealed class DataSourceGenerator
         var methodSymbol = dataSource.MethodSymbol!;
         var className = dataSource.SourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
+        // Generate method arguments if any
+        var methodArgs = GenerateMethodArguments(dataSource);
+
         if (dataSource.IsAsync)
         {
             // All async methods need to be converted to sync using ConvertToSync helper
             var hasCancellationToken = methodSymbol.Parameters.Any(p => p.Type.Name == "CancellationToken");
-            var methodCall = hasCancellationToken ? $"{className}.{methodSymbol.Name}(ct)" : $"{className}.{methodSymbol.Name}()";
+            var ctParam = hasCancellationToken && string.IsNullOrEmpty(methodArgs) ? "ct" : 
+                         hasCancellationToken && !string.IsNullOrEmpty(methodArgs) ? $"{methodArgs}, ct" : 
+                         methodArgs;
+            var methodCall = $"{className}.{methodSymbol.Name}({ctParam})";
             
             // Generate a named async iterator method for this data source
             var methodName = $"AsyncDataSourceWrapper_{SafeMethodName(methodSymbol)}";
@@ -184,7 +201,20 @@ internal sealed class DataSourceGenerator
         }
         else
         {
-            writer.AppendLine($"return {className}.{methodSymbol.Name}();");
+            // Check the return type and generate appropriate conversion
+            var returnType = methodSymbol.ReturnType;
+            var methodCall = $"{className}.{methodSymbol.Name}({methodArgs})";
+            
+            if (IsObjectArrayEnumerable(returnType))
+            {
+                // Already returns IEnumerable<object?[]>
+                writer.AppendLine($"return {methodCall};");
+            }
+            else
+            {
+                // Need to convert to IEnumerable<object?[]>
+                writer.AppendLine($"return ConvertToObjectArrays({methodCall});");
+            }
         }
     }
 
@@ -245,6 +275,21 @@ internal sealed class DataSourceGenerator
     private bool IsObjectArrayType(ITypeSymbol type)
     {
         return type.ToDisplayString() == "object[]" || type.ToDisplayString() == "object?[]";
+    }
+    
+    private bool IsObjectArrayEnumerable(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            var typeName = namedType.Name;
+            if (typeName == "IEnumerable" || typeName == "IAsyncEnumerable" || 
+                typeName == "List" || typeName == "Array")
+            {
+                var elementType = namedType.TypeArguments.FirstOrDefault();
+                return elementType != null && IsObjectArrayType(elementType);
+            }
+        }
+        return false;
     }
 
     private bool IsTupleType(ITypeSymbol type)
@@ -316,6 +361,166 @@ internal sealed class DataSourceGenerator
         writer.AppendLine("}");
         writer.AppendLine();
     }
+    
+    /// <summary>
+    /// Generates a helper method that converts various data source return types to IEnumerable<object?[]>
+    /// </summary>
+    public void GenerateConversionHelpers(CodeWriter writer)
+    {
+        writer.AppendLine("private static IEnumerable<object?[]> ConvertToObjectArrays(object data)");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        writer.AppendLine("switch (data)");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Handle IEnumerable<object?[]> - pass through
+        writer.AppendLine("case IEnumerable<object?[]> objectArrays:");
+        writer.Indent();
+        writer.AppendLine("return objectArrays;");
+        writer.Unindent();
+        
+        // Handle single values
+        writer.AppendLine("case string str:");
+        writer.AppendLine("case int i:");
+        writer.AppendLine("case long l:");
+        writer.AppendLine("case double d:");
+        writer.AppendLine("case float f:");
+        writer.AppendLine("case decimal dec:");
+        writer.AppendLine("case bool b:");
+        writer.AppendLine("case char c:");
+        writer.AppendLine("case byte bt:");
+        writer.AppendLine("case sbyte sb:");
+        writer.AppendLine("case short s:");
+        writer.AppendLine("case ushort us:");
+        writer.AppendLine("case uint ui:");
+        writer.AppendLine("case ulong ul:");
+        writer.Indent();
+        writer.AppendLine("return new[] { new object?[] { data } };");
+        writer.Unindent();
+        
+        // Handle arrays of primitives
+        writer.AppendLine("case int[] intArray:");
+        writer.Indent();
+        writer.AppendLine("return intArray.Select(x => new object?[] { x });");
+        writer.Unindent();
+        
+        writer.AppendLine("case string[] stringArray:");
+        writer.Indent();
+        writer.AppendLine("return stringArray.Select(x => new object?[] { x });");
+        writer.Unindent();
+        
+        // Handle IEnumerable<T> where T is not object[]
+        writer.AppendLine("case System.Collections.IEnumerable enumerable:");
+        writer.Indent();
+        writer.AppendLine("var result = new List<object?[]>();");
+        writer.AppendLine("foreach (var item in enumerable)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("// Handle tuples - check for common tuple types");
+        writer.AppendLine("var itemType = item?.GetType();");
+        writer.AppendLine("if (itemType != null && itemType.IsGenericType)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("var genericTypeDef = itemType.GetGenericTypeDefinition();");
+        writer.AppendLine("var typeName = genericTypeDef.FullName;");
+        writer.AppendLine("if (typeName != null && typeName.StartsWith(\"System.ValueTuple`\"))");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("// Extract tuple items using reflection");
+        writer.AppendLine("var fields = itemType.GetFields();");
+        writer.AppendLine("var tupleItems = new object?[fields.Length];");
+        writer.AppendLine("for (int i = 0; i < fields.Length; i++)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("tupleItems[i] = fields[i].GetValue(item);");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("result.Add(tupleItems);");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("else if (item is object?[] objArray)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("result.Add(objArray);");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("else");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("result.Add(new object?[] { item });");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("return result;");
+        writer.Unindent();
+        
+        // Handle single Func values
+        writer.AppendLine("case System.Func<object> func:");
+        writer.AppendLine("case System.Delegate del:");
+        writer.Indent();
+        writer.AppendLine("return new[] { new object?[] { data } };");
+        writer.Unindent();
+        
+        // Default case
+        writer.AppendLine("default:");
+        writer.Indent();
+        writer.AppendLine("throw new InvalidOperationException($\"Cannot convert {data?.GetType()?.FullName ?? \"null\"} to IEnumerable<object?[]>\");");
+        writer.Unindent();
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+    }
+    
+    private string GenerateMethodArguments(DataSourceInfo dataSource)
+    {
+        if (dataSource.MethodArguments == null || dataSource.MethodArguments.Length == 0)
+            return string.Empty;
+            
+        var args = new List<string>();
+        foreach (var arg in dataSource.MethodArguments)
+        {
+            args.Add(FormatArgumentValue(arg));
+        }
+        
+        return string.Join(", ", args);
+    }
+    
+    private string FormatArgumentValue(TypedConstant arg)
+    {
+        if (arg.IsNull)
+            return "null";
+            
+        switch (arg.Kind)
+        {
+            case TypedConstantKind.Primitive:
+                if (arg.Type?.SpecialType == SpecialType.System_String)
+                    return $"\"{arg.Value}\"";
+                if (arg.Type?.SpecialType == SpecialType.System_Char)
+                    return $"'{arg.Value}'";
+                if (arg.Type?.SpecialType == SpecialType.System_Boolean)
+                    return arg.Value?.ToString()?.ToLowerInvariant() ?? "false";
+                return arg.Value?.ToString() ?? "null";
+                
+            case TypedConstantKind.Type:
+                var type = (ITypeSymbol)arg.Value!;
+                return $"typeof({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
+                
+            case TypedConstantKind.Array:
+                var elements = arg.Values.Select(FormatArgumentValue);
+                return $"new[] {{ {string.Join(", ", elements)} }}";
+                
+            default:
+                return "null";
+        }
+    }
 
 
     private class DataSourceInfo
@@ -325,5 +530,6 @@ internal sealed class DataSourceGenerator
         public IPropertySymbol? PropertySymbol { get; init; }
         public required ITypeSymbol SourceType { get; init; }
         public required bool IsAsync { get; init; }
+        public ImmutableArray<TypedConstant> MethodArguments { get; init; }
     }
 }
