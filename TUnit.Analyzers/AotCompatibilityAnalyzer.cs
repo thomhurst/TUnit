@@ -238,24 +238,56 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             }
         }
         
-        // Check for AsyncDataSourceGenerator attributes
-        var hasAsyncDataSourceGeneratorAttributes = method.GetAttributes()
-            .Any(a => a.AttributeClass?.Name.Contains("AsyncDataSourceGeneratorAttribute") == true);
-        
-        if (hasAsyncDataSourceGeneratorAttributes)
+        // Check for AsyncDataSourceGenerator attributes (implementations of IAsyncDataSourceGeneratorAttribute)
+        var asyncDataSourceInterface = compilation.GetTypeByMetadataName("TUnit.Core.IAsyncDataSourceGeneratorAttribute");
+        if (asyncDataSourceInterface != null)
         {
-            return true; // AsyncDataSourceGenerator attributes can provide type inference
+            var hasAsyncDataSourceGeneratorAttributes = method.GetAttributes()
+                .Any(a => a.AttributeClass?.AllInterfaces.Contains(asyncDataSourceInterface, SymbolEqualityComparer.Default) == true);
+            
+            if (hasAsyncDataSourceGeneratorAttributes)
+            {
+                return true; // AsyncDataSourceGenerator attributes can provide type inference
+            }
         }
         
-        // For generic classes, also check class-level Arguments attributes
-        if (method.ContainingType.IsGenericType && argumentsType != null)
+        // For generic classes, also check class-level data source attributes
+        if (method.ContainingType.IsGenericType)
         {
-            var hasClassLevelArguments = method.ContainingType.GetAttributes()
-                .Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, argumentsType));
-                
-            if (hasClassLevelArguments)
+            // Check class-level Arguments attributes
+            if (argumentsType != null)
             {
-                return true; // Class-level Arguments attributes can provide type inference
+                var hasClassLevelArguments = method.ContainingType.GetAttributes()
+                    .Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, argumentsType));
+                    
+                if (hasClassLevelArguments)
+                {
+                    return true; // Class-level Arguments attributes can provide type inference
+                }
+            }
+            
+            // Check class-level MethodDataSource attributes
+            if (methodDataSourceType != null)
+            {
+                var hasClassLevelMethodDataSource = method.ContainingType.GetAttributes()
+                    .Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, methodDataSourceType));
+                    
+                if (hasClassLevelMethodDataSource)
+                {
+                    return true; // Class-level MethodDataSource attributes can provide type inference
+                }
+            }
+            
+            // Check class-level AsyncDataSourceGenerator attributes
+            if (asyncDataSourceInterface != null)
+            {
+                var hasClassLevelAsyncDataSource = method.ContainingType.GetAttributes()
+                    .Any(a => a.AttributeClass?.AllInterfaces.Contains(asyncDataSourceInterface, SymbolEqualityComparer.Default) == true);
+                    
+                if (hasClassLevelAsyncDataSource)
+                {
+                    return true; // Class-level AsyncDataSourceGenerator attributes can provide type inference
+                }
             }
         }
         
