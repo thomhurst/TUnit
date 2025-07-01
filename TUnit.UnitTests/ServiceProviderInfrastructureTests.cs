@@ -136,8 +136,8 @@ public class ServiceProviderInfrastructureTests
         var otherService = new OtherService { Value = 42 };
 
         // Act
-        serviceProvider.RegisterService<ITestService>(testService);
-        serviceProvider.RegisterService<IOtherService>(otherService);
+        serviceProvider.AddSingleton<ITestService>(testService);
+        serviceProvider.AddSingleton<IOtherService>(otherService);
 
         var resolvedTest = serviceProvider.GetService<ITestService>();
         var resolvedOther = serviceProvider.GetService<IOtherService>();
