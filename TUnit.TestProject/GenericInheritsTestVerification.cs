@@ -4,7 +4,7 @@ using TUnit.Core;
 namespace TUnit.TestProject;
 
 // Simple test to verify InheritsTests with generic base classes works
-public class GenericBase<T>
+public abstract class GenericBase<T>
 {
     [Test]
     public void BaseTest()

@@ -2,7 +2,7 @@ using TUnit.Core;
 
 namespace TUnit.TestProject;
 
-public class GenericTestExample<T>
+public abstract class GenericTestExample<T>
 {
     [Test]
     public void GenericTest()
