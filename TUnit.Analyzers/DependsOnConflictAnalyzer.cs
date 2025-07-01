@@ -35,10 +35,9 @@ public record Chain(IMethodSymbol OriginalMethod)
 public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        new()
-        {
+        ImmutableArray.Create(
             Rules.DependsOnConflicts, Rules.NoMethodFound
-        };
+        );
 
     protected override void InitializeInternal(AnalysisContext context)
     {

@@ -9,10 +9,9 @@ namespace TUnit.Analyzers;
 public class ClassParametersAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        new()
-        {
+        ImmutableArray.Create(
             Rules.NoDataSourceProvided
-        };
+        );
 
     protected override void InitializeInternal(AnalysisContext context)
     {

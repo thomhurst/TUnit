@@ -49,10 +49,9 @@ public class MarkMethodStaticSuppressor : DiagnosticSuppressor
     }
 
     public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } =
-        new()
-        {
+        ImmutableArray.Create(
             CreateDescriptor("CA1822")
-        };
+        );
 
     private static SuppressionDescriptor CreateDescriptor(string id)
         => new(

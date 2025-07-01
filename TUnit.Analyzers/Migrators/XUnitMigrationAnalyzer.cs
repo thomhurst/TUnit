@@ -10,10 +10,9 @@ namespace TUnit.Analyzers;
 public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        new()
-        {
+        ImmutableArray.Create(
             Rules.XunitMigration
-        };
+        );
 
     protected override void InitializeInternal(AnalysisContext context)
     {

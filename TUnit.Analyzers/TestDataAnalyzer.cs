@@ -11,8 +11,7 @@ namespace TUnit.Analyzers;
 public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        new()
-        {
+        ImmutableArray.Create(
             Rules.WrongArgumentTypeTestData,
             Rules.NoTestDataProvided,
             Rules.MethodParameterBadNullability,
@@ -28,7 +27,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.MatrixDataSourceAttributeRequired,
             Rules.TooManyArguments,
             Rules.InstanceMethodSource
-        };
+        );
 
     protected override void InitializeInternal(AnalysisContext context)
     {

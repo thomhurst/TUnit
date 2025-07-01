@@ -11,10 +11,9 @@ namespace TUnit.Analyzers;
 public class BeforeHookAsyncLocalAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        new()
-        {
+        ImmutableArray.Create(
             Rules.AsyncLocalCallFlowValues
-        };
+        );
 
     protected override void InitializeInternal(AnalysisContext context)
     {

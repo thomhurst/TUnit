@@ -10,10 +10,7 @@ namespace TUnit.Analyzers;
 public class InheritsTestsAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        new()
-        {
-            Rules.DoesNotInheritTestsWarning
-        };
+        ImmutableArray.Create(Rules.DoesNotInheritTestsWarning);
 
     protected override void InitializeInternal(AnalysisContext context)
     {

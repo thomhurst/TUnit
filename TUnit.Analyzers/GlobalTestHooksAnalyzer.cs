@@ -11,8 +11,7 @@ namespace TUnit.Analyzers;
 public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        new()
-        {
+        ImmutableArray.Create(
             Rules.MethodMustNotBeAbstract,
             Rules.MethodMustBeStatic,
             Rules.MethodMustBePublic,
@@ -20,7 +19,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.SingleTestContextParameterRequired,
             Rules.SingleClassHookContextParameterRequired,
             Rules.SingleAssemblyHookContextParameterRequired
-        };
+        );
 
     protected override void InitializeInternal(AnalysisContext context)
     {
