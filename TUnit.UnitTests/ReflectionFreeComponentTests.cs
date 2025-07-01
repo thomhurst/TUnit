@@ -10,34 +10,31 @@ namespace TUnit.UnitTests;
 public class ReflectionFreeComponentTests
 {
     [Test]
-    public async Task TestDelegateStorage_StronglyTypedDelegate_NoBoxing()
+    public async Task TestDelegateStorage_InstanceFactory_NoBoxing()
     {
         // Arrange
-        var key = "TestMethod_NoArgs";
-        var called = false;
+        var key = "TestClass_Factory";
+        var factoryCalled = false;
         
-        // Create a strongly-typed delegate that doesn't box
-        TestMethodDelegate testDelegate = async (instance) =>
+        // Create an instance factory
+        Func<object?[], object> factory = (args) =>
         {
-            called = true;
-            await Task.CompletedTask;
+            factoryCalled = true;
+            return new TestClass();
         };
         
         // Act
-        TestDelegateStorage.RegisterStronglyTypedDelegate(key, [], testDelegate);
-        var retrievedDelegate = TestDelegateStorage.GetStronglyTypedDelegate(key);
+        TestDelegateStorage.RegisterInstanceFactory(key, factory);
+        var retrievedFactory = TestDelegateStorage.GetInstanceFactory(key);
         
         // Assert
-        await Assert.That(retrievedDelegate).IsNotNull();
+        await Assert.That(retrievedFactory).IsNotNull();
         
         // Invoke to verify it works
-        var result = retrievedDelegate!.DynamicInvoke(new TestClass());
-        if (result is Task task)
-        {
-            await task;
-        }
-        
-        await Assert.That(called).IsTrue();
+        var instance = retrievedFactory!(Array.Empty<object>());
+        await Assert.That(instance).IsNotNull();
+        await Assert.That(instance is TestClass).IsTrue();
+        await Assert.That(factoryCalled).IsTrue();
     }
 
     [Test]
@@ -124,8 +121,6 @@ public class ReflectionFreeComponentTests
         await Assert.That(executor).IsNotNull();
         await Assert.That(executor is ITestVariationExecutor).IsTrue();
     }
-
-    private delegate Task TestMethodDelegate(object instance);
 
     private class TestClass
     {

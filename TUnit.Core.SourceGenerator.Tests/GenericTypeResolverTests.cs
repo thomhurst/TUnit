@@ -1,6 +1,5 @@
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Tests.Options;
-using Verifier = TUnit.Core.SourceGenerator.Tests.Verifier;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 

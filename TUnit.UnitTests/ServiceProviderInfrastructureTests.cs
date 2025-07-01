@@ -17,7 +17,7 @@ public class ServiceProviderInfrastructureTests
         var testService = new TestService { Name = "Test Service" };
 
         // Act
-        serviceProvider.RegisterService<ITestService>(testService);
+        serviceProvider.AddSingleton<ITestService>(testService);
         var resolvedService = serviceProvider.GetService<ITestService>();
 
         // Assert
@@ -34,7 +34,7 @@ public class ServiceProviderInfrastructureTests
         var factoryCallCount = 0;
 
         // Act
-        serviceProvider.RegisterFactory<ITestService>(() =>
+        serviceProvider.AddTransient<ITestService>(() =>
         {
             factoryCallCount++;
             return new TestService { Name = $"Factory Service {factoryCallCount}" };
@@ -86,8 +86,8 @@ public class ServiceProviderInfrastructureTests
         var concreteService = new TestService { Name = "Concrete" };
 
         // Act
-        serviceProvider.RegisterService<TestService>(concreteService);
-        serviceProvider.RegisterService<ITestService>(concreteService);
+        serviceProvider.AddSingleton<TestService>(concreteService);
+        serviceProvider.AddSingleton<ITestService>(concreteService);
 
         var resolvedConcrete = serviceProvider.GetService<TestService>();
         var resolvedInterface = serviceProvider.GetService<ITestService>();
@@ -119,8 +119,8 @@ public class ServiceProviderInfrastructureTests
         var secondService = new TestService { Name = "Second" };
 
         // Act
-        serviceProvider.RegisterService<ITestService>(firstService);
-        serviceProvider.RegisterService<ITestService>(secondService);
+        serviceProvider.AddSingleton<ITestService>(firstService);
+        serviceProvider.AddSingleton<ITestService>(secondService);
         var resolvedService = serviceProvider.GetService<ITestService>();
 
         // Assert

@@ -19,6 +19,8 @@ public class AotCompatibilityAnalyzerTests
 
     // This generic test method should trigger TUnit0058 if not explicitly instantiated
     [Test]
+    [GenerateGenericTest(typeof(string))]
+    [GenerateGenericTest(typeof(object))]
     public async Task GenericTest_ShouldTriggerAnalyzer<T>()
         where T : class, new()
     {
@@ -29,6 +31,8 @@ public class AotCompatibilityAnalyzerTests
 }
 
 // This generic test class should trigger TUnit0058 if not explicitly instantiated
+[GenerateGenericTest(typeof(string))]
+[GenerateGenericTest(typeof(object))]
 public class AotGenericTestClass<T>
     where T : class, new()
 {
