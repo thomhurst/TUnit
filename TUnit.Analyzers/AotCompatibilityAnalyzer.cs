@@ -177,17 +177,22 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var attributeTypeName = attributeSymbol.ContainingType.Name;
 
-        // Check for data source attributes that might use dynamic resolution
-        var dynamicDataSourceAttributes = new[]
+        if (attributeTypeName == "MethodDataSourceAttribute")
         {
-            "ClassDataSourceAttribute",
-            "MethodDataSourceAttribute" // Only if using reflection-based patterns
-        };
+            // Analyze MethodDataSource to see if it's AOT-compatible
+            if (IsMethodDataSourceDynamic(context, attribute))
+            {
+                var diagnostic = Diagnostic.Create(
+                    Rules.DynamicDataSourceNotAotCompatible,
+                    attribute.GetLocation(),
+                    attributeTypeName);
 
-        if (dynamicDataSourceAttributes.Contains(attributeTypeName))
+                context.ReportDiagnostic(diagnostic);
+            }
+        }
+        else if (attributeTypeName == "ClassDataSourceAttribute")
         {
-            // For now, we'll be conservative and flag all dynamic data sources
-            // In a more sophisticated implementation, we could analyze if they use static patterns
+            // ClassDataSource is always dynamic since it uses Type parameters
             var diagnostic = Diagnostic.Create(
                 Rules.DynamicDataSourceNotAotCompatible,
                 attribute.GetLocation(),
@@ -243,6 +248,54 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         }
         
         return false;
+    }
+
+    /// <summary>
+    /// Determines if a MethodDataSource attribute uses dynamic resolution patterns
+    /// </summary>
+    private static bool IsMethodDataSourceDynamic(SyntaxNodeAnalysisContext context, AttributeSyntax attribute)
+    {
+        if (attribute.ArgumentList?.Arguments.Count == 0)
+            return true; // No arguments means it can't be statically resolved
+
+        var firstArgument = attribute.ArgumentList?.Arguments[0];
+        if (firstArgument == null)
+            return true;
+        
+        // Check if first argument is nameof() - this is AOT-compatible
+        if (firstArgument.Expression is InvocationExpressionSyntax invocation &&
+            invocation.Expression is IdentifierNameSyntax identifier &&
+            identifier.Identifier.ValueText == "nameof")
+        {
+            return false; // nameof() is AOT-compatible
+        }
+
+        // Check if first argument is a string literal - this is AOT-compatible
+        if (firstArgument.Expression is LiteralExpressionSyntax literal &&
+            literal.Token.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StringLiteralToken))
+        {
+            return false; // String literal method names are AOT-compatible
+        }
+
+        // Check for typeof() with method name - pattern: [MethodDataSource(typeof(SomeType), "MethodName")]
+        if (attribute.ArgumentList?.Arguments.Count >= 2)
+        {
+            var secondArgument = attribute.ArgumentList.Arguments[1];
+            
+            // If first arg is typeof() and second is string literal or nameof(), it's AOT-compatible
+            if (firstArgument.Expression is TypeOfExpressionSyntax &&
+                (secondArgument.Expression is LiteralExpressionSyntax secondLiteral &&
+                 secondLiteral.Token.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StringLiteralToken) ||
+                 secondArgument.Expression is InvocationExpressionSyntax secondInvocation &&
+                 secondInvocation.Expression is IdentifierNameSyntax secondIdentifier &&
+                 secondIdentifier.Identifier.ValueText == "nameof"))
+            {
+                return false; // typeof() + string/nameof() is AOT-compatible
+            }
+        }
+
+        // If we can't determine the pattern, assume it's dynamic
+        return true;
     }
 
     private static bool IsInTestContext(SyntaxNodeAnalysisContext context)
