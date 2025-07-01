@@ -52,6 +52,13 @@ internal sealed class DelegateGenerator
         var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var safeClassName = testInfo.TypeSymbol.Name.Replace(".", "_");
         
+        // Safety check: don't generate if type contains type parameters
+        if (ContainsTypeParameter(testInfo.TypeSymbol))
+        {
+            writer.AppendLine($"// Skipped instance factory for {className} - contains unresolved type parameters");
+            return;
+        }
+        
         writer.AppendLine($"TestDelegateStorage.RegisterInstanceFactory(\"{className}\", args => new {className}({GenerateConstructorArgs(testInfo)}));");
     }
 
@@ -137,10 +144,39 @@ internal sealed class DelegateGenerator
         for (int i = 0; i < constructor.Parameters.Length; i++)
         {
             var param = constructor.Parameters[i];
+            
+            // Check if the parameter type contains type parameters
+            if (ContainsTypeParameter(param.Type))
+            {
+                // Skip generation for types with unresolved type parameters
+                // This shouldn't happen with proper filtering, but acts as a safety net
+                return string.Empty;
+            }
+            
             var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             argList.Add($"({paramType})args[{i}]");
         }
 
         return string.Join(", ", argList);
+    }
+    
+    private static bool ContainsTypeParameter(ITypeSymbol type)
+    {
+        if (type is ITypeParameterSymbol)
+        {
+            return true;
+        }
+
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return ContainsTypeParameter(arrayType.ElementType);
+        }
+
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
+        {
+            return namedType.TypeArguments.Any(ContainsTypeParameter);
+        }
+
+        return false;
     }
 }

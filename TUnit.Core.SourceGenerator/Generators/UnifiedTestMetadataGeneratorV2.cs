@@ -133,8 +133,32 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             return null;
 
         // Skip generic types without explicit instantiation
+        // Check for open generic types (types with unbound type parameters)
         if (containingType.IsGenericType && containingType.TypeParameters.Length > 0)
             return null;
+        
+        // Also check if any type arguments are type parameters (e.g., T)
+        if (containingType is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            if (namedType.TypeArguments.Any(arg => arg.TypeKind == TypeKind.TypeParameter))
+                return null;
+        }
+        
+        // Check the entire type hierarchy for unresolved type parameters
+        var currentType = containingType.BaseType;
+        while (currentType != null)
+        {
+            if (currentType.TypeKind == TypeKind.TypeParameter)
+                return null;
+                
+            if (currentType is INamedTypeSymbol baseNamedType && baseNamedType.IsGenericType)
+            {
+                if (baseNamedType.TypeArguments.Any(arg => arg.TypeKind == TypeKind.TypeParameter))
+                    return null;
+            }
+            
+            currentType = currentType.BaseType;
+        }
 
         // Skip generic methods without explicit instantiation
         if (methodSymbol is IMethodSymbol method && method.IsGenericMethod)

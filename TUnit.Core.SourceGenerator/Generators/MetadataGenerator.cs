@@ -67,7 +67,18 @@ internal sealed class MetadataGenerator
 
         writer.AppendLine($"TestId = \"{testId}\",");
         writer.AppendLine($"TestName = \"{methodName}\",");
-        writer.AppendLine($"TestClassType = typeof({className}),");
+        
+        // Check if the type contains unresolved type parameters
+        if (ContainsTypeParameter(testInfo.TypeSymbol))
+        {
+            // This shouldn't happen with proper filtering, but provide a fallback
+            writer.AppendLine($"TestClassType = typeof(object), // Generic type {className} cannot be resolved at compile time");
+        }
+        else
+        {
+            writer.AppendLine($"TestClassType = typeof({className}),");
+        }
+        
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
         
         // File location if available
@@ -78,6 +89,26 @@ internal sealed class MetadataGenerator
             writer.AppendLine($"FilePath = @\"{lineSpan.Path}\",");
             writer.AppendLine($"LineNumber = {lineSpan.StartLinePosition.Line + 1},");
         }
+    }
+    
+    private static bool ContainsTypeParameter(ITypeSymbol type)
+    {
+        if (type is ITypeParameterSymbol)
+        {
+            return true;
+        }
+
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return ContainsTypeParameter(arrayType.ElementType);
+        }
+
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
+        {
+            return namedType.TypeArguments.Any(ContainsTypeParameter);
+        }
+
+        return false;
     }
 
     private void GenerateTestAttributes(CodeWriter writer, TestMethodMetadata testInfo)
