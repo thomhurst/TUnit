@@ -38,6 +38,11 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         if (methodSymbol == null || !IsTestMethod(methodSymbol))
             return;
 
+        // Skip test methods in abstract classes - they can't be instantiated directly
+        // and type inference happens when concrete classes inherit from them
+        if (methodSymbol.ContainingType.IsAbstract)
+            return;
+
         // Check for generic test methods without explicit instantiation
         if (methodSymbol.IsGenericMethod)
         {
@@ -90,6 +95,11 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclaration);
 
         if (classSymbol == null || !classSymbol.IsGenericType)
+            return;
+
+        // Skip abstract classes - they can't be instantiated directly and type inference
+        // happens when concrete classes inherit from them with actual data sources
+        if (classSymbol.IsAbstract)
             return;
 
         // Check if this class contains test methods
