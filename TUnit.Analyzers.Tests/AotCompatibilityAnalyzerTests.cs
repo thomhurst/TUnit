@@ -93,96 +93,9 @@ public class AotCompatibilityAnalyzerTests
         await CSharpAnalyzerVerifier<AotCompatibilityAnalyzer>.VerifyAnalyzerAsync(source);
     }
 
-    [Test]
-    public async Task ReflectionUsage_InTestMethod_ShowsError()
-    {
-        var source = """
-            using System;
-            using TUnit.Core;
 
-            namespace TestProject;
 
-            public class TestClass
-            {
-                [Test]
-                public void TestMethod()
-                {
-                    var type = typeof(string);
-                    var method = {|TUnit0057:type.GetMethod("ToString")|};
-                }
-            }
-            """;
 
-        await CSharpAnalyzerVerifier<AotCompatibilityAnalyzer>.VerifyAnalyzerAsync(source);
-    }
-
-    [Test]
-    public async Task ReflectionUsage_OutsideTestContext_NoError()
-    {
-        var source = """
-            using System;
-
-            namespace TestProject;
-
-            public class NonTestClass
-            {
-                public void RegularMethod()
-                {
-                    var type = typeof(string);
-                    var method = type.GetMethod("ToString");
-                }
-            }
-            """;
-
-        await CSharpAnalyzerVerifier<AotCompatibilityAnalyzer>.VerifyAnalyzerAsync(source);
-    }
-
-    [Test]
-    public async Task ActivatorCreateInstance_InTestMethod_ShowsError()
-    {
-        var source = """
-            using System;
-            using TUnit.Core;
-
-            namespace TestProject;
-
-            public class TestClass
-            {
-                [Test]
-                public void TestMethod()
-                {
-                    var instance = {|TUnit0057:Activator.CreateInstance(typeof(string))|};
-                }
-            }
-            """;
-
-        await CSharpAnalyzerVerifier<AotCompatibilityAnalyzer>.VerifyAnalyzerAsync(source);
-    }
-
-    [Test]
-    public async Task PropertyGetValue_InTestMethod_ShowsError()
-    {
-        var source = """
-            using System;
-            using System.Reflection;
-            using TUnit.Core;
-
-            namespace TestProject;
-
-            public class TestClass
-            {
-                [Test]
-                public void TestMethod()
-                {
-                    var type = typeof(string);
-                    var prop = type.GetProperty("Length");
-                    var value = {|TUnit0057:prop.GetValue("test")|};
-                }
-            }
-            """;
-
-        await CSharpAnalyzerVerifier<AotCompatibilityAnalyzer>.VerifyAnalyzerAsync(source);
-    }
 
     [Test]
     public async Task ClassDataSourceAttribute_ShowsError()

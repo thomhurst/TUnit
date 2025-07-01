@@ -284,25 +284,6 @@ public async Task GenericTest<T>()
 }
 ```
 
-### Reflection Usage Diagnostics
-
-```csharp
-public class DiagnosticExamples
-{
-    [Test]
-    public async Task TestWithReflection()
-    {
-        var type = typeof(string);
-        
-        // ❌ This will generate TUnit0057 error
-        var method = type.GetMethod("ToUpper"); // Uses reflection
-        
-        // ✅ Use compile-time known operations instead
-        var result = "hello".ToUpper();
-        await Assert.That(result).IsEqualTo("HELLO");
-    }
-}
-```
 
 ### Data Source Diagnostics
 

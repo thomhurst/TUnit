@@ -504,15 +504,6 @@
     <data name="TUnit0056Title" xml:space="preserve">
         <value>Instance methods used as data sources must use the `InstanceMethodDataSource` attribute</value>
     </data>
-    <data name="TUnit0057Description" xml:space="preserve">
-        <value>This pattern uses reflection and is not compatible with AOT compilation. Use source-generated alternatives.</value>
-    </data>
-    <data name="TUnit0057MessageFormat" xml:space="preserve">
-        <value>'{0}' uses reflection and is not AOT-compatible. Use source-generated test metadata instead.</value>
-    </data>
-    <data name="TUnit0057Title" xml:space="preserve">
-        <value>Reflection pattern not AOT-compatible</value>
-    </data>
     <data name="TUnit0058Description" xml:space="preserve">
         <value>Generic test methods require explicit type instantiation for AOT compatibility. Use [GenerateGenericTest] attribute.</value>
     </data>

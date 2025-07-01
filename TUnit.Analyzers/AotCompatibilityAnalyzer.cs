@@ -17,7 +17,6 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(
-            Rules.ReflectionPatternNotAotCompatible,
             Rules.GenericTestMissingExplicitInstantiation,
             Rules.DynamicDataSourceNotAotCompatible,
             Rules.OpenGenericTypeNotAotCompatible);
@@ -26,7 +25,6 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         context.RegisterSyntaxNodeAction(AnalyzeGenericTestMethods, SyntaxKind.MethodDeclaration);
         context.RegisterSyntaxNodeAction(AnalyzeGenericTestClasses, SyntaxKind.ClassDeclaration);
-        context.RegisterSyntaxNodeAction(AnalyzeReflectionUsage, SyntaxKind.InvocationExpression);
         context.RegisterSyntaxNodeAction(AnalyzeDataSourceAttributes, SyntaxKind.Attribute);
     }
 
@@ -134,38 +132,6 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         }
     }
 
-    private static void AnalyzeReflectionUsage(SyntaxNodeAnalysisContext context)
-    {
-        var invocation = (InvocationExpressionSyntax)context.Node;
-        var memberAccess = invocation.Expression as MemberAccessExpressionSyntax;
-
-        if (memberAccess == null)
-            return;
-
-        var memberName = memberAccess.Name.Identifier.ValueText;
-
-        // Check for common reflection patterns that are AOT-incompatible
-        var reflectionMethods = new[]
-        {
-            "GetType", "GetMethod", "GetProperty", "GetField", "GetConstructor",
-            "GetMethods", "GetProperties", "GetFields", "GetConstructors",
-            "Invoke", "GetValue", "SetValue", "CreateInstance"
-        };
-
-        if (reflectionMethods.Contains(memberName))
-        {
-            // Check if this is in a test context (exclude source generators)
-            if (IsInTestContext(context))
-            {
-                var diagnostic = Diagnostic.Create(
-                    Rules.ReflectionPatternNotAotCompatible,
-                    invocation.GetLocation(),
-                    $"{memberAccess.Expression}.{memberName}()");
-
-                context.ReportDiagnostic(diagnostic);
-            }
-        }
-    }
 
     private static void AnalyzeDataSourceAttributes(SyntaxNodeAnalysisContext context)
     {
@@ -298,38 +264,4 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         return true;
     }
 
-    private static bool IsInTestContext(SyntaxNodeAnalysisContext context)
-    {
-        // Check if we're in a test project or test class
-        var root = context.Node.SyntaxTree.GetRoot();
-        
-        // Look for test-related using statements or attributes in the file
-        var compilationUnit = root as CompilationUnitSyntax;
-        if (compilationUnit != null)
-        {
-            var hasTestUsings = compilationUnit.Usings.Any(u => 
-                u.Name?.ToString().Contains("TUnit") == true ||
-                u.Name?.ToString().Contains("Test") == true);
-
-            if (hasTestUsings)
-                return true;
-        }
-
-        // Check if we're in a class with test methods
-        var containingClass = context.Node.FirstAncestorOrSelf<ClassDeclarationSyntax>();
-        if (containingClass != null)
-        {
-            var classSymbol = context.SemanticModel.GetDeclaredSymbol(containingClass);
-            if (classSymbol != null)
-            {
-                var hasTestMethods = classSymbol.GetMembers()
-                    .OfType<IMethodSymbol>()
-                    .Any(IsTestMethod);
-
-                return hasTestMethods;
-            }
-        }
-
-        return false;
-    }
 }

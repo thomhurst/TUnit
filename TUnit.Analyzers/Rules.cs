@@ -133,8 +133,6 @@ public static class Rules
         CreateDescriptor("TUnit0056", UsageCategory, DiagnosticSeverity.Error);
 
     // AOT Compatibility Rules
-    public static readonly DiagnosticDescriptor ReflectionPatternNotAotCompatible =
-        CreateDescriptor("TUnit0057", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor GenericTestMissingExplicitInstantiation =
         CreateDescriptor("TUnit0058", UsageCategory, DiagnosticSeverity.Error);

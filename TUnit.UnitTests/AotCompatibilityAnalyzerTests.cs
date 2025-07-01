@@ -26,15 +26,6 @@ public class AotCompatibilityAnalyzerTests
         await Assert.That(instance).IsNotNull();
     }
 
-    [Test]
-    public async Task ReflectionUsage_ShouldTriggerAnalyzer()
-    {
-        // This should trigger TUnit0057 - reflection pattern not AOT compatible
-        var type = typeof(string);
-        var method = type.GetMethod("ToString");
-        
-        await Assert.That(method).IsNotNull();
-    }
 }
 
 // This generic test class should trigger TUnit0058 if not explicitly instantiated
