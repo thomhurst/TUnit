@@ -48,19 +48,19 @@ internal class UnifiedReflectionFreeTests : TestsBase<UnifiedTestMetadataGenerat
         {
             // Create empty test files for now - these would normally contain actual test classes
             Directory.CreateDirectory(Path.GetDirectoryName(classFile)!);
-            await File.WriteAllTextAsync(classFile, $"""
+            await File.WriteAllTextAsync(classFile, $$"""
             using TUnit.Core;
 
             namespace TUnit.TestProject;
 
-            public class {Path.GetFileNameWithoutExtension(classFile).Replace("Tests", "Test")}
-            {{
+            public class {{Path.GetFileNameWithoutExtension(classFile).Replace("Tests", "Test")}}
+            {
                 [Test]
                 public void SampleTest()
-                {{
-                    // Sample test for {Path.GetFileNameWithoutExtension(classFile)}
-                }}
-            }}
+                {
+                    // Sample test for {{Path.GetFileNameWithoutExtension(classFile)}}
+                }
+            }
             """);
         }
 
