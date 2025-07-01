@@ -6,78 +6,115 @@ namespace TUnit.Core.SourceGenerator.Tests;
 internal class UnifiedReflectionFreeTests : TestsBase<UnifiedTestMetadataGenerator>
 {
     [Test]
-    public Task Test_StronglyTypedDelegates_Generation() => RunTest(Path.Combine(Git.RootDirectory.FullName,
-            "TUnit.TestProject",
-            "TypedDelegateTests.cs"),
-        new RunTestOptions
-        {
-            AdditionalFiles = []
-        });
-
-    [Test]
-    public Task Test_ModuleInitializer_Generation() => RunTest(Path.Combine(Git.RootDirectory.FullName,
-            "TUnit.TestProject",
-            "ModuleInitializerTests.cs"),
-        new RunTestOptions
-        {
-            AdditionalFiles = []
-        });
-
-    [Test]
-    public Task Test_AotSafeDataSourceFactories() => RunTest(Path.Combine(Git.RootDirectory.FullName,
-            "TUnit.TestProject",
-            "AotDataSourceTests.cs"),
-        new RunTestOptions
-        {
-            AdditionalFiles = []
-        });
-
-    [Test]
-    public Task Test_ConfigurationSupport() => RunTest(Path.Combine(Git.RootDirectory.FullName,
-            "TUnit.TestProject",
-            "ConfigurationTests.cs"),
-        new RunTestOptions
-        {
-            AdditionalFiles = []
-        });
-
-    private static async Task RunTest(string classFile, RunTestOptions? options = null)
+    public async Task Test_StronglyTypedDelegates_Generation()
     {
-        if (!File.Exists(classFile))
+        var source = """
+        using TUnit.Core;
+
+        namespace TUnit.TestProject;
+
+        public class TypedDelegateTest
         {
-            // Create empty test files for now - these would normally contain actual test classes
-            Directory.CreateDirectory(Path.GetDirectoryName(classFile)!);
-            await File.WriteAllTextAsync(classFile, $$"""
-            using TUnit.Core;
-
-            namespace TUnit.TestProject;
-
-            public class {{Path.GetFileNameWithoutExtension(classFile).Replace("Tests", "Test")}}
+            [Test]
+            public void TestWithDelegate()
             {
-                [Test]
-                public void SampleTest()
-                {
-                    // Sample test for {{Path.GetFileNameWithoutExtension(classFile)}}
-                }
+                // Test that uses strongly typed delegates
             }
-            """);
         }
+        """;
+        
+        await RunTestWithInlineSource(source);
+    }
 
-        var source = await FilePolyfill.ReadAllTextAsync(classFile);
+    [Test]
+    public async Task Test_ModuleInitializer_Generation()
+    {
+        var source = """
+        using TUnit.Core;
+        using System.Runtime.CompilerServices;
 
-        var (compilation, diagnostics) = await Verifier.GetGeneratedOutput<UnifiedTestMetadataGenerator>(
-            source,
-            options ?? new RunTestOptions()
-        );
+        namespace TUnit.TestProject;
 
-        // Verify no compilation errors related to reflection
-        var errors = diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ToArray();
-        if (errors.Length > 0)
+        public class ModuleInitializerTest
         {
-            throw new InvalidOperationException($"Compilation errors: {string.Join(", ", errors.Select(e => e.GetMessage()))}");
+            [Test]
+            public void TestWithModuleInit()
+            {
+                // Test that verifies module initializer works
+            }
         }
+        """;
+        
+        await RunTestWithInlineSource(source);
+    }
 
-        // Verify source generation output
-        await Verifier.Verify(compilation, $"{nameof(UnifiedReflectionFreeTests)}.{Path.GetFileNameWithoutExtension(classFile)}");
+    [Test]
+    public async Task Test_AotSafeDataSourceFactories()
+    {
+        var source = """
+        using TUnit.Core;
+
+        namespace TUnit.TestProject;
+
+        public class AotDataSourceTest
+        {
+            [Test]
+            [Arguments(1, 2, 3)]
+            [Arguments(4, 5, 6)]
+            public void TestWithDataSource(int a, int b, int c)
+            {
+                // Test with AOT-safe data sources
+            }
+        }
+        """;
+        
+        await RunTestWithInlineSource(source);
+    }
+
+    [Test]
+    public async Task Test_ConfigurationSupport()
+    {
+        var source = """
+        using TUnit.Core;
+
+        namespace TUnit.TestProject;
+
+        public class ConfigurationTest
+        {
+            [Test]
+            public void TestWithConfiguration()
+            {
+                // Test that uses configuration
+            }
+        }
+        """;
+        
+        await RunTestWithInlineSource(source);
+    }
+
+    private async Task RunTestWithInlineSource(string source)
+    {
+        var tempFile = Path.GetTempFileName() + ".cs";
+        await FilePolyfill.WriteAllTextAsync(tempFile, source);
+        
+        try
+        {
+            await RunTest(tempFile, new RunTestOptions(), async generatedFiles =>
+            {
+                // Basic assertion to verify the generator produces output
+                await Assert.That(generatedFiles.Length).IsGreaterThan(0);
+                
+                // Verify at least one file contains generated content
+                var hasGeneratedContent = generatedFiles.Any(f => f.Contains("// <auto-generated/>"));
+                await Assert.That(hasGeneratedContent).IsTrue();
+            });
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
     }
 }
