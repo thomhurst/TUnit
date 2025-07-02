@@ -198,6 +198,11 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 // Generate static test metadata collection
                 writer.AppendLine("private static readonly List<TestMetadata> _allTests = new();");
                 writer.AppendLine();
+                writer.AppendLine("/// <summary>");
+                writer.AppendLine("/// Gets all registered test metadata");
+                writer.AppendLine("/// </summary>");
+                writer.AppendLine("public static IReadOnlyList<TestMetadata> AllTests => _allTests;");
+                writer.AppendLine();
 
                 // Module initializer to register all tests
                 writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
@@ -210,9 +215,8 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                     writer.AppendLine("RegisterDataSourceFactories();");
                     writer.AppendLine("RegisterAllTests();");
                     writer.AppendLine();
-                    writer.AppendLine("// Register with the discovery service");
-                    writer.AppendLine("var source = new global::TUnit.Engine.SourceGeneratedTestMetadataSource(() => _allTests);");
-                    writer.AppendLine("global::TUnit.Engine.TestMetadataRegistry.RegisterSource(source);");
+                    writer.AppendLine("// Register with DirectTestMetadataProvider");
+                    writer.AppendLine("global::TUnit.Core.DirectTestMetadataProvider.RegisterMetadataProvider(() => AllTests);");
                     writer.Unindent();
                     writer.AppendLine("}");
                     writer.AppendLine("catch (Exception ex)");

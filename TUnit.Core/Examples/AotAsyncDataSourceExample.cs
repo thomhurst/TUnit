@@ -108,8 +108,8 @@ public static class GeneratedAotAsyncDataSourceExample
     public static void RegisterFactories()
     {
         // Registration for async data sources on test MyAsyncTests.MyAsyncTest
-        GlobalSourceGeneratedTestRegistry.RegisterAsyncDataSourceResolver("MyAsyncTests.MyAsyncTest", MyAsyncTests_MyAsyncTest_AsyncDataResolver.ResolveAllAsyncDataAsync);
-        GlobalSourceGeneratedTestRegistry.RegisterAsyncDataExecutor("MyAsyncTests.MyAsyncTest", MyAsyncTests_MyAsyncTest_AsyncDataResolver.ResolveAndExecuteAllAsyncDataAsync);
+        global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterAsyncDataSourceResolver("MyAsyncTests.MyAsyncTest", MyAsyncTests_MyAsyncTest_AsyncDataResolver.ResolveAllAsyncDataAsync);
+        global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterAsyncDataExecutor("MyAsyncTests.MyAsyncTest", MyAsyncTests_MyAsyncTest_AsyncDataResolver.ResolveAndExecuteAllAsyncDataAsync);
     }
 }
 

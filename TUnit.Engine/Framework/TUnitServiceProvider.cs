@@ -65,10 +65,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testInvoker = Register<ITestInvoker>(new TestInvoker());
         var hookInvoker = Register<IHookInvoker>(new HookInvoker());
 
-        // Get test metadata sources from registry
-        var sources = TestMetadataRegistry.GetSources();
-        var metadataSource = new SourceGeneratedTestMetadataSource(() =>
-            sources.SelectMany(s => s.GetTestMetadata().GetAwaiter().GetResult()).ToList());
+        // No longer needed - we'll access the generated metadata directly
 
         // AOT-only mode: Reflection discovery is no longer supported
         var enableDynamicDiscovery = false;
@@ -76,7 +73,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Always use AOT mode for maximum performance and compatibility
         TestBuilderPipeline = Register(
             UnifiedTestBuilderPipelineFactory.CreateAotPipeline(
-                metadataSource, testInvoker, hookInvoker, this));
+                testInvoker, hookInvoker, this));
 
         DiscoveryService = Register(new TestDiscoveryServiceV2(TestBuilderPipeline, enableDynamicDiscovery));
 

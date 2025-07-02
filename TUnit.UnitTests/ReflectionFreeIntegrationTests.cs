@@ -157,8 +157,8 @@ public class ReflectionFreeIntegrationTests
         // Arrange & Act
         // Verify that the module initializer set up all the required infrastructure
         
-        // Check that test metadata registry has sources
-        var sources = TUnit.Engine.TestMetadataRegistry.GetSources();
+        // Check that test metadata is available
+        var metadata = DirectTestMetadataProvider.GetAllTests();
         
         // Check that storage classes are available
         var delegateStorageType = typeof(TestDelegateStorage);
@@ -166,7 +166,7 @@ public class ReflectionFreeIntegrationTests
         var factoryRegistryType = typeof(DataSourceFactoryRegistry);
 
         // Assert
-        await Assert.That(sources).IsNotNull();
+        await Assert.That(metadata).IsNotNull();
         await Assert.That(delegateStorageType).IsNotNull();
         await Assert.That(hookStorageType).IsNotNull();
         await Assert.That(factoryRegistryType).IsNotNull();

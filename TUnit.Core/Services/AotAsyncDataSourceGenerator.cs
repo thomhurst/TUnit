@@ -180,8 +180,8 @@ public class AotAsyncDataSourceGenerator
 
         var code = new StringBuilder();
         code.AppendLine($"// Registration for async data sources on test {testId}");
-        code.AppendLine($"GlobalSourceGeneratedTestRegistry.RegisterAsyncDataSourceResolver(\\\"{testId}\\\", {resolverClassName}.ResolveAllAsyncDataAsync);");
-        code.AppendLine($"GlobalSourceGeneratedTestRegistry.RegisterAsyncDataExecutor(\\\"{testId}\\\", {resolverClassName}.ResolveAndExecuteAllAsyncDataAsync);");
+        code.AppendLine($"global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterAsyncDataSourceResolver(\\\"{testId}\\\", {resolverClassName}.ResolveAllAsyncDataAsync);");
+        code.AppendLine($"global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterAsyncDataExecutor(\\\"{testId}\\\", {resolverClassName}.ResolveAndExecuteAllAsyncDataAsync);");
 
         return code.ToString();
     }

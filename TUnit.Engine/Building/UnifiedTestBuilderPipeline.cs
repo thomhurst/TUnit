@@ -120,12 +120,11 @@ public static class UnifiedTestBuilderPipelineFactory
     /// Creates a pipeline configured for AOT mode (source generation)
     /// </summary>
     public static UnifiedTestBuilderPipeline CreateAotPipeline(
-        ITestMetadataSource metadataSource,
         ITestInvoker testInvoker,
         IHookInvoker hookInvoker,
         IServiceProvider? serviceProvider = null)
     {
-        var dataCollector = new Collectors.AotTestDataCollector(metadataSource);
+        var dataCollector = new Collectors.AotTestDataCollector();
         var genericResolver = new Resolvers.AotGenericTypeResolver();
         var dynamicResolver = new Services.DataSourceResolver();
         var dataSourceExpander = new Expanders.DataSourceExpander(dynamicResolver);

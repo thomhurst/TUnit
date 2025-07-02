@@ -9,53 +9,36 @@ namespace TUnit.UnitTests;
 public class ModuleInitializerTests
 {
     [Test]
-    public async Task TestMetadataRegistry_HasSources()
+    public async Task DirectTestMetadataProvider_HasTests()
     {
         // Arrange & Act
-        var sources = TestMetadataRegistry.GetSources();
+        var tests = DirectTestMetadataProvider.GetAllTests();
 
         // Assert
-        await Assert.That(sources).IsNotNull();
-        await Assert.That(sources.Count()).IsGreaterThan(0);
+        await Assert.That(tests).IsNotNull();
+        await Assert.That(tests.Count).IsGreaterThan(0);
     }
 
     [Test]
-    public async Task TestMetadataRegistry_SourcesContainMetadata()
+    public async Task DirectTestMetadataProvider_ContainsMetadata()
     {
-        // Arrange
-        var sources = TestMetadataRegistry.GetSources();
-
-        // Act
-        var hasMetadata = false;
-        foreach (var source in sources)
-        {
-            var metadata = await source.GetTestMetadata();
-            if (metadata.Any())
-            {
-                hasMetadata = true;
-                break;
-            }
-        }
+        // Arrange & Act
+        var tests = DirectTestMetadataProvider.GetAllTests();
 
         // Assert
-        await Assert.That(hasMetadata).IsTrue();
+        await Assert.That(tests.Any()).IsTrue();
     }
 
     [Test]
-    public async Task SourceGeneratedTestMetadataSource_ProvidesTestMetadata()
+    public async Task DirectTestMetadataProvider_ProvidesTestMetadata()
     {
-        // Arrange
-        var sources = TestMetadataRegistry.GetSources();
-        var sourceGeneratedSource = sources.FirstOrDefault(s => s.GetType().Name.Contains("SourceGenerated"));
+        // Arrange & Act
+        var metadata = DirectTestMetadataProvider.GetAllTests();
 
-        // Act & Assert
-        if (sourceGeneratedSource != null)
-        {
-            var metadata = await sourceGeneratedSource.GetTestMetadata();
-            await Assert.That(metadata).IsNotNull();
-            // The metadata collection might be empty if no tests are in this specific assembly,
-            // but the source should still exist and be callable
-        }
+        // Assert
+        await Assert.That(metadata).IsNotNull();
+        // The metadata collection might be empty if no tests are in this specific assembly,
+        // but should still be accessible
     }
 
     [Test]
@@ -125,15 +108,12 @@ public class ModuleInitializerTests
     {
         // Arrange & Act
         // This test verifies that the system is running in AOT-only mode
-        // We can test this by ensuring no reflection-based fallbacks are available
+        // We can test this by checking that DirectTestMetadataProvider is working
         
-        var sources = TestMetadataRegistry.GetSources();
-        var hasOnlySourceGeneratedSources = sources.All(s => 
-            s.GetType().Name.Contains("SourceGenerated") || 
-            s.GetType().Namespace?.Contains("Engine") == true);
+        var metadata = DirectTestMetadataProvider.GetAllTests();
 
         // Assert
-        // In AOT-only mode, we should only have source-generated metadata sources
-        await Assert.That(hasOnlySourceGeneratedSources || !sources.Any()).IsTrue();
+        // In AOT-only mode, we should get metadata directly without any reflection
+        await Assert.That(metadata).IsNotNull();
     }
 }

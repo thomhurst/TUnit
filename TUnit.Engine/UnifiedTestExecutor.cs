@@ -170,12 +170,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         CancellationToken cancellationToken)
     {
         // Create unified pipeline for AOT mode
-        var sources = TestMetadataRegistry.GetSources();
-        var metadataSource = new SourceGeneratedTestMetadataSource(() =>
-            sources.SelectMany(s => s.GetTestMetadata().GetAwaiter().GetResult()).ToList());
-
         var pipeline = UnifiedTestBuilderPipelineFactory.CreateAotPipeline(
-            metadataSource,
             new TestInvoker(),
             new HookInvoker());
 

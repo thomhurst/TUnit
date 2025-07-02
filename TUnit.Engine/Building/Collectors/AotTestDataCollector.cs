@@ -8,25 +8,23 @@ namespace TUnit.Engine.Building.Collectors;
 /// </summary>
 public sealed class AotTestDataCollector : ITestDataCollector
 {
-    private readonly ITestMetadataSource _metadataSource;
-
-    public AotTestDataCollector(ITestMetadataSource metadataSource)
+    public AotTestDataCollector()
     {
-        _metadataSource = metadataSource ?? throw new ArgumentNullException(nameof(metadataSource));
+        // No dependencies needed - we access generated metadata directly
     }
 
-    public async Task<IEnumerable<TestMetadata>> CollectTestsAsync()
+    public Task<IEnumerable<TestMetadata>> CollectTestsAsync()
     {
         // In AOT mode, all test metadata is pre-generated and registered
-        // We simply retrieve it from the metadata source
-        var metadata = await _metadataSource.GetTestMetadata();
+        // We access it directly from the generated registry
+        var metadata = global::TUnit.Core.DirectTestMetadataProvider.GetAllTests();
 
         // Filter out any tests that should be handled by specialized generators
         var filteredMetadata = metadata.Where(m =>
             !HasAsyncDataSourceGenerator(m) &&
             !IsGenericTypeDefinition(m));
 
-        return filteredMetadata;
+        return Task.FromResult(filteredMetadata);
     }
 
     private static bool HasAsyncDataSourceGenerator(TestMetadata metadata)

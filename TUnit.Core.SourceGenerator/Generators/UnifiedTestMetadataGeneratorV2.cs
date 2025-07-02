@@ -558,6 +558,11 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             // Generate test list
             writer.AppendLine("private static readonly List<TestMetadata> _allTests = new();");
             writer.AppendLine();
+            writer.AppendLine("/// <summary>");
+            writer.AppendLine("/// Gets all registered test metadata");
+            writer.AppendLine("/// </summary>");
+            writer.AppendLine("public static IReadOnlyList<TestMetadata> AllTests => _allTests;");
+            writer.AppendLine();
 
             // Generate module initializer
             GenerateModuleInitializer(writer);
@@ -671,6 +676,11 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         // Register generic test registry if available
         writer.AppendLine("// Register generic test combinations if any were discovered");
         writer.AppendLine("RegisterGenericTestCombinations();");
+        writer.AppendLine();
+        
+        // Register with DirectTestMetadataProvider
+        writer.AppendLine("// Register with DirectTestMetadataProvider");
+        writer.AppendLine("global::TUnit.Core.DirectTestMetadataProvider.RegisterMetadataProvider(() => AllTests);");
         
         writer.Unindent();
         writer.AppendLine("}");

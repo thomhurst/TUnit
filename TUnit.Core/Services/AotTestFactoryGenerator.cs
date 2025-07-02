@@ -232,7 +232,7 @@ public class AotTestFactoryGenerator
         code.AppendLine($"// Strongly typed registration for test {testId}");
 
         // Register strongly typed class factory
-        code.AppendLine($"GlobalSourceGeneratedTestRegistry.RegisterStronglyTypedClassFactory<{fullClassName}>(\"{testId}\", {className}StronglyTypedFactory.DefaultFactory);");
+        code.AppendLine($"global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterStronglyTypedClassFactory<{fullClassName}>(\"{testId}\", {className}StronglyTypedFactory.DefaultFactory);");
 
         // Register parameterized factories if available
         var constructors = classMetadata.Type.GetConstructors();
@@ -242,11 +242,11 @@ public class AotTestFactoryGenerator
         {
             var parameters = constructor.GetParameters();
             var factoryName = $"Factory{parameters.Length}Args";
-            code.AppendLine($"GlobalSourceGeneratedTestRegistry.RegisterStronglyTypedClassFactory<{fullClassName}>(\"{testId}_{parameters.Length}args\", {className}StronglyTypedFactory.{factoryName});");
+            code.AppendLine($"global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterStronglyTypedClassFactory<{fullClassName}>(\"{testId}_{parameters.Length}args\", {className}StronglyTypedFactory.{factoryName});");
         }
 
         // Register strongly typed method invoker
-        code.AppendLine($"GlobalSourceGeneratedTestRegistry.RegisterStronglyTypedMethodInvoker<{fullClassName}>(\"{testId}\", {className}_{methodName}StronglyTypedInvoker.Invoker);");
+        code.AppendLine($"global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterStronglyTypedMethodInvoker<{fullClassName}>(\"{testId}\", {className}_{methodName}StronglyTypedInvoker.Invoker);");
 
         // Register method data source resolvers if the method has MethodDataSource attributes
         var methodDataSources = methodMetadata.GetMethodDataSourceAttributes();
@@ -272,7 +272,7 @@ public class AotTestFactoryGenerator
 
         foreach (var property in injectableProperties)
         {
-            code.AppendLine($"GlobalSourceGeneratedTestRegistry.RegisterPropertySetter(\"{testId}\", \"{property.Name}\", {className}_{property.Name}Setter.SetProperty);");
+            code.AppendLine($"global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterPropertySetter(\"{testId}\", \"{property.Name}\", {className}_{property.Name}Setter.SetProperty);");
         }
 
         return code.ToString();

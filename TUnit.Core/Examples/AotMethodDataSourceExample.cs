@@ -58,8 +58,8 @@ public static class GeneratedAotMethodDataSourceExample
     public static void RegisterFactories()
     {
         // Registration for method data sources on test MyTests.MyTest
-        GlobalSourceGeneratedTestRegistry.RegisterMethodDataResolver("MyTests.MyTest", MyTests_MyTest_MethodDataResolver.ResolveAllMethodData);
-        GlobalSourceGeneratedTestRegistry.RegisterAsyncMethodDataResolver("MyTests.MyTest", MyTests_MyTest_MethodDataResolver.ResolveAllMethodDataAsync);
+        global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterMethodDataResolver("MyTests.MyTest", MyTests_MyTest_MethodDataResolver.ResolveAllMethodData);
+        global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterAsyncMethodDataResolver("MyTests.MyTest", MyTests_MyTest_MethodDataResolver.ResolveAllMethodDataAsync);
     }
 }
 

@@ -180,8 +180,8 @@ public class AotMethodDataSourceGenerator
 
         var code = new StringBuilder();
         code.AppendLine($"// Registration for method data sources on test {testId}");
-        code.AppendLine($"GlobalSourceGeneratedTestRegistry.RegisterMethodDataResolver(\"{testId}\", {resolverClassName}.ResolveAllMethodData);");
-        code.AppendLine($"GlobalSourceGeneratedTestRegistry.RegisterAsyncMethodDataResolver(\"{testId}\", {resolverClassName}.ResolveAllMethodDataAsync);");
+        code.AppendLine($"global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterMethodDataResolver(\"{testId}\", {resolverClassName}.ResolveAllMethodData);");
+        code.AppendLine($"global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterAsyncMethodDataResolver(\"{testId}\", {resolverClassName}.ResolveAllMethodDataAsync);");
 
         return code.ToString();
     }

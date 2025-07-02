@@ -8,9 +8,9 @@ namespace TUnit.Core.Services;
 /// </summary>
 public class StronglyTypedFactoryDispatcher
 {
-    private readonly SourceGeneratedTestRegistry _registry;
+    private readonly TestExecutionRegistry _registry;
 
-    public StronglyTypedFactoryDispatcher(SourceGeneratedTestRegistry registry)
+    public StronglyTypedFactoryDispatcher(TestExecutionRegistry registry)
     {
         _registry = registry;
     }
