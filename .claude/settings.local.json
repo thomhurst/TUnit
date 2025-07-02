@@ -93,7 +93,8 @@
       "Bash(cat:*)",
       "Bash(dotnet:*)",
       "mcp__desktop-commander__create_directory",
-      "mcp__desktop-commander__write_file"
+      "mcp__desktop-commander__write_file",
+      "Bash(git restore:*)"
     ],
     "deny": []
   }

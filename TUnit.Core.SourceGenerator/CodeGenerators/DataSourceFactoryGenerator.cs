@@ -48,10 +48,11 @@ internal class DataSourceFactoryGenerator
     private void GenerateDataSourceFactory(DataSourceInfo dataSource)
     {
         var factoryName = $"{dataSource.SafeTypeName}_{dataSource.SafeMemberName}_Factory";
+        var asyncFactoryName = $"{dataSource.SafeTypeName}_{dataSource.SafeMemberName}_AsyncFactory";
         
         if (dataSource.IsAsync)
         {
-            GenerateAsyncDataSourceFactory(dataSource, factoryName);
+            GenerateAsyncDataSourceFactory(dataSource, asyncFactoryName);
         }
         else
         {
@@ -62,11 +63,10 @@ internal class DataSourceFactoryGenerator
     private void GenerateSyncDataSourceFactory(DataSourceInfo dataSource, string factoryName)
     {
         _stringBuilder.AppendLine($@"
-    private static Func<CancellationToken, IAsyncEnumerable<object?[]>> {factoryName} = async (ct) =>
+    private static Func<IEnumerable<object?[]>> {factoryName} = () =>
     {{
         var rawData = {GetDataSourceAccess(dataSource)};
-        var data = ConvertToObjectArrays(rawData);
-        return ConvertToAsyncEnumerable(data, ct);
+        return ConvertToObjectArrays(rawData);
     }};");
     }
     
@@ -116,8 +116,16 @@ internal class DataSourceFactoryGenerator
         
         foreach (var dataSource in dataSources)
         {
-            var factoryName = $"{dataSource.SafeTypeName}_{dataSource.SafeMemberName}_Factory";
-            _stringBuilder.AppendLine($@"        global::TUnit.Core.TestDelegateStorage.RegisterDataSourceFactory(""{dataSource.FactoryKey}"", {factoryName});");
+            if (dataSource.IsAsync)
+            {
+                var asyncFactoryName = $"{dataSource.SafeTypeName}_{dataSource.SafeMemberName}_AsyncFactory";
+                _stringBuilder.AppendLine($@"        global::TUnit.Core.DataSourceFactoryStorage.RegisterFactory(""{dataSource.FactoryKey}"", {asyncFactoryName});");
+            }
+            else
+            {
+                var factoryName = $"{dataSource.SafeTypeName}_{dataSource.SafeMemberName}_Factory";
+                _stringBuilder.AppendLine($@"        global::TUnit.Core.TestDelegateStorage.RegisterDataSourceFactory(""{dataSource.FactoryKey}"", {factoryName});");
+            }
         }
         
         _stringBuilder.AppendLine(@"    }");

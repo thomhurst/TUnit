@@ -364,10 +364,11 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
     private void GenerateBaseTypes(IncrementalGeneratorPostInitializationContext context)
     {
         // Generate base storage classes if they don't exist
-        GenerateTestDelegateStorage(context);
-        GenerateHookDelegateStorage(context);
+        // Don't generate TestDelegateStorage or HookDelegateStorage - they already exist in runtime
+        // GenerateTestDelegateStorage(context);
+        // GenerateHookDelegateStorage(context);
         GenerateDataSourceFactoryRegistry(context);
-        GenerateTypeArrayComparer(context);
+        GenerateTypeArrayComparer(context); // Keep this as it's internal in runtime
     }
 
     private void GenerateTestDelegateStorage(IncrementalGeneratorPostInitializationContext context)
@@ -463,16 +464,48 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
                 /// </summary>
                 public static class DataSourceFactoryRegistry
                 {
-                    private static readonly Dictionary<string, Func<CancellationToken, IEnumerable<object?[]>>> _factories = new();
-
                     public static void Register(string key, Func<CancellationToken, IEnumerable<object?[]>> factory)
                     {
-                        _factories[key] = factory;
+                        // Convert sync factory to async for storage
+                        global::TUnit.Core.DataSourceFactoryStorage.RegisterFactory(key, ct => ConvertToAsyncEnumerable(factory(ct), ct));
                     }
 
                     public static Func<CancellationToken, IEnumerable<object?[]>>? GetFactory(string key)
                     {
-                        return _factories.TryGetValue(key, out var factory) ? factory : null;
+                        // This is for backward compatibility with tests
+                        var asyncFactory = global::TUnit.Core.DataSourceFactoryStorage.GetFactory(key);
+                        if (asyncFactory == null) return null;
+                        
+                        return ct =>
+                        {
+                            var asyncEnum = asyncFactory(ct);
+                            var result = new List<object?[]>();
+                            var enumerator = asyncEnum.GetAsyncEnumerator(ct);
+                            try
+                            {
+                                while (enumerator.MoveNextAsync().AsTask().Result)
+                                {
+                                    result.Add(enumerator.Current);
+                                }
+                            }
+                            finally
+                            {
+                                enumerator.DisposeAsync().AsTask().Wait();
+                            }
+                            return result;
+                        };
+                    }
+                    
+                    private static async IAsyncEnumerable<object?[]> ConvertToAsyncEnumerable(
+                        IEnumerable<object?[]> data, 
+                        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct)
+                    {
+                        await Task.Yield(); // Ensure async behavior
+                        foreach (var item in data)
+                        {
+                            ct.ThrowIfCancellationRequested();
+                            yield return item;
+                        }
                     }
                 }
             }

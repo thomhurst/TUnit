@@ -156,21 +156,49 @@ internal sealed class DataSourceGenerator
 
     private void GenerateDataSourceFactory(CodeWriter writer, DataSourceInfo dataSource)
     {
-        writer.AppendLine($"DataSourceFactoryRegistry.Register(\"{dataSource.FactoryKey}\", ct =>");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        if (dataSource.MethodSymbol != null)
+        if (dataSource.IsAsync)
         {
-            GenerateMethodDataSourceFactory(writer, dataSource);
+            // Use unique factory method name to avoid conflicts
+            var factoryMethodName = $"DataSourceFactory_{dataSource.FactoryKey.Replace(".", "_").Replace("::", "_")}";
+            
+            // Generate factory method
+            writer.AppendLine($"async IAsyncEnumerable<object?[]> {factoryMethodName}([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct)");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            if (dataSource.MethodSymbol != null)
+            {
+                GenerateMethodDataSourceFactory(writer, dataSource);
+            }
+            else if (dataSource.PropertySymbol != null)
+            {
+                GeneratePropertyDataSourceFactory(writer, dataSource);
+            }
+            
+            writer.Unindent();
+            writer.AppendLine("}");
+            
+            // Register the factory
+            writer.AppendLine($"global::TUnit.Core.DataSourceFactoryStorage.RegisterFactory(\"{dataSource.FactoryKey}\", {factoryMethodName});");
         }
-        else if (dataSource.PropertySymbol != null)
+        else
         {
-            GeneratePropertyDataSourceFactory(writer, dataSource);
-        }
+            writer.AppendLine($"global::TUnit.Core.TestDelegateStorage.RegisterDataSourceFactory(\"{dataSource.FactoryKey}\", () =>");
+            writer.AppendLine("{");
+            writer.Indent();
 
-        writer.Unindent();
-        writer.AppendLine("});");
+            if (dataSource.MethodSymbol != null)
+            {
+                GenerateMethodDataSourceFactory(writer, dataSource);
+            }
+            else if (dataSource.PropertySymbol != null)
+            {
+                GeneratePropertyDataSourceFactory(writer, dataSource);
+            }
+
+            writer.Unindent();
+            writer.AppendLine("});");
+        }
     }
 
     private void GenerateMethodDataSourceFactory(CodeWriter writer, DataSourceInfo dataSource)
@@ -183,21 +211,85 @@ internal sealed class DataSourceGenerator
 
         if (dataSource.IsAsync)
         {
-            // All async methods need to be converted to sync using ConvertToSync helper
+            // For async methods, we need to generate an async enumerable
             var hasCancellationToken = methodSymbol.Parameters.Any(p => p.Type.Name == "CancellationToken");
             var ctParam = hasCancellationToken && string.IsNullOrEmpty(methodArgs) ? "ct" : 
                          hasCancellationToken && !string.IsNullOrEmpty(methodArgs) ? $"{methodArgs}, ct" : 
                          methodArgs;
             var methodCall = $"{className}.{methodSymbol.Name}({ctParam})";
             
-            // Generate a named async iterator method for this data source
-            var methodName = $"AsyncDataSourceWrapper_{SafeMethodName(methodSymbol)}";
-            
-            // Generate the async wrapper method first
-            GenerateAsyncDataSourceWrapper(writer, dataSource, methodName, methodCall);
-            
-            // Now use it in the factory
-            writer.AppendLine($"return ConvertToSync({methodName});");
+            // Check if it returns IAsyncEnumerable
+            if (IsAsyncEnumerable(methodSymbol.ReturnType))
+            {
+                // Check if we need to convert the async enumerable to object?[]
+                var returnType = methodSymbol.ReturnType as INamedTypeSymbol;
+                var typeArg = returnType?.TypeArguments.FirstOrDefault();
+                
+                if (typeArg != null && !IsObjectArrayType(typeArg))
+                {
+                    // Need to convert each item to object?[]
+                    writer.AppendLine($"await foreach (var item in {methodCall})");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    if (IsTupleType(typeArg))
+                    {
+                        // Handle tuple types by converting to object array
+                        var tupleElements = GetTupleElements(typeArg);
+                        if (tupleElements.Length == 2)
+                        {
+                            writer.AppendLine("yield return new object?[] { item.Item1, item.Item2 };");
+                        }
+                        else if (tupleElements.Length == 3)
+                        {
+                            writer.AppendLine("yield return new object?[] { item.Item1, item.Item2, item.Item3 };");
+                        }
+                        else
+                        {
+                            // Generic tuple handling
+                            writer.AppendLine("// Converting tuple to object array");
+                            writer.AppendLine("yield return ConvertTupleToObjectArray(item);");
+                        }
+                    }
+                    else
+                    {
+                        writer.AppendLine("yield return new object?[] { item };");
+                    }
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                }
+                else
+                {
+                    // Already returns IAsyncEnumerable<object?[]>
+                    writer.AppendLine($"await foreach (var item in {methodCall})");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine("yield return item;");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                }
+            }
+            else if (IsTaskOfEnumerable(methodSymbol.ReturnType))
+            {
+                // Task<IEnumerable<T>> - need to convert to IAsyncEnumerable
+                writer.AppendLine($"var result = await {methodCall};");
+                writer.AppendLine("await foreach (var item in ConvertToAsyncEnumerableInternal(ConvertToObjectArrays(result), ct))");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("yield return item;");
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
+            else if (IsValueTaskOfEnumerable(methodSymbol.ReturnType))
+            {
+                // ValueTask<IEnumerable<T>> - need to convert to IAsyncEnumerable
+                writer.AppendLine($"var result = await {methodCall};");
+                writer.AppendLine("await foreach (var item in ConvertToAsyncEnumerableInternal(ConvertToObjectArrays(result), ct))");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("yield return item;");
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
         }
         else
         {
@@ -367,6 +459,23 @@ internal sealed class DataSourceGenerator
     /// </summary>
     public void GenerateConversionHelpers(CodeWriter writer)
     {
+        // Generate async enumerable conversion helper
+        writer.AppendLine("private static async IAsyncEnumerable<object?[]> ConvertToAsyncEnumerableInternal(");
+        writer.AppendLine("    IEnumerable<object?[]> data,");
+        writer.AppendLine("    [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("await Task.Yield(); // Ensure async behavior");
+        writer.AppendLine("foreach (var item in data)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("ct.ThrowIfCancellationRequested();");
+        writer.AppendLine("yield return item;");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
         writer.AppendLine("private static IEnumerable<object?[]> ConvertToObjectArrays(object data)");
         writer.AppendLine("{");
         writer.Indent();
@@ -520,6 +629,47 @@ internal sealed class DataSourceGenerator
             default:
                 return "null";
         }
+    }
+    
+    private bool IsAsyncEnumerable(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol namedType)
+        {
+            return namedType.Name == "IAsyncEnumerable" || 
+                   namedType.AllInterfaces.Any(i => i.Name == "IAsyncEnumerable");
+        }
+        return false;
+    }
+    
+    private bool IsTaskOfEnumerable(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol namedType && namedType.Name == "Task" && namedType.TypeArguments.Length == 1)
+        {
+            var innerType = namedType.TypeArguments[0];
+            return innerType is INamedTypeSymbol innerNamed && 
+                   (innerNamed.Name == "IEnumerable" || innerNamed.AllInterfaces.Any(i => i.Name == "IEnumerable"));
+        }
+        return false;
+    }
+    
+    private bool IsValueTaskOfEnumerable(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol namedType && namedType.Name == "ValueTask" && namedType.TypeArguments.Length == 1)
+        {
+            var innerType = namedType.TypeArguments[0];
+            return innerType is INamedTypeSymbol innerNamed && 
+                   (innerNamed.Name == "IEnumerable" || innerNamed.AllInterfaces.Any(i => i.Name == "IEnumerable"));
+        }
+        return false;
+    }
+    
+    private ITypeSymbol[] GetTupleElements(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol namedType && namedType.IsTupleType)
+        {
+            return namedType.TupleElements.Select(e => e.Type).ToArray();
+        }
+        return Array.Empty<ITypeSymbol>();
     }
 
 
