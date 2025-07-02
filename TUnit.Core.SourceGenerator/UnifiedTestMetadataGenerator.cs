@@ -188,28 +188,24 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("using System.Threading;");
             writer.AppendLine("using System.Threading.Tasks;");
             writer.AppendLine("using global::TUnit.Core;");
-            writer.AppendLine("using global::TUnit.Engine;");
-            writer.AppendLine("using global::TUnit.Engine.Building.Collectors;");
+            writer.AppendLine("using global::TUnit.Core.Interfaces.SourceGenerator;");
             writer.AppendLine();
 
             writer.AppendLine("namespace TUnit.Generated;");
             writer.AppendLine();
 
-            // Generate the registry class
-            using (writer.BeginBlock("public static class UnifiedTestMetadataRegistry"))
+            // Generate the test source implementation
+            using (writer.BeginBlock("public sealed class GeneratedTestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource"))
             {
                 // Generate static test metadata collection
                 writer.AppendLine("private static readonly List<TestMetadata> _allTests = new();");
                 writer.AppendLine();
-                writer.AppendLine("/// <summary>");
-                writer.AppendLine("/// Gets all registered test metadata");
-                writer.AppendLine("/// </summary>");
-                writer.AppendLine("public static IReadOnlyList<TestMetadata> AllTests => _allTests;");
+                
+                writer.AppendLine("public IEnumerable<TestMetadata> GetTests() => _allTests;");
                 writer.AppendLine();
 
-                // Module initializer to register all tests
-                writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
-                using (writer.BeginBlock("public static void Initialize()"))
+                // Static constructor to initialize tests
+                using (writer.BeginBlock("static GeneratedTestSource()"))
                 {
                     writer.AppendLine("try");
                     writer.AppendLine("{");
@@ -217,14 +213,12 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                     writer.AppendLine("RegisterAllDelegates();");
                     writer.AppendLine("RegisterDataSourceFactories();");
                     writer.AppendLine("RegisterAllTests();");
-                    writer.AppendLine();
-                    writer.AppendLine("// Tests are now registered individually in RegisterAllTests() for better error isolation");
                     writer.Unindent();
                     writer.AppendLine("}");
                     writer.AppendLine("catch (Exception ex)");
                     writer.AppendLine("{");
                     writer.Indent();
-                    writer.AppendLine("Console.Error.WriteLine($\"Failed to initialize test registry: {ex}\");");
+                    writer.AppendLine("Console.Error.WriteLine($\"Failed to initialize test source: {ex}\");");
                     writer.AppendLine("throw;");
                     writer.Unindent();
                     writer.AppendLine("}");
@@ -362,6 +356,18 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                     }
                 }
             }
+            
+            writer.AppendLine();
+            
+            // Generate module initializer class
+            using (writer.BeginBlock("internal static class ModuleInitializer"))
+            {
+                writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
+                using (writer.BeginBlock("public static void Initialize()"))
+                {
+                    writer.AppendLine("global::TUnit.Core.SourceRegistrar.Register(new GeneratedTestSource());");
+                }
+            }
 
             context.AddSource("UnifiedTestMetadataRegistry.g.cs", writer.ToString());
             
@@ -401,7 +407,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             ? $"{context.ClassName}.{context.MethodName}({string.Join(",", paramTypeNames)})"
             : $"{context.ClassName}.{context.MethodName}";
 
-        using (writer.BeginBlock("global::TUnit.Engine.Building.Collectors.AotTestDataCollector.RegisterTest(new TestMetadata"))
+        using (writer.BeginBlock("_allTests.Add(new TestMetadata"))
         {
             writer.AppendLine($"TestId = \"{testId}\",");
             writer.AppendLine($"TestName = \"{context.MethodName}\",");
@@ -566,7 +572,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         var typeArgsDisplay = string.Join(", ", typeArgs.Select(t => t.ToDisplayString()));
         var testId = $"{testInfo.TypeSymbol.ToDisplayString()}.{testInfo.MethodSymbol.Name}<{typeArgsDisplay}>";
         
-        writer.AppendLine("global::TUnit.Engine.Building.Collectors.AotTestDataCollector.RegisterTest(new TestMetadata");
+        writer.AppendLine("_allTests.Add(new TestMetadata");
         writer.AppendLine("{");
         writer.Indent();
         

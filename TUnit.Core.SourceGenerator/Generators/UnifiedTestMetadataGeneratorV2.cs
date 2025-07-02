@@ -389,22 +389,36 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             // Note: Generic analysis would need to be done in a separate step
             // For now, we'll generate the registry structure without analysis
 
-            // Generate the registry class
-            writer.AppendLine($"public static class {RegistryClassName}");
+            // Generate the test source implementation
+            writer.AppendLine($"public sealed class GeneratedTestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
             writer.AppendLine("{");
             writer.Indent();
-
-            // Generate test list
             writer.AppendLine("private static readonly List<TestMetadata> _allTests = new();");
             writer.AppendLine();
-            writer.AppendLine("/// <summary>");
-            writer.AppendLine("/// Gets all registered test metadata");
-            writer.AppendLine("/// </summary>");
-            writer.AppendLine("public static IReadOnlyList<TestMetadata> AllTests => _allTests;");
+            writer.AppendLine("public IEnumerable<TestMetadata> GetTests() => _allTests;");
             writer.AppendLine();
-
-            // Generate module initializer
-            GenerateModuleInitializer(writer);
+            
+            // Static constructor to initialize tests
+            writer.AppendLine("static GeneratedTestSource()");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("try");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("RegisterAllDelegates();");
+            writer.AppendLine("RegisterAllTests();");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("catch (Exception ex)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("Console.Error.WriteLine($\"Failed to initialize test source: {ex}\");");
+            writer.AppendLine("throw;");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine();
 
             // Generate registration methods
             GenerateRegisterAllDelegates(writer, delegateGenerator, hookGenerator, testMethods);
@@ -440,6 +454,22 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             writer.AppendLine("// Hook implementations");
             hookGenerator.GenerateHookInvokers(writer, testMethods);
 
+            writer.Unindent();
+            writer.AppendLine("}");
+            
+            writer.AppendLine();
+            
+            // Generate module initializer class
+            writer.AppendLine("internal static class ModuleInitializer");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
+            writer.AppendLine("public static void Initialize()");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("global::TUnit.Core.SourceRegistrar.Register(new GeneratedTestSource());");
+            writer.Unindent();
+            writer.AppendLine("}");
             writer.Unindent();
             writer.AppendLine("}");
 
@@ -481,7 +511,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("using System.Runtime;");
         writer.AppendLine("using global::TUnit.Core;");
         writer.AppendLine("using global::TUnit.Core.Services;");
-        writer.AppendLine("using global::TUnit.Engine.Building.Collectors;");
+        writer.AppendLine("using global::TUnit.Core.Interfaces.SourceGenerator;");
         writer.AppendLine($"namespace {GeneratedNamespace};");
     }
 

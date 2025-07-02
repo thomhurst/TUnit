@@ -71,7 +71,7 @@ internal sealed class MetadataGenerator
 
     private void GenerateTestMetadata(CodeWriter writer, TestMethodMetadata testInfo)
     {
-        writer.AppendLine("global::TUnit.Engine.Building.Collectors.AotTestDataCollector.RegisterTest(new TestMetadata");
+        writer.AppendLine("_allTests.Add(new TestMetadata");
         writer.AppendLine("{");
         writer.Indent();
 

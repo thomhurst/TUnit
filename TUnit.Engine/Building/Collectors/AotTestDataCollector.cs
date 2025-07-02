@@ -1,4 +1,5 @@
 using TUnit.Core;
+using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Engine.Building.Interfaces;
 
 namespace TUnit.Engine.Building.Collectors;
@@ -8,50 +9,33 @@ namespace TUnit.Engine.Building.Collectors;
 /// </summary>
 public sealed class AotTestDataCollector : ITestDataCollector
 {
-    private static readonly List<TestMetadata> _allTestMetadata = new();
-    private static readonly object _lock = new();
-
-    /// <summary>
-    /// Registers test metadata from generated code.
-    /// This is called by the source-generated module initializer.
-    /// </summary>
-    public static void RegisterTests(IEnumerable<TestMetadata> tests)
-    {
-        lock (_lock)
-        {
-            _allTestMetadata.AddRange(tests);
-        }
-    }
-    
-    /// <summary>
-    /// Registers a single test metadata from generated code.
-    /// This is safer as it isolates errors to individual tests.
-    /// </summary>
-    public static void RegisterTest(TestMetadata test)
-    {
-        lock (_lock)
-        {
-            _allTestMetadata.Add(test);
-        }
-    }
-
     public Task<IEnumerable<TestMetadata>> CollectTestsAsync()
     {
-        IReadOnlyList<TestMetadata> metadata;
-        lock (_lock)
+        var allTests = new List<TestMetadata>();
+        
+        // Collect tests from all registered test sources
+        foreach (var testSource in Sources.TestSources)
         {
-            // Create a copy to avoid concurrency issues
-            metadata = _allTestMetadata.ToList();
+            try
+            {
+                var tests = testSource.GetTests();
+                allTests.AddRange(tests);
+            }
+            catch (Exception ex)
+            {
+                // Log but continue with other sources
+                Console.WriteLine($"Warning: Failed to collect tests from source {testSource.GetType().Name}: {ex.Message}");
+            }
         }
 
-        if (metadata.Count == 0)
+        if (allTests.Count == 0)
         {
             // No generated tests found
             return Task.FromResult(Enumerable.Empty<TestMetadata>());
         }
 
         // Filter out any tests that should be handled by specialized generators
-        var filteredMetadata = metadata.Where(m =>
+        var filteredMetadata = allTests.Where(m =>
             !HasAsyncDataSourceGenerator(m) &&
             !IsGenericTypeDefinition(m));
 
