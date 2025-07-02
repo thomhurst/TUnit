@@ -481,6 +481,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("using System.Runtime;");
         writer.AppendLine("using global::TUnit.Core;");
         writer.AppendLine("using global::TUnit.Core.Services;");
+        writer.AppendLine("using global::TUnit.Engine.Building.Collectors;");
         writer.AppendLine($"namespace {GeneratedNamespace};");
     }
 
@@ -515,9 +516,9 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("RegisterGenericTestCombinations();");
         writer.AppendLine();
         
-        // Register with DirectTestMetadataProvider
-        writer.AppendLine("// Register with DirectTestMetadataProvider");
-        writer.AppendLine("global::TUnit.Core.DirectTestMetadataProvider.RegisterMetadataProvider(() => AllTests);");
+        // Register with AotTestDataCollector
+        writer.AppendLine("// Register with AotTestDataCollector");
+        writer.AppendLine("global::TUnit.Engine.Building.Collectors.AotTestDataCollector.RegisterMetadataProvider(() => AllTests);");
         
         writer.Unindent();
         writer.AppendLine("}");

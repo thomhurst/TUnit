@@ -4,20 +4,37 @@ using TUnit.Engine.Building.Interfaces;
 namespace TUnit.Engine.Building.Collectors;
 
 /// <summary>
-/// Test data collector for AOT mode - reads from source-generated metadata
+/// Test data collector for AOT mode - collects source-generated test metadata
 /// </summary>
 public sealed class AotTestDataCollector : ITestDataCollector
 {
-    public AotTestDataCollector()
+    private static Func<IReadOnlyList<TestMetadata>>? _metadataProvider;
+    private static readonly object _lock = new();
+
+    /// <summary>
+    /// Registers the metadata provider from generated code.
+    /// This is called by the source-generated module initializer.
+    /// </summary>
+    public static void RegisterMetadataProvider(Func<IReadOnlyList<TestMetadata>> provider)
     {
-        // No dependencies needed - we access generated metadata directly
+        lock (_lock)
+        {
+            _metadataProvider = provider;
+        }
     }
 
     public Task<IEnumerable<TestMetadata>> CollectTestsAsync()
     {
-        // In AOT mode, all test metadata is pre-generated and registered
-        // We access it directly from the generated registry
-        var metadata = global::TUnit.Core.DirectTestMetadataProvider.GetAllTests();
+        // Get the registered metadata provider
+        var provider = _metadataProvider;
+        if (provider == null)
+        {
+            // No generated tests found
+            return Task.FromResult(Enumerable.Empty<TestMetadata>());
+        }
+
+        // Get all test metadata from the generated registry
+        var metadata = provider();
 
         // Filter out any tests that should be handled by specialized generators
         var filteredMetadata = metadata.Where(m =>

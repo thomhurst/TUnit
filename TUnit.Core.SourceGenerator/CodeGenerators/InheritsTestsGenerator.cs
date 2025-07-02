@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
-[Generator]
+// [Generator] // Temporarily disabled - needs to be updated to use TestMetadata instead of DynamicTestMetadata
 public class InheritsTestsGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -152,7 +152,6 @@ public class InheritsTestsGenerator : IIncrementalGenerator
         writer.AppendLine("using System.Linq;");
         writer.AppendLine("using System.Reflection;");
         writer.AppendLine("using global::TUnit.Core;");
-        writer.AppendLine("using global::TUnit.Core.SourceGenerator;");
         writer.AppendLine();
         writer.AppendLine("namespace TUnit.Generated;");
         writer.AppendLine();

@@ -270,15 +270,7 @@ internal sealed class MetadataGenerator
             }
         }
 
-        // Generate DependsOn array (legacy)
-        if (legacyDependencies.Any())
-        {
-            writer.AppendLine($"DependsOn = new string[] {{ {string.Join(", ", legacyDependencies.Select(d => $"\"{d}\""))} }},");
-        }
-        else
-        {
-            writer.AppendLine("DependsOn = Array.Empty<string>(),");
-        }
+        // DependsOn array removed - using Dependencies property instead
 
         // Generate Dependencies array (new)
         if (testDependencies.Any())

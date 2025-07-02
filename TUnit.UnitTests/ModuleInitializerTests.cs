@@ -1,5 +1,6 @@
 using TUnit.Core;
 using TUnit.Engine;
+using TUnit.Engine.Building.Collectors;
 
 namespace TUnit.UnitTests;
 
@@ -9,31 +10,34 @@ namespace TUnit.UnitTests;
 public class ModuleInitializerTests
 {
     [Test]
-    public async Task DirectTestMetadataProvider_HasTests()
+    public async Task AotTestDataCollector_HasTests()
     {
         // Arrange & Act
-        var tests = DirectTestMetadataProvider.GetAllTests();
+        var collector = new AotTestDataCollector();
+        var tests = await collector.CollectTestsAsync();
 
         // Assert
         await Assert.That(tests).IsNotNull();
-        await Assert.That(tests.Count).IsGreaterThan(0);
+        await Assert.That(tests.Count()).IsGreaterThan(0);
     }
 
     [Test]
-    public async Task DirectTestMetadataProvider_ContainsMetadata()
+    public async Task AotTestDataCollector_ContainsMetadata()
     {
         // Arrange & Act
-        var tests = DirectTestMetadataProvider.GetAllTests();
+        var collector = new AotTestDataCollector();
+        var tests = await collector.CollectTestsAsync();
 
         // Assert
         await Assert.That(tests.Any()).IsTrue();
     }
 
     [Test]
-    public async Task DirectTestMetadataProvider_ProvidesTestMetadata()
+    public async Task AotTestDataCollector_ProvidesTestMetadata()
     {
         // Arrange & Act
-        var metadata = DirectTestMetadataProvider.GetAllTests();
+        var collector = new AotTestDataCollector();
+        var metadata = await collector.CollectTestsAsync();
 
         // Assert
         await Assert.That(metadata).IsNotNull();
@@ -111,9 +115,10 @@ public class ModuleInitializerTests
     {
         // Arrange & Act
         // This test verifies that the system is running in AOT-only mode
-        // We can test this by checking that DirectTestMetadataProvider is working
+        // We can test this by checking that AotTestDataCollector is working
         
-        var metadata = DirectTestMetadataProvider.GetAllTests();
+        var collector = new AotTestDataCollector();
+        var metadata = await collector.CollectTestsAsync();
 
         // Assert
         // In AOT-only mode, we should get metadata directly without any reflection

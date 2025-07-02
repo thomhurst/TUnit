@@ -189,6 +189,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("using System.Threading.Tasks;");
             writer.AppendLine("using global::TUnit.Core;");
             writer.AppendLine("using global::TUnit.Engine;");
+            writer.AppendLine("using global::TUnit.Engine.Building.Collectors;");
             writer.AppendLine();
 
             writer.AppendLine("namespace TUnit.Generated;");
@@ -217,8 +218,8 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                     writer.AppendLine("RegisterDataSourceFactories();");
                     writer.AppendLine("RegisterAllTests();");
                     writer.AppendLine();
-                    writer.AppendLine("// Register with DirectTestMetadataProvider");
-                    writer.AppendLine("global::TUnit.Core.DirectTestMetadataProvider.RegisterMetadataProvider(() => AllTests);");
+                    writer.AppendLine("// Register with AotTestDataCollector");
+                    writer.AppendLine("global::TUnit.Engine.Building.Collectors.AotTestDataCollector.RegisterMetadataProvider(() => AllTests);");
                     writer.Unindent();
                     writer.AppendLine("}");
                     writer.AppendLine("catch (Exception ex)");
@@ -399,7 +400,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
 
                 // Dependencies
                 //GenerateDependencies(writer, testInfo);
-                writer.AppendLine("DependsOn = Array.Empty<string>(),");
+                writer.AppendLine("Dependencies = Array.Empty<TestDependency>(),");
 
                 // Data sources
                 GenerateDataSources(writer, testInfo);
@@ -558,7 +559,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"CanRunInParallel = {GetCanRunInParallel(testInfo).ToString().ToLower()},");
         
         // Dependencies
-        writer.AppendLine("DependsOn = Array.Empty<string>(),");
+        writer.AppendLine("Dependencies = Array.Empty<TestDependency>(),");
         
         // Data sources
         GenerateDataSources(writer, testInfo);
@@ -1158,13 +1159,12 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
 
         if (dependencies.Any())
         {
-            writer.Append("DependsOn = new[] { ");
-            writer.Append(string.Join(", ", dependencies.Select(d => $"\"{d}\"")));
-            writer.AppendLine(" },");
+            // TODO: Convert string dependencies to TestDependency objects
+            writer.AppendLine("Dependencies = Array.Empty<TestDependency>(), // TODO: Implement dependency conversion");
         }
         else
         {
-            writer.AppendLine("DependsOn = Array.Empty<string>(),");
+            writer.AppendLine("Dependencies = Array.Empty<TestDependency>(),");
         }
     }
 

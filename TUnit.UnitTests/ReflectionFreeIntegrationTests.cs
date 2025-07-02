@@ -1,5 +1,6 @@
 using TUnit.Core;
 using TUnit.Core.Services;
+using TUnit.Engine.Building.Collectors;
 
 namespace TUnit.UnitTests;
 
@@ -160,8 +161,9 @@ public class ReflectionFreeIntegrationTests
         // Arrange & Act
         // Verify that the module initializer set up all the required infrastructure
         
-        // Check that test metadata is available
-        var metadata = DirectTestMetadataProvider.GetAllTests();
+        // Check that test metadata is available through AotTestDataCollector
+        var collector = new AotTestDataCollector();
+        var metadata = await collector.CollectTestsAsync();
         
         // Check that storage classes are available
         var delegateStorageType = typeof(TestDelegateStorage);
