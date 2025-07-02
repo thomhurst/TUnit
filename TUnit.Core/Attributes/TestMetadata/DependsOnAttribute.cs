@@ -202,6 +202,44 @@ public class DependsOnAttribute : TUnitAttribute
     public bool ProceedOnFailure { get; set; }
 
     /// <summary>
+    /// Creates a TestDependency object from this attribute's data
+    /// </summary>
+    public TestDependency ToTestDependency()
+    {
+        // If only test name is specified, it's a dependency on a test in the same class
+        if (ClassMetadata == null && !string.IsNullOrEmpty(TestName))
+        {
+            return new TestDependency 
+            { 
+                MethodName = TestName,
+                MethodParameters = ParameterTypes
+            };
+        }
+        
+        // If only class is specified, it's a dependency on all tests in that class
+        if (ClassMetadata != null && string.IsNullOrEmpty(TestName))
+        {
+            return TestDependency.FromClass(ClassMetadata);
+        }
+        
+        // If both class and method are specified
+        if (ClassMetadata != null && !string.IsNullOrEmpty(TestName))
+        {
+            return new TestDependency
+            {
+                ClassType = ClassMetadata,
+                ClassGenericArity = ClassMetadata.IsGenericTypeDefinition 
+                    ? ClassMetadata.GetGenericArguments().Length 
+                    : 0,
+                MethodName = TestName,
+                MethodParameters = ParameterTypes
+            };
+        }
+        
+        throw new InvalidOperationException("DependsOnAttribute must specify either a test name, a class type, or both.");
+    }
+
+    /// <summary>
     /// Returns a string representation of the dependency.
     /// </summary>
     /// <returns>A string that represents the dependency.</returns>

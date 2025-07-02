@@ -60,9 +60,15 @@ public sealed class TestMetadata
     public bool CanRunInParallel { get; init; } = true;
 
     /// <summary>
-    /// Tests that must run before this one
+    /// Tests that must run before this one (legacy string format)
     /// </summary>
+    [Obsolete("Use Dependencies property instead")]
     public string[] DependsOn { get; init; } = [];
+    
+    /// <summary>
+    /// Test dependencies with full metadata support for generic types and methods
+    /// </summary>
+    public TestDependency[] Dependencies { get; init; } = [];
 
     /// <summary>
     /// Test data for parameterized tests
@@ -100,6 +106,11 @@ public sealed class TestMetadata
     /// Parameter types for validation
     /// </summary>
     public Type[] ParameterTypes { get; init; } = [];
+    
+    /// <summary>
+    /// Parameter type names for dependency matching (fully qualified type names)
+    /// </summary>
+    public string[] TestMethodParameterTypes { get; init; } = [];
 
     /// <summary>
     /// Hooks to run at various test lifecycle points

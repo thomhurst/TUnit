@@ -201,18 +201,101 @@ internal sealed class MetadataGenerator
     private void GenerateDependencies(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var dependsOnAttributes = testInfo.MethodSymbol.GetAttributes()
-            .Where(a => a.AttributeClass?.Name == "DependsOnAttribute")
-            .Select(a => a.ConstructorArguments.FirstOrDefault().Value?.ToString())
-            .Where(d => !string.IsNullOrEmpty(d))
+            .Where(a => a.AttributeClass?.Name == "DependsOnAttribute" || 
+                       a.AttributeClass?.Name.StartsWith("DependsOnAttribute`") == true)
             .ToList();
 
-        if (dependsOnAttributes.Any())
+        // Generate legacy DependsOn for backward compatibility
+        var legacyDependencies = new List<string>();
+        var testDependencies = new List<string>();
+
+        foreach (var attr in dependsOnAttributes)
         {
-            writer.AppendLine($"DependsOn = new string[] {{ {string.Join(", ", dependsOnAttributes.Select(d => $"\"{d}\""))} }},");
+            // Check if it's a generic DependsOnAttribute<T>
+            if (attr.AttributeClass?.IsGenericType == true)
+            {
+                // Generic version: DependsOnAttribute<T>
+                var typeArg = attr.AttributeClass.TypeArguments.FirstOrDefault();
+                if (typeArg != null)
+                {
+                    var testName = attr.ConstructorArguments.FirstOrDefault().Value?.ToString();
+                    if (string.IsNullOrEmpty(testName))
+                    {
+                        // Depends on all tests in the class
+                        testDependencies.Add($"TestDependency.FromClass(typeof({typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}))");
+                    }
+                    else
+                    {
+                        // Depends on specific test in the class
+                        testDependencies.Add($"TestDependency.FromClassAndMethod(typeof({typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}), \"{testName}\")");
+                    }
+                }
+            }
+            else
+            {
+                // Non-generic version
+                var args = attr.ConstructorArguments;
+                if (args.Length == 1 && args[0].Type?.Name == "String")
+                {
+                    // DependsOnAttribute(string testName)
+                    var testName = args[0].Value?.ToString();
+                    if (!string.IsNullOrEmpty(testName))
+                    {
+                        legacyDependencies.Add(testName);
+                        testDependencies.Add($"TestDependency.FromMethodName(\"{testName}\")");
+                    }
+                }
+                else if (args.Length >= 1 && args[0].Type?.Name == "Type")
+                {
+                    // DependsOnAttribute(Type testClass) or DependsOnAttribute(Type testClass, string testName)
+                    var classType = args[0].Value as ITypeSymbol;
+                    if (classType != null)
+                    {
+                        var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                        if (args.Length == 1)
+                        {
+                            // Depends on all tests in the class
+                            testDependencies.Add($"TestDependency.FromClass(typeof({className}))");
+                        }
+                        else if (args.Length >= 2 && args[1].Type?.Name == "String")
+                        {
+                            var testName = args[1].Value?.ToString();
+                            if (!string.IsNullOrEmpty(testName))
+                            {
+                                testDependencies.Add($"TestDependency.FromClassAndMethod(typeof({className}), \"{testName}\")");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Generate DependsOn array (legacy)
+        if (legacyDependencies.Any())
+        {
+            writer.AppendLine($"DependsOn = new string[] {{ {string.Join(", ", legacyDependencies.Select(d => $"\"{d}\""))} }},");
         }
         else
         {
             writer.AppendLine("DependsOn = Array.Empty<string>(),");
+        }
+
+        // Generate Dependencies array (new)
+        if (testDependencies.Any())
+        {
+            writer.AppendLine("Dependencies = new TestDependency[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            foreach (var dep in testDependencies)
+            {
+                writer.AppendLine($"{dep},");
+            }
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
+        else
+        {
+            writer.AppendLine("Dependencies = Array.Empty<TestDependency>(),");
         }
     }
 
@@ -223,6 +306,7 @@ internal sealed class MetadataGenerator
         if (!parameters.Any())
         {
             writer.AppendLine("ParameterTypes = Type.EmptyTypes,");
+            writer.AppendLine("TestMethodParameterTypes = Array.Empty<string>(),");
             return;
         }
 
@@ -232,9 +316,11 @@ internal sealed class MetadataGenerator
         {
             // For methods with unresolved type parameters, we can't generate typeof() at compile time
             writer.AppendLine("ParameterTypes = Type.EmptyTypes, // Method has unresolved type parameters");
+            writer.AppendLine("TestMethodParameterTypes = Array.Empty<string>(), // Method has unresolved type parameters");
             return;
         }
 
+        // Generate ParameterTypes
         writer.AppendLine("ParameterTypes = new Type[]");
         writer.AppendLine("{");
         writer.Indent();
@@ -243,6 +329,20 @@ internal sealed class MetadataGenerator
         {
             var typeName = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             writer.AppendLine($"typeof({typeName}),");
+        }
+
+        writer.Unindent();
+        writer.AppendLine("},");
+
+        // Generate TestMethodParameterTypes (string array for dependency matching)
+        writer.AppendLine("TestMethodParameterTypes = new string[]");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        foreach (var param in parameters)
+        {
+            var typeName = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            writer.AppendLine($"\"{typeName}\",");
         }
 
         writer.Unindent();

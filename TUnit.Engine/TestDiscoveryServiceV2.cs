@@ -92,7 +92,24 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
         {
             var dependencies = new List<ExecutableTest>();
 
+            // Handle new TestDependency model
+            foreach (var dependency in test.Metadata.Dependencies)
+            {
+                var matchingTests = allTests.Where(t => dependency.Matches(t.Metadata, test.Metadata)).ToList();
+
+                if (matchingTests.Count == 0)
+                {
+                    throw new InvalidOperationException(
+                        $"Test '{test.DisplayName}' depends on {dependency} which was not found.");
+                }
+
+                dependencies.AddRange(matchingTests);
+            }
+
+            // Handle legacy string-based dependencies for backward compatibility
+#pragma warning disable CS0618 // Type or member is obsolete
             foreach (var dependencyName in test.Metadata.DependsOn)
+#pragma warning restore CS0618 // Type or member is obsolete
             {
                 // Try exact match first
                 if (testMap.TryGetValue(dependencyName, out var dependency))
@@ -101,10 +118,10 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
                     continue;
                 }
 
-                // Try matching by test name
+                // Try matching by test name in same class
                 var matchingTests = allTests.Where(t =>
-                    t.Metadata.TestName == dependencyName ||
-                    t.DisplayName == dependencyName).ToList();
+                    t.Metadata.TestClassType == test.Metadata.TestClassType &&
+                    (t.Metadata.TestName == dependencyName || t.Metadata.TestMethodName == dependencyName)).ToList();
 
                 if (matchingTests.Count == 1)
                 {
@@ -123,7 +140,11 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
                 }
             }
 
-            test.Dependencies = dependencies.ToArray();
+            // Remove duplicates and ensure we don't depend on ourselves
+            test.Dependencies = dependencies
+                .Distinct()
+                .Where(d => d.TestId != test.TestId)
+                .ToArray();
         }
     }
 
