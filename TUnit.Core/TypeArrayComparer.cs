@@ -6,7 +6,7 @@ namespace TUnit.Core;
 /// <summary>
 /// Efficient equality comparer for Type arrays used in generic test registration
 /// </summary>
-internal sealed class TypeArrayComparer : IEqualityComparer<Type[]>
+public sealed class TypeArrayComparer : IEqualityComparer<Type[]>
 {
     /// <summary>
     /// Singleton instance for reuse
