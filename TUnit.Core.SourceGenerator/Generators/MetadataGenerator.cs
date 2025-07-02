@@ -74,6 +74,7 @@ internal sealed class MetadataGenerator
         GenerateBasicMetadata(writer, testInfo);
         GenerateTestAttributes(writer, testInfo);
         _dataSourceGenerator.GenerateDataSourceMetadata(writer, testInfo);
+        _dataSourceGenerator.GenerateClassDataSourceMetadata(writer, testInfo);
         GeneratePropertyDataSources(writer, testInfo);
         GenerateParameterTypes(writer, testInfo);
         _hookGenerator.GenerateHookMetadata(writer, testInfo);
