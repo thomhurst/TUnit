@@ -4,15 +4,15 @@ This document describes the safeguards implemented to prevent hanging and deadlo
 
 ## Implemented Safeguards
 
-### 1. CartesianProduct Recursion Protection
-**Location**: `TestFactory.CartesianProductWithLimits()`
-**Issues Addressed**: Stack overflow from deep recursion, exponential test expansion
+### 1. Memory and Time-Based Resource Protection
+**Location**: `DiscoveryCircuitBreaker`
+**Issues Addressed**: Excessive resource consumption during test discovery
 
 **Safeguards**:
-- Maximum recursion depth (default: 100)
-- Maximum total combinations (default: 100,000)
-- Diagnostic logging of recursion depth and set counts
-- Configurable limits via `DiscoveryConfiguration`
+- Memory-based limits (default: 70% of available memory)
+- Time-based limits (default: 2 minutes)
+- Intelligent resource monitoring
+- Auto-scaling based on system capabilities (CI, container, CPU count)
 
 ### 2. Discovery Phase Timeout
 **Location**: `TestDiscoveryService.DiscoverTests()`
@@ -21,7 +21,6 @@ This document describes the safeguards implemented to prevent hanging and deadlo
 **Safeguards**:
 - Overall discovery timeout (default: 5 minutes)
 - Cancellation token propagation throughout discovery
-- Maximum test count per discovery session (default: 50,000)
 - Configurable via environment variables
 
 ### 3. Dynamic Data Source Protection
@@ -29,8 +28,7 @@ This document describes the safeguards implemented to prevent hanging and deadlo
 **Issues Addressed**: Hanging on blocking data source operations
 
 **Safeguards**:
-- Timeout for data source resolution (default: 30 seconds)
-- Maximum items per data source (default: 10,000)
+- Timeout for data source resolution (default: 30 seconds, auto-scaled)
 - Task.Run wrapper for reflection-based operations
 - Cancellation token support for async data sources
 
@@ -49,7 +47,6 @@ This document describes the safeguards implemented to prevent hanging and deadlo
 
 **Features**:
 - Event logging for key discovery operations
-- Cartesian product depth tracking
 - Data source timing monitoring
 - Hang detection and reporting
 - Environment variable control
@@ -60,33 +57,15 @@ This document describes the safeguards implemented to prevent hanging and deadlo
 - `TUNIT_DISCOVERY_DIAGNOSTICS=1` - Enable diagnostic logging
 - `TUNIT_DISCOVERY_TIMEOUT_SECONDS` - Override discovery timeout
 - `TUNIT_DATA_SOURCE_TIMEOUT_SECONDS` - Override data source timeout
-- `TUNIT_MAX_TESTS` - Override maximum tests per discovery
-- `TUNIT_MAX_COMBINATIONS` - Override maximum cartesian combinations
-- `TUNIT_MAX_DATA_ITEMS` - Override maximum data source items
 
 ### Default Limits
 ```csharp
-DiscoveryTimeout = 30 seconds
-DataSourceTimeout = 30 seconds
-MaxCartesianDepth = 100
-MaxCartesianCombinations = 100,000
-MaxTestsPerDiscovery = 50,000
-MaxDataSourceItems = 10,000
+DiscoveryTimeout = 30 seconds (auto-scaled based on system)
+DataSourceTimeout = 30 seconds (auto-scaled based on system)
 ```
 
 ## Error Messages
 
-### CartesianProduct Depth Exceeded
-```
-Cartesian product exceeded maximum recursion depth of {maxDepth}. 
-This may indicate an excessive number of data source combinations.
-```
-
-### Combinations Limit Exceeded
-```
-Cartesian product exceeded maximum combinations limit of {maxCombinations:N0}. 
-Consider reducing the number of data sources or their sizes.
-```
 
 ### Discovery Timeout
 ```
@@ -100,16 +79,7 @@ Data source '{memberName}' on type '{typeName}' timed out after {timeout} second
 Consider optimizing the data source or using cached data.
 ```
 
-### Test Count Exceeded
-```
-Test discovery exceeded maximum test count of {maxTests:N0}. 
-Consider reducing data source sizes or using test filters.
-```
 
-### Data Source Items Exceeded
-```
-Data source '{memberName}' exceeded maximum item count of {maxItems:N0}
-```
 
 ## Monitoring
 

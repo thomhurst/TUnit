@@ -6,13 +6,9 @@ echo
 # Enable all diagnostics
 export TUNIT_DISCOVERY_DIAGNOSTICS=1
 export TUNIT_DISCOVERY_TIMEOUT_SECONDS=10  # Reduce timeout for faster debugging
-export TUNIT_MAX_COMBINATIONS=100          # Limit combinations
-export TUNIT_MAX_DATA_ITEMS=50            # Limit data items
 
 echo "Configuration:"
 echo "- Discovery timeout: 10 seconds"
-echo "- Max combinations: 100"
-echo "- Max data items: 50"
 echo "- Diagnostics: ENABLED"
 echo
 
@@ -34,10 +30,6 @@ if grep -q "TestRegistry has not been initialized" discovery_output.log 2>/dev/n
     echo "   The framework needs to initialize TestRegistry before discovery"
 fi
 
-if grep -q "Cartesian product exceeded" discovery_output.log 2>/dev/null; then
-    echo "❌ FOUND: Excessive cartesian product expansion"
-    echo "   Reduce the size of your test data sources"
-fi
 
 if grep -q "timed out after" discovery_output.log 2>/dev/null; then
     echo "❌ FOUND: Discovery timeout"

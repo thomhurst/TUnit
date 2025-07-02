@@ -56,21 +56,12 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
 
     private async Task<IEnumerable<ExecutableTest>> DiscoverTestsWithTimeout(CancellationToken cancellationToken)
     {
-        const int MaxTestsPerDiscovery = 50_000;
-
         // Use the pipeline to build all tests
         var allTests = new List<ExecutableTest>();
 
         await foreach (var test in BuildTestsAsync(cancellationToken))
         {
             allTests.Add(test);
-
-            if (allTests.Count > MaxTestsPerDiscovery)
-            {
-                throw new InvalidOperationException(
-                    $"Test discovery exceeded maximum test count of {MaxTestsPerDiscovery:N0}. " +
-                    "Consider reducing data source sizes or using test filters.");
-            }
         }
 
         // No longer using TestRegistry - tests are managed directly
