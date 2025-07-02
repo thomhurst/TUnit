@@ -4,7 +4,8 @@ using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Engine.Building;
 
-namespace TUnit.Engine.Discovery;
+namespace TUnit.Engine.Discovery
+{
 
 /// <summary>
 /// Example demonstrating ReflectionTestDataCollector usage
@@ -114,5 +115,6 @@ namespace TUnit.Engine.Discovery.Examples
             Console.WriteLine($"Generic test for type: {typeof(T).Name}");
         }
     }
+}
 }
 #endif
