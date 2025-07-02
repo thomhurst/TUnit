@@ -81,7 +81,21 @@ public sealed class TestDependency : IEquatable<TestDependency>
             {
                 // Match generic type definition
                 if (testClassType.GetGenericTypeDefinition() != ClassType)
-                    return false;
+                {
+                    // Check if any base type matches the generic type definition
+                    var currentType = testClassType.BaseType;
+                    var found = false;
+                    while (currentType != null && !found)
+                    {
+                        if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == ClassType)
+                        {
+                            found = true;
+                        }
+                        currentType = currentType.BaseType;
+                    }
+                    if (!found)
+                        return false;
+                }
             }
             else if (!ClassType.IsAssignableFrom(testClassType))
             {
