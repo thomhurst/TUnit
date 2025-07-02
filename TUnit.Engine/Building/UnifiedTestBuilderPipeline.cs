@@ -117,14 +117,14 @@ public sealed class UnifiedTestBuilderPipeline
 public static class UnifiedTestBuilderPipelineFactory
 {
     /// <summary>
-    /// Creates a pipeline configured for AOT mode (source generation)
+    /// Creates a pipeline configured for the specified execution mode
     /// </summary>
-    public static UnifiedTestBuilderPipeline CreateAotPipeline(
-        ITestInvoker testInvoker,
-        IHookInvoker hookInvoker,
-        IServiceProvider? serviceProvider = null)
+    public static UnifiedTestBuilderPipeline CreatePipeline(
+        TestExecutionMode executionMode,
+        IServiceProvider? serviceProvider = null,
+        Assembly[]? assembliesToScan = null)
     {
-        var dataCollector = new Collectors.AotTestDataCollector();
+        var dataCollector = TestDataCollectorFactory.Create(executionMode, assembliesToScan);
         var genericResolver = new Resolvers.AotGenericTypeResolver();
         var dataSourceExpander = new Expanders.DataSourceExpander();
         var testBuilder = new TestBuilder(serviceProvider);
@@ -137,17 +137,44 @@ public static class UnifiedTestBuilderPipelineFactory
     }
 
     /// <summary>
-    /// Creates a pipeline configured for reflection mode
-    /// NOTE: Reflection mode has been removed in favor of AOT-only source generation.
-    /// Use CreateAotPipeline instead.
+    /// Creates a pipeline configured for AOT mode (source generation)
     /// </summary>
-    [Obsolete("Reflection mode has been removed for AOT compatibility. Use CreateAotPipeline instead.")]
+    public static UnifiedTestBuilderPipeline CreateAotPipeline(
+        ITestInvoker testInvoker,
+        IHookInvoker hookInvoker,
+        IServiceProvider? serviceProvider = null)
+    {
+        return CreatePipeline(TestExecutionMode.SourceGeneration, serviceProvider);
+    }
+
+    /// <summary>
+    /// Creates a pipeline configured for reflection mode
+    /// </summary>
     public static UnifiedTestBuilderPipeline CreateReflectionPipeline(
         Assembly[] assemblies,
         ITestInvoker testInvoker,
-        IHookInvoker hookInvoker)
+        IHookInvoker hookInvoker,
+        IServiceProvider? serviceProvider = null)
     {
-        throw new NotSupportedException(
-            "Reflection mode has been removed for AOT compatibility. Use CreateAotPipeline instead.");
+        return CreatePipeline(TestExecutionMode.Reflection, serviceProvider, assemblies);
+    }
+
+    /// <summary>
+    /// Creates a pipeline with automatic mode detection
+    /// </summary>
+    public static UnifiedTestBuilderPipeline CreateAutoDetectPipeline(
+        IServiceProvider? serviceProvider = null,
+        Assembly[]? assembliesToScan = null)
+    {
+        var dataCollector = TestDataCollectorFactory.CreateAutoDetect(assembliesToScan);
+        var genericResolver = new Resolvers.AotGenericTypeResolver();
+        var dataSourceExpander = new Expanders.DataSourceExpander();
+        var testBuilder = new TestBuilder(serviceProvider);
+
+        return new UnifiedTestBuilderPipeline(
+            dataCollector,
+            genericResolver,
+            dataSourceExpander,
+            testBuilder);
     }
 }

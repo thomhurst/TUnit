@@ -19,15 +19,6 @@ public record MethodMetadata : MemberMetadata
 
     public required ClassMetadata Class { get; init; }
 
-    [field: AllowNull, MaybeNull]
-    [JsonIgnore]
-    [Obsolete("ReflectionInformation is not compatible with AOT. Use source-generated metadata instead.")]
-    public MethodInfo ReflectionInformation
-    {
-        get => field ??=
-            MethodInfoRetriever.GetMethodInfo(Type, Name, GenericTypeCount, Parameters.Select(x => x.Type).ToArray());
-        set;
-    }
 
     public required TypeReference ReturnTypeReference { get; init; }
 

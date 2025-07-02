@@ -58,12 +58,6 @@ public sealed class TestMetadata
     /// Whether this test can run in parallel
     /// </summary>
     public bool CanRunInParallel { get; init; } = true;
-
-    /// <summary>
-    /// Tests that must run before this one (legacy string format)
-    /// </summary>
-    [Obsolete("Use Dependencies property instead")]
-    public string[] DependsOn { get; init; } = [];
     
     /// <summary>
     /// Test dependencies with full metadata support for generic types and methods

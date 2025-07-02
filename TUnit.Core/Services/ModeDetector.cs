@@ -65,4 +65,25 @@ public class ModeDetector : IModeDetector
 
     /// <inheritdoc />
     public bool IsReflectionModeRequested => _isReflectionModeRequested;
+
+    /// <summary>
+    /// Static helper to get the current execution mode
+    /// </summary>
+    public static TestExecutionMode Mode
+    {
+        get
+        {
+            // Check environment variable first
+            var envMode = Environment.GetEnvironmentVariable("TUNIT_EXECUTION_MODE");
+            if (!string.IsNullOrEmpty(envMode) && 
+                Enum.TryParse<TestExecutionMode>(envMode, ignoreCase: true, out var mode))
+            {
+                return mode;
+            }
+
+            // Use default detector logic
+            var detector = new ModeDetector();
+            return detector.DetectMode();
+        }
+    }
 }

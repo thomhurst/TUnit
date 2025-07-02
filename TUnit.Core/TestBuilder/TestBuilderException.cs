@@ -20,7 +20,7 @@ public class TestBuilderException : Exception
     /// <summary>
     /// Gets or sets the test metadata that caused the exception.
     /// </summary>
-    public DynamicTestMetadata? TestMetadata { get; set; }
+    public TestMetadata? TestMetadata { get; set; }
 
     /// <summary>
     /// Gets or sets additional context about the error.
@@ -33,12 +33,12 @@ public class TestBuilderException : Exception
 /// </summary>
 public class InvalidTestMetadataException : TestBuilderException
 {
-    public InvalidTestMetadataException(string message, DynamicTestMetadata metadata) : base(message)
+    public InvalidTestMetadataException(string message, TestMetadata metadata) : base(message)
     {
         TestMetadata = metadata;
     }
 
-    public InvalidTestMetadataException(string message, DynamicTestMetadata metadata, Exception innerException)
+    public InvalidTestMetadataException(string message, TestMetadata metadata, Exception innerException)
         : base(message, innerException)
     {
         TestMetadata = metadata;

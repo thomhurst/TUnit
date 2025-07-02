@@ -65,17 +65,16 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testInvoker = Register<ITestInvoker>(new TestInvoker());
         var hookInvoker = Register<IHookInvoker>(new HookInvoker());
 
-        // No longer needed - we'll access the generated metadata directly
-
-        // AOT-only mode: Reflection discovery is no longer supported
-        var enableDynamicDiscovery = false;
+        // Detect execution mode from command line or environment
+        var executionMode = GetExecutionMode(CommandLineOptions);
         
-        // Always use AOT mode for maximum performance and compatibility
+        // Create pipeline based on execution mode
         TestBuilderPipeline = Register(
-            UnifiedTestBuilderPipelineFactory.CreateAotPipeline(
-                testInvoker, hookInvoker, this));
+            UnifiedTestBuilderPipelineFactory.CreatePipeline(
+                executionMode, this, assembliesToScan: null));
 
-        DiscoveryService = Register(new TestDiscoveryServiceV2(TestBuilderPipeline, enableDynamicDiscovery));
+        DiscoveryService = Register(new TestDiscoveryServiceV2(TestBuilderPipeline, 
+            enableDynamicDiscovery: executionMode == Core.Enums.TestExecutionMode.Reflection));
 
         // Create single test executor with ExecutionContext support
         var singleTestExecutor = Register<ISingleTestExecutor>(
@@ -102,6 +101,29 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     {
         _services[typeof(T)] = service;
         return service;
+    }
+
+    private Core.Enums.TestExecutionMode GetExecutionMode(ICommandLineOptions commandLineOptions)
+    {
+        // Check for command line option first
+        if (commandLineOptions.TryGetOptionArgumentList("tunit-execution-mode", out var modes) && modes.Length > 0)
+        {
+            if (Enum.TryParse<Core.Enums.TestExecutionMode>(modes[0], ignoreCase: true, out var mode))
+            {
+                return mode;
+            }
+        }
+
+        // Check environment variable
+        var envMode = Environment.GetEnvironmentVariable("TUNIT_EXECUTION_MODE");
+        if (!string.IsNullOrEmpty(envMode) && 
+            Enum.TryParse<Core.Enums.TestExecutionMode>(envMode, ignoreCase: true, out var envModeEnum))
+        {
+            return envModeEnum;
+        }
+
+        // Default to auto-detect based on available tests
+        return Core.Enums.TestExecutionMode.SourceGeneration;
     }
 
 

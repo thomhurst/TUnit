@@ -55,28 +55,19 @@ public sealed class TestBuilder : ITestBuilder
         return executableTest;
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL2072:'type' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicConstructors' in call to 'System.Activator.CreateInstance(Type, params Object[])'", Justification = "This is only used in migration period when delegates are not available")]
     private Func<Task<object>> CreateInstanceFactory(TestMetadata metadata, ExpandedTestData expandedData)
     {
-        if (metadata.InstanceFactory != null)
+        if (metadata.InstanceFactory == null)
         {
-            // AOT mode with pre-compiled factory
-            return async () =>
-            {
-                var classArgs = expandedData.ClassArgumentsFactory();
-                var instance = metadata.InstanceFactory(classArgs);
-                await InjectPropertiesAsync(instance, expandedData.PropertyFactories);
-                return instance;
-            };
+            throw new InvalidOperationException(
+                $"No instance factory provided for test class {metadata.TestClassType}. " +
+                "Ensure tests are either source-generated or discovered via reflection with proper factory initialization.");
         }
 
-        // Fallback for migration period
         return async () =>
         {
-            var classType = metadata.TestClassType;
             var classArgs = expandedData.ClassArgumentsFactory();
-            var instance = Activator.CreateInstance(classType, classArgs) 
-                ?? throw new InvalidOperationException($"Failed to create instance of {classType}");
+            var instance = metadata.InstanceFactory(classArgs);
             await InjectPropertiesAsync(instance, expandedData.PropertyFactories);
             return instance;
         };
@@ -84,18 +75,18 @@ public sealed class TestBuilder : ITestBuilder
 
     private Func<object, Task> CreateTestInvoker(TestMetadata metadata, ExpandedTestData expandedData)
     {
-        if (metadata.TestInvoker != null)
+        if (metadata.TestInvoker == null)
         {
-            // AOT mode with pre-compiled invoker
-            return async instance =>
-            {
-                var methodArgs = expandedData.MethodArgumentsFactory();
-                await metadata.TestInvoker(instance, methodArgs);
-            };
+            throw new InvalidOperationException(
+                $"No test invoker provided for test {metadata.TestName}. " +
+                "Ensure tests are either source-generated or discovered via reflection with proper invoker initialization.");
         }
 
-        // This should not happen in AOT mode
-        throw new InvalidOperationException($"No test invoker available for test {metadata.TestName}. Ensure source generators have run.");
+        return async instance =>
+        {
+            var methodArgs = expandedData.MethodArgumentsFactory();
+            await metadata.TestInvoker(instance, methodArgs);
+        };
     }
 
     private async Task InjectPropertiesAsync(object instance, Dictionary<string, Func<object?>> propertyFactories)
