@@ -55,7 +55,7 @@ public sealed class ExecutableTest
     /// <summary>
     /// Test execution context
     /// </summary>
-    public TestContext? Context { get; set; }
+    public required TestContext Context { get; init; }
 
     /// <summary>
     /// Tests that must complete before this one can run

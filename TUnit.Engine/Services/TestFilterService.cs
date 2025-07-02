@@ -86,7 +86,7 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
             properties.Add(new KeyValuePairStringProperty("Category", category));
         }
 
-        if (test.Context?.TestDetails.CustomProperties == null)
+        if (test.Context.TestDetails.CustomProperties == null)
         {
             return new PropertyBag(properties);
         }

@@ -38,12 +38,6 @@ public sealed class TestExecutorAdapter : ITestExecutor, IDataProducer
         test.State = TestState.Running;
         test.StartTime = DateTimeOffset.UtcNow;
 
-        // Ensure test context is initialized
-        if (test.Context == null)
-        {
-            test.Context = new TestContext(test.TestId, test.DisplayName);
-        }
-
         // Report test started
         await _messageBus.PublishAsync(
             this,

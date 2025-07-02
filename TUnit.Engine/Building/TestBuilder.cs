@@ -35,7 +35,10 @@ public sealed class TestBuilder : ITestBuilder
         // Create hooks
         var hooks = CreateHooks(metadata);
 
-        // Build the executable test
+        // Create test context first since it's required
+        var context = await CreateTestContextAsync(testId, displayName, metadata, createInstance, invokeTest, hooks);
+
+        // Build the executable test with all required properties
         var executableTest = new ExecutableTest
         {
             TestId = testId,
@@ -46,11 +49,9 @@ public sealed class TestBuilder : ITestBuilder
             CreateInstance = createInstance,
             InvokeTest = invokeTest,
             PropertyValues = new Dictionary<string, object?>(), // Will be populated by factory
-            Hooks = hooks
+            Hooks = hooks,
+            Context = context
         };
-
-        // Create test context
-        executableTest.Context = await CreateTestContextAsync(executableTest);
 
         return executableTest;
     }
@@ -156,36 +157,37 @@ public sealed class TestBuilder : ITestBuilder
         return displayName;
     }
 
-    private async Task<TestContext> CreateTestContextAsync(ExecutableTest test)
+    private async Task<TestContext> CreateTestContextAsync(string testId, string displayName, TestMetadata metadata, 
+        Func<Task<object>> createInstance, Func<object, Task> invokeTest, TestLifecycleHooks hooks)
     {
         // Create test details
         var testDetails = new TestDetails
         {
-            TestId = test.TestId,
-            TestName = test.Metadata.TestName,
-            ClassType = test.Metadata.TestClassType,
-            MethodName = test.Metadata.TestMethodName,
+            TestId = testId,
+            TestName = metadata.TestName,
+            ClassType = metadata.TestClassType,
+            MethodName = metadata.TestMethodName,
             ClassInstance = null, // Will be set during execution
-            TestMethodArguments = test.Arguments,
-            TestClassArguments = test.ClassArguments,
-            DisplayName = test.DisplayName,
-            TestFilePath = test.Metadata.FilePath ?? "Unknown",
-            TestLineNumber = test.Metadata.LineNumber ?? 0,
-            TestMethodParameterTypes = test.Metadata.ParameterTypes,
+            TestMethodArguments = [], // Will be populated by factory
+            TestClassArguments = [], // Will be populated by factory
+            DisplayName = displayName,
+            TestFilePath = metadata.FilePath ?? "Unknown",
+            TestLineNumber = metadata.LineNumber ?? 0,
+            TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task), // All test methods return Task in AOT mode
-            ClassMetadata = CreateClassMetadata(test.Metadata),
-            MethodMetadata = CreateMethodMetadata(test.Metadata)
+            ClassMetadata = CreateClassMetadata(metadata),
+            MethodMetadata = CreateMethodMetadata(metadata)
         };
 
         // Add categories
-        foreach (var category in test.Metadata.Categories)
+        foreach (var category in metadata.Categories)
         {
             testDetails.Categories.Add(category);
         }
 
         var context = new TestContext(
-            test.Metadata.TestName, 
-            test.DisplayName, 
+            metadata.TestName, 
+            displayName, 
             CancellationToken.None,
             _serviceProvider ?? new TUnit.Core.Services.TestServiceProvider())
         {

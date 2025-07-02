@@ -72,6 +72,34 @@ public sealed class UnifiedTestBuilderPipeline
         var testId = metadata.TestId ?? $"{metadata.TestClassType.FullName}.{metadata.TestMethodName}_DataSourceError";
         var displayName = $"{metadata.TestName} [DATA SOURCE ERROR]";
 
+        // Create a minimal test context for failed test
+        var testDetails = new TestDetails
+        {
+            TestId = testId,
+            TestName = metadata.TestName,
+            ClassType = metadata.TestClassType,
+            MethodName = metadata.TestMethodName,
+            ClassInstance = null,
+            TestMethodArguments = [],
+            TestClassArguments = [],
+            DisplayName = displayName,
+            TestFilePath = metadata.FilePath ?? "Unknown",
+            TestLineNumber = metadata.LineNumber ?? 0,
+            TestMethodParameterTypes = metadata.ParameterTypes,
+            ReturnType = typeof(Task),
+            ClassMetadata = null!,
+            MethodMetadata = null!
+        };
+
+        var context = new TestContext(
+            metadata.TestName,
+            displayName,
+            CancellationToken.None,
+            new TUnit.Core.Services.TestServiceProvider())
+        {
+            TestDetails = testDetails
+        };
+
         return new ExecutableTest
         {
             TestId = testId,
@@ -96,6 +124,7 @@ public sealed class UnifiedTestBuilderPipeline
                 AfterTest = [
                 ]
             },
+            Context = context,
             State = TestState.Failed,
             Result = new TestResult
             {
@@ -105,7 +134,7 @@ public sealed class UnifiedTestBuilderPipeline
                 Duration = TimeSpan.Zero,
                 Exception = exception,
                 ComputerName = Environment.MachineName,
-                TestContext = null
+                TestContext = context
             }
         };
     }
