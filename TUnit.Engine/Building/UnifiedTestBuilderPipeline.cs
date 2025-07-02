@@ -87,8 +87,8 @@ public sealed class UnifiedTestBuilderPipeline
             TestLineNumber = metadata.LineNumber ?? 0,
             TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task),
-            ClassMetadata = null!,
-            MethodMetadata = null!
+            ClassMetadata = CreateClassMetadata(metadata),
+            MethodMetadata = CreateMethodMetadata(metadata)
         };
 
         var context = new TestContext(
@@ -136,6 +136,58 @@ public sealed class UnifiedTestBuilderPipeline
                 ComputerName = Environment.MachineName,
                 TestContext = context
             }
+        };
+    }
+
+    [UnconditionalSuppressMessage("AOT", "IL2072:'value' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ClassMetadata.Type.init'", Justification = "Type annotations are handled by source generators")]
+    private static ClassMetadata CreateClassMetadata(TestMetadata metadata)
+    {
+        var type = metadata.TestClassType;
+
+        return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => new ClassMetadata
+        {
+            Name = type.Name,
+            Type = type,
+            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
+            Namespace = type.Namespace,
+            Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.FullName ?? "Unknown", () => new AssemblyMetadata
+            {
+                Name = type.Assembly.GetName().Name ?? "Unknown",
+                Attributes = []
+            }),
+            Parameters = [],
+            Properties = [],
+            Parent = null,
+            Attributes = []
+        });
+    }
+
+    [UnconditionalSuppressMessage("AOT", "IL2072:'value' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.MethodMetadata.Type.init'", Justification = "Type annotations are handled by source generators")]
+    [UnconditionalSuppressMessage("AOT", "IL2067:'Type' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ParameterMetadata.ParameterMetadata(Type)'", Justification = "Parameter types are known at compile time")]
+    private static MethodMetadata CreateMethodMetadata(TestMetadata metadata)
+    {
+        // In AOT mode, use metadata directly without reflection
+        // Create parameters from ParameterTypes array
+        var parameters = metadata.ParameterTypes.Select((type, index) => new ParameterMetadata(type)
+        {
+            Name = $"param{index}",
+            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
+            Attributes = [],
+            ReflectionInfo = null! // No reflection info in AOT mode
+        }).ToArray();
+
+        // Minimal metadata when MethodInfo is not available
+        return new MethodMetadata
+        {
+            Name = metadata.TestMethodName,
+            Type = metadata.TestClassType,
+            TypeReference = TypeReference.CreateConcrete(metadata.TestClassType.AssemblyQualifiedName ?? metadata.TestClassType.FullName ?? metadata.TestClassType.Name),
+            Class = CreateClassMetadata(metadata),
+            Parameters = parameters,
+            GenericTypeCount = 0,
+            ReturnTypeReference = TypeReference.CreateConcrete(typeof(Task).AssemblyQualifiedName ?? typeof(Task).FullName ?? "System.Threading.Tasks.Task"),
+            ReturnType = typeof(Task),
+            Attributes = []
         };
     }
 }
