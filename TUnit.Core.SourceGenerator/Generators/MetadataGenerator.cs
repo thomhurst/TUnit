@@ -26,7 +26,6 @@ internal sealed class MetadataGenerator
     public void GenerateTestRegistrations(CodeWriter writer, IEnumerable<TestMethodMetadata> testMethods)
     {
         var testCount = testMethods.Count();
-        writer.AppendLine($"// Registering {testCount} tests individually with error isolation");
         writer.AppendLine($"Console.Error.WriteLine(\"Registering {testCount} tests...\");");
         writer.AppendLine("var successCount = 0;");
         writer.AppendLine("var failedTests = new List<string>();");
@@ -107,7 +106,7 @@ internal sealed class MetadataGenerator
         if (ContainsTypeParameter(testInfo.TypeSymbol))
         {
             // This shouldn't happen with proper filtering, but provide a fallback
-            writer.AppendLine($"TestClassType = typeof(object), // Generic type {className} cannot be resolved at compile time");
+            writer.AppendLine($"TestClassType = typeof(object),");
         }
         else
         {
@@ -341,8 +340,8 @@ internal sealed class MetadataGenerator
         if (hasUnresolvedTypeParameters)
         {
             // For methods with unresolved type parameters, we can't generate typeof() at compile time
-            writer.AppendLine("ParameterTypes = Type.EmptyTypes, // Method has unresolved type parameters");
-            writer.AppendLine("TestMethodParameterTypes = Array.Empty<string>(), // Method has unresolved type parameters");
+            writer.AppendLine("ParameterTypes = Type.EmptyTypes,");
+            writer.AppendLine("TestMethodParameterTypes = Array.Empty<string>(),");
             return;
         }
 
