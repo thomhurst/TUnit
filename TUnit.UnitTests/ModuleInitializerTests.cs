@@ -92,6 +92,8 @@ public class ModuleInitializerTests
         await Assert.That(hookStorageType.IsClass).IsTrue();
     }
 
+    // DataSourceFactoryRegistry test removed - registry pattern eliminated
+    /*
     [Test]
     public async Task DataSourceFactoryRegistry_IsInitialized()
     {
@@ -102,6 +104,7 @@ public class ModuleInitializerTests
         await Assert.That(registryType).IsNotNull();
         await Assert.That(registryType.IsClass).IsTrue();
     }
+    */
 
     [Test]
     public async Task AOTMode_IsEnforced()

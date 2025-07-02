@@ -164,8 +164,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 }
             }
             
-            // Collect all unique data sources globally to avoid duplicates
-            var globalDataSources = CollectAllDataSources(validTests);
+            // Data source collection removed - now using inline delegates
             
             using var writer = new CodeWriter();
             
@@ -296,11 +295,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
 
                 writer.AppendLine();
                 
-                // Generate global data source factories method
-                if (globalDataSources.Any())
-                {
-                    GenerateGlobalDataSourceFactories(writer, globalDataSources, configuration);
-                }
+                // Data source factories now generated inline - no global generation needed
 
                 // Generate the conversion helper for data sources
                 GenerateConversionHelper(writer);
@@ -767,11 +762,32 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        // Generate property injection (always enabled)
-        var hasPropertyInjection = GeneratePropertyInjection(writer, classSymbol, diagnosticContext);
+        // Check if the class has properties that need injection
+        var hasInjectableProperties = classSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Any(p => p.GetAttributes().Any(a => a.AttributeClass?.Name?.EndsWith("DataSourceAttribute") == true));
+        
+        // Generate property injection if needed
+        if (hasInjectableProperties)
+        {
+            var generator = new PropertyInjectionGenerator();
+            var context = new PropertyInjectionContext
+            {
+                ClassSymbol = classSymbol,
+                ClassName = classSymbol.ToDisplayString(),
+                SafeClassName = classSymbol.Name.Replace(".", "_"),
+                DiagnosticContext = diagnosticContext
+            };
+            
+            var code = generator.GeneratePropertyInjection(context);
+            if (!string.IsNullOrEmpty(code))
+            {
+                writer.Append(code);
+            }
+        }
         
         // Generate hook invokers (including property injection hooks if needed)
-        GenerateHookInvokers(writer, classSymbol, hasPropertyInjection, configuration);
+        GenerateHookInvokers(writer, classSymbol, hasInjectableProperties, configuration);
 
         writer.AppendLine($"#endregion");
         writer.AppendLine();
@@ -1393,26 +1409,31 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
 
         var isShared = attr.NamedArguments.FirstOrDefault(a => a.Key == "IsShared").Value.Value as bool? ?? true;
         
-        // Check if the data source method is async
+        // Check the member type and return type
         var member = sourceType.GetMembers(memberName).FirstOrDefault();
-        bool isAsync = false;
         
-        if (member is IMethodSymbol methodSymbol)
+        if (member is IMethodSymbol method)
         {
-            isAsync = IsAsyncMethod(methodSymbol);
+            if (IsAsyncEnumerableType(method.ReturnType))
+            {
+                return $"new AsyncDelegateDataSource((ct) => {sourceType.ToDisplayString()}.{memberName}(ct), {isShared.ToString().ToLower()})";
+            }
+            else if (IsTaskOfEnumerableType(method.ReturnType))
+            {
+                return $"new TaskDelegateDataSource(() => {sourceType.ToDisplayString()}.{memberName}(), {isShared.ToString().ToLower()})";
+            }
+            else
+            {
+                return $"new DelegateDataSource(() => {sourceType.ToDisplayString()}.{memberName}(), {isShared.ToString().ToLower()})";
+            }
         }
-        else if (member is IPropertySymbol propertySymbol)
+        else if (member is IPropertySymbol property)
         {
-            isAsync = propertySymbol.Type.Name == "Task" || 
-                     propertySymbol.Type.Name == "ValueTask" ||
-                     propertySymbol.Type.AllInterfaces.Any(i => i.Name == "IAsyncEnumerable");
+            return $"new DelegateDataSource(() => {sourceType.ToDisplayString()}.{memberName}, {isShared.ToString().ToLower()})";
         }
         
-        // Use appropriate data source type
-        var dataSourceType = isAsync ? "AsyncDynamicTestDataSource" : "DynamicTestDataSource";
-        
-        // Note: Arguments are now handled by the data source factory, not stored in the metadata
-        return $"new {dataSourceType}({isShared.ToString().ToLower()}) {{ FactoryKey = \"global::{sourceType.ToDisplayString()}.{memberName}\" }}";
+        // Fallback for unknown member types
+        return $"new DelegateDataSource(() => {sourceType.ToDisplayString()}.{memberName}(), {isShared.ToString().ToLower()})";
     }
 
     private static void GenerateDynamicDataSource(CodeWriter writer, AttributeData attr)
@@ -1426,14 +1447,33 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
 
             if (sourceType != null && memberName != null)
             {
-                writer.AppendLine($"new DynamicTestDataSource({isShared})");
-                writer.AppendLine("{");
-                writer.Indent();
-                
-                writer.AppendLine($"FactoryKey = \"global::{sourceType.ToDisplayString()}.{memberName}\"");
-
-                writer.Unindent();
-                writer.AppendLine("},");
+                // Check if the data source is async
+                var member = sourceType.GetMembers(memberName).FirstOrDefault();
+                if (member is IMethodSymbol method)
+                {
+                    if (IsAsyncEnumerableType(method.ReturnType))
+                    {
+                        writer.AppendLine($"new AsyncDelegateDataSource((ct) => {sourceType.ToDisplayString()}.{memberName}(ct), {isShared})");
+                    }
+                    else if (IsTaskOfEnumerableType(method.ReturnType))
+                    {
+                        writer.AppendLine($"new TaskDelegateDataSource(() => {sourceType.ToDisplayString()}.{memberName}(), {isShared})");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"new DelegateDataSource(() => {sourceType.ToDisplayString()}.{memberName}(), {isShared})");
+                    }
+                }
+                else if (member is IPropertySymbol property)
+                {
+                    writer.AppendLine($"new DelegateDataSource(() => {sourceType.ToDisplayString()}.{memberName}, {isShared})");
+                }
+                else
+                {
+                    // Fallback for unknown member types
+                    writer.AppendLine($"new DelegateDataSource(() => {sourceType.ToDisplayString()}.{memberName}(), {isShared})");
+                }
+                writer.AppendLine(",");
             }
         }
     }
@@ -1722,6 +1762,34 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         return false;
     }
     
+    private static bool IsAsyncEnumerableType(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol namedType)
+            return false;
+            
+        var fullName = namedType.ToDisplayString();
+        return fullName.StartsWith("System.Collections.Generic.IAsyncEnumerable<") ||
+               fullName.StartsWith("IAsyncEnumerable<");
+    }
+    
+    private static bool IsTaskOfEnumerableType(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol namedType)
+            return false;
+            
+        if (namedType.Name != "Task" || namedType.TypeArguments.Length != 1)
+            return false;
+            
+        var innerType = namedType.TypeArguments[0];
+        var innerTypeName = innerType.ToDisplayString();
+        
+        return innerTypeName.Contains("IEnumerable<") || 
+               innerTypeName.Contains("List<") || 
+               innerTypeName.Contains("[]");
+    }
+    
+    // DataSourceInfo methods removed - no longer needed with inline delegates
+    /*
     private static DataSourceInfo? ExtractDataSourceInfo(AttributeData attribute, IMethodSymbol testMethod)
     {
         if (attribute.ConstructorArguments.Length < 2)
@@ -1758,6 +1826,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             }).ToList()
         };
     }
+    */
     
     private static void GenerateStronglyTypedDelegatesInline(CodeWriter writer, List<TestMethodMetadata> validTests, DiagnosticContext diagnosticContext)
     {
@@ -1924,6 +1993,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         context.AddSource("TUnitModuleInitializer.g.cs", moduleInitializerCode);
     }
 
+    /* ExtractPropertyDataSourceInfo method removed - no longer needed with inline delegates
     private static DataSourceInfo? ExtractPropertyDataSourceInfo(AttributeData attribute)
     {
         if (attribute.ConstructorArguments.Length < 2)
@@ -1953,12 +2023,6 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         };
     }
     
-    private static bool IsTaskLikeType(ITypeSymbol type)
-    {
-        var typeName = type.Name;
-        return typeName == "Task" || typeName == "ValueTask" || 
-               typeName == "IAsyncEnumerable" || type.AllInterfaces.Any(i => i.Name == "IAsyncEnumerable");
-    }
     
 
     private static bool GeneratePropertyInjection(CodeWriter writer, INamedTypeSymbol classSymbol, DiagnosticContext? diagnosticContext = null)
@@ -1982,6 +2046,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         return false;
     }
     
+    /* DataSource collection methods removed - no longer needed with inline delegates
     private static List<DataSourceInfo> CollectAllDataSources(List<TestMethodMetadata> validTests)
     {
         var dataSources = new Dictionary<string, DataSourceInfo>();
@@ -2037,17 +2102,13 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
     
     private static void GenerateGlobalDataSourceFactories(CodeWriter writer, List<DataSourceInfo> dataSources, TUnitConfiguration configuration)
     {
-        if (!dataSources.Any())
-            return;
-            
-        var generator = new DataSourceFactoryGenerator();
-        var code = generator.GenerateDataSourceFactories(dataSources);
-        writer.Append(code);
+        // Data source factories are now generated inline with delegates
+        // No need for global factory generation
         
-        // Report data source count if verbose diagnostics enabled
-        if (configuration.EnableVerboseDiagnostics)
+        if (configuration.EnableVerboseDiagnostics && dataSources.Any())
         {
-            writer.AppendLine($"// Generated {dataSources.Count} unique data source factories globally");
+            writer.AppendLine($"// {dataSources.Count} data sources use inline delegates");
         }
     }
+    */
 }

@@ -9,6 +9,7 @@ namespace TUnit.Engine.Services;
 /// <summary>
 /// AOT-safe service for resolving dynamic test data sources using pre-compiled factories
 /// </summary>
+[Obsolete("This class is obsolete along with DynamicTestDataSource. Data sources now contain their delegates directly.")]
 public class DataSourceResolver : IDynamicTestDataResolver
 {
     /// <summary>

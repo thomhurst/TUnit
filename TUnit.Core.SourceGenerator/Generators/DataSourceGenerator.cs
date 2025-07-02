@@ -18,12 +18,13 @@ internal sealed class DataSourceGenerator
     /// </summary>
     public void GenerateDataSourceRegistrations(CodeWriter writer, IEnumerable<TestMethodMetadata> testMethods)
     {
-        var dataSources = ExtractAllDataSources(testMethods);
-        
-        foreach (var dataSource in dataSources)
-        {
-            GenerateDataSourceFactory(writer, dataSource);
-        }
+        // Data source registrations are no longer needed - using inline delegates instead
+        // var dataSources = ExtractAllDataSources(testMethods);
+        // 
+        // foreach (var dataSource in dataSources)
+        // {
+        //     GenerateDataSourceFactory(writer, dataSource);
+        // }
     }
 
     /// <summary>

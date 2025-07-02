@@ -408,7 +408,6 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
 
             // Generate registration methods
             GenerateRegisterAllDelegates(writer, delegateGenerator, hookGenerator, testMethods);
-            GenerateRegisterDataSourceFactories(writer, dataSourceGenerator, testMethods);
             GenerateRegisterAllTests(writer, metadataGenerator, testMethods);
 
             // Generate generic test registry
@@ -503,7 +502,6 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         // Register all generated metadata
         writer.AppendLine("// Register all generated metadata");
         writer.AppendLine("RegisterAllDelegates();");
-        writer.AppendLine("RegisterDataSourceFactories();");
         writer.AppendLine("RegisterAllTests();");
         writer.AppendLine();
         
@@ -553,22 +551,6 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         
         delegateGenerator.GenerateDelegateRegistrations(writer, testMethods);
         hookGenerator.GenerateHookRegistrations(writer, testMethods);
-        
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-    }
-
-    private void GenerateRegisterDataSourceFactories(
-        CodeWriter writer,
-        DataSourceGenerator dataSourceGenerator,
-        IEnumerable<TestMethodMetadata> testMethods)
-    {
-        writer.AppendLine("private static void RegisterDataSourceFactories()");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        dataSourceGenerator.GenerateDataSourceRegistrations(writer, testMethods);
         
         writer.Unindent();
         writer.AppendLine("}");

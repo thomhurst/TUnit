@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ namespace TUnit.Engine.Services;
 /// <summary>
 /// Interface for resolving dynamic test data sources
 /// </summary>
+[Obsolete("This interface is obsolete along with DynamicTestDataSource. Data sources now contain their delegates directly.")]
 public interface IDynamicTestDataResolver
 {
     /// <summary>

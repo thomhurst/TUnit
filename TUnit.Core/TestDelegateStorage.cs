@@ -30,10 +30,7 @@ public static class TestDelegateStorage
     /// </summary>
     private static readonly Dictionary<string, Func<object?, HookContext, Task>> HookInvokers = new();
     
-    /// <summary>
-    /// Data source factories indexed by unique identifier
-    /// </summary>
-    private static readonly Dictionary<string, Func<IEnumerable<object?[]>>> DataSourceFactories = new();
+    // Data source factories removed - now using inline delegates in TestDataSource objects
     
     /// <summary>
     /// Strongly-typed delegates indexed by method signature
@@ -82,13 +79,7 @@ public static class TestDelegateStorage
         HookInvokers[key] = invoker;
     }
     
-    /// <summary>
-    /// Register a data source factory
-    /// </summary>
-    public static void RegisterDataSourceFactory(string key, Func<IEnumerable<object?[]>> factory)
-    {
-        DataSourceFactories[key] = factory;
-    }
+    // Data source factory registration removed - now using inline delegates
     
     /// <summary>
     /// Get a test invoker by key
@@ -122,21 +113,7 @@ public static class TestDelegateStorage
         return HookInvokers.TryGetValue(key, out var invoker) ? invoker : null;
     }
     
-    /// <summary>
-    /// Get a data source factory by key
-    /// </summary>
-    public static Func<IEnumerable<object?[]>>? GetDataSourceFactory(string key)
-    {
-        return DataSourceFactories.TryGetValue(key, out var factory) ? factory : null;
-    }
-    
-    /// <summary>
-    /// Get an async data source factory by key (delegates to DataSourceFactoryStorage)
-    /// </summary>
-    public static Func<CancellationToken, IAsyncEnumerable<object?[]>>? GetAsyncDataSourceFactory(string key)
-    {
-        return DataSourceFactoryStorage.GetFactory(key);
-    }
+    // Data source factory methods removed - now using inline delegates
     
     /// <summary>
     /// Register a strongly-typed delegate

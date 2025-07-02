@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
-using TUnit.Engine.Services;
 using TUnit.Engine.Building.Interfaces;
 
 namespace TUnit.Engine.Building.Expanders;
@@ -19,11 +18,10 @@ namespace TUnit.Engine.Building.Expanders;
 public sealed class DataSourceExpander : IDataSourceExpander
 {
     private const int DataSourceTimeoutSeconds = 30;
-    private readonly IDynamicTestDataResolver _dynamicDataResolver;
 
-    public DataSourceExpander(IDynamicTestDataResolver dynamicDataResolver)
+    public DataSourceExpander()
     {
-        _dynamicDataResolver = dynamicDataResolver ?? throw new ArgumentNullException(nameof(dynamicDataResolver));
+        // No longer need dynamic data resolver - data sources contain their delegates directly
     }
 
     /// <inheritdoc />
@@ -170,21 +168,26 @@ public sealed class DataSourceExpander : IDataSourceExpander
             case StaticTestDataSource staticSource:
                 return staticSource.GetDataFactories();
 
-            case DynamicTestDataSource dynamicSource:
-                return await ResolveDynamicDataSourceAsync(dynamicSource, level, cancellationToken);
+            case DelegateDataSource delegateSource:
+                return await Task.Run(() => delegateSource.GetDataFactories(), cancellationToken);
+                
+            case AsyncDelegateDataSource asyncSource:
+                return await Task.Run(() => asyncSource.GetDataFactories(), cancellationToken);
+                
+            case TaskDelegateDataSource taskSource:
+                return await Task.Run(() => taskSource.GetDataFactories(), cancellationToken);
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            case DynamicTestDataSource:
+                throw new NotSupportedException("DynamicTestDataSource is obsolete. Use DelegateDataSource instead.");
+                
+            case AsyncDynamicTestDataSource:
+                throw new NotSupportedException("AsyncDynamicTestDataSource is obsolete. Use AsyncDelegateDataSource instead.");
+#pragma warning restore CS0618 // Type or member is obsolete
 
             default:
                 throw new NotSupportedException($"Data source type {dataSource.GetType()} is not supported");
         }
-    }
-
-    private async Task<IEnumerable<Func<object?[]>>> ResolveDynamicDataSourceAsync(
-        DynamicTestDataSource dataSource,
-        DataSourceLevel level,
-        CancellationToken cancellationToken)
-    {
-        // In AOT mode, use the pre-compiled factory
-        return await Task.Run(() => dataSource.GetDataFactories(), cancellationToken);
     }
 
 

@@ -29,6 +29,16 @@ public abstract class TestDataSource : IDataSource
     {
         return GetDataFactories();
     }
+    
+    /// <summary>
+    /// Helper method to clone arguments for test isolation
+    /// </summary>
+    protected static object?[] CloneArguments(object?[] args)
+    {
+        var cloned = new object?[args.Length];
+        Array.Copy(args, cloned, args.Length);
+        return cloned;
+    }
 }
 
 /// <summary>
@@ -47,37 +57,24 @@ public sealed class StaticTestDataSource : TestDataSource
 
     public override IEnumerable<Func<object?[]>> GetDataFactories()
     {
-        // For static data, we create factories that return cloned arrays
-        // to ensure test isolation even for reference types
         return _data.Select(args => new Func<object?[]>(() => CloneArguments(args)));
-    }
-
-    private static object?[] CloneArguments(object?[] args)
-    {
-        // Create a new array to ensure isolation
-        var cloned = new object?[args.Length];
-        Array.Copy(args, cloned, args.Length);
-        return cloned;
     }
 }
 
 /// <summary>
-/// Dynamic test data source that uses pre-compiled factories (AOT-only)
+/// Delegate-based test data source that stores the factory delegate directly
 /// </summary>
-public sealed class DynamicTestDataSource : TestDataSource
+public sealed class DelegateDataSource : TestDataSource
 {
-    /// <summary>
-    /// Factory key for looking up the pre-compiled data source factory
-    /// </summary>
-    public required string FactoryKey { get; init; }
-    
+    private readonly Func<IEnumerable<object?[]>> _factory;
     private readonly bool _isShared;
     private IEnumerable<Func<object?[]>>? _cachedFactories;
 
     public override bool IsShared => _isShared;
 
-    public DynamicTestDataSource(bool isShared = false)
+    public DelegateDataSource(Func<IEnumerable<object?[]>> factory, bool isShared = false)
     {
+        _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         _isShared = isShared;
     }
 
@@ -88,13 +85,7 @@ public sealed class DynamicTestDataSource : TestDataSource
             return _cachedFactories;
         }
 
-        var factory = TestDelegateStorage.GetDataSourceFactory(FactoryKey);
-        if (factory == null)
-        {
-            throw new InvalidOperationException($"No data source factory registered with key '{FactoryKey}'");
-        }
-
-        var dataArrays = factory().ToArray();
+        var dataArrays = _factory().ToArray();
         var factories = dataArrays.Select(args => new Func<object?[]>(() => CloneArguments(args))).ToList();
 
         if (_isShared)
@@ -104,33 +95,22 @@ public sealed class DynamicTestDataSource : TestDataSource
 
         return factories;
     }
-
-    private static object?[] CloneArguments(object?[] args)
-    {
-        var cloned = new object?[args.Length];
-        Array.Copy(args, cloned, args.Length);
-        return cloned;
-    }
 }
 
 /// <summary>
-/// Async dynamic test data source that uses pre-compiled async factories (AOT-only)
-/// Supports cancellation and async enumeration
+/// Async delegate-based test data source that stores the async factory delegate directly
 /// </summary>
-public sealed class AsyncDynamicTestDataSource : TestDataSource
+public sealed class AsyncDelegateDataSource : TestDataSource
 {
-    /// <summary>
-    /// Factory key for looking up the pre-compiled async data source factory
-    /// </summary>
-    public required string FactoryKey { get; init; }
-    
+    private readonly Func<CancellationToken, IAsyncEnumerable<object?[]>> _asyncFactory;
     private readonly bool _isShared;
     private IEnumerable<Func<object?[]>>? _cachedFactories;
 
     public override bool IsShared => _isShared;
 
-    public AsyncDynamicTestDataSource(bool isShared = false)
+    public AsyncDelegateDataSource(Func<CancellationToken, IAsyncEnumerable<object?[]>> asyncFactory, bool isShared = false)
     {
+        _asyncFactory = asyncFactory ?? throw new ArgumentNullException(nameof(asyncFactory));
         _isShared = isShared;
     }
 
@@ -141,15 +121,7 @@ public sealed class AsyncDynamicTestDataSource : TestDataSource
             return _cachedFactories;
         }
 
-        var asyncFactory = TestDelegateStorage.GetAsyncDataSourceFactory(FactoryKey);
-        if (asyncFactory == null)
-        {
-            throw new InvalidOperationException($"No async data source factory registered with key '{FactoryKey}'");
-        }
-
-        // Convert async enumerable to sync for compatibility
-        // This is a bridge until the entire system supports async
-        var dataArrays = ConvertToSync(asyncFactory).ToArray();
+        var dataArrays = ConvertToSync(_asyncFactory).ToArray();
         var factories = dataArrays.Select(args => new Func<object?[]>(() => CloneArguments(args))).ToList();
 
         if (_isShared)
@@ -162,7 +134,6 @@ public sealed class AsyncDynamicTestDataSource : TestDataSource
 
     private static IEnumerable<object?[]> ConvertToSync(Func<CancellationToken, IAsyncEnumerable<object?[]>> asyncFactory)
     {
-        // Use a reasonable timeout for data source generation
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
         
         var asyncEnumerable = asyncFactory(cts.Token);
@@ -194,12 +165,44 @@ public sealed class AsyncDynamicTestDataSource : TestDataSource
             disposeTask.Wait(TimeSpan.FromSeconds(30));
         }
     }
+}
 
-    private static object?[] CloneArguments(object?[] args)
+/// <summary>
+/// Task-based delegate data source for methods that return Task<IEnumerable<T>>
+/// </summary>
+public sealed class TaskDelegateDataSource : TestDataSource
+{
+    private readonly Func<Task<IEnumerable<object?[]>>> _taskFactory;
+    private readonly bool _isShared;
+    private IEnumerable<Func<object?[]>>? _cachedFactories;
+
+    public override bool IsShared => _isShared;
+
+    public TaskDelegateDataSource(Func<Task<IEnumerable<object?[]>>> taskFactory, bool isShared = false)
     {
-        var cloned = new object?[args.Length];
-        Array.Copy(args, cloned, args.Length);
-        return cloned;
+        _taskFactory = taskFactory ?? throw new ArgumentNullException(nameof(taskFactory));
+        _isShared = isShared;
+    }
+
+    public override IEnumerable<Func<object?[]>> GetDataFactories()
+    {
+        if (_isShared && _cachedFactories != null)
+        {
+            return _cachedFactories;
+        }
+
+        var task = _taskFactory();
+        task.Wait(TimeSpan.FromMinutes(5));
+        
+        var dataArrays = task.Result.ToArray();
+        var factories = dataArrays.Select(args => new Func<object?[]>(() => CloneArguments(args))).ToList();
+
+        if (_isShared)
+        {
+            _cachedFactories = factories;
+        }
+
+        return factories;
     }
 }
 
@@ -211,4 +214,43 @@ public sealed class PropertyDataSource
     public required string PropertyName { get; init; }
     public required Type PropertyType { get; init; }
     public required TestDataSource DataSource { get; init; }
+}
+
+// Obsolete classes for backward compatibility
+[Obsolete("Use DelegateDataSource instead")]
+public sealed class DynamicTestDataSource : TestDataSource
+{
+    public required string FactoryKey { get; init; }
+    private readonly bool _isShared;
+
+    public override bool IsShared => _isShared;
+
+    public DynamicTestDataSource(bool isShared = false)
+    {
+        _isShared = isShared;
+    }
+
+    public override IEnumerable<Func<object?[]>> GetDataFactories()
+    {
+        throw new NotSupportedException("DynamicTestDataSource is obsolete. Use DelegateDataSource instead.");
+    }
+}
+
+[Obsolete("Use AsyncDelegateDataSource instead")]
+public sealed class AsyncDynamicTestDataSource : TestDataSource
+{
+    public required string FactoryKey { get; init; }
+    private readonly bool _isShared;
+
+    public override bool IsShared => _isShared;
+
+    public AsyncDynamicTestDataSource(bool isShared = false)
+    {
+        _isShared = isShared;
+    }
+
+    public override IEnumerable<Func<object?[]>> GetDataFactories()
+    {
+        throw new NotSupportedException("AsyncDynamicTestDataSource is obsolete. Use AsyncDelegateDataSource instead.");
+    }
 }

@@ -126,8 +126,7 @@ public static class UnifiedTestBuilderPipelineFactory
     {
         var dataCollector = new Collectors.AotTestDataCollector();
         var genericResolver = new Resolvers.AotGenericTypeResolver();
-        var dynamicResolver = new Services.DataSourceResolver();
-        var dataSourceExpander = new Expanders.DataSourceExpander(dynamicResolver);
+        var dataSourceExpander = new Expanders.DataSourceExpander();
         var testBuilder = new TestBuilder(serviceProvider);
 
         return new UnifiedTestBuilderPipeline(

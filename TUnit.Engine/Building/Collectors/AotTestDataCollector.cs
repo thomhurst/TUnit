@@ -29,11 +29,8 @@ public sealed class AotTestDataCollector : ITestDataCollector
 
     private static bool HasAsyncDataSourceGenerator(TestMetadata metadata)
     {
-        // Check if any data sources are from AsyncDataSourceGenerator attributes
-        // These are handled by specialized generators
-        // In AOT mode, async data sources are identified by their factory key pattern
-        return metadata.DataSources.Any(ds => ds is DynamicTestDataSource dts &&
-            dts.FactoryKey.Contains("AsyncDataSource"));
+        // Check if any data sources are async
+        return metadata.DataSources.Any(ds => ds is AsyncDelegateDataSource || ds is TaskDelegateDataSource);
     }
 
     private static bool IsGenericTypeDefinition(TestMetadata metadata)

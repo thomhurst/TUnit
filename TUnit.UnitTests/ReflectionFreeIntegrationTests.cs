@@ -92,6 +92,8 @@ public class ReflectionFreeIntegrationTests
         await Assert.That(hookExecuted).IsTrue();
     }
 
+    // DataSourceFactoryRegistry test removed - registry pattern eliminated
+    /*
     [Test]
     public async Task DataSourceFactories_WorkWithoutReflection()
     {
@@ -116,6 +118,7 @@ public class ReflectionFreeIntegrationTests
         await Assert.That(data[0][0]).IsEqualTo(1);
         await Assert.That(data[1][0]).IsEqualTo(2);
     }
+    */
 
     [Test]
     public async Task TypeArrayComparer_WorksInRuntimeContext()
@@ -163,13 +166,12 @@ public class ReflectionFreeIntegrationTests
         // Check that storage classes are available
         var delegateStorageType = typeof(TestDelegateStorage);
         var hookStorageType = typeof(HookDelegateStorage);
-        var factoryRegistryType = typeof(DataSourceFactoryRegistry);
+        // DataSourceFactoryRegistry removed - no longer using registry pattern
 
         // Assert
         await Assert.That(metadata).IsNotNull();
         await Assert.That(delegateStorageType).IsNotNull();
         await Assert.That(hookStorageType).IsNotNull();
-        await Assert.That(factoryRegistryType).IsNotNull();
     }
 
     // Test interface for service provider integration

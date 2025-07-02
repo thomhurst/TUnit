@@ -100,6 +100,8 @@ public class DelegateGenerationTests
         await Assert.That(hook).IsNull();
     }
 
+    // DataSourceFactoryRegistry tests removed - registry pattern eliminated in favor of inline delegates
+    /*
     [Test]
     public async Task DataSourceFactoryRegistry_CanRegisterFactory()
     {
@@ -150,6 +152,7 @@ public class DelegateGenerationTests
         await Assert.That(data[0][0]).IsEqualTo(42);
         await Assert.That(data[0][1]).IsEqualTo("test_value");
     }
+    */
 
     private class TestClass
     {

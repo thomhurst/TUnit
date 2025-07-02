@@ -427,12 +427,25 @@ internal sealed class MetadataGenerator
     {
         if (attr.AttributeClass?.Name == "ClassDataSourceAttribute")
         {
-            // ClassDataSource typically creates a single instance
-            var factoryKey = $"{classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{propertyName}_ClassDataSource";
+            // ClassDataSource creates instances of the specified type
             var sharedType = GetSharedTypeFromAttribute(attr);
             var isShared = sharedType != "None";
             
-            writer.AppendLine($"DataSource = new DynamicTestDataSource({isShared.ToString().ToLower()}) {{ FactoryKey = \"{factoryKey}\" }}");
+            // Get the type to instantiate from the generic attribute
+            if (attr.AttributeClass is INamedTypeSymbol namedType && namedType.IsGenericType && namedType.TypeArguments.Length > 0)
+            {
+                var dataType = namedType.TypeArguments[0];
+                writer.AppendLine($"DataSource = new DelegateDataSource(() => new object?[][] {{ new object?[] {{ new {dataType.ToDisplayString()}() }} }}, {isShared.ToString().ToLower()})");
+            }
+            else
+            {
+                // Non-generic ClassDataSource - need to get the type from constructor arguments
+                var typeArg = attr.ConstructorArguments.FirstOrDefault();
+                if (typeArg.Value is ITypeSymbol typeSymbol)
+                {
+                    writer.AppendLine($"DataSource = new DelegateDataSource(() => new object?[][] {{ new object?[] {{ new {typeSymbol.ToDisplayString()}() }} }}, {isShared.ToString().ToLower()})");
+                }
+            }
         }
         else if (attr.AttributeClass?.Name == "MethodDataSourceAttribute")
         {
@@ -440,18 +453,107 @@ internal sealed class MetadataGenerator
             var methodName = attr.ConstructorArguments.FirstOrDefault().Value?.ToString();
             if (!string.IsNullOrEmpty(methodName))
             {
-                var factoryKey = $"{classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{methodName}";
-                writer.AppendLine($"DataSource = new DynamicTestDataSource(false) {{ FactoryKey = \"{factoryKey}\" }}");
+                var member = classType.GetMembers(methodName).FirstOrDefault();
+                if (member is IMethodSymbol method)
+                {
+                    if (IsAsyncEnumerableType(method.ReturnType))
+                    {
+                        writer.AppendLine($"DataSource = new AsyncDelegateDataSource((ct) => {classType.ToDisplayString()}.{methodName}(ct), false)");
+                    }
+                    else if (IsTaskOfEnumerableType(method.ReturnType))
+                    {
+                        writer.AppendLine($"DataSource = new TaskDelegateDataSource(() => {classType.ToDisplayString()}.{methodName}(), false)");
+                    }
+                    else if (IsFuncOfTupleType(method.ReturnType))
+                    {
+                        // Special case: method returns Func<tuple> - need to invoke the func and wrap in array
+                        writer.AppendLine($"DataSource = new DelegateDataSource(() => {{ var func = {classType.ToDisplayString()}.{methodName}(); var result = func(); return new object?[][] {{ new object?[] {{ result }} }}; }}, false)");
+                    }
+                    else if (IsEnumerableOfObjectArrayType(method.ReturnType))
+                    {
+                        // Method returns IEnumerable<object?[]> - use directly
+                        writer.AppendLine($"DataSource = new DelegateDataSource(() => {classType.ToDisplayString()}.{methodName}(), false)");
+                    }
+                    else
+                    {
+                        // For other return types (single values), wrap in array
+                        writer.AppendLine($"DataSource = new DelegateDataSource(() => new object?[][] {{ new object?[] {{ {classType.ToDisplayString()}.{methodName}() }} }}, false)");
+                    }
+                }
+                else
+                {
+                    writer.AppendLine($"DataSource = new DelegateDataSource(() => {classType.ToDisplayString()}.{methodName}(), false)");
+                }
             }
         }
         else
         {
-            // For custom data attributes, use a generic approach
-            var factoryKey = $"{classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{propertyName}_DataSource";
-            writer.AppendLine($"DataSource = new DynamicTestDataSource(false) {{ FactoryKey = \"{factoryKey}\" }}");
+            // For custom data attributes (like ArgumentsAttribute), get the values from the attribute
+            if (attr.AttributeClass?.Name == "ArgumentsAttribute" && attr.ConstructorArguments.Length > 0)
+            {
+                // ArgumentsAttribute provides the values directly
+                var values = attr.ConstructorArguments.Select(arg => FormatArgumentValue(arg)).ToList();
+                var valuesStr = string.Join(", ", values);
+                writer.AppendLine($"DataSource = new DelegateDataSource(() => new object?[][] {{ new object?[] {{ {valuesStr} }} }}, false)");
+            }
+            else
+            {
+                // For other data attributes, just return empty for now
+                writer.AppendLine($"DataSource = new DelegateDataSource(() => new object?[][] {{ new object?[] {{ null }} }}, false)");
+            }
         }
     }
 
+    private bool IsAsyncEnumerableType(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol namedType)
+            return false;
+            
+        var fullName = namedType.ToDisplayString();
+        return fullName.StartsWith("System.Collections.Generic.IAsyncEnumerable<") ||
+               fullName.StartsWith("IAsyncEnumerable<");
+    }
+    
+    private bool IsTaskOfEnumerableType(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol namedType)
+            return false;
+            
+        if (namedType.Name != "Task" || namedType.TypeArguments.Length != 1)
+            return false;
+            
+        var innerType = namedType.TypeArguments[0];
+        var innerTypeName = innerType.ToDisplayString();
+        
+        return innerTypeName.Contains("IEnumerable<") || 
+               innerTypeName.Contains("List<") || 
+               innerTypeName.Contains("[]");
+    }
+    
+    private bool IsFuncOfTupleType(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol namedType)
+            return false;
+            
+        if (!namedType.Name.StartsWith("Func") || namedType.TypeArguments.Length != 1)
+            return false;
+            
+        var returnType = namedType.TypeArguments[0];
+        return returnType is INamedTypeSymbol { IsTupleType: true };
+    }
+    
+    private bool IsEnumerableOfObjectArrayType(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol namedType)
+            return false;
+            
+        var typeName = namedType.ToDisplayString();
+        return typeName.Contains("IEnumerable<object[]>") || 
+               typeName.Contains("IEnumerable<object?[]>") ||
+               typeName.Contains("List<object[]>") ||
+               typeName.Contains("List<object?[]>");
+    }
+    
     private string GetSharedTypeFromAttribute(AttributeData attr)
     {
         // Look for Shared property in named arguments
@@ -462,5 +564,35 @@ internal sealed class MetadataGenerator
             return value ?? "None";
         }
         return "None";
+    }
+    
+    private string FormatArgumentValue(TypedConstant arg)
+    {
+        if (arg.IsNull)
+            return "null";
+            
+        switch (arg.Kind)
+        {
+            case TypedConstantKind.Primitive:
+                if (arg.Type?.SpecialType == SpecialType.System_String)
+                    return $"\"{arg.Value}\"";
+                if (arg.Type?.SpecialType == SpecialType.System_Char)
+                    return $"'{arg.Value}'";
+                if (arg.Type?.SpecialType == SpecialType.System_Boolean)
+                    return arg.Value?.ToString()?.ToLower() ?? "false";
+                return arg.Value?.ToString() ?? "null";
+                
+            case TypedConstantKind.Type:
+                if (arg.Value is ITypeSymbol typeSymbol)
+                    return $"typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
+                return "null";
+                
+            case TypedConstantKind.Array:
+                var elements = arg.Values.Select(FormatArgumentValue);
+                return $"new[] {{ {string.Join(", ", elements)} }}";
+                
+            default:
+                return "null";
+        }
     }
 }
