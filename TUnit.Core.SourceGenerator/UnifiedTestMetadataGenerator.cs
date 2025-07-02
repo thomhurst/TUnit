@@ -218,8 +218,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                     writer.AppendLine("RegisterDataSourceFactories();");
                     writer.AppendLine("RegisterAllTests();");
                     writer.AppendLine();
-                    writer.AppendLine("// Register with AotTestDataCollector");
-                    writer.AppendLine("global::TUnit.Engine.Building.Collectors.AotTestDataCollector.RegisterMetadataProvider(() => AllTests);");
+                    writer.AppendLine("// Tests are now registered individually in RegisterAllTests() for better error isolation");
                     writer.Unindent();
                     writer.AppendLine("}");
                     writer.AppendLine("catch (Exception ex)");
@@ -274,12 +273,18 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 // Generate the registration method
                 using (writer.BeginBlock("private static void RegisterAllTests()"))
                 {
-                    writer.AppendLine($"// Registering {validTests.Count} tests");
+                    writer.AppendLine($"// Registering {validTests.Count} tests individually with error isolation");
                     writer.AppendLine($"Console.Error.WriteLine(\"Registering {validTests.Count} tests...\");");
+                    writer.AppendLine("var successCount = 0;");
+                    writer.AppendLine("var failedTests = new List<string>();");
                     writer.AppendLine();
 
                     foreach (var testInfo in validTests)
                     {
+                        writer.AppendLine("try");
+                        writer.AppendLine("{");
+                        writer.Indent();
+                        
                         if (testInfo.MethodSymbol.IsGenericMethod)
                         {
                             GenerateGenericTestMetadata(writer, testInfo);
@@ -288,10 +293,34 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                         {
                             GenerateTestMetadata(writer, testInfo);
                         }
+                        
+                        writer.AppendLine("successCount++;");
+                        writer.Unindent();
+                        writer.AppendLine("}");
+                        writer.AppendLine("catch (Exception ex)");
+                        writer.AppendLine("{");
+                        writer.Indent();
+                        writer.AppendLine($"var testName = \"{testInfo.TypeSymbol.ToDisplayString()}.{testInfo.MethodSymbol.Name}\";");
+                        writer.AppendLine("failedTests.Add($\"{testName}: {ex.Message}\");");
+                        writer.AppendLine("Console.Error.WriteLine($\"Failed to register test {testName}: {ex}\");");
+                        writer.Unindent();
+                        writer.AppendLine("}");
                         writer.AppendLine();
                     }
 
-                    writer.AppendLine($"Console.Error.WriteLine(\"All {validTests.Count} tests registered successfully\");");
+                    writer.AppendLine($"Console.Error.WriteLine($\"Successfully registered {{successCount}} out of {validTests.Count} tests\");");
+                    writer.AppendLine("if (failedTests.Count > 0)");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine("Console.Error.WriteLine($\"Failed to register {failedTests.Count} tests:\");");
+                    writer.AppendLine("foreach (var failure in failedTests)");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine("Console.Error.WriteLine($\"  - {failure}\");");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                    writer.Unindent();
+                    writer.AppendLine("}");
                 }
 
                 writer.AppendLine();
@@ -372,7 +401,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             ? $"{context.ClassName}.{context.MethodName}({string.Join(",", paramTypeNames)})"
             : $"{context.ClassName}.{context.MethodName}";
 
-        using (writer.BeginBlock("_allTests.Add(new TestMetadata"))
+        using (writer.BeginBlock("global::TUnit.Engine.Building.Collectors.AotTestDataCollector.RegisterTest(new TestMetadata"))
         {
             writer.AppendLine($"TestId = \"{testId}\",");
             writer.AppendLine($"TestName = \"{context.MethodName}\",");
@@ -537,7 +566,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         var typeArgsDisplay = string.Join(", ", typeArgs.Select(t => t.ToDisplayString()));
         var testId = $"{testInfo.TypeSymbol.ToDisplayString()}.{testInfo.MethodSymbol.Name}<{typeArgsDisplay}>";
         
-        writer.AppendLine("_allTests.Add(new TestMetadata");
+        writer.AppendLine("global::TUnit.Engine.Building.Collectors.AotTestDataCollector.RegisterTest(new TestMetadata");
         writer.AppendLine("{");
         writer.Indent();
         

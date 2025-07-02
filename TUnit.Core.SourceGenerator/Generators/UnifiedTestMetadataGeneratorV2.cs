@@ -516,9 +516,8 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("RegisterGenericTestCombinations();");
         writer.AppendLine();
         
-        // Register with AotTestDataCollector
-        writer.AppendLine("// Register with AotTestDataCollector");
-        writer.AppendLine("global::TUnit.Engine.Building.Collectors.AotTestDataCollector.RegisterMetadataProvider(() => AllTests);");
+        // Tests are now registered individually in RegisterAllTests() for better error isolation
+        writer.AppendLine("// Tests are now registered individually in RegisterAllTests() for better error isolation");
         
         writer.Unindent();
         writer.AppendLine("}");

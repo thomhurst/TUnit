@@ -26,18 +26,52 @@ internal sealed class MetadataGenerator
     public void GenerateTestRegistrations(CodeWriter writer, IEnumerable<TestMethodMetadata> testMethods)
     {
         var testCount = testMethods.Count();
-        writer.AppendLine($"// Registering {testCount} tests");
+        writer.AppendLine($"// Registering {testCount} tests individually with error isolation");
         writer.AppendLine($"Console.Error.WriteLine(\"Registering {testCount} tests...\");");
+        writer.AppendLine("var successCount = 0;");
+        writer.AppendLine("var failedTests = new List<string>();");
+        writer.AppendLine();
 
         foreach (var testInfo in testMethods)
         {
+            writer.AppendLine("try");
+            writer.AppendLine("{");
+            writer.Indent();
+            
             GenerateTestMetadata(writer, testInfo);
+            
+            writer.AppendLine("successCount++;");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("catch (Exception ex)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"var testName = \"{testInfo.TypeSymbol.ToDisplayString()}.{testInfo.MethodSymbol.Name}\";");
+            writer.AppendLine("failedTests.Add($\"{testName}: {ex.Message}\");");
+            writer.AppendLine("Console.Error.WriteLine($\"Failed to register test {testName}: {ex}\");");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine();
         }
+
+        writer.AppendLine($"Console.Error.WriteLine($\"Successfully registered {{successCount}} out of {testCount} tests\");");
+        writer.AppendLine("if (failedTests.Count > 0)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("Console.Error.WriteLine($\"Failed to register {failedTests.Count} tests:\");");
+        writer.AppendLine("foreach (var failure in failedTests)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("Console.Error.WriteLine($\"  - {failure}\");");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
     }
 
     private void GenerateTestMetadata(CodeWriter writer, TestMethodMetadata testInfo)
     {
-        writer.AppendLine("_allTests.Add(new TestMetadata");
+        writer.AppendLine("global::TUnit.Engine.Building.Collectors.AotTestDataCollector.RegisterTest(new TestMetadata");
         writer.AppendLine("{");
         writer.Indent();
 

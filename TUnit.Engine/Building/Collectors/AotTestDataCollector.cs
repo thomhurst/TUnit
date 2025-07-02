@@ -8,33 +8,47 @@ namespace TUnit.Engine.Building.Collectors;
 /// </summary>
 public sealed class AotTestDataCollector : ITestDataCollector
 {
-    private static Func<IReadOnlyList<TestMetadata>>? _metadataProvider;
+    private static readonly List<TestMetadata> _allTestMetadata = new();
     private static readonly object _lock = new();
 
     /// <summary>
-    /// Registers the metadata provider from generated code.
+    /// Registers test metadata from generated code.
     /// This is called by the source-generated module initializer.
     /// </summary>
-    public static void RegisterMetadataProvider(Func<IReadOnlyList<TestMetadata>> provider)
+    public static void RegisterTests(IEnumerable<TestMetadata> tests)
     {
         lock (_lock)
         {
-            _metadataProvider = provider;
+            _allTestMetadata.AddRange(tests);
+        }
+    }
+    
+    /// <summary>
+    /// Registers a single test metadata from generated code.
+    /// This is safer as it isolates errors to individual tests.
+    /// </summary>
+    public static void RegisterTest(TestMetadata test)
+    {
+        lock (_lock)
+        {
+            _allTestMetadata.Add(test);
         }
     }
 
     public Task<IEnumerable<TestMetadata>> CollectTestsAsync()
     {
-        // Get the registered metadata provider
-        var provider = _metadataProvider;
-        if (provider == null)
+        IReadOnlyList<TestMetadata> metadata;
+        lock (_lock)
+        {
+            // Create a copy to avoid concurrency issues
+            metadata = _allTestMetadata.ToList();
+        }
+
+        if (metadata.Count == 0)
         {
             // No generated tests found
             return Task.FromResult(Enumerable.Empty<TestMetadata>());
         }
-
-        // Get all test metadata from the generated registry
-        var metadata = provider();
 
         // Filter out any tests that should be handled by specialized generators
         var filteredMetadata = metadata.Where(m =>
