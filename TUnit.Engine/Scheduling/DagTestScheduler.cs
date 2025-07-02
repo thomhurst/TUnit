@@ -120,8 +120,15 @@ public sealed class DagTestScheduler : ITestScheduler
         var readyQueue = new ConcurrentQueue<TestExecutionState>();
         var completionTracker = new TestCompletionTracker(graph, readyQueue);
 
+        // Handle pre-failed tests (e.g., from dependency resolution failures)
+        foreach (var state in graph.Values.Where(s => s.Test.State == TestState.Failed))
+        {
+            state.State = TestState.Failed;
+            completionTracker.OnTestCompleted(state);
+        }
+
         // Enqueue tests with no dependencies
-        foreach (var state in graph.Values.Where(s => s.RemainingDependencies == 0))
+        foreach (var state in graph.Values.Where(s => s.RemainingDependencies == 0 && s.Test.State != TestState.Failed))
         {
             readyQueue.Enqueue(state);
         }

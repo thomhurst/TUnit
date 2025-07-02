@@ -5,6 +5,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Enums;
 using TUnit.Engine.Building;
 using TUnit.Engine.Services;
 
@@ -90,61 +91,81 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
 
         foreach (var test in allTests)
         {
-            var dependencies = new List<ExecutableTest>();
-
-            // Handle new TestDependency model
-            foreach (var dependency in test.Metadata.Dependencies)
+            try
             {
-                var matchingTests = allTests.Where(t => dependency.Matches(t.Metadata, test.Metadata)).ToList();
+                var dependencies = new List<ExecutableTest>();
 
-                if (matchingTests.Count == 0)
+                // Handle new TestDependency model
+                foreach (var dependency in test.Metadata.Dependencies)
                 {
-                    throw new InvalidOperationException(
-                        $"Test '{test.DisplayName}' depends on {dependency} which was not found.");
+                    var matchingTests = allTests.Where(t => dependency.Matches(t.Metadata, test.Metadata)).ToList();
+
+                    if (matchingTests.Count == 0)
+                    {
+                        throw new InvalidOperationException(
+                            $"Test '{test.DisplayName}' depends on {dependency} which was not found.");
+                    }
+
+                    dependencies.AddRange(matchingTests);
                 }
 
-                dependencies.AddRange(matchingTests);
-            }
-
-            // Handle legacy string-based dependencies for backward compatibility
+                // Handle legacy string-based dependencies for backward compatibility
 #pragma warning disable CS0618 // Type or member is obsolete
-            foreach (var dependencyName in test.Metadata.DependsOn)
+                foreach (var dependencyName in test.Metadata.DependsOn)
 #pragma warning restore CS0618 // Type or member is obsolete
-            {
-                // Try exact match first
-                if (testMap.TryGetValue(dependencyName, out var dependency))
                 {
-                    dependencies.Add(dependency);
-                    continue;
+                    // Try exact match first
+                    if (testMap.TryGetValue(dependencyName, out var dependency))
+                    {
+                        dependencies.Add(dependency);
+                        continue;
+                    }
+
+                    // Try matching by test name in same class
+                    var matchingTests = allTests.Where(t =>
+                        t.Metadata.TestClassType == test.Metadata.TestClassType &&
+                        (t.Metadata.TestName == dependencyName || t.Metadata.TestMethodName == dependencyName)).ToList();
+
+                    if (matchingTests.Count == 1)
+                    {
+                        dependencies.Add(matchingTests[0]);
+                    }
+                    else if (matchingTests.Count > 1)
+                    {
+                        throw new InvalidOperationException(
+                            $"Test '{test.DisplayName}' depends on '{dependencyName}' which matches multiple tests. " +
+                            "Use a more specific test identifier.");
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            $"Test '{test.DisplayName}' depends on '{dependencyName}' which was not found.");
+                    }
                 }
 
-                // Try matching by test name in same class
-                var matchingTests = allTests.Where(t =>
-                    t.Metadata.TestClassType == test.Metadata.TestClassType &&
-                    (t.Metadata.TestName == dependencyName || t.Metadata.TestMethodName == dependencyName)).ToList();
-
-                if (matchingTests.Count == 1)
-                {
-                    dependencies.Add(matchingTests[0]);
-                }
-                else if (matchingTests.Count > 1)
-                {
-                    throw new InvalidOperationException(
-                        $"Test '{test.DisplayName}' depends on '{dependencyName}' which matches multiple tests. " +
-                        "Use a more specific test identifier.");
-                }
-                else
-                {
-                    throw new InvalidOperationException(
-                        $"Test '{test.DisplayName}' depends on '{dependencyName}' which was not found.");
-                }
+                // Remove duplicates and ensure we don't depend on ourselves
+                test.Dependencies = dependencies
+                    .Distinct()
+                    .Where(d => d.TestId != test.TestId)
+                    .ToArray();
             }
-
-            // Remove duplicates and ensure we don't depend on ourselves
-            test.Dependencies = dependencies
-                .Distinct()
-                .Where(d => d.TestId != test.TestId)
-                .ToArray();
+            catch (Exception ex)
+            {
+                // Mark test as failed due to dependency resolution error
+                test.State = TestState.Failed;
+                test.Result = new TestResult
+                {
+                    Status = Status.Failed,
+                    Start = DateTimeOffset.UtcNow,
+                    End = DateTimeOffset.UtcNow,
+                    Duration = TimeSpan.Zero,
+                    Exception = ex,
+                    ComputerName = Environment.MachineName
+                };
+                
+                // Clear dependencies so test won't be scheduled
+                test.Dependencies = [];
+            }
         }
     }
 
