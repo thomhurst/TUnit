@@ -472,7 +472,7 @@ internal sealed class DataSourceGenerator
         writer.AppendLine($"return {className}.{propertySymbol.Name};");
     }
 
-    private void GenerateInlineDataSourceDelegate(CodeWriter writer, DataSourceInfo dataSource)
+    private void GenerateUnifiedDataSourceDelegate(CodeWriter writer, DataSourceInfo dataSource)
     {
         var attributeClass = dataSource.AttributeData?.AttributeClass;
         if (attributeClass == null)
@@ -481,144 +481,74 @@ internal sealed class DataSourceGenerator
         // Check if this is an async data source generator attribute
         if (IsAsyncDataSourceGeneratorAttributeType(attributeClass))
         {
-            // For generic AsyncDataSourceGeneratorAttribute<T>, we know it creates instances of T
+            // Use the same ConvertToObjectArrays pattern as method data sources
+            writer.AppendLine($"new DelegateDataSource(() => ConvertToObjectArrays(");
+            writer.Indent();
+            
+            // Generate the raw data - single value or array of values
             if (attributeClass.IsGenericType)
             {
+                // Generic ClassDataSourceAttribute<T> - create instance of T
                 var typeArg = attributeClass.TypeArguments[0];
                 var className = typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                
-                // Get constructor parameters of the test class for conversion
-                var testClassType = dataSource.SourceType as INamedTypeSymbol;
-                var constructor = testClassType?.InstanceConstructors.FirstOrDefault(c => !c.IsStatic);
-                var constructorParams = constructor?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
-                
-                writer.AppendLine($"new DelegateDataSource(() => ");
-                writer.AppendLine("{");
-                writer.Indent();
-                
-                if (constructorParams.Length == 1)
-                {
-                    // Single parameter - convert the ClassDataSource instance to the expected parameter type
-                    var paramType = constructorParams[0].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                    writer.AppendLine($"var instance = new {className}();");
-                    writer.AppendLine($"var converted = global::TUnit.Core.Helpers.CastHelper.Cast<{paramType}>(instance);");
-                    writer.AppendLine("return new global::System.Collections.Generic.List<object?[]> { new object?[] { converted } };");
-                }
-                else if (constructorParams.Length > 1)
-                {
-                    // Multiple parameters - need to handle tuple conversion from single instance
-                    writer.AppendLine($"var instance = new {className}();");
-                    writer.AppendLine("// Multiple constructor parameters - need to convert single instance to multiple values");
-                    writer.AppendLine("// For now, pass the instance as the first parameter and nulls for the rest");
-                    var paramTypes = constructorParams.Select(p => p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).ToArray();
-                    writer.AppendLine($"var converted = global::TUnit.Core.Helpers.CastHelper.Cast<{paramTypes[0]}>(instance);");
-                    writer.Append("return new global::System.Collections.Generic.List<object?[]> { new object?[] { converted");
-                    for (int i = 1; i < paramTypes.Length; i++)
-                    {
-                        writer.Append(", null");
-                    }
-                    writer.AppendLine(" } };");
-                }
-                else
-                {
-                    // No parameters
-                    writer.AppendLine("return new global::System.Collections.Generic.List<object?[]> { new object?[] { } };");
-                }
-                
-                writer.Unindent();
-                writer.AppendLine("}),");
+                writer.AppendLine($"new {className}()");
             }
-            else if (!attributeClass.IsGenericType)
+            else
             {
-                // Non-generic AsyncDataSourceGeneratorAttribute - can take single Type or Type[] as constructor arguments
+                // Non-generic ClassDataSourceAttribute - can take single Type or Type[] as constructor arguments
                 var constructorArgs = dataSource.AttributeData?.ConstructorArguments ?? ImmutableArray<TypedConstant>.Empty;
                 
                 if (constructorArgs.Length > 0)
                 {
-                    // Get the test class constructor parameter type for conversion
-                    var testClassType = dataSource.SourceType as INamedTypeSymbol;
-                    var constructor = testClassType?.InstanceConstructors.FirstOrDefault(c => !c.IsStatic);
-                    var constructorParams = constructor?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
-                    
-                    writer.AppendLine($"new DelegateDataSource(() => ");
-                    writer.AppendLine("{");
-                    writer.Indent();
-                    
                     if (constructorArgs[0].Kind == TypedConstantKind.Array)
                     {
-                        // Multiple types in params constructor
+                        // Multiple types passed as Type[] - create array of instances
                         var types = constructorArgs[0].Values;
-                        writer.AppendLine("var instances = new object?[] {");
+                        writer.AppendLine("new object[] {");
                         writer.Indent();
-                        foreach (var typeConstant in types)
+                        
+                        for (int i = 0; i < types.Length; i++)
                         {
-                            if (typeConstant.Value is INamedTypeSymbol typeSymbol)
+                            if (types[i].Value is INamedTypeSymbol typeSymbol)
                             {
                                 var typeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                                if (constructorParams.Length == 1)
-                                {
-                                    var paramType = constructorParams[0].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                                    writer.AppendLine($"global::TUnit.Core.Helpers.CastHelper.Cast<{paramType}>(new {typeName}()),");
-                                }
+                                writer.Append($"new {typeName}()");
+                                if (i < types.Length - 1)
+                                    writer.AppendLine(",");
                                 else
-                                {
-                                    writer.AppendLine($"new {typeName}(),");
-                                }
+                                    writer.AppendLine();
                             }
                         }
+                        
                         writer.Unindent();
-                        writer.AppendLine("};");
-                        writer.AppendLine("return new global::System.Collections.Generic.List<object?[]> { instances };");
+                        writer.AppendLine("}");
                     }
-                    else if (constructorArgs[0].Kind == TypedConstantKind.Type)
+                    else if (constructorArgs[0].Kind == TypedConstantKind.Type && constructorArgs[0].Value is INamedTypeSymbol singleType)
                     {
-                        // Single type constructor like [ClassDataSource(typeof(DataSource1))]
-                        if (constructorArgs[0].Value is INamedTypeSymbol typeSymbol)
-                        {
-                            var typeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                            if (constructorParams.Length == 1)
-                            {
-                                // Convert the instance to the expected parameter type
-                                var paramType = constructorParams[0].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                                writer.AppendLine($"var instance = new {typeName}();");
-                                writer.AppendLine($"var converted = global::TUnit.Core.Helpers.CastHelper.Cast<{paramType}>(instance);");
-                                writer.AppendLine("return new global::System.Collections.Generic.List<object?[]> { new object?[] { converted } };");
-                            }
-                            else
-                            {
-                                writer.AppendLine($"var instance = new {typeName}();");
-                                writer.AppendLine("return new global::System.Collections.Generic.List<object?[]> { new object?[] { instance } };");
-                            }
-                        }
-                        else
-                        {
-                            writer.AppendLine("return new global::System.Collections.Generic.List<object?[]> { new object?[] { } };");
-                        }
+                        // Single type passed
+                        var typeName = singleType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                        writer.AppendLine($"new {typeName}()");
                     }
                     else
                     {
-                        writer.AppendLine("return new global::System.Collections.Generic.List<object?[]> { new object?[] { } };");
+                        // Fallback
+                        writer.AppendLine("new object[0]");
                     }
-                    
-                    writer.Unindent();
-                    writer.AppendLine("}),");
                 }
                 else
                 {
-                    writer.AppendLine($"new StaticTestDataSource(new object?[][] {{ }}),");
+                    // No constructor arguments
+                    writer.AppendLine("new object[0]");
                 }
             }
-            else
-            {
-                // For other async data source attributes, we can't easily generate inline
-                // Fall back to a simpler approach
-                writer.AppendLine($"// TODO: Handle custom async data source: {attributeClass.Name}");
-                writer.AppendLine($"new StaticTestDataSource(new object?[][] {{ }}),");
-            }
+            
+            writer.Unindent();
+            writer.AppendLine(")),");
         }
         else
         {
-            // For other data source attributes, fall back to empty for now
+            // For other data source attributes that don't inherit from AsyncDataSourceGeneratorAttribute
+            writer.AppendLine($"// TODO: Handle other data source attribute: {attributeClass.Name}");
             writer.AppendLine($"new StaticTestDataSource(new object?[][] {{ }}),");
         }
     }
@@ -656,16 +586,16 @@ internal sealed class DataSourceGenerator
         }
         else if (dataSource.AttributeData != null)
         {
-            // Generate inline delegate for ClassDataSourceAttribute and other data source attributes
-            GenerateInlineDataSourceDelegate(writer, dataSource);
+            // Generate unified delegate for ClassDataSourceAttribute and other data source attributes
+            GenerateUnifiedDataSourceDelegate(writer, dataSource);
         }
         else if (dataSource.IsAsync)
         {
-            writer.AppendLine($"new AsyncDynamicTestDataSource {{ FactoryKey = \"{dataSource.FactoryKey}\" }},");
+            writer.AppendLine($"new AsyncDelegateDataSource(async (ct) => ConvertToAsyncEnumerableInternal(ConvertToObjectArrays(await {dataSource.FactoryKey}()), ct)),");
         }
         else
         {
-            writer.AppendLine($"new DynamicTestDataSource(true) {{ FactoryKey = \"{dataSource.FactoryKey}\" }},");
+            writer.AppendLine($"new DelegateDataSource(() => ConvertToObjectArrays({dataSource.FactoryKey}())),");
         }
     }
 
