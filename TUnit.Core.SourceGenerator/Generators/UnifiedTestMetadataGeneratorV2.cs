@@ -622,9 +622,6 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         {
             GenerateConvertToSyncHelper(writer);
         }
-        
-        // Always generate the conversion helper for data sources
-        dataSourceGenerator.GenerateConversionHelpers(writer);
     }
 
     private void GenerateConvertToSyncHelper(CodeWriter writer)

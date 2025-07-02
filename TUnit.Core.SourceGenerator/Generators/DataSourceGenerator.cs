@@ -426,7 +426,7 @@ internal sealed class DataSourceGenerator
             {
                 // Task<IEnumerable<T>> - need to convert to IAsyncEnumerable
                 writer.AppendLine($"var result = await {methodCall};");
-                writer.AppendLine("await foreach (var item in ConvertToAsyncEnumerableInternal(ConvertToObjectArrays(result), ct))");
+                writer.AppendLine("await foreach (var item in global::TUnit.Core.Helpers.DataConversionHelper.ConvertToAsyncEnumerableInternal(global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(result), ct))");
                 writer.AppendLine("{");
                 writer.Indent();
                 writer.AppendLine("yield return item;");
@@ -437,7 +437,7 @@ internal sealed class DataSourceGenerator
             {
                 // ValueTask<IEnumerable<T>> - need to convert to IAsyncEnumerable
                 writer.AppendLine($"var result = await {methodCall};");
-                writer.AppendLine("await foreach (var item in ConvertToAsyncEnumerableInternal(ConvertToObjectArrays(result), ct))");
+                writer.AppendLine("await foreach (var item in global::TUnit.Core.Helpers.DataConversionHelper.ConvertToAsyncEnumerableInternal(global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(result), ct))");
                 writer.AppendLine("{");
                 writer.Indent();
                 writer.AppendLine("yield return item;");
@@ -459,7 +459,7 @@ internal sealed class DataSourceGenerator
             else
             {
                 // Need to convert to IEnumerable<object?[]>
-                writer.AppendLine($"return ConvertToObjectArrays({methodCall});");
+                writer.AppendLine($"return global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays({methodCall});");
             }
         }
     }
@@ -482,7 +482,7 @@ internal sealed class DataSourceGenerator
         if (IsAsyncDataSourceGeneratorAttributeType(attributeClass))
         {
             // Use the same ConvertToObjectArrays pattern as method data sources
-            writer.AppendLine($"new DelegateDataSource(() => ConvertToObjectArrays(");
+            writer.AppendLine($"new DelegateDataSource(() => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(");
             writer.Indent();
             
             // Generate the raw data - single value or array of values
@@ -589,13 +589,36 @@ internal sealed class DataSourceGenerator
             // Generate unified delegate for ClassDataSourceAttribute and other data source attributes
             GenerateUnifiedDataSourceDelegate(writer, dataSource);
         }
-        else if (dataSource.IsAsync)
+        else if (dataSource.MethodSymbol != null)
         {
-            writer.AppendLine($"new AsyncDelegateDataSource(async (ct) => ConvertToAsyncEnumerableInternal(ConvertToObjectArrays(await {dataSource.FactoryKey}()), ct)),");
+            // Generate inline delegate for method data source
+            var methodArgs = GenerateMethodArguments(dataSource);
+            var className = dataSource.SourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var methodCall = $"{className}.{dataSource.MethodSymbol.Name}({methodArgs})";
+            
+            if (dataSource.IsAsync)
+            {
+                writer.AppendLine($"new AsyncDelegateDataSource(async (ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToAsyncEnumerableInternal(global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(await {methodCall}), ct)),");
+            }
+            else
+            {
+                writer.AppendLine($"new DelegateDataSource(() => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays({methodCall})),");
+            }
         }
-        else
+        else if (dataSource.PropertySymbol != null)
         {
-            writer.AppendLine($"new DelegateDataSource(() => ConvertToObjectArrays({dataSource.FactoryKey}())),");
+            // Generate inline delegate for property data source
+            var className = dataSource.SourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var propertyAccess = $"{className}.{dataSource.PropertySymbol.Name}";
+            
+            if (dataSource.IsAsync)
+            {
+                writer.AppendLine($"new AsyncDelegateDataSource(async (ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToAsyncEnumerableInternal(global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(await {propertyAccess}), ct)),");
+            }
+            else
+            {
+                writer.AppendLine($"new DelegateDataSource(() => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays({propertyAccess})),");
+            }
         }
     }
 
@@ -723,139 +746,6 @@ internal sealed class DataSourceGenerator
         writer.AppendLine();
     }
     
-    /// <summary>
-    /// Generates a helper method that converts various data source return types to IEnumerable<object?[]>
-    /// </summary>
-    public void GenerateConversionHelpers(CodeWriter writer)
-    {
-        // Generate async enumerable conversion helper
-        writer.AppendLine("private static async IAsyncEnumerable<object?[]> ConvertToAsyncEnumerableInternal(");
-        writer.AppendLine("    IEnumerable<object?[]> data,");
-        writer.AppendLine("    [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("await Task.Yield(); // Ensure async behavior");
-        writer.AppendLine("foreach (var item in data)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("ct.ThrowIfCancellationRequested();");
-        writer.AppendLine("yield return item;");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-        writer.AppendLine("private static IEnumerable<object?[]> ConvertToObjectArrays(object data)");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        writer.AppendLine("switch (data)");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        // Handle IEnumerable<object?[]> - pass through
-        writer.AppendLine("case IEnumerable<object?[]> objectArrays:");
-        writer.Indent();
-        writer.AppendLine("return objectArrays;");
-        writer.Unindent();
-        
-        // Handle single values
-        writer.AppendLine("case string str:");
-        writer.AppendLine("case int i:");
-        writer.AppendLine("case long l:");
-        writer.AppendLine("case double d:");
-        writer.AppendLine("case float f:");
-        writer.AppendLine("case decimal dec:");
-        writer.AppendLine("case bool b:");
-        writer.AppendLine("case char c:");
-        writer.AppendLine("case byte bt:");
-        writer.AppendLine("case sbyte sb:");
-        writer.AppendLine("case short s:");
-        writer.AppendLine("case ushort us:");
-        writer.AppendLine("case uint ui:");
-        writer.AppendLine("case ulong ul:");
-        writer.Indent();
-        writer.AppendLine("return new[] { new object?[] { data } };");
-        writer.Unindent();
-        
-        // Handle arrays of primitives
-        writer.AppendLine("case int[] intArray:");
-        writer.Indent();
-        writer.AppendLine("return intArray.Select(x => new object?[] { x });");
-        writer.Unindent();
-        
-        writer.AppendLine("case string[] stringArray:");
-        writer.Indent();
-        writer.AppendLine("return stringArray.Select(x => new object?[] { x });");
-        writer.Unindent();
-        
-        // Handle IEnumerable<T> where T is not object[]
-        writer.AppendLine("case System.Collections.IEnumerable enumerable:");
-        writer.Indent();
-        writer.AppendLine("var result = new List<object?[]>();");
-        writer.AppendLine("foreach (var item in enumerable)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("// Handle tuples - check for common tuple types");
-        writer.AppendLine("var itemType = item?.GetType();");
-        writer.AppendLine("if (itemType != null && itemType.IsGenericType)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("var genericTypeDef = itemType.GetGenericTypeDefinition();");
-        writer.AppendLine("var typeName = genericTypeDef.FullName;");
-        writer.AppendLine("if (typeName != null && typeName.StartsWith(\"System.ValueTuple`\"))");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("// Extract tuple items using reflection");
-        writer.AppendLine("var fields = itemType.GetFields();");
-        writer.AppendLine("var tupleItems = new object?[fields.Length];");
-        writer.AppendLine("for (int i = 0; i < fields.Length; i++)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("tupleItems[i] = fields[i].GetValue(item);");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine("result.Add(tupleItems);");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine("else if (item is object?[] objArray)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("result.Add(objArray);");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine("else");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("result.Add(new object?[] { item });");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine("return result;");
-        writer.Unindent();
-        
-        // Handle single Func values
-        writer.AppendLine("case System.Func<object> func:");
-        writer.AppendLine("case System.Delegate del:");
-        writer.Indent();
-        writer.AppendLine("return new[] { new object?[] { data } };");
-        writer.Unindent();
-        
-        // Default case
-        writer.AppendLine("default:");
-        writer.Indent();
-        writer.AppendLine("throw new InvalidOperationException($\"Cannot convert {data?.GetType()?.FullName ?? \"null\"} to IEnumerable<object?[]>\");");
-        writer.Unindent();
-        
-        writer.Unindent();
-        writer.AppendLine("}");
-        
-        writer.Unindent();
-        writer.AppendLine("}");
-    }
     
     private string GenerateMethodArguments(DataSourceInfo dataSource)
     {
