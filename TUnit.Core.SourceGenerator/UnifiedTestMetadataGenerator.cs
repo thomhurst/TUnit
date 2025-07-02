@@ -164,6 +164,9 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 }
             }
             
+            // Collect all unique data sources globally to avoid duplicates
+            var globalDataSources = CollectAllDataSources(validTests);
+            
             using var writer = new CodeWriter();
             
             // Report configuration if verbose diagnostics enabled
@@ -292,6 +295,12 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 }
 
                 writer.AppendLine();
+                
+                // Generate global data source factories method
+                if (globalDataSources.Any())
+                {
+                    GenerateGlobalDataSourceFactories(writer, globalDataSources, configuration);
+                }
 
                 // Generate the conversion helper for data sources
                 GenerateConversionHelper(writer);
@@ -758,9 +767,6 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        // Generate data source factories using the new generator
-        GenerateDataSourceFactoriesV2(writer, classSymbol, testMethods, configuration);
-        
         // Generate property injection (always enabled)
         var hasPropertyInjection = GeneratePropertyInjection(writer, classSymbol, diagnosticContext);
         
@@ -1406,7 +1412,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         var dataSourceType = isAsync ? "AsyncDynamicTestDataSource" : "DynamicTestDataSource";
         
         // Note: Arguments are now handled by the data source factory, not stored in the metadata
-        return $"new {dataSourceType}({isShared.ToString().ToLower()}) {{ FactoryKey = \"{sourceType.ToDisplayString()}.{memberName}\" }}";
+        return $"new {dataSourceType}({isShared.ToString().ToLower()}) {{ FactoryKey = \"global::{sourceType.ToDisplayString()}.{memberName}\" }}";
     }
 
     private static void GenerateDynamicDataSource(CodeWriter writer, AttributeData attr)
@@ -1424,7 +1430,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("{");
                 writer.Indent();
                 
-                writer.AppendLine($"FactoryKey = \"{sourceType.ToDisplayString()}.{memberName}\"");
+                writer.AppendLine($"FactoryKey = \"global::{sourceType.ToDisplayString()}.{memberName}\"");
 
                 writer.Unindent();
                 writer.AppendLine("},");
@@ -1716,45 +1722,6 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         return false;
     }
     
-    private static void GenerateDataSourceFactoriesV2(CodeWriter writer, INamedTypeSymbol classSymbol, List<TestMethodMetadata> testMethods, TUnitConfiguration configuration)
-    {
-        var dataSources = new List<DataSourceInfo>();
-        
-        // Collect all data sources from test methods
-        foreach (var testMethod in testMethods)
-        {
-            // Check method data sources
-            var methodDataSources = testMethod.MethodSymbol.GetAttributes()
-                .Where(attr => attr.AttributeClass?.Name == "MethodDataSourceAttribute")
-                .Select(attr => ExtractDataSourceInfo(attr, testMethod.MethodSymbol))
-                .Where(info => info != null);
-                
-            dataSources.AddRange(methodDataSources!);
-            
-            // Check property data sources
-            var propertyDataSources = testMethod.MethodSymbol.GetAttributes()
-                .Where(attr => attr.AttributeClass?.Name == "PropertyDataSourceAttribute")
-                .Select(attr => ExtractPropertyDataSourceInfo(attr))
-                .Where(info => info != null);
-                
-            dataSources.AddRange(propertyDataSources!);
-        }
-        
-        if (dataSources.Any())
-        {
-            // No limits on data sources (unlimited for optimal performance)
-            var generator = new DataSourceFactoryGenerator();
-            var code = generator.GenerateDataSourceFactories(dataSources);
-            writer.Append(code);
-            
-            // Report data source count if verbose diagnostics enabled
-            if (configuration.EnableVerboseDiagnostics)
-            {
-                writer.AppendLine($"// Generated {dataSources.Count} data source factories (no limits)");
-            }
-        }
-    }
-    
     private static DataSourceInfo? ExtractDataSourceInfo(AttributeData attribute, IMethodSymbol testMethod)
     {
         if (attribute.ConstructorArguments.Length < 2)
@@ -1779,7 +1746,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             IsProperty = false,
             IsAsync = method.IsAsync || IsTaskLikeType(method.ReturnType),
             ReturnType = method.ReturnType,
-            FactoryKey = $"{type.ToDisplayString()}.{methodName}",
+            FactoryKey = $"global::{type.ToDisplayString()}.{methodName}",
             Parameters = method.Parameters.Select(p => new ParameterInfo
             {
                 ParameterName = p.Name,
@@ -1981,7 +1948,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             IsProperty = true,
             IsAsync = IsTaskLikeType(property.Type),
             ReturnType = property.Type,
-            FactoryKey = $"{type.ToDisplayString()}.{propertyName}",
+            FactoryKey = $"global::{type.ToDisplayString()}.{propertyName}",
             Parameters = new List<ParameterInfo>()
         };
     }
@@ -2013,5 +1980,74 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
         
         return false;
+    }
+    
+    private static List<DataSourceInfo> CollectAllDataSources(List<TestMethodMetadata> validTests)
+    {
+        var dataSources = new Dictionary<string, DataSourceInfo>();
+        
+        // Collect all unique data sources from all test methods
+        foreach (var testMethod in validTests)
+        {
+            // Check method data sources
+            var methodDataSources = testMethod.MethodSymbol.GetAttributes()
+                .Where(attr => attr.AttributeClass?.Name == "MethodDataSourceAttribute")
+                .Select(attr => ExtractDataSourceInfo(attr, testMethod.MethodSymbol))
+                .Where(info => info != null);
+                
+            foreach (var dataSource in methodDataSources)
+            {
+                if (dataSource != null && !dataSources.ContainsKey(dataSource.FactoryKey))
+                {
+                    dataSources[dataSource.FactoryKey] = dataSource;
+                }
+            }
+            
+            // Check property data sources
+            var propertyDataSources = testMethod.MethodSymbol.GetAttributes()
+                .Where(attr => attr.AttributeClass?.Name == "PropertyDataSourceAttribute")
+                .Select(attr => ExtractPropertyDataSourceInfo(attr))
+                .Where(info => info != null);
+                
+            foreach (var dataSource in propertyDataSources)
+            {
+                if (dataSource != null && !dataSources.ContainsKey(dataSource.FactoryKey))
+                {
+                    dataSources[dataSource.FactoryKey] = dataSource;
+                }
+            }
+            
+            // Check class-level data sources
+            var classDataSources = testMethod.TypeSymbol.GetAttributes()
+                .Where(attr => attr.AttributeClass?.Name == "MethodDataSourceAttribute")
+                .Select(attr => ExtractDataSourceInfo(attr, testMethod.MethodSymbol))
+                .Where(info => info != null);
+                
+            foreach (var dataSource in classDataSources)
+            {
+                if (dataSource != null && !dataSources.ContainsKey(dataSource.FactoryKey))
+                {
+                    dataSources[dataSource.FactoryKey] = dataSource;
+                }
+            }
+        }
+        
+        return dataSources.Values.ToList();
+    }
+    
+    private static void GenerateGlobalDataSourceFactories(CodeWriter writer, List<DataSourceInfo> dataSources, TUnitConfiguration configuration)
+    {
+        if (!dataSources.Any())
+            return;
+            
+        var generator = new DataSourceFactoryGenerator();
+        var code = generator.GenerateDataSourceFactories(dataSources);
+        writer.Append(code);
+        
+        // Report data source count if verbose diagnostics enabled
+        if (configuration.EnableVerboseDiagnostics)
+        {
+            writer.AppendLine($"// Generated {dataSources.Count} unique data source factories globally");
+        }
     }
 }

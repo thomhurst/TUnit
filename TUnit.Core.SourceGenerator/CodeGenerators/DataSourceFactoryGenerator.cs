@@ -64,7 +64,8 @@ internal class DataSourceFactoryGenerator
         _stringBuilder.AppendLine($@"
     private static Func<CancellationToken, IAsyncEnumerable<object?[]>> {factoryName} = async (ct) =>
     {{
-        var data = {GetDataSourceAccess(dataSource)};
+        var rawData = {GetDataSourceAccess(dataSource)};
+        var data = ConvertToObjectArrays(rawData);
         return ConvertToAsyncEnumerable(data, ct);
     }};");
     }
@@ -79,7 +80,8 @@ internal class DataSourceFactoryGenerator
             _stringBuilder.AppendLine($@"
     private static Func<CancellationToken, IAsyncEnumerable<object?[]>> {factoryName} = async (ct) =>
     {{
-        var data = await {GetDataSourceAccess(dataSource)};
+        var rawData = await {GetDataSourceAccess(dataSource)};
+        var data = ConvertToObjectArrays(rawData);
         return ConvertToAsyncEnumerable(data, ct);
     }};");
         }
@@ -99,7 +101,8 @@ internal class DataSourceFactoryGenerator
             _stringBuilder.AppendLine($@"
     private static Func<CancellationToken, IAsyncEnumerable<object?[]>> {factoryName} = async (ct) =>
     {{
-        var data = await {GetDataSourceAccess(dataSource)};
+        var rawData = await {GetDataSourceAccess(dataSource)};
+        var data = ConvertToObjectArrays(rawData);
         return ConvertToAsyncEnumerable(data, ct);
     }};");
         }
@@ -114,7 +117,7 @@ internal class DataSourceFactoryGenerator
         foreach (var dataSource in dataSources)
         {
             var factoryName = $"{dataSource.SafeTypeName}_{dataSource.SafeMemberName}_Factory";
-            _stringBuilder.AppendLine($@"        DataSourceFactoryStorage.RegisterFactory(""{dataSource.FactoryKey}"", {factoryName});");
+            _stringBuilder.AppendLine($@"        global::TUnit.Core.TestDelegateStorage.RegisterDataSourceFactory(""{dataSource.FactoryKey}"", {factoryName});");
         }
         
         _stringBuilder.AppendLine(@"    }");
@@ -187,6 +190,25 @@ internal class DataSourceFactoryGenerator
     {
         _stringBuilder.AppendLine(@"
     #region Data Source Conversion Helpers
+    
+    private static IEnumerable<object?[]> ConvertToObjectArrays(object? rawData)
+    {
+        if (rawData is IEnumerable<object?[]> arrays)
+            return arrays;
+            
+        if (rawData is System.Collections.IEnumerable enumerable)
+        {
+            var result = new List<object?[]>();
+            foreach (var item in enumerable)
+            {
+                result.Add(ConvertToObjectArray(item));
+            }
+            return result;
+        }
+        
+        // Single value
+        return new[] { new object?[] { rawData } };
+    }
     
     private static async IAsyncEnumerable<object?[]> ConvertToAsyncEnumerable(
         IEnumerable<object?[]> data, 
