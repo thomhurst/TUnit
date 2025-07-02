@@ -148,12 +148,12 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             {
                 return;
             }
-            
+
             var diagnosticContext = new DiagnosticContext(context);
-            
+
             // Initialize generic type resolver with unlimited depth (no longer configurable)
             var genericResolver = new GenericTypeResolver(int.MaxValue);
-            
+
             // Process generic types
             var testsByClass = validTests.GroupBy(t => t.TypeSymbol, SymbolEqualityComparer.Default);
             foreach (var classGroup in testsByClass)
@@ -163,11 +163,11 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                     genericResolver.ResolveGenericTypes(namedType, classGroup.ToList());
                 }
             }
-            
+
             // Data source collection removed - now using inline delegates
-            
+
             using var writer = new CodeWriter();
-            
+
             // Report configuration if verbose diagnostics enabled
             if (configuration.EnableVerboseDiagnostics)
             {
@@ -200,7 +200,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 // Generate static test metadata collection
                 writer.AppendLine("private static readonly List<TestMetadata> _allTests = new();");
                 writer.AppendLine();
-                
+
                 writer.AppendLine("public IEnumerable<TestMetadata> GetTests() => _allTests;");
                 writer.AppendLine();
 
@@ -230,10 +230,10 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 using (writer.BeginBlock("private static void RegisterAllDelegates()"))
                 {
                     writer.AppendLine($"// Registering delegates for AOT execution");
-                    
+
                     // Track registered data sources to avoid duplicates
                     var registeredDataSources = new HashSet<string>();
-                    
+
                     foreach (var testInfo in validTests)
                     {
                         var genContext = TestMetadataGenerationContext.Create(testInfo);
@@ -248,20 +248,20 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                             {
                                 writer.AppendLine($"TestDelegateStorage.RegisterInstanceFactory(\"{genContext.ClassName}\", args => new {genContext.ClassName}());");
                             }
-                            
+
                             // Register test invoker
                             writer.AppendLine($"TestDelegateStorage.RegisterTestInvoker(\"{genContext.ClassName}.{genContext.MethodName}\", {genContext.SafeClassName}_{genContext.SafeMethodName}_Invoker);");
                         }
-                        
+
                         // Register data source factories
                         // Note: Data source factories are now registered by GenerateDataSourceFactoriesV2
                         // RegisterDataSourceFactories(writer, testInfo, registeredDataSources);
                     }
-                    
+
                     // Register hook delegates for property injection
                     RegisterPropertyInjectionHooks(writer, validTests, configuration);
                 }
-                
+
                 writer.AppendLine();
 
                 // Generate the registration method
@@ -278,7 +278,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                         writer.AppendLine("try");
                         writer.AppendLine("{");
                         writer.Indent();
-                        
+
                         if (testInfo.MethodSymbol.IsGenericMethod)
                         {
                             GenerateGenericTestMetadata(writer, testInfo);
@@ -287,7 +287,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                         {
                             GenerateTestMetadata(writer, testInfo);
                         }
-                        
+
                         writer.AppendLine("successCount++;");
                         writer.Unindent();
                         writer.AppendLine("}");
@@ -302,7 +302,6 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                         writer.AppendLine();
                     }
 
-                    writer.AppendLine($"Console.Error.WriteLine($\"Successfully registered {{successCount}} out of {validTests.Count} tests\");");
                     writer.AppendLine("if (failedTests.Count > 0)");
                     writer.AppendLine("{");
                     writer.Indent();
@@ -318,7 +317,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 }
 
                 writer.AppendLine();
-                
+
                 // Data source factories now generated inline - no global generation needed
 
                 // Generate the conversion helper for data sources
@@ -326,10 +325,10 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
 
                 // Generate strongly-typed delegates inline
                 GenerateStronglyTypedDelegatesInline(writer, validTests, diagnosticContext);
-                
+
                 // Generate typed property setters inline
                 GenerateTypedPropertySettersInline(writer, validTests, diagnosticContext);
-                
+
                 // Generate generic type instantiations if any
                 var genericInstantiations = genericResolver.GenerateGenericInstantiations();
                 if (!string.IsNullOrWhiteSpace(genericInstantiations))
@@ -356,9 +355,9 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                     }
                 }
             }
-            
+
             writer.AppendLine();
-            
+
             // Generate module initializer class
             using (writer.BeginBlock("internal static class ModuleInitializer"))
             {
@@ -370,7 +369,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             }
 
             context.AddSource("UnifiedTestMetadataRegistry.g.cs", writer.ToString());
-            
+
             // Module initializer is now included in the unified registry, no need for separate file
         }
         catch (Exception ex)
@@ -522,7 +521,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         var explicitInstantiations = testInfo.MethodSymbol.GetAttributes()
             .Where(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute")
             .ToList();
-            
+
         if (explicitInstantiations.Any())
         {
             // Generate a test for each explicit instantiation
@@ -538,12 +537,12 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             GenerateTestMetadata(writer, testInfo);
         }
     }
-    
+
     private static void GenerateExplicitGenericTestMetadata(CodeWriter writer, TestMethodMetadata testInfo, AttributeData genericTestAttr)
     {
         // Extract type arguments from the attribute
         var typeArgs = new List<ITypeSymbol>();
-        
+
         foreach (var arg in genericTestAttr.ConstructorArguments)
         {
             if (arg.Kind == TypedConstantKind.Type && arg.Value is ITypeSymbol typeSymbol)
@@ -561,78 +560,78 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 }
             }
         }
-        
+
         if (typeArgs.Count != testInfo.MethodSymbol.TypeParameters.Length)
         {
             // Type argument count mismatch - skip this instantiation
             return;
         }
-        
+
         // Generate specialized test metadata for this generic instantiation
         var typeArgsDisplay = string.Join(", ", typeArgs.Select(t => t.ToDisplayString()));
         var testId = $"{testInfo.TypeSymbol.ToDisplayString()}.{testInfo.MethodSymbol.Name}<{typeArgsDisplay}>";
-        
+
         writer.AppendLine("_allTests.Add(new TestMetadata");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine($"TestId = \"{testId}\",");
         writer.AppendLine($"TestName = \"{testInfo.MethodSymbol.Name}<{typeArgsDisplay}>\",");
         writer.AppendLine($"TestClassType = typeof({testInfo.TypeSymbol.ToDisplayString()}),");
         writer.AppendLine($"TestMethodName = \"{testInfo.MethodSymbol.Name}\",");
-        
+
         // Generate generic type arguments
         writer.Append("GenericMethodTypeArguments = new Type[] { ");
         writer.Append(string.Join(", ", typeArgs.Select(t => $"typeof({t.ToDisplayString()})")));
         writer.AppendLine(" },");
-        
+
         // Generate the rest of the metadata
         GenerateCategories(writer, testInfo);
         GenerateSkipStatus(writer, testInfo);
         GenerateTimeout(writer, testInfo);
         writer.AppendLine($"RetryCount = {GetRetryCount(testInfo)},");
         writer.AppendLine($"CanRunInParallel = {GetCanRunInParallel(testInfo).ToString().ToLower()},");
-        
+
         // Dependencies
         writer.AppendLine("Dependencies = Array.Empty<TestDependency>(),");
-        
+
         // Data sources
         GenerateDataSources(writer, testInfo);
         GenerateClassDataSources(writer, testInfo);
         GeneratePropertyDataSources(writer, testInfo);
-        
+
         // Parameter info
         writer.AppendLine($"ParameterCount = {testInfo.MethodSymbol.Parameters.Length},");
         GenerateParameterTypes(writer, testInfo);
-        
+
         // Factory and invoker - null for generic instantiations
         writer.AppendLine("InstanceFactory = null, // Generic instantiation handled at runtime");
         writer.AppendLine("TestInvoker = null, // Generic instantiation handled at runtime");
-        
+
         // Hooks
         GenerateHooks(writer, testInfo);
         writer.AppendLine($"FilePath = @\"{testInfo.FilePath}\",");
         writer.AppendLine($"LineNumber = {testInfo.LineNumber},");
         GenerateGenericTypeInfo(writer, testInfo);
         GenerateGenericMethodInfo(writer, testInfo);
-        
+
         writer.Unindent();
         writer.AppendLine("});");
     }
-    
+
     private static void RegisterDataSourceFactories(CodeWriter writer, TestMethodMetadata testInfo, HashSet<string> registeredSources)
     {
         // Find all MethodDataSource attributes
         var methodDataSources = testInfo.MethodSymbol.GetAttributes()
             .Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
-            
+
         foreach (var attr in methodDataSources)
         {
             if (attr.ConstructorArguments.Length >= 2)
             {
                 var sourceType = attr.ConstructorArguments[0].Value as ITypeSymbol;
                 var memberName = attr.ConstructorArguments[1].Value?.ToString();
-                
+
                 if (sourceType != null && memberName != null)
                 {
                     var key = $"{sourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{memberName}";
@@ -649,18 +648,18 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 }
             }
         }
-        
+
         // Also check class-level data sources
         var classDataSources = testInfo.TypeSymbol.GetAttributes()
             .Where(a => a.AttributeClass?.Name == "ClassDataSourceAttribute");
-            
+
         foreach (var attr in classDataSources)
         {
             if (attr.ConstructorArguments.Length >= 1)
             {
                 var sourceType = attr.ConstructorArguments[0].Type as INamedTypeSymbol ?? testInfo.TypeSymbol;
                 var memberName = attr.ConstructorArguments[0].Value?.ToString();
-                
+
                 if (memberName != null)
                 {
                     var key = $"{sourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{memberName}";
@@ -677,7 +676,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             }
         }
     }
-    
+
     private static string GetSafeDataSourceName(ITypeSymbol type, string memberName)
     {
         var typeName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
@@ -687,7 +686,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             .Replace(">", "_")
             .Replace(",", "_")
             .Replace(" ", "_");
-        
+
         return $"{typeName}_{memberName}";
     }
 
@@ -802,7 +801,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         var hasInjectableProperties = classSymbol.GetMembers()
             .OfType<IPropertySymbol>()
             .Any(p => p.GetAttributes().Any(a => a.AttributeClass?.Name?.EndsWith("DataSourceAttribute") == true));
-        
+
         // Generate property injection if needed
         if (hasInjectableProperties)
         {
@@ -814,14 +813,14 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 SafeClassName = classSymbol.Name.Replace(".", "_"),
                 DiagnosticContext = diagnosticContext
             };
-            
+
             var code = generator.GeneratePropertyInjection(context);
             if (!string.IsNullOrEmpty(code))
             {
                 writer.Append(code);
             }
         }
-        
+
         // Generate hook invokers (including property injection hooks if needed)
         GenerateHookInvokers(writer, classSymbol, hasInjectableProperties, configuration);
 
@@ -932,39 +931,39 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
     private static void GenerateDataSourceFactories(CodeWriter writer, INamedTypeSymbol classSymbol, List<TestMethodMetadata> testMethods, HashSet<string> generatedMethods)
     {
         var dataSourceMembers = new HashSet<(ITypeSymbol Type, string MemberName)>();
-        
+
         // Collect all unique data source members from test methods
         foreach (var testInfo in testMethods)
         {
             // Method data sources
             var methodDataSources = testInfo.MethodSymbol.GetAttributes()
                 .Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
-                
+
             foreach (var attr in methodDataSources)
             {
                 if (attr.ConstructorArguments.Length >= 2)
                 {
                     var sourceType = attr.ConstructorArguments[0].Value as ITypeSymbol;
                     var memberName = attr.ConstructorArguments[1].Value?.ToString();
-                    
+
                     if (sourceType != null && memberName != null)
                     {
                         dataSourceMembers.Add((sourceType, memberName));
                     }
                 }
             }
-            
+
             // Class data sources
             var classDataSources = testInfo.TypeSymbol.GetAttributes()
                 .Where(a => a.AttributeClass?.Name == "ClassDataSourceAttribute");
-                
+
             foreach (var attr in classDataSources)
             {
                 if (attr.ConstructorArguments.Length >= 1)
                 {
                     var sourceType = attr.ConstructorArguments[0].Type as INamedTypeSymbol ?? testInfo.TypeSymbol;
                     var memberName = attr.ConstructorArguments[0].Value?.ToString();
-                    
+
                     if (memberName != null)
                     {
                         dataSourceMembers.Add((sourceType, memberName));
@@ -972,7 +971,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 }
             }
         }
-        
+
         // Generate factory methods for each unique data source
         foreach (var (sourceType, memberName) in dataSourceMembers)
         {
@@ -981,7 +980,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             {
                 var safeName = GetSafeDataSourceName(sourceType, memberName);
                 var factoryName = $"{safeName}_Factory";
-                
+
                 if (!generatedMethods.Contains(factoryName))
                 {
                     generatedMethods.Add(factoryName);
@@ -990,12 +989,12 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             }
         }
     }
-    
+
     private static void GenerateDataSourceFactory(CodeWriter writer, ITypeSymbol sourceType, ISymbol member)
     {
         var safeName = GetSafeDataSourceName(sourceType, member.Name);
         var typeName = sourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        
+
         using (writer.BeginBlock($"private static IEnumerable<object?[]> {safeName}_Factory()"))
         {
             if (member is IPropertySymbol property)
@@ -1020,7 +1019,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
         writer.AppendLine();
     }
-    
+
     private static void GenerateConversionHelper(CodeWriter writer)
     {
         // Generate helper method for converting data source values
@@ -1055,7 +1054,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
         writer.AppendLine();
     }
-    
+
     private static void GenerateHookInvokers(CodeWriter writer, INamedTypeSymbol classSymbol, bool hasPropertyInjection, TUnitConfiguration configuration)
     {
         // Find all hook methods in the class hierarchy
@@ -1067,35 +1066,35 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         // TODO: Generate standard hook invokers for user-defined hooks
         // For now, this method is just a placeholder for future hook generation
     }
-    
+
     private static void RegisterPropertyInjectionHooks(CodeWriter writer, List<TestMethodMetadata> validTests, TUnitConfiguration configuration)
     {
         // Property injection is always enabled (no longer configurable)
-            
+
         // Group tests by class to avoid duplicate registrations
         var testClasses = validTests.GroupBy(t => t.TypeSymbol, SymbolEqualityComparer.Default);
-        
+
         foreach (var classGroup in testClasses)
         {
             if (classGroup.Key is INamedTypeSymbol classSymbol)
             {
                 var safeClassName = classSymbol.Name.Replace(".", "_");
-                
+
                 // Check if this class has properties with [Inject] attribute
                 var hasPropertyInjection = classSymbol.GetMembers()
                     .OfType<IPropertySymbol>()
                     .Any(p => p.GetAttributes().Any(a => a.AttributeClass?.Name == "InjectAttribute"));
-                    
+
                 if (hasPropertyInjection)
                 {
                     writer.AppendLine($"HookDelegateStorage.RegisterHook(\"{safeClassName}_InjectProperties\", {safeClassName}_InjectProperties);");
-                    
+
                     // Check if disposal hook is needed
                     var hasDisposableProperties = classSymbol.GetMembers()
                         .OfType<IPropertySymbol>()
                         .Where(p => p.GetAttributes().Any(a => a.AttributeClass?.Name == "InjectAttribute"))
                         .Any(p => p.Type.AllInterfaces.Any(i => i.Name == "IAsyncDisposable" || i.Name == "IDisposable"));
-                        
+
                     if (hasDisposableProperties)
                     {
                         writer.AppendLine($"HookDelegateStorage.RegisterHook(\"{safeClassName}_DisposeProperties\", {safeClassName}_DisposeProperties);");
@@ -1380,7 +1379,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         // Generate each hook type
         writer.AppendLine("BeforeClass = Array.Empty<HookMetadata>(),");
         writer.AppendLine("AfterClass = Array.Empty<HookMetadata>(),");
-        
+
         if (hasPropertyInjection)
         {
             // Add property injection as a before test hook
@@ -1400,7 +1399,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("}");
             writer.Unindent();
             writer.AppendLine("},");
-            
+
             // TODO: Add property disposal as an after test hook if any properties implement IAsyncDisposable
             writer.AppendLine("AfterTest = Array.Empty<HookMetadata>()");
         }
@@ -1443,10 +1442,10 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
 
         var isShared = attr.NamedArguments.FirstOrDefault(a => a.Key == "IsShared").Value.Value as bool? ?? true;
-        
+
         // Check the member type and return type
         var member = sourceType.GetMembers(memberName).FirstOrDefault();
-        
+
         if (member is IMethodSymbol method)
         {
             if (IsAsyncEnumerableType(method.ReturnType))
@@ -1466,7 +1465,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         {
             return $"new DelegateDataSource(() => {sourceType.ToDisplayString()}.{memberName}, {isShared.ToString().ToLower()})";
         }
-        
+
         // Fallback for unknown member types
         return $"new DelegateDataSource(() => {sourceType.ToDisplayString()}.{memberName}(), {isShared.ToString().ToLower()})";
     }
@@ -1796,50 +1795,50 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         // for tests that are already handled by UnifiedTestMetadataGenerator
         return false;
     }
-    
+
     private static bool IsAsyncEnumerableType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol namedType)
             return false;
-            
+
         var fullName = namedType.ToDisplayString();
         return fullName.StartsWith("System.Collections.Generic.IAsyncEnumerable<") ||
                fullName.StartsWith("IAsyncEnumerable<");
     }
-    
+
     private static bool IsTaskOfEnumerableType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol namedType)
             return false;
-            
+
         if (namedType.Name != "Task" || namedType.TypeArguments.Length != 1)
             return false;
-            
+
         var innerType = namedType.TypeArguments[0];
         var innerTypeName = innerType.ToDisplayString();
-        
-        return innerTypeName.Contains("IEnumerable<") || 
-               innerTypeName.Contains("List<") || 
+
+        return innerTypeName.Contains("IEnumerable<") ||
+               innerTypeName.Contains("List<") ||
                innerTypeName.Contains("[]");
     }
-    
+
     // DataSourceInfo methods removed - no longer needed with inline delegates
     /*
     private static DataSourceInfo? ExtractDataSourceInfo(AttributeData attribute, IMethodSymbol testMethod)
     {
         if (attribute.ConstructorArguments.Length < 2)
             return null;
-            
+
         var typeArg = attribute.ConstructorArguments[0];
         var methodNameArg = attribute.ConstructorArguments[1];
-        
+
         if (typeArg.Value is not INamedTypeSymbol type || methodNameArg.Value is not string methodName)
             return null;
-            
+
         var method = type.GetMembers(methodName).OfType<IMethodSymbol>().FirstOrDefault();
         if (method == null)
             return null;
-            
+
         return new DataSourceInfo
         {
             ContainingTypeName = type.ToDisplayString(),
@@ -1862,28 +1861,28 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         };
     }
     */
-    
+
     private static void GenerateStronglyTypedDelegatesInline(CodeWriter writer, List<TestMethodMetadata> validTests, DiagnosticContext diagnosticContext)
     {
         writer.AppendLine();
         writer.AppendLine("// Strongly-typed test delegates for AOT compilation");
-        
+
         writer.AppendLine("/// <summary>");
         writer.AppendLine("/// Strongly-typed delegates for test invocation without boxing");
         writer.AppendLine("/// </summary>");
-        
+
         using (writer.BeginBlock("internal static class StronglyTypedTestDelegates"))
         {
             var processedMethods = new HashSet<string>();
             var processedFactories = new HashSet<string>();
             var registrations = new List<string>();
-            
+
             foreach (var testMethod in validTests)
             {
                 var methodKey = GetMethodKey(testMethod);
                 if (processedMethods.Contains(methodKey))
                     continue;
-                    
+
                 processedMethods.Add(methodKey);
                 var registration = GenerateTestDelegateInline(writer, testMethod, diagnosticContext, processedFactories);
                 if (!string.IsNullOrEmpty(registration))
@@ -1891,7 +1890,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                     registrations.Add(registration);
                 }
             }
-            
+
             // Generate single static constructor to register all delegates
             if (registrations.Count > 0)
             {
@@ -1904,7 +1903,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 }
             }
         }
-        
+
         writer.AppendLine();
     }
 
@@ -1912,17 +1911,17 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
     {
         writer.AppendLine();
         writer.AppendLine("// Strongly-typed property setters for dependency injection");
-        
+
         writer.AppendLine("/// <summary>");
         writer.AppendLine("/// Strongly-typed property setters for dependency injection");
         writer.AppendLine("/// </summary>");
-        
+
         using (writer.BeginBlock("internal static class TypedPropertySetters"))
         {
             // For now, empty - will implement when needed
             writer.AppendLine("// Property setters will be generated here when needed");
         }
-        
+
         writer.AppendLine();
     }
 
@@ -1941,33 +1940,33 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         {
             return string.Empty;
         }
-        
+
         var className = testMethod.TypeSymbol.ToDisplayString();
         var methodName = testMethod.MethodSymbol.Name;
         var safeClassName = testMethod.TypeSymbol.Name.Replace(".", "_").Replace("<", "_").Replace(">", "_");
         var safeMethodName = methodName.Replace(".", "_");
-        
+
         var parameters = testMethod.MethodSymbol.Parameters;
         var returnType = testMethod.MethodSymbol.ReturnType;
-        
+
         // Determine if method is async
         var isAsync = IsAsyncMethod(testMethod.MethodSymbol);
-        
+
         // Generate delegate type
         var delegateTypeName = $"{safeClassName}_{safeMethodName}_Delegate";
-        
+
         // Build parameter list for delegate
         var parameterTypes = new List<string> { className }; // Instance type first
         parameterTypes.AddRange(parameters.Select(p => p.Type.ToDisplayString()));
-        
+
         var returnTypeName = isAsync ? "Task" : "void";
-        
+
         // Generate delegate type declaration
         writer.AppendLine($"/// <summary>");
         writer.AppendLine($"/// Strongly-typed delegate for {className}.{methodName}");
         writer.AppendLine($"/// </summary>");
         writer.Append($"public delegate {returnTypeName} {delegateTypeName}(");
-        writer.Append(string.Join(", ", parameterTypes.Select((type, index) => 
+        writer.Append(string.Join(", ", parameterTypes.Select((type, index) =>
             index == 0 ? $"{type} instance" : $"{type} arg{index}")));
         writer.AppendLine(");");
         writer.AppendLine();
@@ -1977,22 +1976,22 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"/// Strongly-typed delegate instance for {className}.{methodName}");
         writer.AppendLine($"/// </summary>");
         writer.Append($"public static readonly {delegateTypeName} {safeClassName}_{safeMethodName} = ");
-        
+
         if (isAsync)
         {
             writer.Append("async ");
         }
-        
+
         writer.Append("(");
-        writer.Append(string.Join(", ", parameterTypes.Select((type, index) => 
+        writer.Append(string.Join(", ", parameterTypes.Select((type, index) =>
             index == 0 ? "instance" : $"arg{index}")));
         writer.Append(") => ");
-        
+
         if (isAsync)
         {
             writer.Append("await ");
         }
-        
+
         writer.Append($"instance.{methodName}(");
         writer.Append(string.Join(", ", parameters.Select((p, index) => $"arg{index + 1}")));
         writer.AppendLine(");");
@@ -2011,11 +2010,11 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         }
 
         // Return registration code for later inclusion in static constructor
-        var typeArray = parameters.Length > 0 
+        var typeArray = parameters.Length > 0
             ? $"new[] {{ {string.Join(", ", parameters.Select(p => $"typeof({p.Type.ToDisplayString()})"))} }}"
             : "new Type[0]"; // Use explicit Type[0] for empty arrays
         var registrationCode = $"TestDelegateStorage.RegisterStronglyTypedDelegate(\"{className}.{methodName}\", {typeArray}, {safeClassName}_{safeMethodName});";
-        
+
         writer.AppendLine();
         return registrationCode;
     }
@@ -2024,7 +2023,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
     {
         var generator = new ModuleInitializerGenerator();
         var moduleInitializerCode = generator.GenerateModuleInitializer(validTests, diagnosticContext);
-        
+
         context.AddSource("TUnitModuleInitializer.g.cs", moduleInitializerCode);
     }
 
@@ -2033,17 +2032,17 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
     {
         if (attribute.ConstructorArguments.Length < 2)
             return null;
-            
+
         var typeArg = attribute.ConstructorArguments[0];
         var propertyNameArg = attribute.ConstructorArguments[1];
-        
+
         if (typeArg.Value is not INamedTypeSymbol type || propertyNameArg.Value is not string propertyName)
             return null;
-            
+
         var property = type.GetMembers(propertyName).OfType<IPropertySymbol>().FirstOrDefault();
         if (property == null)
             return null;
-            
+
         return new DataSourceInfo
         {
             ContainingTypeName = type.ToDisplayString(),
@@ -2057,8 +2056,8 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             Parameters = new List<ParameterInfo>()
         };
     }
-    
-    
+
+
 
     private static bool GeneratePropertyInjection(CodeWriter writer, INamedTypeSymbol classSymbol, DiagnosticContext? diagnosticContext = null)
     {
@@ -2070,22 +2069,22 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
             SafeClassName = classSymbol.Name.Replace(".", "_"),
             DiagnosticContext = diagnosticContext
         };
-        
+
         var code = generator.GeneratePropertyInjection(context);
         if (!string.IsNullOrEmpty(code))
         {
             writer.Append(code);
             return true;
         }
-        
+
         return false;
     }
-    
+
     /* DataSource collection methods removed - no longer needed with inline delegates
     private static List<DataSourceInfo> CollectAllDataSources(List<TestMethodMetadata> validTests)
     {
         var dataSources = new Dictionary<string, DataSourceInfo>();
-        
+
         // Collect all unique data sources from all test methods
         foreach (var testMethod in validTests)
         {
@@ -2094,7 +2093,7 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 .Where(attr => attr.AttributeClass?.Name == "MethodDataSourceAttribute")
                 .Select(attr => ExtractDataSourceInfo(attr, testMethod.MethodSymbol))
                 .Where(info => info != null);
-                
+
             foreach (var dataSource in methodDataSources)
             {
                 if (dataSource != null && !dataSources.ContainsKey(dataSource.FactoryKey))
@@ -2102,13 +2101,13 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                     dataSources[dataSource.FactoryKey] = dataSource;
                 }
             }
-            
+
             // Check property data sources
             var propertyDataSources = testMethod.MethodSymbol.GetAttributes()
                 .Where(attr => attr.AttributeClass?.Name == "PropertyDataSourceAttribute")
                 .Select(attr => ExtractPropertyDataSourceInfo(attr))
                 .Where(info => info != null);
-                
+
             foreach (var dataSource in propertyDataSources)
             {
                 if (dataSource != null && !dataSources.ContainsKey(dataSource.FactoryKey))
@@ -2116,13 +2115,13 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                     dataSources[dataSource.FactoryKey] = dataSource;
                 }
             }
-            
+
             // Check class-level data sources
             var classDataSources = testMethod.TypeSymbol.GetAttributes()
                 .Where(attr => attr.AttributeClass?.Name == "MethodDataSourceAttribute")
                 .Select(attr => ExtractDataSourceInfo(attr, testMethod.MethodSymbol))
                 .Where(info => info != null);
-                
+
             foreach (var dataSource in classDataSources)
             {
                 if (dataSource != null && !dataSources.ContainsKey(dataSource.FactoryKey))
@@ -2131,15 +2130,15 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
                 }
             }
         }
-        
+
         return dataSources.Values.ToList();
     }
-    
+
     private static void GenerateGlobalDataSourceFactories(CodeWriter writer, List<DataSourceInfo> dataSources, TUnitConfiguration configuration)
     {
         // Data source factories are now generated inline with delegates
         // No need for global factory generation
-        
+
         if (configuration.EnableVerboseDiagnostics && dataSources.Any())
         {
             writer.AppendLine($"// {dataSources.Count} data sources use inline delegates");

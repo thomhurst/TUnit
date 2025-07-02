@@ -108,6 +108,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                 // This is likely a fail-fast cancellation
                 await serviceProvider.Logger.LogErrorAsync("Test execution stopped due to fail-fast.");
             }
+
+            throw;
         }
         catch (Exception e)
         {

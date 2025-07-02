@@ -25,8 +25,6 @@ internal sealed class MetadataGenerator
     /// </summary>
     public void GenerateTestRegistrations(CodeWriter writer, IEnumerable<TestMethodMetadata> testMethods)
     {
-        var testCount = testMethods.Count();
-        writer.AppendLine($"Console.Error.WriteLine(\"Registering {testCount} tests...\");");
         writer.AppendLine("var successCount = 0;");
         writer.AppendLine("var failedTests = new List<string>();");
         writer.AppendLine();
@@ -36,9 +34,9 @@ internal sealed class MetadataGenerator
             writer.AppendLine("try");
             writer.AppendLine("{");
             writer.Indent();
-            
+
             GenerateTestMetadata(writer, testInfo);
-            
+
             writer.AppendLine("successCount++;");
             writer.Unindent();
             writer.AppendLine("}");
@@ -53,7 +51,6 @@ internal sealed class MetadataGenerator
             writer.AppendLine();
         }
 
-        writer.AppendLine($"Console.Error.WriteLine($\"Successfully registered {{successCount}} out of {testCount} tests\");");
         writer.AppendLine("if (failedTests.Count > 0)");
         writer.AppendLine("{");
         writer.Indent();
@@ -91,17 +88,17 @@ internal sealed class MetadataGenerator
         var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var methodName = testInfo.MethodSymbol.Name;
         var testId = $"{className}.{methodName}";
-        
+
         if (testInfo.MethodSymbol.Parameters.Any())
         {
-            var paramTypes = string.Join(",", testInfo.MethodSymbol.Parameters.Select(p => 
+            var paramTypes = string.Join(",", testInfo.MethodSymbol.Parameters.Select(p =>
                 p.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
             testId += $"({paramTypes})";
         }
 
         writer.AppendLine($"TestId = \"{testId}\",");
         writer.AppendLine($"TestName = \"{methodName}\",");
-        
+
         // Check if the type contains unresolved type parameters
         if (ContainsTypeParameter(testInfo.TypeSymbol))
         {
@@ -112,9 +109,9 @@ internal sealed class MetadataGenerator
         {
             writer.AppendLine($"TestClassType = typeof({className}),");
         }
-        
+
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
-        
+
         // File location if available
         var location = testInfo.MethodSymbol.Locations.FirstOrDefault();
         if (location != null && location.IsInSource)
@@ -124,7 +121,7 @@ internal sealed class MetadataGenerator
             writer.AppendLine($"LineNumber = {lineSpan.StartLinePosition.Line + 1},");
         }
     }
-    
+
     private static bool ContainsTypeParameter(ITypeSymbol type)
     {
         if (type is ITypeParameterSymbol)
@@ -234,7 +231,7 @@ internal sealed class MetadataGenerator
     private void GenerateDependencies(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var dependsOnAttributes = testInfo.MethodSymbol.GetAttributes()
-            .Where(a => a.AttributeClass?.Name == "DependsOnAttribute" || 
+            .Where(a => a.AttributeClass?.Name == "DependsOnAttribute" ||
                        a.AttributeClass?.Name.StartsWith("DependsOnAttribute`") == true)
             .ToList();
 
@@ -327,7 +324,7 @@ internal sealed class MetadataGenerator
     private void GenerateParameterTypes(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var parameters = testInfo.MethodSymbol.Parameters;
-        
+
         if (!parameters.Any())
         {
             writer.AppendLine("ParameterTypes = Type.EmptyTypes,");
@@ -386,7 +383,7 @@ internal sealed class MetadataGenerator
     private void GeneratePropertyDataSources(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var propertyDataSources = new List<(string name, ITypeSymbol type, AttributeData attr)>();
-        
+
         // Find all properties with data source attributes
         foreach (var member in testInfo.TypeSymbol.GetMembers().OfType<IPropertySymbol>())
         {
@@ -398,7 +395,7 @@ internal sealed class MetadataGenerator
                 propertyDataSources.Add((member.Name, member.Type, classDataSourceAttr));
                 continue;
             }
-            
+
             // Check for MethodDataSource attribute on properties
             var methodDataSourceAttr = member.GetAttributes()
                 .FirstOrDefault(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
@@ -407,7 +404,7 @@ internal sealed class MetadataGenerator
                 propertyDataSources.Add((member.Name, member.Type, methodDataSourceAttr));
                 continue;
             }
-            
+
             // Check for other data source attributes (e.g., custom attributes)
             var dataSourceAttrs = member.GetAttributes()
                 .Where(a => a.AttributeClass?.AllInterfaces.Any(i => i.Name == "IDataAttribute") == true)
@@ -433,13 +430,13 @@ internal sealed class MetadataGenerator
             writer.AppendLine("new PropertyDataSource");
             writer.AppendLine("{");
             writer.Indent();
-            
+
             writer.AppendLine($"PropertyName = \"{propName}\",");
             writer.AppendLine($"PropertyType = typeof({propType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
-            
+
             // Generate the appropriate data source based on attribute type
             GeneratePropertyDataSourceInstance(writer, attr, testInfo.TypeSymbol, propName);
-            
+
             writer.Unindent();
             writer.AppendLine("},");
         }
@@ -455,7 +452,7 @@ internal sealed class MetadataGenerator
             // ClassDataSource creates instances of the specified type
             var sharedType = GetSharedTypeFromAttribute(attr);
             var isShared = sharedType != "None";
-            
+
             // Get the type to instantiate from the generic attribute
             if (attr.AttributeClass is INamedTypeSymbol namedType && namedType.IsGenericType && namedType.TypeArguments.Length > 0)
             {
@@ -533,52 +530,52 @@ internal sealed class MetadataGenerator
     {
         if (type is not INamedTypeSymbol namedType)
             return false;
-            
+
         var fullName = namedType.ToDisplayString();
         return fullName.StartsWith("System.Collections.Generic.IAsyncEnumerable<") ||
                fullName.StartsWith("IAsyncEnumerable<");
     }
-    
+
     private bool IsTaskOfEnumerableType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol namedType)
             return false;
-            
+
         if (namedType.Name != "Task" || namedType.TypeArguments.Length != 1)
             return false;
-            
+
         var innerType = namedType.TypeArguments[0];
         var innerTypeName = innerType.ToDisplayString();
-        
-        return innerTypeName.Contains("IEnumerable<") || 
-               innerTypeName.Contains("List<") || 
+
+        return innerTypeName.Contains("IEnumerable<") ||
+               innerTypeName.Contains("List<") ||
                innerTypeName.Contains("[]");
     }
-    
+
     private bool IsFuncOfTupleType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol namedType)
             return false;
-            
+
         if (!namedType.Name.StartsWith("Func") || namedType.TypeArguments.Length != 1)
             return false;
-            
+
         var returnType = namedType.TypeArguments[0];
         return returnType is INamedTypeSymbol { IsTupleType: true };
     }
-    
+
     private bool IsEnumerableOfObjectArrayType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol namedType)
             return false;
-            
+
         var typeName = namedType.ToDisplayString();
-        return typeName.Contains("IEnumerable<object[]>") || 
+        return typeName.Contains("IEnumerable<object[]>") ||
                typeName.Contains("IEnumerable<object?[]>") ||
                typeName.Contains("List<object[]>") ||
                typeName.Contains("List<object?[]>");
     }
-    
+
     private string GetSharedTypeFromAttribute(AttributeData attr)
     {
         // Look for Shared property in named arguments
@@ -590,12 +587,12 @@ internal sealed class MetadataGenerator
         }
         return "None";
     }
-    
+
     private string FormatArgumentValue(TypedConstant arg)
     {
         if (arg.IsNull)
             return "null";
-            
+
         switch (arg.Kind)
         {
             case TypedConstantKind.Primitive:
@@ -606,16 +603,16 @@ internal sealed class MetadataGenerator
                 if (arg.Type?.SpecialType == SpecialType.System_Boolean)
                     return arg.Value?.ToString()?.ToLower() ?? "false";
                 return arg.Value?.ToString() ?? "null";
-                
+
             case TypedConstantKind.Type:
                 if (arg.Value is ITypeSymbol typeSymbol)
                     return $"typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
                 return "null";
-                
+
             case TypedConstantKind.Array:
                 var elements = arg.Values.Select(FormatArgumentValue);
                 return $"new[] {{ {string.Join(", ", elements)} }}";
-                
+
             default:
                 return "null";
         }

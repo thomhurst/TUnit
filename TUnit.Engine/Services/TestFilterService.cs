@@ -50,7 +50,7 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
         var assembly = metadata.TestClassType.Assembly.GetName();
         var classTypeName = metadata.TestClassType.Name;
 
-        return $"/{assembly.Name ?? assembly.FullName}/{metadata.TestClassType.Namespace}/{classTypeName}/{metadata.TestMethodName}";
+        return $"/{assembly.Name ?? "*"}/{metadata.TestClassType.Namespace ?? "*"}/{classTypeName}/{metadata.TestMethodName}";
     }
 
     private bool CheckTreeNodeFilter(
@@ -86,26 +86,15 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
             properties.Add(new KeyValuePairStringProperty("Category", category));
         }
 
-        // Add custom properties from TestContext if available
-        if (test.Context?.TestDetails.CustomProperties != null)
+        if (test.Context?.TestDetails.CustomProperties == null)
         {
-            _logger.LogDebug($"Found {test.Context.TestDetails.CustomProperties.Count} custom properties");
-            foreach (var propertyEntry in test.Context.TestDetails.CustomProperties)
-            {
-                // CustomProperties is Dictionary<string, List<string>>
-                foreach (var value in propertyEntry.Value)
-                {
-                    _logger.LogDebug($"Adding property: {propertyEntry.Key}={value}");
-                    properties.Add(new KeyValuePairStringProperty(propertyEntry.Key, value));
-                }
-            }
-        }
-        else
-        {
-            _logger.LogDebug("No custom properties found in test context");
+            return new PropertyBag(properties);
         }
 
-        _logger.LogDebug($"Total properties in bag: {properties.Count}");
+        foreach (var propertyEntry in test.Context.TestDetails.CustomProperties)
+        {
+            properties.AddRange(propertyEntry.Value.Select(value => new KeyValuePairStringProperty(propertyEntry.Key, value)).Cast<IProperty>());
+        }
 
         return new PropertyBag(properties);
     }
