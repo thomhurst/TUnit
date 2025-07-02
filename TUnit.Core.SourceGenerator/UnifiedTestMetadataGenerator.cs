@@ -2019,13 +2019,6 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         return registrationCode;
     }
 
-    private static void GenerateModuleInitializerSource(SourceProductionContext context, List<TestMethodMetadata> validTests, DiagnosticContext diagnosticContext)
-    {
-        var generator = new ModuleInitializerGenerator();
-        var moduleInitializerCode = generator.GenerateModuleInitializer(validTests, diagnosticContext);
-
-        context.AddSource("TUnitModuleInitializer.g.cs", moduleInitializerCode);
-    }
 
     /* ExtractPropertyDataSourceInfo method removed - no longer needed with inline delegates
     private static DataSourceInfo? ExtractPropertyDataSourceInfo(AttributeData attribute)
