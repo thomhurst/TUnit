@@ -888,9 +888,31 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
     {
         // Use the declaring type for the delegate key to ensure uniqueness
         var declaringType = hook.DeclaringTypeSymbol ?? hook.TypeSymbol;
-        // For generic types, use just the type name without parameters
-        var typeName = declaringType.IsGenericType ? declaringType.Name : declaringType.Name;
-        var safeClassName = typeName.Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace("`", "_");
+        
+        // Get the full type name including namespace to ensure uniqueness
+        var fullTypeName = declaringType.ToDisplayString();
+        
+        // For generic types, remove type parameters to avoid compilation issues
+        if (declaringType.IsGenericType)
+        {
+            var genericIndex = fullTypeName.IndexOf('<');
+            if (genericIndex > 0)
+            {
+                fullTypeName = fullTypeName.Substring(0, genericIndex);
+            }
+        }
+        
+        // Make the name safe for use as an identifier
+        var safeClassName = fullTypeName
+            .Replace(".", "_")
+            .Replace("::", "_")
+            .Replace("<", "_")
+            .Replace(">", "_")
+            .Replace(",", "_")
+            .Replace(" ", "")
+            .Replace("`", "_")
+            .Replace("+", "_"); // Handle nested classes
+            
         return $"{safeClassName}_{hook.MethodSymbol.Name}";
     }
 
