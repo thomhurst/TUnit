@@ -12,8 +12,6 @@ public static class DataConversionHelper
     /// <summary>
     /// Converts various data source return types to IEnumerable<object?[]>
     /// </summary>
-    [RequiresUnreferencedCode("This method uses reflection to handle tuple types and may not work correctly with trimming.")]
-    [RequiresDynamicCode("This method uses reflection to handle tuple types and may require JIT compilation.")]
     public static IEnumerable<object?[]> ConvertToObjectArrays(object? data)
     {
         switch (data)
@@ -94,24 +92,28 @@ public static class DataConversionHelper
                 
                 foreach (var item in enumerable)
                 {
-                    // Check if item is a tuple type
-                    var itemType = item?.GetType();
-                    var typeName = itemType?.FullName;
-                    
-                    if (typeName != null && typeName.StartsWith("System.ValueTuple`"))
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP
+                    // Check if item is a tuple using ITuple interface
+                    if (item is ITuple tuple)
                     {
-                        // Handle tuple types using reflection
-                        var fields = itemType!.GetFields();
-                        var tupleItems = new object?[fields.Length];
-                        for (int i = 0; i < fields.Length; i++)
+                        // Use ITuple interface to access elements
+                        var tupleItems = new object?[tuple.Length];
+                        for (int i = 0; i < tuple.Length; i++)
                         {
-                            tupleItems[i] = fields[i].GetValue(item);
+                            tupleItems[i] = tuple[i];
                         }
                         yield return tupleItems;
                     }
+                    else 
+#endif
+                    if (item is object?[] array)
+                    {
+                        // Already an object array
+                        yield return array;
+                    }
                     else
                     {
-                        // Not a tuple, wrap in array
+                        // Not a tuple or array, wrap in array
                         yield return new object?[] { item };
                     }
                 }
@@ -185,5 +187,47 @@ public static class DataConversionHelper
     {
         var result = await task;
         return ConvertToObjectArrays(result);
+    }
+    
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP
+    /// <summary>
+    /// Unwraps an ITuple to an object?[] array
+    /// </summary>
+    public static object?[] UnwrapTuple(ITuple tuple)
+    {
+        if (tuple == null)
+            throw new ArgumentNullException(nameof(tuple));
+            
+        var result = new object?[tuple.Length];
+        for (int i = 0; i < tuple.Length; i++)
+        {
+            result[i] = tuple[i];
+        }
+        return result;
+    }
+#endif
+    
+    /// <summary>
+    /// Unwraps a ValueTuple<T1, T2> to an object?[] array (optimized for 2-tuples)
+    /// </summary>
+    public static object?[] UnwrapTuple<T1, T2>((T1, T2) tuple)
+    {
+        return new object?[] { tuple.Item1, tuple.Item2 };
+    }
+    
+    /// <summary>
+    /// Unwraps a ValueTuple<T1, T2, T3> to an object?[] array (optimized for 3-tuples)
+    /// </summary>
+    public static object?[] UnwrapTuple<T1, T2, T3>((T1, T2, T3) tuple)
+    {
+        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3 };
+    }
+    
+    /// <summary>
+    /// Unwraps a ValueTuple<T1, T2, T3, T4> to an object?[] array (optimized for 4-tuples)
+    /// </summary>
+    public static object?[] UnwrapTuple<T1, T2, T3, T4>((T1, T2, T3, T4) tuple)
+    {
+        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4 };
     }
 }
