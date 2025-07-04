@@ -181,6 +181,32 @@ public static class DataConversionHelper
     }
     
     /// <summary>
+    /// Converts IAsyncEnumerable<(T1, T2, T3, T4)> to IAsyncEnumerable<object?[]>
+    /// </summary>
+    public static async IAsyncEnumerable<object?[]> ConvertAsyncEnumerableTuple4ToObjectArrays<T1, T2, T3, T4>(
+        IAsyncEnumerable<(T1, T2, T3, T4)> source,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        await foreach (var (item1, item2, item3, item4) in source.WithCancellation(ct))
+        {
+            yield return new object?[] { item1, item2, item3, item4 };
+        }
+    }
+    
+    /// <summary>
+    /// Converts IAsyncEnumerable<(T1, T2, T3, T4, T5)> to IAsyncEnumerable<object?[]>
+    /// </summary>
+    public static async IAsyncEnumerable<object?[]> ConvertAsyncEnumerableTuple5ToObjectArrays<T1, T2, T3, T4, T5>(
+        IAsyncEnumerable<(T1, T2, T3, T4, T5)> source,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        await foreach (var (item1, item2, item3, item4, item5) in source.WithCancellation(ct))
+        {
+            yield return new object?[] { item1, item2, item3, item4, item5 };
+        }
+    }
+    
+    /// <summary>
     /// Wraps a Task<IEnumerable<T>> to ensure it returns object arrays
     /// </summary>
     public static async Task<IEnumerable<object?[]>> WrapTaskEnumerableAsObjectArrays<T>(Task<IEnumerable<T>> task)
@@ -229,5 +255,53 @@ public static class DataConversionHelper
     public static object?[] UnwrapTuple<T1, T2, T3, T4>((T1, T2, T3, T4) tuple)
     {
         return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4 };
+    }
+    
+    /// <summary>
+    /// Unwraps a ValueTuple<T1, T2, T3, T4, T5> to an object?[] array (optimized for 5-tuples)
+    /// </summary>
+    public static object?[] UnwrapTuple<T1, T2, T3, T4, T5>((T1, T2, T3, T4, T5) tuple)
+    {
+        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5 };
+    }
+    
+    /// <summary>
+    /// Unwraps a ValueTuple<T1, T2, T3, T4, T5, T6> to an object?[] array (optimized for 6-tuples)
+    /// </summary>
+    public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6>((T1, T2, T3, T4, T5, T6) tuple)
+    {
+        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6 };
+    }
+    
+    /// <summary>
+    /// Unwraps a ValueTuple<T1, T2, T3, T4, T5, T6, T7> to an object?[] array (optimized for 7-tuples)
+    /// </summary>
+    public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6, T7>((T1, T2, T3, T4, T5, T6, T7) tuple)
+    {
+        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7 };
+    }
+    
+    /// <summary>
+    /// Unwraps a ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> to an object?[] array (optimized for 8-tuples)
+    /// </summary>
+    public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6, T7, T8>((T1, T2, T3, T4, T5, T6, T7, T8) tuple)
+    {
+        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7, tuple.Item8 };
+    }
+    
+    /// <summary>
+    /// Unwraps a ValueTuple with 9 elements to an object?[] array
+    /// </summary>
+    public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9>((T1, T2, T3, T4, T5, T6, T7, T8, T9) tuple)
+    {
+        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7, tuple.Item8, tuple.Item9 };
+    }
+    
+    /// <summary>
+    /// Unwraps a ValueTuple with 10 elements to an object?[] array
+    /// </summary>
+    public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) tuple)
+    {
+        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7, tuple.Item8, tuple.Item9, tuple.Item10 };
     }
 }

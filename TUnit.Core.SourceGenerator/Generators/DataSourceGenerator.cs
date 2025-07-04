@@ -626,18 +626,24 @@ internal sealed class DataSourceGenerator
                         {
                             // Convert tuple to object array
                             var tupleElements = GetTupleElements(elementType);
-                            if (tupleElements.Length == 2)
+                            switch (tupleElements.Length)
                             {
-                                writer.AppendLine($"new AsyncDelegateDataSource((ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertAsyncEnumerableTuple2ToObjectArrays({methodCallWithCt})),");
-                            }
-                            else if (tupleElements.Length == 3)
-                            {
-                                writer.AppendLine($"new AsyncDelegateDataSource((ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertAsyncEnumerableTuple3ToObjectArrays({methodCallWithCt})),");
-                            }
-                            else
-                            {
-                                // For other tuple sizes, we need a different approach
-                                writer.AppendLine($"new AsyncDelegateDataSource((ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertAsyncEnumerableToObjectArrays({methodCallWithCt})),");
+                                case 2:
+                                    writer.AppendLine($"new AsyncDelegateDataSource((ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertAsyncEnumerableTuple2ToObjectArrays({methodCallWithCt})),");
+                                    break;
+                                case 3:
+                                    writer.AppendLine($"new AsyncDelegateDataSource((ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertAsyncEnumerableTuple3ToObjectArrays({methodCallWithCt})),");
+                                    break;
+                                case 4:
+                                    writer.AppendLine($"new AsyncDelegateDataSource((ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertAsyncEnumerableTuple4ToObjectArrays({methodCallWithCt})),");
+                                    break;
+                                case 5:
+                                    writer.AppendLine($"new AsyncDelegateDataSource((ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertAsyncEnumerableTuple5ToObjectArrays({methodCallWithCt})),");
+                                    break;
+                                default:
+                                    // For larger tuple sizes, use the generic approach
+                                    writer.AppendLine($"new AsyncDelegateDataSource((ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertAsyncEnumerableToObjectArrays({methodCallWithCt})),");
+                                    break;
                             }
                         }
                         else
