@@ -138,4 +138,52 @@ public static class DataConversionHelper
             yield return item;
         }
     }
+    
+    /// <summary>
+    /// Converts IAsyncEnumerable<T> to IAsyncEnumerable<object?[]> where T is not object?[]
+    /// </summary>
+    public static async IAsyncEnumerable<object?[]> ConvertAsyncEnumerableToObjectArrays<T>(
+        IAsyncEnumerable<T> source,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        await foreach (var item in source.WithCancellation(ct))
+        {
+            yield return new object?[] { item };
+        }
+    }
+    
+    /// <summary>
+    /// Converts IAsyncEnumerable<(T1, T2)> to IAsyncEnumerable<object?[]>
+    /// </summary>
+    public static async IAsyncEnumerable<object?[]> ConvertAsyncEnumerableTuple2ToObjectArrays<T1, T2>(
+        IAsyncEnumerable<(T1, T2)> source,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        await foreach (var (item1, item2) in source.WithCancellation(ct))
+        {
+            yield return new object?[] { item1, item2 };
+        }
+    }
+    
+    /// <summary>
+    /// Converts IAsyncEnumerable<(T1, T2, T3)> to IAsyncEnumerable<object?[]>
+    /// </summary>
+    public static async IAsyncEnumerable<object?[]> ConvertAsyncEnumerableTuple3ToObjectArrays<T1, T2, T3>(
+        IAsyncEnumerable<(T1, T2, T3)> source,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        await foreach (var (item1, item2, item3) in source.WithCancellation(ct))
+        {
+            yield return new object?[] { item1, item2, item3 };
+        }
+    }
+    
+    /// <summary>
+    /// Wraps a Task<IEnumerable<T>> to ensure it returns object arrays
+    /// </summary>
+    public static async Task<IEnumerable<object?[]>> WrapTaskEnumerableAsObjectArrays<T>(Task<IEnumerable<T>> task)
+    {
+        var result = await task;
+        return ConvertToObjectArrays(result);
+    }
 }

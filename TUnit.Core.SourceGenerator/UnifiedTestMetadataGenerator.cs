@@ -1450,7 +1450,16 @@ public class UnifiedTestMetadataGenerator : IIncrementalGenerator
         {
             if (IsAsyncEnumerableType(method.ReturnType))
             {
-                return $"new AsyncDelegateDataSource((ct) => {sourceType.ToDisplayString()}.{memberName}(ct), {isShared.ToString().ToLower()})";
+                // Check if method accepts CancellationToken
+                var hasCancellationToken = method.Parameters.Any(p => p.Type.Name == "CancellationToken");
+                if (hasCancellationToken)
+                {
+                    return $"new AsyncDelegateDataSource((ct) => {sourceType.ToDisplayString()}.{memberName}(ct), {isShared.ToString().ToLower()})";
+                }
+                else
+                {
+                    return $"new AsyncDelegateDataSource((ct) => {sourceType.ToDisplayString()}.{memberName}(), {isShared.ToString().ToLower()})";
+                }
             }
             else if (IsTaskOfEnumerableType(method.ReturnType))
             {

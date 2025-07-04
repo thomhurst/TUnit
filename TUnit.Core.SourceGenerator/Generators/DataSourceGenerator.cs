@@ -598,7 +598,110 @@ internal sealed class DataSourceGenerator
             
             if (dataSource.IsAsync)
             {
-                writer.AppendLine($"new AsyncDelegateDataSource(async (ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToAsyncEnumerableInternal(global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(await {methodCall}), ct)),");
+                // Check what type of async data source this is
+                if (IsAsyncEnumerable(dataSource.MethodSymbol.ReturnType))
+                {
+                    // IAsyncEnumerable - check if it returns object?[] or needs conversion
+                    var hasCancellationToken = dataSource.MethodSymbol.Parameters.Any(p => p.Type.Name == "CancellationToken");
+                    var ctParam = hasCancellationToken && string.IsNullOrEmpty(methodArgs) ? "ct" : 
+                                 hasCancellationToken && !string.IsNullOrEmpty(methodArgs) ? $"{methodArgs}, ct" : 
+                                 methodArgs;
+                    var methodCallWithCt = $"{className}.{dataSource.MethodSymbol.Name}({ctParam})";
+                    
+                    // Check if the async enumerable returns object?[]
+                    var asyncEnumType = dataSource.MethodSymbol.ReturnType as INamedTypeSymbol;
+                    if (asyncEnumType != null && 
+                        asyncEnumType.TypeArguments.Length > 0 &&
+                        IsObjectArrayType(asyncEnumType.TypeArguments[0]))
+                    {
+                        // Already returns IAsyncEnumerable<object?[]> - use directly
+                        writer.AppendLine($"new AsyncDelegateDataSource((ct) => {methodCallWithCt}),");
+                    }
+                    else
+                    {
+                        // Returns IAsyncEnumerable<T> where T is not object?[] - need to convert
+                        // We'll use a wrapper method to convert the items
+                        var elementType = asyncEnumType?.TypeArguments.Length > 0 ? asyncEnumType.TypeArguments[0] : null;
+                        if (elementType != null && IsTupleType(elementType))
+                        {
+                            // Convert tuple to object array
+                            var tupleElements = GetTupleElements(elementType);
+                            if (tupleElements.Length == 2)
+                            {
+                                writer.AppendLine($"new AsyncDelegateDataSource((ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertAsyncEnumerableTuple2ToObjectArrays({methodCallWithCt})),");
+                            }
+                            else if (tupleElements.Length == 3)
+                            {
+                                writer.AppendLine($"new AsyncDelegateDataSource((ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertAsyncEnumerableTuple3ToObjectArrays({methodCallWithCt})),");
+                            }
+                            else
+                            {
+                                // For other tuple sizes, we need a different approach
+                                writer.AppendLine($"new AsyncDelegateDataSource((ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertAsyncEnumerableToObjectArrays({methodCallWithCt})),");
+                            }
+                        }
+                        else
+                        {
+                            // Single value - wrap in object array
+                            writer.AppendLine($"new AsyncDelegateDataSource((ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertAsyncEnumerableToObjectArrays({methodCallWithCt})),");
+                        }
+                    }
+                }
+                else if (IsTaskOfEnumerable(dataSource.MethodSymbol.ReturnType))
+                {
+                    // Task<IEnumerable> - check if it already returns object arrays
+                    var taskType = dataSource.MethodSymbol.ReturnType as INamedTypeSymbol;
+                    if (taskType != null && taskType.TypeArguments.Length > 0)
+                    {
+                        var innerType = taskType.TypeArguments[0] as INamedTypeSymbol;
+                        if (innerType != null && innerType.IsGenericType && innerType.TypeArguments.Length > 0 && 
+                            IsObjectArrayType(innerType.TypeArguments[0]))
+                        {
+                            // Already returns Task<IEnumerable<object?[]>>
+                            writer.AppendLine($"new TaskDelegateDataSource(() => {methodCall}),");
+                        }
+                        else
+                        {
+                            // Need to convert - wrap in async lambda that converts the result
+                            writer.AppendLine($"new TaskDelegateDataSource(async () => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(await {methodCall})),");
+                        }
+                    }
+                    else
+                    {
+                        // Fallback
+                        writer.AppendLine($"new TaskDelegateDataSource(async () => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(await {methodCall})),");
+                    }
+                }
+                else if (IsValueTaskOfEnumerable(dataSource.MethodSymbol.ReturnType))
+                {
+                    // ValueTask<IEnumerable> - need to convert to Task
+                    var valueTaskType = dataSource.MethodSymbol.ReturnType as INamedTypeSymbol;
+                    if (valueTaskType != null && valueTaskType.TypeArguments.Length > 0)
+                    {
+                        var innerType = valueTaskType.TypeArguments[0] as INamedTypeSymbol;
+                        if (innerType != null && innerType.IsGenericType && innerType.TypeArguments.Length > 0 && 
+                            IsObjectArrayType(innerType.TypeArguments[0]))
+                        {
+                            // Already returns ValueTask<IEnumerable<object?[]>> - convert to Task
+                            writer.AppendLine($"new TaskDelegateDataSource(async () => await {methodCall}),");
+                        }
+                        else
+                        {
+                            // Need to convert - wrap in async lambda that converts the result
+                            writer.AppendLine($"new TaskDelegateDataSource(async () => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(await {methodCall})),");
+                        }
+                    }
+                    else
+                    {
+                        // Fallback
+                        writer.AppendLine($"new TaskDelegateDataSource(async () => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(await {methodCall})),");
+                    }
+                }
+                else
+                {
+                    // Other async types - use default handling
+                    writer.AppendLine($"new AsyncDelegateDataSource(async (ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToAsyncEnumerableInternal(global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(await {methodCall}), ct)),");
+                }
             }
             else
             {

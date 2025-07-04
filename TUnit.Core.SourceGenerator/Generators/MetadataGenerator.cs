@@ -481,7 +481,16 @@ internal sealed class MetadataGenerator
                 {
                     if (IsAsyncEnumerableType(method.ReturnType))
                     {
-                        writer.AppendLine($"DataSource = new AsyncDelegateDataSource((ct) => {classType.ToDisplayString()}.{methodName}(ct), false)");
+                        // Check if method accepts CancellationToken
+                        var hasCancellationToken = method.Parameters.Any(p => p.Type.Name == "CancellationToken");
+                        if (hasCancellationToken)
+                        {
+                            writer.AppendLine($"DataSource = new AsyncDelegateDataSource((ct) => {classType.ToDisplayString()}.{methodName}(ct), false)");
+                        }
+                        else
+                        {
+                            writer.AppendLine($"DataSource = new AsyncDelegateDataSource((ct) => {classType.ToDisplayString()}.{methodName}(), false)");
+                        }
                     }
                     else if (IsTaskOfEnumerableType(method.ReturnType))
                     {
