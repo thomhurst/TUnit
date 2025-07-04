@@ -3,40 +3,24 @@ using TUnit.Core;
 namespace TUnit.Engine;
 
 /// <summary>
-/// AOT-safe implementation of hook invoker using strongly-typed delegates
+/// AOT-safe implementation of hook invoker - no longer needed with direct context passing
+/// This class is kept for backward compatibility but is deprecated
 /// </summary>
+[Obsolete("HookInvoker is no longer needed. Hooks are invoked directly with proper context types.")]
 public class HookInvoker : IHookInvoker
 {
-    public async Task InvokeHook(HookMetadata hook, HookContext context)
+    public Task InvokeHook(HookMetadata hook, object context)
     {
-        // Use AOT-compiled delegates only
-        if (hook.Invoker != null)
-        {
-            var instance = hook.IsStatic ? null : context.TestInstance;
-            await hook.Invoker(instance, context);
-        }
-        else
-        {
-            throw new InvalidOperationException($"Hook {hook.Name} does not have a pre-compiled invoker. Ensure source generators have run.");
-        }
+        throw new NotSupportedException("HookInvoker is deprecated. Use direct hook invocation with proper context types.");
     }
 
-    public async Task InvokeHookAsync(string hookKey, object? instance, HookContext context)
+    public Task InvokeHookAsync(string hookKey, object? instance, object context)
     {
-        // Try to get hook from storage
-        var hookInvoker = HookDelegateStorage.GetHook(hookKey);
-        if (hookInvoker != null)
-        {
-            await hookInvoker(instance, context);
-            return;
-        }
-        
-        throw new InvalidOperationException(
-            $"No hook invoker found for {hookKey}. Ensure source generators have run and hook is properly registered.");
+        throw new NotSupportedException("HookInvoker is deprecated. Use direct hook invocation with proper context types.");
     }
 
-    public async Task InvokeHookAsync(object? instance, Func<object?, HookContext, Task> hookInvoker, HookContext context)
+    public Task InvokeHookAsync(object? instance, Func<object?, object, Task> hookInvoker, object context)
     {
-        await hookInvoker(instance, context);
+        throw new NotSupportedException("HookInvoker is deprecated. Use direct hook invocation with proper context types.");
     }
 }

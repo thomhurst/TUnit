@@ -85,16 +85,7 @@ public class ModuleInitializerTests
         await Assert.That(delegateStorageType.IsClass).IsTrue();
     }
 
-    [Test]
-    public async Task HookDelegateStorage_IsInitialized()
-    {
-        // Arrange & Act
-        var hookStorageType = typeof(HookDelegateStorage);
-        
-        // Assert
-        await Assert.That(hookStorageType).IsNotNull();
-        await Assert.That(hookStorageType.IsClass).IsTrue();
-    }
+    // HookDelegateStorage test removed - hooks now use direct context passing
 
     // DataSourceFactoryRegistry test removed - registry pattern eliminated
     /*

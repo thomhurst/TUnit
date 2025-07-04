@@ -380,11 +380,11 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             GenerateFileHeader(writer);
 
             // Create generator instances
-            var hookGenerator = new HookGenerator();
+            // HookGenerator removed - hooks are now handled by UnifiedHookMetadataGenerator
             var dataSourceGenerator = new DataSourceGenerator();
             var delegateGenerator = new DelegateGenerator();
             var genericTypeResolver = new GenericTypeResolver();
-            var metadataGenerator = new MetadataGenerator(hookGenerator, dataSourceGenerator);
+            var metadataGenerator = new MetadataGenerator(dataSourceGenerator);
             
             // Note: Generic analysis would need to be done in a separate step
             // For now, we'll generate the registry structure without analysis
@@ -421,7 +421,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             writer.AppendLine();
 
             // Generate registration methods
-            GenerateRegisterAllDelegates(writer, delegateGenerator, hookGenerator, testMethods);
+            GenerateRegisterAllDelegates(writer, delegateGenerator, testMethods);
             GenerateRegisterAllTests(writer, metadataGenerator, testMethods);
 
             // Generate generic test registry
@@ -449,10 +449,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             writer.AppendLine("// Strongly-typed delegate implementations");
             delegateGenerator.GenerateStronglyTypedDelegates(writer, testMethods);
 
-            // Generate hook implementations
-            writer.AppendLine();
-            writer.AppendLine("// Hook implementations");
-            hookGenerator.GenerateHookInvokers(writer, testMethods);
+            // Hook implementations are now handled by UnifiedHookMetadataGenerator
 
             writer.Unindent();
             writer.AppendLine("}");
@@ -571,8 +568,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
 
     private void GenerateRegisterAllDelegates(
         CodeWriter writer, 
-        DelegateGenerator delegateGenerator, 
-        HookGenerator hookGenerator,
+        DelegateGenerator delegateGenerator,
         IEnumerable<TestMethodMetadata> testMethods)
     {
         writer.AppendLine("private static void RegisterAllDelegates()");
@@ -580,7 +576,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.Indent();
         
         delegateGenerator.GenerateDelegateRegistrations(writer, testMethods);
-        hookGenerator.GenerateHookRegistrations(writer, testMethods);
+        // Hook registrations removed - hooks are now handled by UnifiedHookMetadataGenerator
         
         writer.Unindent();
         writer.AppendLine("}");

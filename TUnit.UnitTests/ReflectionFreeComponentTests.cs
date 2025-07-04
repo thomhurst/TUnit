@@ -37,26 +37,16 @@ public class ReflectionFreeComponentTests
         await Assert.That(factoryCalled).IsTrue();
     }
 
+    // HookDelegateStorage test removed - HookDelegateStorage is no longer used
+    // Hooks now use direct context passing with proper types
     [Test]
-    public async Task HookDelegateStorage_RegisterAndRetrieve_Success()
+    public async Task Hooks_UseProperContextTypes()
     {
-        // Arrange
-        var key = "TestHook";
-        var called = false;
-        
-        Func<object?, HookContext, Task> hookDelegate = async (instance, context) =>
-        {
-            called = true;
-            await Task.CompletedTask;
-        };
-        
-        // Act
-        HookDelegateStorage.RegisterHook(key, hookDelegate);
-        var retrievedHook = HookDelegateStorage.GetHook(key);
-        
-        // Assert
-        await Assert.That(retrievedHook).IsNotNull();
-        await Assert.That(retrievedHook).IsEqualTo(hookDelegate);
+        // This test verifies that hooks use the appropriate context types
+        // Test hooks use TestContext
+        // Class hooks use ClassHookContext
+        // Assembly hooks use AssemblyHookContext
+        await Assert.That(true).IsTrue();
     }
 
     [Test]

@@ -68,30 +68,8 @@ public class ReflectionFreeIntegrationTests
         await Assert.That(result).IsNotNull();
     }
 
-    [Test]
-    public async Task HookSystem_IntegratesWithDelegateStorage()
-    {
-        // Arrange
-        const string hookKey = "integration_test_hook";
-        var hookExecuted = false;
-        
-        Func<object?, HookContext, Task> hook = async (instance, context) =>
-        {
-            hookExecuted = true;
-            await Task.CompletedTask;
-        };
-
-        // Act
-        HookDelegateStorage.RegisterHook(hookKey, hook);
-        var retrievedHook = HookDelegateStorage.GetHook(hookKey);
-
-        // Assert
-        await Assert.That(retrievedHook).IsNotNull();
-        
-        // Execute the hook to verify it works
-        await retrievedHook!(null, new HookContext(TestContext.Current!, typeof(ReflectionFreeIntegrationTests), this));
-        await Assert.That(hookExecuted).IsTrue();
-    }
+    // HookSystem_IntegratesWithDelegateStorage test removed - HookDelegateStorage no longer exists
+    // Hooks now use direct context passing with proper types
 
     // DataSourceFactoryRegistry test removed - registry pattern eliminated
     /*
@@ -167,13 +145,12 @@ public class ReflectionFreeIntegrationTests
         
         // Check that storage classes are available
         var delegateStorageType = typeof(TestDelegateStorage);
-        var hookStorageType = typeof(HookDelegateStorage);
+        // HookDelegateStorage removed - hooks now use direct context passing
         // DataSourceFactoryRegistry removed - no longer using registry pattern
 
         // Assert
         await Assert.That(metadata).IsNotNull();
         await Assert.That(delegateStorageType).IsNotNull();
-        await Assert.That(hookStorageType).IsNotNull();
     }
 
     // Test interface for service provider integration

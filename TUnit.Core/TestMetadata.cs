@@ -7,7 +7,7 @@ namespace TUnit.Core;
 /// <summary>
 /// Unified metadata for a test, fully AOT-compatible with no reflection dependencies
 /// </summary>
-public sealed class TestMetadata
+public class TestMetadata
 {
     /// <summary>
     /// Unique identifier for the test
@@ -176,9 +176,9 @@ public sealed class HookMetadata
     public int Order { get; init; }
 
     /// <summary>
-    /// AOT-safe hook invoker
+    /// Hook delegate key for AOT-safe invocation
     /// </summary>
-    public Func<object?, HookContext, Task>? Invoker { get; init; }
+    public string? DelegateKey { get; init; }
 
     /// <summary>
     /// Type that declares this hook

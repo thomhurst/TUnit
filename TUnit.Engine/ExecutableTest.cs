@@ -5,7 +5,7 @@ namespace TUnit.Engine;
 /// <summary>
 /// A fully prepared test ready for execution, containing all necessary data and invokers
 /// </summary>
-public sealed class ExecutableTest
+public abstract class ExecutableTest
 {
     /// <summary>
     /// Unique identifier for this test instance
@@ -20,7 +20,7 @@ public sealed class ExecutableTest
     /// <summary>
     /// The source metadata this test was created from
     /// </summary>
-    public required TestMetadata Metadata { get; init; }
+    public virtual TestMetadata Metadata { get; init; } = null!;
 
     /// <summary>
     /// Arguments to pass to the test method (empty for parameterless tests)
@@ -33,14 +33,14 @@ public sealed class ExecutableTest
     public object?[] ClassArguments { get; init; } = [];
 
     /// <summary>
-    /// Factory to create the test class instance
+    /// Creates the test class instance
     /// </summary>
-    public required Func<Task<object>> CreateInstance { get; init; }
+    public abstract Task<object> CreateInstanceAsync();
 
     /// <summary>
-    /// Invoker for the test method
+    /// Invokes the test method with the given instance and cancellation token
     /// </summary>
-    public required Func<object, Task> InvokeTest { get; init; }
+    public abstract Task InvokeTestAsync(object instance, CancellationToken cancellationToken);
 
     /// <summary>
     /// Property values to inject after instance creation
@@ -48,9 +48,14 @@ public sealed class ExecutableTest
     public Dictionary<string, object?> PropertyValues { get; init; } = new();
 
     /// <summary>
-    /// Lifecycle hooks for this test
+    /// Hooks to run before the test method executes
     /// </summary>
-    public required TestLifecycleHooks Hooks { get; init; }
+    public required Func<TestContext, CancellationToken, Task>[] BeforeTestHooks { get; init; }
+    
+    /// <summary>
+    /// Hooks to run after the test method executes
+    /// </summary>
+    public required Func<TestContext, CancellationToken, Task>[] AfterTestHooks { get; init; }
 
     /// <summary>
     /// Test execution context

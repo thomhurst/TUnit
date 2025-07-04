@@ -68,37 +68,8 @@ public class DelegateGenerationTests
         await Assert.That(invoker).IsNull();
     }
 
-    [Test]
-    public async Task HookDelegateStorage_CanRegisterHook()
-    {
-        // Arrange
-        const string key = "test_hook";
-        Func<object?, HookContext, Task> hook = async (instance, context) => 
-        {
-            await Task.CompletedTask;
-        };
-
-        // Act
-        HookDelegateStorage.RegisterHook(key, hook);
-        var retrievedHook = HookDelegateStorage.GetHook(key);
-
-        // Assert
-        await Assert.That(retrievedHook).IsNotNull();
-        await Assert.That(retrievedHook).IsEqualTo(hook);
-    }
-
-    [Test]
-    public async Task HookDelegateStorage_GetNonExistentHook_ReturnsNull()
-    {
-        // Arrange
-        const string key = "non_existent_hook";
-
-        // Act
-        var hook = HookDelegateStorage.GetHook(key);
-
-        // Assert
-        await Assert.That(hook).IsNull();
-    }
+    // HookDelegateStorage tests removed - HookDelegateStorage is no longer used
+    // Hooks now use direct context passing with proper types
 
     // DataSourceFactoryRegistry tests removed - registry pattern eliminated in favor of inline delegates
     /*

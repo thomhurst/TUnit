@@ -3,11 +3,12 @@ using TUnit.Core;
 namespace TUnit.Engine;
 
 /// <summary>
-/// Interface for invoking hook methods without reflection
+/// Interface for invoking hook methods without reflection - deprecated
 /// </summary>
+[Obsolete("IHookInvoker is no longer needed. Hooks are invoked directly with proper context types.")]
 public interface IHookInvoker
 {
-    Task InvokeHook(HookMetadata hook, HookContext context);
-    Task InvokeHookAsync(string hookKey, object? instance, HookContext context);
-    Task InvokeHookAsync(object? instance, Func<object?, HookContext, Task> hookInvoker, HookContext context);
+    Task InvokeHook(HookMetadata hook, object context);
+    Task InvokeHookAsync(string hookKey, object? instance, object context);
+    Task InvokeHookAsync(object? instance, Func<object?, object, Task> hookInvoker, object context);
 }

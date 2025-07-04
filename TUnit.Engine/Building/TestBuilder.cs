@@ -29,27 +29,24 @@ public sealed class TestBuilder : ITestBuilder
         // Create instance factory
         var createInstance = CreateInstanceFactory(metadata, expandedData);
 
-        // Create test invoker
-        var invokeTest = CreateTestInvoker(metadata, expandedData);
+        // Create test context first since it's required
+        var context = await CreateTestContextAsync(testId, displayName, metadata, createInstance);
 
         // Create hooks
-        var hooks = CreateHooks(metadata);
-
-        // Create test context first since it's required
-        var context = await CreateTestContextAsync(testId, displayName, metadata, createInstance, invokeTest, hooks);
+        var beforeTestHooks = CreateTestHooks(metadata.Hooks.BeforeTest);
+        var afterTestHooks = CreateTestHooks(metadata.Hooks.AfterTest);
 
         // Build the executable test with all required properties
-        var executableTest = new ExecutableTest
+        var executableTest = new DynamicExecutableTest(createInstance, metadata.TestInvoker!)
         {
             TestId = testId,
             DisplayName = displayName,
             Metadata = metadata,
-            Arguments = [], // Will be populated by factory
-            ClassArguments = [], // Will be populated by factory
-            CreateInstance = createInstance,
-            InvokeTest = invokeTest,
+            Arguments = expandedData.MethodArgumentsFactory(),
+            ClassArguments = expandedData.ClassArgumentsFactory(),
             PropertyValues = new Dictionary<string, object?>(), // Will be populated by factory
-            Hooks = hooks,
+            BeforeTestHooks = beforeTestHooks,
+            AfterTestHooks = afterTestHooks,
             Context = context
         };
 
@@ -74,21 +71,6 @@ public sealed class TestBuilder : ITestBuilder
         };
     }
 
-    private Func<object, Task> CreateTestInvoker(TestMetadata metadata, ExpandedTestData expandedData)
-    {
-        if (metadata.TestInvoker == null)
-        {
-            throw new InvalidOperationException(
-                $"No test invoker provided for test {metadata.TestName}. " +
-                "Ensure tests are either source-generated or discovered via reflection with proper invoker initialization.");
-        }
-
-        return async instance =>
-        {
-            var methodArgs = expandedData.MethodArgumentsFactory();
-            await metadata.TestInvoker(instance, methodArgs);
-        };
-    }
 
     private async Task InjectPropertiesAsync(object instance, Dictionary<string, Func<object?>> propertyFactories)
     {
@@ -99,37 +81,11 @@ public sealed class TestBuilder : ITestBuilder
         await Task.CompletedTask;
     }
 
-    private TestLifecycleHooks CreateHooks(TestMetadata metadata)
+    private Func<TestContext, CancellationToken, Task>[] CreateTestHooks(HookMetadata[] hooks)
     {
-        return new TestLifecycleHooks
-        {
-            BeforeClass = CreateStaticHookInvokers(metadata.Hooks.BeforeClass),
-            AfterClass = CreateInstanceHookInvokers(metadata.Hooks.AfterClass),
-            BeforeTest = CreateInstanceHookInvokers(metadata.Hooks.BeforeTest),
-            AfterTest = CreateInstanceHookInvokers(metadata.Hooks.AfterTest)
-        };
-    }
-
-    private Func<HookContext, Task>[] CreateStaticHookInvokers(HookMetadata[] hooks)
-    {
-        return hooks.Select(h => new Func<HookContext, Task>(async context =>
-        {
-            if (h.Invoker != null)
-            {
-                await h.Invoker(null, context);
-            }
-        })).ToArray();
-    }
-
-    private Func<object, HookContext, Task>[] CreateInstanceHookInvokers(HookMetadata[] hooks)
-    {
-        return hooks.Select(h => new Func<object, HookContext, Task>(async (instance, context) =>
-        {
-            if (h.Invoker != null)
-            {
-                await h.Invoker(instance, context);
-            }
-        })).ToArray();
+        // For now, return empty array since hooks need to be invoked through the proper hook system
+        // The actual hook execution will be handled by the hook sources registered with the engine
+        return Array.Empty<Func<TestContext, CancellationToken, Task>>();
     }
 
     private static string GenerateTestId(TestMetadata metadata, int[] dataSourceIndices)
@@ -158,7 +114,7 @@ public sealed class TestBuilder : ITestBuilder
     }
 
     private async Task<TestContext> CreateTestContextAsync(string testId, string displayName, TestMetadata metadata, 
-        Func<Task<object>> createInstance, Func<object, Task> invokeTest, TestLifecycleHooks hooks)
+        Func<Task<object>> createInstance)
     {
         // Create test details
         var testDetails = new TestDetails

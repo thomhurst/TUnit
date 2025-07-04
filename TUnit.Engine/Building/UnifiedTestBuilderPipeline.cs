@@ -100,30 +100,15 @@ public sealed class UnifiedTestBuilderPipeline
             TestDetails = testDetails
         };
 
-        return new ExecutableTest
+        return new FailedExecutableTest(exception)
         {
             TestId = testId,
             DisplayName = displayName,
             Metadata = metadata,
             Arguments = [],
             ClassArguments = [],
-            // Create instance that throws the exception
-            CreateInstance = () => throw new InvalidOperationException(
-                $"Failed to expand data source for test '{displayName}': {exception.Message}", exception),
-            // Test method that throws the exception
-            InvokeTest = instance => throw new InvalidOperationException(
-                $"Failed to expand data source for test '{displayName}': {exception.Message}", exception),
-            Hooks = new TestLifecycleHooks
-            {
-                BeforeClass = [
-                ],
-                AfterClass = [
-                ],
-                BeforeTest = [
-                ],
-                AfterTest = [
-                ]
-            },
+            BeforeTestHooks = [],
+            AfterTestHooks = [],
             Context = context,
             State = TestState.Failed,
             Result = new TestResult
@@ -222,7 +207,6 @@ public static class UnifiedTestBuilderPipelineFactory
     /// </summary>
     public static UnifiedTestBuilderPipeline CreateAotPipeline(
         ITestInvoker testInvoker,
-        IHookInvoker hookInvoker,
         IServiceProvider? serviceProvider = null)
     {
         return CreatePipeline(TestExecutionMode.SourceGeneration, serviceProvider);
@@ -234,7 +218,6 @@ public static class UnifiedTestBuilderPipelineFactory
     public static UnifiedTestBuilderPipeline CreateReflectionPipeline(
         Assembly[] assemblies,
         ITestInvoker testInvoker,
-        IHookInvoker hookInvoker,
         IServiceProvider? serviceProvider = null)
     {
         return CreatePipeline(TestExecutionMode.Reflection, serviceProvider, assemblies);

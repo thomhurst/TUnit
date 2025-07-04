@@ -171,8 +171,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     {
         // Create unified pipeline for AOT mode
         var pipeline = UnifiedTestBuilderPipelineFactory.CreateAotPipeline(
-            new TestInvoker(),
-            new HookInvoker());
+            new TestInvoker());
 
         var discoveryService = new TestDiscoveryServiceV2(pipeline);
         var tests = await discoveryService.DiscoverTests();

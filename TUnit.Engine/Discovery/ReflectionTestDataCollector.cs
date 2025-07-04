@@ -772,23 +772,14 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             _ => HookLevel.Test
         };
         
-        var invoker = CreateHookInvoker(method);
-        if (invoker == null)
-            return null;
-            
-        return new HookMetadata
-        {
-            Name = hookName,
-            Level = level,
-            Order = hookAttr.Order,
-            Invoker = invoker,
-            DeclaringType = method.DeclaringType,
-            IsStatic = method.IsStatic,
-            IsAsync = IsAsyncMethod(method),
-            ReturnsValueTask = method.ReturnType == typeof(ValueTask)
-        };
+        // Hook invokers are no longer supported in reflection mode
+        // Hooks require source-generated context-specific delegates
+        return null;
     }
     
+    // CreateHookInvoker removed - hooks are no longer supported in reflection mode
+    // Hooks require source-generated context-specific delegates
+    /*
     [UnconditionalSuppressMessage("Trimming", "IL2026:Using member 'System.Linq.Expressions.Expression.Property(Expression, String)' which has 'RequiresUnreferencedCodeAttribute' can break functionality when trimming application code", Justification = "Reflection mode cannot support trimming")]
     private static Func<object?, HookContext, Task>? CreateHookInvoker(MethodInfo method)
     {
@@ -863,6 +854,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             
         return lambda.Compile();
     }
+    */
     
     private static bool IsAsyncMethod(MethodInfo method)
     {

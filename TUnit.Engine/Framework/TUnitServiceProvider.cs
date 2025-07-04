@@ -63,7 +63,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create test services using unified architecture
         var testInvoker = Register<ITestInvoker>(new TestInvoker());
-        var hookInvoker = Register<IHookInvoker>(new HookInvoker());
 
         // Detect execution mode from command line or environment
         var executionMode = GetExecutionMode(CommandLineOptions);

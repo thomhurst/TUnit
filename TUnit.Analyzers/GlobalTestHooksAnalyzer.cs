@@ -70,19 +70,19 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             IsGlobalHook(context, attributeData, out var hookLevel);
 
             if (hookLevel == HookLevel.Test
-                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.TestContext.WithGlobalPrefix))
+                && !HasValidHookParameters(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.TestContext.WithGlobalPrefix))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
             }
 
             else if (hookLevel == HookLevel.Class
-                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.ClassHookContext.WithGlobalPrefix))
+                && !HasValidHookParameters(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.ClassHookContext.WithGlobalPrefix))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleClassHookContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
             }
 
             else if (hookLevel == HookLevel.Assembly
-                && !HasSingleParameter(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext.WithGlobalPrefix)
+                && !HasValidHookParameters(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext.WithGlobalPrefix)
                 && attributeData.IsEveryHook(context.Compilation, out _, out _, out _))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleAssemblyHookContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
@@ -108,9 +108,38 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         return x.IsEveryHook(context.Compilation, out _, out hookLevel, out _);
     }
 
-    private static bool HasSingleParameter(IMethodSymbol methodSymbol, string parameterType)
+    private static bool HasValidHookParameters(IMethodSymbol methodSymbol, string contextType)
     {
-        return methodSymbol.Parameters.WithoutCancellationTokenParameter().Count() == 1
-               && methodSymbol.Parameters[0].Type.GloballyQualifiedNonGeneric() == parameterType;
+        var parameters = methodSymbol.Parameters;
+        
+        // No parameters is valid
+        if (parameters.Length == 0)
+        {
+            return true;
+        }
+        
+        // Single CancellationToken is valid
+        if (parameters.Length == 1 && 
+            parameters[0].Type.GloballyQualifiedNonGeneric() == "global::System.Threading.CancellationToken")
+        {
+            return true;
+        }
+        
+        // Single context parameter is valid
+        if (parameters.Length == 1 && 
+            parameters[0].Type.GloballyQualifiedNonGeneric() == contextType)
+        {
+            return true;
+        }
+        
+        // Context + CancellationToken is valid
+        if (parameters.Length == 2 && 
+            parameters[0].Type.GloballyQualifiedNonGeneric() == contextType &&
+            parameters[1].Type.GloballyQualifiedNonGeneric() == "global::System.Threading.CancellationToken")
+        {
+            return true;
+        }
+        
+        return false;
     }
 }

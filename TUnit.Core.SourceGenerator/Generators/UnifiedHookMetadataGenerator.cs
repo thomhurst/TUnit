@@ -179,8 +179,12 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        // Validate method signature
-        if (!IsValidHookMethod(methodSymbol))
+        // Get hook type from attribute first
+        var hookAttribute = context.Attributes[0];
+        var hookType = GetHookType(hookAttribute);
+        
+        // Validate method signature with hook type
+        if (!IsValidHookMethod(methodSymbol, hookType))
         {
             return null;
         }
@@ -190,9 +194,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         var filePath = location.SourceTree?.FilePath ?? "";
         var lineNumber = location.GetLineSpan().StartLinePosition.Line + 1;
 
-        // Get hook type from attribute
-        var hookAttribute = context.Attributes[0];
-        var hookType = GetHookType(hookAttribute);
+        // Get order from attribute
         var order = GetHookOrder(hookAttribute);
 
         return new HookMethodMetadata
@@ -209,7 +211,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         };
     }
 
-    private static bool IsValidHookMethod(IMethodSymbol method)
+    private static bool IsValidHookMethod(IMethodSymbol method, string hookType)
     {
         // Check return type - must be void, Task, or ValueTask
         var returnType = method.ReturnType;
@@ -220,19 +222,59 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             return false;
         }
 
-        // Check parameters - must be none or single HookContext parameter
-        if (method.Parameters.Length > 1)
+        // Check parameters - can be:
+        // 1. No parameters
+        // 2. Single context parameter
+        // 3. Single CancellationToken parameter
+        // 4. Context parameter followed by CancellationToken parameter
+        if (method.Parameters.Length > 2)
         {
             return false;
         }
 
-        if (method.Parameters.Length == 1)
+        if (method.Parameters.Length >= 1)
         {
-            var paramType = method.Parameters[0].Type;
-            if (paramType.Name != "HookContext" || 
-                paramType.ContainingNamespace?.ToString() != "TUnit.Core")
+            var firstParam = method.Parameters[0];
+            var firstParamType = firstParam.Type;
+            var firstParamTypeName = firstParamType.Name;
+            var firstParamNamespace = firstParamType.ContainingNamespace?.ToString();
+
+            // Check if first parameter is CancellationToken
+            if (firstParamTypeName == "CancellationToken" && firstParamNamespace == "System.Threading")
+            {
+                // If only parameter, it's valid
+                return method.Parameters.Length == 1;
+            }
+
+            // Otherwise, first parameter should be the appropriate context type
+            var expectedContextType = hookType switch
+            {
+                "Test" => "TestContext",
+                "Class" => "ClassHookContext",
+                "Assembly" => "AssemblyHookContext",
+                "TestSession" => "TestSessionContext",
+                "TestDiscovery" => "TestDiscoveryContext",
+                _ => null
+            };
+
+            // For BeforeTestDiscovery, we need a special context type
+            if (hookType == "TestDiscovery" && method.Name.Contains("Before"))
+            {
+                expectedContextType = "BeforeTestDiscoveryContext";
+            }
+
+            if (expectedContextType == null || firstParamNamespace != "TUnit.Core" || firstParamTypeName != expectedContextType)
             {
                 return false;
+            }
+
+            // If there's a second parameter, it must be CancellationToken
+            if (method.Parameters.Length == 2)
+            {
+                var secondParam = method.Parameters[1];
+                var secondParamType = secondParam.Type;
+                return secondParamType.Name == "CancellationToken" && 
+                       secondParamType.ContainingNamespace?.ToString() == "System.Threading";
             }
         }
 
@@ -429,16 +471,8 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         // Generate delegate registration method
         using (writer.BeginBlock("private static void RegisterAllHookDelegates()"))
         {
-            // Register delegates only once per unique method
-            var uniqueMethods = hooks
-                .GroupBy(h => h.MethodSymbol, SymbolEqualityComparer.Default)
-                .Select(g => g.First());
-                
-            foreach (var hook in uniqueMethods)
-            {
-                var delegateKey = GetDelegateKey(hook);
-                writer.AppendLine($"HookDelegateStorage.RegisterHook(\"{delegateKey}\", {delegateKey}_Delegate);");
-            }
+            // No longer registering delegates - using direct context passing
+            writer.AppendLine("// Hook delegates are no longer used - direct context passing is used instead");
         }
 
         writer.AppendLine();
@@ -476,6 +510,14 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             foreach (var typeGroup in hooksByType)
             {
                 var typeSymbol = (INamedTypeSymbol)typeGroup.Key;
+                
+                // Skip generic types with unresolved type parameters
+                if (HasUnresolvedTypeParameters(typeSymbol))
+                {
+                    writer.AppendLine($"// Skipping type registration for generic type: {typeSymbol.ToDisplayString()}");
+                    continue;
+                }
+                
                 var typeDisplay = GetTypeDisplayString(typeSymbol);
                 
                 // Group by static vs instance
@@ -564,6 +606,13 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateHookInitialization(CodeWriter writer, HookMethodMetadata hook, string fieldName)
     {
+        // Skip hooks from generic types with unresolved type parameters
+        if (HasUnresolvedTypeParameters(hook.TypeSymbol))
+        {
+            writer.AppendLine($"// Skipping hook from generic type: {hook.TypeSymbol.ToDisplayString()}");
+            return;
+        }
+        
         var isStatic = hook.MethodSymbol.IsStatic;
         var hookClass = GetHookClass(hook.HookType, hook.HookKind, isStatic);
         var delegateKey = GetDelegateKey(hook);
@@ -811,52 +860,46 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateHookDelegate(CodeWriter writer, HookMethodMetadata hook)
     {
+        // Skip hooks from generic types with unresolved type parameters
+        if (HasUnresolvedTypeParameters(hook.TypeSymbol))
+        {
+            writer.AppendLine($"// Skipping delegate for hook from generic type: {hook.TypeSymbol.ToDisplayString()}");
+            return;
+        }
+        
         var delegateKey = GetDelegateKey(hook);
         
         // For generic types, we need to handle them specially to avoid compilation errors
         var className = GetTypeDisplayString(hook.TypeSymbol);
         var methodName = hook.MethodSymbol.Name;
         var isStatic = hook.MethodSymbol.IsStatic;
-        var hasParameter = hook.MethodSymbol.Parameters.Length > 0;
         var isAsync = IsAsyncMethod(hook.MethodSymbol);
-
-        // Generate the delegate method
-        using (writer.BeginBlock($"private static async Task {delegateKey}_Delegate(object? instance, HookContext context)"))
+        
+        // Analyze parameters
+        var paramCount = hook.MethodSymbol.Parameters.Length;
+        var hasCancellationTokenOnly = false;
+        var hasContextOnly = false;
+        var hasContextAndCancellationToken = false;
+        
+        if (paramCount == 1)
         {
-            if (!isStatic)
+            var paramType = hook.MethodSymbol.Parameters[0].Type;
+            if (paramType.Name == "CancellationToken" && paramType.ContainingNamespace?.ToString() == "System.Threading")
             {
-                writer.AppendLine($"var typedInstance = ({className})instance!;");
-            }
-
-            // Build method call
-            var methodCall = isStatic 
-                ? $"{className}.{methodName}" 
-                : $"typedInstance.{methodName}";
-
-            if (hasParameter)
-            {
-                methodCall += "(context)";
+                hasCancellationTokenOnly = true;
             }
             else
             {
-                methodCall += "()";
-            }
-
-            // Handle different return types using AsyncConvert
-            if (hook.MethodSymbol.ReturnType.SpecialType == SpecialType.System_Void)
-            {
-                writer.AppendLine($"{methodCall};");
-            }
-            else if (hook.MethodSymbol.ReturnType.Name == "Task")
-            {
-                writer.AppendLine($"await {methodCall};");
-            }
-            else if (hook.MethodSymbol.ReturnType.Name == "ValueTask")
-            {
-                writer.AppendLine($"await {methodCall};");
+                hasContextOnly = true;
             }
         }
+        else if (paramCount == 2)
+        {
+            // We already validated in IsValidHookMethod that this is Context + CancellationToken
+            hasContextAndCancellationToken = true;
+        }
 
+        // Skip delegate generation - we'll use direct context passing
         writer.AppendLine();
 
         // Generate the Body delegate for hook initialization
@@ -877,14 +920,24 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                     ? $"{className}.{methodName}"
                     : $"typedInstance.{methodName}";
 
-                if (hasParameter)
+                if (hasCancellationTokenOnly)
                 {
-                    // For hooks that take HookContext, we need to create one
-                    var contextParam = "new HookContext(context, context.TestDetails.TestClass.Type, instance)";
-                    methodCall += $"({contextParam})";
+                    // Pass only the cancellation token
+                    methodCall += "(cancellationToken)";
+                }
+                else if (hasContextOnly)
+                {
+                    // Pass only the context
+                    methodCall += "(context)";
+                }
+                else if (hasContextAndCancellationToken)
+                {
+                    // Pass both context and cancellation token
+                    methodCall += "(context, cancellationToken)";
                 }
                 else
                 {
+                    // No parameters
                     methodCall += "()";
                 }
 
@@ -900,23 +953,24 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                 // Build method call
                 var methodCall = $"{className}.{methodName}";
 
-                if (hasParameter)
+                if (hasCancellationTokenOnly)
                 {
-                    // For hooks that take HookContext, we need to create one
-                    // The actual context depends on the hook type
-                    var contextParam = hook.HookType switch
-                    {
-                        "Test" => "new HookContext(context, context.TestDetails.TestClass.Type, context.TestDetails.ClassInstance)",
-                        "Class" => "new HookContext(context.TestContext, context.ClassType, context.ClassInstance)",
-                        "Assembly" => "new HookContext(null!, context.Assembly.GetTypes().FirstOrDefault() ?? typeof(object), null)",
-                        "TestSession" => "new HookContext(null!, typeof(object), null)",
-                        "TestDiscovery" => "new HookContext(null!, typeof(object), null)",
-                        _ => "new HookContext(null!, typeof(object), null)"
-                    };
-                    methodCall += $"({contextParam})";
+                    // Pass only the cancellation token
+                    methodCall += "(cancellationToken)";
+                }
+                else if (hasContextOnly)
+                {
+                    // Pass only the context
+                    methodCall += "(context)";
+                }
+                else if (hasContextAndCancellationToken)
+                {
+                    // Pass both context and cancellation token
+                    methodCall += "(context, cancellationToken)";
                 }
                 else
                 {
+                    // No parameters
                     methodCall += "()";
                 }
 
@@ -962,7 +1016,9 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             .Replace("`", "_")
             .Replace("+", "_"); // Handle nested classes
             
-        return $"{safeClassName}_{hook.MethodSymbol.Name}";
+        // Include parameter count to handle overloads
+        var paramCount = hook.MethodSymbol.Parameters.Length;
+        return $"{safeClassName}_{hook.MethodSymbol.Name}_{paramCount}Params";
     }
 
     private static bool IsStaticHook(string hookType, string hookKind)
@@ -1042,15 +1098,12 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
     
     private static string GetTypeDisplayString(INamedTypeSymbol typeSymbol)
     {
-        // For generic types with type parameters, use the original definition
-        // to generate the open generic form (e.g., BaseClass<>)
-        if (typeSymbol.IsGenericType && typeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
-        {
-            // Use OriginalDefinition to get the unbound generic type
-            return typeSymbol.OriginalDefinition.ToDisplayString();
-        }
-        
         return typeSymbol.ToDisplayString();
+    }
+    
+    private static bool HasUnresolvedTypeParameters(INamedTypeSymbol typeSymbol)
+    {
+        return typeSymbol.IsGenericType && typeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
     }
 }
 

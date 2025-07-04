@@ -25,11 +25,7 @@ public static class TestDelegateStorage
     /// </summary>
     private static readonly Dictionary<string, Action<object, object?>> PropertySetters = new();
     
-    /// <summary>
-    /// Hook invokers indexed by class.method name
-    /// </summary>
-    private static readonly Dictionary<string, Func<object?, HookContext, Task>> HookInvokers = new();
-    
+    // Hook invokers removed - hooks now use direct context passing
     // Data source factories removed - now using inline delegates in TestDataSource objects
     
     /// <summary>
@@ -71,14 +67,7 @@ public static class TestDelegateStorage
         PropertySetters[key] = setter;
     }
     
-    /// <summary>
-    /// Register a hook invoker
-    /// </summary>
-    public static void RegisterHookInvoker(string key, Func<object?, HookContext, Task> invoker)
-    {
-        HookInvokers[key] = invoker;
-    }
-    
+    // Hook invoker registration removed - hooks now use direct context passing
     // Data source factory registration removed - now using inline delegates
     
     /// <summary>
@@ -105,14 +94,7 @@ public static class TestDelegateStorage
         return PropertySetters.TryGetValue(key, out var setter) ? setter : null;
     }
     
-    /// <summary>
-    /// Get a hook invoker by key
-    /// </summary>
-    public static Func<object?, HookContext, Task>? GetHookInvoker(string key)
-    {
-        return HookInvokers.TryGetValue(key, out var invoker) ? invoker : null;
-    }
-    
+    // Hook invoker methods removed - hooks now use direct context passing
     // Data source factory methods removed - now using inline delegates
     
     /// <summary>

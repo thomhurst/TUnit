@@ -76,21 +76,18 @@ public class SingleTestExecutor : ISingleTestExecutor
     private async Task ExecuteTestWithHooksAsync(ExecutableTest test, CancellationToken cancellationToken)
     {
         // Create test instance
-        var instance = await test.CreateInstance();
+        var instance = await test.CreateInstanceAsync();
 
         // Inject property values
         await InjectPropertyValuesAsync(instance, test.PropertyValues);
 
-        // Create hook context and restore ExecutionContext
-        var hookContext = new HookContext(test.Context!, test.Metadata.TestClassType, instance);
+        // Restore ExecutionContext for AsyncLocal support
         test.Context!.RestoreExecutionContext();
 
         try
         {
-            // Execute lifecycle hooks
-            await ExecuteHooksAsync(test.Hooks.BeforeClass, hookContext, null);
-            await ExecuteHooksAsync(test.Hooks.AfterClass, hookContext, instance);
-            await ExecuteHooksAsync(test.Hooks.BeforeTest, hookContext, instance);
+            // Execute before test hooks
+            await ExecuteBeforeTestHooksAsync(test.BeforeTestHooks, test.Context!, cancellationToken);
 
             // Execute the test
             await InvokeTestWithTimeout(test, instance, cancellationToken);
@@ -106,7 +103,7 @@ public class SingleTestExecutor : ISingleTestExecutor
         finally
         {
             // Execute after test hooks (always run)
-            await ExecuteAfterTestHooksAsync(test.Hooks.AfterTest, hookContext, instance);
+            await ExecuteAfterTestHooksAsync(test.AfterTestHooks, test.Context!, cancellationToken);
         }
     }
 
@@ -117,31 +114,35 @@ public class SingleTestExecutor : ISingleTestExecutor
         await Task.CompletedTask;
     }
 
-    private async Task ExecuteHooksAsync(Func<HookContext, Task>[] hooks, HookContext context, object? instance)
+    private async Task ExecuteBeforeTestHooksAsync(Func<TestContext, CancellationToken, Task>[] hooks, TestContext context, CancellationToken cancellationToken)
     {
         foreach (var hook in hooks)
         {
-            await hook(context);
+            try
+            {
+                await hook(context, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in before test hook: {ex.Message}");
+                throw;
+            }
         }
     }
 
-    private async Task ExecuteHooksAsync(Func<object, HookContext, Task>[] hooks, HookContext context, object instance)
+    private async Task ExecuteAfterTestHooksAsync(Func<TestContext, CancellationToken, Task>[] hooks, TestContext context, CancellationToken cancellationToken)
     {
         foreach (var hook in hooks)
         {
-            await hook(instance, context);
-        }
-    }
-
-    private async Task ExecuteAfterTestHooksAsync(Func<object, HookContext, Task>[] hooks, HookContext context, object instance)
-    {
-        try
-        {
-            await ExecuteHooksAsync(hooks, context, instance);
-        }
-        catch (Exception ex)
-        {
-            await _logger.LogErrorAsync($"Error in after test hook: {ex.Message}");
+            try
+            {
+                await hook(context, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in after test hook: {ex.Message}");
+                // Don't throw for after hooks - we want to run all of them
+            }
         }
     }
 
@@ -200,7 +201,7 @@ public class SingleTestExecutor : ISingleTestExecutor
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(test.Metadata.TimeoutMs.Value);
 
-            var testTask = test.InvokeTest(instance);
+            var testTask = test.InvokeTestAsync(instance, cts.Token);
             var completedTask = await Task.WhenAny(testTask, Task.Delay(test.Metadata.TimeoutMs.Value, cts.Token));
 
             if (completedTask != testTask)
@@ -212,7 +213,7 @@ public class SingleTestExecutor : ISingleTestExecutor
         }
         else
         {
-            await test.InvokeTest(instance);
+            await test.InvokeTestAsync(instance, cancellationToken);
         }
     }
 }
