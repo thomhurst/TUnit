@@ -6,7 +6,7 @@ namespace TUnit.Core.SourceGenerator.Models;
 /// Context used when building individual test definitions.
 /// This is a subset of TestGenerationContext focused on what's needed for a single test.
 /// </summary>
-internal class TestDefinitionContext
+public class TestDefinitionContext
 {
     public required TestMetadataGenerationContext GenerationContext { get; init; }
     public required AttributeData? ClassDataAttribute { get; init; }

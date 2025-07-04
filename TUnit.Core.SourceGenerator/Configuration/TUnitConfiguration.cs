@@ -8,13 +8,13 @@ namespace TUnit.Core.SourceGenerator.Configuration;
 /// <summary>
 /// Simplified configuration for TUnit source generation
 /// </summary>
-internal class TUnitConfiguration
+public class TUnitConfiguration
 {
     /// <summary>
     /// Enable verbose diagnostics during source generation
     /// </summary>
     public bool EnableVerboseDiagnostics { get; set; } = false;
-    
+
     // Hardcoded optimal defaults (no longer configurable):
     // - No generic depth limits (unlimited)
     // - AOT mode enabled by default (with runtime reflection override via --reflection flag)
@@ -22,41 +22,41 @@ internal class TUnitConfiguration
     // - ValueTask support always enabled
     // - No limits on generic instantiations
     // - Auto generic discovery always enabled
-    
+
     /// <summary>
     /// Creates simplified configuration from analyzer options
     /// </summary>
     public static TUnitConfiguration Create(AnalyzerConfigOptions options)
     {
         var config = new TUnitConfiguration();
-        
+
         // Only read verbose diagnostics setting (all other settings are hardcoded for optimal defaults)
-        if (options.TryGetValue("tunit.enable_verbose_diagnostics", out var verbose) && 
+        if (options.TryGetValue("tunit.enable_verbose_diagnostics", out var verbose) &&
             bool.TryParse(verbose, out var enableVerbose))
         {
             config.EnableVerboseDiagnostics = enableVerbose;
         }
-        
+
         return config;
     }
-    
+
     /// <summary>
     /// Creates simplified configuration from MSBuild properties
     /// </summary>
     public static TUnitConfiguration Create(Dictionary<string, string> msbuildProperties)
     {
         var config = new TUnitConfiguration();
-        
+
         // Only read verbose diagnostics setting (all other settings are hardcoded for optimal defaults)
-        if (msbuildProperties.TryGetValue("TUnitEnableVerboseDiagnostics", out var verbose) && 
+        if (msbuildProperties.TryGetValue("TUnitEnableVerboseDiagnostics", out var verbose) &&
             bool.TryParse(verbose, out var enableVerbose))
         {
             config.EnableVerboseDiagnostics = enableVerbose;
         }
-        
+
         return config;
     }
-    
+
     /// <summary>
     /// Gets hardcoded optimal values for framework features (no longer configurable)
     /// </summary>

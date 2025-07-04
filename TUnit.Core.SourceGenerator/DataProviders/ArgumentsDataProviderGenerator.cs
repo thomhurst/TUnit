@@ -9,7 +9,7 @@ namespace TUnit.Core.SourceGenerator.DataProviders;
 /// <summary>
 /// Generates data providers for ArgumentsAttribute
 /// </summary>
-internal class ArgumentsDataProviderGenerator : IDataProviderGenerator
+public class ArgumentsDataProviderGenerator : IDataProviderGenerator
 {
     public bool CanGenerate(AttributeData attribute)
     {

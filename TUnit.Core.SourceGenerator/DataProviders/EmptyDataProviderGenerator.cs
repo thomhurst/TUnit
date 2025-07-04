@@ -6,7 +6,7 @@ namespace TUnit.Core.SourceGenerator.DataProviders;
 /// <summary>
 /// Default generator that creates an empty data provider
 /// </summary>
-internal class EmptyDataProviderGenerator : IDataProviderGenerator
+public class EmptyDataProviderGenerator : IDataProviderGenerator
 {
     public bool CanGenerate(AttributeData attribute)
     {

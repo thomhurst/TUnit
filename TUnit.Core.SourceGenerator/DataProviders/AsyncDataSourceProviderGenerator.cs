@@ -8,7 +8,7 @@ namespace TUnit.Core.SourceGenerator.DataProviders;
 /// <summary>
 /// Generates data providers for attributes inheriting from AsyncDataSourceGeneratorAttribute
 /// </summary>
-internal class AsyncDataSourceProviderGenerator : IDataProviderGenerator
+public class AsyncDataSourceProviderGenerator : IDataProviderGenerator
 {
     public bool CanGenerate(AttributeData attribute)
     {

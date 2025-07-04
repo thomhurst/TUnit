@@ -11,7 +11,7 @@ namespace TUnit.Core.SourceGenerator.Generators;
 /// <summary>
 /// Responsible for generating data source factories and registrations
 /// </summary>
-internal sealed class DataSourceGenerator
+public sealed class DataSourceGenerator
 {
     /// <summary>
     /// Generates data source factory registrations
@@ -20,7 +20,7 @@ internal sealed class DataSourceGenerator
     {
         // Data source registrations are no longer needed - using inline delegates instead
         // var dataSources = ExtractAllDataSources(testMethods);
-        // 
+        //
         // foreach (var dataSource in dataSources)
         // {
         //     GenerateDataSourceFactory(writer, dataSource);
@@ -35,7 +35,7 @@ internal sealed class DataSourceGenerator
         var dataSources = ExtractAllDataSources(testMethods)
             .Where(ds => ds.IsAsync && ds.MethodSymbol != null)
             .ToList();
-        
+
         foreach (var dataSource in dataSources)
         {
             var methodSymbol = dataSource.MethodSymbol!;
@@ -43,7 +43,7 @@ internal sealed class DataSourceGenerator
             var hasCancellationToken = methodSymbol.Parameters.Any(p => p.Type.Name == "CancellationToken");
             var methodCall = hasCancellationToken ? $"{className}.{methodSymbol.Name}(ct)" : $"{className}.{methodSymbol.Name}()";
             var methodName = $"AsyncDataSourceWrapper_{SafeMethodName(methodSymbol)}";
-            
+
             GenerateAsyncDataSourceWrapper(writer, dataSource, methodName, methodCall);
         }
     }
@@ -54,7 +54,7 @@ internal sealed class DataSourceGenerator
     public void GenerateDataSourceMetadata(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var dataSources = ExtractDataSources(testInfo);
-        
+
         if (!dataSources.Any())
         {
             writer.AppendLine("DataSources = Array.Empty<TestDataSource>(),");
@@ -80,7 +80,7 @@ internal sealed class DataSourceGenerator
     public void GenerateClassDataSourceMetadata(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var classDataSources = ExtractClassDataSources(testInfo);
-        
+
         if (!classDataSources.Any())
         {
             writer.AppendLine("ClassDataSources = Array.Empty<TestDataSource>(),");
@@ -123,7 +123,7 @@ internal sealed class DataSourceGenerator
         var methodDataSources = testInfo.MethodSymbol.GetAttributes()
             .Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute")
             .Select(a => ExtractMethodDataSource(a, testInfo));
-        
+
         dataSources.AddRange(methodDataSources.Where(ds => ds != null)!);
 
         // Property data sources
@@ -131,7 +131,7 @@ internal sealed class DataSourceGenerator
             .OfType<IPropertySymbol>()
             .Where(p => p.GetAttributes().Any(a => a.AttributeClass?.Name == "DataSourceForAttribute"))
             .Select(p => ExtractPropertyDataSource(p, testInfo));
-        
+
         dataSources.AddRange(propertyDataSources.Where(ds => ds != null)!);
 
         return dataSources;
@@ -143,7 +143,7 @@ internal sealed class DataSourceGenerator
     private IEnumerable<DataSourceInfo> ExtractClassDataSources(TestMethodMetadata testInfo)
     {
         var dataSources = new List<DataSourceInfo>();
-        
+
         // Get all class-level attributes
         var classAttributes = testInfo.TypeSymbol.GetAttributes()
             .Where(a => IsClassDataSourceAttribute(a))
@@ -216,7 +216,7 @@ internal sealed class DataSourceGenerator
     private bool IsAsyncDataSourceAttribute(INamedTypeSymbol attributeClass)
     {
         // Check if it implements IAsyncDataSourceGeneratorAttribute
-        if (attributeClass.AllInterfaces.Any(i => 
+        if (attributeClass.AllInterfaces.Any(i =>
             i.ToDisplayString() == "TUnit.Core.IAsyncDataSourceGeneratorAttribute"))
             return true;
 
@@ -242,7 +242,7 @@ internal sealed class DataSourceGenerator
     private bool IsAsyncDataSourceGeneratorAttributeType(INamedTypeSymbol attributeClass)
     {
         // Check if it implements IAsyncDataSourceGeneratorAttribute
-        if (attributeClass.AllInterfaces.Any(i => 
+        if (attributeClass.AllInterfaces.Any(i =>
             i.ToDisplayString() == "TUnit.Core.IAsyncDataSourceGeneratorAttribute"))
             return true;
 
@@ -282,9 +282,9 @@ internal sealed class DataSourceGenerator
         var argumentsValue = attribute.NamedArguments
             .FirstOrDefault(na => na.Key == "Arguments")
             .Value;
-            
-        var methodArguments = argumentsValue.Kind == TypedConstantKind.Array 
-            ? argumentsValue.Values 
+
+        var methodArguments = argumentsValue.Kind == TypedConstantKind.Array
+            ? argumentsValue.Values
             : default(ImmutableArray<TypedConstant>);
 
         return new DataSourceInfo
@@ -314,12 +314,12 @@ internal sealed class DataSourceGenerator
         {
             // Use unique factory method name to avoid conflicts
             var factoryMethodName = $"DataSourceFactory_{dataSource.FactoryKey.Replace(".", "_").Replace("::", "_")}";
-            
+
             // Generate factory method
             writer.AppendLine($"async IAsyncEnumerable<object?[]> {factoryMethodName}([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct)");
             writer.AppendLine("{");
             writer.Indent();
-            
+
             if (dataSource.MethodSymbol != null)
             {
                 GenerateMethodDataSourceFactory(writer, dataSource);
@@ -328,10 +328,10 @@ internal sealed class DataSourceGenerator
             {
                 GeneratePropertyDataSourceFactory(writer, dataSource);
             }
-            
+
             writer.Unindent();
             writer.AppendLine("}");
-            
+
             // Register the factory
             writer.AppendLine($"global::TUnit.Core.DataSourceFactoryStorage.RegisterFactory(\"{dataSource.FactoryKey}\", {factoryMethodName});");
         }
@@ -367,18 +367,18 @@ internal sealed class DataSourceGenerator
         {
             // For async methods, we need to generate an async enumerable
             var hasCancellationToken = methodSymbol.Parameters.Any(p => p.Type.Name == "CancellationToken");
-            var ctParam = hasCancellationToken && string.IsNullOrEmpty(methodArgs) ? "ct" : 
-                         hasCancellationToken && !string.IsNullOrEmpty(methodArgs) ? $"{methodArgs}, ct" : 
+            var ctParam = hasCancellationToken && string.IsNullOrEmpty(methodArgs) ? "ct" :
+                         hasCancellationToken && !string.IsNullOrEmpty(methodArgs) ? $"{methodArgs}, ct" :
                          methodArgs;
             var methodCall = $"{className}.{methodSymbol.Name}({ctParam})";
-            
+
             // Check if it returns IAsyncEnumerable
             if (IsAsyncEnumerable(methodSymbol.ReturnType))
             {
                 // Check if we need to convert the async enumerable to object?[]
                 var returnType = methodSymbol.ReturnType as INamedTypeSymbol;
                 var typeArg = returnType?.TypeArguments.FirstOrDefault();
-                
+
                 if (typeArg != null && !IsObjectArrayType(typeArg))
                 {
                     // Need to convert each item to object?[]
@@ -450,7 +450,7 @@ internal sealed class DataSourceGenerator
             // Check the return type and generate appropriate conversion
             var returnType = methodSymbol.ReturnType;
             var methodCall = $"{className}.{methodSymbol.Name}({methodArgs})";
-            
+
             if (IsObjectArrayEnumerable(returnType))
             {
                 // Already returns IEnumerable<object?[]>
@@ -468,7 +468,7 @@ internal sealed class DataSourceGenerator
     {
         var propertySymbol = dataSource.PropertySymbol!;
         var className = dataSource.SourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        
+
         writer.AppendLine($"return {className}.{propertySymbol.Name};");
     }
 
@@ -484,7 +484,7 @@ internal sealed class DataSourceGenerator
             // Use the same ConvertToObjectArrays pattern as method data sources
             writer.AppendLine($"new DelegateDataSource(() => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(");
             writer.Indent();
-            
+
             // Generate the raw data - single value or array of values
             if (attributeClass.IsGenericType)
             {
@@ -497,7 +497,7 @@ internal sealed class DataSourceGenerator
             {
                 // Non-generic ClassDataSourceAttribute - can take single Type or Type[] as constructor arguments
                 var constructorArgs = dataSource.AttributeData?.ConstructorArguments ?? ImmutableArray<TypedConstant>.Empty;
-                
+
                 if (constructorArgs.Length > 0)
                 {
                     if (constructorArgs[0].Kind == TypedConstantKind.Array)
@@ -506,7 +506,7 @@ internal sealed class DataSourceGenerator
                         var types = constructorArgs[0].Values;
                         writer.AppendLine("new object[] {");
                         writer.Indent();
-                        
+
                         for (int i = 0; i < types.Length; i++)
                         {
                             if (types[i].Value is INamedTypeSymbol typeSymbol)
@@ -519,7 +519,7 @@ internal sealed class DataSourceGenerator
                                     writer.AppendLine();
                             }
                         }
-                        
+
                         writer.Unindent();
                         writer.AppendLine("}");
                     }
@@ -541,7 +541,7 @@ internal sealed class DataSourceGenerator
                     writer.AppendLine("new object[0]");
                 }
             }
-            
+
             writer.Unindent();
             writer.AppendLine(")),");
         }
@@ -561,7 +561,7 @@ internal sealed class DataSourceGenerator
         if (dataSource.AttributeData?.AttributeClass?.Name == "ArgumentsAttribute")
         {
             writer.Append("new StaticTestDataSource(");
-            
+
             // The ArgumentsAttribute constructor takes params object?[] args
             // So the first constructor argument IS the array we need
             var args = dataSource.AttributeData.ConstructorArguments;
@@ -595,7 +595,7 @@ internal sealed class DataSourceGenerator
             var methodArgs = GenerateMethodArguments(dataSource);
             var className = dataSource.SourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             var methodCall = $"{className}.{dataSource.MethodSymbol.Name}({methodArgs})";
-            
+
             if (dataSource.IsAsync)
             {
                 // Check what type of async data source this is
@@ -603,14 +603,14 @@ internal sealed class DataSourceGenerator
                 {
                     // IAsyncEnumerable - check if it returns object?[] or needs conversion
                     var hasCancellationToken = dataSource.MethodSymbol.Parameters.Any(p => p.Type.Name == "CancellationToken");
-                    var ctParam = hasCancellationToken && string.IsNullOrEmpty(methodArgs) ? "ct" : 
-                                 hasCancellationToken && !string.IsNullOrEmpty(methodArgs) ? $"{methodArgs}, ct" : 
+                    var ctParam = hasCancellationToken && string.IsNullOrEmpty(methodArgs) ? "ct" :
+                                 hasCancellationToken && !string.IsNullOrEmpty(methodArgs) ? $"{methodArgs}, ct" :
                                  methodArgs;
                     var methodCallWithCt = $"{className}.{dataSource.MethodSymbol.Name}({ctParam})";
-                    
+
                     // Check if the async enumerable returns object?[]
                     var asyncEnumType = dataSource.MethodSymbol.ReturnType as INamedTypeSymbol;
-                    if (asyncEnumType != null && 
+                    if (asyncEnumType != null &&
                         asyncEnumType.TypeArguments.Length > 0 &&
                         IsObjectArrayType(asyncEnumType.TypeArguments[0]))
                     {
@@ -660,7 +660,7 @@ internal sealed class DataSourceGenerator
                     if (taskType != null && taskType.TypeArguments.Length > 0)
                     {
                         var innerType = taskType.TypeArguments[0] as INamedTypeSymbol;
-                        if (innerType != null && innerType.IsGenericType && innerType.TypeArguments.Length > 0 && 
+                        if (innerType != null && innerType.IsGenericType && innerType.TypeArguments.Length > 0 &&
                             IsObjectArrayType(innerType.TypeArguments[0]))
                         {
                             // Already returns Task<IEnumerable<object?[]>>
@@ -685,7 +685,7 @@ internal sealed class DataSourceGenerator
                     if (valueTaskType != null && valueTaskType.TypeArguments.Length > 0)
                     {
                         var innerType = valueTaskType.TypeArguments[0] as INamedTypeSymbol;
-                        if (innerType != null && innerType.IsGenericType && innerType.TypeArguments.Length > 0 && 
+                        if (innerType != null && innerType.IsGenericType && innerType.TypeArguments.Length > 0 &&
                             IsObjectArrayType(innerType.TypeArguments[0]))
                         {
                             // Already returns ValueTask<IEnumerable<object?[]>> - convert to Task
@@ -719,7 +719,7 @@ internal sealed class DataSourceGenerator
             // Generate inline delegate for property data source
             var className = dataSource.SourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             var propertyAccess = $"{className}.{dataSource.PropertySymbol.Name}";
-            
+
             if (dataSource.IsAsync)
             {
                 writer.AppendLine($"new AsyncDelegateDataSource(async (ct) => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToAsyncEnumerableInternal(global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(await {propertyAccess}), ct)),");
@@ -734,34 +734,34 @@ internal sealed class DataSourceGenerator
     private bool IsAsyncDataSource(IMethodSymbol method)
     {
         var returnType = method.ReturnType;
-        
+
         if (returnType is INamedTypeSymbol namedType)
         {
             // Check for IAsyncEnumerable<T>
             if (namedType.IsGenericType && namedType.Name == "IAsyncEnumerable")
                 return true;
-                
+
             // Check for Task<IEnumerable<T>> or ValueTask<IEnumerable<T>>
             if ((namedType.Name == "Task" || namedType.Name == "ValueTask") && namedType.IsGenericType)
             {
                 var typeArg = namedType.TypeArguments.FirstOrDefault();
-                if (typeArg is INamedTypeSymbol innerType && 
-                    innerType.IsGenericType && 
+                if (typeArg is INamedTypeSymbol innerType &&
+                    innerType.IsGenericType &&
                     innerType.Name == "IEnumerable")
                 {
                     return true;
                 }
             }
         }
-        
+
         return false;
     }
 
     private bool IsAsyncDataSource(ITypeSymbol type)
     {
         return type.Name == "IAsyncEnumerable" ||
-               (type is INamedTypeSymbol namedType && 
-                namedType.IsGenericType && 
+               (type is INamedTypeSymbol namedType &&
+                namedType.IsGenericType &&
                 namedType.Name == "IAsyncEnumerable");
     }
 
@@ -769,13 +769,13 @@ internal sealed class DataSourceGenerator
     {
         return type.ToDisplayString() == "object[]" || type.ToDisplayString() == "object?[]";
     }
-    
+
     private bool IsObjectArrayEnumerable(ITypeSymbol type)
     {
         if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
         {
             var typeName = namedType.Name;
-            if (typeName == "IEnumerable" || typeName == "IAsyncEnumerable" || 
+            if (typeName == "IEnumerable" || typeName == "IAsyncEnumerable" ||
                 typeName == "List" || typeName == "Array")
             {
                 var elementType = namedType.TypeArguments.FirstOrDefault();
@@ -798,18 +798,18 @@ internal sealed class DataSourceGenerator
     private void GenerateAsyncDataSourceWrapper(CodeWriter writer, DataSourceInfo dataSource, string methodName, string methodCall)
     {
         var methodSymbol = dataSource.MethodSymbol!;
-        
+
         writer.AppendLine($"static async IAsyncEnumerable<object?[]> {methodName}(CancellationToken ct)");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         // Handle different async return types
         if (methodSymbol.ReturnType.Name == "IAsyncEnumerable")
         {
             // Check if we need to convert the async enumerable to object?[]
             var returnType = methodSymbol.ReturnType as INamedTypeSymbol;
             var typeArg = returnType?.TypeArguments.FirstOrDefault();
-            
+
             if (typeArg != null && !IsObjectArrayType(typeArg))
             {
                 // Need to convert each item to object?[]
@@ -849,32 +849,32 @@ internal sealed class DataSourceGenerator
             writer.Unindent();
             writer.AppendLine("}");
         }
-        
+
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
     }
-    
-    
+
+
     private string GenerateMethodArguments(DataSourceInfo dataSource)
     {
         if (dataSource.MethodArguments == null || dataSource.MethodArguments.Length == 0)
             return string.Empty;
-            
+
         var args = new List<string>();
         foreach (var arg in dataSource.MethodArguments)
         {
             args.Add(FormatArgumentValue(arg));
         }
-        
+
         return string.Join(", ", args);
     }
-    
+
     private string FormatArgumentValue(TypedConstant arg)
     {
         if (arg.IsNull)
             return "null";
-            
+
         switch (arg.Kind)
         {
             case TypedConstantKind.Primitive:
@@ -885,55 +885,55 @@ internal sealed class DataSourceGenerator
                 if (arg.Type?.SpecialType == SpecialType.System_Boolean)
                     return arg.Value?.ToString()?.ToLowerInvariant() ?? "false";
                 return arg.Value?.ToString() ?? "null";
-                
+
             case TypedConstantKind.Type:
                 var type = (ITypeSymbol)arg.Value!;
                 return $"typeof({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
-                
+
             case TypedConstantKind.Array:
                 var elements = arg.Values.Select(FormatArgumentValue);
                 // For array types, we need to get the element type and add []
                 var arrayType = arg.Type as IArrayTypeSymbol;
                 var elementType = arrayType?.ElementType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object?";
                 return $"new {elementType}[] {{ {string.Join(", ", elements)} }}";
-                
+
             default:
                 return "null";
         }
     }
-    
+
     private bool IsAsyncEnumerable(ITypeSymbol type)
     {
         if (type is INamedTypeSymbol namedType)
         {
-            return namedType.Name == "IAsyncEnumerable" || 
+            return namedType.Name == "IAsyncEnumerable" ||
                    namedType.AllInterfaces.Any(i => i.Name == "IAsyncEnumerable");
         }
         return false;
     }
-    
+
     private bool IsTaskOfEnumerable(ITypeSymbol type)
     {
         if (type is INamedTypeSymbol namedType && namedType.Name == "Task" && namedType.TypeArguments.Length == 1)
         {
             var innerType = namedType.TypeArguments[0];
-            return innerType is INamedTypeSymbol innerNamed && 
+            return innerType is INamedTypeSymbol innerNamed &&
                    (innerNamed.Name == "IEnumerable" || innerNamed.AllInterfaces.Any(i => i.Name == "IEnumerable"));
         }
         return false;
     }
-    
+
     private bool IsValueTaskOfEnumerable(ITypeSymbol type)
     {
         if (type is INamedTypeSymbol namedType && namedType.Name == "ValueTask" && namedType.TypeArguments.Length == 1)
         {
             var innerType = namedType.TypeArguments[0];
-            return innerType is INamedTypeSymbol innerNamed && 
+            return innerType is INamedTypeSymbol innerNamed &&
                    (innerNamed.Name == "IEnumerable" || innerNamed.AllInterfaces.Any(i => i.Name == "IEnumerable"));
         }
         return false;
     }
-    
+
     private ITypeSymbol[] GetTupleElements(ITypeSymbol type)
     {
         if (type is INamedTypeSymbol namedType && namedType.IsTupleType)

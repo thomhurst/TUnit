@@ -65,9 +65,9 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
     private static bool IsTestMethod(SyntaxNode node)
     {
         return node is MethodDeclarationSyntax method &&
-               method.AttributeLists.Any(al => 
-                   al.Attributes.Any(a => 
-                       a.Name.ToString().EndsWith("Test") || 
+               method.AttributeLists.Any(al =>
+                   al.Attributes.Any(a =>
+                       a.Name.ToString().EndsWith("Test") ||
                        a.Name.ToString().EndsWith("TestAttribute")));
     }
 
@@ -120,7 +120,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
     {
         var methodSyntax = (MethodDeclarationSyntax)context.Node;
         var methodSymbol = context.SemanticModel.GetDeclaredSymbol(methodSyntax);
-        
+
         if (methodSymbol?.ContainingType == null)
             return null;
 
@@ -136,36 +136,36 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         // Check for open generic types (types with unbound type parameters)
         if (containingType.IsGenericType && containingType.TypeParameters.Length > 0)
             return null;
-        
+
         // Also check if any type arguments are type parameters (e.g., T)
         if (containingType is INamedTypeSymbol namedType && namedType.IsGenericType)
         {
             if (namedType.TypeArguments.Any(arg => arg.TypeKind == TypeKind.TypeParameter))
                 return null;
         }
-        
+
         // Check the entire type hierarchy for unresolved type parameters
         var currentType = containingType.BaseType;
         while (currentType != null)
         {
             if (currentType.TypeKind == TypeKind.TypeParameter)
                 return null;
-                
+
             if (currentType is INamedTypeSymbol baseNamedType && baseNamedType.IsGenericType)
             {
                 if (baseNamedType.TypeArguments.Any(arg => arg.TypeKind == TypeKind.TypeParameter))
                     return null;
             }
-            
+
             currentType = currentType.BaseType;
         }
 
         // Skip generic methods without explicit instantiation
         if (methodSymbol is IMethodSymbol method && method.IsGenericMethod)
             return null;
-            
+
         // Also skip if method has parameters with unresolved type parameters
-        if (methodSymbol is IMethodSymbol methodWithParams && 
+        if (methodSymbol is IMethodSymbol methodWithParams &&
             methodWithParams.Parameters.Any(p => DelegateGenerator.ContainsTypeParameter(p.Type)))
             return null;
 
@@ -189,10 +189,10 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             // Get all generic test methods in the class
             var namedTypeSymbol = classSymbol as INamedTypeSymbol;
             if (namedTypeSymbol == null) return null;
-            
+
             // Skip abstract classes (cannot be instantiated)
             if (namedTypeSymbol.IsAbstract) return null;
-            
+
             var genericMethods = namedTypeSymbol.GetMembers()
                 .OfType<IMethodSymbol>()
                 .Where(m => m.IsGenericMethod && HasTestAttribute(m));
@@ -212,7 +212,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
 
                     // Create a constructed generic method
                     var constructedMethod = method.Construct(typeArgs);
-                    
+
                     results.Add(new TestMethodMetadata
                     {
                         MethodSymbol = constructedMethod,
@@ -249,7 +249,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             foreach (var method in genericMethods)
             {
                 var inferredTypes = resolver.InferGenericTypesFromDataSources(method);
-                
+
                 foreach (var typeArgs in inferredTypes)
                 {
                     if (typeArgs.Length == method.TypeParameters.Length)
@@ -276,7 +276,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
                 foreach (var method in testMethods)
                 {
                     var inferredTypes = resolver.InferGenericTypesFromDataSources(method);
-                    
+
                     foreach (var typeArgs in inferredTypes)
                     {
                         if (typeArgs.Length == classSymbol.TypeParameters.Length)
@@ -316,7 +316,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             if (methodSymbol.IsGenericMethod && HasTestAttribute(methodSymbol))
             {
                 var inferredTypes = resolver.InferGenericTypesFromDataSources(methodSymbol);
-                
+
                 foreach (var typeArgs in inferredTypes)
                 {
                     if (typeArgs.Length == methodSymbol.TypeParameters.Length)
@@ -339,7 +339,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
 
     private static bool HasTestAttribute(IMethodSymbol method)
     {
-        return method.GetAttributes().Any(a => 
+        return method.GetAttributes().Any(a =>
             a.AttributeClass?.Name == "TestAttribute" ||
             a.AttributeClass?.Name == "Test");
     }
@@ -375,7 +375,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         try
         {
             var writer = new CodeWriter();
-            
+
             // Generate file header
             GenerateFileHeader(writer);
 
@@ -385,7 +385,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             var delegateGenerator = new DelegateGenerator();
             var genericTypeResolver = new GenericTypeResolver();
             var metadataGenerator = new MetadataGenerator(dataSourceGenerator);
-            
+
             // Note: Generic analysis would need to be done in a separate step
             // For now, we'll generate the registry structure without analysis
 
@@ -397,7 +397,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             writer.AppendLine();
             writer.AppendLine("public IEnumerable<TestMetadata> GetTests() => _allTests;");
             writer.AppendLine();
-            
+
             // Static constructor to initialize tests
             writer.AppendLine("static GeneratedTestSource()");
             writer.AppendLine("{");
@@ -428,7 +428,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             writer.AppendLine();
             writer.AppendLine("// Generic test registry");
             genericTypeResolver.GenerateGenericTestRegistry(writer);
-            
+
             // Generate async data source wrapper methods
             writer.AppendLine();
             writer.AppendLine("// Async data source wrapper methods");
@@ -438,7 +438,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             writer.AppendLine();
             writer.AppendLine("// Helper methods");
             GenerateHelperMethods(writer, dataSourceGenerator, testMethods);
-            
+
             // Generate factory methods for classes with required properties
             writer.AppendLine();
             writer.AppendLine("// Factory methods for classes with required properties");
@@ -453,9 +453,9 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
 
             writer.Unindent();
             writer.AppendLine("}");
-            
+
             writer.AppendLine();
-            
+
             // Generate module initializer class
             writer.AppendLine("internal static class ModuleInitializer");
             writer.AppendLine("{");
@@ -487,7 +487,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
                     isEnabledByDefault: true),
                 Location.None,
                 ex.Message);
-            
+
             context.ReportDiagnostic(diagnostic);
         }
     }
@@ -521,31 +521,31 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         // Load referenced assemblies for complete test discovery
         writer.AppendLine("// Load referenced assemblies to ensure complete test discovery");
         writer.AppendLine("LoadReferencedAssemblies();");
         writer.AppendLine();
-        
+
         // Register all generated metadata
         writer.AppendLine("// Register all generated metadata");
         writer.AppendLine("RegisterAllDelegates();");
         writer.AppendLine("RegisterAllTests();");
         writer.AppendLine();
-        
+
         // Create efficient test registry with proper equality comparers
         writer.AppendLine("// Register with the discovery service using efficient registry");
         writer.AppendLine("// Note: Registration will be handled by the test engine at runtime");
         writer.AppendLine();
-        
+
         // Register generic test registry if available
         writer.AppendLine("// Register generic test combinations if any were discovered");
         writer.AppendLine("RegisterGenericTestCombinations();");
         writer.AppendLine();
-        
+
         // Tests are now registered individually in RegisterAllTests() for better error isolation
         writer.AppendLine("// Tests are now registered individually in RegisterAllTests() for better error isolation");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine("catch (Exception ex)");
@@ -558,26 +558,26 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
-        
+
         // Generate assembly loading method
         GenerateAssemblyLoadingMethod(writer);
-        
+
         // Generate generic test registration method
         GenerateGenericTestRegistrationMethod(writer);
     }
 
     private void GenerateRegisterAllDelegates(
-        CodeWriter writer, 
+        CodeWriter writer,
         DelegateGenerator delegateGenerator,
         IEnumerable<TestMethodMetadata> testMethods)
     {
         writer.AppendLine("private static void RegisterAllDelegates()");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         delegateGenerator.GenerateDelegateRegistrations(writer, testMethods);
         // Hook registrations removed - hooks are now handled by UnifiedHookMetadataGenerator
-        
+
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
@@ -591,16 +591,16 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("private static void RegisterAllTests()");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         metadataGenerator.GenerateTestRegistrations(writer, testMethods);
-        
+
         writer.Unindent();
         writer.AppendLine("}");
     }
 
     private void GenerateHelperMethods(
         CodeWriter writer,
-        DataSourceGenerator dataSourceGenerator, 
+        DataSourceGenerator dataSourceGenerator,
         IEnumerable<TestMethodMetadata> testMethods)
     {
         // Check if we need the ConvertToSync helper
@@ -625,7 +625,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("private static IEnumerable<object?[]> ConvertToSync(Func<CancellationToken, IAsyncEnumerable<object?[]>> asyncFactory)");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine("var cts = new CancellationTokenSource();");
         writer.AppendLine("var enumerator = asyncFactory(cts.Token).GetAsyncEnumerator(cts.Token);");
         writer.AppendLine("try");
@@ -669,7 +669,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("cts.Dispose();");
         writer.Unindent();
         writer.AppendLine("}");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
     }
@@ -682,15 +682,15 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("private static void LoadReferencedAssemblies()");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine("// AOT-only mode: All test metadata is statically generated at compile-time");
         writer.AppendLine("// No runtime assembly loading or reflection required");
         writer.AppendLine("Console.WriteLine(\"TUnit: Running in AOT-only mode with compile-time test discovery\");");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine("catch (Exception ex)");
@@ -699,7 +699,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("Console.Error.WriteLine($\"Warning: Assembly loading failed: {ex.Message}\");");
         writer.Unindent();
         writer.AppendLine("}");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
     }
@@ -712,30 +712,30 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("private static void RegisterGenericTestCombinations()");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine("// Check if GenericTestRegistry exists and has tests");
         writer.AppendLine("// This will be empty if no generic tests were discovered");
         writer.AppendLine("var genericTests = GenericTestRegistry.GetAllGenericTests();");
         writer.AppendLine("if (genericTests.Any())");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine("foreach (var (typeArgs, metadata) in genericTests)");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine("_allTests.Add(metadata);");
         writer.Unindent();
         writer.AppendLine("}");
-        
+
         writer.AppendLine("Console.WriteLine($\"Registered {genericTests.Count()} generic test combinations\");");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine("catch (Exception ex)");
@@ -745,7 +745,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("Console.Error.WriteLine($\"Warning: Failed to register generic tests: {ex.Message}\");");
         writer.Unindent();
         writer.AppendLine("}");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
     }
@@ -754,7 +754,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
 /// <summary>
 /// Metadata for a test method
 /// </summary>
-internal class TestMethodMetadata
+public class TestMethodMetadata
 {
     public required IMethodSymbol MethodSymbol { get; init; }
     public required INamedTypeSymbol TypeSymbol { get; init; }

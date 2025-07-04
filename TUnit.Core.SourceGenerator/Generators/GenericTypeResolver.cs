@@ -35,7 +35,7 @@ internal sealed class GenericTypeResolver
         {
             var semanticModel = compilation.GetSemanticModel(syntaxTree);
             var root = syntaxTree.GetRoot();
-            
+
             // Find all class declarations
             foreach (var classDecl in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
             {
@@ -63,10 +63,10 @@ internal sealed class GenericTypeResolver
         {
             // Generate the registry dictionary
             GenerateRegistryDictionary(writer);
-            
+
             // Generate lookup methods
             GenerateLookupMethods(writer);
-            
+
             // Generate metadata creation methods
             GenerateMetadataCreationMethods(writer);
         }
@@ -139,7 +139,7 @@ internal sealed class GenericTypeResolver
             {
                 // Try to infer generic types from data sources
                 var inferredTypes = InferGenericTypesFromDataSources(member);
-                
+
                 foreach (var typeArgs in inferredTypes)
                 {
                     if (typeArgs.Length <= _maxGenericDepth)
@@ -152,7 +152,7 @@ internal sealed class GenericTypeResolver
             {
                 // For non-generic methods in generic classes, try to infer class type parameters
                 var inferredTypes = InferGenericTypesFromDataSources(member);
-                
+
                 foreach (var typeArgs in inferredTypes)
                 {
                     if (typeArgs.Length <= _maxGenericDepth)
@@ -273,7 +273,7 @@ internal sealed class GenericTypeResolver
 
         var typeParameters = testMethod.TypeParameters;
         var methodParameters = testMethod.Parameters;
-        
+
         // For simple cases, map argument types to generic type parameters
         var argumentTypes = new List<ITypeSymbol>();
         var constructorArgs = attribute.ConstructorArguments;
@@ -364,7 +364,7 @@ internal sealed class GenericTypeResolver
             {
                 return namedType.TupleElements.Select(e => e.Type).ToArray();
             }
-            
+
             // Handle single type T
             return new[] { elementType };
         }
@@ -413,7 +413,7 @@ internal sealed class GenericTypeResolver
 
     private bool HasTestAttribute(IMethodSymbol method)
     {
-        return method.GetAttributes().Any(a => 
+        return method.GetAttributes().Any(a =>
             a.AttributeClass?.Name == "TestAttribute" ||
             a.AttributeClass?.Name == "Test");
     }
@@ -436,7 +436,7 @@ internal sealed class GenericTypeResolver
         {
             var typeArgs = kvp.Key;
             var testInfo = kvp.Value;
-            
+
             writer.Append("{ new Type[] { ");
             writer.Append(string.Join(", ", typeArgs.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})")));
             writer.Append(" }, ");
@@ -469,12 +469,12 @@ internal sealed class GenericTypeResolver
     private void GenerateMetadataCreationMethods(CodeWriter writer)
     {
         writer.AppendLine("// Metadata creation methods for each generic instantiation");
-        
+
         foreach (var kvp in _genericTests)
         {
             var typeArgs = kvp.Key;
             var testInfo = kvp.Value;
-            
+
             GenerateMetadataCreationMethod(writer, typeArgs, testInfo);
         }
     }
@@ -483,11 +483,11 @@ internal sealed class GenericTypeResolver
     {
         var methodName = $"CreateMetadata_{SafeTypeName(typeArgs)}";
         var typeArgsDisplay = string.Join(", ", typeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
-        
+
         writer.AppendLine($"private static TestMetadata {methodName}() => new()");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine($"TestId = \"GenericTest<{typeArgsDisplay}>\",");
         writer.AppendLine($"TestName = \"GenericTest\",");
         writer.AppendLine($"TestClassType = typeof({testInfo.OriginalType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}<{typeArgsDisplay}>),");
@@ -513,7 +513,7 @@ internal sealed class GenericTypeResolver
         writer.AppendLine("},");
         writer.AppendLine($"InstanceFactory = null, // Would need generic-aware factory");
         writer.AppendLine($"TestInvoker = null, // Would need generic-aware invoker");
-        
+
         writer.Unindent();
         writer.AppendLine("};");
         writer.AppendLine();
@@ -548,7 +548,7 @@ internal sealed class GenericTypeResolver
 /// <summary>
 /// Information about a discovered generic test instantiation
 /// </summary>
-internal class GenericTestInfo
+public class GenericTestInfo
 {
     public required INamedTypeSymbol OriginalType { get; init; }
     public required ITypeSymbol[] TypeArguments { get; init; }

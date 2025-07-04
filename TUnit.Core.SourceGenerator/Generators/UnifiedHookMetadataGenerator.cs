@@ -24,7 +24,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             .ForAttributeWithMetadataName(
                 "TUnit.Core.TestAttribute",
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
-                transform: static (ctx, _) => 
+                transform: static (ctx, _) =>
                 {
                     if (ctx.TargetSymbol is IMethodSymbol methodSymbol)
                     {
@@ -89,7 +89,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                 .Where(h => h != null)
                 .Cast<HookMethodMetadata>()
                 .ToList();
-            
+
             // Discover hooks from base classes
             var allHooks = DiscoverAllHooks(directHooks, testClassesList);
             GenerateHookRegistry(context, allHooks.ToImmutableArray());
@@ -99,10 +99,10 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
     private static List<HookMethodMetadata> DiscoverAllHooks(List<HookMethodMetadata> directHooks, ImmutableArray<INamedTypeSymbol> testClasses)
     {
         // Filter out hooks from abstract generic classes
-        var validDirectHooks = directHooks.Where(h => 
-            !(h.TypeSymbol.IsAbstract && h.TypeSymbol.IsGenericType && 
+        var validDirectHooks = directHooks.Where(h =>
+            !(h.TypeSymbol.IsAbstract && h.TypeSymbol.IsGenericType &&
               h.TypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))).ToList();
-        
+
         // Just return the direct hooks - no need to walk inheritance during registration
         // Inheritance will be handled at execution time in GetHooksForType
         return validDirectHooks
@@ -110,16 +110,16 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             .Select(g => g.First())
             .ToList();
     }
-    
+
     private static AttributeData? GetHookAttribute(IMethodSymbol method)
     {
-        return method.GetAttributes().FirstOrDefault(a => 
+        return method.GetAttributes().FirstOrDefault(a =>
             a.AttributeClass?.Name == "BeforeAttribute" ||
             a.AttributeClass?.Name == "AfterAttribute" ||
             a.AttributeClass?.Name == "BeforeEveryAttribute" ||
             a.AttributeClass?.Name == "AfterEveryAttribute");
     }
-    
+
     private static string GetHookKindFromAttribute(AttributeData attribute)
     {
         return attribute.AttributeClass?.Name switch
@@ -131,22 +131,22 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             _ => "Before"
         };
     }
-    
+
     private class HookEqualityComparer : IEqualityComparer<HookMethodMetadata>
     {
         public bool Equals(HookMethodMetadata? x, HookMethodMetadata? y)
         {
             if (x == null || y == null) return x == y;
-            
+
             // Hooks are equal if they have the same method and are used by the same test class
             return SymbolEqualityComparer.Default.Equals(x.TypeSymbol, y.TypeSymbol) &&
                    SymbolEqualityComparer.Default.Equals(x.MethodSymbol, y.MethodSymbol);
         }
-        
+
         public int GetHashCode(HookMethodMetadata obj)
         {
             if (obj == null) return 0;
-            
+
             unchecked
             {
                 var hash = 17;
@@ -182,7 +182,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         // Get hook type from attribute first
         var hookAttribute = context.Attributes[0];
         var hookType = GetHookType(hookAttribute);
-        
+
         // Validate method signature with hook type
         if (!IsValidHookMethod(methodSymbol, hookType))
         {
@@ -273,7 +273,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             {
                 var secondParam = method.Parameters[1];
                 var secondParamType = secondParam.Type;
-                return secondParamType.Name == "CancellationToken" && 
+                return secondParamType.Name == "CancellationToken" &&
                        secondParamType.ContainingNamespace?.ToString() == "System.Threading";
             }
         }
@@ -283,7 +283,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
     private static string GetHookType(AttributeData attribute)
     {
-        if (attribute.ConstructorArguments.Length > 0 && 
+        if (attribute.ConstructorArguments.Length > 0 &&
             attribute.ConstructorArguments[0].Value is int hookTypeValue)
         {
             return hookTypeValue switch
@@ -374,7 +374,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                 // Generate helper methods
                 GenerateInitializeHookDictionaries(writer, validHooks);
                 GenerateHookLookupMethods(writer);
-                
+
                 // Generate hook delegates
                 GenerateHookDelegates(writer, validHooks);
             }
@@ -388,20 +388,20 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                 using (writer.BeginBlock("public static void Initialize()"))
                 {
                     writer.AppendLine("var source = new GeneratedHookSource();");
-                    
+
                     // Register for all implemented interfaces based on hooks found
                     if (validHooks.Any(h => h.HookType == "Test"))
                         writer.AppendLine("global::TUnit.Core.SourceRegistrar.RegisterTestHookSource(source);");
-                    
+
                     if (validHooks.Any(h => h.HookType == "Class"))
                         writer.AppendLine("global::TUnit.Core.SourceRegistrar.RegisterClassHookSource(source);");
-                    
+
                     if (validHooks.Any(h => h.HookType == "Assembly"))
                         writer.AppendLine("global::TUnit.Core.SourceRegistrar.RegisterAssemblyHookSource(source);");
-                    
+
                     if (validHooks.Any(h => h.HookType == "TestSession"))
                         writer.AppendLine("global::TUnit.Core.SourceRegistrar.RegisterTestSessionHookSource(source);");
-                    
+
                     if (validHooks.Any(h => h.HookType == "TestDiscovery"))
                         writer.AppendLine("global::TUnit.Core.SourceRegistrar.RegisterTestDiscoveryHookSource(source);");
                 }
@@ -430,7 +430,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("private static readonly Dictionary<Type, Dictionary<HookType, List<StaticHookMethod>>> _staticHooksByType = new();");
         writer.AppendLine("private static readonly Dictionary<Type, Dictionary<HookType, List<InstanceHookMethod>>> _instanceHooksByType = new();");
         writer.AppendLine();
-        
+
         // Also keep the existing fields for backward compatibility during refactoring
         var hookGroups = hooks.GroupBy(h => new { h.HookType, h.HookKind });
 
@@ -483,13 +483,13 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("// Initialize dictionary-based storage");
             writer.AppendLine("InitializeHookDictionaries();");
             writer.AppendLine();
-            
+
             var hookGroups = hooks.GroupBy(h => new { h.HookType, h.HookKind });
 
             foreach (var group in hookGroups)
             {
                 var fieldName = GetFieldName(group.Key.HookType, group.Key.HookKind);
-                
+
                 foreach (var hook in group)
                 {
                     GenerateHookInitialization(writer, hook, fieldName);
@@ -506,42 +506,42 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         {
             // Group hooks by the type where they are declared
             var hooksByType = hooks.GroupBy(h => h.TypeSymbol as ISymbol, SymbolEqualityComparer.Default);
-            
+
             foreach (var typeGroup in hooksByType)
             {
                 var typeSymbol = (INamedTypeSymbol)typeGroup.Key;
-                
+
                 // Skip generic types with unresolved type parameters
                 if (HasUnresolvedTypeParameters(typeSymbol))
                 {
                     writer.AppendLine($"// Skipping type registration for generic type: {typeSymbol.ToDisplayString()}");
                     continue;
                 }
-                
+
                 var typeDisplay = GetTypeDisplayString(typeSymbol);
-                
+
                 // Group by static vs instance
-                var instanceHooks = typeGroup.Where(h => !h.MethodSymbol.IsStatic && 
+                var instanceHooks = typeGroup.Where(h => !h.MethodSymbol.IsStatic &&
                     ((h.HookKind == "Before" || h.HookKind == "After") && h.HookType == "Test")).ToList();
                 var staticHooks = typeGroup.Where(h => !instanceHooks.Contains(h)).ToList();
-                
+
                 if (instanceHooks.Any())
                 {
                     writer.AppendLine($"if (!_instanceHooksByType.ContainsKey(typeof({typeDisplay})))");
                     writer.AppendLine($"    _instanceHooksByType[typeof({typeDisplay})] = new Dictionary<HookType, List<InstanceHookMethod>>();");
-                    
+
                     var hooksByHookType = instanceHooks.GroupBy(h => h.HookType);
                     foreach (var htGroup in hooksByHookType)
                     {
                         writer.AppendLine($"_instanceHooksByType[typeof({typeDisplay})][HookType.{htGroup.Key}] = new List<InstanceHookMethod>();");
                     }
                 }
-                
+
                 if (staticHooks.Any())
                 {
                     writer.AppendLine($"if (!_staticHooksByType.ContainsKey(typeof({typeDisplay})))");
                     writer.AppendLine($"    _staticHooksByType[typeof({typeDisplay})] = new Dictionary<HookType, List<StaticHookMethod>>();");
-                    
+
                     var hooksByHookType = staticHooks.GroupBy(h => h.HookType);
                     foreach (var htGroup in hooksByHookType)
                     {
@@ -560,13 +560,13 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         {
             writer.AppendLine("var results = new List<T>();");
             writer.AppendLine();
-            
+
             writer.AppendLine("// Walk up the inheritance chain");
             writer.AppendLine("var currentType = type;");
             writer.AppendLine("while (currentType != null && currentType != typeof(object))");
             writer.AppendLine("{");
             writer.Indent();
-            
+
             writer.AppendLine("// Check instance hooks");
             writer.AppendLine("if (typeof(T) == typeof(InstanceHookMethod) && _instanceHooksByType.TryGetValue(currentType, out var instanceDict))");
             writer.AppendLine("{");
@@ -576,7 +576,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
             writer.AppendLine();
-            
+
             writer.AppendLine("// Check static hooks");
             writer.AppendLine("if (_staticHooksByType.TryGetValue(currentType, out var staticDict))");
             writer.AppendLine("{");
@@ -585,17 +585,17 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("    results.AddRange(staticHooks.Cast<T>());");
             writer.Unindent();
             writer.AppendLine("}");
-            
+
             writer.AppendLine("currentType = currentType.BaseType;");
             writer.Unindent();
             writer.AppendLine("}");
             writer.AppendLine();
-            
+
             writer.AppendLine("// Sort by order and return");
             writer.AppendLine("return results.OrderBy(h => (h as dynamic)?.Order ?? 0);");
         }
         writer.AppendLine();
-        
+
         // Generate convenience method for test hooks that need a specific class type
         using (writer.BeginBlock("public IReadOnlyList<InstanceHookMethod> GetInstanceHooksForClass(Type classType, HookType hookType)"))
         {
@@ -612,7 +612,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"// Skipping hook from generic type: {hook.TypeSymbol.ToDisplayString()}");
             return;
         }
-        
+
         var isStatic = hook.MethodSymbol.IsStatic;
         var hookClass = GetHookClass(hook.HookType, hook.HookKind, isStatic);
         var delegateKey = GetDelegateKey(hook);
@@ -636,7 +636,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("HookExecutor = null!,"); // This will be set by the engine
         writer.AppendLine($"Order = {hook.Order},");
         writer.AppendLine($"Body = {delegateKey}_Body" + (isInstanceHook ? "" : ","));
-        
+
         // Only static hooks have FilePath and LineNumber
         if (!isInstanceHook)
         {
@@ -646,10 +646,10 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
         writer.Unindent();
         writer.AppendLine("});");
-        
+
         // Also add to the type-based dictionary
         var hookTypeDisplay = GetTypeDisplayString(hook.TypeSymbol);
-        
+
         if (isInstanceHook)
         {
             writer.AppendLine($"_instanceHooksByType[typeof({hookTypeDisplay})][HookType.{hook.HookType}].Add({fieldName}.Last() as InstanceHookMethod);");
@@ -658,7 +658,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         {
             writer.AppendLine($"_staticHooksByType[typeof({hookTypeDisplay})][HookType.{hook.HookType}].Add({fieldName}.Last() as StaticHookMethod);");
         }
-        
+
         writer.AppendLine();
     }
 
@@ -672,22 +672,22 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         {
             GenerateTestHookMethods(writer, hooksByType["Test"]);
         }
-        
+
         if (hooksByType.ContainsKey("Class"))
         {
             GenerateClassHookMethods(writer, hooksByType["Class"]);
         }
-        
+
         if (hooksByType.ContainsKey("Assembly"))
         {
             GenerateAssemblyHookMethods(writer, hooksByType["Assembly"]);
         }
-        
+
         if (hooksByType.ContainsKey("TestSession"))
         {
             GenerateTestSessionHookMethods(writer, hooksByType["TestSession"]);
         }
-        
+
         if (hooksByType.ContainsKey("TestDiscovery"))
         {
             GenerateTestDiscoveryHookMethods(writer, hooksByType["TestDiscovery"]);
@@ -866,21 +866,21 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"// Skipping delegate for hook from generic type: {hook.TypeSymbol.ToDisplayString()}");
             return;
         }
-        
+
         var delegateKey = GetDelegateKey(hook);
-        
+
         // For generic types, we need to handle them specially to avoid compilation errors
         var className = GetTypeDisplayString(hook.TypeSymbol);
         var methodName = hook.MethodSymbol.Name;
         var isStatic = hook.MethodSymbol.IsStatic;
         var isAsync = IsAsyncMethod(hook.MethodSymbol);
-        
+
         // Analyze parameters
         var paramCount = hook.MethodSymbol.Parameters.Length;
         var hasCancellationTokenOnly = false;
         var hasContextOnly = false;
         var hasContextAndCancellationToken = false;
-        
+
         if (paramCount == 1)
         {
             var paramType = hook.MethodSymbol.Parameters[0].Type;
@@ -904,19 +904,19 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
         // Generate the Body delegate for hook initialization
         var contextType = GetContextTypeForBody(hook.HookType, hook.HookKind);
-        
-        // For Before/After hooks without "Every", they are instance hooks  
+
+        // For Before/After hooks without "Every", they are instance hooks
         var isInstanceHook = (hook.HookKind == "Before" || hook.HookKind == "After") && hook.HookType == "Test";
-        
+
         if (isInstanceHook)
         {
             // Instance hooks - match InstanceHookMethod.Body signature
             using (writer.BeginBlock($"private static async ValueTask {delegateKey}_Body(object instance, {contextType} context, CancellationToken cancellationToken)"))
             {
                 writer.AppendLine($"var typedInstance = ({className})instance;");
-                
+
                 // Build method call
-                var methodCall = isStatic 
+                var methodCall = isStatic
                     ? $"{className}.{methodName}"
                     : $"typedInstance.{methodName}";
 
@@ -991,10 +991,10 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
     {
         // Use the type where the hook is declared for the delegate key
         var declaringType = hook.TypeSymbol;
-        
+
         // Get the full type name including namespace to ensure uniqueness
         var fullTypeName = declaringType.ToDisplayString();
-        
+
         // For generic types, remove type parameters to avoid compilation issues
         if (declaringType.IsGenericType)
         {
@@ -1004,7 +1004,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                 fullTypeName = fullTypeName.Substring(0, genericIndex);
             }
         }
-        
+
         // Make the name safe for use as an identifier
         var safeClassName = fullTypeName
             .Replace(".", "_")
@@ -1015,7 +1015,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             .Replace(" ", "")
             .Replace("`", "_")
             .Replace("+", "_"); // Handle nested classes
-            
+
         // Include parameter count to handle overloads
         var paramCount = hook.MethodSymbol.Parameters.Length;
         return $"{safeClassName}_{hook.MethodSymbol.Name}_{paramCount}Params";
@@ -1095,12 +1095,12 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                (returnType is INamedTypeSymbol namedType && namedType.IsGenericType &&
                 (namedType.ConstructedFrom.Name == "Task" || namedType.ConstructedFrom.Name == "ValueTask"));
     }
-    
+
     private static string GetTypeDisplayString(INamedTypeSymbol typeSymbol)
     {
         return typeSymbol.ToDisplayString();
     }
-    
+
     private static bool HasUnresolvedTypeParameters(INamedTypeSymbol typeSymbol)
     {
         return typeSymbol.IsGenericType && typeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
@@ -1108,7 +1108,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 }
 
 // Hook metadata model
-internal class HookMethodMetadata
+public class HookMethodMetadata
 {
     public required IMethodSymbol MethodSymbol { get; init; }
     public required INamedTypeSymbol TypeSymbol { get; init; } // The type where the hook is declared

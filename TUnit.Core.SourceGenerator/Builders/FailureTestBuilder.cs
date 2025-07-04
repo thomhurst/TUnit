@@ -8,7 +8,7 @@ namespace TUnit.Core.SourceGenerator.Builders;
 /// <summary>
 /// Builds test definitions for runtime failures
 /// </summary>
-internal class FailureTestBuilder
+public class FailureTestBuilder
 {
     /// <summary>
     /// Generates a failure test metadata for a test that failed during initialization

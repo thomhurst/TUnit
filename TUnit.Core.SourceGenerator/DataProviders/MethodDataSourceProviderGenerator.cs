@@ -7,7 +7,7 @@ namespace TUnit.Core.SourceGenerator.DataProviders;
 /// <summary>
 /// Generates data providers for MethodDataSourceAttribute
 /// </summary>
-internal class MethodDataSourceProviderGenerator : IDataProviderGenerator
+public class MethodDataSourceProviderGenerator : IDataProviderGenerator
 {
     public bool CanGenerate(AttributeData attribute)
     {
