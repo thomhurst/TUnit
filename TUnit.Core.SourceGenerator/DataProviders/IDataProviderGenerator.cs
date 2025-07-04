@@ -23,7 +23,7 @@ internal interface IDataProviderGenerator
 /// <summary>
 /// Specifies whether the data provider is for class or method parameters
 /// </summary>
-internal enum DataProviderType
+public enum DataProviderType
 {
     ClassParameters,
     TestParameters

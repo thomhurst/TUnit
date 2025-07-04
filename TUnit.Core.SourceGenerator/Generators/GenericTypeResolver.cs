@@ -559,7 +559,7 @@ public class GenericTestInfo
 /// <summary>
 /// Source of generic test discovery
 /// </summary>
-internal enum GenericTestSource
+public enum GenericTestSource
 {
     ExplicitAttribute,
     ConcreteInheritance,

@@ -266,7 +266,7 @@ public class GenericInstantiation
 /// <summary>
 /// Source of generic instantiation
 /// </summary>
-internal enum InstantiationSource
+public enum InstantiationSource
 {
     ExplicitAttribute,
     UsageAnalysis,
