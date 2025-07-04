@@ -59,14 +59,26 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
 #pragma warning restore TPEXP
         ExecutableTest executableTest)
     {
-        var path = BuildPath(executableTest);
-        var propertyBag = BuildPropertyBag(executableTest);
-        _logger.LogDebug($"Checking TreeNodeFilter for path: {path}");
+        try
+        {
+            if (executableTest.Context.TestDetails.ClassMetadata.Name == "AllDataSourcesCombinedTests")
+            {
+                Console.Write("");
+            }
+            var path = BuildPath(executableTest);
+            var propertyBag = BuildPropertyBag(executableTest);
+            _logger.LogDebug($"Checking TreeNodeFilter for path: {path}");
 
-        var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
-        _logger.LogDebug($"Filter match result: {matches}");
+            var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
+            _logger.LogDebug($"Filter match result: {matches}");
 
-        return matches;
+            return matches;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     private bool UnhandledFilter(ITestExecutionFilter testExecutionFilter)
@@ -84,11 +96,6 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
         {
             properties.Add(new TestMetadataProperty(category));
             properties.Add(new KeyValuePairStringProperty("Category", category));
-        }
-
-        if (test.Context.TestDetails.CustomProperties == null)
-        {
-            return new PropertyBag(properties);
         }
 
         foreach (var propertyEntry in test.Context.TestDetails.CustomProperties)
