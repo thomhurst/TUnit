@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.CodeGenerators;
+using TUnit.Core.SourceGenerator.Generators;
 using TUnit.Core.SourceGenerator.Tests.Extensions;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
@@ -14,7 +15,7 @@ public class TestsBase
     {
     }
 
-    public TestsBase<Generators.MetadataGenerator> TestMetadataGenerator = new();
+    public TestsBase<UnifiedTestMetadataGeneratorV2> TestMetadataGenerator = new();
     public TestsBase<TestHooksGenerator> HooksGenerator = new();
     public TestsBase<AssemblyLoaderGenerator> AssemblyLoaderGenerator = new();
     public TestsBase<DisableReflectionScannerGenerator> DisableReflectionScannerGenerator = new();

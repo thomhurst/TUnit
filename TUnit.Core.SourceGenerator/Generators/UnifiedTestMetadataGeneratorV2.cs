@@ -366,10 +366,6 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         // All base types now exist in TUnit.Core - no need to generate any
     }
 
-
-
-
-
     private void GenerateTestRegistry(SourceProductionContext context, IEnumerable<TestMethodMetadata> testMethods)
     {
         try
