@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
@@ -14,10 +13,10 @@ namespace TUnit.Engine;
 /// <summary>
 /// Unified test discovery service that uses the new pipeline architecture
 /// </summary>
-public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
+public sealed class TestDiscoveryServiceV2 : IDataProducer
 {
+    private const int DiscoveryTimeoutSeconds = 30;
     private readonly UnifiedTestBuilderPipeline _testBuilderPipeline;
-    private readonly bool _enableDynamicDiscovery;
 
     public string Uid => "TUnit";
     public string Version => "2.0.0";
@@ -27,12 +26,9 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
 
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
-    public TestDiscoveryServiceV2(
-        UnifiedTestBuilderPipeline testBuilderPipeline,
-        bool enableDynamicDiscovery = false)
+    public TestDiscoveryServiceV2(UnifiedTestBuilderPipeline testBuilderPipeline)
     {
         _testBuilderPipeline = testBuilderPipeline ?? throw new ArgumentNullException(nameof(testBuilderPipeline));
-        _enableDynamicDiscovery = enableDynamicDiscovery;
     }
 
     /// <summary>
@@ -40,7 +36,6 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
     /// </summary>
     public async Task<IEnumerable<ExecutableTest>> DiscoverTests()
     {
-        const int DiscoveryTimeoutSeconds = 30;
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(DiscoveryTimeoutSeconds));
 
         try
@@ -87,8 +82,6 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
 
     private void ResolveDependencies(List<ExecutableTest> allTests)
     {
-        var testMap = allTests.ToDictionary(t => t.TestId);
-
         foreach (var test in allTests)
         {
             try
@@ -128,86 +121,10 @@ public sealed class TestDiscoveryServiceV2 : ITestDiscoverer, IDataProducer
                     Exception = ex,
                     ComputerName = Environment.MachineName
                 };
-                
+
                 // Clear dependencies so test won't be scheduled
                 test.Dependencies = [];
             }
         }
-    }
-
-    /// <summary>
-    /// ITestDiscoverer implementation for Microsoft.Testing.Platform
-    /// </summary>
-    public async Task<IEnumerable<TestNode>> DiscoverTestsAsync(
-        DiscoverTestExecutionRequest discoverTestExecutionRequest,
-        IMessageBus messageBus,
-        CancellationToken cancellationToken)
-    {
-        var tests = await DiscoverTests();
-        var testNodes = new List<TestNode>();
-
-        foreach (var test in tests)
-        {
-            var testNode = CreateTestNode(test);
-            var message = new TestNodeUpdateMessage(
-                discoverTestExecutionRequest.Session.SessionUid,
-                testNode);
-
-            await messageBus.PublishAsync(this, message);
-            testNodes.Add(testNode);
-        }
-
-        return testNodes;
-    }
-
-    private static TestNode CreateTestNode(ExecutableTest test)
-    {
-        var propertyList = new List<IProperty>();
-
-        // Add file location if available
-        if (test.Metadata.FilePath != null && test.Metadata.LineNumber.HasValue)
-        {
-            propertyList.Add(new TestFileLocationProperty(
-                test.Metadata.FilePath,
-                new LinePositionSpan(
-                    new LinePosition(test.Metadata.LineNumber.Value, 0),
-                    new LinePosition(test.Metadata.LineNumber.Value, 0)
-                )));
-        }
-
-        // Add test method identifier
-        propertyList.Add(new TestMethodIdentifierProperty(
-            Namespace: test.Metadata.TestClassType.Namespace ?? "GlobalNamespace",
-            AssemblyFullName: test.Metadata.TestClassType.Assembly.FullName ?? "UnknownAssembly",
-            TypeName: test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name,
-            MethodName: test.Metadata.TestMethodName,
-            ParameterTypeFullNames: test.Metadata.ParameterTypes?.Select(t => t.FullName ?? "unknown").ToArray() ?? [],
-            ReturnTypeFullName: "void",
-            MethodArity: 0
-        ));
-
-        // Add categories as metadata
-        foreach (var category in test.Metadata.Categories)
-        {
-            propertyList.Add(new TestMetadataProperty(category));
-        }
-
-        // Add TRX properties
-        propertyList.Add(new TrxFullyQualifiedTypeNameProperty(
-            test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name));
-        propertyList.Add(new TrxCategoriesProperty(test.Metadata.Categories.ToArray()));
-
-        // Add test state if already failed (e.g., from data source expansion error)
-        if (test.State == TestState.Failed && test.Result?.Exception != null)
-        {
-            propertyList.Add(new FailedTestNodeStateProperty(test.Result.Exception));
-        }
-
-        return new TestNode
-        {
-            Uid = new TestNodeUid(test.TestId),
-            DisplayName = test.DisplayName,
-            Properties = new PropertyBag(propertyList)
-        };
     }
 }

@@ -67,14 +67,13 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Detect execution mode from command line or environment
         var executionMode = GetExecutionMode(CommandLineOptions);
-        
+
         // Create pipeline based on execution mode
         TestBuilderPipeline = Register(
             UnifiedTestBuilderPipelineFactory.CreatePipeline(
                 executionMode, this, assembliesToScan: null));
 
-        DiscoveryService = Register(new TestDiscoveryServiceV2(TestBuilderPipeline, 
-            enableDynamicDiscovery: executionMode == Core.Enums.TestExecutionMode.Reflection));
+        DiscoveryService = Register(new TestDiscoveryServiceV2(TestBuilderPipeline));
 
         // Create single test executor with ExecutionContext support
         var singleTestExecutor = Register<ISingleTestExecutor>(
@@ -116,7 +115,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Check environment variable
         var envMode = Environment.GetEnvironmentVariable("TUNIT_EXECUTION_MODE");
-        if (!string.IsNullOrEmpty(envMode) && 
+        if (!string.IsNullOrEmpty(envMode) &&
             Enum.TryParse<Core.Enums.TestExecutionMode>(envMode, ignoreCase: true, out var envModeEnum))
         {
             return envModeEnum;

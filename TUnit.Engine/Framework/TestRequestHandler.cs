@@ -38,10 +38,8 @@ internal sealed class TestRequestHandler : IRequestHandler
         foreach (var test in allTests)
         {
             context.CancellationToken.ThrowIfCancellationRequested();
-            if (test.Context != null)
-            {
-                await serviceProvider.MessageBus.Discovered(test.Context);
-            }
+
+            await serviceProvider.MessageBus.Discovered(test.Context);
         }
     }
 

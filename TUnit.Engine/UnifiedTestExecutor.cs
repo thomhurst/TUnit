@@ -174,7 +174,7 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             new TestInvoker(),
             new HookInvoker());
 
-        var discoveryService = new TestDiscoveryServiceV2(pipeline, enableDynamicDiscovery: false);
+        var discoveryService = new TestDiscoveryServiceV2(pipeline);
         var tests = await discoveryService.DiscoverTests();
 
         // Execute tests
