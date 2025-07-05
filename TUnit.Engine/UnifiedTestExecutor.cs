@@ -81,7 +81,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         if (filter != null)
         {
             var beforeCount = testList.Count;
-            testList = ApplyFilter(testList, filter);
+            testList = await ApplyFilterAsync(testList, filter);
         }
 
         // Create hook orchestrator if we have the service
@@ -169,7 +169,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         return TestSchedulerFactory.Create(config, _logger, _serviceProvider.CancellationToken);
     }
 
-    private List<ExecutableTest> ApplyFilter(List<ExecutableTest> tests, ITestExecutionFilter filter)
+    private async Task<List<ExecutableTest>> ApplyFilterAsync(List<ExecutableTest> tests, ITestExecutionFilter filter)
     {
         // Debug: Applying filter to {tests.Count} tests of type {filter.GetType().Name}
 
@@ -211,10 +211,10 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             }
         }
 
-        _logger.LogAsync(TUnit.Core.Logging.LogLevel.Debug, 
+        await _logger.LogAsync(TUnit.Core.Logging.LogLevel.Debug, 
             $"After including dependencies: {testsToInclude.Count} tests will be executed", 
             null, 
-            (state, _) => state).AsTask().GetAwaiter().GetResult();
+            (state, _) => state);
 
         return testsToInclude.ToList();
     }

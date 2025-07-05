@@ -125,7 +125,12 @@ internal sealed class DelegateGenerator
         // Generate method invocation
         var argList = string.Join(", ", Enumerable.Range(0, parameters.Length).Select(i => $"arg{i}"));
         
-        if (testInfo.MethodSymbol.IsAsync)
+        // Check if method returns Task or Task<T>
+        var returnType = testInfo.MethodSymbol.ReturnType;
+        var isTaskType = returnType.Name == "Task" && 
+                        (returnType.ContainingNamespace?.ToString() == "System.Threading.Tasks");
+        
+        if (isTaskType)
         {
             writer.AppendLine($"await typedInstance.{methodName}({argList});");
         }

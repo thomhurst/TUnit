@@ -226,11 +226,11 @@ public static class UnifiedTestBuilderPipelineFactory
     /// <summary>
     /// Creates a pipeline with automatic mode detection
     /// </summary>
-    public static UnifiedTestBuilderPipeline CreateAutoDetectPipeline(
+    public static async Task<UnifiedTestBuilderPipeline> CreateAutoDetectPipelineAsync(
         IServiceProvider? serviceProvider = null,
         Assembly[]? assembliesToScan = null)
     {
-        var dataCollector = TestDataCollectorFactory.CreateAutoDetect(assembliesToScan);
+        var dataCollector = await TestDataCollectorFactory.CreateAutoDetectAsync(assembliesToScan);
         var genericResolver = new Resolvers.AotGenericTypeResolver();
         var dataSourceExpander = new Expanders.DataSourceExpander();
         var testBuilder = new TestBuilder(serviceProvider);

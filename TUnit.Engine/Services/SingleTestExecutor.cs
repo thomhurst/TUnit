@@ -205,13 +205,28 @@ public class SingleTestExecutor : ISingleTestExecutor
             cts.CancelAfter(test.Metadata.TimeoutMs.Value);
 
             var testTask = test.InvokeTestAsync(instance, cts.Token);
-            var completedTask = await Task.WhenAny(testTask, Task.Delay(test.Metadata.TimeoutMs.Value, cts.Token));
+            var timeoutTask = Task.Delay(test.Metadata.TimeoutMs.Value, cancellationToken);
+            var completedTask = await Task.WhenAny(testTask, timeoutTask);
 
-            if (completedTask != testTask)
+            if (completedTask == timeoutTask)
             {
-                throw new OperationCanceledException();
+                // Cancel the test task
+                cts.Cancel();
+                
+                // Wait for the test task to complete (with cancellation) or throw
+                try
+                {
+                    await testTask.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+                }
+                catch
+                {
+                    // Ignore exceptions from cancelled task
+                }
+                
+                throw new OperationCanceledException($"Test '{test.DisplayName}' exceeded timeout of {test.Metadata.TimeoutMs.Value}ms");
             }
 
+            // Test completed within timeout
             await testTask;
         }
         else
