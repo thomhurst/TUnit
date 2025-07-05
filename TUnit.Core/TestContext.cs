@@ -388,7 +388,7 @@ public class TestContext : Context
     /// <summary>
     /// Gets the dependencies for this test
     /// </summary>
-    public List<string> Dependencies { get; } =
+    public List<TestDetails> Dependencies { get; } =
     [
     ];
 

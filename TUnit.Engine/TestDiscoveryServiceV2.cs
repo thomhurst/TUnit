@@ -112,7 +112,7 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer
                 test.Context.Dependencies.Clear();
                 foreach (var dep in test.Dependencies)
                 {
-                    test.Context.Dependencies.Add(dep.DisplayName);
+                    test.Context.Dependencies.Add(dep.Context.TestDetails);
                 }
             }
             catch (Exception ex)
