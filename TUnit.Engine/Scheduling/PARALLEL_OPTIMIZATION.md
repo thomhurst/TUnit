@@ -31,7 +31,6 @@ This document describes the optimized parallel test execution architecture imple
 - **After**: Multiple layers of protection:
   - Pre-execution cycle detection
   - Individual test timeouts (default 5 minutes)
-  - Global progress monitoring (10-minute stall detection)
   - Diagnostic dumps on timeout
 
 ## Architecture
@@ -45,7 +44,6 @@ This document describes the optimized parallel test execution architecture imple
 5. **AdaptiveParallelismStrategy**: Hill-climbing algorithm for optimal thread count
 6. **WorkStealingQueue**: Per-thread queue with steal capability
 7. **TestCompletionTracker**: Lock-free dependency resolution
-8. **IProgressMonitor**: Stall detection and monitoring
 
 ### Usage
 
@@ -62,7 +60,6 @@ var config = new SchedulerConfiguration
     MinParallelism = 2,
     MaxParallelism = 16,
     TestTimeout = TimeSpan.FromMinutes(10),
-    StallTimeout = TimeSpan.FromMinutes(15),
     EnableWorkStealing = true,
     EnableAdaptiveParallelism = true,
     Strategy = ParallelismStrategy.Adaptive
@@ -95,7 +92,6 @@ var executor = new UnifiedTestExecutor(
 - `TUNIT_MIN_PARALLELISM`: Minimum thread count
 - `TUNIT_MAX_PARALLELISM`: Maximum thread count
 - `TUNIT_TEST_TIMEOUT_SECONDS`: Individual test timeout
-- `TUNIT_STALL_TIMEOUT_SECONDS`: Progress stall detection timeout
 
 ### Scheduler Configuration
 ```csharp
@@ -104,7 +100,6 @@ public class SchedulerConfiguration
     public int MinParallelism { get; set; } = 1;
     public int MaxParallelism { get; set; } = Environment.ProcessorCount * 2;
     public TimeSpan TestTimeout { get; set; } = TimeSpan.FromMinutes(5);
-    public TimeSpan StallTimeout { get; set; } = TimeSpan.FromMinutes(10);
     public bool EnableWorkStealing { get; set; } = true;
     public bool EnableAdaptiveParallelism { get; set; } = true;
     public ParallelismStrategy Strategy { get; set; } = ParallelismStrategy.Adaptive;

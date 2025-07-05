@@ -28,17 +28,8 @@ internal static class TestSchedulerFactory
                 configuration.MaxParallelism)
             : new FixedParallelismStrategy(configuration.MaxParallelism);
 
-        var progressMonitor = new DefaultProgressMonitor(
-            stallTimeout: configuration.StallTimeout,
-            onStallDetected: message =>
-            {
-                logger.LogWarning(message);
-                engineCancellationToken.CancellationTokenSource.Cancel();
-            });
-
         return new DagTestScheduler(
             parallelismStrategy,
-            progressMonitor,
             logger,
             configuration.TestTimeout);
     }

@@ -10,18 +10,15 @@ namespace TUnit.Engine.Scheduling;
 public sealed class DagTestScheduler : ITestScheduler
 {
     private readonly IParallelismStrategy _parallelismStrategy;
-    private readonly IProgressMonitor _progressMonitor;
     private readonly TUnitFrameworkLogger _logger;
     private readonly TimeSpan _testTimeout;
 
     public DagTestScheduler(
         IParallelismStrategy parallelismStrategy,
-        IProgressMonitor progressMonitor,
         TUnitFrameworkLogger logger,
         TimeSpan? testTimeout = null)
     {
         _parallelismStrategy = parallelismStrategy;
-        _progressMonitor = progressMonitor;
         _logger = logger;
         _testTimeout = testTimeout ?? TimeSpan.FromMinutes(5);
     }
@@ -133,12 +130,8 @@ public sealed class DagTestScheduler : ITestScheduler
             readyQueue.Enqueue(state);
         }
 
-        // Start progress monitoring
-        using var progressCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var progressTask = _progressMonitor.MonitorProgressAsync(completionTracker, progressCts.Token);
-
         // Start worker tasks
-        var workers = CreateWorkers(readyQueue, graph, executor, completionTracker, progressCts.Token);
+        var workers = CreateWorkers(readyQueue, graph, executor, completionTracker, cancellationToken);
 
         try
         {
@@ -148,19 +141,6 @@ public sealed class DagTestScheduler : ITestScheduler
         {
             // This is expected when cancellation is requested (either user or fail-fast)
             await _logger.LogInformationAsync("Test execution cancelled");
-        }
-        finally
-        {
-            // Always cancel progress monitoring and wait for it to complete
-            progressCts.Cancel();
-            try
-            {
-                await progressTask;
-            }
-            catch (OperationCanceledException)
-            {
-                // Expected when progress monitoring is cancelled
-            }
         }
     }
 
