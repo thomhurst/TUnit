@@ -32,7 +32,7 @@ public class SingleTestExecutor : ISingleTestExecutor
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
-        // If test is already failed (e.g., from data source expansion error), 
+        // If test is already failed (e.g., from data source expansion error),
         // just report the existing failure
         if (test.State == TestState.Failed && test.Result != null)
         {
@@ -80,7 +80,7 @@ public class SingleTestExecutor : ISingleTestExecutor
 
         // Inject property values
         await InjectPropertyValuesAsync(instance, test.PropertyValues);
-        
+
         // Set the instance in the test context for hooks
         test.Context!.TestDetails.ClassInstance = instance;
 
@@ -212,17 +212,17 @@ public class SingleTestExecutor : ISingleTestExecutor
             {
                 // Cancel the test task
                 cts.Cancel();
-                
+
                 // Wait for the test task to complete (with cancellation) or throw
                 try
                 {
-                    await testTask.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+                    await testTask;
                 }
                 catch
                 {
                     // Ignore exceptions from cancelled task
                 }
-                
+
                 throw new OperationCanceledException($"Test '{test.DisplayName}' exceeded timeout of {test.Metadata.TimeoutMs.Value}ms");
             }
 

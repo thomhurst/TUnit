@@ -118,7 +118,7 @@ public sealed class VerifySettingsTask
 
             if (_onVerifyMismatch != null)
             {
-                await _onVerifyMismatch((_receivedPath, _verifiedPath), $"Verification failed for '{name}'", async () => { });
+                await _onVerifyMismatch((_receivedPath, _verifiedPath), $"Verification failed for '{name}'", () => Task.CompletedTask);
             }
             else
             {

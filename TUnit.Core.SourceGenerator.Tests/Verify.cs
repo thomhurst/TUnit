@@ -70,7 +70,7 @@ public sealed class VerifySettingsTask
     {
         var testContext = TestContext.Current;
         string testClassName, testName;
-        
+
         if (testContext != null)
         {
             testClassName = testContext.TestDetails.ClassType.Name;
@@ -84,9 +84,9 @@ public sealed class VerifySettingsTask
             testClassName = callingMethod?.DeclaringType?.Name ?? "UnknownClass";
             testName = callingMethod?.Name ?? "UnknownTest";
         }
-        
+
         var name = $"{testClassName}.{testName}{_uniqueSuffix}";
-        
+
         // Fallback directory path if Sourcy is not available
         string dir;
         try
@@ -96,7 +96,7 @@ public sealed class VerifySettingsTask
         catch
         {
             // Use the project directory as fallback
-            dir = Path.GetDirectoryName(typeof(VerifySettingsTask).Assembly.Location) ?? 
+            dir = Path.GetDirectoryName(typeof(VerifySettingsTask).Assembly.Location) ??
                   Directory.GetCurrentDirectory();
         }
         _receivedPath = Path.Combine(dir, $"{name}.received.txt");
@@ -149,7 +149,7 @@ public sealed class VerifySettingsTask
 
             if (_onVerifyMismatch != null)
             {
-                await _onVerifyMismatch((_receivedPath, _verifiedPath), $"Verification failed for '{name}'", async () => { });
+                await _onVerifyMismatch((_receivedPath, _verifiedPath), $"Verification failed for '{name}'", () => Task.CompletedTask);
             }
             else
             {

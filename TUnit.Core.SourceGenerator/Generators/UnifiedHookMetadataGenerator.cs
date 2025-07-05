@@ -309,13 +309,12 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         return 0;
     }
 
-    private static void GenerateHookRegistry(SourceProductionContext context, ImmutableArray<HookMethodMetadata?> hooks)
+    private static void GenerateHookRegistry(SourceProductionContext context, ImmutableArray<HookMethodMetadata> hooks)
     {
         try
         {
             var validHooks = hooks
                 .Where(h => h != null)
-                .Cast<HookMethodMetadata>()
                 .ToList();
 
             if (!validHooks.Any())

@@ -273,7 +273,7 @@ public sealed class MetadataGenerator
                     var testName = args[0].Value?.ToString();
                     if (!string.IsNullOrEmpty(testName))
                     {
-                        legacyDependencies.Add(testName);
+                        legacyDependencies.Add(testName!);
                         testDependencies.Add($"TestDependency.FromMethodName(\"{testName}\")");
                     }
                 }
@@ -494,7 +494,7 @@ public sealed class MetadataGenerator
             var methodName = attr.ConstructorArguments.FirstOrDefault().Value?.ToString();
             if (!string.IsNullOrEmpty(methodName))
             {
-                var member = classType.GetMembers(methodName).FirstOrDefault();
+                var member = classType.GetMembers(methodName!).FirstOrDefault();
                 if (member is IMethodSymbol method)
                 {
                     if (IsAsyncEnumerableType(method.ReturnType))
@@ -621,7 +621,7 @@ public sealed class MetadataGenerator
     {
         // Collect all attributes that implement ITestDiscoveryEventReceiver
         var discoveryAttributes = new List<AttributeData>();
-        
+
         // Method attributes
         foreach (var attr in testInfo.MethodSymbol.GetAttributes())
         {
@@ -630,7 +630,7 @@ public sealed class MetadataGenerator
                 discoveryAttributes.Add(attr);
             }
         }
-        
+
         // Class attributes
         foreach (var attr in testInfo.TypeSymbol.GetAttributes())
         {
@@ -639,7 +639,7 @@ public sealed class MetadataGenerator
                 discoveryAttributes.Add(attr);
             }
         }
-        
+
         // Assembly attributes
         if (testInfo.TypeSymbol.ContainingAssembly != null)
         {
@@ -651,20 +651,20 @@ public sealed class MetadataGenerator
                 }
             }
         }
-        
+
         if (discoveryAttributes.Any())
         {
             writer.AppendLine("AttributeFactory = () => new Attribute[]");
             writer.AppendLine("{");
             writer.Indent();
-            
+
             foreach (var attr in discoveryAttributes)
             {
                 // Generate attribute instantiation using TypedConstantParser
                 GenerateAttributeInstantiation(writer, attr);
                 writer.AppendLine(",");
             }
-            
+
             writer.Unindent();
             writer.AppendLine("},");
         }
@@ -673,11 +673,11 @@ public sealed class MetadataGenerator
             writer.AppendLine("AttributeFactory = null,");
         }
     }
-    
+
     private void GenerateAttributeInstantiation(CodeWriter writer, AttributeData attributeData)
     {
         var attributeType = attributeData.AttributeClass!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        
+
         // Handle constructor arguments
         if (attributeData.ConstructorArguments.Length == 0)
         {
@@ -693,7 +693,7 @@ public sealed class MetadataGenerator
             }
             writer.Append(")");
         }
-        
+
         // Handle named arguments (properties)
         if (attributeData.NamedArguments.Length > 0)
         {
@@ -707,12 +707,12 @@ public sealed class MetadataGenerator
             writer.Append(" }");
         }
     }
-    
+
     private bool IsDiscoveryEventReceiverAttribute(INamedTypeSymbol attributeClass)
     {
         // Check if the attribute implements ITestDiscoveryEventReceiver
-        return attributeClass.AllInterfaces.Any(i => 
-            i.Name == "ITestDiscoveryEventReceiver" && 
+        return attributeClass.AllInterfaces.Any(i =>
+            i.Name == "ITestDiscoveryEventReceiver" &&
             i.ContainingNamespace?.ToDisplayString() == "TUnit.Core.Interfaces");
     }
 }
