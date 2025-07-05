@@ -557,7 +557,9 @@ public sealed class MetadataGenerator
     private bool IsAsyncEnumerableType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol namedType)
+        {
             return false;
+        }
 
         var fullName = namedType.ToDisplayString();
         return fullName.StartsWith("System.Collections.Generic.IAsyncEnumerable<") ||
@@ -567,10 +569,14 @@ public sealed class MetadataGenerator
     private bool IsTaskOfEnumerableType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol namedType)
+        {
             return false;
+        }
 
         if (namedType.Name != "Task" || namedType.TypeArguments.Length != 1)
+        {
             return false;
+        }
 
         var innerType = namedType.TypeArguments[0];
         var innerTypeName = innerType.ToDisplayString();
@@ -583,10 +589,14 @@ public sealed class MetadataGenerator
     private bool IsFuncOfTupleType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol namedType)
+        {
             return false;
+        }
 
         if (!namedType.Name.StartsWith("Func") || namedType.TypeArguments.Length != 1)
+        {
             return false;
+        }
 
         var returnType = namedType.TypeArguments[0];
         return returnType is INamedTypeSymbol { IsTupleType: true };
@@ -595,7 +605,9 @@ public sealed class MetadataGenerator
     private bool IsEnumerableOfObjectArrayType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol namedType)
+        {
             return false;
+        }
 
         var typeName = namedType.ToDisplayString();
         return typeName.Contains("IEnumerable<object[]>") ||
@@ -686,9 +698,12 @@ public sealed class MetadataGenerator
         else
         {
             writer.Append($"new {attributeType}(");
-            for (int i = 0; i < attributeData.ConstructorArguments.Length; i++)
+            for (var i = 0; i < attributeData.ConstructorArguments.Length; i++)
             {
-                if (i > 0) writer.Append(", ");
+                if (i > 0)
+                {
+                    writer.Append(", ");
+                }
                 writer.Append(CodeGenerators.Helpers.TypedConstantParser.GetRawTypedConstantValue(attributeData.ConstructorArguments[i]));
             }
             writer.Append(")");
@@ -698,9 +713,12 @@ public sealed class MetadataGenerator
         if (attributeData.NamedArguments.Length > 0)
         {
             writer.Append(" { ");
-            for (int i = 0; i < attributeData.NamedArguments.Length; i++)
+            for (var i = 0; i < attributeData.NamedArguments.Length; i++)
             {
-                if (i > 0) writer.Append(", ");
+                if (i > 0)
+                {
+                    writer.Append(", ");
+                }
                 var namedArg = attributeData.NamedArguments[i];
                 writer.Append($"{namedArg.Key} = {CodeGenerators.Helpers.TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)}");
             }

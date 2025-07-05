@@ -24,8 +24,10 @@ public class TestService : ITestService, IAsyncInitializable, IAsyncDisposable
     public string GetValue()
     {
         if (!IsInitialized)
+        {
             throw new InvalidOperationException("Service not initialized");
-        
+        }
+
         return "TestValue";
     }
     

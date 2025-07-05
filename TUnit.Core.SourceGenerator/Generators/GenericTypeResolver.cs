@@ -40,7 +40,10 @@ internal sealed class GenericTypeResolver
             foreach (var classDecl in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
             {
                 var classSymbol = semanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
-                if (classSymbol == null) continue;
+                if (classSymbol == null)
+                {
+                    continue;
+                }
 
                 AnalyzeClassForGenericTests(classSymbol, semanticModel);
             }
@@ -87,7 +90,10 @@ internal sealed class GenericTypeResolver
 
     private void AnalyzeClassForGenericTests(INamedTypeSymbol classSymbol, SemanticModel semanticModel)
     {
-        if (!_processedTypes.Add(classSymbol)) return;
+        if (!_processedTypes.Add(classSymbol))
+        {
+            return;
+        }
 
         // Check for explicit generic test generation attributes
         AnalyzeExplicitGenericTestAttributes(classSymbol);
@@ -278,7 +284,7 @@ internal sealed class GenericTypeResolver
         var argumentTypes = new List<ITypeSymbol>();
         var constructorArgs = attribute.ConstructorArguments;
 
-        for (int i = 0; i < constructorArgs.Length && i < methodParameters.Length; i++)
+        for (var i = 0; i < constructorArgs.Length && i < methodParameters.Length; i++)
         {
             var argType = constructorArgs[i].Type;
             var paramType = methodParameters[i].Type;
@@ -311,7 +317,9 @@ internal sealed class GenericTypeResolver
     {
         var methodName = attribute.ConstructorArguments.FirstOrDefault().Value?.ToString();
         if (string.IsNullOrEmpty(methodName))
+        {
             return Array.Empty<ITypeSymbol>();
+        }
 
         var containingType = testMethod.ContainingType;
         var dataSourceMethod = containingType.GetMembers(methodName!)
@@ -319,7 +327,9 @@ internal sealed class GenericTypeResolver
             .FirstOrDefault();
 
         if (dataSourceMethod?.ReturnType is not INamedTypeSymbol returnType)
+        {
             return Array.Empty<ITypeSymbol>();
+        }
 
         // Extract type from IEnumerable<T> or similar
         return ExtractGenericTypesFromEnumerableReturnType(returnType, testMethod);
@@ -332,7 +342,9 @@ internal sealed class GenericTypeResolver
     {
         var attributeClass = attribute.AttributeClass;
         if (attributeClass?.BaseType == null)
+        {
             return Array.Empty<ITypeSymbol>();
+        }
 
         // The base type should be AsyncDataSourceGeneratorAttribute<T1, T2, ...>
         var baseType = attributeClass.BaseType;
@@ -374,7 +386,10 @@ internal sealed class GenericTypeResolver
 
     private void RegisterGenericTestInstantiation(INamedTypeSymbol originalType, ITypeSymbol[] typeArgs, GenericTestSource source)
     {
-        if (_genericTests.ContainsKey(typeArgs)) return;
+        if (_genericTests.ContainsKey(typeArgs))
+        {
+            return;
+        }
 
         var genericTestInfo = new GenericTestInfo
         {
@@ -390,7 +405,9 @@ internal sealed class GenericTypeResolver
     private ITypeSymbol[] ExtractTypeArgumentsFromAttribute(AttributeData attribute)
     {
         if (attribute.ConstructorArguments.Length == 0)
+        {
             return Array.Empty<ITypeSymbol>();
+        }
 
         var typeArgs = new List<ITypeSymbol>();
         foreach (var arg in attribute.ConstructorArguments)

@@ -17,7 +17,7 @@ public partial class Tests
     public async Task MyRecordType_SerializesProperly()
     {
         MyRecordType original = new(["a", "b"]);
-        MyRecordType? roundTripped = RoundTripSerialize(original);
+        var roundTripped = RoundTripSerialize(original);
 
         await Assert.That(roundTripped).IsEquivalentTo(original);
     }
@@ -26,7 +26,7 @@ public partial class Tests
     public async Task MyRecordType2_SerializesProperly()
     {
         MyRecordType2 original = new(new List<string> { "a", "b" });
-        MyRecordType2? roundTripped = RoundTripSerialize(original);
+        var roundTripped = RoundTripSerialize(original);
         await Assert.That(roundTripped).IsEquivalentTo(original);
     }
 
@@ -34,7 +34,7 @@ public partial class Tests
     public async Task MyRecordType3_SerializesProperly()
     {
         MyRecordType3 original = new(new List<string> { "a", "b" });
-        MyRecordType3 roundTripped = RoundTripSerialize(original);
+        var roundTripped = RoundTripSerialize(original);
         await Assert.That(roundTripped).IsEquivalentTo(original);
     }
 
@@ -42,7 +42,7 @@ public partial class Tests
     public async Task MyRecordType4_SerializesProperly()
     {
         MyRecordType4 original = new(new Dictionary<string, int> { { "a", 1 }, { "b", 2 } });
-        MyRecordType4? roundTripped = RoundTripSerialize(original);
+        var roundTripped = RoundTripSerialize(original);
         await Assert.That(roundTripped).IsEquivalentTo(original);
     }
 

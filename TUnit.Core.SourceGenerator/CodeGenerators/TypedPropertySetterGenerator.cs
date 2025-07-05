@@ -42,7 +42,9 @@ public class TypedPropertySetterGenerator
             {
                 var className = namedType.ToDisplayString();
                 if (processedClasses.Contains(className))
+                {
                     continue;
+                }
 
                 processedClasses.Add(className);
                 GeneratePropertySettersForClass(namedType, diagnosticContext);
@@ -62,7 +64,9 @@ public class TypedPropertySetterGenerator
         var injectableProperties = GetInjectableProperties(classSymbol);
 
         if (!injectableProperties.Any())
+        {
             return;
+        }
 
         _stringBuilder.AppendLine($"    #region Property Setters for {className}");
         _stringBuilder.AppendLine();
@@ -162,7 +166,9 @@ public class TypedPropertySetterGenerator
         foreach (var member in classSymbol.GetMembers())
         {
             if (member is not IPropertySymbol property)
+            {
                 continue;
+            }
 
             // Check for injectable attributes or naming patterns
             var hasInjectAttribute = property.GetAttributes()

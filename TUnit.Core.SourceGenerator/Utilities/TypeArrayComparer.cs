@@ -16,14 +16,25 @@ internal sealed class TypeArrayComparer : IEqualityComparer<ITypeSymbol[]>
 
     public bool Equals(ITypeSymbol[]? x, ITypeSymbol[]? y)
     {
-        if (ReferenceEquals(x, y)) return true;
-        if (x is null || y is null) return false;
-        if (x.Length != y.Length) return false;
+        if (ReferenceEquals(x, y))
+        {
+            return true;
+        }
+        if (x is null || y is null)
+        {
+            return false;
+        }
+        if (x.Length != y.Length)
+        {
+            return false;
+        }
 
-        for (int i = 0; i < x.Length; i++)
+        for (var i = 0; i < x.Length; i++)
         {
             if (!SymbolEqualityComparer.Default.Equals(x[i], y[i]))
+            {
                 return false;
+            }
         }
 
         return true;
@@ -32,7 +43,7 @@ internal sealed class TypeArrayComparer : IEqualityComparer<ITypeSymbol[]>
     public int GetHashCode(ITypeSymbol[] obj)
     {
         // Use simple hash combining for .NET Standard 2.0 compatibility
-        int hash = 17;
+        var hash = 17;
         foreach (var type in obj)
         {
             hash = hash * 31 + SymbolEqualityComparer.Default.GetHashCode(type);

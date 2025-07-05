@@ -33,18 +33,24 @@ public class ArgumentsDataProviderGenerator : IDataProviderGenerator
         {
             // Handle params array case
             var values = args[0].Values;
-            for (int i = 0; i < values.Length; i++)
+            for (var i = 0; i < values.Length; i++)
             {
-                if (i > 0) writer.Append(", ");
+                if (i > 0)
+                {
+                    writer.Append(", ");
+                }
                 writer.Append(TypedConstantParser.GetRawTypedConstantValue(values[i]));
             }
         }
         else
         {
             // Handle individual arguments
-            for (int i = 0; i < args.Length; i++)
+            for (var i = 0; i < args.Length; i++)
             {
-                if (i > 0) writer.Append(", ");
+                if (i > 0)
+                {
+                    writer.Append(", ");
+                }
                 writer.Append(TypedConstantParser.GetRawTypedConstantValue(args[i]));
             }
         }

@@ -23,7 +23,7 @@ internal static class CompileTimeGenericResolver
         var parameters = genericMethod.Parameters;
 
         // Match parameters with arguments
-        for (int i = 0; i < Math.Min(parameters.Length, argumentTypes.Length); i++)
+        for (var i = 0; i < Math.Min(parameters.Length, argumentTypes.Length); i++)
         {
             var parameterType = parameters[i].Type;
             var argumentType = argumentTypes[i];
@@ -95,7 +95,7 @@ internal static class CompileTimeGenericResolver
                 return false;
             }
 
-            for (int i = 0; i < paramTypeArgs.Length; i++)
+            for (var i = 0; i < paramTypeArgs.Length; i++)
             {
                 if (!TryInferTypeMapping(paramTypeArgs[i], argTypeArgs[i], typeMapping))
                 {

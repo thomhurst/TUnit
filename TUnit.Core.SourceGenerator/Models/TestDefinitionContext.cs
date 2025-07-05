@@ -101,14 +101,18 @@ public class TestDefinitionContext
         // - Attributes inheriting from AsyncDataSourceGeneratorAttribute (generate lambda to instantiate and call)
 
         if (attrName is "ArgumentsAttribute" or "MethodDataSourceAttribute")
+        {
             return true;
+        }
 
         // Check if it inherits from AsyncDataSourceGeneratorAttribute
         var baseType = attr.AttributeClass?.BaseType;
         while (baseType != null)
         {
             if (baseType.Name == "AsyncDataSourceGeneratorAttribute")
+            {
                 return true;
+            }
             baseType = baseType.BaseType;
         }
 

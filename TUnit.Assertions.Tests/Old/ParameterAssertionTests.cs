@@ -5,11 +5,11 @@ public class ParameterAssertionTests
     [Test]
     public async Task Greet_ShouldReturnCorrectGreeting_WhenAllParametersAreProvided()
     {
-        string name = "TUnit";
-        string greeting = "Hi";
-        string punctuation = "?";
+        var name = "TUnit";
+        var greeting = "Hi";
+        var punctuation = "?";
 
-        string result = Greet(name, greeting, punctuation);
+        var result = Greet(name, greeting, punctuation);
 
         await TUnitAssert.That(result).IsEqualTo("Hi, TUnit?");
     }
@@ -17,9 +17,9 @@ public class ParameterAssertionTests
     [Test]
     public async Task Greet_ShouldUseDefaultValues_WhenOptionalParametersAreNotProvided()
     {
-        string name = "TUnit";
+        var name = "TUnit";
 
-        string result = Greet(name);
+        var result = Greet(name);
 
         await TUnitAssert.That(result).IsEqualTo("Hello, TUnit!");
     }
@@ -27,10 +27,10 @@ public class ParameterAssertionTests
     [Test]
     public async Task Greet_ShouldUseDefaultForPunctuation_WhenOnlyGreetingIsProvided()
     {
-        string name = "TUnit";
-        string greeting = "Hi";
+        var name = "TUnit";
+        var greeting = "Hi";
 
-        string result = Greet(name, greeting);
+        var result = Greet(name, greeting);
 
         await TUnitAssert.That(result).IsEqualTo("Hi, TUnit!");
     }

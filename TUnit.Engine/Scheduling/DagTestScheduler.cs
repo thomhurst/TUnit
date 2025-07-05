@@ -29,7 +29,10 @@ public sealed class DagTestScheduler : ITestScheduler
         CancellationToken cancellationToken)
     {
         var testList = tests.ToList();
-        if (!testList.Any()) return;
+        if (!testList.Any())
+        {
+            return;
+        }
 
         // Build execution state
         var executionGraph = BuildExecutionGraph(testList);
@@ -92,12 +95,16 @@ public sealed class DagTestScheduler : ITestScheduler
         foreach (var dependencyId in state.Test.Dependencies.Select(d => d.TestId))
         {
             if (!graph.ContainsKey(dependencyId))
+            {
                 continue;
+            }
 
             if (!visited.Contains(dependencyId))
             {
                 if (HasCycle(dependencyId, graph, visited, recursionStack))
+                {
                     return true;
+                }
             }
             else if (recursionStack.Contains(dependencyId))
             {
@@ -155,12 +162,12 @@ public sealed class DagTestScheduler : ITestScheduler
         var workers = new Task[workerCount];
         var workStealingQueues = new WorkStealingQueue<TestExecutionState>[workerCount];
 
-        for (int i = 0; i < workerCount; i++)
+        for (var i = 0; i < workerCount; i++)
         {
             workStealingQueues[i] = new WorkStealingQueue<TestExecutionState>();
         }
 
-        for (int i = 0; i < workerCount; i++)
+        for (var i = 0; i < workerCount; i++)
         {
             var workerId = i;
             workers[i] = Task.Run(async () =>
@@ -234,7 +241,7 @@ public sealed class DagTestScheduler : ITestScheduler
     {
         state = null;
 
-        for (int i = 1; i < queues.Length; i++)
+        for (var i = 1; i < queues.Length; i++)
         {
             var targetId = (workerId + i) % queues.Length;
             if (queues[targetId].TrySteal(out state))

@@ -32,7 +32,7 @@ public partial class StringRegexAssertionTests
     public async Task Matches_WithValidPattern_GeneratedRegexPattern_Succeeds() 
     {
         var text = "Hello123World";
-        Regex regex = FindHello123WorldRegex();
+        var regex = FindHello123WorldRegex();
         
         await TUnitAssert.That(text).Matches(regex);
     }
@@ -50,7 +50,7 @@ public partial class StringRegexAssertionTests
     {
         Func<Task> action = async () => await TUnitAssert.That(text).Matches(pattern);
 
-        Exception? exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
+        var exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
         if (exceptionType != typeof(TUnitAssertionException))
         {
             return;
@@ -102,11 +102,11 @@ public partial class StringRegexAssertionTests
     [Arguments(typeof(TUnitAssertionException), "Hello123World")]
     public async Task Matches_WithInvalidPattern_GeneratedRegexPattern_Throws(Type exceptionType, string? text) 
     {
-        Regex regex = Matches_FindNumberRegex();
+        var regex = Matches_FindNumberRegex();
         
         Func<Task> action = async () => await TUnitAssert.That(text).Matches(regex);
 
-        Exception? exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
+        var exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
         if (exceptionType != typeof(TUnitAssertionException)) 
         {
             return;
@@ -171,7 +171,7 @@ public partial class StringRegexAssertionTests
     public async Task DoesNotMatch_WithValidPattern_GeneratedRegexPattern_Succeeds() 
     {
         var text = "Hello123World";
-        Regex regex = DoesNotMatch_FindNumberOnlyRegex();
+        var regex = DoesNotMatch_FindNumberOnlyRegex();
         
         await TUnitAssert.That(text).DoesNotMatch(regex);
     }
@@ -189,7 +189,7 @@ public partial class StringRegexAssertionTests
     {
         Func<Task> action = async () => await TUnitAssert.That(text).DoesNotMatch(pattern);
 
-        Exception? exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
+        var exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
         if (exceptionType != typeof(TUnitAssertionException))
         {
             return;
@@ -215,7 +215,7 @@ public partial class StringRegexAssertionTests
 
         Func<Task> action = async () => await TUnitAssert.That(text).DoesNotMatch(pattern);
 
-        Exception? exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
+        var exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
         if (exceptionType != typeof(TUnitAssertionException))
         {
             return;
@@ -241,11 +241,11 @@ public partial class StringRegexAssertionTests
     [Arguments(typeof(TUnitAssertionException), "123")]
     public async Task DoesNotMatch_WithInvalidPattern_GeneratedRegexPattern_Throws(Type exceptionType, string? text) 
     {
-        Regex regex = FindNumberRegex();
+        var regex = FindNumberRegex();
         
         Func<Task> action = async () => await TUnitAssert.That(text).DoesNotMatch(regex);
 
-        Exception? exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
+        var exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
         if (exceptionType != typeof(TUnitAssertionException)) 
         {
             return;

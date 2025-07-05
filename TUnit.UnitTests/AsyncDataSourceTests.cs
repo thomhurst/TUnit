@@ -58,7 +58,7 @@ public class AsyncDataSourceTests
     public static async IAsyncEnumerable<(int value, string text)> AsyncEnumerableWithCancellation(
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        for (int i = 0; i < 5; i++)
+        for (var i = 0; i < 5; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             await Task.Delay(10, cancellationToken);

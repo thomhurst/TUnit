@@ -53,7 +53,7 @@ internal class DependencyTracker
         }
 
         List<IDisposableReference>? dependencies = null;
-        bool hadDependencies = false;
+        var hadDependencies = false;
 
         lock (_lock)
         {

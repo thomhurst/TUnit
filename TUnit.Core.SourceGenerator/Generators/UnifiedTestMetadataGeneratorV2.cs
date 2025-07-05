@@ -122,26 +122,36 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         var methodSymbol = context.SemanticModel.GetDeclaredSymbol(methodSyntax);
 
         if (methodSymbol?.ContainingType == null)
+        {
             return null;
+        }
 
         var containingType = methodSymbol.ContainingType as INamedTypeSymbol;
         if (containingType == null)
+        {
             return null;
+        }
 
         // Skip abstract classes (cannot be instantiated)
         if (containingType.IsAbstract)
+        {
             return null;
+        }
 
         // Skip generic types without explicit instantiation
         // Check for open generic types (types with unbound type parameters)
         if (containingType.IsGenericType && containingType.TypeParameters.Length > 0)
+        {
             return null;
+        }
 
         // Also check if any type arguments are type parameters (e.g., T)
         if (containingType is INamedTypeSymbol namedType && namedType.IsGenericType)
         {
             if (namedType.TypeArguments.Any(arg => arg.TypeKind == TypeKind.TypeParameter))
+            {
                 return null;
+            }
         }
 
         // Check the entire type hierarchy for unresolved type parameters
@@ -149,12 +159,16 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         while (currentType != null)
         {
             if (currentType.TypeKind == TypeKind.TypeParameter)
+            {
                 return null;
+            }
 
             if (currentType is INamedTypeSymbol baseNamedType && baseNamedType.IsGenericType)
             {
                 if (baseNamedType.TypeArguments.Any(arg => arg.TypeKind == TypeKind.TypeParameter))
+                {
                     return null;
+                }
             }
 
             currentType = currentType.BaseType;
@@ -162,12 +176,16 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
 
         // Skip generic methods without explicit instantiation
         if (methodSymbol is IMethodSymbol method && method.IsGenericMethod)
+        {
             return null;
+        }
 
         // Also skip if method has parameters with unresolved type parameters
         if (methodSymbol is IMethodSymbol methodWithParams &&
             methodWithParams.Parameters.Any(p => DelegateGenerator.ContainsTypeParameter(p.Type)))
+        {
             return null;
+        }
 
         return new TestMethodMetadata
         {
@@ -184,14 +202,23 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         if (context.Node is ClassDeclarationSyntax classDecl)
         {
             var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDecl);
-            if (classSymbol == null) return null;
+            if (classSymbol == null)
+            {
+                return null;
+            }
 
             // Get all generic test methods in the class
             var namedTypeSymbol = classSymbol as INamedTypeSymbol;
-            if (namedTypeSymbol == null) return null;
+            if (namedTypeSymbol == null)
+            {
+                return null;
+            }
 
             // Skip abstract classes (cannot be instantiated)
-            if (namedTypeSymbol.IsAbstract) return null;
+            if (namedTypeSymbol.IsAbstract)
+            {
+                return null;
+            }
 
             var genericMethods = namedTypeSymbol.GetMembers()
                 .OfType<IMethodSymbol>()
@@ -204,11 +231,17 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             foreach (var attr in generateAttributes)
             {
                 var typeArgs = ExtractTypeArguments(attr);
-                if (typeArgs.Length == 0) continue;
+                if (typeArgs.Length == 0)
+                {
+                    continue;
+                }
 
                 foreach (var method in genericMethods)
                 {
-                    if (method.TypeParameters.Length != typeArgs.Length) continue;
+                    if (method.TypeParameters.Length != typeArgs.Length)
+                    {
+                        continue;
+                    }
 
                     // Create a constructed generic method
                     var constructedMethod = method.Construct(typeArgs);
@@ -235,11 +268,16 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         if (context.Node is ClassDeclarationSyntax classDecl)
         {
             var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
-            if (classSymbol == null || classSymbol.IsAbstract) return null;
+            if (classSymbol == null || classSymbol.IsAbstract)
+            {
+                return null;
+            }
 
             // Skip if explicit GenerateGenericTest attributes are present
             if (classSymbol.GetAttributes().Any(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute"))
+            {
                 return null;
+            }
 
             // Analyze generic test methods
             var genericMethods = classSymbol.GetMembers()
@@ -304,14 +342,22 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         else if (context.Node is MethodDeclarationSyntax methodDecl)
         {
             var methodSymbol = context.SemanticModel.GetDeclaredSymbol(methodDecl) as IMethodSymbol;
-            if (methodSymbol?.ContainingType == null) return null;
+            if (methodSymbol?.ContainingType == null)
+            {
+                return null;
+            }
 
             var containingType = methodSymbol.ContainingType as INamedTypeSymbol;
-            if (containingType == null || containingType.IsAbstract) return null;
+            if (containingType == null || containingType.IsAbstract)
+            {
+                return null;
+            }
 
             // Skip if explicit GenerateGenericTest attributes are present
             if (methodSymbol.GetAttributes().Any(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute"))
+            {
                 return null;
+            }
 
             if (methodSymbol.IsGenericMethod && HasTestAttribute(methodSymbol))
             {
@@ -347,7 +393,9 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
     private static ITypeSymbol[] ExtractTypeArguments(AttributeData attribute)
     {
         if (attribute.ConstructorArguments.Length == 0)
+        {
             return Array.Empty<ITypeSymbol>();
+        }
 
         var typeArgs = new List<ITypeSymbol>();
         foreach (var arg in attribute.ConstructorArguments)
@@ -474,7 +522,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         {
             // Report diagnostic with full stack trace for debugging
             var errorMessage = $"{ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
-            
+
             var diagnostic = Diagnostic.Create(
                 new DiagnosticDescriptor(
                     "TU0001",

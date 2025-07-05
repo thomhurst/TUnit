@@ -175,7 +175,7 @@ public sealed class TypeResolver
         if (declaringType?.IsGenericType == true)
         {
             var genericArgs = declaringType.GetGenericArguments();
-            for (int i = 0; i < genericArgs.Length; i++)
+            for (var i = 0; i < genericArgs.Length; i++)
             {
                 map[(i, false)] = genericArgs[i];
             }
@@ -185,7 +185,7 @@ public sealed class TypeResolver
         if (declaringMethod?.IsGenericMethodDefinition == true)
         {
             var genericArgs = declaringMethod.GetGenericArguments();
-            for (int i = 0; i < genericArgs.Length; i++)
+            for (var i = 0; i < genericArgs.Length; i++)
             {
                 map[(i, true)] = genericArgs[i];
             }

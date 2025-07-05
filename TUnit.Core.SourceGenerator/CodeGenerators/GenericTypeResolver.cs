@@ -71,7 +71,9 @@ public class GenericTypeResolver
     private ITypeSymbol[]? ExtractTypeArguments(AttributeData attribute)
     {
         if (attribute.ConstructorArguments.Length == 0)
+        {
             return null;
+        }
 
         // For params array attributes, the types are passed as individual arguments
         var types = new List<ITypeSymbol>();
@@ -101,16 +103,20 @@ public class GenericTypeResolver
     private bool ValidateTypeArguments(INamedTypeSymbol genericType, ITypeSymbol[] typeArguments)
     {
         if (genericType.TypeParameters.Length != typeArguments.Length)
+        {
             return false;
+        }
 
         // Validate constraints
-        for (int i = 0; i < genericType.TypeParameters.Length; i++)
+        for (var i = 0; i < genericType.TypeParameters.Length; i++)
         {
             var param = genericType.TypeParameters[i];
             var arg = typeArguments[i];
 
             if (!ValidateConstraints(param, arg))
+            {
                 return false;
+            }
         }
 
         return true;
@@ -128,23 +134,31 @@ public class GenericTypeResolver
                     c.Parameters.Length == 0 &&
                     c.DeclaredAccessibility == Accessibility.Public);
                 if (!hasDefaultCtor)
+                {
                     return false;
+                }
             }
         }
 
         // Check class/struct constraints
         if (parameter.HasReferenceTypeConstraint && argumentType.IsValueType)
+        {
             return false;
+        }
 
         if (parameter.HasValueTypeConstraint && !argumentType.IsValueType)
+        {
             return false;
+        }
 
         // Check base type constraints
         foreach (var constraintType in parameter.ConstraintTypes)
         {
             // Check if argumentType satisfies the constraint
             if (!SatisfiesConstraint(argumentType, constraintType))
+            {
                 return false;
+            }
         }
 
         return true;
@@ -154,7 +168,9 @@ public class GenericTypeResolver
     {
         // Check direct match
         if (SymbolEqualityComparer.Default.Equals(argumentType, constraintType))
+        {
             return true;
+        }
 
         // Check if argumentType inherits from or implements constraintType
         if (constraintType.TypeKind == TypeKind.Interface)
@@ -168,7 +184,9 @@ public class GenericTypeResolver
             while (baseType != null)
             {
                 if (SymbolEqualityComparer.Default.Equals(baseType, constraintType))
+                {
                     return true;
+                }
                 baseType = baseType.BaseType;
             }
         }

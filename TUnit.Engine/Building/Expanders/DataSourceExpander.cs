@@ -92,9 +92,18 @@ public sealed class DataSourceExpander : IDataSourceExpander
         }
 
         // Ensure we have at least one item in each collection
-        if (!classDataFactories.Any()) classDataFactories = new List<IEnumerable<Func<object?[]>>> { Array.Empty<Func<object?[]>>() };
-        if (!methodDataFactories.Any()) methodDataFactories = new List<IEnumerable<Func<object?[]>>> { Array.Empty<Func<object?[]>>() };
-        if (!propertyDataFactories.Any()) propertyDataFactories = new List<Dictionary<string, List<Func<object?>>>> { new Dictionary<string, List<Func<object?>>>() };
+        if (!classDataFactories.Any())
+        {
+            classDataFactories = new List<IEnumerable<Func<object?[]>>> { Array.Empty<Func<object?[]>>() };
+        }
+        if (!methodDataFactories.Any())
+        {
+            methodDataFactories = new List<IEnumerable<Func<object?[]>>> { Array.Empty<Func<object?[]>>() };
+        }
+        if (!propertyDataFactories.Any())
+        {
+            propertyDataFactories = new List<Dictionary<string, List<Func<object?>>>> { new Dictionary<string, List<Func<object?>>>() };
+        }
 
         // Generate all combinations
         var indices = new List<int>();
@@ -278,7 +287,7 @@ public sealed class DataSourceExpander : IDataSourceExpander
                 if (fields.Length > 0)
                 {
                     var unwrapped = new object?[fields.Length];
-                    for (int i = 0; i < fields.Length; i++)
+                    for (var i = 0; i < fields.Length; i++)
                     {
                         unwrapped[i] = fields[i].GetValue(args[0]);
                     }

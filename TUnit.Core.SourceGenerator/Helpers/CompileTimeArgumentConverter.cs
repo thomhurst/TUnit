@@ -135,7 +135,7 @@ public static class CompileTimeArgumentConverter
 
         var propertyAccessors = new string?[targetMethod.Parameters.Length];
 
-        for (int i = 0; i < targetMethod.Parameters.Length; i++)
+        for (var i = 0; i < targetMethod.Parameters.Length; i++)
         {
             var paramName = parameterNames[i];
             var matchingProperty = properties.FirstOrDefault(p =>

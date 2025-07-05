@@ -136,7 +136,10 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
     {
         public bool Equals(HookMethodMetadata? x, HookMethodMetadata? y)
         {
-            if (x == null || y == null) return x == y;
+            if (x == null || y == null)
+            {
+                return x == y;
+            }
 
             // Hooks are equal if they have the same method and are used by the same test class
             return SymbolEqualityComparer.Default.Equals(x.TypeSymbol, y.TypeSymbol) &&
@@ -145,7 +148,10 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
         public int GetHashCode(HookMethodMetadata obj)
         {
-            if (obj == null) return 0;
+            if (obj == null)
+            {
+                return 0;
+            }
 
             unchecked
             {
@@ -348,15 +354,25 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             // Generate the hook source implementation
             var interfaces = new List<string>();
             if (validHooks.Any(h => h.HookType == "Test"))
+            {
                 interfaces.Add("ITestHookSource");
+            }
             if (validHooks.Any(h => h.HookType == "Class"))
+            {
                 interfaces.Add("IClassHookSource");
+            }
             if (validHooks.Any(h => h.HookType == "Assembly"))
+            {
                 interfaces.Add("IAssemblyHookSource");
+            }
             if (validHooks.Any(h => h.HookType == "TestSession"))
+            {
                 interfaces.Add("ITestSessionHookSource");
+            }
             if (validHooks.Any(h => h.HookType == "TestDiscovery"))
+            {
                 interfaces.Add("ITestDiscoveryHookSource");
+            }
 
             var interfaceList = interfaces.Any() ? " : " + string.Join(", ", interfaces) : "";
             using (writer.BeginBlock($"public sealed class GeneratedHookSource{interfaceList}"))
@@ -390,19 +406,29 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
                     // Register for all implemented interfaces based on hooks found
                     if (validHooks.Any(h => h.HookType == "Test"))
+                    {
                         writer.AppendLine("global::TUnit.Core.SourceRegistrar.RegisterTestHookSource(source);");
+                    }
 
                     if (validHooks.Any(h => h.HookType == "Class"))
+                    {
                         writer.AppendLine("global::TUnit.Core.SourceRegistrar.RegisterClassHookSource(source);");
+                    }
 
                     if (validHooks.Any(h => h.HookType == "Assembly"))
+                    {
                         writer.AppendLine("global::TUnit.Core.SourceRegistrar.RegisterAssemblyHookSource(source);");
+                    }
 
                     if (validHooks.Any(h => h.HookType == "TestSession"))
+                    {
                         writer.AppendLine("global::TUnit.Core.SourceRegistrar.RegisterTestSessionHookSource(source);");
+                    }
 
                     if (validHooks.Any(h => h.HookType == "TestDiscovery"))
+                    {
                         writer.AppendLine("global::TUnit.Core.SourceRegistrar.RegisterTestDiscoveryHookSource(source);");
+                    }
                 }
             }
 
@@ -702,30 +728,46 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
         writer.AppendLine("public IReadOnlyList<InstanceHookMethod> CollectBeforeTestHooks(string sessionId)");
         if (hasBefore)
+        {
             writer.AppendLine($"    => {GetFieldName("Test", "Before")}.Cast<InstanceHookMethod>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<InstanceHookMethod>();");
+        }
         writer.AppendLine();
 
         writer.AppendLine("public IReadOnlyList<InstanceHookMethod> CollectAfterTestHooks(string sessionId)");
         if (hasAfter)
+        {
             writer.AppendLine($"    => {GetFieldName("Test", "After")}.Cast<InstanceHookMethod>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<InstanceHookMethod>();");
+        }
         writer.AppendLine();
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<TestContext>> CollectBeforeEveryTestHooks(string sessionId)");
         if (hasBeforeEvery)
+        {
             writer.AppendLine($"    => {GetFieldName("Test", "BeforeEvery")}.Cast<StaticHookMethod<TestContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<TestContext>>();");
+        }
         writer.AppendLine();
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<TestContext>> CollectAfterEveryTestHooks(string sessionId)");
         if (hasAfterEvery)
+        {
             writer.AppendLine($"    => {GetFieldName("Test", "AfterEvery")}.Cast<StaticHookMethod<TestContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<TestContext>>();");
+        }
         writer.AppendLine();
     }
 
@@ -738,30 +780,46 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<ClassHookContext>> CollectBeforeClassHooks(string sessionId)");
         if (hasBefore)
+        {
             writer.AppendLine($"    => {GetFieldName("Class", "Before")}.Cast<StaticHookMethod<ClassHookContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<ClassHookContext>>();");
+        }
         writer.AppendLine();
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<ClassHookContext>> CollectAfterClassHooks(string sessionId)");
         if (hasAfter)
+        {
             writer.AppendLine($"    => {GetFieldName("Class", "After")}.Cast<StaticHookMethod<ClassHookContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<ClassHookContext>>();");
+        }
         writer.AppendLine();
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<ClassHookContext>> CollectBeforeEveryClassHooks(string sessionId)");
         if (hasBeforeEvery)
+        {
             writer.AppendLine($"    => {GetFieldName("Class", "BeforeEvery")}.Cast<StaticHookMethod<ClassHookContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<ClassHookContext>>();");
+        }
         writer.AppendLine();
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<ClassHookContext>> CollectAfterEveryClassHooks(string sessionId)");
         if (hasAfterEvery)
+        {
             writer.AppendLine($"    => {GetFieldName("Class", "AfterEvery")}.Cast<StaticHookMethod<ClassHookContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<ClassHookContext>>();");
+        }
         writer.AppendLine();
     }
 
@@ -774,30 +832,46 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<AssemblyHookContext>> CollectBeforeAssemblyHooks(string sessionId)");
         if (hasBefore)
+        {
             writer.AppendLine($"    => {GetFieldName("Assembly", "Before")}.Cast<StaticHookMethod<AssemblyHookContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<AssemblyHookContext>>();");
+        }
         writer.AppendLine();
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<AssemblyHookContext>> CollectAfterAssemblyHooks(string sessionId)");
         if (hasAfter)
+        {
             writer.AppendLine($"    => {GetFieldName("Assembly", "After")}.Cast<StaticHookMethod<AssemblyHookContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<AssemblyHookContext>>();");
+        }
         writer.AppendLine();
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<AssemblyHookContext>> CollectBeforeEveryAssemblyHooks(string sessionId)");
         if (hasBeforeEvery)
+        {
             writer.AppendLine($"    => {GetFieldName("Assembly", "BeforeEvery")}.Cast<StaticHookMethod<AssemblyHookContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<AssemblyHookContext>>();");
+        }
         writer.AppendLine();
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<AssemblyHookContext>> CollectAfterEveryAssemblyHooks(string sessionId)");
         if (hasAfterEvery)
+        {
             writer.AppendLine($"    => {GetFieldName("Assembly", "AfterEvery")}.Cast<StaticHookMethod<AssemblyHookContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<AssemblyHookContext>>();");
+        }
         writer.AppendLine();
     }
 
@@ -808,16 +882,24 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<TestSessionContext>> CollectBeforeTestSessionHooks(string sessionId)");
         if (hasBefore)
+        {
             writer.AppendLine($"    => {GetFieldName("TestSession", "Before")}.Cast<StaticHookMethod<TestSessionContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<TestSessionContext>>();");
+        }
         writer.AppendLine();
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<TestSessionContext>> CollectAfterTestSessionHooks(string sessionId)");
         if (hasAfter)
+        {
             writer.AppendLine($"    => {GetFieldName("TestSession", "After")}.Cast<StaticHookMethod<TestSessionContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<TestSessionContext>>();");
+        }
         writer.AppendLine();
     }
 
@@ -828,16 +910,24 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks(string sessionId)");
         if (hasBefore)
+        {
             writer.AppendLine($"    => {GetFieldName("TestDiscovery", "Before")}.Cast<StaticHookMethod<BeforeTestDiscoveryContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<BeforeTestDiscoveryContext>>();");
+        }
         writer.AppendLine();
 
         writer.AppendLine("public IReadOnlyList<StaticHookMethod<TestDiscoveryContext>> CollectAfterTestDiscoveryHooks(string sessionId)");
         if (hasAfter)
+        {
             writer.AppendLine($"    => {GetFieldName("TestDiscovery", "After")}.Cast<StaticHookMethod<TestDiscoveryContext>>().ToList();");
+        }
         else
+        {
             writer.AppendLine("    => Array.Empty<StaticHookMethod<TestDiscoveryContext>>();");
+        }
         writer.AppendLine();
     }
 

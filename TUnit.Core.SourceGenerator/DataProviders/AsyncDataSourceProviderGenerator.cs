@@ -37,7 +37,9 @@ public class AsyncDataSourceProviderGenerator : IDataProviderGenerator
         while (baseType != null)
         {
             if (baseType.Name == "AsyncDataSourceGeneratorAttribute")
+            {
                 return true;
+            }
             baseType = baseType.BaseType;
         }
         return false;
@@ -65,9 +67,12 @@ public class AsyncDataSourceProviderGenerator : IDataProviderGenerator
         if (constructor != null)
         {
             var parameters = constructor.Parameters;
-            for (int i = 0; i < parameters.Length; i++)
+            for (var i = 0; i < parameters.Length; i++)
             {
-                if (i > 0) writer.Append(", ");
+                if (i > 0)
+                {
+                    writer.Append(", ");
+                }
                 var param = parameters[i];
                 var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
                 writer.Append($"new TUnit.Core.ParameterMetadata(typeof({paramType})) {{ ");
@@ -99,9 +104,12 @@ public class AsyncDataSourceProviderGenerator : IDataProviderGenerator
         writer.Append("MembersToGenerate = new TUnit.Core.MemberMetadata[] { ");
 
         var parameters = context.TestInfo.MethodSymbol.Parameters;
-        for (int i = 0; i < parameters.Length; i++)
+        for (var i = 0; i < parameters.Length; i++)
         {
-            if (i > 0) writer.Append(", ");
+            if (i > 0)
+            {
+                writer.Append(", ");
+            }
             var param = parameters[i];
             var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
             writer.Append($"new TUnit.Core.ParameterMetadata(typeof({paramType})) {{ ");

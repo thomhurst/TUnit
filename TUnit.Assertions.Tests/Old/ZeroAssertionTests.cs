@@ -6,7 +6,7 @@ public class ZeroAssertionTests
     [Test]
     public async Task Int()
     {
-        int zero = 0;
+        var zero = 0;
         await TUnitAssert.That<long>(zero).IsEqualTo(0);
     }
 
@@ -27,7 +27,7 @@ public class ZeroAssertionTests
     [Test]
     public async Task Int_Bad()
     {
-        int zero = 1;
+        var zero = 1;
         await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await Assert.That<long>(zero).IsEqualTo(0));
     }
 

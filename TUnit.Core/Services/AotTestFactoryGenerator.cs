@@ -322,37 +322,59 @@ public class AotTestFactoryGenerator
     private static string GetTypeName(Type type)
     {
         if (type == typeof(void))
+        {
             return "void";
+        }
 
         if (type == typeof(string))
+        {
             return "string";
+        }
 
         if (type == typeof(int))
+        {
             return "int";
+        }
 
         if (type == typeof(bool))
+        {
             return "bool";
+        }
 
         if (type == typeof(double))
+        {
             return "double";
+        }
 
         if (type == typeof(float))
+        {
             return "float";
+        }
 
         if (type == typeof(long))
+        {
             return "long";
+        }
 
         if (type == typeof(short))
+        {
             return "short";
+        }
 
         if (type == typeof(byte))
+        {
             return "byte";
+        }
 
         if (type == typeof(char))
+        {
             return "char";
+        }
 
         if (type == typeof(decimal))
+        {
             return "decimal";
+        }
 
         if (type.IsGenericType)
         {

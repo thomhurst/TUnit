@@ -28,7 +28,7 @@ public class GenericTypeResolver : IGenericTypeResolver
         var typeMapping = new Dictionary<Type, Type>();
 
         // Infer types from arguments
-        for (int i = 0; i < methodParameters.Length && i < runtimeArguments.Length; i++)
+        for (var i = 0; i < methodParameters.Length && i < runtimeArguments.Length; i++)
         {
             var parameterType = methodParameters[i].ParameterType;
             var argumentValue = runtimeArguments[i];
@@ -53,7 +53,7 @@ public class GenericTypeResolver : IGenericTypeResolver
 
         // Resolve all generic parameters
         var resolvedTypes = new Type[genericParameters.Length];
-        for (int i = 0; i < genericParameters.Length; i++)
+        for (var i = 0; i < genericParameters.Length; i++)
         {
             var genericParam = genericParameters[i];
             if (!typeMapping.TryGetValue(genericParam, out var resolvedType))
@@ -103,9 +103,9 @@ public class GenericTypeResolver : IGenericTypeResolver
             if (parameters.Length == constructorArguments.Length)
             {
                 typeMapping.Clear();
-                bool allMatched = true;
+                var allMatched = true;
 
-                for (int i = 0; i < parameters.Length; i++)
+                for (var i = 0; i < parameters.Length; i++)
                 {
                     var parameterType = parameters[i].ParameterType;
                     var argumentValue = constructorArguments[i];
@@ -130,7 +130,7 @@ public class GenericTypeResolver : IGenericTypeResolver
 
         // Resolve all generic parameters
         var resolvedTypes = new Type[genericParameters.Length];
-        for (int i = 0; i < genericParameters.Length; i++)
+        for (var i = 0; i < genericParameters.Length; i++)
         {
             var genericParam = genericParameters[i];
             if (!typeMapping.TryGetValue(genericParam, out var resolvedType))
@@ -198,8 +198,8 @@ public class GenericTypeResolver : IGenericTypeResolver
 
                 if (paramGenericArgs.Length == argGenericArgs.Length)
                 {
-                    bool allMatched = true;
-                    for (int i = 0; i < paramGenericArgs.Length; i++)
+                    var allMatched = true;
+                    for (var i = 0; i < paramGenericArgs.Length; i++)
                     {
                         if (!TryInferTypeMapping(paramGenericArgs[i], argGenericArgs[i], typeMapping))
                         {
@@ -218,7 +218,7 @@ public class GenericTypeResolver : IGenericTypeResolver
 
     private void ValidateGenericConstraints(Type[] genericParameters, Type[] resolvedTypes)
     {
-        for (int i = 0; i < genericParameters.Length; i++)
+        for (var i = 0; i < genericParameters.Length; i++)
         {
             var genericParam = genericParameters[i];
             var resolvedType = resolvedTypes[i];

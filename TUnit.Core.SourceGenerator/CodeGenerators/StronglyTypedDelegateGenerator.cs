@@ -37,7 +37,9 @@ public class StronglyTypedDelegateGenerator
         {
             var methodKey = GetMethodKey(testMethod);
             if (processedMethods.Contains(methodKey))
+            {
                 continue;
+            }
 
             processedMethods.Add(methodKey);
             GenerateTestDelegate(testMethod, diagnosticContext);

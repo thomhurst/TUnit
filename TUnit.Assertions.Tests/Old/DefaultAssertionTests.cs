@@ -16,7 +16,7 @@ public class DefaultAssertionTests
     {
         await TUnitAssert.That(async () =>
         {
-            string? s = "1";
+            var s = "1";
             await TUnitAssert.That(s).IsDefault();
         }).Throws<TUnitAssertionException>();
     }
@@ -24,7 +24,7 @@ public class DefaultAssertionTests
     [Test]
     public async Task IsDefault_ValueType_Integer_Default()
     {
-        int x = 0;
+        var x = 0;
         await TUnitAssert.That(x).IsDefault();
     }
 
@@ -33,7 +33,7 @@ public class DefaultAssertionTests
     {
         await TUnitAssert.That(async () =>
         {
-            int x = 1;
+            var x = 1;
             await TUnitAssert.That(x).IsDefault();
         }).Throws<TUnitAssertionException>();
     }
@@ -68,7 +68,7 @@ public class DefaultAssertionTests
     [Test]
     public async Task IsNotDefault_ReferenceType_NotDefault()
     {
-        string? s = "1";
+        var s = "1";
         await TUnitAssert.That(s).IsNotDefault();
     }
 
@@ -77,7 +77,7 @@ public class DefaultAssertionTests
     {
         await TUnitAssert.That(async () =>
         {
-            int x = 0;
+            var x = 0;
             await TUnitAssert.That(x).IsNotDefault();
         }).Throws<TUnitAssertionException>();
     }
@@ -85,7 +85,7 @@ public class DefaultAssertionTests
     [Test]
     public async Task IsNotDefault_ValueType_Integer_NotDefault()
     {
-        int x = 1;
+        var x = 1;
         await TUnitAssert.That(x).IsNotDefault();
     }
 

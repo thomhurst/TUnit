@@ -33,13 +33,21 @@ internal static class ReflectionTestExample
             Console.WriteLine($"    Class: {test.TestClassType.Name}");
             Console.WriteLine($"    Method: {test.TestMethodName}");
             if (test.Categories.Length > 0)
+            {
                 Console.WriteLine($"    Categories: {string.Join(", ", test.Categories)}");
+            }
             if (test.IsSkipped)
+            {
                 Console.WriteLine($"    Skipped: {test.SkipReason}");
+            }
             if (test.TimeoutMs.HasValue)
+            {
                 Console.WriteLine($"    Timeout: {test.TimeoutMs}ms");
+            }
             if (test.DataSources.Length > 0)
+            {
                 Console.WriteLine($"    Data Sources: {test.DataSources.Length}");
+            }
         }
     }
 }

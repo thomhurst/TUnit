@@ -193,7 +193,7 @@ internal static class CodeGenerationHelpers
         {
             var argStrings = new List<string>();
 
-            for (int i = 0; i < attr.ConstructorArguments.Length; i++)
+            for (var i = 0; i < attr.ConstructorArguments.Length; i++)
             {
                 var arg = attr.ConstructorArguments[i];
 
@@ -753,8 +753,14 @@ internal static class CodeGenerationHelpers
     {
         // For now, we'll use a conservative approach and only optimize static methods
         // with simple return types that are clearly data sources
-        if (!method.IsStatic) return false;
-        if (method.Parameters.Length > 0) return false;
+        if (!method.IsStatic)
+        {
+            return false;
+        }
+        if (method.Parameters.Length > 0)
+        {
+            return false;
+        }
 
         var returnType = method.ReturnType;
 
@@ -822,7 +828,10 @@ internal static class CodeGenerationHelpers
             // For instance properties, check if the containing type has a parameterless constructor
             var containingType = property.ContainingType;
             var hasParameterlessConstructor = containingType.Constructors.Any(c => c.Parameters.Length == 0);
-            if (!hasParameterlessConstructor) return false;
+            if (!hasParameterlessConstructor)
+            {
+                return false;
+            }
         }
 
         var returnType = property.Type;

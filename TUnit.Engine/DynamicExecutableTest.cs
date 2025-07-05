@@ -33,7 +33,7 @@ internal sealed class DynamicExecutableTest : ExecutableTest
         var hasCancellationToken = false;
         var cancellationTokenIndex = -1;
         
-        for (int i = 0; i < parameterTypes.Length; i++)
+        for (var i = 0; i < parameterTypes.Length; i++)
         {
             if (parameterTypes[i] == typeof(CancellationToken))
             {
@@ -49,7 +49,7 @@ internal sealed class DynamicExecutableTest : ExecutableTest
             var argsWithToken = new object?[Arguments.Length + 1];
             
             // Copy arguments before the CancellationToken position
-            for (int i = 0; i < cancellationTokenIndex && i < Arguments.Length; i++)
+            for (var i = 0; i < cancellationTokenIndex && i < Arguments.Length; i++)
             {
                 argsWithToken[i] = Arguments[i];
             }
@@ -58,7 +58,7 @@ internal sealed class DynamicExecutableTest : ExecutableTest
             argsWithToken[cancellationTokenIndex] = cancellationToken;
             
             // Copy remaining arguments
-            for (int i = cancellationTokenIndex; i < Arguments.Length; i++)
+            for (var i = cancellationTokenIndex; i < Arguments.Length; i++)
             {
                 argsWithToken[i + 1] = Arguments[i];
             }

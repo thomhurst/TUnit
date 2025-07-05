@@ -68,7 +68,7 @@ public abstract class StringMatcher
 
         private static string WildcardToRegularExpression(string value)
         {
-            string regex = Regex.Escape(value)
+            var regex = Regex.Escape(value)
                 .Replace("\\?", ".")
                 .Replace("\\*", ".*");
             return $"^{regex}$";
@@ -93,7 +93,7 @@ public abstract class StringMatcher
                 return false;
             }
 
-            RegexOptions options = RegexOptions.Multiline;
+            var options = RegexOptions.Multiline;
             if (_ignoreCase)
             {
                 options |= RegexOptions.IgnoreCase;

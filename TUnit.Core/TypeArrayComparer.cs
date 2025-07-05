@@ -24,18 +24,30 @@ public sealed class TypeArrayComparer : IEqualityComparer<Type[]>
     public bool Equals(Type[]? x, Type[]? y)
     {
         // Fast reference equality check
-        if (ReferenceEquals(x, y)) return true;
-        
-        // Handle null cases
-        if (x is null || y is null) return false;
-        
-        // Check length first (fastest check)
-        if (x.Length != y.Length) return false;
-        
-        // Compare each type
-        for (int i = 0; i < x.Length; i++)
+        if (ReferenceEquals(x, y))
         {
-            if (x[i] != y[i]) return false;
+            return true;
+        }
+
+        // Handle null cases
+        if (x is null || y is null)
+        {
+            return false;
+        }
+
+        // Check length first (fastest check)
+        if (x.Length != y.Length)
+        {
+            return false;
+        }
+
+        // Compare each type
+        for (var i = 0; i < x.Length; i++)
+        {
+            if (x[i] != y[i])
+            {
+                return false;
+            }
         }
         
         return true;
@@ -46,12 +58,15 @@ public sealed class TypeArrayComparer : IEqualityComparer<Type[]>
     /// </summary>
     public int GetHashCode(Type[] obj)
     {
-        if (obj is null) return 0;
-        
+        if (obj is null)
+        {
+            return 0;
+        }
+
         // Use simple but effective hash combination for .NET Standard 2.0 compatibility
         unchecked
         {
-            int hash = 17;
+            var hash = 17;
             foreach (var type in obj)
             {
                 hash = hash * 31 + (type?.GetHashCode() ?? 0);

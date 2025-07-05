@@ -29,7 +29,7 @@ public abstract class TestDataSource : IDataSource
     {
         return GetDataFactories();
     }
-    
+
     /// <summary>
     /// Helper method to clone arguments for test isolation
     /// </summary>
@@ -135,10 +135,10 @@ public sealed class AsyncDelegateDataSource : TestDataSource
     private static IEnumerable<object?[]> ConvertToSync(Func<CancellationToken, IAsyncEnumerable<object?[]>> asyncFactory)
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
-        
+
         var asyncEnumerable = asyncFactory(cts.Token);
         var enumerator = asyncEnumerable.GetAsyncEnumerator(cts.Token);
-        
+
         try
         {
             while (true)
@@ -152,10 +152,12 @@ public sealed class AsyncDelegateDataSource : TestDataSource
                 {
                     throw new TimeoutException("Data source generation timed out");
                 }
-                
+
                 if (!moveNextTask.Result)
+                {
                     break;
-                    
+                }
+
                 yield return enumerator.Current;
             }
         }
@@ -193,7 +195,7 @@ public sealed class TaskDelegateDataSource : TestDataSource
 
         var task = _taskFactory();
         task.Wait(TimeSpan.FromMinutes(5));
-        
+
         var dataArrays = task.Result.ToArray();
         var factories = dataArrays.Select(args => new Func<object?[]>(() => CloneArguments(args))).ToList();
 

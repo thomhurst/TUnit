@@ -209,7 +209,7 @@ public class STAThreadTests
 
     private async IAsyncEnumerable<int> GetAsyncEnumerable()
     {
-        for (int i = 1; i <= 3; i++)
+        for (var i = 1; i <= 3; i++)
         {
             await Task.Delay(1);
             yield return i;

@@ -34,12 +34,16 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         var methodSymbol = context.SemanticModel.GetDeclaredSymbol(methodDeclaration);
 
         if (methodSymbol == null || !IsTestMethod(methodSymbol))
+        {
             return;
+        }
 
         // Skip test methods in abstract classes - they can't be instantiated directly
         // and type inference happens when concrete classes inherit from them
         if (methodSymbol.ContainingType.IsAbstract)
+        {
             return;
+        }
 
         // Check for generic test methods without explicit instantiation
         if (methodSymbol.IsGenericMethod)
@@ -93,12 +97,16 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclaration);
 
         if (classSymbol == null || !classSymbol.IsGenericType)
+        {
             return;
+        }
 
         // Skip abstract classes - they can't be instantiated directly and type inference
         // happens when concrete classes inherit from them with actual data sources
         if (classSymbol.IsAbstract)
+        {
             return;
+        }
 
         // Check if this class contains test methods
         var testMethods = classSymbol.GetMembers()
@@ -107,7 +115,9 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             .ToList();
 
         if (!testMethods.Any())
+        {
             return;
+        }
 
         // Check for generic test class without explicit instantiation
         if (classSymbol.TypeParameters.Length > 0)
@@ -142,7 +152,9 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         var attributeSymbol = context.SemanticModel.GetSymbolInfo(attribute).Symbol;
 
         if (attributeSymbol?.ContainingType == null)
+        {
             return;
+        }
 
         var attributeTypeName = attributeSymbol.ContainingType.Name;
 
@@ -324,12 +336,16 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
     private static bool IsMethodDataSourceDynamic(SyntaxNodeAnalysisContext context, AttributeSyntax attribute)
     {
         if (attribute.ArgumentList?.Arguments.Count == 0)
+        {
             return true; // No arguments means it can't be statically resolved
+        }
 
         var firstArgument = attribute.ArgumentList?.Arguments[0];
         if (firstArgument == null)
+        {
             return true;
-        
+        }
+
         // Check if first argument is nameof() - this is AOT-compatible
         if (firstArgument.Expression is InvocationExpressionSyntax invocation &&
             invocation.Expression is IdentifierNameSyntax identifier &&

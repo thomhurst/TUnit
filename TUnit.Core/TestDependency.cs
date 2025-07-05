@@ -94,7 +94,9 @@ public sealed class TestDependency : IEquatable<TestDependency>
                         currentType = currentType.BaseType;
                     }
                     if (!found)
+                    {
                         return false;
+                    }
                 }
             }
             else if (!ClassType.IsAssignableFrom(testClassType))
@@ -109,34 +111,44 @@ public sealed class TestDependency : IEquatable<TestDependency>
                     ? testClassType.GetGenericArguments().Length 
                     : 0;
                 if (testGenericArgs != ClassGenericArity)
+                {
                     return false;
+                }
             }
         }
         else if (dependentTest != null)
         {
             // If no ClassType specified, assume same class as dependent test
             if (test.TestClassType != dependentTest.TestClassType)
+            {
                 return false;
+            }
         }
         
         // If MethodName is specified, it must match
         if (!string.IsNullOrEmpty(MethodName))
         {
             if (test.TestMethodName != MethodName)
+            {
                 return false;
-                
+            }
+
             // Check method parameters if specified
             if (MethodParameters != null)
             {
                 var testParams = test.TestMethodParameterTypes ?? Array.Empty<string>();
                 if (testParams.Length != MethodParameters.Length)
+                {
                     return false;
-                    
+                }
+
                 // Compare parameter types
-                for (int i = 0; i < MethodParameters.Length; i++)
+                for (var i = 0; i < MethodParameters.Length; i++)
                 {
                     if (testParams[i] != MethodParameters[i].FullName)
+                    {
                         return false;
+                    }
                 }
             }
             
@@ -153,7 +165,9 @@ public sealed class TestDependency : IEquatable<TestDependency>
         {
             // If depending on all tests in a class, exclude self
             if (test.TestId == dependentTest.TestId)
+            {
                 return false;
+            }
         }
         
         return true;
@@ -161,9 +175,15 @@ public sealed class TestDependency : IEquatable<TestDependency>
     
     public bool Equals(TestDependency? other)
     {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-        
+        if (other is null)
+        {
+            return false;
+        }
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return ClassType == other.ClassType &&
                ClassGenericArity == other.ClassGenericArity &&
                MethodName == other.MethodName &&
@@ -200,16 +220,22 @@ public sealed class TestDependency : IEquatable<TestDependency>
         {
             parts.Add($"Class={ClassType.Name}");
             if (ClassGenericArity > 0)
+            {
                 parts.Add($"ClassGenericArity={ClassGenericArity}");
+            }
         }
         
         if (!string.IsNullOrEmpty(MethodName))
         {
             parts.Add($"Method={MethodName}");
             if (MethodGenericArity > 0)
+            {
                 parts.Add($"MethodGenericArity={MethodGenericArity}");
+            }
             if (MethodParameters?.Length > 0)
+            {
                 parts.Add($"Params=[{string.Join(", ", MethodParameters.Select(p => p.Name))}]");
+            }
         }
         
         return $"TestDependency({string.Join(", ", parts)})";

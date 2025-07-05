@@ -89,25 +89,33 @@ public class TestMetadataGenerationContext
         // Can use static definition if:
         // 1. The type is not generic
         if (testInfo.TypeSymbol.IsGenericType)
+        {
             return false;
+        }
 
         // 2. The method is not generic
         if (testInfo.MethodSymbol.IsGenericMethod)
+        {
             return false;
+        }
 
         // 3. No data sources that require runtime resolution
         // Check class-level attributes for data sources
         foreach (var attr in testInfo.TypeSymbol.GetAttributes())
         {
             if (IsRuntimeDataSourceAttribute(attr, testInfo.TypeSymbol))
+            {
                 return false;
+            }
         }
 
         // Check method-level attributes for data sources
         foreach (var attr in testInfo.MethodSymbol.GetAttributes())
         {
             if (IsRuntimeDataSourceAttribute(attr, testInfo.TypeSymbol))
+            {
                 return false;
+            }
         }
 
         // Check method parameters for data attributes
@@ -117,7 +125,9 @@ public class TestMetadataGenerationContext
             {
                 // Check if it's a data source attribute that requires runtime resolution
                 if (IsRuntimeDataSourceAttribute(attr, testInfo.TypeSymbol))
+                {
                     return false;
+                }
             }
         }
 
@@ -132,7 +142,9 @@ public class TestMetadataGenerationContext
                 foreach (var attr in param.GetAttributes())
                 {
                     if (IsRuntimeDataSourceAttribute(attr, testInfo.TypeSymbol))
+                    {
                         return false;
+                    }
                 }
             }
         }
@@ -144,7 +156,9 @@ public class TestMetadataGenerationContext
             foreach (var attr in prop.GetAttributes())
             {
                 if (IsRuntimeDataSourceAttribute(attr, testInfo.TypeSymbol))
+                {
                     return false;
+                }
             }
         }
 
@@ -161,7 +175,9 @@ public class TestMetadataGenerationContext
         // - Attributes inheriting from AsyncDataSourceGeneratorAttribute (async generation)
         // - Attributes inheriting from DataSourceGeneratorAttribute (dynamic generation)
         if (attrName is "GeneratedDataAttribute")
+        {
             return true;
+        }
 
         // Check if it inherits from async/sync data source generator attributes
         var baseType = attr.AttributeClass?.BaseType;
@@ -170,7 +186,9 @@ public class TestMetadataGenerationContext
             var baseName = baseType.Name;
             if (baseName is "AsyncDataSourceGeneratorAttribute" or "DataSourceGeneratorAttribute"
                 or "AsyncNonTypedDataSourceGeneratorAttribute" or "NonTypedDataSourceGeneratorAttribute")
+            {
                 return true;
+            }
             baseType = baseType.BaseType;
         }
 

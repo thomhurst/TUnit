@@ -50,16 +50,20 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
     private bool IsDataSourceAttribute(AttributeData attribute)
     {
         if (attribute.AttributeClass == null)
+        {
             return false;
-            
+        }
+
         var className = attribute.AttributeClass.Name;
         
         // Direct attribute types
         if (className == "ArgumentsAttribute" || 
             className == "ClassDataSourceAttribute" ||
             className == "MethodDataSourceAttribute")
+        {
             return true;
-            
+        }
+
         // Check if it inherits from AsyncDataSourceGeneratorAttribute
         return InheritsFromAsyncDataSourceGenerator(attribute.AttributeClass);
     }
@@ -68,8 +72,10 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
     {
         // Check interfaces
         if (type.AllInterfaces.Any(i => i.ToDisplayString() == "TUnit.Core.IAsyncDataSourceGeneratorAttribute"))
+        {
             return true;
-            
+        }
+
         // Check base types
         var baseType = type.BaseType;
         while (baseType != null)
@@ -92,8 +98,10 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
         DataSourceLevel level, TestMethodMetadata testContext)
     {
         if (attribute.AttributeClass == null)
+        {
             return null;
-            
+        }
+
         var className = attribute.AttributeClass.Name;
         
         return className switch
@@ -129,16 +137,20 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
     {
         var methodName = attribute.ConstructorArguments.FirstOrDefault().Value?.ToString();
         if (string.IsNullOrEmpty(methodName))
+        {
             return null;
-            
+        }
+
         var sourceType = GetSourceType(symbol, testContext);
         var methodSymbol = sourceType.GetMembers(methodName!)
             .OfType<IMethodSymbol>()
             .FirstOrDefault();
             
         if (methodSymbol == null)
+        {
             return null;
-            
+        }
+
         var key = GenerateKey(symbol, level, $"Method_{methodName}", 0);
         
         return new ExtractedDataSource
@@ -157,14 +169,18 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
         DataSourceLevel level, TestMethodMetadata testContext)
     {
         if (property == null)
+        {
             return null;
-            
+        }
+
         var dataSourceAttribute = property.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "DataSourceForAttribute");
             
         if (dataSourceAttribute == null)
+        {
             return null;
-            
+        }
+
         var key = GenerateKey(property, level, $"Property_{property.Name}", 0);
         
         return new ExtractedDataSource
@@ -227,8 +243,10 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
         {
             // Check for IAsyncEnumerable<T>
             if (namedType.IsGenericType && namedType.Name == "IAsyncEnumerable")
+            {
                 return true;
-                
+            }
+
             // Check for Task<IEnumerable<T>> or ValueTask<IEnumerable<T>>
             if ((namedType.Name == "Task" || namedType.Name == "ValueTask") && namedType.IsGenericType)
             {

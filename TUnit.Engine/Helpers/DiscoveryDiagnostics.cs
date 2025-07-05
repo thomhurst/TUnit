@@ -14,7 +14,10 @@ internal static class DiscoveryDiagnostics
 
     public static void RecordEvent(string eventName, string details = "")
     {
-        if (!IsEnabled) return;
+        if (!IsEnabled)
+        {
+            return;
+        }
 
         lock (_lock)
         {
@@ -58,7 +61,10 @@ internal static class DiscoveryDiagnostics
 
     public static void DumpDiagnostics()
     {
-        if (!IsEnabled) return;
+        if (!IsEnabled)
+        {
+            return;
+        }
 
         lock (_lock)
         {

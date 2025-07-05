@@ -106,7 +106,9 @@ public class HookSystemEnhancer
         if (orderAttribute?.ConstructorArguments.Length > 0)
         {
             if (orderAttribute.ConstructorArguments[0].Value is int order)
+            {
                 return order;
+            }
         }
 
         return 0;

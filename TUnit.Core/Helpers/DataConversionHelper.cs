@@ -98,7 +98,7 @@ public static class DataConversionHelper
                     {
                         // Use ITuple interface to access elements
                         var tupleItems = new object?[tuple.Length];
-                        for (int i = 0; i < tuple.Length; i++)
+                        for (var i = 0; i < tuple.Length; i++)
                         {
                             tupleItems[i] = tuple[i];
                         }
@@ -222,10 +222,12 @@ public static class DataConversionHelper
     public static object?[] UnwrapTuple(ITuple tuple)
     {
         if (tuple == null)
+        {
             throw new ArgumentNullException(nameof(tuple));
-            
+        }
+
         var result = new object?[tuple.Length];
-        for (int i = 0; i < tuple.Length; i++)
+        for (var i = 0; i < tuple.Length; i++)
         {
             result[i] = tuple[i];
         }

@@ -27,7 +27,7 @@ public class Tests
     [Category("Pass")]
     public async Task LessThan()
     {
-        int value = 1;
+        var value = 1;
         await Assert.That(value).IsLessThan(2);
     }
 

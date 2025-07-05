@@ -41,7 +41,9 @@ public sealed class AdaptiveParallelismStrategy : IParallelismStrategy
         lock (_lock)
         {
             if (DateTime.UtcNow - _lastAdjustment < _adjustmentInterval)
+            {
                 return;
+            }
 
             var currentThroughput = CalculateThroughput(metrics);
 

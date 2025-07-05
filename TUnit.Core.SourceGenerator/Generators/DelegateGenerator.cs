@@ -22,8 +22,10 @@ internal sealed class DelegateGenerator
         {
             // Skip generic methods - they need special handling
             if (testInfo.MethodSymbol.IsGenericMethod)
+            {
                 continue;
-                
+            }
+
             GenerateInstanceFactoryRegistration(writer, testInfo);
             GenerateTestInvokerRegistration(writer, testInfo);
         }
@@ -104,7 +106,7 @@ internal sealed class DelegateGenerator
         
         // Generate parameter unpacking
         var parameters = testInfo.MethodSymbol.Parameters;
-        for (int i = 0; i < parameters.Length; i++)
+        for (var i = 0; i < parameters.Length; i++)
         {
             var param = parameters[i];
             var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -170,7 +172,7 @@ internal sealed class DelegateGenerator
         }
 
         var argList = new List<string>();
-        for (int i = 0; i < constructor.Parameters.Length; i++)
+        for (var i = 0; i < constructor.Parameters.Length; i++)
         {
             var param = constructor.Parameters[i];
             
@@ -215,8 +217,10 @@ internal sealed class DelegateGenerator
         {
             // Check if it's a required property
             if (!member.IsRequired)
+            {
                 continue;
-                
+            }
+
             // Check if it has any data source attributes
             var hasDataSourceAttr = member.GetAttributes().Any(a => 
                 a.AttributeClass?.Name == "ClassDataSourceAttribute" ||
@@ -225,7 +229,9 @@ internal sealed class DelegateGenerator
                 a.AttributeClass?.AllInterfaces.Any(i => i.Name == "IDataAttribute") == true);
                 
             if (hasDataSourceAttr)
+            {
                 return true;
+            }
         }
         
         return false;
@@ -259,14 +265,18 @@ internal sealed class DelegateGenerator
         foreach (var testInfo in testMethods)
         {
             if (!HasRequiredPropertiesWithDataSource(testInfo.TypeSymbol))
+            {
                 continue;
-                
+            }
+
             var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             var safeFactoryName = GetSafeFactoryMethodName(testInfo.TypeSymbol);
             
             if (!processedTypes.Add(className))
+            {
                 continue;
-                
+            }
+
             writer.AppendLine($"private static object {safeFactoryName}_Factory(object?[] args)");
             writer.AppendLine("{");
             writer.Indent();
@@ -282,8 +292,10 @@ internal sealed class DelegateGenerator
             foreach (var member in testInfo.TypeSymbol.GetMembers().OfType<IPropertySymbol>())
             {
                 if (!member.IsRequired)
+                {
                     continue;
-                    
+                }
+
                 var hasDataSourceAttr = member.GetAttributes().Any(a => 
                     a.AttributeClass?.Name == "ClassDataSourceAttribute" ||
                     a.AttributeClass?.Name == "MethodDataSourceAttribute" ||

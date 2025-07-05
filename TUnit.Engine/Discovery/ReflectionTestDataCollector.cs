@@ -40,8 +40,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             lock (_lock)
             {
                 if (_scannedAssemblies.Contains(assembly))
+                {
                     continue;
-                    
+                }
+
                 _scannedAssemblies.Add(assembly);
             }
             
@@ -67,12 +69,16 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     private static void OnAssemblyLoaded(object? sender, AssemblyLoadEventArgs args)
     {
         if (!ShouldScanAssembly(args.LoadedAssembly))
+        {
             return;
+        }
 
         lock (_lock)
         {
             if (_scannedAssemblies.Contains(args.LoadedAssembly))
+            {
                 return;
+            }
 
             _scannedAssemblies.Add(args.LoadedAssembly);
         }
@@ -95,21 +101,27 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var name = assembly.GetName().Name;
         if (name == null)
+        {
             return false;
+        }
 
         // Skip system and framework assemblies
         if (name.StartsWith("System.") || 
             name.StartsWith("Microsoft.") ||
             name.StartsWith("netstandard") ||
             name.StartsWith("mscorlib"))
+        {
             return false;
+        }
 
         // Skip TUnit framework assemblies (except test projects)
         if ((name.StartsWith("TUnit.") && !name.Contains("Test")) ||
             name == "TUnit.Core" ||
             name == "TUnit.Engine" ||
             name == "TUnit.Assertions")
+        {
             return false;
+        }
 
         return true;
     }
@@ -139,7 +151,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
 
                 if (metadata != null)
+                {
                     yield return metadata;
+                }
             }
         }
     }
@@ -188,8 +202,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         
         var parameters = testMethod.GetParameters();
         if (parameters.Length == 0)
+        {
             return $"{className}.{methodName}";
-            
+        }
+
         var paramTypes = string.Join(", ", parameters.Select(p => p.ParameterType.Name));
         return $"{className}.{methodName}({paramTypes})";
     }
@@ -256,18 +272,24 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         // Check method-level timeout (highest priority)
         var methodTimeout = testMethod.GetCustomAttribute<TimeoutAttribute>();
         if (methodTimeout != null)
+        {
             return (int)methodTimeout.Timeout.TotalMilliseconds;
-        
+        }
+
         // Check class-level timeout
         var classTimeout = testClass.GetCustomAttribute<TimeoutAttribute>();
         if (classTimeout != null)
+        {
             return (int)classTimeout.Timeout.TotalMilliseconds;
-        
+        }
+
         // Check assembly-level timeout
         var assemblyTimeout = testClass.Assembly.GetCustomAttribute<TimeoutAttribute>();
         if (assemblyTimeout != null)
+        {
             return (int)assemblyTimeout.Timeout.TotalMilliseconds;
-        
+        }
+
         return null;
     }
 
@@ -276,18 +298,24 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         // Check method-level retry (highest priority)
         var methodRetry = testMethod.GetCustomAttribute<RetryAttribute>();
         if (methodRetry != null)
+        {
             return methodRetry.Times;
-        
+        }
+
         // Check class-level retry
         var classRetry = testClass.GetCustomAttribute<RetryAttribute>();
         if (classRetry != null)
+        {
             return classRetry.Times;
-        
+        }
+
         // Check assembly-level retry
         var assemblyRetry = testClass.Assembly.GetCustomAttribute<RetryAttribute>();
         if (assemblyRetry != null)
+        {
             return assemblyRetry.Times;
-        
+        }
+
         return 0;
     }
 
@@ -295,14 +323,20 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         // Check if NotInParallel attribute is present at any level
         if (testMethod.GetCustomAttribute<NotInParallelAttribute>() != null)
+        {
             return false;
-            
+        }
+
         if (testClass.GetCustomAttribute<NotInParallelAttribute>() != null)
+        {
             return false;
-            
+        }
+
         if (testClass.Assembly.GetCustomAttribute<NotInParallelAttribute>() != null)
+        {
             return false;
-        
+        }
+
         return true;
     }
 
@@ -344,7 +378,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             var dataSource = CreateMethodDataSource(attr, testMethod.DeclaringType!);
             if (dataSource != null)
+            {
                 dataSources.Add(dataSource);
+            }
         }
         
         // Get ClassDataSource attributes
@@ -353,7 +389,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             var dataSource = CreateClassDataSource(attr);
             if (dataSource != null)
+            {
                 dataSources.Add(dataSource);
+            }
         }
         
         return dataSources.ToArray();
@@ -376,7 +414,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             var dataSource = CreateMethodDataSource(attr, testClass);
             if (dataSource != null)
+            {
                 dataSources.Add(dataSource);
+            }
         }
         
         // Get ClassDataSource attributes on class
@@ -385,7 +425,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             var dataSource = CreateClassDataSource(attr);
             if (dataSource != null)
+            {
                 dataSources.Add(dataSource);
+            }
         }
         
         return dataSources.ToArray();
@@ -416,7 +458,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 var dataSource = CreateMethodDataSource(attr, testClass);
                 if (dataSource != null)
+                {
                     dataSources.Add(dataSource);
+                }
             }
             
             // Get ClassDataSource attributes on property
@@ -425,7 +469,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 var dataSource = CreateClassDataSource(attr);
                 if (dataSource != null)
+                {
                     dataSources.Add(dataSource);
+                }
             }
             
             // If property has data sources, create a PropertyDataSource for each
@@ -505,8 +551,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         // ClassDataSource creates instances of the specified type
         var dataType = attr.GetType().GetGenericArguments().FirstOrDefault();
         if (dataType == null)
+        {
             return null;
-            
+        }
+
         try
         {
             var instance = Activator.CreateInstance(dataType);
@@ -525,7 +573,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             var result = method.Invoke(instance, args);
             if (result is IEnumerable<object?[]> enumerable)
+            {
                 return enumerable;
+            }
             return [];
         };
     }
@@ -536,7 +586,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             var result = method.Invoke(instance, args);
             if (result is Task<IEnumerable<object?[]>> task)
+            {
                 return task;
+            }
             return Task.FromResult(Enumerable.Empty<object?[]>());
         };
     }
@@ -547,7 +599,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             var result = method.Invoke(instance, args);
             if (result is IAsyncEnumerable<object?[]> asyncEnumerable)
+            {
                 return asyncEnumerable;
+            }
             return EmptyAsyncEnumerable();
         };
     }
@@ -578,7 +632,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var constructors = testClass.GetConstructors();
         if (constructors.Length == 0)
+        {
             return null;
+        }
 
         var ctor = constructors.FirstOrDefault(c => c.GetParameters().Length == 0) 
                    ?? constructors.First();
@@ -587,7 +643,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         var paramExpr = Expression.Parameter(typeof(object[]), "args");
         
         var argExpressions = new Expression[parameters.Length];
-        for (int i = 0; i < parameters.Length; i++)
+        for (var i = 0; i < parameters.Length; i++)
         {
             var indexExpr = Expression.ArrayIndex(paramExpr, Expression.Constant(i));
             var convertExpr = Expression.Convert(indexExpr, parameters[i].ParameterType);
@@ -615,7 +671,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         var parameters = testMethod.GetParameters();
         var argExpressions = new Expression[parameters.Length];
         
-        for (int i = 0; i < parameters.Length; i++)
+        for (var i = 0; i < parameters.Length; i++)
         {
             var indexExpr = Expression.ArrayIndex(argsParam, Expression.Constant(i));
             var convertExpr = Expression.Convert(indexExpr, parameters[i].ParameterType);
@@ -882,12 +938,14 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     private static GenericTypeInfo? ExtractGenericTypeInfo(Type testClass)
     {
         if (!testClass.IsGenericTypeDefinition)
+        {
             return null;
+        }
 
         var genericParams = testClass.GetGenericArguments();
         var constraints = new GenericParameterConstraints[genericParams.Length];
         
-        for (int i = 0; i < genericParams.Length; i++)
+        for (var i = 0; i < genericParams.Length; i++)
         {
             var param = genericParams[i];
             constraints[i] = new GenericParameterConstraints
@@ -913,7 +971,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     private static GenericMethodInfo? ExtractGenericMethodInfo(MethodInfo method)
     {
         if (!method.IsGenericMethodDefinition)
+        {
             return null;
+        }
 
         var genericParams = method.GetGenericArguments();
         var constraints = new GenericParameterConstraints[genericParams.Length];
@@ -921,7 +981,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         
         // Map generic parameters to method argument positions
         var methodParams = method.GetParameters();
-        for (int i = 0; i < methodParams.Length; i++)
+        for (var i = 0; i < methodParams.Length; i++)
         {
             var paramType = methodParams[i].ParameterType;
             if (paramType.IsGenericParameter && Array.IndexOf(genericParams, paramType) >= 0)
@@ -930,7 +990,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
         
-        for (int i = 0; i < genericParams.Length; i++)
+        for (var i = 0; i < genericParams.Length; i++)
         {
             var param = genericParams[i];
             constraints[i] = new GenericParameterConstraints

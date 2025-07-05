@@ -33,7 +33,7 @@ public class EqualsAssertionTests
     [Test]
     public async Task Int_Bad()
     {
-        int zero = 1;
+        var zero = 1;
         await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That<long>(zero).IsEqualTo(0));
     }
 
