@@ -67,12 +67,35 @@ public sealed class TestBuilder : ITestBuilder
                 "Ensure tests are either source-generated or discovered via reflection with proper factory initialization.");
         }
 
-        return async () =>
+        return () =>
         {
             var classArgs = expandedData.ClassArgumentsFactory();
-            var instance = metadata.InstanceFactory(classArgs);
-            await InjectPropertiesAsync(instance, metadata, expandedData.PropertyFactories);
-            return instance;
+            
+            // For classes with properties that have data sources, the source generator creates a special factory
+            // that expects property values as a Dictionary in the last argument
+            object instance;
+            if (expandedData.PropertyFactories.Any())
+            {
+                // Create property values dictionary
+                var propertyValues = new Dictionary<string, object?>();
+                foreach (var kvp in expandedData.PropertyFactories)
+                {
+                    propertyValues[kvp.Key] = kvp.Value();
+                }
+                
+                // Pass property values as the last argument
+                var argsWithProperties = classArgs.Concat(new object[] { propertyValues }).ToArray();
+                instance = metadata.InstanceFactory(argsWithProperties);
+                
+                // No need for post-construction injection - all properties are set during construction
+            }
+            else
+            {
+                // Standard instance creation
+                instance = metadata.InstanceFactory(classArgs);
+            }
+            
+            return Task.FromResult(instance);
         };
     }
 

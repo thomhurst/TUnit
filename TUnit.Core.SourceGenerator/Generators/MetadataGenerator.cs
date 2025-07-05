@@ -747,12 +747,51 @@ public sealed class MetadataGenerator
     {
         var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         
-        // Check if the class has required properties with data source attributes
-        var hasRequiredPropertiesWithDataSource = HasRequiredPropertiesWithDataSource(testInfo.TypeSymbol);
-        
-        // For now, always use standard instantiation
-        // Required properties will be handled during test expansion
-        writer.AppendLine($"InstanceFactory = args => new {className}({GenerateConstructorArgs(testInfo)}),");
+        // Get all non-static properties that have data source attributes
+        var propertiesWithDataSources = testInfo.TypeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(p => p.SetMethod != null && !p.IsStatic && p.GetAttributes()
+                .Any(a => a.AttributeClass?.AllInterfaces.Any(i => i.Name == "IDataAttribute") == true
+                    || a.AttributeClass?.Name == "ClassDataSourceAttribute"
+                    || a.AttributeClass?.Name == "MethodDataSourceAttribute"
+                    || a.AttributeClass?.Name == "ArgumentsAttribute"))
+            .ToList();
+            
+        if (propertiesWithDataSources.Any())
+        {
+            // Generate a factory that expects property values to be passed via a dictionary in args
+            writer.AppendLine("InstanceFactory = args =>");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            // Constructor arguments come first
+            var constructorArgs = GenerateConstructorArgs(testInfo);
+            
+            // The runtime will pass property values as the last argument
+            writer.AppendLine("var propertyValues = args.Length > 0 && args[args.Length - 1] is Dictionary<string, object?> dict ? dict : new Dictionary<string, object?>();");
+            writer.AppendLine($"return new {className}({constructorArgs})");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            // Generate property initializers for ALL properties with data sources
+            foreach (var prop in propertiesWithDataSources)
+            {
+                var propName = prop.Name;
+                var propType = prop.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                writer.AppendLine($"{propName} = propertyValues.TryGetValue(\"{propName}\", out var _{propName}) ? ({propType})_{propName}! : default!,");
+            }
+            
+            writer.Unindent();
+            writer.AppendLine("};");
+            
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
+        else
+        {
+            // Standard instantiation for classes without properties with data sources
+            writer.AppendLine($"InstanceFactory = args => new {className}({GenerateConstructorArgs(testInfo)}),");
+        }
     }
     
     private void GenerateInlineTestInvoker(CodeWriter writer, TestMethodMetadata testInfo)
@@ -794,89 +833,14 @@ public sealed class MetadataGenerator
     
     private void GenerateInlinePropertySetters(CodeWriter writer, TestMethodMetadata testInfo)
     {
-        var properties = testInfo.TypeSymbol.GetMembers()
-            .OfType<IPropertySymbol>()
-            .Where(p => p.SetMethod != null && !p.IsStatic && p.SetMethod.DeclaredAccessibility == Accessibility.Public);
-        
-        writer.AppendLine("PropertySetters = new Dictionary<string, Action<object, object?>>()");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        foreach (var property in properties)
-        {
-            var propName = property.Name;
-            var propType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            
-            writer.AppendLine($"[\"{propName}\"] = (instance, value) => (({className})instance).{propName} = ({propType})value!,");
-        }
-        
-        writer.Unindent();
-        writer.AppendLine("},");
+        // PropertySetters are no longer needed since all properties are set during construction
+        writer.AppendLine("PropertySetters = new Dictionary<string, Action<object, object?>>(),");
     }
     
     private void GeneratePropertyInjections(CodeWriter writer, TestMethodMetadata testInfo)
     {
-        // Collect properties with data source attributes
-        var propertyDataSources = new List<(IPropertySymbol property, AttributeData attr)>();
-        
-        foreach (var member in testInfo.TypeSymbol.GetMembers().OfType<IPropertySymbol>())
-        {
-            if (member.SetMethod == null || member.IsStatic || member.SetMethod.DeclaredAccessibility != Accessibility.Public)
-                continue;
-                
-            // Check for data source attributes
-            var dataSourceAttrs = member.GetAttributes()
-                .Where(a => a.AttributeClass?.AllInterfaces.Any(i => i.Name == "IDataAttribute") == true
-                    || a.AttributeClass?.Name == "ClassDataSourceAttribute"
-                    || a.AttributeClass?.Name == "MethodDataSourceAttribute")
-                .ToList();
-                
-            foreach (var attr in dataSourceAttrs)
-            {
-                propertyDataSources.Add((member, attr));
-            }
-        }
-        
-        if (!propertyDataSources.Any())
-        {
-            writer.AppendLine("PropertyInjections = Array.Empty<PropertyInjectionData>(),");
-            return;
-        }
-        
-        writer.AppendLine("PropertyInjections = new PropertyInjectionData[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        foreach (var (property, attr) in propertyDataSources)
-        {
-            writer.AppendLine("new PropertyInjectionData");
-            writer.AppendLine("{");
-            writer.Indent();
-            
-            writer.AppendLine($"PropertyName = \"{property.Name}\",");
-            writer.AppendLine($"PropertyType = typeof({property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
-            
-            // Generate setter delegate
-            var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})value!,");
-            
-            // Generate value factory that will be resolved at runtime
-            // The actual value will come from the PropertyDataSources during test expansion
-            writer.AppendLine("ValueFactory = () =>");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("// This is a placeholder - actual values come from PropertyDataSources during test expansion");
-            writer.AppendLine("throw new InvalidOperationException(\"Property value should be provided by test expansion\");");
-            writer.Unindent();
-            writer.AppendLine("}");
-            
-            writer.Unindent();
-            writer.AppendLine("},");
-        }
-        
-        writer.Unindent();
-        writer.AppendLine("},");
+        // PropertyInjections are no longer needed since all properties are set during construction
+        writer.AppendLine("PropertyInjections = Array.Empty<PropertyInjectionData>(),");
     }
     
     private bool HasRequiredPropertiesWithDataSource(ITypeSymbol typeSymbol)
@@ -886,6 +850,17 @@ public sealed class MetadataGenerator
             .Any(p => p.IsRequired && p.GetAttributes()
                 .Any(a => a.AttributeClass?.AllInterfaces
                     .Any(i => i.Name == "IDataAttribute") == true));
+    }
+    
+    private List<IPropertySymbol> GetInitOnlyPropertiesWithDataSource(ITypeSymbol typeSymbol)
+    {
+        return typeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(p => p.SetMethod != null && p.SetMethod.IsInitOnly && p.GetAttributes()
+                .Any(a => a.AttributeClass?.AllInterfaces.Any(i => i.Name == "IDataAttribute") == true
+                    || a.AttributeClass?.Name == "ClassDataSourceAttribute"
+                    || a.AttributeClass?.Name == "MethodDataSourceAttribute"))
+            .ToList();
     }
     
     private string GetSafeFactoryMethodName(ITypeSymbol typeSymbol)

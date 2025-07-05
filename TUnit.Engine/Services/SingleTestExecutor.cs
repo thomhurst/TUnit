@@ -76,11 +76,8 @@ public class SingleTestExecutor : ISingleTestExecutor
 
     private async Task ExecuteTestWithHooksAsync(ExecutableTest test, CancellationToken cancellationToken)
     {
-        // Create test instance
+        // Create test instance (properties are injected during construction)
         var instance = await test.CreateInstanceAsync();
-
-        // Inject property values
-        await InjectPropertyValuesAsync(instance, test.PropertyValues);
 
         // Set the instance in the test context for hooks
         test.Context!.TestDetails.ClassInstance = instance;
@@ -111,12 +108,6 @@ public class SingleTestExecutor : ISingleTestExecutor
         }
     }
 
-    private async Task InjectPropertyValuesAsync(object instance, IDictionary<string, object?> propertyValues)
-    {
-        // Property injection is now handled via hooks with dependency injection
-        // This method is kept for backward compatibility but does nothing
-        await Task.CompletedTask;
-    }
 
     private async Task ExecuteBeforeTestHooksAsync(Func<TestContext, CancellationToken, Task>[] hooks, TestContext context, CancellationToken cancellationToken)
     {

@@ -44,17 +44,8 @@ public sealed class ExecutableTest<T> : ExecutableTest where T : class
     /// <inheritdoc/>
     public override async Task<object> CreateInstanceAsync()
     {
+        // Properties are now injected during construction by the factory
         var instance = await CreateTypedInstance();
-        
-        // Apply property values using strongly typed setters
-        foreach (var kvp in PropertyValues)
-        {
-            if (TypedPropertySetters.TryGetValue(kvp.Key, out var setter))
-            {
-                setter(instance, kvp.Value);
-            }
-        }
-        
         return instance;
     }
 
