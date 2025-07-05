@@ -9,6 +9,7 @@ using TUnit.Core;
 using TUnit.Core.Services;
 using TUnit.Engine.Building;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Framework;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
@@ -19,7 +20,7 @@ namespace TUnit.Engine;
 /// <summary>
 /// Simplified test executor that works directly with ExecutableTest
 /// </summary>
-public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
+internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
 {
     private readonly ISingleTestExecutor _singleTestExecutor;
     private readonly ICommandLineOptions _commandLineOptions;
@@ -28,15 +29,15 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     private readonly ILoggerFactory _loggerFactory;
     private SessionUid? _sessionUid;
     private readonly CancellationTokenSource _failFastCancellationSource = new();
-    private readonly IServiceProvider? _serviceProvider;
+    private readonly TUnitServiceProvider _serviceProvider;
 
     public UnifiedTestExecutor(
         ISingleTestExecutor singleTestExecutor,
         ICommandLineOptions commandLineOptions,
         TUnitFrameworkLogger logger,
-        ILoggerFactory? loggerFactory = null,
-        ITestScheduler? testScheduler = null,
-        IServiceProvider? serviceProvider = null)
+        ILoggerFactory? loggerFactory,
+        ITestScheduler? testScheduler,
+        TUnitServiceProvider serviceProvider)
     {
         _singleTestExecutor = singleTestExecutor;
         _commandLineOptions = commandLineOptions;
@@ -153,10 +154,10 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     private ITestScheduler CreateDefaultScheduler()
     {
         var config = SchedulerConfiguration.Default;
-        
+
         // Check for command line override of maximum parallel tests
         if (_commandLineOptions.TryGetOptionArgumentList(
-            MaximumParallelTestsCommandProvider.MaximumParallelTests, 
+            MaximumParallelTestsCommandProvider.MaximumParallelTests,
             out var args) && args.Length > 0)
         {
             if (int.TryParse(args[0], out var maxParallelTests) && maxParallelTests > 0)
@@ -164,8 +165,8 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
                 config.MaxParallelism = maxParallelTests;
             }
         }
-        
-        return TestSchedulerFactory.Create(config, _logger);
+
+        return TestSchedulerFactory.Create(config, _logger, _serviceProvider.CancellationToken);
     }
 
     private List<ExecutableTest> ApplyFilter(List<ExecutableTest> tests, ITestExecutionFilter filter)

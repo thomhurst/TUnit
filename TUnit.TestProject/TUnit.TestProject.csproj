@@ -55,6 +55,7 @@
         <None Update="testconfig.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Remove="TestSessionAfterTestsb7e72d6a41f342238b9e690f28e8d99d.txt" />
     </ItemGroup>
 
     <Import Project="..\TestProject.targets" />

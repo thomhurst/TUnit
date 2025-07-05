@@ -1,3 +1,4 @@
+using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.Logging;
 
@@ -6,20 +7,20 @@ namespace TUnit.Engine.Scheduling;
 /// <summary>
 /// Factory for creating test schedulers with various configurations
 /// </summary>
-public static class TestSchedulerFactory
+internal static class TestSchedulerFactory
 {
     /// <summary>
     /// Creates a scheduler with default configuration
     /// </summary>
-    public static ITestScheduler CreateDefault(TUnitFrameworkLogger logger)
+    public static ITestScheduler CreateDefault(TUnitFrameworkLogger logger, EngineCancellationToken engineCancellationToken)
     {
-        return Create(SchedulerConfiguration.Default, logger);
+        return Create(SchedulerConfiguration.Default, logger, engineCancellationToken);
     }
 
     /// <summary>
     /// Creates a scheduler with specified configuration
     /// </summary>
-    public static ITestScheduler Create(SchedulerConfiguration configuration, TUnitFrameworkLogger logger)
+    public static ITestScheduler Create(SchedulerConfiguration configuration, TUnitFrameworkLogger logger, EngineCancellationToken engineCancellationToken)
     {
         var parallelismStrategy = configuration.Strategy == ParallelismStrategy.Adaptive
             ? (IParallelismStrategy) new AdaptiveParallelismStrategy(
@@ -29,7 +30,11 @@ public static class TestSchedulerFactory
 
         var progressMonitor = new DefaultProgressMonitor(
             stallTimeout: configuration.StallTimeout,
-            onStallDetected: message => logger.LogWarningAsync(message).GetAwaiter().GetResult());
+            onStallDetected: message =>
+            {
+                logger.LogWarning(message);
+                engineCancellationToken.CancellationTokenSource.Cancel();
+            });
 
         return new DagTestScheduler(
             parallelismStrategy,
