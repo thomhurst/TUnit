@@ -240,6 +240,9 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         {
             DiscoveredTest = discoveredTest
         };
+        
+        // Link the discovered test to the test context's internal property
+        test.Context.InternalDiscoveredTest = discoveredTest;
 
         // Get attributes from the test context
         var attributes = test.Context.TestDetails.Attributes;
@@ -260,9 +263,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
                 }
             }
         }
-
-        // Store the discovered test with its executor in the test context
-        test.Context.ObjectBag["DiscoveredTest"] = discoveredTest;
     }
 
 

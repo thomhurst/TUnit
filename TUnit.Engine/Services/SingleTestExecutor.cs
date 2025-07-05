@@ -201,11 +201,7 @@ public class SingleTestExecutor : ISingleTestExecutor
     private async Task InvokeTestWithTimeout(ExecutableTest test, object instance, CancellationToken cancellationToken)
     {
         // Check if there's a custom test executor
-        DiscoveredTest? discoveredTest = null;
-        if (test.Context.ObjectBag.TryGetValue("DiscoveredTest", out var discoveredTestObj))
-        {
-            discoveredTest = discoveredTestObj as DiscoveredTest;
-        }
+        var discoveredTest = test.Context.InternalDiscoveredTest;
 
         Func<ValueTask> testAction;
         if (test.Metadata.TimeoutMs.HasValue)
