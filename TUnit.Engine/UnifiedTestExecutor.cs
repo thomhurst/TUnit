@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Building;
 using TUnit.Engine.CommandLineProviders;
@@ -216,7 +217,52 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             null, 
             (state, _) => state);
 
-        return testsToInclude.ToList();
+        // Invoke test registered event receivers for filtered tests
+        var resultList = testsToInclude.ToList();
+        foreach (var test in resultList)
+        {
+            await InvokeTestRegisteredEventReceiversAsync(test);
+        }
+
+        return resultList;
+    }
+
+    private async Task InvokeTestRegisteredEventReceiversAsync(ExecutableTest test)
+    {
+        // Create a DiscoveredTest instance
+        var discoveredTest = new DiscoveredTest<object>
+        {
+            TestContext = test.Context
+        };
+
+        // Create a TestRegisteredContext
+        var registeredContext = new TestRegisteredContext(test.Context)
+        {
+            DiscoveredTest = discoveredTest
+        };
+
+        // Get attributes from the test context
+        var attributes = test.Context.TestDetails.Attributes;
+        
+        // Invoke all ITestRegisteredEventReceiver implementations
+        foreach (var attribute in attributes)
+        {
+            if (attribute is ITestRegisteredEventReceiver receiver)
+            {
+                try
+                {
+                    await receiver.OnTestRegistered(registeredContext);
+                }
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
+                    // Continue with other receivers even if one fails
+                }
+            }
+        }
+
+        // Store the discovered test with its executor in the test context
+        test.Context.ObjectBag["DiscoveredTest"] = discoveredTest;
     }
 
 

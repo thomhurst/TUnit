@@ -2,6 +2,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 
@@ -199,39 +200,60 @@ public class SingleTestExecutor : ISingleTestExecutor
 
     private async Task InvokeTestWithTimeout(ExecutableTest test, object instance, CancellationToken cancellationToken)
     {
+        // Check if there's a custom test executor
+        DiscoveredTest? discoveredTest = null;
+        if (test.Context.ObjectBag.TryGetValue("DiscoveredTest", out var discoveredTestObj))
+        {
+            discoveredTest = discoveredTestObj as DiscoveredTest;
+        }
+
+        Func<ValueTask> testAction;
         if (test.Metadata.TimeoutMs.HasValue)
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(test.Metadata.TimeoutMs.Value);
 
-            var testTask = test.InvokeTestAsync(instance, cts.Token);
-            var timeoutTask = Task.Delay(test.Metadata.TimeoutMs.Value, cancellationToken);
-            var completedTask = await Task.WhenAny(testTask, timeoutTask);
-
-            if (completedTask == timeoutTask)
+            testAction = async () =>
             {
-                // Cancel the test task
-                cts.Cancel();
+                var testTask = test.InvokeTestAsync(instance, cts.Token);
+                var timeoutTask = Task.Delay(test.Metadata.TimeoutMs.Value, cancellationToken);
+                var completedTask = await Task.WhenAny(testTask, timeoutTask);
 
-                // Wait for the test task to complete (with cancellation) or throw
-                try
+                if (completedTask == timeoutTask)
                 {
-                    await testTask;
-                }
-                catch
-                {
-                    // Ignore exceptions from cancelled task
+                    // Cancel the test task
+                    cts.Cancel();
+
+                    // Wait for the test task to complete (with cancellation) or throw
+                    try
+                    {
+                        await testTask;
+                    }
+                    catch
+                    {
+                        // Ignore exceptions from cancelled task
+                    }
+
+                    throw new OperationCanceledException($"Test '{test.DisplayName}' exceeded timeout of {test.Metadata.TimeoutMs.Value}ms");
                 }
 
-                throw new OperationCanceledException($"Test '{test.DisplayName}' exceeded timeout of {test.Metadata.TimeoutMs.Value}ms");
-            }
-
-            // Test completed within timeout
-            await testTask;
+                // Test completed within timeout
+                await testTask;
+            };
         }
         else
         {
-            await test.InvokeTestAsync(instance, cancellationToken);
+            testAction = async () => await test.InvokeTestAsync(instance, cancellationToken);
+        }
+
+        // Use custom executor if available, otherwise execute directly
+        if (discoveredTest?.TestExecutor != null)
+        {
+            await discoveredTest.TestExecutor.ExecuteTest(test.Context, testAction);
+        }
+        else
+        {
+            await testAction();
         }
     }
 }
