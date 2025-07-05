@@ -188,7 +188,35 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
 
         // Debug: Filter matched {filteredTests.Count} tests
 
-        return filteredTests;
+        // Include all dependencies of filtered tests
+        var testsToInclude = new HashSet<ExecutableTest>(filteredTests);
+        var processedTests = new HashSet<string>();
+        var queue = new Queue<ExecutableTest>(filteredTests);
+
+        while (queue.Count > 0)
+        {
+            var currentTest = queue.Dequeue();
+            if (!processedTests.Add(currentTest.TestId))
+            {
+                continue;
+            }
+
+            // Add all dependencies of the current test
+            foreach (var dependency in currentTest.Dependencies)
+            {
+                if (testsToInclude.Add(dependency))
+                {
+                    queue.Enqueue(dependency);
+                }
+            }
+        }
+
+        _logger.LogAsync(TUnit.Core.Logging.LogLevel.Debug, 
+            $"After including dependencies: {testsToInclude.Count} tests will be executed", 
+            null, 
+            (state, _) => state).AsTask().GetAwaiter().GetResult();
+
+        return testsToInclude.ToList();
     }
 
 

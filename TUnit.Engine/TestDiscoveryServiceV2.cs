@@ -107,6 +107,13 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer
                     .Distinct()
                     .Where(d => d.TestId != test.TestId)
                     .ToArray();
+                
+                // Populate the TestContext.Dependencies list for user access
+                test.Context.Dependencies.Clear();
+                foreach (var dep in test.Dependencies)
+                {
+                    test.Context.Dependencies.Add(dep.DisplayName);
+                }
             }
             catch (Exception ex)
             {
