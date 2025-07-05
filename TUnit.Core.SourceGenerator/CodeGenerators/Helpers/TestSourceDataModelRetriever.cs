@@ -199,11 +199,14 @@ public static class TestSourceDataModelRetriever
 
     private static IEnumerable<string> GetParameterTypes(IMethodSymbol methodSymbol, string[] argumentTypes)
     {
-        for (var index = 0; index < methodSymbol.Parameters.Length; index++)
+        // Use the same pattern as other parts of TUnit - exclude CancellationToken parameters
+        var parametersWithoutCancellationToken = methodSymbol.Parameters.WithoutCancellationTokenParameter();
+        
+        for (var index = 0; index < parametersWithoutCancellationToken.Length; index++)
         {
-            var parameter = methodSymbol.Parameters[index];
+            var parameter = parametersWithoutCancellationToken[index];
 
-            if (parameter.Type.IsGenericDefinition())
+            if (parameter.Type.IsGenericDefinition() && index < argumentTypes.Length)
             {
                 yield return argumentTypes[index];
             }

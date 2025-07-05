@@ -41,12 +41,12 @@ public sealed class UnifiedDataSourceCodeGenerator : IDataSourceCodeGenerator
         writer.Append("new StaticTestDataSource(");
         
         // The ArgumentsAttribute constructor takes params object?[] args
-        var args = dataSource.Attribute.ConstructorArguments;
+        var args = dataSource.Attribute?.ConstructorArguments;
         
         // Handle the params array - Roslyn always passes params as a single array argument
-        if (args.Length > 0)
+        if (args?.Length > 0)
         {
-            var firstArg = args[0];
+            var firstArg = args.Value[0];
             if (firstArg.Kind == TypedConstantKind.Array)
             {
                 // Extract the array values
@@ -428,4 +428,5 @@ public sealed class UnifiedDataSourceCodeGenerator : IDataSourceCodeGenerator
         }
         return Array.Empty<ITypeSymbol>();
     }
+    
 }
