@@ -47,7 +47,7 @@ To use TUnit with a file-based C# application, you can follow these steps:
 
         ```
 
-    4 **Run your tests**: You can run your tests by executing the script in F# Interactive. The results will be printed to the console.
+4. **Run your tests**: You can run your tests by executing the script using `dotnet run`. The results will be printed to the console.
     To run the script, you can use the following command
 
     ```powershell
