@@ -137,9 +137,9 @@ public class TestMetadata
     public Type[]? GenericMethodTypeArguments { get; init; }
     
     /// <summary>
-    /// Attribute types applied to this test (for discovery event receivers)
+    /// Factory to create attribute instances applied to this test (for discovery event receivers)
     /// </summary>
-    public Type[] AttributeTypes { get; init; } = [];
+    public Func<Attribute[]>? AttributeFactory { get; init; }
 }
 
 // TestDataSource classes have been moved to TestDataSources.cs

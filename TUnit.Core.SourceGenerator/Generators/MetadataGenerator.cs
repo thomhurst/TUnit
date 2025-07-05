@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -539,7 +540,7 @@ public sealed class MetadataGenerator
             if (attr.AttributeClass?.Name == "ArgumentsAttribute" && attr.ConstructorArguments.Length > 0)
             {
                 // ArgumentsAttribute provides the values directly
-                var values = attr.ConstructorArguments.Select(arg => FormatArgumentValue(arg)).ToList();
+                var values = attr.ConstructorArguments.Select(arg => CodeGenerators.Helpers.TypedConstantParser.GetRawTypedConstantValue(arg)).ToList();
                 var valuesStr = string.Join(", ", values);
                 writer.AppendLine($"DataSource = new DelegateDataSource(() => new object?[][] {{ new object?[] {{ {valuesStr} }} }}, false)");
             }
@@ -613,48 +614,18 @@ public sealed class MetadataGenerator
         return "None";
     }
 
-    private string FormatArgumentValue(TypedConstant arg)
-    {
-        if (arg.IsNull)
-            return "null";
-
-        switch (arg.Kind)
-        {
-            case TypedConstantKind.Primitive:
-                if (arg.Type?.SpecialType == SpecialType.System_String)
-                    return $"\"{arg.Value}\"";
-                if (arg.Type?.SpecialType == SpecialType.System_Char)
-                    return $"'{arg.Value}'";
-                if (arg.Type?.SpecialType == SpecialType.System_Boolean)
-                    return arg.Value?.ToString()?.ToLower() ?? "false";
-                return arg.Value?.ToString() ?? "null";
-
-            case TypedConstantKind.Type:
-                if (arg.Value is ITypeSymbol typeSymbol)
-                    return $"typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
-                return "null";
-
-            case TypedConstantKind.Array:
-                var elements = arg.Values.Select(FormatArgumentValue);
-                return $"new[] {{ {string.Join(", ", elements)} }}";
-
-            default:
-                return "null";
-        }
-    }
 
     private void GenerateAttributeTypes(CodeWriter writer, TestMethodMetadata testInfo)
     {
-        // Collect all attributes from method, class, and assembly
-        var attributeTypes = new HashSet<string>();
+        // Collect all attributes that implement ITestDiscoveryEventReceiver
+        var discoveryAttributes = new List<AttributeData>();
         
         // Method attributes
         foreach (var attr in testInfo.MethodSymbol.GetAttributes())
         {
             if (attr.AttributeClass != null && IsDiscoveryEventReceiverAttribute(attr.AttributeClass))
             {
-                var typeName = attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                attributeTypes.Add(typeName);
+                discoveryAttributes.Add(attr);
             }
         }
         
@@ -663,8 +634,7 @@ public sealed class MetadataGenerator
         {
             if (attr.AttributeClass != null && IsDiscoveryEventReceiverAttribute(attr.AttributeClass))
             {
-                var typeName = attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                attributeTypes.Add(typeName);
+                discoveryAttributes.Add(attr);
             }
         }
         
@@ -675,27 +645,64 @@ public sealed class MetadataGenerator
             {
                 if (attr.AttributeClass != null && IsDiscoveryEventReceiverAttribute(attr.AttributeClass))
                 {
-                    var typeName = attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                    attributeTypes.Add(typeName);
+                    discoveryAttributes.Add(attr);
                 }
             }
         }
         
-        if (attributeTypes.Any())
+        if (discoveryAttributes.Any())
         {
-            writer.AppendLine("AttributeTypes = new Type[]");
+            writer.AppendLine("AttributeFactory = () => new Attribute[]");
             writer.AppendLine("{");
             writer.Indent();
-            foreach (var attrType in attributeTypes)
+            
+            foreach (var attr in discoveryAttributes)
             {
-                writer.AppendLine($"typeof({attrType}),");
+                // Generate attribute instantiation using TypedConstantParser
+                GenerateAttributeInstantiation(writer, attr);
+                writer.AppendLine(",");
             }
+            
             writer.Unindent();
             writer.AppendLine("},");
         }
         else
         {
-            writer.AppendLine("AttributeTypes = Array.Empty<Type>(),");
+            writer.AppendLine("AttributeFactory = null,");
+        }
+    }
+    
+    private void GenerateAttributeInstantiation(CodeWriter writer, AttributeData attributeData)
+    {
+        var attributeType = attributeData.AttributeClass!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        
+        // Handle constructor arguments
+        if (attributeData.ConstructorArguments.Length == 0)
+        {
+            writer.Append($"new {attributeType}()");
+        }
+        else
+        {
+            writer.Append($"new {attributeType}(");
+            for (int i = 0; i < attributeData.ConstructorArguments.Length; i++)
+            {
+                if (i > 0) writer.Append(", ");
+                writer.Append(CodeGenerators.Helpers.TypedConstantParser.GetRawTypedConstantValue(attributeData.ConstructorArguments[i]));
+            }
+            writer.Append(")");
+        }
+        
+        // Handle named arguments (properties)
+        if (attributeData.NamedArguments.Length > 0)
+        {
+            writer.Append(" { ");
+            for (int i = 0; i < attributeData.NamedArguments.Length; i++)
+            {
+                if (i > 0) writer.Append(", ");
+                var namedArg = attributeData.NamedArguments[i];
+                writer.Append($"{namedArg.Key} = {CodeGenerators.Helpers.TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)}");
+            }
+            writer.Append(" }");
         }
     }
     
