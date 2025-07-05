@@ -126,6 +126,24 @@ public sealed class DataSourceGenerator
 
         dataSources.AddRange(methodDataSources.Where(ds => ds != null)!);
 
+        // Arguments attributes on methods
+        var argumentsAttributes = testInfo.MethodSymbol.GetAttributes()
+            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
+            .ToList();
+            
+        for (int i = 0; i < argumentsAttributes.Count; i++)
+        {
+            var attr = argumentsAttributes[i];
+            dataSources.Add(new DataSourceInfo
+            {
+                FactoryKey = $"{testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{testInfo.MethodSymbol.Name}.Arguments_{i}",
+                SourceType = testInfo.TypeSymbol,
+                IsAsync = false,
+                AttributeData = attr,
+                IsClassLevel = false
+            });
+        }
+
         // Property data sources
         var propertyDataSources = testInfo.TypeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
@@ -563,16 +581,31 @@ public sealed class DataSourceGenerator
             writer.Append("new StaticTestDataSource(");
 
             // The ArgumentsAttribute constructor takes params object?[] args
-            // So the first constructor argument IS the array we need
             var args = dataSource.AttributeData.ConstructorArguments;
-            if (args.Length > 0 && args[0].Kind == TypedConstantKind.Array)
+            
+            // ArgumentsAttribute has a single constructor that takes params object?[]
+            // The source generator wraps all arguments into a single array
+            if (args.Length == 1 && args[0].Kind == TypedConstantKind.Array)
             {
-                // The arguments are already wrapped in an array by the params parameter
-                writer.Append(FormatArgumentValue(args[0]));
+                // Extract the array values
+                var arrayValues = args[0].Values;
+                writer.Append("new object?[] { ");
+                for (int i = 0; i < arrayValues.Length; i++)
+                {
+                    writer.Append(FormatArgumentValue(arrayValues[i]));
+                    if (i < arrayValues.Length - 1)
+                        writer.Append(", ");
+                }
+                writer.Append(" }");
+            }
+            else if (args.Length == 0)
+            {
+                // No arguments provided
+                writer.Append("new object?[] { }");
             }
             else
             {
-                // Fallback for unexpected format
+                // Direct arguments (shouldn't happen with params, but handle it)
                 writer.Append("new object?[] { ");
                 for (int i = 0; i < args.Length; i++)
                 {
@@ -879,7 +912,17 @@ public sealed class DataSourceGenerator
         {
             case TypedConstantKind.Primitive:
                 if (arg.Type?.SpecialType == SpecialType.System_String)
-                    return $"\"{arg.Value}\"";
+                {
+                    if (arg.Value == null)
+                        return "null";
+                    
+                    var value = arg.Value.ToString() ?? "";
+                    // Escape backslashes first, then quotes
+                    value = value.Replace("\\", "\\\\").Replace("\"", "\\\"");
+                    // Handle special characters
+                    value = value.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\t", "\\t");
+                    return $"\"{value}\"";
+                }
                 if (arg.Type?.SpecialType == SpecialType.System_Char)
                     return $"'{arg.Value}'";
                 if (arg.Type?.SpecialType == SpecialType.System_Boolean)
