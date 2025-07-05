@@ -71,18 +71,37 @@ public sealed class TestBuilder : ITestBuilder
         {
             var classArgs = expandedData.ClassArgumentsFactory();
             var instance = metadata.InstanceFactory(classArgs);
-            await InjectPropertiesAsync(instance, expandedData.PropertyFactories);
+            await InjectPropertiesAsync(instance, metadata, expandedData.PropertyFactories);
             return instance;
         };
     }
 
 
-    private async Task InjectPropertiesAsync(object instance, Dictionary<string, Func<object?>> propertyFactories)
+    private async Task InjectPropertiesAsync(object instance, TestMetadata metadata, Dictionary<string, Func<object?>> propertyFactories)
     {
-        // Property injection is handled by source-generated code
-        // The propertyFactories are pre-compiled setters that will be invoked
-        // This is a placeholder for future enhancement where we might need
-        // to coordinate with generated property injection code
+        // Use embedded property setters from metadata with values from propertyFactories
+        foreach (var kvp in propertyFactories)
+        {
+            var propertyName = kvp.Key;
+            var valueFactory = kvp.Value;
+            
+            if (metadata.PropertySetters.TryGetValue(propertyName, out var setter))
+            {
+                var value = valueFactory();
+                setter(instance, value);
+            }
+            else
+            {
+                // Try to find a matching PropertyInjection
+                var injection = metadata.PropertyInjections.FirstOrDefault(pi => pi.PropertyName == propertyName);
+                if (injection != null)
+                {
+                    var value = valueFactory();
+                    injection.Setter(instance, value);
+                }
+            }
+        }
+        
         await Task.CompletedTask;
     }
 

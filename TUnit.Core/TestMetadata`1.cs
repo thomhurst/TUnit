@@ -22,5 +22,5 @@ public class TestMetadata<T> : TestMetadata where T : class
     /// <summary>
     /// Property setters for this test class
     /// </summary>
-    public Dictionary<string, Action<T, object?>> PropertySetters { get; init; } = new();
+    public new Dictionary<string, Action<T, object?>> PropertySetters { get; init; } = new();
 }

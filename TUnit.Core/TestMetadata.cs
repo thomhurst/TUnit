@@ -140,6 +140,17 @@ public class TestMetadata
     /// Factory to create attribute instances applied to this test (for discovery event receivers)
     /// </summary>
     public Func<Attribute[]>? AttributeFactory { get; init; }
+    
+    /// <summary>
+    /// Property setters dictionary for property injection
+    /// Key is property name, value is setter delegate
+    /// </summary>
+    public Dictionary<string, Action<object, object?>> PropertySetters { get; init; } = new();
+    
+    /// <summary>
+    /// Enhanced property injection data including setters and value factories
+    /// </summary>
+    public PropertyInjectionData[] PropertyInjections { get; init; } = [];
 }
 
 // TestDataSource classes have been moved to TestDataSources.cs
@@ -294,4 +305,15 @@ public sealed class GenericParameterConstraints
     /// Whether the parameter has a notnull constraint
     /// </summary>
     public bool HasNotNullConstraint { get; init; }
+}
+
+/// <summary>
+/// Data for property injection including setter and value factory
+/// </summary>
+public sealed class PropertyInjectionData
+{
+    public required string PropertyName { get; init; }
+    public required Type PropertyType { get; init; }
+    public required Action<object, object?> Setter { get; init; }
+    public required Func<object?> ValueFactory { get; init; }
 }

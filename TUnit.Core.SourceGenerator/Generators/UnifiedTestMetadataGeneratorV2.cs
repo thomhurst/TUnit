@@ -182,7 +182,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
 
         // Also skip if method has parameters with unresolved type parameters
         if (methodSymbol is IMethodSymbol methodWithParams &&
-            methodWithParams.Parameters.Any(p => DelegateGenerator.ContainsTypeParameter(p.Type)))
+            methodWithParams.Parameters.Any(p => ContainsTypeParameter(p.Type)))
         {
             return null;
         }
@@ -426,7 +426,6 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             // Create generator instances
             // HookGenerator removed - hooks are now handled by UnifiedHookMetadataGenerator
             var dataSourceGenerator = new DataSourceGenerator();
-            var delegateGenerator = new DelegateGenerator();
             var genericTypeResolver = new GenericTypeResolver();
             var metadataGenerator = new MetadataGenerator(dataSourceGenerator);
 
@@ -449,7 +448,6 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             writer.AppendLine("try");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("RegisterAllDelegates();");
             writer.AppendLine("RegisterAllTests();");
             writer.Unindent();
             writer.AppendLine("}");
@@ -465,7 +463,6 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             writer.AppendLine();
 
             // Generate registration methods
-            GenerateRegisterAllDelegates(writer, delegateGenerator, testMethods);
             GenerateRegisterAllTests(writer, metadataGenerator, testMethods);
 
             // Generate generic test registry
@@ -483,15 +480,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             writer.AppendLine("// Helper methods");
             GenerateHelperMethods(writer, dataSourceGenerator, testMethods);
 
-            // Generate factory methods for classes with required properties
-            writer.AppendLine();
-            writer.AppendLine("// Factory methods for classes with required properties");
-            delegateGenerator.GenerateRequiredPropertyFactories(writer, testMethods);
-
-            // Generate delegate implementations
-            writer.AppendLine();
-            writer.AppendLine("// Strongly-typed delegate implementations");
-            delegateGenerator.GenerateStronglyTypedDelegates(writer, testMethods);
+            // Factory methods and delegate implementations are now embedded in TestMetadata
 
             // Hook implementations are now handled by UnifiedHookMetadataGenerator
 
@@ -575,8 +564,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
 
         // Register all generated metadata
         writer.AppendLine("// Register all generated metadata");
-        writer.AppendLine("RegisterAllDelegates();");
-        writer.AppendLine("RegisterAllTests();");
+        writer.AppendLine("// Tests are registered through ITestSource in the static constructor");
         writer.AppendLine();
 
         // Create efficient test registry with proper equality comparers
@@ -612,22 +600,6 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         GenerateGenericTestRegistrationMethod(writer);
     }
 
-    private void GenerateRegisterAllDelegates(
-        CodeWriter writer,
-        DelegateGenerator delegateGenerator,
-        IEnumerable<TestMethodMetadata> testMethods)
-    {
-        writer.AppendLine("private static void RegisterAllDelegates()");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        delegateGenerator.GenerateDelegateRegistrations(writer, testMethods);
-        // Hook registrations removed - hooks are now handled by UnifiedHookMetadataGenerator
-
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-    }
 
     private void GenerateRegisterAllTests(
         CodeWriter writer,
@@ -794,6 +766,29 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
 
         writer.Unindent();
         writer.AppendLine("}");
+    }
+    
+    private static bool ContainsTypeParameter(ITypeSymbol type)
+    {
+        if (type is ITypeParameterSymbol)
+        {
+            return true;
+        }
+
+        if (type is INamedTypeSymbol namedType)
+        {
+            if (namedType.TypeArguments.Any(ContainsTypeParameter))
+            {
+                return true;
+            }
+        }
+
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return ContainsTypeParameter(arrayType.ElementType);
+        }
+
+        return false;
     }
 }
 

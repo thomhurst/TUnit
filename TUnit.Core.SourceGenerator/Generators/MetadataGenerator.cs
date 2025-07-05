@@ -335,7 +335,7 @@ public sealed class MetadataGenerator
         }
 
         // Check if any parameter contains unresolved type parameters
-        var hasUnresolvedTypeParameters = parameters.Any(p => DelegateGenerator.ContainsTypeParameter(p.Type));
+        var hasUnresolvedTypeParameters = parameters.Any(p => ContainsTypeParameter(p.Type));
         if (hasUnresolvedTypeParameters)
         {
             // For methods with unresolved type parameters, we can't generate typeof() at compile time
@@ -378,8 +378,17 @@ public sealed class MetadataGenerator
         var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var methodName = testInfo.MethodSymbol.Name;
 
-        writer.AppendLine($"InstanceFactory = TestDelegateStorage.GetInstanceFactory(\"{className}\"),");
-        writer.AppendLine($"TestInvoker = TestDelegateStorage.GetTestInvoker(\"{className}.{methodName}\"),");
+        // Generate instance factory inline
+        GenerateInlineInstanceFactory(writer, testInfo);
+        
+        // Generate test invoker inline
+        GenerateInlineTestInvoker(writer, testInfo);
+        
+        // Generate property setters inline
+        GenerateInlinePropertySetters(writer, testInfo);
+        
+        // Generate property injections with embedded factories
+        GeneratePropertyInjections(writer, testInfo);
     }
 
     private void GenerateEmptyHookMetadata(CodeWriter writer)
@@ -732,5 +741,179 @@ public sealed class MetadataGenerator
         return attributeClass.AllInterfaces.Any(i =>
             i.Name == "ITestDiscoveryEventReceiver" &&
             i.ContainingNamespace?.ToDisplayString() == "TUnit.Core.Interfaces");
+    }
+    
+    private void GenerateInlineInstanceFactory(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        
+        // Check if the class has required properties with data source attributes
+        var hasRequiredPropertiesWithDataSource = HasRequiredPropertiesWithDataSource(testInfo.TypeSymbol);
+        
+        // For now, always use standard instantiation
+        // Required properties will be handled during test expansion
+        writer.AppendLine($"InstanceFactory = args => new {className}({GenerateConstructorArgs(testInfo)}),");
+    }
+    
+    private void GenerateInlineTestInvoker(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var methodName = testInfo.MethodSymbol.Name;
+        var isAsync = testInfo.MethodSymbol.IsAsync;
+        
+        writer.AppendLine("TestInvoker = async (instance, args) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Cast instance to correct type
+        writer.AppendLine($"var typedInstance = ({className})instance;");
+        
+        // Generate parameter casting
+        var parameters = testInfo.MethodSymbol.Parameters;
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            var paramType = parameters[i].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            writer.AppendLine($"var arg{i} = ({paramType})args[{i}]!;");
+        }
+        
+        // Generate method call
+        var argList = string.Join(", ", Enumerable.Range(0, parameters.Length).Select(i => $"arg{i}"));
+        if (isAsync)
+        {
+            writer.AppendLine($"await typedInstance.{methodName}({argList});");
+        }
+        else
+        {
+            writer.AppendLine($"typedInstance.{methodName}({argList});");
+            writer.AppendLine("await Task.CompletedTask;");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+    
+    private void GenerateInlinePropertySetters(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        var properties = testInfo.TypeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(p => p.SetMethod != null && !p.IsStatic && p.SetMethod.DeclaredAccessibility == Accessibility.Public);
+        
+        writer.AppendLine("PropertySetters = new Dictionary<string, Action<object, object?>>()");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        foreach (var property in properties)
+        {
+            var propName = property.Name;
+            var propType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            
+            writer.AppendLine($"[\"{propName}\"] = (instance, value) => (({className})instance).{propName} = ({propType})value!,");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+    
+    private void GeneratePropertyInjections(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        // Collect properties with data source attributes
+        var propertyDataSources = new List<(IPropertySymbol property, AttributeData attr)>();
+        
+        foreach (var member in testInfo.TypeSymbol.GetMembers().OfType<IPropertySymbol>())
+        {
+            if (member.SetMethod == null || member.IsStatic || member.SetMethod.DeclaredAccessibility != Accessibility.Public)
+                continue;
+                
+            // Check for data source attributes
+            var dataSourceAttrs = member.GetAttributes()
+                .Where(a => a.AttributeClass?.AllInterfaces.Any(i => i.Name == "IDataAttribute") == true
+                    || a.AttributeClass?.Name == "ClassDataSourceAttribute"
+                    || a.AttributeClass?.Name == "MethodDataSourceAttribute")
+                .ToList();
+                
+            foreach (var attr in dataSourceAttrs)
+            {
+                propertyDataSources.Add((member, attr));
+            }
+        }
+        
+        if (!propertyDataSources.Any())
+        {
+            writer.AppendLine("PropertyInjections = Array.Empty<PropertyInjectionData>(),");
+            return;
+        }
+        
+        writer.AppendLine("PropertyInjections = new PropertyInjectionData[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        foreach (var (property, attr) in propertyDataSources)
+        {
+            writer.AppendLine("new PropertyInjectionData");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            writer.AppendLine($"PropertyName = \"{property.Name}\",");
+            writer.AppendLine($"PropertyType = typeof({property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
+            
+            // Generate setter delegate
+            var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})value!,");
+            
+            // Generate value factory that will be resolved at runtime
+            // The actual value will come from the PropertyDataSources during test expansion
+            writer.AppendLine("ValueFactory = () =>");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("// This is a placeholder - actual values come from PropertyDataSources during test expansion");
+            writer.AppendLine("throw new InvalidOperationException(\"Property value should be provided by test expansion\");");
+            writer.Unindent();
+            writer.AppendLine("}");
+            
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+    
+    private bool HasRequiredPropertiesWithDataSource(ITypeSymbol typeSymbol)
+    {
+        return typeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Any(p => p.IsRequired && p.GetAttributes()
+                .Any(a => a.AttributeClass?.AllInterfaces
+                    .Any(i => i.Name == "IDataAttribute") == true));
+    }
+    
+    private string GetSafeFactoryMethodName(ITypeSymbol typeSymbol)
+    {
+        return typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+            .Replace("global::", "")
+            .Replace(".", "_")
+            .Replace("<", "_")
+            .Replace(">", "_")
+            .Replace(",", "_")
+            .Replace(" ", "");
+    }
+    
+    private string GenerateConstructorArgs(TestMethodMetadata testInfo)
+    {
+        var constructor = testInfo.TypeSymbol.Constructors
+            .FirstOrDefault(c => !c.IsStatic);
+            
+        if (constructor == null || constructor.Parameters.Length == 0)
+            return "";
+            
+        var args = new List<string>();
+        for (int i = 0; i < constructor.Parameters.Length; i++)
+        {
+            var paramType = constructor.Parameters[i].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            args.Add($"({paramType})args[{i}]");
+        }
+        
+        return string.Join(", ", args);
     }
 }
