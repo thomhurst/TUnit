@@ -10,6 +10,7 @@ using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Building;
+using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
@@ -63,6 +64,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create test services using unified architecture
         var testInvoker = Register<ITestInvoker>(new TestInvoker());
+        var hookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
 
         // Detect execution mode from command line or environment
         var executionMode = GetExecutionMode(CommandLineOptions);
@@ -82,7 +84,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             singleTestExecutor,
             CommandLineOptions,
             Logger,
-            loggerFactory));
+            loggerFactory,
+            testScheduler: null,
+            serviceProvider: this));
 
         // Set session IDs for proper test reporting
         var sessionUid = context.Request.Session.SessionUid;

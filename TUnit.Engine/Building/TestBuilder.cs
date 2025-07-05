@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Interfaces;
 
 namespace TUnit.Engine.Building;
 
@@ -32,9 +33,9 @@ public sealed class TestBuilder : ITestBuilder
         // Create test context first since it's required
         var context = await CreateTestContextAsync(testId, displayName, metadata, createInstance);
 
-        // Create hooks
-        var beforeTestHooks = CreateTestHooks(metadata.Hooks.BeforeTest);
-        var afterTestHooks = CreateTestHooks(metadata.Hooks.AfterTest);
+        // Create hooks using the HookCollectionService
+        var beforeTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: true);
+        var afterTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: false);
 
         // Build the executable test with all required properties
         var executableTest = new DynamicExecutableTest(createInstance, metadata.TestInvoker!)
@@ -81,11 +82,19 @@ public sealed class TestBuilder : ITestBuilder
         await Task.CompletedTask;
     }
 
-    private Func<TestContext, CancellationToken, Task>[] CreateTestHooks(HookMetadata[] hooks)
+    private async Task<Func<TestContext, CancellationToken, Task>[]> CreateTestHooksAsync(Type testClassType, bool isBeforeHook)
     {
-        // For now, return empty array since hooks need to be invoked through the proper hook system
-        // The actual hook execution will be handled by the hook sources registered with the engine
-        return Array.Empty<Func<TestContext, CancellationToken, Task>>();
+        var hookCollectionService = _serviceProvider?.GetService(typeof(IHookCollectionService)) as IHookCollectionService;
+        if (hookCollectionService == null)
+        {
+            return Array.Empty<Func<TestContext, CancellationToken, Task>>();
+        }
+
+        var hooks = isBeforeHook
+            ? await hookCollectionService.CollectBeforeTestHooksAsync(testClassType)
+            : await hookCollectionService.CollectAfterTestHooksAsync(testClassType);
+
+        return hooks.ToArray();
     }
 
     private static string GenerateTestId(TestMetadata metadata, int[] dataSourceIndices)

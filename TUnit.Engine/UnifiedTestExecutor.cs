@@ -9,6 +9,7 @@ using TUnit.Core;
 using TUnit.Core.Services;
 using TUnit.Engine.Building;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
@@ -27,18 +28,21 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     private readonly ILoggerFactory _loggerFactory;
     private SessionUid? _sessionUid;
     private readonly CancellationTokenSource _failFastCancellationSource = new();
+    private readonly IServiceProvider? _serviceProvider;
 
     public UnifiedTestExecutor(
         ISingleTestExecutor singleTestExecutor,
         ICommandLineOptions commandLineOptions,
         TUnitFrameworkLogger logger,
         ILoggerFactory? loggerFactory = null,
-        ITestScheduler? testScheduler = null)
+        ITestScheduler? testScheduler = null,
+        IServiceProvider? serviceProvider = null)
     {
         _singleTestExecutor = singleTestExecutor;
         _commandLineOptions = commandLineOptions;
         _logger = logger;
         _loggerFactory = loggerFactory ?? new NullLoggerFactory();
+        _serviceProvider = serviceProvider;
 
         // Use provided scheduler or create default
         _testScheduler = testScheduler ?? CreateDefaultScheduler();
@@ -79,25 +83,64 @@ public sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             testList = ApplyFilter(testList, filter);
         }
 
-        // Check if fail-fast is enabled
-        var isFailFastEnabled = IsFailFastEnabled();
+        // Create hook orchestrator if we have the service
+        HookOrchestrator? hookOrchestrator = null;
+        if (_serviceProvider != null)
+        {
+            var hookCollectionService = _serviceProvider.GetService(typeof(IHookCollectionService)) as IHookCollectionService;
+            if (hookCollectionService != null)
+            {
+                hookOrchestrator = new HookOrchestrator(hookCollectionService, _logger);
+            }
+        }
 
-        // Create executor adapter with fail-fast support
-        var executorAdapter = new FailFastTestExecutorAdapter(
-            _singleTestExecutor,
-            messageBus,
-            _sessionUid ?? new SessionUid(Guid.NewGuid().ToString()),
-            isFailFastEnabled,
-            _failFastCancellationSource,
-            _logger);
+        try
+        {
+            // Initialize contexts with all tests after filtering
+            if (hookOrchestrator != null)
+            {
+                hookOrchestrator.SetTotalTestCount(testList.Count);
+                await hookOrchestrator.InitializeContextsWithTestsAsync(testList, cancellationToken);
+                await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
+            }
 
-        // Combine cancellation tokens
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            cancellationToken,
-            _failFastCancellationSource.Token);
+            // Check if fail-fast is enabled
+            var isFailFastEnabled = IsFailFastEnabled();
 
-        // Schedule and execute tests
-        await _testScheduler.ScheduleAndExecuteAsync(testList, executorAdapter, linkedCts.Token);
+            // Create executor adapter with fail-fast support and hook orchestration
+            Scheduling.ITestExecutor executorAdapter = hookOrchestrator != null
+                ? new HookOrchestratingTestExecutorAdapter(
+                    _singleTestExecutor,
+                    messageBus,
+                    _sessionUid ?? new SessionUid(Guid.NewGuid().ToString()),
+                    isFailFastEnabled,
+                    _failFastCancellationSource,
+                    _logger,
+                    hookOrchestrator)
+                : new FailFastTestExecutorAdapter(
+                    _singleTestExecutor,
+                    messageBus,
+                    _sessionUid ?? new SessionUid(Guid.NewGuid().ToString()),
+                    isFailFastEnabled,
+                    _failFastCancellationSource,
+                    _logger);
+
+            // Combine cancellation tokens
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+                cancellationToken,
+                _failFastCancellationSource.Token);
+
+            // Schedule and execute tests
+            await _testScheduler.ScheduleAndExecuteAsync(testList, executorAdapter, linkedCts.Token);
+        }
+        finally
+        {
+            // Execute AfterTestSession hooks
+            if (hookOrchestrator != null)
+            {
+                await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cancellationToken);
+            }
+        }
     }
 
     private bool IsFailFastEnabled()

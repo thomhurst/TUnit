@@ -21,9 +21,12 @@ public abstract record StaticHookMethod
     public required MethodMetadata MethodInfo { get; init; }
 
     [field: AllowNull, MaybeNull]
-    public string Name => field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})";
-    public Type ClassType => MethodInfo.Class.Type;
-    public Assembly Assembly => ClassType.Assembly;
+    public string Name => field ??= MethodInfo?.Class?.Type != null 
+        ? $"{MethodInfo.Class.Type.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})"
+        : $"UnknownClass.{MethodInfo?.Name ?? "UnknownMethod"}()";
+    
+    public Type? ClassType => MethodInfo?.Class?.Type;
+    public Assembly? Assembly => ClassType?.Assembly;
 
     public Attribute[] MethodAttributes => MethodInfo.Attributes.Select(a => a.Instance).ToArray();
     public Attribute[] ClassAttributes => MethodInfo.Class.Attributes.Select(a => a.Instance).ToArray();

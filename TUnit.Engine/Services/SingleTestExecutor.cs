@@ -80,6 +80,9 @@ public class SingleTestExecutor : ISingleTestExecutor
 
         // Inject property values
         await InjectPropertyValuesAsync(instance, test.PropertyValues);
+        
+        // Set the instance in the test context for hooks
+        test.Context!.TestDetails.ClassInstance = instance;
 
         // Restore ExecutionContext for AsyncLocal support
         test.Context!.RestoreExecutionContext();

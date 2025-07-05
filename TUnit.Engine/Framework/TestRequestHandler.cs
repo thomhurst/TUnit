@@ -1,5 +1,6 @@
 ﻿using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
+using TUnit.Engine.Interfaces;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
@@ -33,13 +34,38 @@ internal sealed class TestRequestHandler : IRequestHandler
         TUnitServiceProvider serviceProvider,
         ExecuteRequestContext context)
     {
-        var allTests = await serviceProvider.DiscoveryService.DiscoverTests();
-
-        foreach (var test in allTests)
+        // Create hook orchestrator if we have the service
+        HookOrchestrator? hookOrchestrator = null;
+        var hookCollectionService = serviceProvider.GetService(typeof(IHookCollectionService)) as IHookCollectionService;
+        if (hookCollectionService != null)
         {
-            context.CancellationToken.ThrowIfCancellationRequested();
+            hookOrchestrator = new HookOrchestrator(hookCollectionService, serviceProvider.Logger);
+        }
 
-            await serviceProvider.MessageBus.Discovered(test.Context);
+        try
+        {
+            // Execute BeforeTestDiscovery hooks
+            if (hookOrchestrator != null)
+            {
+                await hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(context.CancellationToken);
+            }
+
+            var allTests = await serviceProvider.DiscoveryService.DiscoverTests();
+
+            foreach (var test in allTests)
+            {
+                context.CancellationToken.ThrowIfCancellationRequested();
+
+                await serviceProvider.MessageBus.Discovered(test.Context);
+            }
+        }
+        finally
+        {
+            // Execute AfterTestDiscovery hooks
+            if (hookOrchestrator != null)
+            {
+                await hookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(context.CancellationToken);
+            }
         }
     }
 
