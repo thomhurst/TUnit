@@ -124,7 +124,13 @@ public sealed class DataSourceGenerator
             .Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute")
             .Select(a => ExtractMethodDataSource(a, testInfo));
 
-        dataSources.AddRange(methodDataSources.Where(ds => ds != null)!);
+        foreach (var ds in methodDataSources)
+        {
+            if (ds != null)
+            {
+                dataSources.Add(ds);
+            }
+        }
 
         // Arguments attributes on methods
         var argumentsAttributes = testInfo.MethodSymbol.GetAttributes()
@@ -150,7 +156,13 @@ public sealed class DataSourceGenerator
             .Where(p => p.GetAttributes().Any(a => a.AttributeClass?.Name == "DataSourceForAttribute"))
             .Select(p => ExtractPropertyDataSource(p, testInfo));
 
-        dataSources.AddRange(propertyDataSources.Where(ds => ds != null)!);
+        foreach (var ds in propertyDataSources)
+        {
+            if (ds != null)
+            {
+                dataSources.Add(ds);
+            }
+        }
 
         return dataSources;
     }
@@ -583,37 +595,44 @@ public sealed class DataSourceGenerator
             // The ArgumentsAttribute constructor takes params object?[] args
             var args = dataSource.AttributeData.ConstructorArguments;
             
-            // ArgumentsAttribute has a single constructor that takes params object?[]
-            // The source generator wraps all arguments into a single array
-            if (args.Length == 1 && args[0].Kind == TypedConstantKind.Array)
+            // Handle the params array - Roslyn always passes params as a single array argument
+            if (args.Length > 0)
             {
-                // Extract the array values
-                var arrayValues = args[0].Values;
-                writer.Append("new object?[] { ");
-                for (int i = 0; i < arrayValues.Length; i++)
+                var firstArg = args[0];
+                if (firstArg.Kind == TypedConstantKind.Array)
                 {
-                    writer.Append(FormatArgumentValue(arrayValues[i]));
-                    if (i < arrayValues.Length - 1)
-                        writer.Append(", ");
+                    // Extract the array values
+                    var arrayValues = firstArg.Values;
+                    
+                    // Special case: if the array is empty, it means [Arguments()] was used
+                    if (arrayValues.Length == 0)
+                    {
+                        writer.Append("new object?[] { }");
+                    }
+                    else
+                    {
+                        writer.Append("new object?[] { ");
+                        for (int i = 0; i < arrayValues.Length; i++)
+                        {
+                            writer.Append(FormatArgumentValue(arrayValues[i]));
+                            if (i < arrayValues.Length - 1)
+                                writer.Append(", ");
+                        }
+                        writer.Append(" }");
+                    }
                 }
-                writer.Append(" }");
-            }
-            else if (args.Length == 0)
-            {
-                // No arguments provided
-                writer.Append("new object?[] { }");
+                else
+                {
+                    // Single non-array argument (shouldn't happen with params, but handle it)
+                    writer.Append("new object?[] { ");
+                    writer.Append(FormatArgumentValue(firstArg));
+                    writer.Append(" }");
+                }
             }
             else
             {
-                // Direct arguments (shouldn't happen with params, but handle it)
-                writer.Append("new object?[] { ");
-                for (int i = 0; i < args.Length; i++)
-                {
-                    writer.Append(FormatArgumentValue(args[i]));
-                    if (i < args.Length - 1)
-                        writer.Append(", ");
-                }
-                writer.Append(" }");
+                // No arguments provided - [Arguments()]
+                writer.Append("new object?[] { }");
             }
             writer.AppendLine("),");
         }
@@ -924,13 +943,19 @@ public sealed class DataSourceGenerator
                     return $"\"{value}\"";
                 }
                 if (arg.Type?.SpecialType == SpecialType.System_Char)
+                {
+                    if (arg.Value == null)
+                        return "null";
                     return $"'{arg.Value}'";
+                }
                 if (arg.Type?.SpecialType == SpecialType.System_Boolean)
                     return arg.Value?.ToString()?.ToLowerInvariant() ?? "false";
                 return arg.Value?.ToString() ?? "null";
 
             case TypedConstantKind.Type:
-                var type = (ITypeSymbol)arg.Value!;
+                if (arg.Value == null)
+                    return "null";
+                var type = (ITypeSymbol)arg.Value;
                 return $"typeof({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
 
             case TypedConstantKind.Array:

@@ -108,7 +108,18 @@ internal sealed class DelegateGenerator
         {
             var param = parameters[i];
             var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            writer.AppendLine($"var arg{i} = ({paramType})args[{i}]!;");
+            
+            // Handle null values for non-nullable value types
+            var isNullableType = paramType.Contains("?") || param.Type.SpecialType == SpecialType.System_String || param.Type.IsReferenceType;
+            
+            if (param.Type.IsValueType && !isNullableType)
+            {
+                writer.AppendLine($"var arg{i} = args[{i}] != null ? ({paramType})args[{i}]! : default({paramType});");
+            }
+            else
+            {
+                writer.AppendLine($"var arg{i} = ({paramType})args[{i}]!;");
+            }
         }
         
         // Generate method invocation

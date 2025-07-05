@@ -472,7 +472,9 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         }
         catch (Exception ex)
         {
-            // Report diagnostic
+            // Report diagnostic with full stack trace for debugging
+            var errorMessage = $"{ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
+            
             var diagnostic = Diagnostic.Create(
                 new DiagnosticDescriptor(
                     "TU0001",
@@ -482,7 +484,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
                     DiagnosticSeverity.Error,
                     isEnabledByDefault: true),
                 Location.None,
-                ex.Message);
+                errorMessage);
 
             context.ReportDiagnostic(diagnostic);
         }
