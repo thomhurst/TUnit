@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Interfaces;
 
@@ -32,6 +33,9 @@ public sealed class TestBuilder : ITestBuilder
 
         // Create test context first since it's required
         var context = await CreateTestContextAsync(testId, displayName, metadata, createInstance);
+
+        // Create discovery context and invoke discovery event receivers
+        await InvokeDiscoveryEventReceiversAsync(metadata, context);
 
         // Create hooks using the HookCollectionService
         var beforeTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: true);
@@ -213,5 +217,60 @@ public sealed class TestBuilder : ITestBuilder
             ReturnType = typeof(Task),
             Attributes = []
         };
+    }
+
+    [UnconditionalSuppressMessage("AOT", "IL2075:Type mismatch", Justification = "Attribute types are known at compile time")]
+    [UnconditionalSuppressMessage("AOT", "IL2072:Type mismatch", Justification = "Attribute types are known at compile time")]
+    private async Task InvokeDiscoveryEventReceiversAsync(TestMetadata metadata, TestContext context)
+    {
+        // Create a DiscoveredTestContext
+        var discoveredContext = new DiscoveredTestContext(
+            context.TestDetails.TestName,
+            context.TestDetails.DisplayName ?? context.TestDetails.TestName,
+            context.TestDetails);
+
+        // Invoke all ITestDiscoveryEventReceiver implementations
+        foreach (var attributeType in metadata.AttributeTypes)
+        {
+            try
+            {
+                // Check if the attribute implements ITestDiscoveryEventReceiver
+                if (typeof(ITestDiscoveryEventReceiver).IsAssignableFrom(attributeType))
+                {
+                    // Try to create an instance of the attribute
+                    // Note: This is a simplified approach - in reality, attributes might have
+                    // constructor parameters that we'd need to handle properly.
+                    // For now, we'll skip attributes that can't be instantiated with default constructor
+                    var constructors = attributeType.GetConstructors();
+                    var defaultConstructor = constructors.FirstOrDefault(c => c.GetParameters().Length == 0);
+                    
+                    if (defaultConstructor != null)
+                    {
+                        var attribute = Activator.CreateInstance(attributeType);
+                        if (attribute is ITestDiscoveryEventReceiver receiver)
+                        {
+                            await receiver.OnTestDiscovered(discoveredContext);
+                        }
+                    }
+                    // TODO: For attributes with parameters, we'd need to store the parameter values
+                    // in TestMetadata and use them here
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log or handle attribute instantiation errors
+                // For now, we'll silently continue to avoid breaking test discovery
+                _ = ex; // Suppress warning
+            }
+        }
+
+        // Transfer any modifications back to the test context
+        discoveredContext.TransferTo(context);
+        
+        // Update the display name if it was changed
+        if (context.TestDetails.DisplayName != discoveredContext.DisplayName)
+        {
+            context.TestDetails.DisplayName = discoveredContext.DisplayName;
+        }
     }
 }

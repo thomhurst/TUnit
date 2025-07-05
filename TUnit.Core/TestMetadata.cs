@@ -135,6 +135,11 @@ public class TestMetadata
     /// Concrete type arguments for generic method instantiation (used with [GenerateGenericTest])
     /// </summary>
     public Type[]? GenericMethodTypeArguments { get; init; }
+    
+    /// <summary>
+    /// Attribute types applied to this test (for discovery event receivers)
+    /// </summary>
+    public Type[] AttributeTypes { get; init; } = [];
 }
 
 // TestDataSource classes have been moved to TestDataSources.cs

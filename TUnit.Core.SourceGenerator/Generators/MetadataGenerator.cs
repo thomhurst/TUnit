@@ -150,6 +150,7 @@ public sealed class MetadataGenerator
         GenerateRetryCount(writer, testInfo);
         GenerateParallelization(writer, testInfo);
         GenerateDependencies(writer, testInfo);
+        GenerateAttributeTypes(writer, testInfo);
     }
 
     private void GenerateCategories(CodeWriter writer, TestMethodMetadata testInfo)
@@ -640,5 +641,69 @@ public sealed class MetadataGenerator
             default:
                 return "null";
         }
+    }
+
+    private void GenerateAttributeTypes(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        // Collect all attributes from method, class, and assembly
+        var attributeTypes = new HashSet<string>();
+        
+        // Method attributes
+        foreach (var attr in testInfo.MethodSymbol.GetAttributes())
+        {
+            if (attr.AttributeClass != null && IsDiscoveryEventReceiverAttribute(attr.AttributeClass))
+            {
+                var typeName = attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                attributeTypes.Add(typeName);
+            }
+        }
+        
+        // Class attributes
+        foreach (var attr in testInfo.TypeSymbol.GetAttributes())
+        {
+            if (attr.AttributeClass != null && IsDiscoveryEventReceiverAttribute(attr.AttributeClass))
+            {
+                var typeName = attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                attributeTypes.Add(typeName);
+            }
+        }
+        
+        // Assembly attributes
+        if (testInfo.TypeSymbol.ContainingAssembly != null)
+        {
+            foreach (var attr in testInfo.TypeSymbol.ContainingAssembly.GetAttributes())
+            {
+                if (attr.AttributeClass != null && IsDiscoveryEventReceiverAttribute(attr.AttributeClass))
+                {
+                    var typeName = attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    attributeTypes.Add(typeName);
+                }
+            }
+        }
+        
+        if (attributeTypes.Any())
+        {
+            writer.AppendLine("AttributeTypes = new Type[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            foreach (var attrType in attributeTypes)
+            {
+                writer.AppendLine($"typeof({attrType}),");
+            }
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
+        else
+        {
+            writer.AppendLine("AttributeTypes = Array.Empty<Type>(),");
+        }
+    }
+    
+    private bool IsDiscoveryEventReceiverAttribute(INamedTypeSymbol attributeClass)
+    {
+        // Check if the attribute implements ITestDiscoveryEventReceiver
+        return attributeClass.AllInterfaces.Any(i => 
+            i.Name == "ITestDiscoveryEventReceiver" && 
+            i.ContainingNamespace?.ToDisplayString() == "TUnit.Core.Interfaces");
     }
 }
