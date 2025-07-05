@@ -5,7 +5,8 @@ namespace TUnit.Core;
 public record FailedTestMetadata<[DynamicallyAccessedMembers(
     DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.NonPublicMethods)] TClassType>
+    | DynamicallyAccessedMemberTypes.NonPublicMethods
+    | DynamicallyAccessedMemberTypes.PublicProperties)] TClassType>
     where TClassType : class
 {
     public required string TestId { get; init; }
@@ -14,14 +15,13 @@ public record FailedTestMetadata<[DynamicallyAccessedMembers(
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
 
-
     public static implicit operator TestMetadata<TClassType>(FailedTestMetadata<TClassType> failedTestMetadata)
     {
         return new TestMetadata<TClassType>
         {
             TestId = failedTestMetadata.TestId,
             RepeatLimit = 0,
-            TestMethod = SourceGeneratedMethodInformation.Failure<TClassType>(failedTestMetadata.MethodName),
+            TestMethod = TestMethod.Failure<TClassType>(failedTestMetadata.MethodName),
             CurrentRepeatAttempt = 0,
             ResettableClassFactory = new ResettableLazy<TClassType>(() => null!, "Unknown", new TestBuilderContext()),
             TestMethodFactory = (_, _) => default,

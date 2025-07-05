@@ -8,14 +8,17 @@ namespace TUnit.Engine.Capabilities;
 public class StopExecutionCapability : IGracefulStopTestExecutionCapability
 {
     public AsyncEvent<EventArgs>? OnStopRequested { get; set; }
-    
+
     public async Task StopTestExecutionAsync(CancellationToken cancellationToken)
     {
         IsStopRequested = true;
-        
+
         if (OnStopRequested != null)
         {
-            await OnStopRequested.InvokeAsync(this, EventArgs.Empty);
+            foreach (var invocation in OnStopRequested.InvocationList.OrderBy(x => x.Order))
+            {
+                await invocation.InvokeAsync(this, EventArgs.Empty);
+            }
         }
     }
 

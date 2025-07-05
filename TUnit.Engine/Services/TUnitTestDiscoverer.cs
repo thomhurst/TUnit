@@ -18,16 +18,18 @@ internal class TUnitTestDiscoverer(
 {
     private IReadOnlyCollection<DiscoveredTest>? _cachedTests;
 
-    public IReadOnlyCollection<DiscoveredTest> GetTests(CancellationToken cancellationToken = default)
+    public IReadOnlyCollection<DiscoveredTest> CachedTests => _cachedTests ?? throw new InvalidOperationException("Tests have not been discovered yet. Call GetTestsAsync first.");
+
+    public async Task<IReadOnlyCollection<DiscoveredTest>> GetTestsAsync(CancellationToken cancellationToken = default)
     {
-        return _cachedTests ??= testsConstructor.GetTests(cancellationToken);
+        return _cachedTests ??= await testsConstructor.GetTestsAsync(cancellationToken);
     }
 
     public async Task<GroupedTests> FilterTests(ExecuteRequestContext context, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
                 
-        var allDiscoveredTests = GetTests(cancellationToken);
+        var allDiscoveredTests = await GetTestsAsync(cancellationToken);
         
         var executionRequest = context.Request as TestExecutionRequest;
         

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.Testing.Platform.Extensions;
+﻿using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
@@ -7,27 +6,21 @@ using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Services;
 
-[UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
-[UnconditionalSuppressMessage("Trimming", "IL2070:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The parameter of method does not have matching annotations.")]
-[UnconditionalSuppressMessage("Trimming", "IL2071:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The parameter of method does not have matching annotations.")]
-[UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-[UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
 internal abstract class BaseTestsConstructor(IExtension extension,
     DependencyCollector dependencyCollector,
     ContextManager contextManager,
     IServiceProvider serviceProvider) : IDataProducer
 {
-    public DiscoveredTest[] GetTests(CancellationToken cancellationToken)
+    public async Task<DiscoveredTest[]> GetTestsAsync(CancellationToken cancellationToken)
     {
-        var discoveredTests = DiscoverTests();
+        var discoveredTests = await DiscoverTestsAsync();
 
         dependencyCollector.ResolveDependencies(discoveredTests, cancellationToken);
 
         return discoveredTests;
     }
 
-    protected abstract DiscoveredTest[] DiscoverTests();
+    protected abstract Task<DiscoveredTest[]> DiscoverTestsAsync();
 
     protected internal DiscoveredTest ConstructTest(TestMetadata testMetadata)
     {

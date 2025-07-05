@@ -1,14 +1,15 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace TUnit.Core;
 
 [RequiresDynamicCode("Reflection")]
 [RequiresUnreferencedCode("Reflection")]
-public record UntypedFailedDynamicTest
+public record UntypedFailedDynamicTest(MethodInfo TestMethod)
 {
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
-        | DynamicallyAccessedMemberTypes.PublicMethods 
-        | DynamicallyAccessedMemberTypes.NonPublicMethods
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.PublicProperties)]
     public required Type TestClassType { get; init; }
     public required string MethodName { get; init; }
@@ -18,7 +19,7 @@ public record UntypedFailedDynamicTest
 
     public static implicit operator DynamicTest(UntypedFailedDynamicTest failedTestMetadata)
     {
-        return new UntypedDynamicTest(failedTestMetadata.TestClassType.GetMethod(failedTestMetadata.MethodName)!)
+        return new UntypedDynamicTest(failedTestMetadata.TestMethod)
         {
             TestClassArguments = [],
             Properties = [],

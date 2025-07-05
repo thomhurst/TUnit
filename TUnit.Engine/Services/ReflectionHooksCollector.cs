@@ -5,6 +5,7 @@ using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Executors;
+using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Hooks;
 using TUnit.Core.Interfaces;
@@ -18,19 +19,19 @@ namespace TUnit.Engine.Services;
 [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
 internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(sessionId)
 {
-    private static BindingFlags BindingFlags => 
-        BindingFlags.Public 
-        | BindingFlags.NonPublic 
-        | BindingFlags.Instance 
+    private static BindingFlags BindingFlags =>
+        BindingFlags.Public
+        | BindingFlags.NonPublic
+        | BindingFlags.Instance
         | BindingFlags.Static
         | BindingFlags.DeclaredOnly;
 
     private bool HasHookType(MethodInfo methodInfo, HookType hookType, [NotNullWhen(true)] out HookAttribute? hookAttribute)
     {
-        hookAttribute = methodInfo.GetCustomAttributes()
+        hookAttribute = methodInfo.GetCustomAttributesSafe()
             .OfType<HookAttribute>()
             .FirstOrDefault(x => IsHookType(x, hookType));
-        
+
         return hookAttribute is not null;
     }
 
@@ -61,7 +62,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
     {
         try
         {
-            return arg.GetCustomAttributes()
+            return arg.GetCustomAttributesSafe()
                 .OfType<HookAttribute>()
                 .Any();
         }
@@ -110,7 +111,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                 if (HasHookType(methodInfo, HookType.TestSession, out var hookAttribute) && hookAttribute is BeforeAttribute or BeforeEveryAttribute)
                 {
                     var sourceGeneratedMethodInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, methodInfo, methodInfo.Name);
-                    
+
                     list.Add(new BeforeTestSessionHookMethod
                     {
                         MethodInfo = sourceGeneratedMethodInformation,
@@ -139,7 +140,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                 {
                     var sourceGeneratedMethodInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, methodInfo, methodInfo.Name);
                     var assembly = sourceGeneratedMethodInformation.Class.Type.Assembly;
-                    
+
                     dict.GetOrAdd(assembly, _ => []).Add(new BeforeAssemblyHookMethod
                     {
                         MethodInfo = sourceGeneratedMethodInformation,
@@ -167,7 +168,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                 if (HasHookType(methodInfo, HookType.Class, out var hookAttribute) && hookAttribute is BeforeAttribute)
                 {
                     var sourceGeneratedMethodInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, methodInfo, methodInfo.Name);
-                    
+
                     dict.GetOrAdd(type, _ => []).Add(new BeforeClassHookMethod
                     {
                         MethodInfo = sourceGeneratedMethodInformation,
@@ -195,7 +196,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                 if (HasHookType(methodInfo, HookType.Test, out var hookAttribute) && hookAttribute is BeforeAttribute)
                 {
                     var sourceGeneratedMethodInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, methodInfo, methodInfo.Name);
-                   
+
                     dict.GetOrAdd(type, _ => []).Add(new InstanceHookMethod
                     {
                         MethodInfo = sourceGeneratedMethodInformation,
@@ -358,7 +359,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                 {
                     var sourceGeneratedMethodInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, methodInfo, methodInfo.Name);
                     var assembly = sourceGeneratedMethodInformation.Class.Type.Assembly;
-                    
+
                     dict.GetOrAdd(assembly, _ => []).Add(new AfterAssemblyHookMethod
                     {
                         MethodInfo = sourceGeneratedMethodInformation,
@@ -386,7 +387,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                 if (HasHookType(methodInfo, HookType.Class, out var hookAttribute) && hookAttribute is AfterAttribute)
                 {
                     var sourceGeneratedMethodInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, methodInfo, methodInfo.Name);
-                    
+
                     dict.GetOrAdd(type, _ => []).Add(new AfterClassHookMethod
                     {
                         MethodInfo = sourceGeneratedMethodInformation,
@@ -414,7 +415,7 @@ internal class ReflectionHooksCollector(string sessionId) : HooksCollectorBase(s
                 if (HasHookType(methodInfo, HookType.Test, out var hookAttribute) && hookAttribute is AfterAttribute)
                 {
                     var sourceGeneratedMethodInformation = ReflectionToSourceModelHelpers.BuildTestMethod(type, methodInfo, methodInfo.Name);
-                    
+
                     dict.GetOrAdd(type, _ => []).Add(new InstanceHookMethod
                     {
                         MethodInfo = sourceGeneratedMethodInformation,

@@ -23,7 +23,7 @@ public class DataClass : IAsyncInitializer, IAsyncDisposable
         {
             throw new ObjectDisposedException(nameof(DataClass));
         }
-        
+
         return default;
     }
 }
