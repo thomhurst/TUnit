@@ -17,8 +17,7 @@ public class DependencyCountTests
     [Test, DependsOn(nameof(Test1))]
     public async Task Test2()
     {
-        // TODO: Fix when Dependencies property is added to TestContext
-        // await Assert.That(TestContext.Current!.Dependencies).HasCount().EqualTo(3);
+        await Assert.That(TestContext.Current!.Dependencies).HasCount().EqualTo(3);
     }
 
     [Test]
