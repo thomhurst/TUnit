@@ -68,11 +68,37 @@ public sealed class VerifySettingsTask
 
     public async Task ToTask()
     {
-        var testContext = TestContext.Current!;
-        var testClassName = testContext.TestDetails.ClassType.Name;
-        var testName = testContext.TestDetails.TestName;
+        var testContext = TestContext.Current;
+        string testClassName, testName;
+        
+        if (testContext != null)
+        {
+            testClassName = testContext.TestDetails.ClassType.Name;
+            testName = testContext.TestDetails.TestName;
+        }
+        else
+        {
+            // Fallback for when TestContext is not available (e.g., during unit testing)
+            var stackTrace = new System.Diagnostics.StackTrace();
+            var callingMethod = stackTrace.GetFrame(1)?.GetMethod();
+            testClassName = callingMethod?.DeclaringType?.Name ?? "UnknownClass";
+            testName = callingMethod?.Name ?? "UnknownTest";
+        }
+        
         var name = $"{testClassName}.{testName}{_uniqueSuffix}";
-        var dir = Sourcy.DotNet.Projects.TUnit_Core_SourceGenerator_Tests.DirectoryName!;
+        
+        // Fallback directory path if Sourcy is not available
+        string dir;
+        try
+        {
+            dir = Sourcy.DotNet.Projects.TUnit_Core_SourceGenerator_Tests.DirectoryName!;
+        }
+        catch
+        {
+            // Use the project directory as fallback
+            dir = Path.GetDirectoryName(typeof(VerifySettingsTask).Assembly.Location) ?? 
+                  Directory.GetCurrentDirectory();
+        }
         _receivedPath = Path.Combine(dir, $"{name}.received.txt");
         _verifiedPath = Path.Combine(dir, $"{name}.verified.txt");
 
