@@ -31,10 +31,7 @@ public class TestRegisteredContext
 
     public void SetTestExecutor(ITestExecutor executor)
     {
-        if (DiscoveredTest != null)
-        {
-            DiscoveredTest.TestExecutor = executor;
-        }
+        DiscoveredTest.TestExecutor = executor;
     }
 
     /// <summary>
