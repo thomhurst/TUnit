@@ -64,6 +64,37 @@ public sealed class MetadataGenerator
         writer.AppendLine("}");
     }
 
+    /// <summary>
+    /// Generates test metadata for a single test method
+    /// </summary>
+    public void GenerateSingleTestMetadata(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        // Skip generic methods without type arguments to avoid CS0453 errors
+        if (testInfo.MethodSymbol.IsGenericMethod && 
+            (testInfo.GenericTypeArguments == null || testInfo.GenericTypeArguments.Length == 0))
+        {
+            // Log a comment to help with debugging
+            writer.AppendLine($"// Skipped generic method {testInfo.MethodSymbol.Name} - no type arguments provided");
+            return;
+        }
+
+        writer.AppendLine("_testMetadata = new TestMetadata");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        GenerateBasicMetadata(writer, testInfo);
+        GenerateTestAttributes(writer, testInfo);
+        _dataSourceGenerator.GenerateDataSourceMetadata(writer, testInfo);
+        _dataSourceGenerator.GenerateClassDataSourceMetadata(writer, testInfo);
+        _dataSourceGenerator.GeneratePropertyDataSourceMetadata(writer, testInfo);
+        GenerateParameterTypes(writer, testInfo);
+        GenerateEmptyHookMetadata(writer);
+        GenerateDelegateReferences(writer, testInfo);
+
+        writer.Unindent();
+        writer.AppendLine("};");
+    }
+
     private void GenerateTestMetadata(CodeWriter writer, TestMethodMetadata testInfo)
     {
         // Skip generic methods without type arguments to avoid CS0453 errors

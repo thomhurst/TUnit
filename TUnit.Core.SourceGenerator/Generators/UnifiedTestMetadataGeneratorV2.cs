@@ -27,15 +27,38 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         // Register post-initialization output for base types
         context.RegisterPostInitializationOutput(GenerateBaseTypes);
 
-        // Find all test classes (classes that contain test methods)
-        var testClassesProvider = context.SyntaxProvider
-            .CreateSyntaxProvider(
-                predicate: static (node, _) => IsTestClass(node),
-                transform: static (ctx, _) => GetTestClassMetadata(ctx))
+        // Find all test methods using the more performant ForAttributeWithMetadataName
+        var testMethodsProvider = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                "TUnit.Core.TestAttribute",
+                predicate: static (node, _) => node is MethodDeclarationSyntax,
+                transform: static (ctx, _) => GetTestMethodMetadata(ctx))
             .Where(static m => m is not null);
 
-        // Generate one source file per test class
-        context.RegisterSourceOutput(testClassesProvider, GenerateTestClassSource!);
+        // Generate one source file per test method
+        context.RegisterSourceOutput(testMethodsProvider, static (context, testMethod) => GenerateTestMethodSource(context, testMethod));
+
+        // Handle generic tests with explicit type arguments
+        var genericTestsProvider = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                "TUnit.Core.GenerateGenericTestAttribute",
+                predicate: static (node, _) => node is MethodDeclarationSyntax or ClassDeclarationSyntax,
+                transform: static (ctx, _) => GetGenericTestMetadata(ctx))
+            .Where(static m => m is not null)
+            .SelectMany(static (m, _) => m!);
+
+        // Generate one file per generic test instantiation
+        context.RegisterSourceOutput(genericTestsProvider, static (context, testMethod) => GenerateTestMethodSource(context, testMethod));
+
+        // Handle inferred generic tests (using CreateSyntaxProvider for complex logic)
+        var inferredGenericTests = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => IsGenericTestMethodOrClass(node),
+                transform: static (ctx, _) => GetInferredGenericTestMetadata(ctx))
+            .Where(static m => m is not null)
+            .SelectMany(static (m, _) => m!);
+
+        context.RegisterSourceOutput(inferredGenericTests, static (context, testMethod) => GenerateTestMethodSource(context, testMethod));
     }
 
     private static bool IsTestClass(SyntaxNode node)
@@ -107,72 +130,11 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         return false;
     }
 
-    private static TestClassGroup? GetTestClassMetadata(GeneratorSyntaxContext context)
+
+    private static TestMethodMetadata? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context)
     {
-        var classDecl = (ClassDeclarationSyntax)context.Node;
-        var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
-        
-        if (classSymbol == null || classSymbol.IsAbstract)
-        {
-            return null;
-        }
-
-        // Skip generic types without explicit instantiation
-        if (classSymbol.IsGenericType && classSymbol.TypeParameters.Length > 0)
-        {
-            return null;
-        }
-
-        var testMethods = new List<TestMethodMetadata>();
-
-        // Get all test methods in this class
-        var methods = classSymbol.GetMembers().OfType<IMethodSymbol>();
-        foreach (var method in methods)
-        {
-            // Skip generic methods for now
-            if (method.IsGenericMethod)
-            {
-                continue;
-            }
-
-            // Check if it's a test method
-            if (!HasTestAttribute(method))
-            {
-                continue;
-            }
-
-            // Find the corresponding syntax node
-            var methodSyntax = classDecl.Members
-                .OfType<MethodDeclarationSyntax>()
-                .FirstOrDefault(m => m.Identifier.Text == method.Name);
-
-            if (methodSyntax != null)
-            {
-                testMethods.Add(new TestMethodMetadata
-                {
-                    MethodSymbol = method,
-                    TypeSymbol = classSymbol,
-                    MethodSyntax = methodSyntax
-                });
-            }
-        }
-
-        if (testMethods.Count == 0)
-        {
-            return null;
-        }
-
-        return new TestClassGroup
-        {
-            TypeSymbol = classSymbol,
-            TestMethods = testMethods
-        };
-    }
-
-    private static TestMethodMetadata? GetTestMethodMetadata(GeneratorSyntaxContext context)
-    {
-        var methodSyntax = (MethodDeclarationSyntax)context.Node;
-        var methodSymbol = context.SemanticModel.GetDeclaredSymbol(methodSyntax);
+        var methodSyntax = (MethodDeclarationSyntax)context.TargetNode;
+        var methodSymbol = context.TargetSymbol as IMethodSymbol;
 
         if (methodSymbol?.ContainingType == null)
         {
@@ -248,13 +210,13 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         };
     }
 
-    private static IEnumerable<TestMethodMetadata>? GetGenericTestMetadata(GeneratorSyntaxContext context)
+    private static IEnumerable<TestMethodMetadata>? GetGenericTestMetadata(GeneratorAttributeSyntaxContext context)
     {
         var results = new List<TestMethodMetadata>();
 
-        if (context.Node is ClassDeclarationSyntax classDecl)
+        if (context.TargetNode is ClassDeclarationSyntax classDecl)
         {
-            var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDecl);
+            var classSymbol = context.TargetSymbol as INamedTypeSymbol;
             if (classSymbol == null)
             {
                 return null;
@@ -486,28 +448,27 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         // All base types now exist in TUnit.Core - no need to generate any
     }
 
-    private void GenerateTestClassSource(SourceProductionContext context, TestClassGroup testClassGroup)
+    private static void GenerateTestMethodSource(SourceProductionContext context, TestMethodMetadata? testMethod)
     {
         try
         {
             // Add null check
-            if (testClassGroup?.TypeSymbol == null || testClassGroup.TestMethods == null)
+            if (testMethod?.MethodSymbol == null || testMethod.TypeSymbol == null)
             {
                 return;
             }
+            
             var writer = new CodeWriter();
 
             // Generate file header
             GenerateFileHeader(writer);
 
             // Create generator instances
-            // HookGenerator removed - hooks are now handled by UnifiedHookMetadataGenerator
             var dataSourceGenerator = new DataSourceGenerator();
-            var genericTypeResolver = new GenericTypeResolver();
             var metadataGenerator = new MetadataGenerator(dataSourceGenerator);
 
-            // Generate unique names based on the test class
-            var fullTypeName = testClassGroup.TypeSymbol.ToDisplayString(new SymbolDisplayFormat(
+            // Generate unique names based on the test method
+            var typeFullName = testMethod.TypeSymbol.ToDisplayString(new SymbolDisplayFormat(
                 typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
                 genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
                 miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes))
@@ -519,60 +480,42 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
                 .Replace('[', '_')
                 .Replace(']', '_');
             
-            var sourceClassName = $"{fullTypeName}_TestSource";
-            var moduleInitializerClassName = $"{fullTypeName}_ModuleInitializer";
+            var methodName = testMethod.MethodSymbol.Name;
+            var sourceClassName = $"{typeFullName}_{methodName}_TestSource";
+            var moduleInitializerClassName = $"{typeFullName}_{methodName}_ModuleInitializer";
 
             // Generate the test source implementation
             writer.AppendLine($"internal sealed class {sourceClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("private static readonly List<TestMetadata> _allTests = new();");
+            writer.AppendLine("private static readonly TestMetadata _testMetadata;");
             writer.AppendLine();
-            writer.AppendLine("public IEnumerable<TestMetadata> GetTests() => _allTests;");
+            writer.AppendLine("public IEnumerable<TestMetadata> GetTests() { yield return _testMetadata; }");
             writer.AppendLine();
 
-            // Static constructor to initialize tests
+            // Static constructor to initialize the test
             writer.AppendLine($"static {sourceClassName}()");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("try");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("RegisterAllTests();");
+            
+            // Generate the metadata for this single test method
+            metadataGenerator.GenerateSingleTestMetadata(writer, testMethod);
+            
             writer.Unindent();
             writer.AppendLine("}");
-            writer.AppendLine("catch (Exception ex)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine($"Console.Error.WriteLine($\"Failed to initialize test source for {testClassGroup.TypeSymbol.Name}: {{ex}}\");");
-            writer.AppendLine("throw;");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine();
 
-            // Generate registration methods
-            GenerateRegisterAllTests(writer, metadataGenerator, testClassGroup.TestMethods);
-
-            // Generate generic test registry
-            writer.AppendLine();
-            writer.AppendLine("// Generic test registry");
-            genericTypeResolver.GenerateGenericTestRegistry(writer);
-
-            // Generate async data source wrapper methods
-            writer.AppendLine();
-            writer.AppendLine("// Async data source wrapper methods");
-            dataSourceGenerator.GenerateAsyncDataSourceWrappers(writer, testClassGroup.TestMethods);
-
-            // Generate helper methods that may be needed
-            writer.AppendLine();
-            writer.AppendLine("// Helper methods");
-            GenerateHelperMethods(writer, dataSourceGenerator, testClassGroup.TestMethods);
-
-            // Factory methods and delegate implementations are now embedded in TestMetadata
-
-            // Hook implementations are now handled by UnifiedHookMetadataGenerator
+            // Generate any async data source wrapper methods needed for this test
+            var testMethods = new List<TestMethodMetadata> { testMethod };
+            if (HasAsyncDataSources(testMethod))
+            {
+                writer.AppendLine();
+                writer.AppendLine("// Async data source wrapper methods");
+                dataSourceGenerator.GenerateAsyncDataSourceWrappers(writer, testMethods);
+                
+                // Also generate the ConvertToSync helper if needed
+                writer.AppendLine();
+                GenerateConvertToSyncHelper(writer);
+            }
 
             writer.Unindent();
             writer.AppendLine("}");
@@ -595,33 +538,15 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
 
             // Add source with unique filename
             var source = writer.ToString();
-            var fileName = $"{fullTypeName}.TestSource.g.cs";
+            var fileName = $"{typeFullName}.{methodName}.TestSource.g.cs";
             context.AddSource(fileName, SourceText.From(source, Encoding.UTF8));
-        }
-        catch (InvalidOperationException ioex) when (ioex.Message.Contains("TypedConstant is an array"))
-        {
-            // This is likely happening in one of the sub-generators
-            var className = testClassGroup?.TypeSymbol?.Name ?? "Unknown";
-            var errorMessage = $"TypedConstant array error in {className}: {ioex.Message}\n\nStack Trace:\n{ioex.StackTrace}";
-
-            var diagnostic = Diagnostic.Create(
-                new DiagnosticDescriptor(
-                    "TU0002",
-                    "TypedConstant Array Error",
-                    "Failed due to TypedConstant array access: {0}",
-                    "TUnit.Generation",
-                    DiagnosticSeverity.Warning,
-                    isEnabledByDefault: true),
-                Location.None,
-                errorMessage);
-
-            context.ReportDiagnostic(diagnostic);
         }
         catch (Exception ex)
         {
             // Report diagnostic with full stack trace for debugging
-            var className = testClassGroup?.TypeSymbol?.Name ?? "Unknown";
-            var errorMessage = $"Failed to generate test source for {className}: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
+            var methodName = testMethod?.MethodSymbol?.Name ?? "Unknown";
+            var className = testMethod?.TypeSymbol?.Name ?? "Unknown";
+            var errorMessage = $"Failed to generate test source for {className}.{methodName}: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
 
             var diagnostic = Diagnostic.Create(
                 new DiagnosticDescriptor(
@@ -638,7 +563,19 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         }
     }
 
-    private void GenerateFileHeader(CodeWriter writer)
+    private static bool HasAsyncDataSources(TestMethodMetadata testMethod)
+    {
+        var hasMethodDataSource = testMethod.MethodSymbol.GetAttributes()
+            .Any(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
+        
+        var hasPropertyDataSource = testMethod.TypeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Any(p => p.GetAttributes().Any(a => a.AttributeClass?.Name == "DataSourceForAttribute"));
+            
+        return hasMethodDataSource || hasPropertyDataSource;
+    }
+
+    private static void GenerateFileHeader(CodeWriter writer)
     {
         writer.AppendLine("// <auto-generated/>");
         writer.AppendLine("#pragma warning disable");
@@ -658,98 +595,10 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine($"namespace {GeneratedNamespace};");
     }
 
-    private void GenerateModuleInitializer(CodeWriter writer)
-    {
-        writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
-        writer.AppendLine("public static void Initialize()");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("try");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Load referenced assemblies for complete test discovery
-        writer.AppendLine("// Load referenced assemblies to ensure complete test discovery");
-        writer.AppendLine("LoadReferencedAssemblies();");
-        writer.AppendLine();
-
-        // Register all generated metadata
-        writer.AppendLine("// Register all generated metadata");
-        writer.AppendLine("// Tests are registered through ITestSource in the static constructor");
-        writer.AppendLine();
-
-        // Create efficient test registry with proper equality comparers
-        writer.AppendLine("// Register with the discovery service using efficient registry");
-        writer.AppendLine("// Note: Registration will be handled by the test engine at runtime");
-        writer.AppendLine();
-
-        // Register generic test registry if available
-        writer.AppendLine("// Register generic test combinations if any were discovered");
-        writer.AppendLine("RegisterGenericTestCombinations();");
-        writer.AppendLine();
-
-        // Tests are now registered individually in RegisterAllTests() for better error isolation
-        writer.AppendLine("// Tests are now registered individually in RegisterAllTests() for better error isolation");
-
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine("catch (Exception ex)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("Console.Error.WriteLine($\"Failed to initialize test registry: {ex}\");");
-        writer.AppendLine("throw;");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-
-        // Generate assembly loading method
-        GenerateAssemblyLoadingMethod(writer);
-
-        // Generate generic test registration method
-        GenerateGenericTestRegistrationMethod(writer);
-    }
 
 
-    private void GenerateRegisterAllTests(
-        CodeWriter writer,
-        MetadataGenerator metadataGenerator,
-        IEnumerable<TestMethodMetadata> testMethods)
-    {
-        writer.AppendLine("private static void RegisterAllTests()");
-        writer.AppendLine("{");
-        writer.Indent();
 
-        metadataGenerator.GenerateTestRegistrations(writer, testMethods);
-
-        writer.Unindent();
-        writer.AppendLine("}");
-    }
-
-    private void GenerateHelperMethods(
-        CodeWriter writer,
-        DataSourceGenerator dataSourceGenerator,
-        IEnumerable<TestMethodMetadata> testMethods)
-    {
-        // Check if we need the ConvertToSync helper
-        var hasAsyncDataSources = testMethods.Any(tm =>
-        {
-            var methodDataSources = tm.MethodSymbol.GetAttributes()
-                .Any(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
-            var propertyDataSources = tm.TypeSymbol.GetMembers()
-                .OfType<IPropertySymbol>()
-                .Any(p => p.GetAttributes().Any(a => a.AttributeClass?.Name == "DataSourceForAttribute"));
-            return methodDataSources || propertyDataSources;
-        });
-
-        if (hasAsyncDataSources)
-        {
-            GenerateConvertToSyncHelper(writer);
-        }
-    }
-
-    private void GenerateConvertToSyncHelper(CodeWriter writer)
+    private static void GenerateConvertToSyncHelper(CodeWriter writer)
     {
         writer.AppendLine("private static IEnumerable<object?[]> ConvertToSync(Func<CancellationToken, IAsyncEnumerable<object?[]>> asyncFactory)");
         writer.AppendLine("{");
@@ -803,81 +652,6 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("}");
     }
 
-    private void GenerateAssemblyLoadingMethod(CodeWriter writer)
-    {
-        writer.AppendLine("/// <summary>");
-        writer.AppendLine("/// Loads referenced assemblies to ensure complete test discovery across modules");
-        writer.AppendLine("/// </summary>");
-        writer.AppendLine("private static void LoadReferencedAssemblies()");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine("try");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine("// AOT-only mode: All test metadata is statically generated at compile-time");
-        writer.AppendLine("// No runtime assembly loading or reflection required");
-        writer.AppendLine("Console.WriteLine(\"TUnit: Running in AOT-only mode with compile-time test discovery\");");
-
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine("catch (Exception ex)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("Console.Error.WriteLine($\"Warning: Assembly loading failed: {ex.Message}\");");
-        writer.Unindent();
-        writer.AppendLine("}");
-
-        writer.Unindent();
-        writer.AppendLine("}");
-    }
-
-    private void GenerateGenericTestRegistrationMethod(CodeWriter writer)
-    {
-        writer.AppendLine("/// <summary>");
-        writer.AppendLine("/// Registers generic test combinations discovered at compile-time");
-        writer.AppendLine("/// </summary>");
-        writer.AppendLine("private static void RegisterGenericTestCombinations()");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine("try");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine("// Check if GenericTestRegistry exists and has tests");
-        writer.AppendLine("// This will be empty if no generic tests were discovered");
-        writer.AppendLine("var genericTests = GenericTestRegistry.GetAllGenericTests();");
-        writer.AppendLine("if (genericTests.Any())");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine("foreach (var (typeArgs, metadata) in genericTests)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("_allTests.Add(metadata);");
-        writer.Unindent();
-        writer.AppendLine("}");
-
-        writer.AppendLine("Console.WriteLine($\"Registered {genericTests.Count()} generic test combinations\");");
-
-        writer.Unindent();
-        writer.AppendLine("}");
-
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine("catch (Exception ex)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("// Generic test registration is optional - don't fail if it doesn't work");
-        writer.AppendLine("Console.Error.WriteLine($\"Warning: Failed to register generic tests: {ex.Message}\");");
-        writer.Unindent();
-        writer.AppendLine("}");
-
-        writer.Unindent();
-        writer.AppendLine("}");
-    }
     
     private static bool ContainsTypeParameter(ITypeSymbol type)
     {
@@ -914,11 +688,3 @@ public class TestMethodMetadata
     public ITypeSymbol[]? GenericTypeArguments { get; init; }
 }
 
-/// <summary>
-/// Groups test methods by their containing class
-/// </summary>
-public class TestClassGroup
-{
-    public required INamedTypeSymbol TypeSymbol { get; init; }
-    public required List<TestMethodMetadata> TestMethods { get; init; }
-}
