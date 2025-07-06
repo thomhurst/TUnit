@@ -113,7 +113,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         var dataAttributes = attributes.Where(x =>
                 x.AttributeClass?.AllInterfaces.Contains(
                     context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataAttribute
-                        .WithoutGlobalPrefix), SymbolEqualityComparer.Default
+                        .WithoutGlobalPrefix)!, SymbolEqualityComparer.Default
                 ) == true)
             .ToImmutableArray();
 
