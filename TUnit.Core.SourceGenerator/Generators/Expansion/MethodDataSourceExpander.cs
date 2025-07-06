@@ -294,34 +294,47 @@ public sealed class MethodDataSourceExpander : ITestExpander
             writer.AppendLine($"InstanceFactory = args => new {className}(),");
         }
 
-        // Generate test invoker that uses the captured arguments
-        writer.AppendLine("TestInvoker = async (instance, args) =>");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"var typedInstance = ({className})instance;");
+        // Check if method has CancellationToken parameter
+        var hasCancellationToken = testInfo.MethodSymbol.Parameters.Any(p => 
+            p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "global::System.Threading.CancellationToken");
         
-        // Generate method call with proper argument casting
-        var parameterCasts = new List<string>();
-        for (int i = 0; i < testInfo.MethodSymbol.Parameters.Length; i++)
+        if (hasCancellationToken)
         {
-            var param = testInfo.MethodSymbol.Parameters[i];
-            var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            parameterCasts.Add($"({paramType})arguments[{i}]");
-        }
-        
-        var argList = string.Join(", ", parameterCasts);
-        if (isAsync)
-        {
-            writer.AppendLine($"await typedInstance.{methodName}({argList});");
+            // TestInvoker doesn't support CancellationToken, so set it to null
+            // The test will be executed via InvokeTypedTest which does support it
+            writer.AppendLine("TestInvoker = null, // Method has CancellationToken - use InvokeTypedTest instead");
         }
         else
         {
-            writer.AppendLine($"typedInstance.{methodName}({argList});");
-            writer.AppendLine("await Task.CompletedTask;");
+            // Generate test invoker that uses the captured arguments
+            writer.AppendLine("TestInvoker = async (instance, args) =>");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"var typedInstance = ({className})instance;");
+            
+            // Generate method call with proper argument casting
+            var parameterCasts = new List<string>();
+            for (int i = 0; i < testInfo.MethodSymbol.Parameters.Length; i++)
+            {
+                var param = testInfo.MethodSymbol.Parameters[i];
+                var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                parameterCasts.Add($"({paramType})arguments[{i}]");
+            }
+            
+            var argList = string.Join(", ", parameterCasts);
+            if (isAsync)
+            {
+                writer.AppendLine($"await typedInstance.{methodName}({argList});");
+            }
+            else
+            {
+                writer.AppendLine($"typedInstance.{methodName}({argList});");
+                writer.AppendLine("await Task.CompletedTask;");
+            }
+            
+            writer.Unindent();
+            writer.AppendLine("},");
         }
-        
-        writer.Unindent();
-        writer.AppendLine("},");
 
         writer.AppendLine($"PropertySetters = new Dictionary<string, Action<{className}, object?>>(),");
         writer.AppendLine("PropertyInjections = Array.Empty<PropertyInjectionData>(),");
@@ -332,13 +345,33 @@ public sealed class MethodDataSourceExpander : ITestExpander
         writer.AppendLine("{");
         writer.Indent();
         
+        // Build argument list including cancellation token
+        var invokerArgs = new List<string>();
+        var dataArgIndex = 0;
+        for (int i = 0; i < testInfo.MethodSymbol.Parameters.Length; i++)
+        {
+            var param = testInfo.MethodSymbol.Parameters[i];
+            var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            
+            if (paramType == "global::System.Threading.CancellationToken")
+            {
+                invokerArgs.Add("cancellationToken");
+            }
+            else
+            {
+                invokerArgs.Add($"({paramType})arguments[{dataArgIndex}]");
+                dataArgIndex++;
+            }
+        }
+        
+        var fullArgList = string.Join(", ", invokerArgs);
         if (isAsync)
         {
-            writer.AppendLine($"await instance.{methodName}({argList});");
+            writer.AppendLine($"await instance.{methodName}({fullArgList});");
         }
         else
         {
-            writer.AppendLine($"instance.{methodName}({argList});");
+            writer.AppendLine($"instance.{methodName}({fullArgList});");
         }
         
         writer.Unindent();

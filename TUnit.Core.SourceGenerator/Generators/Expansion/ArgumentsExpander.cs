@@ -169,25 +169,38 @@ public sealed class ArgumentsExpander : ITestExpander
             writer.AppendLine($"InstanceFactory = args => new {className}(),");
         }
 
-        writer.AppendLine("TestInvoker = async (instance, args) =>");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"var typedInstance = ({className})instance;");
-        writer.AppendLine("// Using compile-time expanded arguments");
+        // Check if method has CancellationToken parameter
+        var hasCancellationToken = testInfo.MethodSymbol.Parameters.Any(p => 
+            p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "global::System.Threading.CancellationToken");
         
-        var argList = GenerateArgumentList(testInfo, argumentValues);
-        if (isAsync)
+        if (hasCancellationToken)
         {
-            writer.AppendLine($"await typedInstance.{methodName}({argList});");
+            // TestInvoker doesn't support CancellationToken, so set it to null
+            // The test will be executed via InvokeTypedTest which does support it
+            writer.AppendLine("TestInvoker = null, // Method has CancellationToken - use InvokeTypedTest instead");
         }
         else
         {
-            writer.AppendLine($"typedInstance.{methodName}({argList});");
-            writer.AppendLine("await Task.CompletedTask;");
+            writer.AppendLine("TestInvoker = async (instance, args) =>");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"var typedInstance = ({className})instance;");
+            writer.AppendLine("// Using compile-time expanded arguments");
+            
+            var argList = GenerateArgumentList(testInfo, argumentValues);
+            if (isAsync)
+            {
+                writer.AppendLine($"await typedInstance.{methodName}({argList});");
+            }
+            else
+            {
+                writer.AppendLine($"typedInstance.{methodName}({argList});");
+                writer.AppendLine("await Task.CompletedTask;");
+            }
+            
+            writer.Unindent();
+            writer.AppendLine("},");
         }
-        
-        writer.Unindent();
-        writer.AppendLine("},");
 
         writer.AppendLine($"PropertySetters = new Dictionary<string, Action<{className}, object?>>(),");
         writer.AppendLine("PropertyInjections = Array.Empty<PropertyInjectionData>(),");
@@ -198,14 +211,14 @@ public sealed class ArgumentsExpander : ITestExpander
         writer.Indent();
         writer.AppendLine("// Using compile-time expanded arguments");
         
-        var argList2 = GenerateArgumentList(testInfo, argumentValues);
+        var argListWithCancellation = GenerateArgumentListWithCancellation(testInfo, argumentValues);
         if (isAsync)
         {
-            writer.AppendLine($"await instance.{methodName}({argList2});");
+            writer.AppendLine($"await instance.{methodName}({argListWithCancellation});");
         }
         else
         {
-            writer.AppendLine($"instance.{methodName}({argList2});");
+            writer.AppendLine($"instance.{methodName}({argListWithCancellation});");
         }
         
         writer.Unindent();
@@ -272,6 +285,32 @@ public sealed class ArgumentsExpander : ITestExpander
             var paramType = parameters[i].Type;
             var formattedValue = _formatter.FormatValue(value, paramType);
             formattedArgs.Add(formattedValue);
+        }
+
+        return string.Join(", ", formattedArgs);
+    }
+
+    private string GenerateArgumentListWithCancellation(TestMethodMetadata testInfo, object?[] argumentValues)
+    {
+        var parameters = testInfo.MethodSymbol.Parameters;
+        var formattedArgs = new List<string>();
+        var argIndex = 0;
+
+        foreach (var parameter in parameters)
+        {
+            var paramType = parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            
+            if (paramType == "global::System.Threading.CancellationToken")
+            {
+                formattedArgs.Add("cancellationToken");
+            }
+            else if (argIndex < argumentValues.Length)
+            {
+                var value = argumentValues[argIndex];
+                var formattedValue = _formatter.FormatValue(value, parameter.Type);
+                formattedArgs.Add(formattedValue);
+                argIndex++;
+            }
         }
 
         return string.Join(", ", formattedArgs);
