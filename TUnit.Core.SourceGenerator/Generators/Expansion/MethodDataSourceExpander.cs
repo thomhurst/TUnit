@@ -278,7 +278,18 @@ public sealed class MethodDataSourceExpander : ITestExpander
         var methodName = testInfo.MethodSymbol.Name;
         var isAsync = testInfo.MethodSymbol.IsAsync;
 
-        writer.AppendLine($"InstanceFactory = args => new {className}(),");
+        // Generate instance factory based on whether the class has constructor parameters
+        if (HasClassConstructorParameters(testInfo.TypeSymbol))
+        {
+            // For classes with constructor parameters, leave InstanceFactory null
+            // The TestBuilder will handle instance creation with proper constructor arguments
+            writer.AppendLine("InstanceFactory = null,");
+        }
+        else
+        {
+            // For classes with default constructor, generate the factory
+            writer.AppendLine($"InstanceFactory = args => new {className}(),");
+        }
 
         // Generate test invoker that uses the captured arguments
         writer.AppendLine("TestInvoker = async (instance, args) =>");
@@ -569,6 +580,17 @@ public sealed class MethodDataSourceExpander : ITestExpander
                   .Replace("\n", "\\n")
                   .Replace("\t", "\\t")
                   .Replace("\"", "\\\"");
+    }
+
+    private bool HasClassConstructorParameters(ITypeSymbol typeSymbol)
+    {
+        // Check if the class has any constructors with parameters
+        var constructors = typeSymbol.GetMembers()
+            .OfType<IMethodSymbol>()
+            .Where(m => m.MethodKind == MethodKind.Constructor && !m.IsStatic);
+
+        // If there's a parameterized constructor, return true
+        return constructors.Any(c => c.Parameters.Length > 0);
     }
 
     private record DataSourceInfo(string MethodName, ITypeSymbol? ClassType, object?[]? Arguments);

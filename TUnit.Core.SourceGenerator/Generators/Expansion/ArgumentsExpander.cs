@@ -79,8 +79,8 @@ public sealed class ArgumentsExpander : ITestExpander
         {
             TypedConstantKind.Primitive => typedConstant.Value,
             TypedConstantKind.Enum => typedConstant.Value,
-            TypedConstantKind.Type => typedConstant.Value,
-            TypedConstantKind.Array => typedConstant.Values.Select(ExtractTypedConstantValue).ToArray(),
+            TypedConstantKind.Type => typedConstant, // Keep the TypedConstant for Type arguments so we can format them as typeof(...)
+            TypedConstantKind.Array => typedConstant, // Keep the TypedConstant for arrays so we can format them properly later
             _ => typedConstant.Value
         };
     }
@@ -163,7 +163,18 @@ public sealed class ArgumentsExpander : ITestExpander
         var methodName = testInfo.MethodSymbol.Name;
         var isAsync = testInfo.MethodSymbol.IsAsync;
 
-        writer.AppendLine($"InstanceFactory = args => new {className}(),");
+        // Generate instance factory based on whether the class has constructor parameters
+        if (HasClassConstructorParameters(testInfo.TypeSymbol))
+        {
+            // For classes with constructor parameters, leave InstanceFactory null
+            // The TestBuilder will handle instance creation with proper constructor arguments
+            writer.AppendLine("InstanceFactory = null,");
+        }
+        else
+        {
+            // For classes with default constructor, generate the factory
+            writer.AppendLine($"InstanceFactory = args => new {className}(),");
+        }
 
         writer.AppendLine("TestInvoker = async (instance, args) =>");
         writer.AppendLine("{");
@@ -171,7 +182,7 @@ public sealed class ArgumentsExpander : ITestExpander
         writer.AppendLine($"var typedInstance = ({className})instance;");
         writer.AppendLine("// Using compile-time expanded arguments");
         
-        var argList = string.Join(", ", argumentValues.Select(FormatArgumentValueWithCast));
+        var argList = GenerateArgumentList(testInfo, argumentValues);
         if (isAsync)
         {
             writer.AppendLine($"await typedInstance.{methodName}({argList});");
@@ -194,13 +205,14 @@ public sealed class ArgumentsExpander : ITestExpander
         writer.Indent();
         writer.AppendLine("// Using compile-time expanded arguments");
         
+        var argList2 = GenerateArgumentList(testInfo, argumentValues);
         if (isAsync)
         {
-            writer.AppendLine($"await instance.{methodName}({argList});");
+            writer.AppendLine($"await instance.{methodName}({argList2});");
         }
         else
         {
-            writer.AppendLine($"instance.{methodName}({argList});");
+            writer.AppendLine($"instance.{methodName}({argList2});");
         }
         
         writer.Unindent();
@@ -225,7 +237,7 @@ public sealed class ArgumentsExpander : ITestExpander
         writer.AppendLine("DisplayName = creationContext.DisplayName,");
         writer.AppendLine("Metadata = metadata,");
         
-        var argsArray = string.Join(", ", argumentValues.Select(v => TypedConstantParser.FormatPrimitive(v)));
+        var argsArray = string.Join(", ", argumentValues.Select(v => FormatArgumentValue(v)));
         writer.AppendLine($"Arguments = new object?[] {{ {argsArray} }},");
         
         writer.AppendLine("ClassArguments = creationContext.ClassArguments,");
@@ -256,9 +268,146 @@ public sealed class ArgumentsExpander : ITestExpander
         writer.AppendLine("},");
     }
 
-    private string FormatArgumentValueWithCast(object? value)
+    private string FormatArgumentValue(object? value)
     {
+        if (value is TypedConstant tc)
+        {
+            return TypedConstantParser.GetRawTypedConstantValue(tc);
+        }
         return TypedConstantParser.FormatPrimitive(value);
+    }
+
+    private string GenerateArgumentList(TestMethodMetadata testInfo, object?[] argumentValues)
+    {
+        var parameters = testInfo.MethodSymbol.Parameters;
+        var formattedArgs = new List<string>();
+
+        for (int i = 0; i < argumentValues.Length && i < parameters.Length; i++)
+        {
+            var value = argumentValues[i];
+            var paramType = parameters[i].Type;
+            var formattedValue = FormatArgumentWithType(value, paramType);
+            formattedArgs.Add(formattedValue);
+        }
+
+        return string.Join(", ", formattedArgs);
+    }
+
+    private string FormatArgumentWithType(object? value, ITypeSymbol targetType)
+    {
+        if (value == null)
+        {
+            return "null";
+        }
+
+        // Handle TypedConstant for arrays and other complex types
+        if (value is TypedConstant tc)
+        {
+            return TypedConstantParser.GetRawTypedConstantValue(tc);
+        }
+
+        // Handle enum types
+        if (targetType.TypeKind == TypeKind.Enum && targetType is INamedTypeSymbol enumType)
+        {
+            // Try to find the enum member name for this value
+            var enumMemberName = GetEnumMemberName(enumType, value);
+            if (enumMemberName != null)
+            {
+                var enumTypeName = targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                return $"{enumTypeName}.{enumMemberName}";
+            }
+            
+            // Fallback to cast syntax for values without named members (like -1)
+            var formattedValue = TypedConstantParser.FormatPrimitive(value);
+            var enumTypeNameForCast = targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            
+            // Handle negative values by wrapping them in parentheses
+            if (formattedValue.StartsWith("-"))
+            {
+                return $"({enumTypeNameForCast})({formattedValue})";
+            }
+            
+            return $"({enumTypeNameForCast}){formattedValue}";
+        }
+
+        // Handle float types - all numeric values stored as double need 'f' suffix for float
+        if (targetType.SpecialType == SpecialType.System_Single)
+        {
+            if (value is double doubleValue)
+            {
+                return $"{doubleValue}f";
+            }
+            if (value is float floatValue)
+            {
+                return $"{floatValue}f";
+            }
+            if (value is int intValue)
+            {
+                return $"{intValue}f";
+            }
+            if (value is long longValue)
+            {
+                return $"{longValue}f";
+            }
+            // Fallback for any numeric type
+            return $"{value}f";
+        }
+
+        // Default formatting
+        return TypedConstantParser.FormatPrimitive(value);
+    }
+
+    private string? GetEnumMemberName(INamedTypeSymbol enumType, object value)
+    {
+        // Convert the value to the underlying type of the enum
+        var underlyingType = enumType.EnumUnderlyingType;
+        if (underlyingType == null)
+            return null;
+
+        // Get all enum members
+        foreach (var member in enumType.GetMembers())
+        {
+            if (member is IFieldSymbol field && field.IsConst && field.HasConstantValue)
+            {
+                // Compare the constant values
+                if (AreValuesEqual(field.ConstantValue, value))
+                {
+                    return field.Name;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private bool AreValuesEqual(object? enumValue, object? providedValue)
+    {
+        if (enumValue == null || providedValue == null)
+            return enumValue == providedValue;
+
+        // Convert both to long for comparison (handles most integer types)
+        try
+        {
+            var enumLong = Convert.ToInt64(enumValue);
+            var providedLong = Convert.ToInt64(providedValue);
+            return enumLong == providedLong;
+        }
+        catch
+        {
+            // Fall back to direct comparison
+            return enumValue.Equals(providedValue);
+        }
+    }
+
+    private bool HasClassConstructorParameters(ITypeSymbol typeSymbol)
+    {
+        // Check if the class has any constructors with parameters
+        var constructors = typeSymbol.GetMembers()
+            .OfType<IMethodSymbol>()
+            .Where(m => m.MethodKind == MethodKind.Constructor && !m.IsStatic);
+
+        // If there's a parameterized constructor, return true
+        return constructors.Any(c => c.Parameters.Length > 0);
     }
 
     private static string FormatArgumentForTestId(object? value)
@@ -266,7 +415,23 @@ public sealed class ArgumentsExpander : ITestExpander
         if (value == null)
             return "null";
         
-        var str = value.ToString() ?? "null";
+        // Handle TypedConstant
+        if (value is TypedConstant tc)
+        {
+            switch (tc.Kind)
+            {
+                case TypedConstantKind.Array:
+                    var elements = tc.Values.Select(v => FormatArgumentForTestId(v.Value));
+                    return $"[{string.Join(", ", elements)}]";
+                case TypedConstantKind.Type:
+                    return ((ITypeSymbol)tc.Value!).ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                default:
+                    value = tc.Value;
+                    break;
+            }
+        }
+        
+        var str = value?.ToString() ?? "null";
         
         // Escape special characters for TestId
         return str.Replace("\\", "\\\\")
