@@ -554,12 +554,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return tupleType.TupleElements.Select(x => x.Type).ToImmutableArray();
         }
 
-        // Handle object[] case - when a data source returns IEnumerable<object[]>,
-        // each object[] contains the arguments for one test invocation
-        if (type is IArrayTypeSymbol { ElementType.SpecialType: SpecialType.System_Object })
+        // Handle object[] and object?[] case - when a data source returns IEnumerable<object[]> or IEnumerable<object?[]>,
+        // each array contains the arguments for one test invocation
+        if (type is IArrayTypeSymbol arrayType && arrayType.ElementType.SpecialType == SpecialType.System_Object)
         {
             // Return empty array to indicate that type checking should be skipped
-            // since object[] can contain any types that will be checked at runtime
+            // since object[] or object?[] can contain any types that will be checked at runtime
             return ImmutableArray<ITypeSymbol>.Empty;
         }
 
