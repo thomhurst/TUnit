@@ -128,6 +128,16 @@ public sealed class MetadataGenerator
         writer.AppendLine("});");
     }
 
+    private static object? GetTypedConstantValue(TypedConstant typedConstant)
+    {
+        if (typedConstant.Kind == TypedConstantKind.Array)
+        {
+            // For array, return the first element if it exists
+            return typedConstant.Values.Length > 0 ? typedConstant.Values[0].Value : null;
+        }
+        return typedConstant.Value;
+    }
+
     private void GenerateBasicMetadata(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -202,7 +212,7 @@ public sealed class MetadataGenerator
     {
         var categories = testInfo.MethodSymbol.GetAttributes()
             .Where(a => a.AttributeClass?.Name == "CategoryAttribute")
-            .Select(a => a.ConstructorArguments.FirstOrDefault().Value?.ToString())
+            .Select(a => GetTypedConstantValue(a.ConstructorArguments.FirstOrDefault())?.ToString())
             .Where(c => !string.IsNullOrEmpty(c))
             .ToList();
 
@@ -223,7 +233,7 @@ public sealed class MetadataGenerator
 
         if (skipAttribute != null)
         {
-            var reason = skipAttribute.ConstructorArguments.FirstOrDefault().Value?.ToString() ?? "No reason provided";
+            var reason = GetTypedConstantValue(skipAttribute.ConstructorArguments.FirstOrDefault())?.ToString() ?? "No reason provided";
             writer.AppendLine("IsSkipped = true,");
             writer.AppendLine($"SkipReason = \"{reason}\",");
         }
@@ -241,7 +251,7 @@ public sealed class MetadataGenerator
 
         if (timeoutAttribute != null)
         {
-            var timeout = timeoutAttribute.ConstructorArguments.FirstOrDefault().Value;
+            var timeout = GetTypedConstantValue(timeoutAttribute.ConstructorArguments.FirstOrDefault());
             writer.AppendLine($"TimeoutMs = {timeout},");
         }
         else
@@ -257,7 +267,7 @@ public sealed class MetadataGenerator
 
         if (retryAttribute != null)
         {
-            var retryCount = retryAttribute.ConstructorArguments.FirstOrDefault().Value ?? 0;
+            var retryCount = GetTypedConstantValue(retryAttribute.ConstructorArguments.FirstOrDefault()) ?? 0;
             writer.AppendLine($"RetryCount = {retryCount},");
         }
         else
@@ -294,7 +304,7 @@ public sealed class MetadataGenerator
                 var typeArg = attr.AttributeClass.TypeArguments.FirstOrDefault();
                 if (typeArg != null)
                 {
-                    var testName = attr.ConstructorArguments.FirstOrDefault().Value?.ToString();
+                    var testName = GetTypedConstantValue(attr.ConstructorArguments.FirstOrDefault())?.ToString();
                     if (string.IsNullOrEmpty(testName))
                     {
                         // Depends on all tests in the class
@@ -317,7 +327,7 @@ public sealed class MetadataGenerator
                     ])
                 {
                     // DependsOnAttribute(string testName)
-                    var testName = args[0].Value?.ToString();
+                    var testName = GetTypedConstantValue(args[0])?.ToString();
                     if (!string.IsNullOrEmpty(testName))
                     {
                         legacyDependencies.Add(testName!);
@@ -330,7 +340,7 @@ public sealed class MetadataGenerator
                          ])
                 {
                     // DependsOnAttribute(Type testClass) or DependsOnAttribute(Type testClass, string testName)
-                    if (args[0].Value is ITypeSymbol classType)
+                    if (GetTypedConstantValue(args[0]) is ITypeSymbol classType)
                     {
                         var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                         if (args.Length == 1)
@@ -343,7 +353,7 @@ public sealed class MetadataGenerator
                                      _, { Type.Name: "String" } _, ..
                                  ])
                         {
-                            var testName = args[1].Value?.ToString();
+                            var testName = GetTypedConstantValue(args[1])?.ToString();
                             if (!string.IsNullOrEmpty(testName))
                             {
                                 testDependencies.Add($"TestDependency.FromClassAndMethod(typeof({className}), \"{testName}\")");
@@ -562,7 +572,7 @@ public sealed class MetadataGenerator
             {
                 // Non-generic ClassDataSource - need to get the type from constructor arguments
                 var typeArg = attr.ConstructorArguments.FirstOrDefault();
-                if (typeArg.Value is ITypeSymbol typeSymbol)
+                if (GetTypedConstantValue(typeArg) is ITypeSymbol typeSymbol)
                 {
                     writer.AppendLine($"DataSource = new DelegateDataSource(() => new object?[][] {{ new object?[] {{ new {typeSymbol.ToDisplayString()}() }} }}, {isShared.ToString().ToLower()})");
                 }
@@ -571,7 +581,7 @@ public sealed class MetadataGenerator
         else if (attr.AttributeClass?.Name == "MethodDataSourceAttribute")
         {
             // MethodDataSource references a method
-            var methodName = attr.ConstructorArguments.FirstOrDefault().Value?.ToString();
+            var methodName = GetTypedConstantValue(attr.ConstructorArguments.FirstOrDefault())?.ToString();
             if (!string.IsNullOrEmpty(methodName))
             {
                 var member = classType.GetMembers(methodName!).FirstOrDefault();

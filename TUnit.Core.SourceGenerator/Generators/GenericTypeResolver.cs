@@ -278,18 +278,68 @@ internal sealed class GenericTypeResolver
         var argumentTypes = new List<ITypeSymbol>();
         var constructorArgs = attribute.ConstructorArguments;
 
-        for (var i = 0; i < constructorArgs.Length && i < methodParameters.Length; i++)
+        // Handle params array - ArgumentsAttribute takes params object?[]
+        // Roslyn always passes params as a single array argument
+        if (constructorArgs.Length == 1 && constructorArgs[0].Kind == TypedConstantKind.Array)
         {
-            var paramType = methodParameters[i].Type;
-
-            // If the parameter is a generic type parameter, use the argument's actual value type
-            if (paramType is ITypeParameterSymbol typeParam)
+            var arrayValues = constructorArgs[0].Values;
+            for (var i = 0; i < arrayValues.Length && i < methodParameters.Length; i++)
             {
-                var argValue = constructorArgs[i].Value;
-                ITypeSymbol? argType = null;
+                var paramType = methodParameters[i].Type;
 
-                // Determine the actual type from the value
-                if (argValue != null)
+                // If the parameter is a generic type parameter, use the argument's actual value type
+                if (paramType is ITypeParameterSymbol typeParam)
+                {
+                    var argValue = arrayValues[i].Value;
+                    ITypeSymbol? argType = null;
+
+                    // Determine the actual type from the value
+                    if (argValue != null)
+                    {
+                        argType = argValue switch
+                        {
+                            int => testMethod.ContainingType.ContainingAssembly.GetTypeByMetadataName("System.Int32"),
+                            bool => testMethod.ContainingType.ContainingAssembly.GetTypeByMetadataName("System.Boolean"),
+                            string => testMethod.ContainingType.ContainingAssembly.GetTypeByMetadataName("System.String"),
+                            double => testMethod.ContainingType.ContainingAssembly.GetTypeByMetadataName("System.Double"),
+                            float => testMethod.ContainingType.ContainingAssembly.GetTypeByMetadataName("System.Single"),
+                            long => testMethod.ContainingType.ContainingAssembly.GetTypeByMetadataName("System.Int64"),
+                            _ => arrayValues[i].Type // Fall back to the declared type
+                        };
+                    }
+
+                    if (argType != null)
+                    {
+                        // Find the corresponding type parameter in the method's type parameters
+                        var typeParamIndex = Array.IndexOf(typeParameters.ToArray(), typeParam);
+                        if (typeParamIndex >= 0)
+                        {
+                            // Ensure we have enough space in our list
+                            while (argumentTypes.Count <= typeParamIndex)
+                            {
+                                argumentTypes.Add(null!);
+                            }
+                            argumentTypes[typeParamIndex] = argType;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Handle non-params case (shouldn't happen with ArgumentsAttribute, but handle it)
+            for (var i = 0; i < constructorArgs.Length && i < methodParameters.Length; i++)
+            {
+                var paramType = methodParameters[i].Type;
+
+                // If the parameter is a generic type parameter, use the argument's actual value type
+                if (paramType is ITypeParameterSymbol typeParam)
+                {
+                    var argValue = constructorArgs[i].Value;
+                    ITypeSymbol? argType = null;
+
+                    // Determine the actual type from the value
+                    if (argValue != null)
                 {
                     argType = argValue switch
                     {
@@ -319,6 +369,7 @@ internal sealed class GenericTypeResolver
                 }
             }
         }
+        }
 
         // Remove null entries and return
         return argumentTypes.Where(t => t != null).ToArray();
@@ -329,7 +380,28 @@ internal sealed class GenericTypeResolver
     /// </summary>
     private ITypeSymbol[] ExtractTypesFromMethodDataSourceAttribute(AttributeData attribute, IMethodSymbol testMethod)
     {
-        var methodName = attribute.ConstructorArguments.FirstOrDefault().Value?.ToString();
+        // Get method name from constructor argument
+        if (attribute.ConstructorArguments.IsDefaultOrEmpty)
+        {
+            return Array.Empty<ITypeSymbol>();
+        }
+
+        var firstArg = attribute.ConstructorArguments[0];
+        string? methodName = null;
+
+        // Handle array case (shouldn't happen for MethodDataSourceAttribute, but be safe)
+        if (firstArg.Kind == TypedConstantKind.Array)
+        {
+            if (firstArg.Values.Length > 0)
+            {
+                methodName = firstArg.Values[0].Value?.ToString();
+            }
+        }
+        else
+        {
+            methodName = firstArg.Value?.ToString();
+        }
+
         if (string.IsNullOrEmpty(methodName))
         {
             return Array.Empty<ITypeSymbol>();

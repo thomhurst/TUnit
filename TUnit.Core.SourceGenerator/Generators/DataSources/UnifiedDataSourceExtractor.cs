@@ -130,7 +130,28 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
     private ExtractedDataSource? ExtractMethodDataSourceAttribute(AttributeData attribute, ISymbol symbol,
         DataSourceLevel level, TestMethodMetadata testContext)
     {
-        var methodName = attribute.ConstructorArguments.FirstOrDefault().Value?.ToString();
+        // Get method name from constructor argument
+        if (attribute.ConstructorArguments.IsDefaultOrEmpty)
+        {
+            return null;
+        }
+
+        var firstArg = attribute.ConstructorArguments[0];
+        string? methodName = null;
+
+        // Handle array case (shouldn't happen for MethodDataSourceAttribute, but be safe)
+        if (firstArg.Kind == TypedConstantKind.Array)
+        {
+            if (firstArg.Values.Length > 0)
+            {
+                methodName = firstArg.Values[0].Value?.ToString();
+            }
+        }
+        else
+        {
+            methodName = firstArg.Value?.ToString();
+        }
+
         if (string.IsNullOrEmpty(methodName))
         {
             return null;
