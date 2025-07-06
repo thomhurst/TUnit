@@ -153,7 +153,7 @@ public sealed class TestMetadataExpander
     {
         var className = testInfo.TypeSymbol.ToDisplayString(Microsoft.CodeAnalysis.SymbolDisplayFormat.FullyQualifiedFormat);
 
-        writer.AppendLine($"InstanceFactory = args => new {className}(),");
+        InstanceFactoryGenerator.GenerateInstanceFactory(writer, testInfo.TypeSymbol);
         writer.AppendLine("TestInvoker = null, // Will be set by TestBuilder");
         writer.AppendLine($"PropertySetters = new Dictionary<string, Action<{className}, object?>>(),");
         writer.AppendLine("PropertyInjections = Array.Empty<PropertyInjectionData>(),");

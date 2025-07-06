@@ -152,7 +152,7 @@ public sealed class AsyncDataSourceExpander : ITestExpander
     {
         var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
-        writer.AppendLine($"InstanceFactory = args => new {className}(),");
+        InstanceFactoryGenerator.GenerateInstanceFactory(writer, testInfo.TypeSymbol);
         writer.AppendLine("TestInvoker = null, // Will be set by TestBuilder for async runtime expansion");
         writer.AppendLine($"PropertySetters = new Dictionary<string, Action<{className}, object?>>(),");
         writer.AppendLine("PropertyInjections = Array.Empty<PropertyInjectionData>(),");
@@ -160,5 +160,4 @@ public sealed class AsyncDataSourceExpander : ITestExpander
         writer.AppendLine("InvokeTypedTest = null, // Will be set by TestBuilder for async runtime expansion");
         writer.AppendLine("CreateExecutableTest = null, // Will be set by TestBuilder for async runtime expansion");
     }
-
 }

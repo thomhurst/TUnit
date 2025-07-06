@@ -845,7 +845,15 @@ public sealed class MetadataGenerator
                     || a.AttributeClass?.Name == "ArgumentsAttribute"))
             .ToList();
 
-        if (propertiesWithDataSources.Any())
+        // Get required properties with data sources (including from base types)
+        var requiredPropertiesWithDataSource = RequiredPropertyHelper.GetRequiredPropertiesWithDataSource(testInfo.TypeSymbol).ToList();
+
+        // Combine both lists, removing duplicates
+        var allPropertiesNeedingInit = propertiesWithDataSources
+            .Union(requiredPropertiesWithDataSource, new PropertySymbolComparer())
+            .ToList();
+
+        if (allPropertiesNeedingInit.Any())
         {
             // Generate a factory that expects property values to be passed via a dictionary in args
             writer.AppendLine("InstanceFactory = args =>");
@@ -861,12 +869,13 @@ public sealed class MetadataGenerator
             writer.AppendLine("{");
             writer.Indent();
 
-            // Generate property initializers for ALL properties with data sources
-            foreach (var prop in propertiesWithDataSources)
+            // Generate property initializers for ALL properties with data sources or that are required
+            foreach (var prop in allPropertiesNeedingInit)
             {
                 var propName = prop.Name;
                 var propType = prop.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                writer.AppendLine($"{propName} = propertyValues.TryGetValue(\"{propName}\", out var _{propName}) ? ({propType})_{propName}! : default!,");
+                var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(prop.Type);
+                writer.AppendLine($"{propName} = propertyValues.TryGetValue(\"{propName}\", out var _{propName}) ? ({propType})_{propName}! : {defaultValue},");
             }
 
             writer.Unindent();
@@ -877,8 +886,44 @@ public sealed class MetadataGenerator
         }
         else
         {
-            // Standard instantiation for classes without properties with data sources
-            writer.AppendLine($"InstanceFactory = args => new {className}({GenerateConstructorArgs(testInfo)}),");
+            // Check if there are any required properties without data sources
+            var requiredPropertiesWithoutDataSource = RequiredPropertyHelper.GetRequiredPropertiesWithoutDataSource(testInfo.TypeSymbol).ToList();
+            
+            if (requiredPropertiesWithoutDataSource.Any())
+            {
+                // Generate factory with required property initializers
+                writer.AppendLine($"InstanceFactory = args => new {className}({GenerateConstructorArgs(testInfo)})");
+                writer.AppendLine("{");
+                writer.Indent();
+                
+                foreach (var prop in requiredPropertiesWithoutDataSource)
+                {
+                    var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(prop.Type);
+                    writer.AppendLine($"{prop.Name} = {defaultValue},");
+                }
+                
+                writer.Unindent();
+                writer.AppendLine("},");
+            }
+            else
+            {
+                // Standard instantiation for classes without properties with data sources or required properties
+                writer.AppendLine($"InstanceFactory = args => new {className}({GenerateConstructorArgs(testInfo)}),");
+            }
+        }
+    }
+
+    private class PropertySymbolComparer : IEqualityComparer<IPropertySymbol>
+    {
+        public bool Equals(IPropertySymbol x, IPropertySymbol y)
+        {
+            if (x == null || y == null) return false;
+            return x.Name == y.Name && SymbolEqualityComparer.Default.Equals(x.ContainingType, y.ContainingType);
+        }
+
+        public int GetHashCode(IPropertySymbol obj)
+        {
+            return obj.Name.GetHashCode();
         }
     }
 

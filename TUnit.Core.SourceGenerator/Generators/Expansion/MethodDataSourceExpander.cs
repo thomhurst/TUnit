@@ -282,17 +282,8 @@ public sealed class MethodDataSourceExpander : ITestExpander
         var isAsync = testInfo.MethodSymbol.IsAsync;
 
         // Generate instance factory based on whether the class has constructor parameters
-        if (testInfo.TypeSymbol.HasParameterizedConstructor())
-        {
-            // For classes with constructor parameters, leave InstanceFactory null
-            // The TestBuilder will handle instance creation with proper constructor arguments
-            writer.AppendLine("InstanceFactory = null,");
-        }
-        else
-        {
-            // For classes with default constructor, generate the factory
-            writer.AppendLine($"InstanceFactory = args => new {className}(),");
-        }
+        // Generate instance factory
+        InstanceFactoryGenerator.GenerateInstanceFactory(writer, testInfo.TypeSymbol);
 
         // Check if method has CancellationToken parameter
         var hasCancellationToken = testInfo.MethodSymbol.Parameters.Any(p => 
