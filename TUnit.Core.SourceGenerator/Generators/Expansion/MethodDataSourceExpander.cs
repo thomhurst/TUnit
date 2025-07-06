@@ -29,59 +29,19 @@ public sealed class MethodDataSourceExpander : ITestExpander
     private int GenerateMethodDataSourceVariants(CodeWriter writer, TestMethodMetadata testInfo, 
         AttributeData methodDataSourceAttribute, int variantIndex)
     {
-        var dataSourceInfo = ExtractDataSourceInfo(methodDataSourceAttribute);
-        
-        // Try to resolve and evaluate the data source at compile-time
-        var dataRows = TryResolveDataSourceAtCompileTime(testInfo, dataSourceInfo);
-        
-        if (dataRows != null)
-        {
-            // Generate individual test metadata for each data row
-            foreach (var row in dataRows)
-            {
-                GenerateSingleDataRowVariant(writer, testInfo, row, variantIndex++, dataSourceInfo.MethodName);
-            }
-        }
-        else
-        {
-            // Fallback: Generate single test that will expand at runtime
-            // This is for complex data sources that can't be resolved at compile-time
-            GenerateRuntimeExpandableTest(writer, testInfo, dataSourceInfo, variantIndex++);
-        }
-
+        // For MethodDataSource, we always generate runtime-expandable tests
+        // The runtime will handle calling the method and expanding the data
+        GenerateRuntimeExpandableTest(writer, testInfo, methodDataSourceAttribute, variantIndex++);
         return variantIndex;
     }
 
-    private void GenerateSingleDataRowVariant(CodeWriter writer, TestMethodMetadata testInfo, 
-        object?[] dataRow, int variantIndex, string dataSourceMethod)
-    {
-        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        
-        writer.AppendLine($"_allTests.Add(new TestMetadata<{className}>");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        GenerateBasicMetadataWithDataRow(writer, testInfo, variantIndex, dataRow, dataSourceMethod);
-        GenerateTestAttributes(writer, testInfo);
-        
-        writer.AppendLine("DataSources = Array.Empty<TestDataSource>(),");
-        writer.AppendLine("ClassDataSources = Array.Empty<TestDataSource>(),");
-        writer.AppendLine("PropertyDataSources = Array.Empty<PropertyDataSource>(),");
-        
-        GenerateParameterTypes(writer, testInfo);
-        GenerateEmptyHookMetadata(writer);
-        GenerateTypedDelegatesWithDataRow(writer, testInfo, dataRow);
-
-        writer.Unindent();
-        writer.AppendLine("});");
-    }
-
     private void GenerateRuntimeExpandableTest(CodeWriter writer, TestMethodMetadata testInfo, 
-        DataSourceInfo dataSourceInfo, int variantIndex)
+        AttributeData methodDataSourceAttribute, int variantIndex)
     {
         var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var dataSourceInfo = ExtractDataSourceInfo(methodDataSourceAttribute);
         
-        writer.AppendLine($"// Runtime-expandable test for {dataSourceInfo.MethodName} - complex data source");
+        writer.AppendLine($"// Runtime-expandable test for MethodDataSource: {dataSourceInfo.MethodName}");
         writer.AppendLine($"_allTests.Add(new TestMetadata<{className}>");
         writer.AppendLine("{");
         writer.Indent();
@@ -89,8 +49,8 @@ public sealed class MethodDataSourceExpander : ITestExpander
         GenerateBasicMetadataForRuntimeExpansion(writer, testInfo, variantIndex, dataSourceInfo);
         GenerateTestAttributes(writer, testInfo);
         
-        // For runtime expansion, we'll use the existing data source infrastructure
-        writer.AppendLine("DataSources = Array.Empty<TestDataSource>(), // Will be resolved at runtime");
+        // Generate the actual TestDataSource that will be used at runtime
+        GenerateMethodDataSource(writer, testInfo, dataSourceInfo);
         
         writer.AppendLine("ClassDataSources = Array.Empty<TestDataSource>(),");
         writer.AppendLine("PropertyDataSources = Array.Empty<PropertyDataSource>(),");
@@ -103,6 +63,313 @@ public sealed class MethodDataSourceExpander : ITestExpander
         writer.AppendLine("});");
     }
 
+    private void GenerateMethodDataSource(CodeWriter writer, TestMethodMetadata testInfo, DataSourceInfo dataSourceInfo)
+    {
+        writer.AppendLine("DataSources = new TestDataSource[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Determine the source type (class containing the method)
+        var sourceType = dataSourceInfo.ClassType ?? testInfo.TypeSymbol;
+        var sourceTypeName = sourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        
+        // Find the data source method
+        var dataSourceMethod = FindDataSourceMethod(sourceType, dataSourceInfo.MethodName);
+        if (dataSourceMethod == null)
+        {
+            writer.AppendLine($"// ERROR: Could not find method {dataSourceInfo.MethodName}");
+            writer.Unindent();
+            writer.AppendLine("},");
+            return;
+        }
+
+        // Analyze the method return type to determine the appropriate data source
+        var returnType = dataSourceMethod.ReturnType;
+        GenerateDataSourceForReturnType(writer, sourceTypeName, dataSourceInfo, dataSourceMethod, returnType);
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+
+    private void GenerateDataSourceForReturnType(CodeWriter writer, string sourceTypeName, 
+        DataSourceInfo dataSourceInfo, IMethodSymbol method, ITypeSymbol returnType)
+    {
+        var methodName = dataSourceInfo.MethodName;
+        var methodCall = GenerateMethodCall(sourceTypeName, methodName, dataSourceInfo.Arguments);
+        
+        // Handle Task<T> and ValueTask<T>
+        if (IsTaskType(returnType, out var taskResultType))
+        {
+            GenerateTaskDataSource(writer, methodCall, taskResultType);
+            return;
+        }
+        
+        // Handle IAsyncEnumerable<T>
+        if (IsAsyncEnumerableType(returnType, out var asyncElementType))
+        {
+            GenerateAsyncEnumerableDataSource(writer, methodCall, asyncElementType);
+            return;
+        }
+        
+        // Handle regular IEnumerable<T>
+        if (IsEnumerableType(returnType, out var elementType))
+        {
+            GenerateSyncEnumerableDataSource(writer, methodCall, elementType);
+            return;
+        }
+        
+        // Unsupported return type
+        writer.AppendLine($"// ERROR: Unsupported return type {returnType} for method {methodName}");
+    }
+
+    private void GenerateSyncEnumerableDataSource(CodeWriter writer, string methodCall, ITypeSymbol elementType)
+    {
+        writer.AppendLine("new global::TUnit.Core.DelegateDataSource(() =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        writer.AppendLine($"var enumerable = {methodCall};");
+        writer.AppendLine("var result = new global::System.Collections.Generic.List<object?[]>();");
+        writer.AppendLine("foreach (var item in enumerable)");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        GenerateDataUnwrapping(writer, "item", elementType);
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("return result;");
+        
+        writer.Unindent();
+        writer.AppendLine("})");
+    }
+
+    private void GenerateTaskDataSource(CodeWriter writer, string methodCall, ITypeSymbol taskResultType)
+    {
+        writer.AppendLine("new global::TUnit.Core.TaskDelegateDataSource(async () =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        writer.AppendLine($"var taskResult = await {methodCall};");
+        
+        // Check if the task result is an enumerable
+        if (IsEnumerableType(taskResultType, out var elementType))
+        {
+            writer.AppendLine("var result = new global::System.Collections.Generic.List<object?[]>();");
+            writer.AppendLine("foreach (var item in taskResult)");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            GenerateDataUnwrapping(writer, "item", elementType);
+            
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("return result;");
+        }
+        else
+        {
+            writer.AppendLine($"// ERROR: Task result type {taskResultType} is not an enumerable");
+            writer.AppendLine("return Array.Empty<object?[]>();");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("})");
+    }
+
+    private void GenerateAsyncEnumerableDataSource(CodeWriter writer, string methodCall, ITypeSymbol elementType)
+    {
+        writer.AppendLine("new global::TUnit.Core.AsyncDelegateDataSource(async (cancellationToken) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        writer.AppendLine($"var asyncEnumerable = {methodCall};");
+        writer.AppendLine("await foreach (var item in asyncEnumerable.WithCancellation(cancellationToken))");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        GenerateAsyncDataUnwrapping(writer, "item", elementType);
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+        
+        writer.Unindent();
+        writer.AppendLine("})");
+    }
+
+    private void GenerateDataUnwrapping(CodeWriter writer, string itemVar, ITypeSymbol elementType)
+    {
+        // Handle object?[] directly
+        if (IsObjectArray(elementType))
+        {
+            writer.AppendLine($"result.Add({itemVar});");
+            return;
+        }
+        
+        // Handle tuples - unwrap into object array
+        if (IsTupleType(elementType, out var tupleElements))
+        {
+            writer.AppendLine("result.Add(new object?[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            for (int i = 0; i < tupleElements.Count; i++)
+            {
+                var itemNumber = i + 1;
+                writer.AppendLine($"{itemVar}.Item{itemNumber},");
+            }
+            
+            writer.Unindent();
+            writer.AppendLine("});");
+            return;
+        }
+        
+        // Single value - wrap in array
+        writer.AppendLine($"result.Add(new object?[] {{ {itemVar} }});");
+    }
+
+    private void GenerateAsyncDataUnwrapping(CodeWriter writer, string itemVar, ITypeSymbol elementType)
+    {
+        // For async enumerable, we yield return the unwrapped data
+        writer.Append("yield return ");
+        
+        // Handle object?[] directly
+        if (IsObjectArray(elementType))
+        {
+            writer.AppendLine($"{itemVar};");
+            return;
+        }
+        
+        // Handle tuples - unwrap into object array
+        if (IsTupleType(elementType, out var tupleElements))
+        {
+            writer.AppendLine("new object?[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            for (int i = 0; i < tupleElements.Count; i++)
+            {
+                var itemNumber = i + 1;
+                writer.AppendLine($"{itemVar}.Item{itemNumber},");
+            }
+            
+            writer.Unindent();
+            writer.Append("};");
+            return;
+        }
+        
+        // Single value - wrap in array
+        writer.AppendLine($"new object?[] {{ {itemVar} }};");
+    }
+
+    private string GenerateMethodCall(string sourceTypeName, string methodName, object?[]? arguments)
+    {
+        if (arguments == null || arguments.Length == 0)
+        {
+            return $"{sourceTypeName}.{methodName}()";
+        }
+        
+        var argList = string.Join(", ", arguments.Select(arg => TypedConstantParser.FormatPrimitive(arg)));
+        return $"{sourceTypeName}.{methodName}({argList})";
+    }
+
+    private IMethodSymbol? FindDataSourceMethod(ITypeSymbol type, string methodName)
+    {
+        return type.GetMembers(methodName)
+            .OfType<IMethodSymbol>()
+            .FirstOrDefault(m => m.IsStatic && m.DeclaredAccessibility == Accessibility.Public);
+    }
+
+    private bool IsTaskType(ITypeSymbol type, out ITypeSymbol taskResultType)
+    {
+        taskResultType = null!;
+        
+        if (type is INamedTypeSymbol namedType)
+        {
+            if (namedType.Name == "Task" && namedType.TypeArguments.Length == 1)
+            {
+                taskResultType = namedType.TypeArguments[0];
+                return true;
+            }
+            
+            if (namedType.Name == "ValueTask" && namedType.TypeArguments.Length == 1)
+            {
+                taskResultType = namedType.TypeArguments[0];
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    private bool IsAsyncEnumerableType(ITypeSymbol type, out ITypeSymbol elementType)
+    {
+        elementType = null!;
+        
+        if (type is INamedTypeSymbol namedType)
+        {
+            var asyncEnumerable = namedType.AllInterfaces
+                .FirstOrDefault(i => i.Name == "IAsyncEnumerable" && i.TypeArguments.Length == 1);
+            
+            if (asyncEnumerable != null)
+            {
+                elementType = asyncEnumerable.TypeArguments[0];
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    private bool IsEnumerableType(ITypeSymbol type, out ITypeSymbol elementType)
+    {
+        elementType = null!;
+        
+        if (type is INamedTypeSymbol namedType)
+        {
+            var enumerable = namedType.AllInterfaces
+                .FirstOrDefault(i => i.Name == "IEnumerable" && i.TypeArguments.Length == 1);
+            
+            if (enumerable != null)
+            {
+                elementType = enumerable.TypeArguments[0];
+                return true;
+            }
+            
+            // Check if it's directly IEnumerable<T>
+            if (namedType.Name == "IEnumerable" && namedType.TypeArguments.Length == 1)
+            {
+                elementType = namedType.TypeArguments[0];
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    private bool IsObjectArray(ITypeSymbol type)
+    {
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return arrayType.ElementType.SpecialType == SpecialType.System_Object;
+        }
+        return false;
+    }
+
+    private bool IsTupleType(ITypeSymbol type, out IList<IFieldSymbol> tupleElements)
+    {
+        tupleElements = Array.Empty<IFieldSymbol>();
+        
+        if (type is INamedTypeSymbol namedType && namedType.IsTupleType)
+        {
+            tupleElements = namedType.TupleElements.IsDefaultOrEmpty 
+                ? Array.Empty<IFieldSymbol>() 
+                : namedType.TupleElements.ToList();
+            return true;
+        }
+        
+        return false;
+    }
+
     private DataSourceInfo ExtractDataSourceInfo(AttributeData methodDataSourceAttribute)
     {
         var args = methodDataSourceAttribute.ConstructorArguments;
@@ -110,7 +377,29 @@ public sealed class MethodDataSourceExpander : ITestExpander
         if (args.Length == 0)
             throw new InvalidOperationException("MethodDataSource requires method name");
 
-        var methodName = args[0].Value?.ToString() ?? throw new InvalidOperationException("Invalid method name");
+        // Check if first arg is Type (generic version) or string (non-generic)
+        ITypeSymbol? classType = null;
+        string methodName;
+        
+        if (args[0].Kind == TypedConstantKind.Type)
+        {
+            // Generic version: MethodDataSourceAttribute<T>(methodName)
+            classType = args[0].Value as ITypeSymbol;
+            methodName = args[1].Value?.ToString() ?? throw new InvalidOperationException("Invalid method name");
+        }
+        else
+        {
+            // Non-generic version: MethodDataSourceAttribute(methodName) or MethodDataSourceAttribute(type, methodName)
+            if (args.Length > 1 && args[0].Kind == TypedConstantKind.Type)
+            {
+                classType = args[0].Value as ITypeSymbol;
+                methodName = args[1].Value?.ToString() ?? throw new InvalidOperationException("Invalid method name");
+            }
+            else
+            {
+                methodName = args[0].Value?.ToString() ?? throw new InvalidOperationException("Invalid method name");
+            }
+        }
         
         // Check for Arguments property
         object?[]? arguments = null;
@@ -124,11 +413,16 @@ public sealed class MethodDataSourceExpander : ITestExpander
             }
         }
 
-        return new DataSourceInfo(methodName, arguments);
+        return new DataSourceInfo(methodName, classType, arguments);
     }
 
     private object? ExtractTypedConstantValue(TypedConstant typedConstant)
     {
+        if (typedConstant.IsNull)
+        {
+            return null;
+        }
+        
         return typedConstant.Kind switch
         {
             TypedConstantKind.Primitive => typedConstant.Value,
@@ -137,52 +431,6 @@ public sealed class MethodDataSourceExpander : ITestExpander
             TypedConstantKind.Array => typedConstant.Values.Select(ExtractTypedConstantValue).ToArray(),
             _ => typedConstant.Value
         };
-    }
-
-    private object?[][]? TryResolveDataSourceAtCompileTime(TestMethodMetadata testInfo, DataSourceInfo dataSourceInfo)
-    {
-        // Try to find the data source method in the same class
-        var dataSourceMethod = testInfo.TypeSymbol.GetMembers(dataSourceInfo.MethodName)
-            .OfType<IMethodSymbol>()
-            .FirstOrDefault(m => m.IsStatic);
-
-        if (dataSourceMethod == null)
-            return null;
-
-        // For now, only handle very simple cases that return constant arrays
-        // This could be expanded to handle more complex scenarios
-        return TryExtractSimpleConstantData(dataSourceMethod, dataSourceInfo.Arguments);
-    }
-
-    private object?[][]? TryExtractSimpleConstantData(IMethodSymbol method, object?[]? arguments)
-    {
-        // This is a simplified implementation
-        // In a real scenario, we'd need to analyze the method body to extract constant data
-        // For now, return null to indicate we can't resolve at compile-time
-        return null;
-    }
-
-    private void GenerateBasicMetadataWithDataRow(CodeWriter writer, TestMethodMetadata testInfo, 
-        int variantIndex, object?[] dataRow, string dataSourceMethod)
-    {
-        var testIdArgs = string.Join(", ", dataRow.Select(TypedConstantParser.FormatPrimitive));
-        writer.AppendLine($"TestId = \"{testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{testInfo.MethodSymbol.Name}({testIdArgs})\",");
-        writer.AppendLine($"TestName = \"{testInfo.MethodSymbol.Name}\",");
-        writer.AppendLine($"TestClassType = typeof({testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
-        writer.AppendLine($"TestMethodName = \"{testInfo.MethodSymbol.Name}\",");
-        var location = testInfo.MethodSymbol.Locations.FirstOrDefault();
-        if (location != null && location.IsInSource)
-        {
-            var lineSpan = location.GetLineSpan();
-            writer.AppendLine($"FilePath = @\"{lineSpan.Path?.Replace("\\", "\\\\")}\",");
-            writer.AppendLine($"LineNumber = {lineSpan.StartLinePosition.Line + 1},");
-        }
-        else
-        {
-            writer.AppendLine("FilePath = null,");
-            writer.AppendLine("LineNumber = 0,");
-        }
-        writer.AppendLine($"// Data from {dataSourceMethod}: {string.Join(", ", dataRow.Select(TypedConstantParser.FormatPrimitive))}");
     }
 
     private void GenerateBasicMetadataForRuntimeExpansion(CodeWriter writer, TestMethodMetadata testInfo, 
@@ -204,7 +452,7 @@ public sealed class MethodDataSourceExpander : ITestExpander
             writer.AppendLine("FilePath = null,");
             writer.AppendLine("LineNumber = 0,");
         }
-        writer.AppendLine($"// Runtime-expandable from {dataSourceInfo.MethodName}");
+        writer.AppendLine($"// Runtime expansion from MethodDataSource: {dataSourceInfo.MethodName}");
     }
 
     private void GenerateTestAttributes(CodeWriter writer, TestMethodMetadata testInfo)
@@ -257,58 +505,6 @@ public sealed class MethodDataSourceExpander : ITestExpander
         writer.AppendLine("},");
     }
 
-    private void GenerateTypedDelegatesWithDataRow(CodeWriter writer, TestMethodMetadata testInfo, object?[] dataRow)
-    {
-        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        var methodName = testInfo.MethodSymbol.Name;
-        var isAsync = testInfo.MethodSymbol.IsAsync;
-
-        writer.AppendLine($"InstanceFactory = args => new {className}(),");
-
-        writer.AppendLine("TestInvoker = async (instance, args) =>");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"var typedInstance = ({className})instance;");
-        writer.AppendLine("// Using compile-time expanded data row");
-        
-        var argList = string.Join(", ", dataRow.Select(TypedConstantParser.FormatPrimitive));
-        if (isAsync)
-        {
-            writer.AppendLine($"await typedInstance.{methodName}({argList});");
-        }
-        else
-        {
-            writer.AppendLine($"typedInstance.{methodName}({argList});");
-            writer.AppendLine("await Task.CompletedTask;");
-        }
-        
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        writer.AppendLine($"PropertySetters = new Dictionary<string, Action<{className}, object?>>(),");
-        writer.AppendLine("PropertyInjections = Array.Empty<PropertyInjectionData>(),");
-        writer.AppendLine("CreateTypedInstance = null, // Will be set by TestBuilder");
-
-        writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("// Using compile-time expanded data row");
-        
-        if (isAsync)
-        {
-            writer.AppendLine($"await instance.{methodName}({argList});");
-        }
-        else
-        {
-            writer.AppendLine($"instance.{methodName}({argList});");
-        }
-        
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        GenerateExecutableTestFactoryWithDataRow(writer, testInfo, dataRow);
-    }
-
     private void GenerateTypedDelegatesForRuntimeExpansion(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -322,53 +518,5 @@ public sealed class MethodDataSourceExpander : ITestExpander
         writer.AppendLine("CreateExecutableTest = null, // Will be set by TestBuilder for runtime expansion");
     }
 
-    private void GenerateExecutableTestFactoryWithDataRow(CodeWriter writer, TestMethodMetadata testInfo, object?[] dataRow)
-    {
-        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        
-        writer.AppendLine("CreateExecutableTest = (creationContext, metadata) =>");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        writer.AppendLine($"return new global::TUnit.Engine.ExecutableTest<{className}>");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        writer.AppendLine("TestId = creationContext.TestId,");
-        writer.AppendLine("DisplayName = creationContext.DisplayName,");
-        writer.AppendLine("Metadata = metadata,");
-        
-        var argsArray = string.Join(", ", dataRow.Select(TypedConstantParser.FormatPrimitive));
-        writer.AppendLine($"Arguments = new object?[] {{ {argsArray} }},");
-        
-        writer.AppendLine("ClassArguments = creationContext.ClassArguments,");
-        writer.AppendLine("PropertyValues = creationContext.PropertyValues,");
-        writer.AppendLine("BeforeTestHooks = creationContext.BeforeTestHooks,");
-        writer.AppendLine("AfterTestHooks = creationContext.AfterTestHooks,");
-        writer.AppendLine("Context = creationContext.Context,");
-        
-        writer.AppendLine("CreateTypedInstance = async () =>");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("if (metadata.InstanceFactory != null)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("return await global::System.Threading.Tasks.Task.FromResult(metadata.InstanceFactory(creationContext.ClassArguments));");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine($"throw new global::System.InvalidOperationException(\"No instance factory for {className}\");");
-        writer.Unindent();
-        writer.AppendLine("},");
-        
-        writer.AppendLine("InvokeTypedTest = metadata.InvokeTypedTest ?? throw new global::System.InvalidOperationException(\"No test invoker\")");
-        
-        writer.Unindent();
-        writer.AppendLine("};");
-        
-        writer.Unindent();
-        writer.AppendLine("},");
-    }
-
-
-    private record DataSourceInfo(string MethodName, object?[]? Arguments);
+    private record DataSourceInfo(string MethodName, ITypeSymbol? ClassType, object?[]? Arguments);
 }
