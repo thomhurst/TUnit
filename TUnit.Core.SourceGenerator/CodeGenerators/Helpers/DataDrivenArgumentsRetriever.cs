@@ -35,9 +35,7 @@ public static class DataDrivenArgumentsRetriever
             };
         }
 
-        var attributeSyntax = argumentAttribute.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
-
-        if (attributeSyntax is null)
+        if (argumentAttribute.ApplicationSyntaxReference?.GetSyntax() is not AttributeSyntax attributeSyntax)
         {
             var fallbackArgs = GetArgumentsFallback(constructorArgument.Values, parameterOrPropertyTypeSymbols);
             return new ArgumentsAttributeContainer(argumentsType, [.. fallbackArgs])

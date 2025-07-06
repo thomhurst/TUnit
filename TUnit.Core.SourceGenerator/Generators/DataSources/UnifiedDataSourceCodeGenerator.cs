@@ -185,11 +185,9 @@ public sealed class UnifiedDataSourceCodeGenerator : IDataSourceCodeGenerator
 
     private void GenerateTaskOfEnumerableDataSource(CodeWriter writer, string methodCall, ITypeSymbol returnType)
     {
-        var taskType = returnType as INamedTypeSymbol;
-        if (taskType is { TypeArguments.Length: > 0 })
+        if (returnType is INamedTypeSymbol { TypeArguments.Length: > 0 } taskType)
         {
-            var innerType = taskType.TypeArguments[0] as INamedTypeSymbol;
-            if (innerType is { IsGenericType: true, TypeArguments.Length: > 0 } &&
+            if (taskType.TypeArguments[0] is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: > 0 } innerType &&
                 IsObjectArrayType(innerType.TypeArguments[0]))
             {
                 // Already returns Task<IEnumerable<object?[]>>
@@ -210,11 +208,9 @@ public sealed class UnifiedDataSourceCodeGenerator : IDataSourceCodeGenerator
 
     private void GenerateValueTaskOfEnumerableDataSource(CodeWriter writer, string methodCall, ITypeSymbol returnType)
     {
-        var valueTaskType = returnType as INamedTypeSymbol;
-        if (valueTaskType is { TypeArguments.Length: > 0 })
+        if (returnType is INamedTypeSymbol { TypeArguments.Length: > 0 } valueTaskType)
         {
-            var innerType = valueTaskType.TypeArguments[0] as INamedTypeSymbol;
-            if (innerType is { IsGenericType: true, TypeArguments.Length: > 0 } &&
+            if (valueTaskType.TypeArguments[0] is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: > 0 } innerType &&
                 IsObjectArrayType(innerType.TypeArguments[0]))
             {
                 // Already returns ValueTask<IEnumerable<object?[]>> - convert to Task

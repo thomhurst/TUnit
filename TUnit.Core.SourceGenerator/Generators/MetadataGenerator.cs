@@ -330,8 +330,7 @@ public sealed class MetadataGenerator
                          ])
                 {
                     // DependsOnAttribute(Type testClass) or DependsOnAttribute(Type testClass, string testName)
-                    var classType = args[0].Value as ITypeSymbol;
-                    if (classType != null)
+                    if (args[0].Value is ITypeSymbol classType)
                     {
                         var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                         if (args.Length == 1)

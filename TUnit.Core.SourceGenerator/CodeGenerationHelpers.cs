@@ -493,8 +493,7 @@ internal static class CodeGenerationHelpers
             return "";
         }
 
-        var dataSourceType = attr.ConstructorArguments[0].Value as ITypeSymbol;
-        if (dataSourceType == null)
+        if (attr.ConstructorArguments[0].Value is not ITypeSymbol dataSourceType)
         {
             return "";
         }

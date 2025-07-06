@@ -36,8 +36,7 @@ internal sealed class TestRequestHandler : IRequestHandler
     {
         // Create hook orchestrator if we have the service
         HookOrchestrator? hookOrchestrator = null;
-        var hookCollectionService = serviceProvider.GetService(typeof(IHookCollectionService)) as IHookCollectionService;
-        if (hookCollectionService != null)
+        if (serviceProvider.GetService(typeof(IHookCollectionService)) is IHookCollectionService hookCollectionService)
         {
             hookOrchestrator = new HookOrchestrator(hookCollectionService, serviceProvider.Logger);
         }

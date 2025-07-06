@@ -34,8 +34,7 @@ internal sealed class GenericTypeResolver
             // Find all class declarations
             foreach (var classDecl in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
             {
-                var classSymbol = semanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
-                if (classSymbol == null)
+                if (semanticModel.GetDeclaredSymbol(classDecl) is not INamedTypeSymbol classSymbol)
                 {
                     continue;
                 }

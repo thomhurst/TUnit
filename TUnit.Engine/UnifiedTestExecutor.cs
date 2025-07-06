@@ -84,8 +84,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         }
 
         HookOrchestrator? hookOrchestrator = null;
-        var hookCollectionService = _serviceProvider?.GetService(typeof(IHookCollectionService)) as IHookCollectionService;
-        if (hookCollectionService != null)
+        if (_serviceProvider?.GetService(typeof(IHookCollectionService)) is IHookCollectionService hookCollectionService)
         {
             hookOrchestrator = new HookOrchestrator(hookCollectionService, _logger);
         }

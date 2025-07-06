@@ -80,8 +80,7 @@ public static class ServiceProviderExtensions
 
     public static T GetRequiredService<T>(this IServiceProvider serviceProvider) where T : class
     {
-        var service = serviceProvider.GetService(typeof(T)) as T;
-        if (service == null)
+        if (serviceProvider.GetService(typeof(T)) is not T service)
         {
             throw new InvalidOperationException($"Service of type {typeof(T)} is not registered.");
         }

@@ -160,10 +160,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (context.TargetNode is ClassDeclarationSyntax)
         {
-            var classSymbol = context.TargetSymbol as INamedTypeSymbol;
-
             // Get all generic test methods in the class
-            if (classSymbol == null)
+            if (context.TargetSymbol is not INamedTypeSymbol classSymbol)
             {
                 return null;
             }
@@ -221,8 +219,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (context.Node is ClassDeclarationSyntax classDecl)
         {
-            var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
-            if (classSymbol == null || classSymbol.IsAbstract)
+            if (context.SemanticModel.GetDeclaredSymbol(classDecl) is not INamedTypeSymbol classSymbol || classSymbol.IsAbstract)
             {
                 return null;
             }

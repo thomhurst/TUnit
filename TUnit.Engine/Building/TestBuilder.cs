@@ -115,8 +115,7 @@ public sealed class TestBuilder : ITestBuilder
 
     private async Task<Func<TestContext, CancellationToken, Task>[]> CreateTestHooksAsync(Type testClassType, bool isBeforeHook)
     {
-        var hookCollectionService = _serviceProvider?.GetService(typeof(IHookCollectionService)) as IHookCollectionService;
-        if (hookCollectionService == null)
+        if (_serviceProvider?.GetService(typeof(IHookCollectionService)) is not IHookCollectionService hookCollectionService)
         {
             return Array.Empty<Func<TestContext, CancellationToken, Task>>();
         }
