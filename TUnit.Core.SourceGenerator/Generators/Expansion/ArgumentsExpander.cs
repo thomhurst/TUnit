@@ -87,7 +87,7 @@ public sealed class ArgumentsExpander : ITestExpander
 
     private void GenerateBasicMetadataWithVariant(CodeWriter writer, TestMethodMetadata testInfo, int variantIndex, object?[] argumentValues)
     {
-        var testIdArgs = string.Join(", ", argumentValues.Select(v => TypedConstantParser.FormatPrimitive(v)));
+        var testIdArgs = string.Join(", ", argumentValues.Select(v => FormatArgumentForTestId(v)));
         writer.AppendLine($"TestId = \"{testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{testInfo.MethodSymbol.Name}({testIdArgs})\",");
         writer.AppendLine($"TestName = \"{testInfo.MethodSymbol.Name}\",");
         writer.AppendLine($"TestClassType = typeof({testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
@@ -259,5 +259,16 @@ public sealed class ArgumentsExpander : ITestExpander
     private string FormatArgumentValueWithCast(object? value)
     {
         return TypedConstantParser.FormatPrimitive(value);
+    }
+
+    private static string FormatArgumentForTestId(object? value)
+    {
+        if (value == null)
+            return "null";
+        
+        if (value is string str)
+            return str;
+        
+        return value.ToString() ?? "null";
     }
 }

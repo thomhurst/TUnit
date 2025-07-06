@@ -29,45 +29,7 @@ public sealed class MethodDataSourceExpander : ITestExpander
     private int GenerateMethodDataSourceVariants(CodeWriter writer, TestMethodMetadata testInfo, 
         AttributeData methodDataSourceAttribute, int variantIndex)
     {
-        // For MethodDataSource, we always generate runtime-expandable tests
-        // The runtime will handle calling the method and expanding the data
-        GenerateRuntimeExpandableTest(writer, testInfo, methodDataSourceAttribute, variantIndex++);
-        return variantIndex;
-    }
-
-    private void GenerateRuntimeExpandableTest(CodeWriter writer, TestMethodMetadata testInfo, 
-        AttributeData methodDataSourceAttribute, int variantIndex)
-    {
-        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var dataSourceInfo = ExtractDataSourceInfo(methodDataSourceAttribute);
-        
-        writer.AppendLine($"// Runtime-expandable test for MethodDataSource: {dataSourceInfo.MethodName}");
-        writer.AppendLine($"_allTests.Add(new TestMetadata<{className}>");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        GenerateBasicMetadataForRuntimeExpansion(writer, testInfo, variantIndex, dataSourceInfo);
-        GenerateTestAttributes(writer, testInfo);
-        
-        // Generate the actual TestDataSource that will be used at runtime
-        GenerateMethodDataSource(writer, testInfo, dataSourceInfo);
-        
-        writer.AppendLine("ClassDataSources = Array.Empty<TestDataSource>(),");
-        writer.AppendLine("PropertyDataSources = Array.Empty<PropertyDataSource>(),");
-        
-        GenerateParameterTypes(writer, testInfo);
-        GenerateEmptyHookMetadata(writer);
-        GenerateTypedDelegatesForRuntimeExpansion(writer, testInfo);
-
-        writer.Unindent();
-        writer.AppendLine("});");
-    }
-
-    private void GenerateMethodDataSource(CodeWriter writer, TestMethodMetadata testInfo, DataSourceInfo dataSourceInfo)
-    {
-        writer.AppendLine("DataSources = new TestDataSource[]");
-        writer.AppendLine("{");
-        writer.Indent();
         
         // Determine the source type (class containing the method)
         var sourceType = dataSourceInfo.ClassType ?? testInfo.TypeSymbol;
@@ -77,165 +39,153 @@ public sealed class MethodDataSourceExpander : ITestExpander
         var dataSourceMethod = FindDataSourceMethod(sourceType, dataSourceInfo.MethodName);
         if (dataSourceMethod == null)
         {
-            writer.AppendLine($"// ERROR: Could not find method {dataSourceInfo.MethodName}");
-            writer.Unindent();
-            writer.AppendLine("},");
-            return;
+            writer.AppendLine($"// ERROR: Could not find method {dataSourceInfo.MethodName} on type {sourceTypeName}");
+            return variantIndex;
         }
 
-        // Analyze the method return type to determine the appropriate data source
-        var returnType = dataSourceMethod.ReturnType;
-        GenerateDataSourceForReturnType(writer, sourceTypeName, dataSourceInfo, dataSourceMethod, returnType);
+        // Generate expansion code based on method return type
+        GenerateDataSourceExpansion(writer, testInfo, dataSourceInfo, dataSourceMethod, sourceTypeName, ref variantIndex);
         
-        writer.Unindent();
-        writer.AppendLine("},");
+        return variantIndex;
     }
 
-    private void GenerateDataSourceForReturnType(CodeWriter writer, string sourceTypeName, 
-        DataSourceInfo dataSourceInfo, IMethodSymbol method, ITypeSymbol returnType)
+    private void GenerateDataSourceExpansion(CodeWriter writer, TestMethodMetadata testInfo, 
+        DataSourceInfo dataSourceInfo, IMethodSymbol dataSourceMethod, string sourceTypeName, ref int variantIndex)
     {
-        var methodName = dataSourceInfo.MethodName;
-        var methodCall = GenerateMethodCall(sourceTypeName, methodName, dataSourceInfo.Arguments);
+        var returnType = dataSourceMethod.ReturnType;
+        var methodCall = GenerateMethodCall(sourceTypeName, dataSourceInfo.MethodName, dataSourceInfo.Arguments);
         
-        // Handle Task<T> and ValueTask<T>
+        // Generate appropriate expansion based on return type
         if (IsTaskType(returnType, out var taskResultType))
         {
-            GenerateTaskDataSource(writer, methodCall, taskResultType);
-            return;
+            GenerateTaskExpansion(writer, testInfo, methodCall, taskResultType, dataSourceInfo, ref variantIndex);
         }
-        
-        // Handle IAsyncEnumerable<T>
-        if (IsAsyncEnumerableType(returnType, out var asyncElementType))
+        else if (IsAsyncEnumerableType(returnType, out var asyncElementType))
         {
-            GenerateAsyncEnumerableDataSource(writer, methodCall, asyncElementType);
-            return;
+            GenerateAsyncEnumerableExpansion(writer, testInfo, methodCall, asyncElementType, dataSourceInfo, ref variantIndex);
         }
-        
-        // Handle regular IEnumerable<T>
-        if (IsEnumerableType(returnType, out var elementType))
+        else if (IsEnumerableType(returnType, out var elementType))
         {
-            GenerateSyncEnumerableDataSource(writer, methodCall, elementType);
-            return;
+            GenerateSyncEnumerableExpansion(writer, testInfo, methodCall, elementType, dataSourceInfo, ref variantIndex);
         }
-        
-        // Unsupported return type
-        writer.AppendLine($"// ERROR: Unsupported return type {returnType} for method {methodName}");
+        else
+        {
+            writer.AppendLine($"// ERROR: Unsupported return type {returnType} for method {dataSourceInfo.MethodName}");
+        }
     }
 
-    private void GenerateSyncEnumerableDataSource(CodeWriter writer, string methodCall, ITypeSymbol elementType)
+    private void GenerateSyncEnumerableExpansion(CodeWriter writer, TestMethodMetadata testInfo, 
+        string methodCall, ITypeSymbol elementType, DataSourceInfo dataSourceInfo, ref int variantIndex)
     {
-        writer.AppendLine("new global::TUnit.Core.DelegateDataSource(() =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"var dataSource = {methodCall};");
+        writer.AppendLine("foreach (var dataItem in dataSource)");
         writer.AppendLine("{");
         writer.Indent();
         
-        writer.AppendLine($"var enumerable = {methodCall};");
-        writer.AppendLine("var result = new global::System.Collections.Generic.List<object?[]>();");
-        writer.AppendLine("foreach (var item in enumerable)");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        GenerateDataUnwrapping(writer, "item", elementType);
+        GenerateTestMetadataForDataItem(writer, testInfo, "dataItem", elementType, dataSourceInfo, variantIndex++);
         
         writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine("return result;");
-        
         writer.Unindent();
-        writer.AppendLine("})");
+        writer.AppendLine("}");
     }
 
-    private void GenerateTaskDataSource(CodeWriter writer, string methodCall, ITypeSymbol taskResultType)
+    private void GenerateTaskExpansion(CodeWriter writer, TestMethodMetadata testInfo, 
+        string methodCall, ITypeSymbol taskResultType, DataSourceInfo dataSourceInfo, ref int variantIndex)
     {
-        writer.AppendLine("new global::TUnit.Core.TaskDelegateDataSource(async () =>");
         writer.AppendLine("{");
         writer.Indent();
+        writer.AppendLine($"var dataSourceTask = {methodCall};");
+        writer.AppendLine($"var dataSource = dataSourceTask.GetAwaiter().GetResult();");
         
-        writer.AppendLine($"var taskResult = await {methodCall};");
-        
-        // Check if the task result is an enumerable
         if (IsEnumerableType(taskResultType, out var elementType))
         {
-            writer.AppendLine("var result = new global::System.Collections.Generic.List<object?[]>();");
-            writer.AppendLine("foreach (var item in taskResult)");
+            writer.AppendLine("foreach (var dataItem in dataSource)");
             writer.AppendLine("{");
             writer.Indent();
             
-            GenerateDataUnwrapping(writer, "item", elementType);
+            GenerateTestMetadataForDataItem(writer, testInfo, "dataItem", elementType, dataSourceInfo, variantIndex++);
             
             writer.Unindent();
             writer.AppendLine("}");
-            writer.AppendLine("return result;");
         }
         else
         {
             writer.AppendLine($"// ERROR: Task result type {taskResultType} is not an enumerable");
-            writer.AppendLine("return Array.Empty<object?[]>();");
         }
-        
-        writer.Unindent();
-        writer.AppendLine("})");
-    }
-
-    private void GenerateAsyncEnumerableDataSource(CodeWriter writer, string methodCall, ITypeSymbol elementType)
-    {
-        writer.AppendLine("new global::TUnit.Core.AsyncDelegateDataSource(async (cancellationToken) =>");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        writer.AppendLine($"var asyncEnumerable = {methodCall};");
-        writer.AppendLine("await foreach (var item in asyncEnumerable.WithCancellation(cancellationToken))");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        GenerateAsyncDataUnwrapping(writer, "item", elementType);
         
         writer.Unindent();
         writer.AppendLine("}");
+    }
+
+    private void GenerateAsyncEnumerableExpansion(CodeWriter writer, TestMethodMetadata testInfo, 
+        string methodCall, ITypeSymbol elementType, DataSourceInfo dataSourceInfo, ref int variantIndex)
+    {
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"var asyncDataSource = {methodCall};");
+        writer.AppendLine("var asyncEnumerator = asyncDataSource.GetAsyncEnumerator();");
+        writer.AppendLine("try");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("while (asyncEnumerator.MoveNextAsync().GetAwaiter().GetResult())");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("var dataItem = asyncEnumerator.Current;");
+        
+        GenerateTestMetadataForDataItem(writer, testInfo, "dataItem", elementType, dataSourceInfo, variantIndex++);
         
         writer.Unindent();
-        writer.AppendLine("})");
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("finally");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("asyncEnumerator.DisposeAsync().GetAwaiter().GetResult();");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
     }
 
-    private void GenerateDataUnwrapping(CodeWriter writer, string itemVar, ITypeSymbol elementType)
+    private void GenerateTestMetadataForDataItem(CodeWriter writer, TestMethodMetadata testInfo, 
+        string dataItemVar, ITypeSymbol elementType, DataSourceInfo dataSourceInfo, int variantIndex)
     {
+        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        
+        // Generate code to unwrap the data item into an object array
+        GenerateDataUnwrapping(writer, dataItemVar, elementType);
+        
+        writer.AppendLine($"_allTests.Add(new TestMetadata<{className}>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        GenerateMetadataWithArguments(writer, testInfo, variantIndex, dataSourceInfo);
+        GenerateTestAttributes(writer, testInfo);
+        
+        writer.AppendLine("DataSources = Array.Empty<TestDataSource>(),");
+        writer.AppendLine("ClassDataSources = Array.Empty<TestDataSource>(),");
+        writer.AppendLine("PropertyDataSources = Array.Empty<PropertyDataSource>(),");
+        
+        GenerateParameterTypes(writer, testInfo);
+        GenerateEmptyHookMetadata(writer);
+        GenerateTypedDelegatesWithArguments(writer, testInfo);
+        
+        writer.Unindent();
+        writer.AppendLine("});");
+    }
+
+    private void GenerateDataUnwrapping(CodeWriter writer, string dataItemVar, ITypeSymbol elementType)
+    {
+        writer.Append("var arguments = ");
+        
         // Handle object?[] directly
         if (IsObjectArray(elementType))
         {
-            writer.AppendLine($"result.Add({itemVar});");
-            return;
-        }
-        
-        // Handle tuples - unwrap into object array
-        if (IsTupleType(elementType, out var tupleElements))
-        {
-            writer.AppendLine("result.Add(new object?[]");
-            writer.AppendLine("{");
-            writer.Indent();
-            
-            for (int i = 0; i < tupleElements.Count; i++)
-            {
-                var itemNumber = i + 1;
-                writer.AppendLine($"{itemVar}.Item{itemNumber},");
-            }
-            
-            writer.Unindent();
-            writer.AppendLine("});");
-            return;
-        }
-        
-        // Single value - wrap in array
-        writer.AppendLine($"result.Add(new object?[] {{ {itemVar} }});");
-    }
-
-    private void GenerateAsyncDataUnwrapping(CodeWriter writer, string itemVar, ITypeSymbol elementType)
-    {
-        // For async enumerable, we yield return the unwrapped data
-        writer.Append("yield return ");
-        
-        // Handle object?[] directly
-        if (IsObjectArray(elementType))
-        {
-            writer.AppendLine($"{itemVar};");
+            writer.AppendLine($"{dataItemVar};");
             return;
         }
         
@@ -249,16 +199,195 @@ public sealed class MethodDataSourceExpander : ITestExpander
             for (int i = 0; i < tupleElements.Count; i++)
             {
                 var itemNumber = i + 1;
-                writer.AppendLine($"{itemVar}.Item{itemNumber},");
+                writer.AppendLine($"{dataItemVar}.Item{itemNumber},");
             }
             
             writer.Unindent();
-            writer.Append("};");
+            writer.AppendLine("};");
             return;
         }
         
         // Single value - wrap in array
-        writer.AppendLine($"new object?[] {{ {itemVar} }};");
+        writer.AppendLine($"new object?[] {{ {dataItemVar} }};");
+    }
+
+    private void GenerateMetadataWithArguments(CodeWriter writer, TestMethodMetadata testInfo, 
+        int variantIndex, DataSourceInfo dataSourceInfo)
+    {
+        // Generate test ID with argument placeholders
+        writer.AppendLine($"TestId = $\"{testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{testInfo.MethodSymbol.Name}({{string.Join(\", \", arguments.Select(FormatArgumentForTestId))}})\",");
+        writer.AppendLine($"TestName = \"{testInfo.MethodSymbol.Name}\",");
+        writer.AppendLine($"TestClassType = typeof({testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
+        writer.AppendLine($"TestMethodName = \"{testInfo.MethodSymbol.Name}\",");
+        
+        var location = testInfo.MethodSymbol.Locations.FirstOrDefault();
+        if (location != null && location.IsInSource)
+        {
+            var lineSpan = location.GetLineSpan();
+            writer.AppendLine($"FilePath = @\"{lineSpan.Path?.Replace("\\", "\\\\")}\",");
+            writer.AppendLine($"LineNumber = {lineSpan.StartLinePosition.Line + 1},");
+        }
+        else
+        {
+            writer.AppendLine("FilePath = null,");
+            writer.AppendLine("LineNumber = 0,");
+        }
+        writer.AppendLine($"// Expanded from MethodDataSource: {dataSourceInfo.MethodName}");
+    }
+
+    private void GenerateTestAttributes(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        writer.AppendLine("Categories = Array.Empty<string>(),");
+        writer.AppendLine("IsSkipped = false,");
+        writer.AppendLine("SkipReason = null,");
+        writer.AppendLine("TimeoutMs = null,");
+        writer.AppendLine("RetryCount = 0,");
+        writer.AppendLine("CanRunInParallel = true,");
+        writer.AppendLine("Dependencies = Array.Empty<TestDependency>(),");
+        writer.AppendLine("AttributeFactory = null,");
+    }
+
+    private void GenerateParameterTypes(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        writer.AppendLine("ParameterTypes = new Type[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        foreach (var param in testInfo.MethodSymbol.Parameters)
+        {
+            var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            writer.AppendLine($"typeof({paramType}),");
+        }
+        writer.Unindent();
+        writer.AppendLine("},");
+
+        writer.AppendLine("TestMethodParameterTypes = new string[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        foreach (var param in testInfo.MethodSymbol.Parameters)
+        {
+            var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            writer.AppendLine($"\"{paramType}\",");
+        }
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+
+    private void GenerateEmptyHookMetadata(CodeWriter writer)
+    {
+        writer.AppendLine("Hooks = new TestHooks");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("BeforeClass = Array.Empty<HookMetadata>(),");
+        writer.AppendLine("AfterClass = Array.Empty<HookMetadata>(),");
+        writer.AppendLine("BeforeTest = Array.Empty<HookMetadata>(),");
+        writer.AppendLine("AfterTest = Array.Empty<HookMetadata>()");
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+
+    private void GenerateTypedDelegatesWithArguments(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var methodName = testInfo.MethodSymbol.Name;
+        var isAsync = testInfo.MethodSymbol.IsAsync;
+
+        writer.AppendLine($"InstanceFactory = args => new {className}(),");
+
+        // Generate test invoker that uses the captured arguments
+        writer.AppendLine("TestInvoker = async (instance, args) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"var typedInstance = ({className})instance;");
+        
+        // Generate method call with proper argument casting
+        var parameterCasts = new List<string>();
+        for (int i = 0; i < testInfo.MethodSymbol.Parameters.Length; i++)
+        {
+            var param = testInfo.MethodSymbol.Parameters[i];
+            var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            parameterCasts.Add($"({paramType})arguments[{i}]");
+        }
+        
+        var argList = string.Join(", ", parameterCasts);
+        if (isAsync)
+        {
+            writer.AppendLine($"await typedInstance.{methodName}({argList});");
+        }
+        else
+        {
+            writer.AppendLine($"typedInstance.{methodName}({argList});");
+            writer.AppendLine("await Task.CompletedTask;");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+
+        writer.AppendLine($"PropertySetters = new Dictionary<string, Action<{className}, object?>>(),");
+        writer.AppendLine("PropertyInjections = Array.Empty<PropertyInjectionData>(),");
+        writer.AppendLine("CreateTypedInstance = null, // Will be set by TestBuilder");
+
+        // Generate strongly-typed test invoker
+        writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        if (isAsync)
+        {
+            writer.AppendLine($"await instance.{methodName}({argList});");
+        }
+        else
+        {
+            writer.AppendLine($"instance.{methodName}({argList});");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+
+        GenerateExecutableTestFactory(writer, testInfo);
+    }
+
+    private void GenerateExecutableTestFactory(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        
+        writer.AppendLine("CreateExecutableTest = (creationContext, metadata) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        writer.AppendLine($"return new global::TUnit.Engine.ExecutableTest<{className}>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        writer.AppendLine("TestId = creationContext.TestId,");
+        writer.AppendLine("DisplayName = creationContext.DisplayName,");
+        writer.AppendLine("Metadata = metadata,");
+        writer.AppendLine("Arguments = arguments,");
+        writer.AppendLine("ClassArguments = creationContext.ClassArguments,");
+        writer.AppendLine("PropertyValues = creationContext.PropertyValues,");
+        writer.AppendLine("BeforeTestHooks = creationContext.BeforeTestHooks,");
+        writer.AppendLine("AfterTestHooks = creationContext.AfterTestHooks,");
+        writer.AppendLine("Context = creationContext.Context,");
+        
+        writer.AppendLine("CreateTypedInstance = async () =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("if (metadata.InstanceFactory != null)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("return await global::System.Threading.Tasks.Task.FromResult(metadata.InstanceFactory(creationContext.ClassArguments));");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine($"throw new global::System.InvalidOperationException(\"No instance factory for {className}\");");
+        writer.Unindent();
+        writer.AppendLine("},");
+        
+        writer.AppendLine("InvokeTypedTest = metadata.InvokeTypedTest ?? throw new global::System.InvalidOperationException(\"No test invoker\")");
+        
+        writer.Unindent();
+        writer.AppendLine("};");
+        
+        writer.Unindent();
+        writer.AppendLine("},");
     }
 
     private string GenerateMethodCall(string sourceTypeName, string methodName, object?[]? arguments)
@@ -313,6 +442,13 @@ public sealed class MethodDataSourceExpander : ITestExpander
             if (asyncEnumerable != null)
             {
                 elementType = asyncEnumerable.TypeArguments[0];
+                return true;
+            }
+            
+            // Check if it's directly IAsyncEnumerable<T>
+            if (namedType.Name == "IAsyncEnumerable" && namedType.TypeArguments.Length == 1)
+            {
+                elementType = namedType.TypeArguments[0];
                 return true;
             }
         }
@@ -433,89 +569,15 @@ public sealed class MethodDataSourceExpander : ITestExpander
         };
     }
 
-    private void GenerateBasicMetadataForRuntimeExpansion(CodeWriter writer, TestMethodMetadata testInfo, 
-        int variantIndex, DataSourceInfo dataSourceInfo)
+    private static string FormatArgumentForTestId(object? arg)
     {
-        writer.AppendLine($"TestId = \"{testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{testInfo.MethodSymbol.Name}[{dataSourceInfo.MethodName}]\",");
-        writer.AppendLine($"TestName = \"{testInfo.MethodSymbol.Name}\",");
-        writer.AppendLine($"TestClassType = typeof({testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
-        writer.AppendLine($"TestMethodName = \"{testInfo.MethodSymbol.Name}\",");
-        var location = testInfo.MethodSymbol.Locations.FirstOrDefault();
-        if (location != null && location.IsInSource)
-        {
-            var lineSpan = location.GetLineSpan();
-            writer.AppendLine($"FilePath = @\"{lineSpan.Path?.Replace("\\", "\\\\")}\",");
-            writer.AppendLine($"LineNumber = {lineSpan.StartLinePosition.Line + 1},");
-        }
-        else
-        {
-            writer.AppendLine("FilePath = null,");
-            writer.AppendLine("LineNumber = 0,");
-        }
-        writer.AppendLine($"// Runtime expansion from MethodDataSource: {dataSourceInfo.MethodName}");
-    }
-
-    private void GenerateTestAttributes(CodeWriter writer, TestMethodMetadata testInfo)
-    {
-        writer.AppendLine("Categories = Array.Empty<string>(),");
-        writer.AppendLine("IsSkipped = false,");
-        writer.AppendLine("SkipReason = null,");
-        writer.AppendLine("TimeoutMs = null,");
-        writer.AppendLine("RetryCount = 0,");
-        writer.AppendLine("CanRunInParallel = true,");
-        writer.AppendLine("Dependencies = Array.Empty<TestDependency>(),");
-        writer.AppendLine("AttributeFactory = null,");
-    }
-
-    private void GenerateParameterTypes(CodeWriter writer, TestMethodMetadata testInfo)
-    {
-        writer.AppendLine("ParameterTypes = new Type[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var param in testInfo.MethodSymbol.Parameters)
-        {
-            var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            writer.AppendLine($"typeof({paramType}),");
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        writer.AppendLine("TestMethodParameterTypes = new string[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var param in testInfo.MethodSymbol.Parameters)
-        {
-            var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            writer.AppendLine($"\"{paramType}\",");
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
-    }
-
-    private void GenerateEmptyHookMetadata(CodeWriter writer)
-    {
-        writer.AppendLine("Hooks = new TestHooks");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("BeforeClass = Array.Empty<HookMetadata>(),");
-        writer.AppendLine("AfterClass = Array.Empty<HookMetadata>(),");
-        writer.AppendLine("BeforeTest = Array.Empty<HookMetadata>(),");
-        writer.AppendLine("AfterTest = Array.Empty<HookMetadata>()");
-        writer.Unindent();
-        writer.AppendLine("},");
-    }
-
-    private void GenerateTypedDelegatesForRuntimeExpansion(CodeWriter writer, TestMethodMetadata testInfo)
-    {
-        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-
-        writer.AppendLine($"InstanceFactory = args => new {className}(),");
-        writer.AppendLine("TestInvoker = null, // Will be set by TestBuilder for runtime expansion");
-        writer.AppendLine($"PropertySetters = new Dictionary<string, Action<{className}, object?>>(),");
-        writer.AppendLine("PropertyInjections = Array.Empty<PropertyInjectionData>(),");
-        writer.AppendLine("CreateTypedInstance = null, // Will be set by TestBuilder");
-        writer.AppendLine("InvokeTypedTest = null, // Will be set by TestBuilder for runtime expansion");
-        writer.AppendLine("CreateExecutableTest = null, // Will be set by TestBuilder for runtime expansion");
+        if (arg == null)
+            return "null";
+        
+        if (arg is string)
+            return arg.ToString() ?? "";
+        
+        return arg.ToString() ?? "null";
     }
 
     private record DataSourceInfo(string MethodName, ITypeSymbol? ClassType, object?[]? Arguments);
