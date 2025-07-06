@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -526,6 +527,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             type = enumerableInnerType;
         }
+        
+        // Check for IAsyncEnumerable<T>
+        if (SymbolEqualityComparer.Default.Equals(type, methodContainingTestData.ReturnType) && IsIAsyncEnumerable(methodContainingTestData.ReturnType, context.Compilation, out var asyncEnumerableInnerType))
+        {
+            type = asyncEnumerableInnerType;
+        }
 
         if (testParameterTypes.Length == 1
             && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
@@ -646,6 +653,37 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return type1?.TypeKind == TypeKind.Enum;
         }
 
+        return false;
+    }
+    
+    private static bool IsIAsyncEnumerable(ITypeSymbol type, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)
+    {
+        innerType = null;
+        
+        // Get IAsyncEnumerable<T> type
+        var asyncEnumerableType = compilation.GetTypeByMetadataName("System.Collections.Generic.IAsyncEnumerable`1");
+        if (asyncEnumerableType == null)
+        {
+            return false;
+        }
+        
+        // Check if the type itself is IAsyncEnumerable<T>
+        if (type is INamedTypeSymbol namedType && namedType.OriginalDefinition.Equals(asyncEnumerableType, SymbolEqualityComparer.Default))
+        {
+            innerType = namedType.TypeArguments[0];
+            return true;
+        }
+        
+        // Check interfaces
+        var asyncEnumerableInterface = type.AllInterfaces
+            .FirstOrDefault(i => i.OriginalDefinition.Equals(asyncEnumerableType, SymbolEqualityComparer.Default));
+            
+        if (asyncEnumerableInterface != null)
+        {
+            innerType = asyncEnumerableInterface.TypeArguments[0];
+            return true;
+        }
+        
         return false;
     }
 }
