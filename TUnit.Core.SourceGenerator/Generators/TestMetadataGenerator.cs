@@ -398,7 +398,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var dataSourceGenerator = new DataSourceGenerator();
             var metadataGenerator = new MetadataGenerator(dataSourceGenerator);
 
-            // Generate unique names based on the test method
+            // Generate unique names based on the test method with GUID for uniqueness
             var typeFullName = testMethod.TypeSymbol.ToDisplayString(new SymbolDisplayFormat(
                 typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
                 genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
@@ -412,8 +412,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 .Replace(']', '_');
 
             var methodName = testMethod.MethodSymbol.Name;
-            var sourceClassName = $"{typeFullName}_{methodName}_TestSource";
-            var moduleInitializerClassName = $"{typeFullName}_{methodName}_ModuleInitializer";
+            var guid = Guid.NewGuid().ToString("N");
+            var sourceClassName = $"{typeFullName}_{methodName}_TestSource_{guid}";
+            var moduleInitializerClassName = $"{typeFullName}_{methodName}_ModuleInitializer_{guid}";
 
             // Generate the test source implementation
             writer.AppendLine($"internal sealed class {sourceClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
@@ -467,9 +468,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
 
-            // Add source with unique filename
+            // Add source with unique filename including GUID
             var source = writer.ToString();
-            var fileName = $"{typeFullName}.{methodName}.TestSource.g.cs";
+            var fileName = $"{typeFullName}.{methodName}.{guid}.TestSource.g.cs";
             context.AddSource(fileName, SourceText.From(source, Encoding.UTF8));
         }
         catch (Exception ex)
