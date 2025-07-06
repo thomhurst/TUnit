@@ -273,7 +273,7 @@ public sealed class ArgumentsExpander : ITestExpander
         {
             var value = argumentValues[i];
             var paramType = parameters[i].Type;
-            var formattedValue = _formatter.FormatValue(value, paramType);
+            var formattedValue = FormatArgumentWithConversion(value, paramType, testInfo);
             formattedArgs.Add(formattedValue);
         }
 
@@ -297,12 +297,57 @@ public sealed class ArgumentsExpander : ITestExpander
             else if (argIndex < argumentValues.Length)
             {
                 var value = argumentValues[argIndex];
-                var formattedValue = _formatter.FormatValue(value, parameter.Type);
+                var formattedValue = FormatArgumentWithConversion(value, parameter.Type, testInfo);
                 formattedArgs.Add(formattedValue);
                 argIndex++;
             }
         }
 
         return string.Join(", ", formattedArgs);
+    }
+
+    private string FormatArgumentWithConversion(object? value, ITypeSymbol? parameterType, TestMethodMetadata testInfo)
+    {
+        // Handle null values first
+        if (value == null)
+        {
+            return "null";
+        }
+        
+        // First get the basic formatted value
+        var formattedValue = _formatter.FormatValue(value, parameterType);
+        
+        // If both value and parameterType are available, check for conversions
+        if (value is TypedConstant typedConstant && parameterType != null && 
+            !typedConstant.IsNull && typedConstant.Kind == TypedConstantKind.Primitive && 
+            typedConstant.Type != null)
+        {
+            // Get the source type
+            var sourceType = typedConstant.Type;
+            
+            // Check if types are different and require conversion
+            if (!SymbolEqualityComparer.Default.Equals(sourceType, parameterType))
+            {
+                // Check if the parameter type has user-defined conversion operators
+                var conversions = parameterType.GetMembers()
+                    .OfType<IMethodSymbol>()
+                    .Where(m => m.MethodKind == MethodKind.Conversion)
+                    .ToList();
+                
+                // Look for explicit or implicit conversion from source type
+                var hasExplicitConversion = conversions.Any(m => 
+                    m.Name == "op_Explicit" && 
+                    m.Parameters.Length == 1 && 
+                    SymbolEqualityComparer.Default.Equals(m.Parameters[0].Type, sourceType));
+                
+                if (hasExplicitConversion)
+                {
+                    // Generate explicit cast
+                    return $"({parameterType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}){formattedValue}";
+                }
+            }
+        }
+        
+        return formattedValue;
     }
 }
