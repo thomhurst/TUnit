@@ -8,7 +8,7 @@ namespace TUnit.Engine.Building.Collectors;
 /// </summary>
 public sealed class AotTestDataCollector : ITestDataCollector
 {
-    public Task<IEnumerable<TestMetadata>> CollectTestsAsync()
+    public async Task<IEnumerable<TestMetadata>> CollectTestsAsync()
     {
         var allTests = new List<TestMetadata>();
 
@@ -17,7 +17,7 @@ public sealed class AotTestDataCollector : ITestDataCollector
         {
             try
             {
-                var tests = testSource.GetTests();
+                var tests = await testSource.GetTestsAsync();
                 allTests.AddRange(tests);
             }
             catch (Exception ex)
@@ -30,7 +30,7 @@ public sealed class AotTestDataCollector : ITestDataCollector
         if (allTests.Count == 0)
         {
             // No generated tests found
-            return Task.FromResult(Enumerable.Empty<TestMetadata>());
+            return Enumerable.Empty<TestMetadata>();
         }
 
         // Filter out any tests that should be handled by specialized generators
@@ -38,7 +38,7 @@ public sealed class AotTestDataCollector : ITestDataCollector
             !HasAsyncDataSourceGenerator(m) &&
             !IsGenericTypeDefinition(m));
 
-        return Task.FromResult(filteredMetadata);
+        return filteredMetadata;
     }
 
     private static bool HasAsyncDataSourceGenerator(TestMetadata metadata)

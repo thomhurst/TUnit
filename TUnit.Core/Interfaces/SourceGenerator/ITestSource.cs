@@ -2,5 +2,5 @@
 
 public interface ITestSource
 {
-    IEnumerable<TestMetadata> GetTests();
+    ValueTask<List<TestMetadata>> GetTestsAsync();
 }

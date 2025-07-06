@@ -98,7 +98,7 @@ public sealed class MethodDataSourceExpander : ITestExpander
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine($"var dataSourceTask = {methodCall};");
-        writer.AppendLine($"var dataSource = dataSourceTask.GetAwaiter().GetResult();");
+        writer.AppendLine($"var dataSource = await dataSourceTask;");
         
         if (IsEnumerableType(taskResultType, out var elementType))
         {
@@ -126,25 +126,12 @@ public sealed class MethodDataSourceExpander : ITestExpander
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine($"var asyncDataSource = {methodCall};");
-        writer.AppendLine("var asyncEnumerator = asyncDataSource.GetAsyncEnumerator();");
-        writer.AppendLine("try");
+        writer.AppendLine("await foreach (var dataItem in asyncDataSource)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("while (asyncEnumerator.MoveNextAsync().GetAwaiter().GetResult())");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("var dataItem = asyncEnumerator.Current;");
         
         GenerateTestMetadataForDataItem(writer, testInfo, "dataItem", elementType, dataSourceInfo, variantIndex++);
         
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine("finally");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("asyncEnumerator.DisposeAsync().GetAwaiter().GetResult();");
         writer.Unindent();
         writer.AppendLine("}");
         writer.Unindent();
@@ -215,7 +202,7 @@ public sealed class MethodDataSourceExpander : ITestExpander
         int variantIndex, DataSourceInfo dataSourceInfo)
     {
         // Generate test ID with argument placeholders
-        writer.AppendLine($"TestId = $\"{testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{testInfo.MethodSymbol.Name}({{string.Join(\", \", arguments.Select(FormatArgumentForTestId))}})\",");
+        writer.AppendLine($"TestId = $\"{testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{testInfo.MethodSymbol.Name}({{string.Join(\", \", arguments.Select(a => a?.ToString()?.Replace(\"\\\\\", \"\\\\\\\\\").Replace(\"\\r\", \"\\\\r\").Replace(\"\\n\", \"\\\\n\").Replace(\"\\t\", \"\\\\t\").Replace(\"\\\"\", \"\\\\\\\"\") ?? \"null\"))}})\",");
         writer.AppendLine($"TestName = \"{testInfo.MethodSymbol.Name}\",");
         writer.AppendLine($"TestClassType = typeof({testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
         writer.AppendLine($"TestMethodName = \"{testInfo.MethodSymbol.Name}\",");
@@ -574,10 +561,14 @@ public sealed class MethodDataSourceExpander : ITestExpander
         if (arg == null)
             return "null";
         
-        if (arg is string)
-            return arg.ToString() ?? "";
+        var str = arg.ToString() ?? "null";
         
-        return arg.ToString() ?? "null";
+        // Escape special characters for TestId
+        return str.Replace("\\", "\\\\")
+                  .Replace("\r", "\\r")
+                  .Replace("\n", "\\n")
+                  .Replace("\t", "\\t")
+                  .Replace("\"", "\\\"");
     }
 
     private record DataSourceInfo(string MethodName, ITypeSymbol? ClassType, object?[]? Arguments);

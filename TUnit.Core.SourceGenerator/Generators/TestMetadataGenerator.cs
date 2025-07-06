@@ -460,19 +460,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"internal sealed class {sourceClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("private static readonly List<TestMetadata> _allTests = new();");
-        writer.AppendLine();
-        writer.AppendLine("public IEnumerable<TestMetadata> GetTests() => _allTests;");
-        writer.AppendLine();
-
-        // Static constructor to initialize expanded tests
-        writer.AppendLine($"static {sourceClassName}()");
+        writer.AppendLine("public async ValueTask<List<TestMetadata>> GetTestsAsync()");
         writer.AppendLine("{");
         writer.Indent();
+        writer.AppendLine("var _allTests = new List<TestMetadata>();");
+        writer.AppendLine();
 
         // Generate expanded metadata for all [Arguments] variations
         typedMetadataGenerator.GenerateExpandedTestRegistrations(writer, new[] { testMethod });
 
+        writer.AppendLine();
+        writer.AppendLine("return _allTests;");
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -528,34 +526,33 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"internal sealed class {sourceClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("private static readonly TestMetadata _testMetadata;");
-        writer.AppendLine();
-        writer.AppendLine("public IEnumerable<TestMetadata> GetTests() { yield return _testMetadata; }");
-        writer.AppendLine();
-
-        // Static constructor to initialize the test
-        writer.AppendLine($"static {sourceClassName}()");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Generate the metadata for this single test method
-        metadataGenerator.GenerateSingleTestMetadata(writer, testMethod);
-
-        writer.Unindent();
-        writer.AppendLine("}");
-
+        
         // Generate any async data source wrapper methods needed for this test
         var testMethods = new List<TestMethodMetadata> { testMethod };
         if (HasAsyncDataSources(testMethod))
         {
-            writer.AppendLine();
             writer.AppendLine("// Async data source wrapper methods");
             dataSourceGenerator.GenerateAsyncDataSourceWrappers(writer, testMethods);
 
             // Also generate the ConvertToSync helper if needed
             writer.AppendLine();
             GenerateConvertToSyncHelper(writer);
+            writer.AppendLine();
         }
+        
+        writer.AppendLine("public async ValueTask<List<TestMetadata>> GetTestsAsync()");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("var _allTests = new List<TestMetadata>();");
+        writer.AppendLine();
+
+        // Generate the metadata for this single test method directly in the method
+        metadataGenerator.GenerateTestRegistrations(writer, new[] { testMethod });
+
+        writer.AppendLine();
+        writer.AppendLine("return _allTests;");
+        writer.Unindent();
+        writer.AppendLine("}");
 
         writer.Unindent();
         writer.AppendLine("}");

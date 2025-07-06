@@ -266,9 +266,13 @@ public sealed class ArgumentsExpander : ITestExpander
         if (value == null)
             return "null";
         
-        if (value is string str)
-            return str;
+        var str = value.ToString() ?? "null";
         
-        return value.ToString() ?? "null";
+        // Escape special characters for TestId
+        return str.Replace("\\", "\\\\")
+                  .Replace("\r", "\\r")
+                  .Replace("\n", "\\n")
+                  .Replace("\t", "\\t")
+                  .Replace("\"", "\\\"");
     }
 }
