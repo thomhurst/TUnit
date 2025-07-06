@@ -396,82 +396,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Create generator instances
             var dataSourceGenerator = new DataSourceGenerator();
-            var metadataGenerator = new MetadataGenerator(dataSourceGenerator);
+            var typedMetadataGenerator = new TypedMetadataGenerator(dataSourceGenerator);
 
-            // Generate unique names based on the test method with GUID for uniqueness
-            var typeFullName = testMethod.TypeSymbol.ToDisplayString(new SymbolDisplayFormat(
-                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-                miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes))
-                .Replace('.', '_')
-                .Replace('<', '_')
-                .Replace('>', '_')
-                .Replace(',', '_')
-                .Replace(' ', '_')
-                .Replace('[', '_')
-                .Replace(']', '_');
+            // Check if test has [Arguments] attributes
+            var hasArgumentsAttributes = testMethod.MethodSymbol.GetAttributes()
+                .Any(a => a.AttributeClass?.Name == "ArgumentsAttribute");
 
-            var methodName = testMethod.MethodSymbol.Name;
-            var guid = Guid.NewGuid().ToString("N");
-            var sourceClassName = $"{typeFullName}_{methodName}_TestSource_{guid}";
-            var moduleInitializerClassName = $"{typeFullName}_{methodName}_ModuleInitializer_{guid}";
-
-            // Generate the test source implementation
-            writer.AppendLine($"internal sealed class {sourceClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("private static readonly TestMetadata _testMetadata;");
-            writer.AppendLine();
-            writer.AppendLine("public IEnumerable<TestMetadata> GetTests() { yield return _testMetadata; }");
-            writer.AppendLine();
-
-            // Static constructor to initialize the test
-            writer.AppendLine($"static {sourceClassName}()");
-            writer.AppendLine("{");
-            writer.Indent();
-
-            // Generate the metadata for this single test method
-            metadataGenerator.GenerateSingleTestMetadata(writer, testMethod);
-
-            writer.Unindent();
-            writer.AppendLine("}");
-
-            // Generate any async data source wrapper methods needed for this test
-            var testMethods = new List<TestMethodMetadata> { testMethod };
-            if (HasAsyncDataSources(testMethod))
+            if (hasArgumentsAttributes)
             {
-                writer.AppendLine();
-                writer.AppendLine("// Async data source wrapper methods");
-                dataSourceGenerator.GenerateAsyncDataSourceWrappers(writer, testMethods);
-
-                // Also generate the ConvertToSync helper if needed
-                writer.AppendLine();
-                GenerateConvertToSyncHelper(writer);
+                // Use new typed metadata generator for compile-time expansion
+                GenerateExpandedTestMethodSource(context, testMethod, writer, typedMetadataGenerator);
             }
-
-            writer.Unindent();
-            writer.AppendLine("}");
-
-            writer.AppendLine();
-
-            // Generate module initializer class
-            writer.AppendLine($"internal static class {moduleInitializerClassName}");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
-            writer.AppendLine("public static void Initialize()");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register(new {sourceClassName}());");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.Unindent();
-            writer.AppendLine("}");
-
-            // Add source with unique filename including GUID
-            var source = writer.ToString();
-            var fileName = $"{typeFullName}.{methodName}.{guid}.TestSource.g.cs";
-            context.AddSource(fileName, SourceText.From(source, Encoding.UTF8));
+            else
+            {
+                // Use existing approach for tests without [Arguments]
+                GenerateStandardTestMethodSource(context, testMethod, writer, dataSourceGenerator);
+            }
         }
         catch (Exception ex)
         {
@@ -493,6 +433,153 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             context.ReportDiagnostic(diagnostic);
         }
+    }
+
+    private static void GenerateExpandedTestMethodSource(SourceProductionContext context, TestMethodMetadata testMethod, 
+        CodeWriter writer, TypedMetadataGenerator typedMetadataGenerator)
+    {
+        // Generate unique names based on the test method with GUID for uniqueness
+        var typeFullName = testMethod.TypeSymbol.ToDisplayString(new SymbolDisplayFormat(
+            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+            genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+            miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes))
+            .Replace('.', '_')
+            .Replace('<', '_')
+            .Replace('>', '_')
+            .Replace(',', '_')
+            .Replace(' ', '_')
+            .Replace('[', '_')
+            .Replace(']', '_');
+
+        var methodName = testMethod.MethodSymbol.Name;
+        var guid = Guid.NewGuid().ToString("N");
+        var sourceClassName = $"{typeFullName}_{methodName}_TestSource_{guid}";
+        var moduleInitializerClassName = $"{typeFullName}_{methodName}_ModuleInitializer_{guid}";
+
+        // Generate the test source implementation
+        writer.AppendLine($"internal sealed class {sourceClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("private static readonly List<TestMetadata> _allTests = new();");
+        writer.AppendLine();
+        writer.AppendLine("public IEnumerable<TestMetadata> GetTests() => _allTests;");
+        writer.AppendLine();
+
+        // Static constructor to initialize expanded tests
+        writer.AppendLine($"static {sourceClassName}()");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        // Generate expanded metadata for all [Arguments] variations
+        typedMetadataGenerator.GenerateExpandedTestRegistrations(writer, new[] { testMethod });
+
+        writer.Unindent();
+        writer.AppendLine("}");
+
+        writer.Unindent();
+        writer.AppendLine("}");
+
+        writer.AppendLine();
+
+        // Generate module initializer class
+        writer.AppendLine($"internal static class {moduleInitializerClassName}");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
+        writer.AppendLine("public static void Initialize()");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register(new {sourceClassName}());");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
+
+        // Add source with unique filename including GUID
+        var source = writer.ToString();
+        var fileName = $"{typeFullName}.{methodName}.{guid}.TestSource.g.cs";
+        context.AddSource(fileName, SourceText.From(source, Encoding.UTF8));
+    }
+
+    private static void GenerateStandardTestMethodSource(SourceProductionContext context, TestMethodMetadata testMethod, 
+        CodeWriter writer, DataSourceGenerator dataSourceGenerator)
+    {
+        var metadataGenerator = new MetadataGenerator(dataSourceGenerator);
+
+        // Generate unique names based on the test method with GUID for uniqueness
+        var typeFullName = testMethod.TypeSymbol.ToDisplayString(new SymbolDisplayFormat(
+            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+            genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+            miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes))
+            .Replace('.', '_')
+            .Replace('<', '_')
+            .Replace('>', '_')
+            .Replace(',', '_')
+            .Replace(' ', '_')
+            .Replace('[', '_')
+            .Replace(']', '_');
+
+        var methodName = testMethod.MethodSymbol.Name;
+        var guid = Guid.NewGuid().ToString("N");
+        var sourceClassName = $"{typeFullName}_{methodName}_TestSource_{guid}";
+        var moduleInitializerClassName = $"{typeFullName}_{methodName}_ModuleInitializer_{guid}";
+
+        // Generate the test source implementation
+        writer.AppendLine($"internal sealed class {sourceClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("private static readonly TestMetadata _testMetadata;");
+        writer.AppendLine();
+        writer.AppendLine("public IEnumerable<TestMetadata> GetTests() { yield return _testMetadata; }");
+        writer.AppendLine();
+
+        // Static constructor to initialize the test
+        writer.AppendLine($"static {sourceClassName}()");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        // Generate the metadata for this single test method
+        metadataGenerator.GenerateSingleTestMetadata(writer, testMethod);
+
+        writer.Unindent();
+        writer.AppendLine("}");
+
+        // Generate any async data source wrapper methods needed for this test
+        var testMethods = new List<TestMethodMetadata> { testMethod };
+        if (HasAsyncDataSources(testMethod))
+        {
+            writer.AppendLine();
+            writer.AppendLine("// Async data source wrapper methods");
+            dataSourceGenerator.GenerateAsyncDataSourceWrappers(writer, testMethods);
+
+            // Also generate the ConvertToSync helper if needed
+            writer.AppendLine();
+            GenerateConvertToSyncHelper(writer);
+        }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+
+        writer.AppendLine();
+
+        // Generate module initializer class
+        writer.AppendLine($"internal static class {moduleInitializerClassName}");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
+        writer.AppendLine("public static void Initialize()");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register(new {sourceClassName}());");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
+
+        // Add source with unique filename including GUID
+        var source = writer.ToString();
+        var fileName = $"{typeFullName}.{methodName}.{guid}.TestSource.g.cs";
+        context.AddSource(fileName, SourceText.From(source, Encoding.UTF8));
     }
 
     private static bool HasAsyncDataSources(TestMethodMetadata testMethod)

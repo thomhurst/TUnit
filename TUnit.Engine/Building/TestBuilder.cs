@@ -18,6 +18,7 @@ public sealed class TestBuilder : ITestBuilder
         _serviceProvider = serviceProvider;
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection is only used as a fallback for non-AOT scenarios")]
     public async Task<ExecutableTest> BuildTestAsync(ExpandedTestData expandedData)
     {
         var metadata = expandedData.Metadata;
@@ -36,20 +37,70 @@ public sealed class TestBuilder : ITestBuilder
         var beforeTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: true);
         var afterTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: false);
 
-        var executableTest = new DynamicExecutableTest(createInstance, metadata.TestInvoker!)
+        // Check if we have a typed metadata with CreateExecutableTest factory
+        if (metadata is TestMetadata<object> baseTypedMetadata)
+        {
+            // Get the actual CreateExecutableTest delegate via the interface
+            var createExecutableTestProp = metadata.GetType().GetProperty("CreateExecutableTest");
+            if (createExecutableTestProp != null)
+            {
+                var createExecutableTestValue = createExecutableTestProp.GetValue(metadata);
+                if (createExecutableTestValue != null)
+                {
+                    var typedMethodArgs = expandedData.MethodArgumentsFactory() ?? Array.Empty<object?>();
+                    var typedClassArgs = expandedData.ClassArgumentsFactory() ?? Array.Empty<object?>();
+                    
+                    var creationContext = new ExecutableTestCreationContext
+                    {
+                        TestId = testId,
+                        DisplayName = displayName,
+                        Arguments = typedMethodArgs!,
+                        ClassArguments = typedClassArgs!,
+                        PropertyValues = new Dictionary<string, object?>(),
+                        BeforeTestHooks = beforeTestHooks,
+                        AfterTestHooks = afterTestHooks,
+                        Context = context
+                    };
+                    
+                    // Try to invoke it dynamically
+                    try
+                    {
+                        var methodInfo = createExecutableTestValue.GetType().GetMethod("Invoke");
+                        if (methodInfo != null)
+                        {
+                            var executableTest = methodInfo.Invoke(createExecutableTestValue, new object[] { creationContext, metadata }) as ExecutableTest;
+                            if (executableTest != null)
+                            {
+                                return executableTest;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Fall back to DynamicExecutableTest
+                    }
+                }
+            }
+        }
+        
+        // Fallback to DynamicExecutableTest for non-typed metadata
+        var methodArgs = expandedData.MethodArgumentsFactory() ?? Array.Empty<object?>();
+        var classArgs = expandedData.ClassArgumentsFactory() ?? Array.Empty<object?>();
+        
+        var dynamicExecutableTest = new DynamicExecutableTest(createInstance, metadata.TestInvoker!)
         {
             TestId = testId,
             DisplayName = displayName,
             Metadata = metadata,
-            Arguments = expandedData.MethodArgumentsFactory(),
-            ClassArguments = expandedData.ClassArgumentsFactory(),
+            Arguments = methodArgs,
+            ClassArguments = classArgs,
             PropertyValues = new Dictionary<string, object?>(),
             BeforeTestHooks = beforeTestHooks,
             AfterTestHooks = afterTestHooks,
             Context = context
         };
 
-        return executableTest;
+        return dynamicExecutableTest;
     }
 
     private Func<Task<object>> CreateInstanceFactory(TestMetadata metadata, ExpandedTestData expandedData)

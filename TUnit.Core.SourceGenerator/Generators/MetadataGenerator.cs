@@ -20,6 +20,8 @@ public sealed class MetadataGenerator
     /// </summary>
     public void GenerateTestRegistrations(CodeWriter writer, IEnumerable<TestMethodMetadata> testMethods)
     {
+        // Factory generation is now inline in the metadata
+        
         writer.AppendLine("var successCount = 0;");
         writer.AppendLine("var failedTests = new List<string>();");
         writer.AppendLine();
@@ -74,7 +76,8 @@ public sealed class MetadataGenerator
             return;
         }
 
-        writer.AppendLine("_testMetadata = new TestMetadata");
+        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        writer.AppendLine($"_testMetadata = new TestMetadata<{className}>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -110,7 +113,8 @@ public sealed class MetadataGenerator
             writer.AppendLine($"// Generating generic method {testInfo.MethodSymbol.Name} with type arguments: {string.Join(", ", testInfo.GenericTypeArguments.Select(t => t.ToDisplayString()))}");
         }
 
-        writer.AppendLine("_allTests.Add(new TestMetadata");
+        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        writer.AppendLine($"_allTests.Add(new TestMetadata<{className}>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -457,7 +461,7 @@ public sealed class MetadataGenerator
 
     private void GenerateDelegateReferences(CodeWriter writer, TestMethodMetadata testInfo)
     {
-        testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
         // Generate instance factory inline
         GenerateInlineInstanceFactory(writer, testInfo);
@@ -470,6 +474,9 @@ public sealed class MetadataGenerator
 
         // Generate property injections with embedded factories
         GeneratePropertyInjections(writer, testInfo);
+        
+        // Generate typed delegates for ExecutableTest<T>
+        GenerateTypedDelegates(writer, testInfo);
     }
 
     private void GenerateEmptyHookMetadata(CodeWriter writer)
@@ -962,14 +969,79 @@ public sealed class MetadataGenerator
 
     private void GenerateInlinePropertySetters(CodeWriter writer, TestMethodMetadata testInfo)
     {
+        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         // PropertySetters are no longer needed since all properties are set during construction
-        writer.AppendLine("PropertySetters = new Dictionary<string, Action<object, object?>>(),");
+        writer.AppendLine($"PropertySetters = new Dictionary<string, Action<{className}, object?>>(),");
     }
 
     private void GeneratePropertyInjections(CodeWriter writer, TestMethodMetadata testInfo)
     {
         // PropertyInjections are no longer needed since all properties are set during construction
         writer.AppendLine("PropertyInjections = Array.Empty<PropertyInjectionData>(),");
+    }
+
+    private void GenerateTypedDelegates(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var methodName = testInfo.MethodSymbol.Name;
+        var isAsync = testInfo.MethodSymbol.IsAsync;
+        
+        // Generate CreateTypedInstance - this will be wrapped by TestBuilder to handle constructor args
+        writer.AppendLine("CreateTypedInstance = null, // Will be set by TestBuilder");
+        
+        // Generate InvokeTypedTest with CancellationToken support
+        writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Generate parameter casting
+        var parameters = testInfo.MethodSymbol.Parameters;
+        var paramIndex = 0;
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            var param = parameters[i];
+            if (param.Type.ToDisplayString() == "System.Threading.CancellationToken")
+            {
+                writer.AppendLine($"var arg{i} = cancellationToken;");
+            }
+            else
+            {
+                var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                writer.AppendLine($"var arg{i} = ({paramType})args[{paramIndex}]!;");
+                paramIndex++;
+            }
+        }
+        
+        // Generate method call
+        var argList = string.Join(", ", Enumerable.Range(0, parameters.Length).Select(i => $"arg{i}"));
+        if (isAsync)
+        {
+            writer.AppendLine($"await instance.{methodName}({argList});");
+        }
+        else
+        {
+            writer.AppendLine($"instance.{methodName}({argList});");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+        
+        // Generate inline factory delegate
+        GenerateInlineExecutableTestFactory(writer, testInfo);
+    }
+    
+    private string GetFactoryClassName(ITypeSymbol typeSymbol)
+    {
+        var typeName = typeSymbol.Name;
+        var containingNamespace = typeSymbol.ContainingNamespace.ToDisplayString();
+        return $"global::{containingNamespace}.{typeName}_ExecutableTestFactory";
+    }
+    
+    private string GetFactoryTypeName(ITypeSymbol typeSymbol)
+    {
+        var typeName = typeSymbol.Name;
+        var containingNamespace = typeSymbol.ContainingNamespace.ToDisplayString();
+        return $"{containingNamespace}.{typeName}_ExecutableTestFactory";
     }
 
     private bool HasRequiredPropertiesWithDataSource(ITypeSymbol typeSymbol)
@@ -1019,5 +1091,144 @@ public sealed class MetadataGenerator
         }
 
         return string.Join(", ", args);
+    }
+    
+    private void GenerateInlineExecutableTestFactory(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        
+        writer.AppendLine("CreateExecutableTest = (creationContext, metadata) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        writer.AppendLine($"return new global::TUnit.Engine.ExecutableTest<{className}>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        writer.AppendLine("TestId = creationContext.TestId,");
+        writer.AppendLine("DisplayName = creationContext.DisplayName,");
+        writer.AppendLine("Metadata = metadata,");
+        writer.AppendLine("Arguments = creationContext.Arguments,");
+        writer.AppendLine("ClassArguments = creationContext.ClassArguments,");
+        writer.AppendLine("PropertyValues = creationContext.PropertyValues,");
+        writer.AppendLine("BeforeTestHooks = creationContext.BeforeTestHooks,");
+        writer.AppendLine("AfterTestHooks = creationContext.AfterTestHooks,");
+        writer.AppendLine("Context = creationContext.Context,");
+        
+        // Generate CreateTypedInstance
+        writer.AppendLine("CreateTypedInstance = async () =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("if (metadata.InstanceFactory != null)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("return await global::System.Threading.Tasks.Task.FromResult(metadata.InstanceFactory(creationContext.ClassArguments));");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine($"throw new global::System.InvalidOperationException(\"No instance factory for {className}\");");
+        writer.Unindent();
+        writer.AppendLine("},");
+        
+        // Generate InvokeTypedTest
+        writer.AppendLine("InvokeTypedTest = metadata.InvokeTypedTest ?? throw new global::System.InvalidOperationException(\"No test invoker\")");
+        
+        writer.Unindent();
+        writer.AppendLine("};");
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+
+    private void GenerateExecutableTestFactory(CodeWriter writer, ISymbol testClass)
+    {
+        if (testClass is not ITypeSymbol typeSymbol)
+            return;
+            
+        var className = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var simpleClassName = typeSymbol.Name;
+        var factoryClassName = $"{simpleClassName}_ExecutableTestFactory";
+        
+        writer.AppendLine($"internal sealed class {factoryClassName} : global::TUnit.Engine.Interfaces.IExecutableTestFactory<{className}>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Implement non-generic interface method
+        writer.AppendLine("public global::TUnit.Engine.ExecutableTest CreateExecutableTest(");
+        writer.Indent();
+        writer.AppendLine("string testId,");
+        writer.AppendLine("string displayName,");
+        writer.AppendLine("object[] arguments,");
+        writer.AppendLine("object[] classArguments,");
+        writer.AppendLine("global::System.Collections.Generic.Dictionary<string, object?> propertyValues,");
+        writer.AppendLine("global::System.Func<global::TUnit.Core.TestContext, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task>[] beforeTestHooks,");
+        writer.AppendLine("global::System.Func<global::TUnit.Core.TestContext, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task>[] afterTestHooks,");
+        writer.AppendLine("global::TUnit.Core.TestContext context,");
+        writer.AppendLine("global::TUnit.Core.TestMetadata metadata)");
+        writer.Unindent();
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"if (metadata is not global::TUnit.Core.TestMetadata<{className}> typedMetadata)");
+        writer.AppendLine($"    throw new global::System.InvalidOperationException($\"Expected TestMetadata<{simpleClassName}> but got {{metadata?.GetType().Name}}\");");
+        writer.AppendLine();
+        writer.AppendLine("return CreateTypedExecutableTest(testId, displayName, arguments, classArguments, propertyValues, beforeTestHooks, afterTestHooks, context, typedMetadata);");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        
+        // Implement generic interface method
+        writer.AppendLine($"public global::TUnit.Engine.ExecutableTest<{className}> CreateTypedExecutableTest(");
+        writer.Indent();
+        writer.AppendLine("string testId,");
+        writer.AppendLine("string displayName,");
+        writer.AppendLine("object[] arguments,");
+        writer.AppendLine("object[] classArguments,");
+        writer.AppendLine("global::System.Collections.Generic.Dictionary<string, object?> propertyValues,");
+        writer.AppendLine("global::System.Func<global::TUnit.Core.TestContext, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task>[] beforeTestHooks,");
+        writer.AppendLine("global::System.Func<global::TUnit.Core.TestContext, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task>[] afterTestHooks,");
+        writer.AppendLine("global::TUnit.Core.TestContext context,");
+        writer.AppendLine($"global::TUnit.Core.TestMetadata<{className}> metadata)");
+        writer.Unindent();
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        writer.AppendLine($"return new global::TUnit.Engine.ExecutableTest<{className}>");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("TestId = testId,");
+        writer.AppendLine("DisplayName = displayName,");
+        writer.AppendLine("Metadata = metadata,");
+        writer.AppendLine("Arguments = arguments,");
+        writer.AppendLine("ClassArguments = classArguments,");
+        writer.AppendLine("PropertyValues = propertyValues,");
+        writer.AppendLine("BeforeTestHooks = beforeTestHooks,");
+        writer.AppendLine("AfterTestHooks = afterTestHooks,");
+        writer.AppendLine("Context = context,");
+        
+        // Generate CreateTypedInstance
+        writer.AppendLine("CreateTypedInstance = async () =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("if (metadata.InstanceFactory != null)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("return await global::System.Threading.Tasks.Task.FromResult(metadata.InstanceFactory(classArguments));");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine($"throw new global::System.InvalidOperationException(\"No instance factory for {className}\");");
+        writer.Unindent();
+        writer.AppendLine("},");
+        
+        // Generate InvokeTypedTest
+        writer.AppendLine("InvokeTypedTest = metadata.InvokeTypedTest ?? throw new global::System.InvalidOperationException(\"No test invoker\")");
+        
+        writer.Unindent();
+        writer.AppendLine("};");
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
     }
 }
