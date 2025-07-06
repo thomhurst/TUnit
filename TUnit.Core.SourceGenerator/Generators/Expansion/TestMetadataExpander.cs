@@ -17,7 +17,8 @@ public sealed class TestMetadataExpander
         {
             new ArgumentsExpander(),
             new MethodDataSourceExpander(),
-            new AsyncDataSourceExpander()
+            new AsyncDataSourceExpander(),
+            new AsyncUntypedDataSourceExpander()
         };
     }
 

@@ -87,7 +87,7 @@ public sealed class ArgumentsExpander : ITestExpander
 
     private void GenerateBasicMetadataWithVariant(CodeWriter writer, TestMethodMetadata testInfo, int variantIndex, object?[] argumentValues)
     {
-        var testIdArgs = string.Join(", ", argumentValues.Select(v => v == null ? "null" : TypedConstantParser.FormatPrimitive(v)));
+        var testIdArgs = string.Join(", ", argumentValues.Select(v => TypedConstantParser.FormatPrimitive(v)));
         writer.AppendLine($"TestId = \"{testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{testInfo.MethodSymbol.Name}({testIdArgs})\",");
         writer.AppendLine($"TestName = \"{testInfo.MethodSymbol.Name}\",");
         writer.AppendLine($"TestClassType = typeof({testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
@@ -104,7 +104,7 @@ public sealed class ArgumentsExpander : ITestExpander
             writer.AppendLine("FilePath = null,");
             writer.AppendLine("LineNumber = 0,");
         }
-        writer.AppendLine($"// Embedded argument values: {string.Join(", ", argumentValues.Select(v => v == null ? "null" : TypedConstantParser.FormatPrimitive(v)))}");
+        writer.AppendLine($"// Embedded argument values: {string.Join(", ", argumentValues.Select(v => TypedConstantParser.FormatPrimitive(v)))}");
     }
 
     private void GenerateTestAttributes(CodeWriter writer, TestMethodMetadata testInfo)
@@ -225,7 +225,7 @@ public sealed class ArgumentsExpander : ITestExpander
         writer.AppendLine("DisplayName = creationContext.DisplayName,");
         writer.AppendLine("Metadata = metadata,");
         
-        var argsArray = string.Join(", ", argumentValues.Select(v => v == null ? "null" : TypedConstantParser.FormatPrimitive(v)));
+        var argsArray = string.Join(", ", argumentValues.Select(v => TypedConstantParser.FormatPrimitive(v)));
         writer.AppendLine($"Arguments = new object?[] {{ {argsArray} }},");
         
         writer.AppendLine("ClassArguments = creationContext.ClassArguments,");
@@ -258,10 +258,6 @@ public sealed class ArgumentsExpander : ITestExpander
 
     private string FormatArgumentValueWithCast(object? value)
     {
-        if (value == null)
-        {
-            return "null";
-        }
         return TypedConstantParser.FormatPrimitive(value);
     }
 }
