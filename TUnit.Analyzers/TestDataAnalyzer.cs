@@ -191,10 +191,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         var arguments = argumentsAttribute.ConstructorArguments.First().IsNull
-            ? new ImmutableArray<TypedConstant>
-            {
-                default(TypedConstant)
-            }
+            ? ImmutableArray.Create(default(TypedConstant))
             : argumentsAttribute.ConstructorArguments.First().Values;
 
         var cancellationTokenType = context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!);
@@ -503,10 +500,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (testParameterTypes.Length == 1
             && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
-            return new ImmutableArray<ITypeSymbol>
-            {
-                type
-            };
+            return ImmutableArray.Create(type);
         }
 
         if (context.Symbol is IPropertySymbol)
@@ -520,18 +514,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 type = propertyFuncType.TypeArguments[0];
             }
 
-            return new ImmutableArray<ITypeSymbol>
-            {
-                type
-            };
+            return ImmutableArray.Create(type);
         }
 
         if (methodContainingTestData.ReturnType is not INamedTypeSymbol and not IArrayTypeSymbol)
         {
-            return new ImmutableArray<ITypeSymbol>
-            {
-                methodContainingTestData.ReturnType
-            };
+            return ImmutableArray.Create(methodContainingTestData.ReturnType);
         }
 
         if (methodContainingTestData.ReturnType.IsIEnumerable(context.Compilation, out var enumerableInnerType))
@@ -542,10 +530,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (testParameterTypes.Length == 1
             && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
-            return new ImmutableArray<ITypeSymbol>
-            {
-                type
-            };
+            return ImmutableArray.Create(type);
         }
 
         if (type is INamedTypeSymbol { IsGenericType: true } genericType
@@ -560,10 +545,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (testParameterTypes.Length == 1
             && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
-            return new ImmutableArray<ITypeSymbol>
-            {
-                type
-            };
+            return ImmutableArray.Create(type);
         }
 
         if (type is INamedTypeSymbol { IsTupleType: true } tupleType)
@@ -581,10 +563,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return ImmutableArray<ITypeSymbol>.Empty;
         }
 
-        return new ImmutableArray<ITypeSymbol>
-        {
-            type
-        };
+        return ImmutableArray.Create(type);
     }
 
     private void CheckDataGenerator(SymbolAnalysisContext context,
