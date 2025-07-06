@@ -45,7 +45,6 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        // Check for generic test methods without explicit instantiation
         if (methodSymbol.IsGenericMethod)
         {
             var hasGenerateGenericTestAttribute = HasGenerateGenericTestAttribute(methodSymbol) ||
@@ -53,7 +52,6 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (!hasGenerateGenericTestAttribute)
             {
-                // Check if types can be inferred from data sources
                 var canInferTypes = CanInferGenericTypes(methodSymbol, context.Compilation);
                 
                 if (!canInferTypes)
@@ -68,14 +66,12 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             }
         }
 
-        // Check for generic containing type without explicit instantiation
         if (methodSymbol.ContainingType.IsGenericType && methodSymbol.ContainingType.TypeParameters.Length > 0)
         {
             var hasGenerateGenericTestAttribute = HasGenerateGenericTestAttribute(methodSymbol.ContainingType);
 
             if (!hasGenerateGenericTestAttribute)
             {
-                // Check if types can be inferred from data sources
                 var canInferTypes = CanInferGenericTypes(methodSymbol, context.Compilation);
                 
                 if (!canInferTypes)
@@ -101,14 +97,11 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        // Skip abstract classes - they can't be instantiated directly and type inference
-        // happens when concrete classes inherit from them with actual data sources
         if (classSymbol.IsAbstract)
         {
             return;
         }
 
-        // Check if this class contains test methods
         var testMethods = classSymbol.GetMembers()
             .OfType<IMethodSymbol>()
             .Where(IsTestMethod)
@@ -119,17 +112,14 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        // Check for generic test class without explicit instantiation
         if (classSymbol.TypeParameters.Length > 0)
         {
             var hasGenerateGenericTestAttribute = HasGenerateGenericTestAttribute(classSymbol);
 
             if (!hasGenerateGenericTestAttribute)
             {
-                // Check if types can be inferred from any test method's data sources
                 var canInferTypes = testMethods.Any(m => CanInferGenericTypes(m, context.Compilation));
                 
-                // Check if this generic class is used as a base class for InheritsTests pattern
                 var isUsedAsInheritsTestsBase = IsUsedAsInheritsTestsBase(classSymbol, context.Compilation);
                 
                 if (!canInferTypes && !isUsedAsInheritsTestsBase)
@@ -160,7 +150,6 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
 
         if (attributeTypeName == "MethodDataSourceAttribute")
         {
-            // Analyze MethodDataSource to see if it's AOT-compatible
             if (IsMethodDataSourceDynamic(context, attribute))
             {
                 var diagnostic = Diagnostic.Create(
@@ -173,29 +162,22 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         }
         else if (attributeTypeName == "ClassDataSourceAttribute")
         {
-            // Check if it's the generic version ClassDataSourceAttribute<T> which is AOT-compatible
             if (attributeSymbol.ContainingType.IsGenericType)
             {
-                // Generic version inherits from AsyncDataSourceGeneratorAttribute<T> and is AOT-compatible
                 return;
             }
             
-            // For non-generic version, check if it's using one of the specific constructors (1-5 parameters)
-            // which have proper DynamicallyAccessedMembers attributes and are AOT-compatible
             if (attribute.ArgumentList?.Arguments.Count >= 1 && attribute.ArgumentList?.Arguments.Count <= 5)
             {
-                // Check if all arguments are typeof() expressions (compile-time constants)
                 var allArgumentsAreTypeOf = attribute.ArgumentList.Arguments.All(arg =>
                     arg.Expression is TypeOfExpressionSyntax);
                 
                 if (allArgumentsAreTypeOf)
                 {
-                    // Using specific constructors with typeof() - these are AOT-compatible
                     return;
                 }
             }
             
-            // Using params constructor or dynamic types - not AOT-compatible
             var diagnostic = Diagnostic.Create(
                 Rules.DynamicDataSourceNotAotCompatible,
                 attribute.GetLocation(),

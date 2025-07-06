@@ -76,21 +76,16 @@ public class SingleTestExecutor : ISingleTestExecutor
 
     private async Task ExecuteTestWithHooksAsync(ExecutableTest test, CancellationToken cancellationToken)
     {
-        // Create test instance (properties are injected during construction)
         var instance = await test.CreateInstanceAsync();
 
-        // Set the instance in the test context for hooks
         test.Context!.TestDetails.ClassInstance = instance;
 
-        // Restore ExecutionContext for AsyncLocal support
         test.Context!.RestoreExecutionContext();
 
         try
         {
-            // Execute before test hooks
             await ExecuteBeforeTestHooksAsync(test.BeforeTestHooks, test.Context!, cancellationToken);
 
-            // Execute the test
             await InvokeTestWithTimeout(test, instance, cancellationToken);
 
             test.State = TestState.Passed;
@@ -103,7 +98,6 @@ public class SingleTestExecutor : ISingleTestExecutor
         }
         finally
         {
-            // Execute after test hooks (always run)
             await ExecuteAfterTestHooksAsync(test.AfterTestHooks, test.Context!, cancellationToken);
         }
     }
@@ -136,7 +130,6 @@ public class SingleTestExecutor : ISingleTestExecutor
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"Error in after test hook: {ex.Message}");
-                // Don't throw for after hooks - we want to run all of them
             }
         }
     }
@@ -191,7 +184,6 @@ public class SingleTestExecutor : ISingleTestExecutor
 
     private async Task InvokeTestWithTimeout(ExecutableTest test, object instance, CancellationToken cancellationToken)
     {
-        // Check if there's a custom test executor
         var discoveredTest = test.Context.InternalDiscoveredTest;
 
         Func<ValueTask> testAction;
@@ -208,23 +200,19 @@ public class SingleTestExecutor : ISingleTestExecutor
 
                 if (completedTask == timeoutTask)
                 {
-                    // Cancel the test task
                     cts.Cancel();
 
-                    // Wait for the test task to complete (with cancellation) or throw
                     try
                     {
                         await testTask;
                     }
                     catch
                     {
-                        // Ignore exceptions from cancelled task
                     }
 
                     throw new OperationCanceledException($"Test '{test.DisplayName}' exceeded timeout of {test.Metadata.TimeoutMs.Value}ms");
                 }
 
-                // Test completed within timeout
                 await testTask;
             };
         }
@@ -233,7 +221,6 @@ public class SingleTestExecutor : ISingleTestExecutor
             testAction = async () => await test.InvokeTestAsync(instance, cancellationToken);
         }
 
-        // Use custom executor if available, otherwise execute directly
         if (discoveredTest?.TestExecutor != null)
         {
             await discoveredTest.TestExecutor.ExecuteTest(test.Context, testAction);

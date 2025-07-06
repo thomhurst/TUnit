@@ -113,7 +113,6 @@ public static class ReflectionExtensions
 
         IList<CustomAttributeData> customAttributeDataList;
 
-        // Get custom attribute data based on the provider type
         if (provider is MemberInfo memberInfo)
         {
             customAttributeDataList = CustomAttributeData.GetCustomAttributes(memberInfo);
@@ -132,11 +131,9 @@ public static class ReflectionExtensions
         }
         else
         {
-            // Fallback for any other ICustomAttributeProvider
             return [];
         }
 
-        // Filter by attribute type if specified
         var filteredList = customAttributeDataList
             .Where(x => attributeType == typeof(Attribute) || (inherit
                 ? x.AttributeType.IsAssignableTo(attributeType)
@@ -156,11 +153,9 @@ public static class ReflectionExtensions
             }
             catch
             {
-                // Skip attributes that can't be instantiated
             }
         }
 
-        // If inherit is true and provider is a Type, get attributes from base types
         if (inherit && provider is Type type)
         {
             var baseType = type.BaseType;
@@ -180,28 +175,23 @@ public static class ReflectionExtensions
     {
         var attributeType = attributeData.AttributeType;
 
-        // Skip if it's a generic type definition (not a constructed generic type)
         if (attributeType.IsGenericTypeDefinition)
         {
             return null;
         }
 
-        // Get constructor arguments
         var constructorArgs = attributeData.ConstructorArguments
             .Select(arg => arg.Value)
             .ToArray();
 
-        // Try to create instance
         Attribute? attribute;
 
         if (constructorArgs.Length == 0)
         {
-            // Try parameterless constructor
             attribute = Activator.CreateInstance(attributeType) as Attribute;
         }
         else
         {
-            // Try constructor with parameters
             attribute = Activator.CreateInstance(attributeType, constructorArgs) as Attribute;
         }
 

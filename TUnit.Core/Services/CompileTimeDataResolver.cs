@@ -64,9 +64,7 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
     {
         var propertyData = new Dictionary<string, object?>();
 
-        // Resolve property sources at compile-time
-        // This is a simplified implementation - real implementation would
-        // evaluate property source attributes
+
 
         await Task.CompletedTask;
         return propertyData;
@@ -107,7 +105,6 @@ public class CompileTimeDataResolver : ICompileTimeDataResolver
 
     private static IEnumerable<object?[]> ResolveArgumentsAttribute(ArgumentsAttribute argumentsAttribute)
     {
-        // ArgumentsAttribute contains simple values that can be resolved at compile-time
         yield return argumentsAttribute.Values;
     }
 

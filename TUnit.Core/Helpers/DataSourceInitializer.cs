@@ -115,8 +115,6 @@ internal static class DataSourceInitializer
                 }
             }
 
-            // Since IRequiresImmediateInitialization is just a marker interface,
-            // the initialization is complete once all nested dependencies are initialized
             context.SetInitializationState(instance, InitializationState.Initialized);
         }
         catch (Exception ex) when (ex is not DataSourceInitializationException)
@@ -137,13 +135,11 @@ internal static class DataSourceInitializer
     {
         var dataAttribute = (IAsyncDataSourceGeneratorAttribute) attributeMetadata.Instance;
 
-        // Initialize the attribute itself if it requires it
         if (dataAttribute is IRequiresImmediateInitialization && attributeMetadata.ClassMetadata is not null)
         {
             await InitializeDependenciesAsync(dataAttribute, attributeMetadata.ClassMetadata, context);
         }
 
-        // Create metadata for the generator
         var generatorMetadata = new DataGeneratorMetadata
         {
             Type = DataGeneratorType.Property,
@@ -151,11 +147,10 @@ internal static class DataSourceInitializer
             TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
             MembersToGenerate = [propertyMetadata],
             TestClassInstance = instance,
-            TestInformation = null!, // This might need to be provided from context
+            TestInformation = null!,
             TestSessionId = Guid.NewGuid().ToString()
         };
 
-        // Get the first generated value
         await using var asyncEnumerator = dataAttribute.GenerateAsync(generatorMetadata).GetAsyncEnumerator();
 
         if (await asyncEnumerator.MoveNextAsync())

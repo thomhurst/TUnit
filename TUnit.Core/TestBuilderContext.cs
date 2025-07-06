@@ -46,7 +46,6 @@ public record TestBuilderContext
     }
 }
 
-// A reference for us to access the context which might change within loops by calling the setter
 /// <summary>
 /// Provides access to the current <see cref="TestBuilderContext"/>.
 /// </summary>

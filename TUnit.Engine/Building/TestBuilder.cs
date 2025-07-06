@@ -25,23 +25,17 @@ public sealed class TestBuilder : ITestBuilder
         // Generate unique test ID
         var testId = GenerateTestId(metadata, expandedData.DataSourceIndices);
 
-        // Generate display name
         var displayName = GenerateDisplayName(metadata, expandedData.ArgumentsDisplayText);
 
-        // Create instance factory
         var createInstance = CreateInstanceFactory(metadata, expandedData);
 
-        // Create test context first since it's required
         var context = await CreateTestContextAsync(testId, displayName, metadata, createInstance);
 
-        // Create discovery context and invoke discovery event receivers
         await InvokeDiscoveryEventReceiversAsync(metadata, context);
 
-        // Create hooks using the HookCollectionService
         var beforeTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: true);
         var afterTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: false);
 
-        // Build the executable test with all required properties
         var executableTest = new DynamicExecutableTest(createInstance, metadata.TestInvoker!)
         {
             TestId = testId,
@@ -49,7 +43,7 @@ public sealed class TestBuilder : ITestBuilder
             Metadata = metadata,
             Arguments = expandedData.MethodArgumentsFactory(),
             ClassArguments = expandedData.ClassArgumentsFactory(),
-            PropertyValues = new Dictionary<string, object?>(), // Will be populated by factory
+            PropertyValues = new Dictionary<string, object?>(),
             BeforeTestHooks = beforeTestHooks,
             AfterTestHooks = afterTestHooks,
             Context = context
@@ -71,27 +65,20 @@ public sealed class TestBuilder : ITestBuilder
         {
             var classArgs = expandedData.ClassArgumentsFactory();
             
-            // For classes with properties that have data sources, the source generator creates a special factory
-            // that expects property values as a Dictionary in the last argument
             object instance;
             if (expandedData.PropertyFactories.Any())
             {
-                // Create property values dictionary
                 var propertyValues = new Dictionary<string, object?>();
                 foreach (var kvp in expandedData.PropertyFactories)
                 {
                     propertyValues[kvp.Key] = kvp.Value();
                 }
                 
-                // Pass property values as the last argument
                 var argsWithProperties = classArgs.Concat(new object[] { propertyValues }).ToArray();
                 instance = metadata.InstanceFactory(argsWithProperties);
-                
-                // No need for post-construction injection - all properties are set during construction
             }
             else
             {
-                // Standard instance creation
                 instance = metadata.InstanceFactory(classArgs);
             }
             
@@ -102,7 +89,6 @@ public sealed class TestBuilder : ITestBuilder
 
     private async Task InjectPropertiesAsync(object instance, TestMetadata metadata, Dictionary<string, Func<object?>> propertyFactories)
     {
-        // Use embedded property setters from metadata with values from propertyFactories
         foreach (var kvp in propertyFactories)
         {
             var propertyName = kvp.Key;
@@ -115,7 +101,6 @@ public sealed class TestBuilder : ITestBuilder
             }
             else
             {
-                // Try to find a matching PropertyInjection
                 var injection = metadata.PropertyInjections.FirstOrDefault(pi => pi.PropertyName == propertyName);
                 if (injection != null)
                 {
@@ -171,26 +156,24 @@ public sealed class TestBuilder : ITestBuilder
     private async Task<TestContext> CreateTestContextAsync(string testId, string displayName, TestMetadata metadata, 
         Func<Task<object>> createInstance)
     {
-        // Create test details
         var testDetails = new TestDetails
         {
             TestId = testId,
             TestName = metadata.TestName,
             ClassType = metadata.TestClassType,
             MethodName = metadata.TestMethodName,
-            ClassInstance = null, // Will be set during execution
-            TestMethodArguments = [], // Will be populated by factory
-            TestClassArguments = [], // Will be populated by factory
+            ClassInstance = null,
+            TestMethodArguments = [],
+            TestClassArguments = [],
             DisplayName = displayName,
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
             TestMethodParameterTypes = metadata.ParameterTypes,
-            ReturnType = typeof(Task), // All test methods return Task in AOT mode
+            ReturnType = typeof(Task),
             ClassMetadata = CreateClassMetadata(metadata),
             MethodMetadata = CreateMethodMetadata(metadata)
         };
 
-        // Add categories
         foreach (var category in metadata.Categories)
         {
             testDetails.Categories.Add(category);
@@ -236,17 +219,14 @@ public sealed class TestBuilder : ITestBuilder
     [UnconditionalSuppressMessage("AOT", "IL2067:'Type' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ParameterMetadata.ParameterMetadata(Type)'", Justification = "Parameter types are known at compile time")]
     private static MethodMetadata CreateMethodMetadata(TestMetadata metadata)
     {
-        // In AOT mode, use metadata directly without reflection
-        // Create parameters from ParameterTypes array
         var parameters = metadata.ParameterTypes.Select((type, index) => new ParameterMetadata(type)
         {
             Name = $"param{index}",
             TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
             Attributes = [],
-            ReflectionInfo = null! // No reflection info in AOT mode
+            ReflectionInfo = null!
         }).ToArray();
 
-        // Minimal metadata when MethodInfo is not available
         return new MethodMetadata
         {
             Name = metadata.TestMethodName,
@@ -263,19 +243,15 @@ public sealed class TestBuilder : ITestBuilder
 
     private async Task InvokeDiscoveryEventReceiversAsync(TestMetadata metadata, TestContext context)
     {
-        // Get attribute instances from the factory
         var attributes = metadata.AttributeFactory?.Invoke() ?? Array.Empty<Attribute>();
         
-        // Store the attributes in TestDetails for later use
         context.TestDetails.Attributes = attributes;
 
-        // Create a DiscoveredTestContext
         var discoveredContext = new DiscoveredTestContext(
             context.TestDetails.TestName,
             context.TestDetails.DisplayName ?? context.TestDetails.TestName,
             context.TestDetails);
 
-        // Invoke all ITestDiscoveryEventReceiver implementations
         foreach (var attribute in attributes)
         {
             if (attribute is ITestDiscoveryEventReceiver receiver)
@@ -286,17 +262,13 @@ public sealed class TestBuilder : ITestBuilder
                 }
                 catch (Exception ex)
                 {
-                    // Log or handle discovery event errors
-                    // For now, we'll silently continue to avoid breaking test discovery
-                    _ = ex; // Suppress warning
+                    _ = ex;
                 }
             }
         }
 
-        // Transfer any modifications back to the test context
         discoveredContext.TransferTo(context);
         
-        // Update the display name if it was changed
         if (context.TestDetails.DisplayName != discoveredContext.DisplayName)
         {
             context.TestDetails.DisplayName = discoveredContext.DisplayName;

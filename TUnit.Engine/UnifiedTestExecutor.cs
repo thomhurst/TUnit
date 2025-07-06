@@ -85,7 +85,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             testList = await ApplyFilterAsync(testList, filter);
         }
 
-        // Create hook orchestrator if we have the service
         HookOrchestrator? hookOrchestrator = null;
         if (_serviceProvider != null)
         {
@@ -98,7 +97,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
 
         try
         {
-            // Initialize contexts with all tests after filtering
             if (hookOrchestrator != null)
             {
                 hookOrchestrator.SetTotalTestCount(testList.Count);
@@ -106,10 +104,8 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
                 await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
             }
 
-            // Check if fail-fast is enabled
             var isFailFastEnabled = IsFailFastEnabled();
 
-            // Create executor adapter with fail-fast support and hook orchestration
             Scheduling.ITestExecutor executorAdapter = hookOrchestrator != null
                 ? new HookOrchestratingTestExecutorAdapter(
                     _singleTestExecutor,
@@ -137,7 +133,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         }
         finally
         {
-            // Execute AfterTestSession hooks
             if (hookOrchestrator != null)
             {
                 await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cancellationToken);
@@ -156,7 +151,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     {
         var config = SchedulerConfiguration.Default;
 
-        // Check for command line override of maximum parallel tests
         if (_commandLineOptions.TryGetOptionArgumentList(
             MaximumParallelTestsCommandProvider.MaximumParallelTests,
             out var args) && args.Length > 0)
@@ -174,10 +168,8 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
     {
         // Debug: Applying filter to {tests.Count} tests of type {filter.GetType().Name}
 
-        // Use TestFilterService to apply the filter
         var filterService = new TestFilterService(_loggerFactory);
 
-        // Filter tests directly - TestFilterService handles the request internally
         var filteredTests = new List<ExecutableTest>();
         foreach (var test in tests)
         {
@@ -189,7 +181,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
 
         // Debug: Filter matched {filteredTests.Count} tests
 
-        // Include all dependencies of filtered tests
         var testsToInclude = new HashSet<ExecutableTest>(filteredTests);
         var processedTests = new HashSet<string>();
         var queue = new Queue<ExecutableTest>(filteredTests);
@@ -202,7 +193,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
                 continue;
             }
 
-            // Add all dependencies of the current test
             foreach (var dependency in currentTest.Dependencies)
             {
                 if (testsToInclude.Add(dependency))
@@ -217,7 +207,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             null, 
             (state, _) => state);
 
-        // Invoke test registered event receivers for filtered tests
         var resultList = testsToInclude.ToList();
         foreach (var test in resultList)
         {
@@ -229,25 +218,20 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
 
     private async Task InvokeTestRegisteredEventReceiversAsync(ExecutableTest test)
     {
-        // Create a DiscoveredTest instance
         var discoveredTest = new DiscoveredTest<object>
         {
             TestContext = test.Context
         };
 
-        // Create a TestRegisteredContext
         var registeredContext = new TestRegisteredContext(test.Context)
         {
             DiscoveredTest = discoveredTest
         };
         
-        // Link the discovered test to the test context's internal property
         test.Context.InternalDiscoveredTest = discoveredTest;
 
-        // Get attributes from the test context
         var attributes = test.Context.TestDetails.Attributes;
         
-        // Invoke all ITestRegisteredEventReceiver implementations
         foreach (var attribute in attributes)
         {
             if (attribute is ITestRegisteredEventReceiver receiver)
@@ -259,7 +243,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
                 catch (Exception ex)
                 {
                     await _logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
-                    // Continue with other receivers even if one fails
                 }
             }
         }
@@ -275,7 +258,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
-        // AOT-only mode: Always use source generation
         await ExecuteAsyncAotSafe(request, messageBus, cancellationToken);
     }
 
@@ -287,14 +269,12 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
-        // Create unified pipeline for AOT mode
         var pipeline = UnifiedTestBuilderPipelineFactory.CreateAotPipeline(
             new TestInvoker());
 
         var discoveryService = new TestDiscoveryServiceV2(pipeline);
         var tests = await discoveryService.DiscoverTests();
 
-        // Execute tests
         await ExecuteTests(tests, request.Filter, messageBus, cancellationToken);
     }
 
