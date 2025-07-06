@@ -80,7 +80,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         // Apply filter if provided
         if (filter != null)
         {
-            var beforeCount = testList.Count;
             testList = await ApplyFilterAsync(testList, filter);
         }
 

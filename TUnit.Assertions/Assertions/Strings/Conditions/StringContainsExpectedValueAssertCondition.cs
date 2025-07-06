@@ -39,7 +39,6 @@ public class StringContainsExpectedValueAssertCondition(string expected, StringC
         var actualStartDisplayIndex = Math.Max(0, differIndexOnActual - 25);
 
         var expectedValue = ExpectedValue?.Substring(expectedStartDisplayIndex, Math.Min(ExpectedValue.Length - expectedStartDisplayIndex, 50));
-        var actualValue = ActualValue?.Substring(actualStartDisplayIndex, Math.Min(ActualValue.Length - actualStartDisplayIndex, 50));
 
         return $"Found a closest match which {new StringDifference(closestSubstring, expectedValue)
         {

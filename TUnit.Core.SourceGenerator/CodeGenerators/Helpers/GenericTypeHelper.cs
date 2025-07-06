@@ -53,13 +53,13 @@ internal static class GenericTypeHelper
             return false;
         }
 
-        if (matchingType is not INamedTypeSymbol namedMatchingType)
+        if (matchingType is not { })
         {
             foundMatch = null;
             return false;
         }
 
-        foundMatch = namedMatchingType;
+        foundMatch = matchingType;
         return true;
     }
 }

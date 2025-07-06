@@ -81,13 +81,6 @@ public record AsyncDataSourceGeneratorContainer(
 
     public override void WriteVariableAssignments(ICodeWriter sourceCodeWriter, ref int variableIndex)
     {
-        var type = ArgumentsType switch
-        {
-            ArgumentsType.Property => "Property",
-            ArgumentsType.ClassConstructor => "ClassParameters",
-            _ => "TestParameters"
-        };
-
         if (Property is not null)
         {
             var attr = GenerateDataAttributeVariable("var",

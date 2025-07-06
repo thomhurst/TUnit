@@ -164,7 +164,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
 
         var typeSymbol = methodSymbol.ContainingType;
-        if (typeSymbol == null || typeSymbol is not INamedTypeSymbol namedTypeSymbol)
+        if (typeSymbol == null || typeSymbol is not { })
         {
             return null;
         }
@@ -199,7 +199,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         return new HookMethodMetadata
         {
             MethodSymbol = methodSymbol,
-            TypeSymbol = namedTypeSymbol,
+            TypeSymbol = typeSymbol,
             FilePath = filePath,
             LineNumber = lineNumber,
             HookAttribute = hookAttribute,
@@ -955,7 +955,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         var className = GetTypeDisplayString(hook.TypeSymbol);
         var methodName = hook.MethodSymbol.Name;
         var isStatic = hook.MethodSymbol.IsStatic;
-        var isAsync = IsAsyncMethod(hook.MethodSymbol);
+        IsAsyncMethod(hook.MethodSymbol);
 
         // Analyze parameters
         var paramCount = hook.MethodSymbol.Parameters.Length;

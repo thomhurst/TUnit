@@ -34,7 +34,6 @@ public class AotAsyncDataSourceGenerator
 
         var factoryClassName = $"{asyncDataSourceType.Name}_AotFactory";
         var asyncDataSourceTypeName = asyncDataSourceType.FullName?.Replace('+', '.') ?? asyncDataSourceType.Name;
-        var declaringTypeName = declaringType.FullName?.Replace('+', '.') ?? declaringType.Name;
 
         var code = new StringBuilder();
         code.AppendLine($"// Generated AOT-safe async data source factory for {asyncDataSourceTypeName}");

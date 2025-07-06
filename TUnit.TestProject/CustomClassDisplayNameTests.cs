@@ -30,9 +30,9 @@ public class MyFormatter : ArgumentDisplayFormatter
     {
         return value switch
         {
-            Base3 base3 => "Third Base!",
-            Base2 base2 => "Second Base!",
-            Base1 base1 => "First Base!",
+            Base3 => "Third Base!",
+            Base2 => "Second Base!",
+            Base1 => "First Base!",
             _ => value?.ToString() ?? string.Empty
         };
     }

@@ -219,7 +219,7 @@ public sealed class TestBuilder : ITestBuilder
     [UnconditionalSuppressMessage("AOT", "IL2067:'Type' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ParameterMetadata.ParameterMetadata(Type)'", Justification = "Parameter types are known at compile time")]
     private static MethodMetadata CreateMethodMetadata(TestMetadata metadata)
     {
-        var parameters = metadata.ParameterTypes.Select((type, index) => new ParameterMetadata(type)
+        metadata.ParameterTypes.Select((type, index) => new ParameterMetadata(type)
         {
             Name = $"param{index}",
             TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),

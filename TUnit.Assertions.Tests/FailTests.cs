@@ -32,7 +32,7 @@ public class FailTests
         var reason = "foo";
         var action = () => Fail.Unless(condition, reason);
 
-        var exception = await Assert.That(action).ThrowsNothing();
+        await Assert.That(action).ThrowsNothing();
     }
 
     [Test]
@@ -53,6 +53,6 @@ public class FailTests
         var reason = "foo";
         var action = () => Fail.When(condition, reason);
 
-        var exception = await Assert.That(action).ThrowsNothing();
+        await Assert.That(action).ThrowsNothing();
     }
 }

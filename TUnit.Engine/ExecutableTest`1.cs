@@ -57,9 +57,8 @@ public sealed class ExecutableTest<T> : ExecutableTest where T : class
 
         // Prepare arguments array - this includes data-driven test arguments
         // but NOT CancellationToken, which is passed separately
-        var methodArgs = Arguments;
 
         // Invoke the test with the cancellation token
-        await InvokeTypedTest(typedInstance, methodArgs, cancellationToken);
+        await InvokeTypedTest(typedInstance, Arguments, cancellationToken);
     }
 }

@@ -135,7 +135,7 @@ internal static class DataSourceInitializer
     {
         var dataAttribute = (IAsyncDataSourceGeneratorAttribute) attributeMetadata.Instance;
 
-        if (dataAttribute is IRequiresImmediateInitialization && attributeMetadata.ClassMetadata is not null)
+        if (dataAttribute is not null && attributeMetadata.ClassMetadata is not null)
         {
             await InitializeDependenciesAsync(dataAttribute, attributeMetadata.ClassMetadata, context);
         }

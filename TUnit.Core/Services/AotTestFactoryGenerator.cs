@@ -44,7 +44,6 @@ public class AotTestFactoryGenerator
 
         var className = classMetadata.Type.Name;
         var fullClassName = classMetadata.Type.FullName?.Replace('+', '.');
-        var namespaceName = classMetadata.Type.Namespace ?? "Global";
 
         var code = new StringBuilder();
         code.AppendLine($"// Generated AOT-safe strongly typed factory for {fullClassName}");
@@ -404,7 +403,6 @@ public class AotTestFactoryGenerator
     public string GenerateMethodDataSourceFactories(ClassMetadata classMetadata, IEnumerable<MethodMetadata> testMethods)
     {
         var code = new StringBuilder();
-        var className = classMetadata.Type.Name;
         var fullClassName = classMetadata.Type.FullName?.Replace('+', '.');
 
         code.AppendLine($"// Generated AOT-safe MethodDataSource factories for {fullClassName}");

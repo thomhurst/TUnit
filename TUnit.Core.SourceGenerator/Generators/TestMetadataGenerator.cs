@@ -105,9 +105,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Also check if any type arguments are type parameters (e.g., T)
-        if (containingType is INamedTypeSymbol { IsGenericType: true } namedType)
+        if (containingType is { IsGenericType: true })
         {
-            if (namedType.TypeArguments.Any(arg => arg.TypeKind == TypeKind.TypeParameter))
+            if (containingType.TypeArguments.Any(arg => arg.TypeKind == TypeKind.TypeParameter))
             {
                 return null;
             }
@@ -122,7 +122,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 return null;
             }
 
-            if (currentType is INamedTypeSymbol { IsGenericType: true } baseNamedType)
+            if (currentType is { IsGenericType: true } baseNamedType)
             {
                 if (baseNamedType.TypeArguments.Any(arg => arg.TypeKind == TypeKind.TypeParameter))
                 {
@@ -134,14 +134,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Skip generic methods without explicit instantiation
-        if (methodSymbol is IMethodSymbol { IsGenericMethod: true })
+        if (methodSymbol is { IsGenericMethod: true })
         {
             return null;
         }
 
         // Also skip if method has parameters with unresolved type parameters
-        if (methodSymbol is IMethodSymbol methodWithParams &&
-            methodWithParams.Parameters.Any(p => ContainsTypeParameter(p.Type)))
+        if (methodSymbol != null &&
+            methodSymbol.Parameters.Any(p => ContainsTypeParameter(p.Type)))
         {
             return null;
         }
@@ -158,24 +158,23 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var results = new List<TestMethodMetadata>();
 
-        if (context.TargetNode is ClassDeclarationSyntax classDecl)
+        if (context.TargetNode is ClassDeclarationSyntax)
         {
             var classSymbol = context.TargetSymbol as INamedTypeSymbol;
 
             // Get all generic test methods in the class
-            var namedTypeSymbol = classSymbol;
-            if (namedTypeSymbol == null)
+            if (classSymbol == null)
             {
                 return null;
             }
 
             // Skip abstract classes (cannot be instantiated)
-            if (namedTypeSymbol.IsAbstract)
+            if (classSymbol.IsAbstract)
             {
                 return null;
             }
 
-            var genericMethods = namedTypeSymbol.GetMembers()
+            var genericMethods = classSymbol.GetMembers()
                 .OfType<IMethodSymbol>()
                 .Where(m => m.IsGenericMethod && HasTestAttribute(m));
 
@@ -204,7 +203,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     results.Add(new TestMethodMetadata
                     {
                         MethodSymbol = constructedMethod,
-                        TypeSymbol = namedTypeSymbol,
+                        TypeSymbol = classSymbol,
                         MethodSyntax = null, // Will need to handle this differently
                         GenericTypeArguments = typeArgs
                     });

@@ -33,7 +33,7 @@ public class SkipTests
         var reason = "foo";
         var action = () => Skip.Unless(condition, reason);
 
-        var exception = await Assert.That(action).ThrowsNothing();
+        await Assert.That(action).ThrowsNothing();
     }
 
     [Test]
@@ -54,6 +54,6 @@ public class SkipTests
         var reason = "foo";
         var action = () => Skip.When(condition, reason);
 
-        var exception = await Assert.That(action).ThrowsNothing();
+        await Assert.That(action).ThrowsNothing();
     }
 }

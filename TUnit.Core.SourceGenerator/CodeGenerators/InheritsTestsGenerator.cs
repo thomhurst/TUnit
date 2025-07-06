@@ -320,7 +320,7 @@ public class InheritsTestsGenerator : IIncrementalGenerator
         var requiredProperties = GetAllRequiredProperties(classSymbol);
 
         // Check if all required properties have data sources
-        var requiredPropertiesWithDataSource = requiredProperties
+        requiredProperties
             .Where(p => p.GetAttributes().Any(attr =>
             {
                 var attrName = attr.AttributeClass?.Name ?? "";

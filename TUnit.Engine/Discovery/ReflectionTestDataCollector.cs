@@ -819,15 +819,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     
     private static HookMetadata? CreateHookMetadata(MethodInfo method, HookAttribute hookAttr, bool isBeforeHook)
     {
-        var hookName = $"{method.DeclaringType?.Name}.{method.Name}";
-        var level = hookAttr.HookType switch
-        {
-            HookType.Assembly => HookLevel.Assembly,
-            HookType.Class => HookLevel.Class,
-            HookType.Test => HookLevel.Test,
-            _ => HookLevel.Test
-        };
-        
         // Hook invokers are no longer supported in reflection mode
         // Hooks require source-generated context-specific delegates
         return null;
@@ -922,14 +913,14 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static string? ExtractFilePath(MethodInfo method)
     {
-        var testAttr = method.GetCustomAttribute<TestAttribute>();
+        method.GetCustomAttribute<TestAttribute>();
         // Reflection doesn't have access to file path from CallerFilePath
         return null;
     }
 
     private static int? ExtractLineNumber(MethodInfo method)
     {
-        var testAttr = method.GetCustomAttribute<TestAttribute>();
+        method.GetCustomAttribute<TestAttribute>();
         // Reflection doesn't have access to line number from CallerLineNumber
         return null;
     }

@@ -176,7 +176,7 @@ public class HookSystemEnhancer
             ("AfterTest", result.AfterTestHooks)
         };
 
-        foreach (var (category, hooks) in allHooks)
+        foreach (var (_, hooks) in allHooks)
         {
             foreach (var hook in hooks.Where(h => h.MethodSymbol != null))
             {

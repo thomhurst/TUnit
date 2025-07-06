@@ -13,7 +13,6 @@ public class DataSourceGeneratorTests(int value, string value2, bool value3)
     [AutoFixtureGenerator<int>]
     public void GeneratedData_Method(int value)
     {
-        var data = value;
         // TODO: Fix when Attributes property is added to TestDetails
         // var attrs = TestContext.Current!.TestDetails.Attributes;
     }

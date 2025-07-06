@@ -384,7 +384,7 @@ internal sealed class GenericTypeResolver
         var enumerableInterface = returnType.AllInterfaces
             .FirstOrDefault(i => i.Name == "IEnumerable" && i.IsGenericType);
 
-        if (enumerableInterface?.TypeArguments.FirstOrDefault() is ITypeSymbol elementType)
+        if (enumerableInterface?.TypeArguments.FirstOrDefault() is { } elementType)
         {
             // Handle tuple types like (T1, T2)
             if (elementType is INamedTypeSymbol { IsTupleType: true } namedType)
@@ -467,7 +467,6 @@ internal sealed class GenericTypeResolver
         foreach (var kvp in _genericTests)
         {
             var typeArgs = kvp.Key;
-            var testInfo = kvp.Value;
 
             writer.Append("{ new Type[] { ");
             writer.Append(string.Join(", ", typeArgs.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})")));

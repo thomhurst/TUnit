@@ -90,7 +90,7 @@ public class PropertyInjectionTests
     public async Task PropertyInjection_OptionalServicesCanBeNull()
     {
         // OptionalService should be null if not provided by DI container
-        await Assert.That(OptionalService == null || OptionalService is ITestService).IsTrue();
+        await Assert.That(OptionalService == null || OptionalService is not null).IsTrue();
     }
 }
 

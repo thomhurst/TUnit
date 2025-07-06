@@ -9,7 +9,7 @@ public class Tests1774
     {
         Type1 type1 = new Type2();
 
-        var type2 = await Assert.That(() => type1)
+        await Assert.That(() => type1)
             .ThrowsNothing()
             .And
             .IsTypeOf<Type2>()

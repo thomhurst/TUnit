@@ -83,11 +83,7 @@ public class Tests
 
         await executeTestsResponse.WaitCompletionAsync();
 
-        var newDiscovered = results.Where(x => x.Node.ExecutionState is "discovered").ToList();
         var finished = results.Where(x => x.Node.ExecutionState is not "in-progress").ToList();
-        var passed = finished.Where(x => x.Node.ExecutionState == "passed").ToList();
-        var failed = finished.Where(x => x.Node.ExecutionState == "failed").ToList();
-        var skipped = finished.Where(x => x.Node.ExecutionState == "skipped").ToList();
 
         using (Assert.Multiple())
         {

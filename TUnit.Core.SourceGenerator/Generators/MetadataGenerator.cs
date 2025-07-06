@@ -448,8 +448,7 @@ public sealed class MetadataGenerator
 
     private void GenerateDelegateReferences(CodeWriter writer, TestMethodMetadata testInfo)
     {
-        var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        var methodName = testInfo.MethodSymbol.Name;
+        testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
         // Generate instance factory inline
         GenerateInlineInstanceFactory(writer, testInfo);
@@ -555,7 +554,7 @@ public sealed class MetadataGenerator
             var isShared = sharedType != "None";
 
             // Get the type to instantiate from the generic attribute
-            if (attr.AttributeClass is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: > 0 } namedType)
+            if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 } namedType)
             {
                 var dataType = namedType.TypeArguments[0];
                 writer.AppendLine($"DataSource = new DelegateDataSource(() => new object?[][] {{ new object?[] {{ new {dataType.ToDisplayString()}() }} }}, {isShared.ToString().ToLower()})");

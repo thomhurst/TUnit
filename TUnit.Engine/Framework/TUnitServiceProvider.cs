@@ -60,8 +60,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         CancellationToken = Register(new EngineCancellationToken());
 
         // Create test services using unified architecture
-        var testInvoker = Register<ITestInvoker>(new TestInvoker());
-        var hookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
+        Register<ITestInvoker>(new TestInvoker());
+        Register<IHookCollectionService>(new HookCollectionService());
 
         // Detect execution mode from command line or environment
         var executionMode = GetExecutionMode(CommandLineOptions);

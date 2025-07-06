@@ -59,8 +59,6 @@ public class GenericTypeResolver : IGenericTypeResolver
             if (!typeMapping.TryGetValue(genericParam, out var resolvedType))
             {
                 // Try to use constraints as a fallback
-                var constraints = genericParam.GetGenericParameterConstraints();
-                var attributes = genericParam.GenericParameterAttributes;
 
                 // Provide more specific error message with context
                 var methodName = $"{genericMethodDefinition.DeclaringType?.FullName}.{genericMethodDefinition.Name}";
