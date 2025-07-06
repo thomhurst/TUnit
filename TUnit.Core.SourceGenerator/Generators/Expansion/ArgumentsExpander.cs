@@ -268,13 +268,39 @@ public sealed class ArgumentsExpander : ITestExpander
     {
         var parameters = testInfo.MethodSymbol.Parameters;
         var formattedArgs = new List<string>();
+        var argIndex = 0;
 
-        for (int i = 0; i < argumentValues.Length && i < parameters.Length; i++)
+        for (int paramIndex = 0; paramIndex < parameters.Length && argIndex < argumentValues.Length; paramIndex++)
         {
-            var value = argumentValues[i];
-            var paramType = parameters[i].Type;
-            var formattedValue = FormatArgumentWithConversion(value, paramType, testInfo);
-            formattedArgs.Add(formattedValue);
+            var paramType = parameters[paramIndex].Type;
+            
+            // Check if this is the last parameter and it can consume remaining arguments
+            if (paramIndex == parameters.Length - 1 && IsEnumerableType(paramType) && 
+                argumentValues.Length > parameters.Length)
+            {
+                // Collect all remaining arguments into an array/enumerable
+                var remainingArgs = new List<string>();
+                while (argIndex < argumentValues.Length)
+                {
+                    var value = argumentValues[argIndex];
+                    var elementType = GetEnumerableElementType(paramType);
+                    var formattedValue = FormatArgumentWithConversion(value, elementType, testInfo);
+                    remainingArgs.Add(formattedValue);
+                    argIndex++;
+                }
+                
+                // Format as array initializer
+                var arrayType = GetEnumerableElementType(paramType)?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+                formattedArgs.Add($"new {arrayType}[] {{ {string.Join(", ", remainingArgs)} }}");
+            }
+            else
+            {
+                // Regular single argument
+                var value = argumentValues[argIndex];
+                var formattedValue = FormatArgumentWithConversion(value, paramType, testInfo);
+                formattedArgs.Add(formattedValue);
+                argIndex++;
+            }
         }
 
         return string.Join(", ", formattedArgs);
@@ -286,8 +312,9 @@ public sealed class ArgumentsExpander : ITestExpander
         var formattedArgs = new List<string>();
         var argIndex = 0;
 
-        foreach (var parameter in parameters)
+        for (int paramIndex = 0; paramIndex < parameters.Length; paramIndex++)
         {
+            var parameter = parameters[paramIndex];
             var paramType = parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             
             if (paramType == "global::System.Threading.CancellationToken")
@@ -296,10 +323,37 @@ public sealed class ArgumentsExpander : ITestExpander
             }
             else if (argIndex < argumentValues.Length)
             {
-                var value = argumentValues[argIndex];
-                var formattedValue = FormatArgumentWithConversion(value, parameter.Type, testInfo);
-                formattedArgs.Add(formattedValue);
-                argIndex++;
+                // Check if this is the last non-cancellation parameter and it can consume remaining arguments
+                var isLastNonCancellationParam = paramIndex == parameters.Length - 1 ||
+                    (paramIndex == parameters.Length - 2 && 
+                     parameters[parameters.Length - 1].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "global::System.Threading.CancellationToken");
+                
+                if (isLastNonCancellationParam && IsEnumerableType(parameter.Type) && 
+                    argumentValues.Length - argIndex > 1)
+                {
+                    // Collect all remaining arguments into an array/enumerable
+                    var remainingArgs = new List<string>();
+                    while (argIndex < argumentValues.Length)
+                    {
+                        var value = argumentValues[argIndex];
+                        var elementType = GetEnumerableElementType(parameter.Type);
+                        var formattedValue = FormatArgumentWithConversion(value, elementType, testInfo);
+                        remainingArgs.Add(formattedValue);
+                        argIndex++;
+                    }
+                    
+                    // Format as array initializer
+                    var arrayType = GetEnumerableElementType(parameter.Type)?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+                    formattedArgs.Add($"new {arrayType}[] {{ {string.Join(", ", remainingArgs)} }}");
+                }
+                else
+                {
+                    // Regular single argument
+                    var value = argumentValues[argIndex];
+                    var formattedValue = FormatArgumentWithConversion(value, parameter.Type, testInfo);
+                    formattedArgs.Add(formattedValue);
+                    argIndex++;
+                }
             }
         }
 
@@ -349,5 +403,50 @@ public sealed class ArgumentsExpander : ITestExpander
         }
         
         return formattedValue;
+    }
+
+    private bool IsEnumerableType(ITypeSymbol type)
+    {
+        // Check if it's an array
+        if (type is IArrayTypeSymbol)
+        {
+            return true;
+        }
+
+        // Check if it implements IEnumerable<T> or IEnumerable
+        var enumerableType = type.AllInterfaces.FirstOrDefault(i =>
+            i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>" ||
+            i.ToDisplayString() == "System.Collections.IEnumerable");
+        
+        return enumerableType != null;
+    }
+
+    private ITypeSymbol? GetEnumerableElementType(ITypeSymbol type)
+    {
+        // Handle arrays
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return arrayType.ElementType;
+        }
+
+        // Handle IEnumerable<T>
+        var enumerableInterface = type.AllInterfaces.FirstOrDefault(i =>
+            i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>");
+        
+        if (enumerableInterface != null && enumerableInterface.TypeArguments.Length > 0)
+        {
+            return enumerableInterface.TypeArguments[0];
+        }
+
+        // Check if the type itself is IEnumerable<T>
+        if (type is INamedTypeSymbol namedType && 
+            namedType.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>" &&
+            namedType.TypeArguments.Length > 0)
+        {
+            return namedType.TypeArguments[0];
+        }
+
+        // Default to object for non-generic enumerables
+        return null;
     }
 }
