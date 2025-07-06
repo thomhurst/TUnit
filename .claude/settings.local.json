@@ -97,7 +97,9 @@
       "Bash(git restore:*)",
       "Bash(find /home/thomh/dev/TUnit -path \"*/obj/*\" -name \"*.cs\")",
       "Bash(git rebase:*)",
-      "mcp__desktop-commander__search_files"
+      "mcp__desktop-commander__search_files",
+      "Bash(cp:*)",
+      "Bash(diff:*)"
     ],
     "deny": []
   }

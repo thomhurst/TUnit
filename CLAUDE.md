@@ -131,6 +131,12 @@ When working on TUnit:
    - Never use `GetAwaiter().GetResult()` or `.Result` on tasks - always use proper async/await to avoid deadlocks
    - When in a sync context that needs async functionality, refactor method signatures to be async rather than trying to execute async code synchronously
    - TUnit supports async all the way through the stack - embrace it!
+9. **Code Style**: 
+   - **IMPORTANT**: Avoid adding unnecessary comments - write self-descriptive code instead
+   - Use meaningful variable and method names that clearly express intent
+   - Keep methods small and focused on a single responsibility
+   - Let the code structure and naming tell the story, not comments
+   - Only add comments when dealing with genuinely complex algorithms or non-obvious business logic
 
 ## Key Files and Locations
 
@@ -144,5 +150,6 @@ When working on TUnit:
 ## Memories
 
 - Remember to use the test filter syntax from the claude instructions, including slashes.
-- Remember to not add redundant comments and instead write self descriptive code.
-- Don't add unnecessary comments
+- **Code Style**: Focus on writing self-descriptive code with clear naming instead of adding comments everywhere
+- **No Unnecessary Comments**: Only add comments for genuinely complex algorithms or non-obvious business logic
+- Methods should be small, focused, and their names should clearly express their purpose

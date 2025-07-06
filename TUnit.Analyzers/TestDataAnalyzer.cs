@@ -373,7 +373,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     dataSourceMethod.Locations.FirstOrDefault()));
             }
 
-            var dataSourceMethodParameterTypes = dataSourceMethod.Parameters.Select(x => x.Type).ToArray();
+            var dataSourceMethodParameterTypes = dataSourceMethod.Parameters
+                .WithoutCancellationTokenParameter()
+                .Select(x => x.Type)
+                .ToArray();
 
             // Note: We no longer check if test has multiple parameters when data source doesn't return tuples
             // because the data source method can return arrays of arrays (object[][]) to satisfy multiple parameters
@@ -523,13 +526,26 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return ImmutableArray.Create(methodContainingTestData.ReturnType);
         }
 
-        if (methodContainingTestData.ReturnType.IsIEnumerable(context.Compilation, out var enumerableInnerType))
+        // Check for Task<T> or ValueTask<T> wrappers first
+        if (methodContainingTestData.ReturnType is INamedTypeSymbol { IsGenericType: true } taskType)
+        {
+            var taskTypeSymbol = context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.Task`1");
+            var valueTaskTypeSymbol = context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask`1");
+            
+            if ((taskTypeSymbol != null && SymbolEqualityComparer.Default.Equals(taskType.OriginalDefinition, taskTypeSymbol)) ||
+                (valueTaskTypeSymbol != null && SymbolEqualityComparer.Default.Equals(taskType.OriginalDefinition, valueTaskTypeSymbol)))
+            {
+                type = taskType.TypeArguments[0];
+            }
+        }
+
+        if (type.IsIEnumerable(context.Compilation, out var enumerableInnerType))
         {
             type = enumerableInnerType;
         }
         
         // Check for IAsyncEnumerable<T>
-        if (SymbolEqualityComparer.Default.Equals(type, methodContainingTestData.ReturnType) && IsIAsyncEnumerable(methodContainingTestData.ReturnType, context.Compilation, out var asyncEnumerableInnerType))
+        if (SymbolEqualityComparer.Default.Equals(type, methodContainingTestData.ReturnType) && IsIAsyncEnumerable(type, context.Compilation, out var asyncEnumerableInnerType))
         {
             type = asyncEnumerableInnerType;
         }
@@ -561,12 +577,13 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return tupleType.TupleElements.Select(x => x.Type).ToImmutableArray();
         }
 
-        // Handle object[] and object?[] case - when a data source returns IEnumerable<object[]> or IEnumerable<object?[]>,
+        // Handle array cases - when a data source returns IEnumerable<T[]> or IAsyncEnumerable<T[]>,
         // each array contains the arguments for one test invocation
-        if (type is IArrayTypeSymbol arrayType && arrayType.ElementType.SpecialType == SpecialType.System_Object)
+        if (type is IArrayTypeSymbol arrayType)
         {
-            // Return empty array to indicate that type checking should be skipped
-            // since object[] or object?[] can contain any types that will be checked at runtime
+            // Arrays from data sources are always meant to contain test arguments,
+            // not to be passed as a single array parameter.
+            // Skip compile-time type checking for all array types.
             return ImmutableArray<ITypeSymbol>.Empty;
         }
 
