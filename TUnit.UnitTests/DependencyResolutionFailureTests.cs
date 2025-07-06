@@ -1,7 +1,3 @@
-using System.Threading.Tasks;
-using TUnit.Assertions;
-using TUnit.Core;
-
 #pragma warning disable TUnit0004 // No method found - intentionally testing missing dependencies
 
 namespace TUnit.UnitTests;

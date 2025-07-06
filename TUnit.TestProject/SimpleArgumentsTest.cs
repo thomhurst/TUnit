@@ -1,7 +1,3 @@
-using TUnit.Core;
-using TUnit.Assertions;
-using System.Threading.Tasks;
-
 namespace TUnit.TestProject;
 
 public class SimpleArgumentsTest

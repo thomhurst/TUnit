@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace TUnit.Core.Extensions;
 
@@ -169,8 +170,8 @@ public static class ReflectionExtensions
         return attributes.ToArray();
     }
 
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL2072:Target type's member does not satisfy requirements", Justification = "Attribute types are preserved by the runtime")]
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "Attribute instantiation is required for .NET Framework compatibility")]
+    [UnconditionalSuppressMessage("AOT", "IL2072:Target type's member does not satisfy requirements", Justification = "Attribute types are preserved by the runtime")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "Attribute instantiation is required for .NET Framework compatibility")]
     private static Attribute? CreateAttributeInstance(CustomAttributeData attributeData)
     {
         var attributeType = attributeData.AttributeType;

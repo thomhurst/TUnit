@@ -1,10 +1,9 @@
-using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Generators;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class UnifiedReflectionFreeTests : TestsBase<UnifiedTestMetadataGeneratorV2>
+internal class UnifiedReflectionFreeTests : TestsBase<TestMetadataGenerator>
 {
     [Test]
     public async Task Test_StronglyTypedDelegates_Generation()

@@ -1,12 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Messages;
-using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Engine.Building;
-using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
 
@@ -107,7 +103,7 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer
                     .Distinct()
                     .Where(d => d.TestId != test.TestId)
                     .ToArray();
-                
+
                 // Populate the TestContext.Dependencies list with all dependencies (including transitive)
                 test.Context.Dependencies.Clear();
                 var allDependencies = GetAllDependencies(test, new HashSet<string>());
@@ -139,22 +135,22 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer
     private List<ExecutableTest> GetAllDependencies(ExecutableTest test, HashSet<string> visited)
     {
         var result = new List<ExecutableTest>();
-        
+
         // Add this test's ID to visited to prevent cycles
         visited.Add(test.TestId);
-        
+
         foreach (var dependency in test.Dependencies)
         {
             if (!visited.Contains(dependency.TestId))
             {
                 // Add the direct dependency
                 result.Add(dependency);
-                
+
                 // Recursively add transitive dependencies
                 result.AddRange(GetAllDependencies(dependency, visited));
             }
         }
-        
+
         // Remove duplicates while preserving order
         return result.Distinct().ToList();
     }

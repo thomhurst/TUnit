@@ -15,7 +15,7 @@ public class TestsBase
     {
     }
 
-    public TestsBase<UnifiedTestMetadataGeneratorV2> TestMetadataGenerator = new();
+    public TestsBase<TestMetadataGenerator> TestMetadataGenerator = new();
     public TestsBase<TestHooksGenerator> HooksGenerator = new();
     public TestsBase<AssemblyLoaderGenerator> AssemblyLoaderGenerator = new();
     public TestsBase<DisableReflectionScannerGenerator> DisableReflectionScannerGenerator = new();

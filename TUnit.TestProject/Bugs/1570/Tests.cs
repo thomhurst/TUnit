@@ -1,5 +1,4 @@
-﻿using TUnit.Core.Extensions;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1570;
 

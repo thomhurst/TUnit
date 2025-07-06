@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace TUnit.Core.Helpers;
@@ -19,12 +18,12 @@ public static class DataConversionHelper
             case null:
                 yield return new object?[] { null };
                 yield break;
-                
+
             case IEnumerable<object?[]> objectArrays:
                 foreach (var arr in objectArrays)
                     yield return arr;
                 yield break;
-                
+
             // Handle primitive types and single values
             case string:
             case bool:
@@ -40,40 +39,40 @@ public static class DataConversionHelper
             case ulong:
             case short:
             case ushort:
-                yield return new object?[] { data };
+                yield return new[] { data };
                 yield break;
-                
+
             // Handle arrays of primitives
             case int[] intArray:
                 foreach (var item in intArray)
                     yield return new object?[] { item };
                 yield break;
-                
+
             case string[] stringArray:
                 foreach (var item in stringArray)
                     yield return new object?[] { item };
                 yield break;
-                
+
             case bool[] boolArray:
                 foreach (var item in boolArray)
                     yield return new object?[] { item };
                 yield break;
-                
+
             case double[] doubleArray:
                 foreach (var item in doubleArray)
                     yield return new object?[] { item };
                 yield break;
-                
+
             case float[] floatArray:
                 foreach (var item in floatArray)
                     yield return new object?[] { item };
                 yield break;
-                
+
             case long[] longArray:
                 foreach (var item in longArray)
                     yield return new object?[] { item };
                 yield break;
-                
+
             // Handle generic IEnumerable
             case IEnumerable enumerable:
                 // Check if this is IEnumerable<object[]> to avoid double wrapping
@@ -89,7 +88,7 @@ public static class DataConversionHelper
                         yield break;
                     }
                 }
-                
+
                 foreach (var item in enumerable)
                 {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP
@@ -104,7 +103,7 @@ public static class DataConversionHelper
                         }
                         yield return tupleItems;
                     }
-                    else 
+                    else
 #endif
                     if (item is object?[] array)
                     {
@@ -114,18 +113,18 @@ public static class DataConversionHelper
                     else
                     {
                         // Not a tuple or array, wrap in array
-                        yield return new object?[] { item };
+                        yield return new[] { item };
                     }
                 }
                 yield break;
-                
+
             // Single non-enumerable value
             default:
-                yield return new object?[] { data };
+                yield return new[] { data };
                 yield break;
         }
     }
-    
+
     /// <summary>
     /// Converts IEnumerable<object?[]> to IAsyncEnumerable<object?[]> for async data sources
     /// </summary>
@@ -140,7 +139,7 @@ public static class DataConversionHelper
             yield return item;
         }
     }
-    
+
     /// <summary>
     /// Converts IAsyncEnumerable<T> to IAsyncEnumerable<object?[]> where T is not object?[]
     /// </summary>
@@ -153,7 +152,7 @@ public static class DataConversionHelper
             yield return new object?[] { item };
         }
     }
-    
+
     /// <summary>
     /// Converts IAsyncEnumerable<(T1, T2)> to IAsyncEnumerable<object?[]>
     /// </summary>
@@ -166,7 +165,7 @@ public static class DataConversionHelper
             yield return new object?[] { item1, item2 };
         }
     }
-    
+
     /// <summary>
     /// Converts IAsyncEnumerable<(T1, T2, T3)> to IAsyncEnumerable<object?[]>
     /// </summary>
@@ -179,7 +178,7 @@ public static class DataConversionHelper
             yield return new object?[] { item1, item2, item3 };
         }
     }
-    
+
     /// <summary>
     /// Converts IAsyncEnumerable<(T1, T2, T3, T4)> to IAsyncEnumerable<object?[]>
     /// </summary>
@@ -192,7 +191,7 @@ public static class DataConversionHelper
             yield return new object?[] { item1, item2, item3, item4 };
         }
     }
-    
+
     /// <summary>
     /// Converts IAsyncEnumerable<(T1, T2, T3, T4, T5)> to IAsyncEnumerable<object?[]>
     /// </summary>
@@ -205,7 +204,7 @@ public static class DataConversionHelper
             yield return new object?[] { item1, item2, item3, item4, item5 };
         }
     }
-    
+
     /// <summary>
     /// Wraps a Task<IEnumerable<T>> to ensure it returns object arrays
     /// </summary>
@@ -214,7 +213,7 @@ public static class DataConversionHelper
         var result = await task;
         return ConvertToObjectArrays(result);
     }
-    
+
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP
     /// <summary>
     /// Unwraps an ITuple to an object?[] array
@@ -234,7 +233,7 @@ public static class DataConversionHelper
         return result;
     }
 #endif
-    
+
     /// <summary>
     /// Unwraps a ValueTuple<T1, T2> to an object?[] array (optimized for 2-tuples)
     /// </summary>
@@ -242,7 +241,7 @@ public static class DataConversionHelper
     {
         return new object?[] { tuple.Item1, tuple.Item2 };
     }
-    
+
     /// <summary>
     /// Unwraps a ValueTuple<T1, T2, T3> to an object?[] array (optimized for 3-tuples)
     /// </summary>
@@ -250,7 +249,7 @@ public static class DataConversionHelper
     {
         return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3 };
     }
-    
+
     /// <summary>
     /// Unwraps a ValueTuple<T1, T2, T3, T4> to an object?[] array (optimized for 4-tuples)
     /// </summary>
@@ -258,7 +257,7 @@ public static class DataConversionHelper
     {
         return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4 };
     }
-    
+
     /// <summary>
     /// Unwraps a ValueTuple<T1, T2, T3, T4, T5> to an object?[] array (optimized for 5-tuples)
     /// </summary>
@@ -266,7 +265,7 @@ public static class DataConversionHelper
     {
         return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5 };
     }
-    
+
     /// <summary>
     /// Unwraps a ValueTuple<T1, T2, T3, T4, T5, T6> to an object?[] array (optimized for 6-tuples)
     /// </summary>
@@ -274,7 +273,7 @@ public static class DataConversionHelper
     {
         return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6 };
     }
-    
+
     /// <summary>
     /// Unwraps a ValueTuple<T1, T2, T3, T4, T5, T6, T7> to an object?[] array (optimized for 7-tuples)
     /// </summary>
@@ -282,7 +281,7 @@ public static class DataConversionHelper
     {
         return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7 };
     }
-    
+
     /// <summary>
     /// Unwraps a ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> to an object?[] array (optimized for 8-tuples)
     /// </summary>
@@ -290,7 +289,7 @@ public static class DataConversionHelper
     {
         return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7, tuple.Item8 };
     }
-    
+
     /// <summary>
     /// Unwraps a ValueTuple with 9 elements to an object?[] array
     /// </summary>
@@ -298,7 +297,7 @@ public static class DataConversionHelper
     {
         return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7, tuple.Item8, tuple.Item9 };
     }
-    
+
     /// <summary>
     /// Unwraps a ValueTuple with 10 elements to an object?[] array
     /// </summary>

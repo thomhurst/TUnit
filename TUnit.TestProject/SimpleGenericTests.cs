@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using TUnit.Assertions;
-using TUnit.Core;
-
 namespace TUnit.TestProject;
 
 /// <summary>

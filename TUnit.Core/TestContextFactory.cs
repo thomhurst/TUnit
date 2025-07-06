@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-
 namespace TUnit.Core;
 
 /// <summary>

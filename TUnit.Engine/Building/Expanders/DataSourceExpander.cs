@@ -1,13 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using TUnit.Core;
-using TUnit.Core.Interfaces;
 using TUnit.Engine.Building.Interfaces;
 
 namespace TUnit.Engine.Building.Expanders;
@@ -179,17 +171,17 @@ public sealed class DataSourceExpander : IDataSourceExpander
 
             case DelegateDataSource delegateSource:
                 return await Task.Run(() => delegateSource.GetDataFactories(), cancellationToken);
-                
+
             case AsyncDelegateDataSource asyncSource:
                 return await Task.Run(() => asyncSource.GetDataFactories(), cancellationToken);
-                
+
             case TaskDelegateDataSource taskSource:
                 return await Task.Run(() => taskSource.GetDataFactories(), cancellationToken);
 
 #pragma warning disable CS0618 // Type or member is obsolete
             case DynamicTestDataSource:
                 throw new NotSupportedException("DynamicTestDataSource is obsolete. Use DelegateDataSource instead.");
-                
+
             case AsyncDynamicTestDataSource:
                 throw new NotSupportedException("AsyncDynamicTestDataSource is obsolete. Use AsyncDelegateDataSource instead.");
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -295,7 +287,7 @@ public sealed class DataSourceExpander : IDataSourceExpander
                 }
             }
         }
-        
+
         return args;
     }
 }

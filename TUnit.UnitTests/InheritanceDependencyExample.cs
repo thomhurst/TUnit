@@ -1,7 +1,3 @@
-using System.Threading.Tasks;
-using TUnit.Assertions;
-using TUnit.Core;
-
 namespace TUnit.UnitTests;
 
 /// <summary>

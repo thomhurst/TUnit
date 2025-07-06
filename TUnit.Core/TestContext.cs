@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Threading;
 using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 
@@ -156,7 +151,7 @@ public class TestContext : Context
     /// Service provider (simplified)
     /// </summary>
     private IServiceProvider? _serviceProvider;
-    
+
     /// <summary>
     /// Gets the service provider for dependency injection
     /// </summary>

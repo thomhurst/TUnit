@@ -62,4 +62,4 @@ public sealed class ParallelLimiterAttribute<TParallelLimit> : TUnitAttribute, I
         context.SetParallelLimiter(new TParallelLimit());
         return default;
     }
-};
+}

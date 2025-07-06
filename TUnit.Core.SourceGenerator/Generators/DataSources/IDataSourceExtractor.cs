@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Core.SourceGenerator.Generators.DataSources;
@@ -39,37 +38,37 @@ public sealed class ExtractedDataSource
     /// The attribute that defines this data source
     /// </summary>
     public required AttributeData Attribute { get; init; }
-    
+
     /// <summary>
     /// Type of data source (Arguments, MethodDataSource, or AsyncDataSourceGenerator)
     /// </summary>
     public required DataSourceType Type { get; init; }
-    
+
     /// <summary>
     /// Whether this data source is async
     /// </summary>
     public required bool IsAsync { get; init; }
-    
+
     /// <summary>
     /// Unique key for caching/identification
     /// </summary>
     public required string Key { get; init; }
-    
+
     /// <summary>
     /// For method data sources - the method symbol
     /// </summary>
     public IMethodSymbol? MethodSymbol { get; init; }
-    
+
     /// <summary>
     /// For property data sources - the property symbol
     /// </summary>
     public IPropertySymbol? PropertySymbol { get; init; }
-    
+
     /// <summary>
     /// The type containing the data source
     /// </summary>
     public required ITypeSymbol SourceType { get; init; }
-    
+
     /// <summary>
     /// The level at which this data source was defined
     /// </summary>

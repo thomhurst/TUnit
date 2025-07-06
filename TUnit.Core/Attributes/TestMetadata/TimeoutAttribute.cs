@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -11,7 +10,7 @@ namespace TUnit.Core;
 /// Use this attribute to enforce time limits on test execution. Tests that exceed
 /// the specified timeout will be canceled and marked as failed.
 /// </para>
-/// 
+///
 /// <para>
 /// The attribute can be applied at different levels:
 /// </para>

@@ -10,7 +10,7 @@ internal class DependencyTracker
     // Use ConditionalWeakTable to avoid preventing garbage collection
     private readonly ConditionalWeakTable<object, List<IDisposableReference>> _dependencies = new();
     private readonly object _lock = new();
-    private int _dependencyCount = 0;
+    private int _dependencyCount;
 
     /// <summary>
     /// Registers a nested dependency relationship.

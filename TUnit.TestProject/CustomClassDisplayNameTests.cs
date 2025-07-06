@@ -1,5 +1,4 @@
-﻿using TUnit.Core.Extensions;
-using TUnit.TestProject.AfterTests;
+﻿using TUnit.TestProject.AfterTests;
 using TUnit.TestProject.Attributes;
 
 #pragma warning disable CS9113 // Parameter is unread.

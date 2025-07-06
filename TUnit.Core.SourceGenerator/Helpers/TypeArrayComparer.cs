@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace TUnit.Core.SourceGenerator.Helpers;
 
 /// <summary>
@@ -9,7 +6,7 @@ namespace TUnit.Core.SourceGenerator.Helpers;
 internal sealed class TypeArrayComparer : IEqualityComparer<Type[]>
 {
     public static readonly TypeArrayComparer Instance = new();
-    
+
     public bool Equals(Type[]? x, Type[]? y)
     {
         if (ReferenceEquals(x, y))
@@ -33,7 +30,7 @@ internal sealed class TypeArrayComparer : IEqualityComparer<Type[]>
 
         return true;
     }
-    
+
     public int GetHashCode(Type[] obj)
     {
         // HashCode is not available in netstandard2.0, use manual hash calculation

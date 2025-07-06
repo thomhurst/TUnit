@@ -1,5 +1,3 @@
-using TUnit.Core;
-
 namespace Playground;
 
 public abstract class GenericTestExample<T>

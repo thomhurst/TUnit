@@ -1,6 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using TUnit.Core;
-using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject.Attributes;
 

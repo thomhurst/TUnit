@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
-using TUnit.Engine.Extensions;
 
 namespace TUnit.TestProject;
 

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Core.SourceGenerator.Models;
@@ -10,12 +9,12 @@ public class DiagnosticContext
 {
     private readonly List<Diagnostic> _diagnostics = new();
     private readonly SourceProductionContext _sourceProductionContext;
-    
+
     public DiagnosticContext(SourceProductionContext sourceProductionContext)
     {
         _sourceProductionContext = sourceProductionContext;
     }
-    
+
     /// <summary>
     /// Reports a diagnostic immediately
     /// </summary>
@@ -24,7 +23,7 @@ public class DiagnosticContext
         _sourceProductionContext.ReportDiagnostic(diagnostic);
         _diagnostics.Add(diagnostic);
     }
-    
+
     /// <summary>
     /// Creates and reports an error diagnostic
     /// </summary>
@@ -39,10 +38,10 @@ public class DiagnosticContext
                 DiagnosticSeverity.Error,
                 isEnabledByDefault: true),
             location ?? Location.None);
-            
+
         ReportDiagnostic(diagnostic);
     }
-    
+
     /// <summary>
     /// Creates and reports a warning diagnostic
     /// </summary>
@@ -57,10 +56,10 @@ public class DiagnosticContext
                 DiagnosticSeverity.Warning,
                 isEnabledByDefault: true),
             location ?? Location.None);
-            
+
         ReportDiagnostic(diagnostic);
     }
-    
+
     /// <summary>
     /// Creates and reports an info diagnostic
     /// </summary>
@@ -75,15 +74,15 @@ public class DiagnosticContext
                 DiagnosticSeverity.Info,
                 isEnabledByDefault: true),
             location ?? Location.None);
-            
+
         ReportDiagnostic(diagnostic);
     }
-    
+
     /// <summary>
     /// Gets all diagnostics that have been reported
     /// </summary>
     public IReadOnlyList<Diagnostic> GetDiagnostics() => _diagnostics.AsReadOnly();
-    
+
     /// <summary>
     /// Checks if any errors have been reported
     /// </summary>

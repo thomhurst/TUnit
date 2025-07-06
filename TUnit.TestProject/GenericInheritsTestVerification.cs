@@ -1,6 +1,3 @@
-using System;
-using TUnit.Core;
-
 namespace TUnit.TestProject;
 
 // Simple test to verify InheritsTests with generic base classes works

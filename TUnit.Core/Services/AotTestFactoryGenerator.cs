@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
@@ -197,7 +198,7 @@ public class AotTestFactoryGenerator
         code.AppendLine($"public static class {className}_{propertyName}Setter");
         code.AppendLine("{");
 
-        code.AppendLine($"    public static void SetProperty(object instance, object? value)");
+        code.AppendLine("    public static void SetProperty(object instance, object? value)");
         code.AppendLine("    {");
         code.AppendLine($"        var typedInstance = ({fullClassName})instance;");
 
@@ -291,7 +292,7 @@ public class AotTestFactoryGenerator
         return GenerateStronglyTypedRegistrationCode(testId, classMetadata, methodMetadata);
     }
 
-    private static bool HasPropertyInjectionAttribute(System.Reflection.PropertyInfo property)
+    private static bool HasPropertyInjectionAttribute(PropertyInfo property)
     {
         // Check for common property injection attributes
         return property.GetCustomAttributes(false).Any(attr =>

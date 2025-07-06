@@ -1,6 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace TUnit.Core;
 
 /// <summary>
@@ -13,12 +10,12 @@ public class TestMetadata<T> : TestMetadata where T : class
     /// Strongly typed instance factory
     /// </summary>
     public new Func<object[], T>? InstanceFactory { get; init; }
-    
+
     /// <summary>
     /// Strongly typed test invoker that can handle CancellationToken and other parameters
     /// </summary>
     public new Func<T, object?[], CancellationToken, Task>? TestInvoker { get; init; }
-    
+
     /// <summary>
     /// Property setters for this test class
     /// </summary>

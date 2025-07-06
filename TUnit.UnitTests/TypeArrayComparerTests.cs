@@ -1,5 +1,3 @@
-using TUnit.Core;
-
 namespace TUnit.UnitTests;
 
 /// <summary>

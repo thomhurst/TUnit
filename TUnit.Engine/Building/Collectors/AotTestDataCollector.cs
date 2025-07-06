@@ -1,5 +1,4 @@
 using TUnit.Core;
-using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Engine.Building.Interfaces;
 
 namespace TUnit.Engine.Building.Collectors;
@@ -12,7 +11,7 @@ public sealed class AotTestDataCollector : ITestDataCollector
     public Task<IEnumerable<TestMetadata>> CollectTestsAsync()
     {
         var allTests = new List<TestMetadata>();
-        
+
         // Collect tests from all registered test sources
         foreach (var testSource in Sources.TestSources)
         {

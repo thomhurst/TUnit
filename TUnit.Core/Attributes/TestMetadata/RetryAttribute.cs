@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -9,10 +8,10 @@ namespace TUnit.Core;
 /// <remarks>
 /// When a test fails, the RetryAttribute causes the test to be re-executed up to the specified number of times.
 /// The test is considered successful if any of the attempts complete without throwing an exception.
-/// 
+///
 /// Retry can be applied at the method, class, or assembly level. When applied at a class level, all test methods
 /// in the class will be retried on failure. When applied at the assembly level, it affects all tests in the assembly.
-/// 
+///
 /// Method-level attributes take precedence over class-level attributes, which take precedence over assembly-level attributes.
 /// </remarks>
 /// <example>
@@ -23,7 +22,7 @@ namespace TUnit.Core;
 /// {
 ///     // This test will be retried up to 3 times if it fails
 /// }
-/// 
+///
 /// // Example of a custom retry attribute with conditional logic
 /// public class RetryOnNetworkErrorAttribute : RetryAttribute
 /// {
@@ -82,7 +81,7 @@ public class RetryAttribute : TUnitAttribute, ITestDiscoveryEventReceiver
     /// <remarks>
     /// Can be overridden in derived classes to implement conditional retry logic
     /// based on the specific exception type or other criteria.
-    /// 
+    ///
     /// The default implementation always returns true, meaning the test will always be retried
     /// up to the maximum number of attempts regardless of the exception type.
     /// </remarks>

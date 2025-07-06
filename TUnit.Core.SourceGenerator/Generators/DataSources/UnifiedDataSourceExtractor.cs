@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.Generators.DataSources;
 
@@ -18,7 +13,7 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
     public IEnumerable<ExtractedDataSource> ExtractDataSources(ISymbol symbol, DataSourceLevel level, TestMethodMetadata testContext)
     {
         var attributes = GetAttributesFromSymbol(symbol, level);
-        
+
         foreach (var attribute in attributes)
         {
             var dataSource = ExtractFromAttribute(attribute, symbol, level, testContext);
@@ -28,25 +23,25 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
             }
         }
     }
-    
+
     private IEnumerable<AttributeData> GetAttributesFromSymbol(ISymbol symbol, DataSourceLevel level)
     {
         return level switch
         {
             DataSourceLevel.Class => symbol.GetAttributes()
                 .Where(a => IsDataSourceAttribute(a)),
-            
+
             DataSourceLevel.Method => symbol.GetAttributes()
-                .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute" || 
+                .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute" ||
                            a.AttributeClass?.Name == "MethodDataSourceAttribute"),
-            
+
             DataSourceLevel.Property => symbol.GetAttributes()
                 .Where(a => a.AttributeClass?.Name == "DataSourceForAttribute"),
-            
+
             _ => Enumerable.Empty<AttributeData>()
         };
     }
-    
+
     private bool IsDataSourceAttribute(AttributeData attribute)
     {
         if (attribute.AttributeClass == null)
@@ -55,9 +50,9 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
         }
 
         var className = attribute.AttributeClass.Name;
-        
+
         // Direct attribute types
-        if (className == "ArgumentsAttribute" || 
+        if (className == "ArgumentsAttribute" ||
             className == "ClassDataSourceAttribute" ||
             className == "MethodDataSourceAttribute")
         {
@@ -67,7 +62,7 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
         // Check if it inherits from AsyncDataSourceGeneratorAttribute
         return InheritsFromAsyncDataSourceGenerator(attribute.AttributeClass);
     }
-    
+
     private bool InheritsFromAsyncDataSourceGenerator(INamedTypeSymbol type)
     {
         // Check interfaces
@@ -90,11 +85,11 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
             }
             baseType = baseType.BaseType;
         }
-        
+
         return false;
     }
-    
-    private ExtractedDataSource? ExtractFromAttribute(AttributeData attribute, ISymbol symbol, 
+
+    private ExtractedDataSource? ExtractFromAttribute(AttributeData attribute, ISymbol symbol,
         DataSourceLevel level, TestMethodMetadata testContext)
     {
         if (attribute.AttributeClass == null)
@@ -103,24 +98,24 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
         }
 
         var className = attribute.AttributeClass.Name;
-        
+
         return className switch
         {
             "ArgumentsAttribute" => ExtractArgumentsAttribute(attribute, symbol, level, testContext),
             "MethodDataSourceAttribute" => ExtractMethodDataSourceAttribute(attribute, symbol, level, testContext),
-            "DataSourceForAttribute" when symbol is IPropertySymbol property => 
+            "DataSourceForAttribute" when symbol is IPropertySymbol property =>
                 ExtractPropertyDataSource(property, level, testContext),
-            _ when InheritsFromAsyncDataSourceGenerator(attribute.AttributeClass) => 
+            _ when InheritsFromAsyncDataSourceGenerator(attribute.AttributeClass) =>
                 ExtractAsyncDataSourceGeneratorAttribute(attribute, symbol, level, testContext),
             _ => null
         };
     }
-    
+
     private ExtractedDataSource ExtractArgumentsAttribute(AttributeData attribute, ISymbol symbol,
         DataSourceLevel level, TestMethodMetadata testContext)
     {
         var key = GenerateKey(symbol, level, "Arguments", attribute.GetHashCode());
-        
+
         return new ExtractedDataSource
         {
             Attribute = attribute,
@@ -131,7 +126,7 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
             Level = level
         };
     }
-    
+
     private ExtractedDataSource? ExtractMethodDataSourceAttribute(AttributeData attribute, ISymbol symbol,
         DataSourceLevel level, TestMethodMetadata testContext)
     {
@@ -145,14 +140,14 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
         var methodSymbol = sourceType.GetMembers(methodName!)
             .OfType<IMethodSymbol>()
             .FirstOrDefault();
-            
+
         if (methodSymbol == null)
         {
             return null;
         }
 
         var key = GenerateKey(symbol, level, $"Method_{methodName}", 0);
-        
+
         return new ExtractedDataSource
         {
             Attribute = attribute,
@@ -164,8 +159,8 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
             Level = level
         };
     }
-    
-    private ExtractedDataSource? ExtractPropertyDataSource(IPropertySymbol? property, 
+
+    private ExtractedDataSource? ExtractPropertyDataSource(IPropertySymbol? property,
         DataSourceLevel level, TestMethodMetadata testContext)
     {
         if (property == null)
@@ -175,14 +170,14 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
 
         var dataSourceAttribute = property.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "DataSourceForAttribute");
-            
+
         if (dataSourceAttribute == null)
         {
             return null;
         }
 
         var key = GenerateKey(property, level, $"Property_{property.Name}", 0);
-        
+
         return new ExtractedDataSource
         {
             Attribute = dataSourceAttribute,
@@ -194,12 +189,12 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
             Level = level
         };
     }
-    
+
     private ExtractedDataSource ExtractAsyncDataSourceGeneratorAttribute(AttributeData attribute, ISymbol symbol,
         DataSourceLevel level, TestMethodMetadata testContext)
     {
         var key = GenerateKey(symbol, level, $"AsyncDataSource_{attribute.AttributeClass!.Name}", attribute.GetHashCode());
-        
+
         return new ExtractedDataSource
         {
             Attribute = attribute,
@@ -210,7 +205,7 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
             Level = level
         };
     }
-    
+
     private ITypeSymbol GetSourceType(ISymbol symbol, TestMethodMetadata testContext)
     {
         return symbol switch
@@ -221,7 +216,7 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
             _ => testContext.TypeSymbol
         };
     }
-    
+
     private string GenerateKey(ISymbol symbol, DataSourceLevel level, string suffix, int hash)
     {
         var prefix = symbol switch
@@ -231,14 +226,14 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
             IPropertySymbol property => $"{property.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{property.Name}",
             _ => "Unknown"
         };
-        
+
         return hash != 0 ? $"{prefix}.{level}.{suffix}_{hash}" : $"{prefix}.{level}.{suffix}";
     }
-    
+
     private bool IsAsyncMethod(IMethodSymbol method)
     {
         var returnType = method.ReturnType;
-        
+
         if (returnType is INamedTypeSymbol namedType)
         {
             // Check for IAsyncEnumerable<T>
@@ -259,10 +254,10 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
                 }
             }
         }
-        
+
         return false;
     }
-    
+
     private bool IsAsyncType(ITypeSymbol type)
     {
         return type.Name == "IAsyncEnumerable" ||

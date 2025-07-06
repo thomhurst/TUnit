@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace TUnit.Core;
 
 /// <summary>
@@ -12,12 +9,12 @@ public sealed class TypeArrayComparer : IEqualityComparer<Type[]>
     /// Singleton instance for reuse
     /// </summary>
     public static readonly TypeArrayComparer Instance = new();
-    
+
     /// <summary>
     /// Private constructor to enforce singleton pattern
     /// </summary>
     private TypeArrayComparer() { }
-    
+
     /// <summary>
     /// Compares two Type arrays for equality
     /// </summary>
@@ -49,10 +46,10 @@ public sealed class TypeArrayComparer : IEqualityComparer<Type[]>
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     /// <summary>
     /// Computes hash code for Type array
     /// </summary>

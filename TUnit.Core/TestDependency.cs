@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-
 namespace TUnit.Core;
 
 /// <summary>
@@ -12,27 +9,27 @@ public sealed class TestDependency : IEquatable<TestDependency>
     /// The type containing the test method
     /// </summary>
     public Type? ClassType { get; init; }
-    
+
     /// <summary>
     /// Number of generic type parameters on the class (0 for non-generic classes)
     /// </summary>
     public int ClassGenericArity { get; init; }
-    
+
     /// <summary>
     /// The name of the test method
     /// </summary>
     public string? MethodName { get; init; }
-    
+
     /// <summary>
     /// Parameter types of the method (null if not specified)
     /// </summary>
     public Type[]? MethodParameters { get; init; }
-    
+
     /// <summary>
     /// Number of generic type parameters on the method (0 for non-generic methods)
     /// </summary>
     public int MethodGenericArity { get; init; }
-    
+
     /// <summary>
     /// Creates a dependency on a specific test method by name within the same class
     /// </summary>
@@ -40,32 +37,32 @@ public sealed class TestDependency : IEquatable<TestDependency>
     {
         return new TestDependency { MethodName = methodName };
     }
-    
+
     /// <summary>
     /// Creates a dependency on all tests in a specific class
     /// </summary>
     public static TestDependency FromClass(Type classType)
     {
-        return new TestDependency 
-        { 
+        return new TestDependency
+        {
             ClassType = classType,
             ClassGenericArity = classType.IsGenericTypeDefinition ? classType.GetGenericArguments().Length : 0
         };
     }
-    
+
     /// <summary>
     /// Creates a dependency on a specific test method in a specific class
     /// </summary>
     public static TestDependency FromClassAndMethod(Type classType, string methodName)
     {
-        return new TestDependency 
-        { 
+        return new TestDependency
+        {
             ClassType = classType,
             ClassGenericArity = classType.IsGenericTypeDefinition ? classType.GetGenericArguments().Length : 0,
-            MethodName = methodName 
+            MethodName = methodName
         };
     }
-    
+
     /// <summary>
     /// Checks if this dependency matches the given test metadata
     /// </summary>
@@ -75,7 +72,7 @@ public sealed class TestDependency : IEquatable<TestDependency>
         if (ClassType != null)
         {
             var testClassType = test.TestClassType;
-            
+
             // Handle generic type matching
             if (ClassType.IsGenericTypeDefinition && testClassType.IsGenericType)
             {
@@ -103,12 +100,12 @@ public sealed class TestDependency : IEquatable<TestDependency>
             {
                 return false;
             }
-            
+
             // Check generic arity if specified
             if (ClassGenericArity > 0)
             {
-                var testGenericArgs = testClassType.IsGenericType 
-                    ? testClassType.GetGenericArguments().Length 
+                var testGenericArgs = testClassType.IsGenericType
+                    ? testClassType.GetGenericArguments().Length
                     : 0;
                 if (testGenericArgs != ClassGenericArity)
                 {
@@ -124,7 +121,7 @@ public sealed class TestDependency : IEquatable<TestDependency>
                 return false;
             }
         }
-        
+
         // If MethodName is specified, it must match
         if (!string.IsNullOrEmpty(MethodName))
         {
@@ -151,7 +148,7 @@ public sealed class TestDependency : IEquatable<TestDependency>
                     }
                 }
             }
-            
+
             // Check method generic arity if specified
             if (MethodGenericArity > 0)
             {
@@ -159,7 +156,7 @@ public sealed class TestDependency : IEquatable<TestDependency>
                 // For now, we'll skip this check
             }
         }
-        
+
         // Don't match self-dependencies when only class is specified
         if (ClassType != null && string.IsNullOrEmpty(MethodName) && dependentTest != null)
         {
@@ -169,10 +166,10 @@ public sealed class TestDependency : IEquatable<TestDependency>
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     public bool Equals(TestDependency? other)
     {
         if (other is null)
@@ -188,12 +185,12 @@ public sealed class TestDependency : IEquatable<TestDependency>
                ClassGenericArity == other.ClassGenericArity &&
                MethodName == other.MethodName &&
                MethodGenericArity == other.MethodGenericArity &&
-               (MethodParameters?.SequenceEqual(other.MethodParameters ?? Array.Empty<Type>()) ?? 
+               (MethodParameters?.SequenceEqual(other.MethodParameters ?? Array.Empty<Type>()) ??
                 other.MethodParameters == null);
     }
-    
+
     public override bool Equals(object? obj) => Equals(obj as TestDependency);
-    
+
     public override int GetHashCode()
     {
         unchecked
@@ -211,11 +208,11 @@ public sealed class TestDependency : IEquatable<TestDependency>
             return hash;
         }
     }
-    
+
     public override string ToString()
     {
-        var parts = new System.Collections.Generic.List<string>();
-        
+        var parts = new List<string>();
+
         if (ClassType != null)
         {
             parts.Add($"Class={ClassType.Name}");
@@ -224,7 +221,7 @@ public sealed class TestDependency : IEquatable<TestDependency>
                 parts.Add($"ClassGenericArity={ClassGenericArity}");
             }
         }
-        
+
         if (!string.IsNullOrEmpty(MethodName))
         {
             parts.Add($"Method={MethodName}");
@@ -237,7 +234,7 @@ public sealed class TestDependency : IEquatable<TestDependency>
                 parts.Add($"Params=[{string.Join(", ", MethodParameters.Select(p => p.Name))}]");
             }
         }
-        
+
         return $"TestDependency({string.Join(", ", parts)})";
     }
 }

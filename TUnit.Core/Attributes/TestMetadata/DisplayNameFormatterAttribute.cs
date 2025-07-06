@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Interfaces;
 
 #pragma warning disable CS9113 // Parameter is unread - Used for source generator
 

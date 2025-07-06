@@ -1,11 +1,8 @@
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using TUnit.Analyzers.Extensions;
-using TUnit.Analyzers.Helpers;
 
 namespace TUnit.Analyzers;
 
@@ -53,7 +50,7 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             if (!hasGenerateGenericTestAttribute)
             {
                 var canInferTypes = CanInferGenericTypes(methodSymbol, context.Compilation);
-                
+
                 if (!canInferTypes)
                 {
                     var diagnostic = Diagnostic.Create(
@@ -73,7 +70,7 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             if (!hasGenerateGenericTestAttribute)
             {
                 var canInferTypes = CanInferGenericTypes(methodSymbol, context.Compilation);
-                
+
                 if (!canInferTypes)
                 {
                     var diagnostic = Diagnostic.Create(
@@ -119,9 +116,9 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             if (!hasGenerateGenericTestAttribute)
             {
                 var canInferTypes = testMethods.Any(m => CanInferGenericTypes(m, context.Compilation));
-                
+
                 var isUsedAsInheritsTestsBase = IsUsedAsInheritsTestsBase(classSymbol, context.Compilation);
-                
+
                 if (!canInferTypes && !isUsedAsInheritsTestsBase)
                 {
                     var diagnostic = Diagnostic.Create(
@@ -166,18 +163,18 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 return;
             }
-            
+
             if (attribute.ArgumentList?.Arguments.Count >= 1 && attribute.ArgumentList?.Arguments.Count <= 5)
             {
                 var allArgumentsAreTypeOf = attribute.ArgumentList.Arguments.All(arg =>
                     arg.Expression is TypeOfExpressionSyntax);
-                
+
                 if (allArgumentsAreTypeOf)
                 {
                     return;
                 }
             }
-            
+
             var diagnostic = Diagnostic.Create(
                 Rules.DynamicDataSourceNotAotCompatible,
                 attribute.GetLocation(),
@@ -212,39 +209,39 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             var hasArgumentsAttributes = method.GetAttributes()
                 .Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, argumentsType));
-            
+
             if (hasArgumentsAttributes)
             {
                 return true; // Arguments attributes can provide type inference
             }
         }
-        
+
         // Check for MethodDataSource attributes
         var methodDataSourceType = compilation.GetTypeByMetadataName("TUnit.Core.MethodDataSourceAttribute");
         if (methodDataSourceType != null)
         {
             var hasMethodDataSourceAttributes = method.GetAttributes()
                 .Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, methodDataSourceType));
-            
+
             if (hasMethodDataSourceAttributes)
             {
                 return true; // MethodDataSource attributes can provide type inference
             }
         }
-        
+
         // Check for AsyncDataSourceGenerator attributes (implementations of IAsyncDataSourceGeneratorAttribute)
         var asyncDataSourceInterface = compilation.GetTypeByMetadataName("TUnit.Core.IAsyncDataSourceGeneratorAttribute");
         if (asyncDataSourceInterface != null)
         {
             var hasAsyncDataSourceGeneratorAttributes = method.GetAttributes()
                 .Any(a => a.AttributeClass?.AllInterfaces.Contains(asyncDataSourceInterface, SymbolEqualityComparer.Default) == true);
-            
+
             if (hasAsyncDataSourceGeneratorAttributes)
             {
                 return true; // AsyncDataSourceGenerator attributes can provide type inference
             }
         }
-        
+
         // For generic classes, also check class-level data source attributes
         if (method.ContainingType.IsGenericType)
         {
@@ -253,38 +250,38 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 var hasClassLevelArguments = method.ContainingType.GetAttributes()
                     .Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, argumentsType));
-                    
+
                 if (hasClassLevelArguments)
                 {
                     return true; // Class-level Arguments attributes can provide type inference
                 }
             }
-            
+
             // Check class-level MethodDataSource attributes
             if (methodDataSourceType != null)
             {
                 var hasClassLevelMethodDataSource = method.ContainingType.GetAttributes()
                     .Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, methodDataSourceType));
-                    
+
                 if (hasClassLevelMethodDataSource)
                 {
                     return true; // Class-level MethodDataSource attributes can provide type inference
                 }
             }
-            
+
             // Check class-level AsyncDataSourceGenerator attributes
             if (asyncDataSourceInterface != null)
             {
                 var hasClassLevelAsyncDataSource = method.ContainingType.GetAttributes()
                     .Any(a => a.AttributeClass?.AllInterfaces.Contains(asyncDataSourceInterface, SymbolEqualityComparer.Default) == true);
-                    
+
                 if (hasClassLevelAsyncDataSource)
                 {
                     return true; // Class-level AsyncDataSourceGenerator attributes can provide type inference
                 }
             }
         }
-        
+
         return false;
     }
 
@@ -300,9 +297,9 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         // Check if any type inherits from this generic class and has InheritsTests attribute
         foreach (var type in allTypes)
         {
-            if (type.BaseType != null && 
+            if (type.BaseType != null &&
                 SymbolEqualityComparer.Default.Equals(type.BaseType.OriginalDefinition, genericClass) &&
-                type.GetAttributes().Any(a => a.AttributeClass?.Name == "InheritsTestsAttribute" || 
+                type.GetAttributes().Any(a => a.AttributeClass?.Name == "InheritsTestsAttribute" ||
                                              a.AttributeClass?.Name == "InheritsTests"))
             {
                 return true;
@@ -347,7 +344,7 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         if (attribute.ArgumentList?.Arguments.Count >= 2)
         {
             var secondArgument = attribute.ArgumentList.Arguments[1];
-            
+
             // If first arg is typeof() and second is string literal or nameof(), it's AOT-compatible
             if (firstArgument.Expression is TypeOfExpressionSyntax &&
                 (secondArgument.Expression is LiteralExpressionSyntax secondLiteral &&

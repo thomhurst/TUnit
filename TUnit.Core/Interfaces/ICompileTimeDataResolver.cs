@@ -1,5 +1,3 @@
-using TUnit.Core.Models;
-
 namespace TUnit.Core.Interfaces;
 
 /// <summary>

@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using TUnit.Core.Enums;
 
 namespace TUnit.Core;
@@ -27,14 +26,14 @@ namespace TUnit.Core;
 /// {
 ///     // This test will only run on Windows
 /// }
-/// 
+///
 /// // Run on both Windows and Linux
 /// [Test, RunOn(OS.Windows | OS.Linux)]
 /// public void WindowsAndLinuxTest()
 /// {
 ///     // This test will run on Windows and Linux, but not on macOS
 /// }
-/// 
+///
 /// // Run on all supported platforms
 /// [Test, RunOn(OS.Windows | OS.Linux | OS.MacOs)]
 /// public void AllPlatformsTest()

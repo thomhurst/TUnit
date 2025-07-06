@@ -1,6 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using TUnit.Core;
-using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;
 

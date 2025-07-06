@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
@@ -7,8 +6,6 @@ using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
-using TUnit.Core.Interfaces;
-using TUnit.Core.Services;
 using TUnit.Engine.Building;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;

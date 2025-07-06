@@ -1,9 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.Extensions;
-using TUnit.Core.SourceGenerator;
-using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -70,7 +65,7 @@ public sealed class MetadataGenerator
     public void GenerateSingleTestMetadata(CodeWriter writer, TestMethodMetadata testInfo)
     {
         // Skip generic methods without type arguments to avoid CS0453 errors
-        if (testInfo.MethodSymbol.IsGenericMethod && 
+        if (testInfo.MethodSymbol.IsGenericMethod &&
             (testInfo.GenericTypeArguments == null || testInfo.GenericTypeArguments.Length == 0))
         {
             // Log a comment to help with debugging
@@ -98,7 +93,7 @@ public sealed class MetadataGenerator
     private void GenerateTestMetadata(CodeWriter writer, TestMethodMetadata testInfo)
     {
         // Skip generic methods without type arguments to avoid CS0453 errors
-        if (testInfo.MethodSymbol.IsGenericMethod && 
+        if (testInfo.MethodSymbol.IsGenericMethod &&
             (testInfo.GenericTypeArguments == null || testInfo.GenericTypeArguments.Length == 0))
         {
             // Log a comment to help with debugging
@@ -107,13 +102,13 @@ public sealed class MetadataGenerator
             writer.AppendLine($"// Method parameters: {string.Join(", ", testInfo.MethodSymbol.Parameters.Select(p => p.Type.ToDisplayString()))}");
             return;
         }
-        
+
         // Debug output for generic methods with type arguments
         if (testInfo.MethodSymbol.IsGenericMethod && testInfo.GenericTypeArguments != null)
         {
             writer.AppendLine($"// Generating generic method {testInfo.MethodSymbol.Name} with type arguments: {string.Join(", ", testInfo.GenericTypeArguments.Select(t => t.ToDisplayString()))}");
         }
-        
+
         writer.AppendLine("_allTests.Add(new TestMetadata");
         writer.AppendLine("{");
         writer.Indent();
@@ -374,9 +369,9 @@ public sealed class MetadataGenerator
     private void GenerateParameterTypes(CodeWriter writer, TestMethodMetadata testInfo)
     {
         IList<IParameterSymbol> parameters;
-        
+
         // If this is a generic method with inferred type arguments, use the constructed method
-        if (testInfo.MethodSymbol.IsGenericMethod && testInfo.GenericTypeArguments != null && 
+        if (testInfo.MethodSymbol.IsGenericMethod && testInfo.GenericTypeArguments != null &&
             testInfo.GenericTypeArguments.Length == testInfo.MethodSymbol.TypeParameters.Length)
         {
             try
@@ -448,13 +443,13 @@ public sealed class MetadataGenerator
 
         // Generate instance factory inline
         GenerateInlineInstanceFactory(writer, testInfo);
-        
+
         // Generate test invoker inline
         GenerateInlineTestInvoker(writer, testInfo);
-        
+
         // Generate property setters inline
         GenerateInlinePropertySetters(writer, testInfo);
-        
+
         // Generate property injections with embedded factories
         GeneratePropertyInjections(writer, testInfo);
     }
@@ -810,11 +805,11 @@ public sealed class MetadataGenerator
             i.Name == "ITestDiscoveryEventReceiver" &&
             i.ContainingNamespace?.ToDisplayString() == "TUnit.Core.Interfaces");
     }
-    
+
     private void GenerateInlineInstanceFactory(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        
+
         // Get all non-static properties that have data source attributes
         var propertiesWithDataSources = testInfo.TypeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
@@ -824,23 +819,23 @@ public sealed class MetadataGenerator
                     || a.AttributeClass?.Name == "MethodDataSourceAttribute"
                     || a.AttributeClass?.Name == "ArgumentsAttribute"))
             .ToList();
-            
+
         if (propertiesWithDataSources.Any())
         {
             // Generate a factory that expects property values to be passed via a dictionary in args
             writer.AppendLine("InstanceFactory = args =>");
             writer.AppendLine("{");
             writer.Indent();
-            
+
             // Constructor arguments come first
             var constructorArgs = GenerateConstructorArgs(testInfo);
-            
+
             // The runtime will pass property values as the last argument
             writer.AppendLine("var propertyValues = args.Length > 0 && args[args.Length - 1] is Dictionary<string, object?> dict ? dict : new Dictionary<string, object?>();");
             writer.AppendLine($"return new {className}({constructorArgs})");
             writer.AppendLine("{");
             writer.Indent();
-            
+
             // Generate property initializers for ALL properties with data sources
             foreach (var prop in propertiesWithDataSources)
             {
@@ -848,10 +843,10 @@ public sealed class MetadataGenerator
                 var propType = prop.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 writer.AppendLine($"{propName} = propertyValues.TryGetValue(\"{propName}\", out var _{propName}) ? ({propType})_{propName}! : default!,");
             }
-            
+
             writer.Unindent();
             writer.AppendLine("};");
-            
+
             writer.Unindent();
             writer.AppendLine("},");
         }
@@ -861,20 +856,20 @@ public sealed class MetadataGenerator
             writer.AppendLine($"InstanceFactory = args => new {className}({GenerateConstructorArgs(testInfo)}),");
         }
     }
-    
+
     private void GenerateInlineTestInvoker(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var className = testInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var methodName = testInfo.MethodSymbol.Name;
         var isAsync = testInfo.MethodSymbol.IsAsync;
-        
+
         writer.AppendLine("TestInvoker = async (instance, args) =>");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         // Cast instance to correct type
         writer.AppendLine($"var typedInstance = ({className})instance;");
-        
+
         // Check if this is a generic method that needs special handling
         if (testInfo.MethodSymbol.IsGenericMethod && testInfo.GenericTypeArguments != null &&
             testInfo.GenericTypeArguments.Length == testInfo.MethodSymbol.TypeParameters.Length)
@@ -882,10 +877,10 @@ public sealed class MetadataGenerator
             try
             {
                 // For generic methods with inferred types, generate a constructed method call
-                var typeArgs = string.Join(", ", testInfo.GenericTypeArguments.Select(t => 
+                var typeArgs = string.Join(", ", testInfo.GenericTypeArguments.Select(t =>
                     t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
                 var constructedMethod = testInfo.MethodSymbol.Construct(testInfo.GenericTypeArguments);
-                
+
                 // Generate parameter casting using the constructed method's parameters
                 var parameters = constructedMethod.Parameters;
             for (int i = 0; i < parameters.Length; i++)
@@ -893,7 +888,7 @@ public sealed class MetadataGenerator
                 var paramType = parameters[i].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 writer.AppendLine($"var arg{i} = ({paramType})args[{i}]!;");
             }
-            
+
             // Generate method call with explicit type arguments
             var argList = string.Join(", ", Enumerable.Range(0, parameters.Length).Select(i => $"arg{i}"));
             if (isAsync)
@@ -916,16 +911,16 @@ public sealed class MetadataGenerator
         {
             GenerateNonGenericMethodCall(writer, testInfo);
         }
-        
+
         writer.Unindent();
         writer.AppendLine("},");
     }
-    
+
     private void GenerateNonGenericMethodCall(CodeWriter writer, TestMethodMetadata testInfo)
     {
         var methodName = testInfo.MethodSymbol.Name;
         var isAsync = testInfo.MethodSymbol.IsAsync;
-        
+
         // Generate parameter casting
         var parameters = testInfo.MethodSymbol.Parameters;
         for (int i = 0; i < parameters.Length; i++)
@@ -933,7 +928,7 @@ public sealed class MetadataGenerator
             var paramType = parameters[i].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             writer.AppendLine($"var arg{i} = ({paramType})args[{i}]!;");
         }
-        
+
         // Generate method call
         var argList = string.Join(", ", Enumerable.Range(0, parameters.Length).Select(i => $"arg{i}"));
         if (isAsync)
@@ -946,19 +941,19 @@ public sealed class MetadataGenerator
             writer.AppendLine("await Task.CompletedTask;");
         }
     }
-    
+
     private void GenerateInlinePropertySetters(CodeWriter writer, TestMethodMetadata testInfo)
     {
         // PropertySetters are no longer needed since all properties are set during construction
         writer.AppendLine("PropertySetters = new Dictionary<string, Action<object, object?>>(),");
     }
-    
+
     private void GeneratePropertyInjections(CodeWriter writer, TestMethodMetadata testInfo)
     {
         // PropertyInjections are no longer needed since all properties are set during construction
         writer.AppendLine("PropertyInjections = Array.Empty<PropertyInjectionData>(),");
     }
-    
+
     private bool HasRequiredPropertiesWithDataSource(ITypeSymbol typeSymbol)
     {
         return typeSymbol.GetMembers()
@@ -967,7 +962,7 @@ public sealed class MetadataGenerator
                 .Any(a => a.AttributeClass?.AllInterfaces
                     .Any(i => i.Name == "IDataAttribute") == true));
     }
-    
+
     private List<IPropertySymbol> GetInitOnlyPropertiesWithDataSource(ITypeSymbol typeSymbol)
     {
         return typeSymbol.GetMembers()
@@ -978,7 +973,7 @@ public sealed class MetadataGenerator
                     || a.AttributeClass?.Name == "MethodDataSourceAttribute"))
             .ToList();
     }
-    
+
     private string GetSafeFactoryMethodName(ITypeSymbol typeSymbol)
     {
         return typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
@@ -989,22 +984,22 @@ public sealed class MetadataGenerator
             .Replace(",", "_")
             .Replace(" ", "");
     }
-    
+
     private string GenerateConstructorArgs(TestMethodMetadata testInfo)
     {
         var constructor = testInfo.TypeSymbol.Constructors
             .FirstOrDefault(c => !c.IsStatic);
-            
+
         if (constructor == null || constructor.Parameters.Length == 0)
             return "";
-            
+
         var args = new List<string>();
         for (int i = 0; i < constructor.Parameters.Length; i++)
         {
             var paramType = constructor.Parameters[i].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             args.Add($"({paramType})args[{i}]");
         }
-        
+
         return string.Join(", ", args);
     }
 }

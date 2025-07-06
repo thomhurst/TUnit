@@ -7,7 +7,6 @@ using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
-using TUnit.Core.Services;
 using TUnit.Engine.Building;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Framework;
@@ -202,9 +201,9 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             }
         }
 
-        await _logger.LogAsync(TUnit.Core.Logging.LogLevel.Debug, 
-            $"After including dependencies: {testsToInclude.Count} tests will be executed", 
-            null, 
+        await _logger.LogAsync(TUnit.Core.Logging.LogLevel.Debug,
+            $"After including dependencies: {testsToInclude.Count} tests will be executed",
+            null,
             (state, _) => state);
 
         var resultList = testsToInclude.ToList();
@@ -227,11 +226,11 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
         {
             DiscoveredTest = discoveredTest
         };
-        
+
         test.Context.InternalDiscoveredTest = discoveredTest;
 
         var attributes = test.Context.TestDetails.Attributes;
-        
+
         foreach (var attribute in attributes)
         {
             if (attribute is ITestRegisteredEventReceiver receiver)

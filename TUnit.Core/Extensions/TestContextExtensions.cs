@@ -1,7 +1,5 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using TUnit.Core.Interfaces;
+using System.Reflection;
 
 namespace TUnit.Core.Extensions;
 
@@ -46,7 +44,7 @@ public static class TestContextExtensions
             var registryType = Type.GetType("TUnit.Engine.Services.TestRegistry, TUnit.Engine");
             if (registryType != null)
             {
-                var instanceProperty = registryType.GetProperty("Instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                var instanceProperty = registryType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
                 var registry = instanceProperty?.GetValue(null);
                 if (registry != null)
                 {
@@ -55,7 +53,6 @@ public static class TestContextExtensions
                     {
                         var genericMethod = addDynamicTestMethod.MakeGenericMethod(typeof(T));
                         await (Task) genericMethod.Invoke(registry, [context, dynamicTest])!;
-                        return;
                     }
                 }
             }

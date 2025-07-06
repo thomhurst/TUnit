@@ -1,15 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using TUnit.Core.SourceGenerator.Extensions;
-using TUnit.Core.SourceGenerator;
-using TUnit.Core.SourceGenerator.Utilities;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -17,10 +9,9 @@ namespace TUnit.Core.SourceGenerator.Generators;
 /// Main orchestrator for test metadata generation following Single Responsibility Principle
 /// </summary>
 [Generator]
-public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
+public sealed class TestMetadataGenerator : IIncrementalGenerator
 {
     private const string GeneratedNamespace = "TUnit.Generated";
-    private const string RegistryClassName = "UnifiedTestMetadataRegistry";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -457,7 +448,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             {
                 return;
             }
-            
+
             var writer = new CodeWriter();
 
             // Generate file header
@@ -479,7 +470,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
                 .Replace(' ', '_')
                 .Replace('[', '_')
                 .Replace(']', '_');
-            
+
             var methodName = testMethod.MethodSymbol.Name;
             var sourceClassName = $"{typeFullName}_{methodName}_TestSource";
             var moduleInitializerClassName = $"{typeFullName}_{methodName}_ModuleInitializer";
@@ -497,10 +488,10 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
             writer.AppendLine($"static {sourceClassName}()");
             writer.AppendLine("{");
             writer.Indent();
-            
+
             // Generate the metadata for this single test method
             metadataGenerator.GenerateSingleTestMetadata(writer, testMethod);
-            
+
             writer.Unindent();
             writer.AppendLine("}");
 
@@ -511,7 +502,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
                 writer.AppendLine();
                 writer.AppendLine("// Async data source wrapper methods");
                 dataSourceGenerator.GenerateAsyncDataSourceWrappers(writer, testMethods);
-                
+
                 // Also generate the ConvertToSync helper if needed
                 writer.AppendLine();
                 GenerateConvertToSyncHelper(writer);
@@ -567,11 +558,11 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
     {
         var hasMethodDataSource = testMethod.MethodSymbol.GetAttributes()
             .Any(a => a.AttributeClass?.Name == "MethodDataSourceAttribute");
-        
+
         var hasPropertyDataSource = testMethod.TypeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
             .Any(p => p.GetAttributes().Any(a => a.AttributeClass?.Name == "DataSourceForAttribute"));
-            
+
         return hasMethodDataSource || hasPropertyDataSource;
     }
 
@@ -652,7 +643,7 @@ public sealed class UnifiedTestMetadataGeneratorV2 : IIncrementalGenerator
         writer.AppendLine("}");
     }
 
-    
+
     private static bool ContainsTypeParameter(ITypeSymbol type)
     {
         if (type is ITypeParameterSymbol)

@@ -1,5 +1,3 @@
-using TUnit.Core;
-
 namespace TUnit.TestProject;
 
 // Base class with test methods

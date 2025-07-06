@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Core.SourceGenerator;
@@ -21,7 +15,7 @@ internal static class AsyncDataSourceHelper
         writer.AppendLine("private static IEnumerable<object?[]> ConvertToSync(Func<CancellationToken, IAsyncEnumerable<object?[]>> asyncFactory)");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine("var cts = new CancellationTokenSource();");
         writer.AppendLine("var enumerator = asyncFactory(cts.Token).GetAsyncEnumerator(cts.Token);");
         writer.AppendLine("try");
@@ -65,7 +59,7 @@ internal static class AsyncDataSourceHelper
         writer.AppendLine("cts.Dispose();");
         writer.Unindent();
         writer.AppendLine("}");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
     }
@@ -76,7 +70,7 @@ internal static class AsyncDataSourceHelper
     public static bool IsAsyncDataSource(IMethodSymbol method)
     {
         var returnType = method.ReturnType;
-        
+
         // Check for Task<IEnumerable<T>>
         if (returnType is INamedTypeSymbol namedType && namedType.Name == "Task" && namedType.IsGenericType)
         {

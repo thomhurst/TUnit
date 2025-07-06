@@ -1,5 +1,4 @@
-﻿using TUnit.Core.Extensions;
-using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Tests.Attributes;
 

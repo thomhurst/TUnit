@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace TUnit.Core.SourceGenerator.Configuration;

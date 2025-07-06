@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using TUnit.Core.Enums;
 
 namespace TUnit.Core;
@@ -27,14 +26,14 @@ namespace TUnit.Core;
 /// {
 ///     // This test will run on Linux and macOS, but not on Windows
 /// }
-/// 
+///
 /// // Skip on both Windows and Linux
 /// [Test, ExcludeOn(OS.Windows | OS.Linux)]
 /// public void MacOsOnlyTest()
 /// {
 ///     // This test will only run on macOS
 /// }
-/// 
+///
 /// // Skip on all supported platforms (essentially always skips the test)
 /// [Test, ExcludeOn(OS.Windows | OS.Linux | OS.MacOs)]
 /// public void NeverRunTest()

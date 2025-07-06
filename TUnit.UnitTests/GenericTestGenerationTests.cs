@@ -1,5 +1,3 @@
-using TUnit.Core;
-
 namespace TUnit.UnitTests;
 
 public class GenericTestGenerationTests
@@ -12,7 +10,7 @@ public class GenericTestGenerationTests
         await Assert.That(typeof(T1)).IsNotNull();
         await Assert.That(typeof(T2)).IsNotNull();
     }
-    
+
     [Test]
     [Arguments(5)]
     [Arguments("hello")]
@@ -33,19 +31,19 @@ public class GenericTestGenerationTests
 public class GenericTestClass<T>
 {
     private readonly T _value;
-    
+
     public GenericTestClass()
     {
         _value = default!;
     }
-    
+
     [Test]
     public async Task TestGenericValue()
     {
         await Assert.That(typeof(T)).IsNotNull();
         await Assert.That(_value).IsEqualTo(default(T));
     }
-    
+
     [Test]
     [Arguments(42)]
     [Arguments("test")]

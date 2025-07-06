@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace TUnit.Core.Services;
 
 /// <summary>
@@ -10,10 +7,6 @@ public class TestServiceProvider : IServiceProvider
 {
     private readonly Dictionary<Type, object> _services = new();
     private readonly Dictionary<Type, Func<object>> _factories = new();
-
-    public TestServiceProvider()
-    {
-    }
 
     /// <summary>
     /// Registers a singleton service instance

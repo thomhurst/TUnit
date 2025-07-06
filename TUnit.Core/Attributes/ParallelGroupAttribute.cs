@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -29,13 +28,13 @@ namespace TUnit.Core;
 /// {
 ///     // This test will run in parallel with other tests in the "DatabaseTests" group
 /// }
-/// 
+///
 /// [Test, ParallelGroup("DatabaseTests")]
 /// public async Task DatabaseTest2()
 /// {
 ///     // This will run in parallel with DatabaseTest1
 /// }
-/// 
+///
 /// [Test, ParallelGroup("UITests", Order = 1)]
 /// public async Task UITest1()
 /// {
@@ -64,7 +63,7 @@ public class ParallelGroupAttribute(string group) : TUnitAttribute, ITestDiscove
     /// "NetworkTests", or "UITests".
     /// </para>
     /// <para>
-    /// During test execution, the test engine organizes tests into groups based on this property, and 
+    /// During test execution, the test engine organizes tests into groups based on this property, and
     /// ensures that tests from different groups are not executed simultaneously, helping to manage
     /// resource contention and test isolation.
     /// </para>

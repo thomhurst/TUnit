@@ -1,5 +1,3 @@
-using System;
-
 namespace TUnit.Core;
 
 /// <summary>
@@ -7,7 +5,7 @@ namespace TUnit.Core;
 /// Properties marked with this attribute will be injected before test execution
 /// and disposed (if applicable) after test completion.
 /// </summary>
-[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+[AttributeUsage(AttributeTargets.Property)]
 public sealed class InjectAttribute : Attribute
 {
     /// <summary>

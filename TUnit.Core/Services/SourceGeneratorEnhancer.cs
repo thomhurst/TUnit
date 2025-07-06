@@ -1,5 +1,5 @@
+using System.Reflection;
 using System.Text;
-using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Services;
@@ -265,7 +265,7 @@ public class SourceGeneratorEnhancer
         var className = classMetadata.Type.Name;
 
         code.AppendLine($"    // Registration class for {className}");
-        code.AppendLine($"    [System.Runtime.CompilerServices.ModuleInitializer]");
+        code.AppendLine("    [System.Runtime.CompilerServices.ModuleInitializer]");
         code.AppendLine($"    public static class {className}_Registration");
         code.AppendLine("    {");
         code.AppendLine("        public static void Initialize()");
@@ -294,7 +294,7 @@ public class SourceGeneratorEnhancer
     /// <summary>
     /// Gets properties that are eligible for dependency injection.
     /// </summary>
-    private static IEnumerable<System.Reflection.PropertyInfo> GetInjectableProperties(ClassMetadata classMetadata)
+    private static IEnumerable<PropertyInfo> GetInjectableProperties(ClassMetadata classMetadata)
     {
         return classMetadata.Type.GetProperties()
             .Where(p => p.CanWrite && HasPropertyInjectionAttribute(p));
@@ -303,7 +303,7 @@ public class SourceGeneratorEnhancer
     /// <summary>
     /// Checks if a property has dependency injection attributes.
     /// </summary>
-    private static bool HasPropertyInjectionAttribute(System.Reflection.PropertyInfo property)
+    private static bool HasPropertyInjectionAttribute(PropertyInfo property)
     {
         return property.GetCustomAttributes(true).Any(attr =>
             attr.GetType().Name.Contains("Inject") ||

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
 namespace TUnit.Core;
 
 /// <summary>
@@ -58,7 +54,7 @@ public class TestMetadata
     /// Whether this test can run in parallel
     /// </summary>
     public bool CanRunInParallel { get; init; } = true;
-    
+
     /// <summary>
     /// Test dependencies with full metadata support for generic types and methods
     /// </summary>
@@ -100,7 +96,7 @@ public class TestMetadata
     /// Parameter types for validation
     /// </summary>
     public Type[] ParameterTypes { get; init; } = [];
-    
+
     /// <summary>
     /// Parameter type names for dependency matching (fully qualified type names)
     /// </summary>
@@ -130,23 +126,23 @@ public class TestMetadata
     /// Generic method information if the test method is generic
     /// </summary>
     public GenericMethodInfo? GenericMethodInfo { get; init; }
-    
+
     /// <summary>
     /// Concrete type arguments for generic method instantiation (used with [GenerateGenericTest])
     /// </summary>
     public Type[]? GenericMethodTypeArguments { get; init; }
-    
+
     /// <summary>
     /// Factory to create attribute instances applied to this test (for discovery event receivers)
     /// </summary>
     public Func<Attribute[]>? AttributeFactory { get; init; }
-    
+
     /// <summary>
     /// Property setters dictionary for property injection
     /// Key is property name, value is setter delegate
     /// </summary>
     public Dictionary<string, Action<object, object?>> PropertySetters { get; init; } = new();
-    
+
     /// <summary>
     /// Enhanced property injection data including setters and value factories
     /// </summary>
@@ -200,22 +196,22 @@ public sealed class HookMetadata
     /// Type that declares this hook
     /// </summary>
     public Type? DeclaringType { get; init; }
-    
+
     /// <summary>
     /// Whether this is a static hook
     /// </summary>
     public bool IsStatic { get; init; }
-    
+
     /// <summary>
     /// Whether this hook is async (returns Task or ValueTask)
     /// </summary>
     public bool IsAsync { get; init; }
-    
+
     /// <summary>
     /// Whether this hook returns ValueTask (requires special handling)
     /// </summary>
     public bool ReturnsValueTask { get; init; }
-    
+
     /// <summary>
     /// Hook delegate from storage (AOT mode)
     /// </summary>

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Services;
 
@@ -5,9 +6,9 @@ namespace TUnit.Core.Examples;
 
 /// <summary>
 /// How AOT-safe AsyncDataSourceGenerator generation works.
-/// 
+///
 /// Given this test class with custom AsyncDataSourceGenerators:
-/// 
+///
 /// public class MyAsyncApiDataSource : AsyncDataSourceGeneratorAttribute<string>
 /// {
 ///     protected override async IAsyncEnumerable<Func<Task<string>>> GenerateDataSourcesAsync(DataGeneratorMetadata metadata)
@@ -16,14 +17,14 @@ namespace TUnit.Core.Examples;
 ///         yield return async () => await CallExternalApi("endpoint2");
 ///     }
 /// }
-/// 
-/// public class MyTests 
+///
+/// public class MyTests
 /// {
 ///     [Test]
 ///     [MyAsyncApiDataSource]
 ///     public async Task MyTest(string apiResult) { }
 /// }
-/// 
+///
 /// The source generator will emit the following AOT-safe code:
 /// </summary>
 public static class GeneratedAotAsyncDataSourceExample
@@ -96,7 +97,7 @@ public static class GeneratedAotAsyncDataSourceExample
                 catch (Exception ex)
                 {
                     // Log error and continue with other data sources
-                    System.Diagnostics.Debug.WriteLine($"Error executing async data source: {ex.Message}");
+                    Debug.WriteLine($"Error executing async data source: {ex.Message}");
                 }
             }
 
@@ -108,8 +109,8 @@ public static class GeneratedAotAsyncDataSourceExample
     public static void RegisterFactories()
     {
         // Registration for async data sources on test MyAsyncTests.MyAsyncTest
-        global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterAsyncDataSourceResolver("MyAsyncTests.MyAsyncTest", MyAsyncTests_MyAsyncTest_AsyncDataResolver.ResolveAllAsyncDataAsync);
-        global::TUnit.Core.Services.TestExecutionRegistry.Instance.RegisterAsyncDataExecutor("MyAsyncTests.MyAsyncTest", MyAsyncTests_MyAsyncTest_AsyncDataResolver.ResolveAndExecuteAllAsyncDataAsync);
+        TestExecutionRegistry.Instance.RegisterAsyncDataSourceResolver("MyAsyncTests.MyAsyncTest", MyAsyncTests_MyAsyncTest_AsyncDataResolver.ResolveAllAsyncDataAsync);
+        TestExecutionRegistry.Instance.RegisterAsyncDataExecutor("MyAsyncTests.MyAsyncTest", MyAsyncTests_MyAsyncTest_AsyncDataResolver.ResolveAndExecuteAllAsyncDataAsync);
     }
 }
 
@@ -153,7 +154,7 @@ public class MyAsyncTests
 
 /// <summary>
 /// Benefits of this AOT-safe AsyncDataSourceGenerator approach:
-/// 
+///
 /// ✅ 100% AOT-Safe: No reflection, no dynamic instantiation
 /// ✅ Strongly Typed: Direct instantiation and method calls with compile-time verification
 /// ✅ Full Async Support: Preserves async/await patterns throughout
@@ -162,7 +163,7 @@ public class MyAsyncTests
 /// ✅ Cancellation Support: Full CancellationToken propagation
 /// ✅ Error Handling: Graceful handling of async data source failures
 /// ✅ Lazy Evaluation: Data sources executed only when needed
-/// 
+///
 /// This solves the AsyncDataSourceGenerator AOT problem by generating the instantiation
 /// and invocation code rather than trying to execute generators at compile time.
 /// </summary>

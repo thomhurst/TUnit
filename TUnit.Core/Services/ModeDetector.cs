@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 

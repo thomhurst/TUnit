@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace TUnit.Core;
+﻿namespace TUnit.Core;
 
 #if NET7_0_OR_GREATER
 [AttributeUsage(AttributeTargets.Parameter)]

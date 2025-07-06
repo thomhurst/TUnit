@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Utilities;
 
 namespace TUnit.Core.SourceGenerator.Generators;
@@ -293,7 +288,7 @@ internal sealed class GenericTypeResolver
             {
                 var argValue = constructorArgs[i].Value;
                 ITypeSymbol? argType = null;
-                
+
                 // Determine the actual type from the value
                 if (argValue != null)
                 {
@@ -308,7 +303,7 @@ internal sealed class GenericTypeResolver
                         _ => constructorArgs[i].Type // Fall back to the declared type
                     };
                 }
-                
+
                 if (argType != null)
                 {
                     // Find the corresponding type parameter in the method's type parameters

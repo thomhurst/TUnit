@@ -1,5 +1,3 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Testing;
 using TUnit.Analyzers.Tests.Verifiers;
 
 namespace TUnit.Analyzers.Tests;

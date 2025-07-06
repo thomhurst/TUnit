@@ -1,6 +1,7 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text;
 using TUnit.Core.Extensions;
-using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Services;
 
@@ -26,8 +27,8 @@ public class AotMethodDataSourceGenerator
     /// <returns>Generated AOT-safe factory code</returns>
     public string GenerateMethodDataSourceFactory(
         MethodDataSourceAttribute methodDataSourceAttribute,
-        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
-            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)]
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicMethods)]
         Type declaringType)
     {
         var methodName = methodDataSourceAttribute.MethodNameProvidingDataSource;
@@ -67,7 +68,7 @@ public class AotMethodDataSourceGenerator
     /// <summary>
     /// Generates a synchronous data source factory method.
     /// </summary>
-    private void GenerateSyncDataSourceFactory(StringBuilder code, string declaringTypeName, string methodName, System.Reflection.MethodInfo dataSourceMethod)
+    private void GenerateSyncDataSourceFactory(StringBuilder code, string declaringTypeName, string methodName, MethodInfo dataSourceMethod)
     {
         var returnType = GetDataSourceReturnType(dataSourceMethod);
 
@@ -81,7 +82,7 @@ public class AotMethodDataSourceGenerator
     /// <summary>
     /// Generates an asynchronous data source factory method.
     /// </summary>
-    private void GenerateAsyncDataSourceFactory(StringBuilder code, string declaringTypeName, string methodName, System.Reflection.MethodInfo dataSourceMethod)
+    private void GenerateAsyncDataSourceFactory(StringBuilder code, string declaringTypeName, string methodName, MethodInfo dataSourceMethod)
     {
         var returnType = GetDataSourceReturnType(dataSourceMethod);
 
@@ -100,12 +101,12 @@ public class AotMethodDataSourceGenerator
     {
         if (isAsync)
         {
-            code.AppendLine($"    public static readonly Func<Task<IEnumerable<object?[]>>> AsyncFactory = GetDataAsync;");
-            code.AppendLine($"    public static readonly Func<IEnumerable<object?[]>> SyncFactory = GetData;");
+            code.AppendLine("    public static readonly Func<Task<IEnumerable<object?[]>>> AsyncFactory = GetDataAsync;");
+            code.AppendLine("    public static readonly Func<IEnumerable<object?[]>> SyncFactory = GetData;");
         }
         else
         {
-            code.AppendLine($"    public static readonly Func<IEnumerable<object?[]>> Factory = GetData;");
+            code.AppendLine("    public static readonly Func<IEnumerable<object?[]>> Factory = GetData;");
         }
     }
 
@@ -189,19 +190,19 @@ public class AotMethodDataSourceGenerator
     /// <summary>
     /// Finds a data source method on the given type.
     /// </summary>
-    private static System.Reflection.MethodInfo? FindDataSourceMethod(
-        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
-            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)]
+    private static MethodInfo? FindDataSourceMethod(
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicMethods)]
         Type declaringType,
         string methodName)
     {
-        return declaringType.GetMethod(methodName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+        return declaringType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Static);
     }
 
     /// <summary>
     /// Gets the appropriate return type for a data source method.
     /// </summary>
-    private static string GetDataSourceReturnType(System.Reflection.MethodInfo method)
+    private static string GetDataSourceReturnType(MethodInfo method)
     {
         var returnType = method.ReturnType;
 
@@ -229,8 +230,8 @@ public class AotMethodDataSourceGenerator
     /// <returns>True if AOT-safe generation is possible</returns>
     public bool CanGenerateAotSafe(
         MethodDataSourceAttribute methodDataSourceAttribute,
-        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(
-            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)]
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicMethods)]
         Type declaringType)
     {
         var methodName = methodDataSourceAttribute.MethodNameProvidingDataSource;

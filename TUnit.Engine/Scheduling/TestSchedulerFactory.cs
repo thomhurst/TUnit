@@ -1,5 +1,4 @@
 using TUnit.Core;
-using TUnit.Core.Logging;
 using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Scheduling;

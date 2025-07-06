@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using TUnit.Assertions;
 
 namespace TUnit.TestProject;
 

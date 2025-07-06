@@ -1,5 +1,3 @@
-using TUnit.Core.Enums;
-
 namespace TUnit.Core;
 
 /// <summary>
