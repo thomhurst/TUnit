@@ -286,22 +286,42 @@ internal sealed class GenericTypeResolver
 
         for (var i = 0; i < constructorArgs.Length && i < methodParameters.Length; i++)
         {
-            var argType = constructorArgs[i].Type;
             var paramType = methodParameters[i].Type;
 
-            // If the parameter is a generic type parameter, use the argument's type
-            if (paramType is ITypeParameterSymbol typeParam && argType != null)
+            // If the parameter is a generic type parameter, use the argument's actual value type
+            if (paramType is ITypeParameterSymbol typeParam)
             {
-                // Find the corresponding type parameter in the method's type parameters
-                var typeParamIndex = Array.IndexOf(typeParameters.ToArray(), typeParam);
-                if (typeParamIndex >= 0)
+                var argValue = constructorArgs[i].Value;
+                ITypeSymbol? argType = null;
+                
+                // Determine the actual type from the value
+                if (argValue != null)
                 {
-                    // Ensure we have enough space in our list
-                    while (argumentTypes.Count <= typeParamIndex)
+                    argType = argValue switch
                     {
-                        argumentTypes.Add(null!);
+                        int => testMethod.ContainingType.ContainingAssembly.GetTypeByMetadataName("System.Int32"),
+                        bool => testMethod.ContainingType.ContainingAssembly.GetTypeByMetadataName("System.Boolean"),
+                        string => testMethod.ContainingType.ContainingAssembly.GetTypeByMetadataName("System.String"),
+                        double => testMethod.ContainingType.ContainingAssembly.GetTypeByMetadataName("System.Double"),
+                        float => testMethod.ContainingType.ContainingAssembly.GetTypeByMetadataName("System.Single"),
+                        long => testMethod.ContainingType.ContainingAssembly.GetTypeByMetadataName("System.Int64"),
+                        _ => constructorArgs[i].Type // Fall back to the declared type
+                    };
+                }
+                
+                if (argType != null)
+                {
+                    // Find the corresponding type parameter in the method's type parameters
+                    var typeParamIndex = Array.IndexOf(typeParameters.ToArray(), typeParam);
+                    if (typeParamIndex >= 0)
+                    {
+                        // Ensure we have enough space in our list
+                        while (argumentTypes.Count <= typeParamIndex)
+                        {
+                            argumentTypes.Add(null!);
+                        }
+                        argumentTypes[typeParamIndex] = argType;
                     }
-                    argumentTypes[typeParamIndex] = argType;
                 }
             }
         }

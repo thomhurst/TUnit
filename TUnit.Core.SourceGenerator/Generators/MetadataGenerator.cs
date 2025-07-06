@@ -66,6 +66,23 @@ public sealed class MetadataGenerator
 
     private void GenerateTestMetadata(CodeWriter writer, TestMethodMetadata testInfo)
     {
+        // Skip generic methods without type arguments to avoid CS0453 errors
+        if (testInfo.MethodSymbol.IsGenericMethod && 
+            (testInfo.GenericTypeArguments == null || testInfo.GenericTypeArguments.Length == 0))
+        {
+            // Log a comment to help with debugging
+            writer.AppendLine($"// Skipped generic method {testInfo.MethodSymbol.Name} - no type arguments provided");
+            writer.AppendLine($"// Method has {testInfo.MethodSymbol.TypeParameters.Length} type parameters");
+            writer.AppendLine($"// Method parameters: {string.Join(", ", testInfo.MethodSymbol.Parameters.Select(p => p.Type.ToDisplayString()))}");
+            return;
+        }
+        
+        // Debug output for generic methods with type arguments
+        if (testInfo.MethodSymbol.IsGenericMethod && testInfo.GenericTypeArguments != null)
+        {
+            writer.AppendLine($"// Generating generic method {testInfo.MethodSymbol.Name} with type arguments: {string.Join(", ", testInfo.GenericTypeArguments.Select(t => t.ToDisplayString()))}");
+        }
+        
         writer.AppendLine("_allTests.Add(new TestMetadata");
         writer.AppendLine("{");
         writer.Indent();
@@ -325,7 +342,27 @@ public sealed class MetadataGenerator
 
     private void GenerateParameterTypes(CodeWriter writer, TestMethodMetadata testInfo)
     {
-        var parameters = testInfo.MethodSymbol.Parameters;
+        IList<IParameterSymbol> parameters;
+        
+        // If this is a generic method with inferred type arguments, use the constructed method
+        if (testInfo.MethodSymbol.IsGenericMethod && testInfo.GenericTypeArguments != null && 
+            testInfo.GenericTypeArguments.Length == testInfo.MethodSymbol.TypeParameters.Length)
+        {
+            try
+            {
+                var constructedMethod = testInfo.MethodSymbol.Construct(testInfo.GenericTypeArguments);
+                parameters = constructedMethod.Parameters;
+            }
+            catch
+            {
+                // If construction fails, fall back to original parameters
+                parameters = testInfo.MethodSymbol.Parameters;
+            }
+        }
+        else
+        {
+            parameters = testInfo.MethodSymbol.Parameters;
+        }
 
         if (!parameters.Any())
         {
@@ -336,7 +373,7 @@ public sealed class MetadataGenerator
 
         // Check if any parameter contains unresolved type parameters
         var hasUnresolvedTypeParameters = parameters.Any(p => ContainsTypeParameter(p.Type));
-        if (hasUnresolvedTypeParameters)
+        if (hasUnresolvedTypeParameters && testInfo.GenericTypeArguments == null)
         {
             // For methods with unresolved type parameters, we can't generate typeof() at compile time
             writer.AppendLine("ParameterTypes = Type.EmptyTypes,");
@@ -807,6 +844,57 @@ public sealed class MetadataGenerator
         // Cast instance to correct type
         writer.AppendLine($"var typedInstance = ({className})instance;");
         
+        // Check if this is a generic method that needs special handling
+        if (testInfo.MethodSymbol.IsGenericMethod && testInfo.GenericTypeArguments != null &&
+            testInfo.GenericTypeArguments.Length == testInfo.MethodSymbol.TypeParameters.Length)
+        {
+            try
+            {
+                // For generic methods with inferred types, generate a constructed method call
+                var typeArgs = string.Join(", ", testInfo.GenericTypeArguments.Select(t => 
+                    t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+                var constructedMethod = testInfo.MethodSymbol.Construct(testInfo.GenericTypeArguments);
+                
+                // Generate parameter casting using the constructed method's parameters
+                var parameters = constructedMethod.Parameters;
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var paramType = parameters[i].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                writer.AppendLine($"var arg{i} = ({paramType})args[{i}]!;");
+            }
+            
+            // Generate method call with explicit type arguments
+            var argList = string.Join(", ", Enumerable.Range(0, parameters.Length).Select(i => $"arg{i}"));
+            if (isAsync)
+            {
+                writer.AppendLine($"await typedInstance.{methodName}<{typeArgs}>({argList});");
+            }
+            else
+            {
+                writer.AppendLine($"typedInstance.{methodName}<{typeArgs}>({argList});");
+                writer.AppendLine("await Task.CompletedTask;");
+            }
+            }
+            catch
+            {
+                // If construction fails, fall back to non-generic handling
+                GenerateNonGenericMethodCall(writer, testInfo);
+            }
+        }
+        else
+        {
+            GenerateNonGenericMethodCall(writer, testInfo);
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+    
+    private void GenerateNonGenericMethodCall(CodeWriter writer, TestMethodMetadata testInfo)
+    {
+        var methodName = testInfo.MethodSymbol.Name;
+        var isAsync = testInfo.MethodSymbol.IsAsync;
+        
         // Generate parameter casting
         var parameters = testInfo.MethodSymbol.Parameters;
         for (int i = 0; i < parameters.Length; i++)
@@ -826,9 +914,6 @@ public sealed class MetadataGenerator
             writer.AppendLine($"typedInstance.{methodName}({argList});");
             writer.AppendLine("await Task.CompletedTask;");
         }
-        
-        writer.Unindent();
-        writer.AppendLine("},");
     }
     
     private void GenerateInlinePropertySetters(CodeWriter writer, TestMethodMetadata testInfo)
