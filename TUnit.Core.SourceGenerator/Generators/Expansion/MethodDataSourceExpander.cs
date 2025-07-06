@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Models;
 
@@ -6,6 +7,8 @@ namespace TUnit.Core.SourceGenerator.Generators.Expansion;
 
 public sealed class MethodDataSourceExpander : ITestExpander
 {
+    private readonly ITypedConstantFormatter _formatter = new TypedConstantFormatter();
+    
     public bool CanExpand(TestMethodMetadata testInfo)
     {
         return testInfo.MethodSymbol.GetAttributes()
@@ -279,7 +282,7 @@ public sealed class MethodDataSourceExpander : ITestExpander
         var isAsync = testInfo.MethodSymbol.IsAsync;
 
         // Generate instance factory based on whether the class has constructor parameters
-        if (HasClassConstructorParameters(testInfo.TypeSymbol))
+        if (testInfo.TypeSymbol.HasParameterizedConstructor())
         {
             // For classes with constructor parameters, leave InstanceFactory null
             // The TestBuilder will handle instance creation with proper constructor arguments
@@ -395,7 +398,7 @@ public sealed class MethodDataSourceExpander : ITestExpander
             return $"{sourceTypeName}.{methodName}()";
         }
         
-        var argList = string.Join(", ", arguments.Select(arg => TypedConstantParser.FormatPrimitive(arg)));
+        var argList = string.Join(", ", arguments.Select(arg => _formatter.FormatValue(arg)));
         return $"{sourceTypeName}.{methodName}({argList})";
     }
 
@@ -552,45 +555,8 @@ public sealed class MethodDataSourceExpander : ITestExpander
 
     private object? ExtractTypedConstantValue(TypedConstant typedConstant)
     {
-        if (typedConstant.IsNull)
-        {
-            return null;
-        }
-        
-        return typedConstant.Kind switch
-        {
-            TypedConstantKind.Primitive => typedConstant.Value,
-            TypedConstantKind.Enum => typedConstant.Value,
-            TypedConstantKind.Type => typedConstant.Value,
-            TypedConstantKind.Array => typedConstant.Values.Select(ExtractTypedConstantValue).ToArray(),
-            _ => typedConstant.Value
-        };
-    }
-
-    private static string FormatArgumentForTestId(object? arg)
-    {
-        if (arg == null)
-            return "null";
-        
-        var str = arg.ToString() ?? "null";
-        
-        // Escape special characters for TestId
-        return str.Replace("\\", "\\\\")
-                  .Replace("\r", "\\r")
-                  .Replace("\n", "\\n")
-                  .Replace("\t", "\\t")
-                  .Replace("\"", "\\\"");
-    }
-
-    private bool HasClassConstructorParameters(ITypeSymbol typeSymbol)
-    {
-        // Check if the class has any constructors with parameters
-        var constructors = typeSymbol.GetMembers()
-            .OfType<IMethodSymbol>()
-            .Where(m => m.MethodKind == MethodKind.Constructor && !m.IsStatic);
-
-        // If there's a parameterized constructor, return true
-        return constructors.Any(c => c.Parameters.Length > 0);
+        // Keep the TypedConstant for proper formatting later
+        return typedConstant;
     }
 
     private record DataSourceInfo(string MethodName, ITypeSymbol? ClassType, object?[]? Arguments);
