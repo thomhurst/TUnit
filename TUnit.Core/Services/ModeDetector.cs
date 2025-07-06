@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 
@@ -74,7 +75,7 @@ public class ModeDetector : IModeDetector
         {
             // Check environment variable first
             var envMode = Environment.GetEnvironmentVariable("TUNIT_EXECUTION_MODE");
-            if (!string.IsNullOrEmpty(envMode) && 
+            if (!string.IsNullOrEmpty(envMode) &&
                 Enum.TryParse<TestExecutionMode>(envMode, ignoreCase: true, out var mode))
             {
                 return mode;

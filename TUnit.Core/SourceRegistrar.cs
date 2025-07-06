@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;

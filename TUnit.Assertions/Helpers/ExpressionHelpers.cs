@@ -10,9 +10,9 @@ public static class ExpressionHelpers
         {
             var unaryExpression = (UnaryExpression) exp.Body;
 
-            body = unaryExpression.Operand as MemberExpression;
+            body = (MemberExpression)unaryExpression.Operand;
         }
 
-        return body!.Member.Name;
+        return body.Member.Name;
     }
 }
