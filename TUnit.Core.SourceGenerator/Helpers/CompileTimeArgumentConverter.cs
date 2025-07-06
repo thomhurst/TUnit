@@ -63,8 +63,7 @@ public static class CompileTimeArgumentConverter
         }
 
         // Check if the type itself is IEnumerable<T>
-        if (type is INamedTypeSymbol namedType &&
-            namedType.OriginalDefinition.SpecialType == SpecialType.System_Collections_Generic_IEnumerable_T)
+        if (type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Collections_Generic_IEnumerable_T } namedType)
         {
             return namedType.TypeArguments[0];
         }

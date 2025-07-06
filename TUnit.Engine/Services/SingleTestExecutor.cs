@@ -34,7 +34,7 @@ public class SingleTestExecutor : ISingleTestExecutor
     {
         // If test is already failed (e.g., from data source expansion error),
         // just report the existing failure
-        if (test.State == TestState.Failed && test.Result != null)
+        if (test is { State: TestState.Failed, Result: not null })
         {
             return CreateUpdateMessage(test);
         }

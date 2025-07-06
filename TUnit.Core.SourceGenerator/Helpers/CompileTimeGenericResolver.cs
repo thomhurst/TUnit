@@ -56,11 +56,8 @@ internal static class CompileTimeGenericResolver
                 // Verify consistency
                 return SymbolEqualityComparer.Default.Equals(existingMapping, argumentType);
             }
-            else
-            {
-                typeMapping[typeParam] = argumentType;
-                return true;
-            }
+            typeMapping[typeParam] = argumentType;
+            return true;
         }
 
         // Array types

@@ -164,7 +164,7 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            if (attribute.ArgumentList?.Arguments.Count >= 1 && attribute.ArgumentList?.Arguments.Count <= 5)
+            if (attribute.ArgumentList?.Arguments.Count is >= 1 and <= 5)
             {
                 var allArgumentsAreTypeOf = attribute.ArgumentList.Arguments.All(arg =>
                     arg.Expression is TypeOfExpressionSyntax);
@@ -326,9 +326,7 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         // Check if first argument is nameof() - this is AOT-compatible
-        if (firstArgument.Expression is InvocationExpressionSyntax invocation &&
-            invocation.Expression is IdentifierNameSyntax identifier &&
-            identifier.Identifier.ValueText == "nameof")
+        if (firstArgument.Expression is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } })
         {
             return false; // nameof() is AOT-compatible
         }
@@ -349,9 +347,7 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
             if (firstArgument.Expression is TypeOfExpressionSyntax &&
                 (secondArgument.Expression is LiteralExpressionSyntax secondLiteral &&
                  secondLiteral.Token.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StringLiteralToken) ||
-                 secondArgument.Expression is InvocationExpressionSyntax secondInvocation &&
-                 secondInvocation.Expression is IdentifierNameSyntax secondIdentifier &&
-                 secondIdentifier.Identifier.ValueText == "nameof"))
+                 secondArgument.Expression is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } }))
             {
                 return false; // typeof() + string/nameof() is AOT-compatible
             }

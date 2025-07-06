@@ -75,7 +75,7 @@ public class GenericTypeResolver
 
         foreach (var arg in attribute.ConstructorArguments)
         {
-            if (arg.Kind == TypedConstantKind.Type && arg.Value is ITypeSymbol typeSymbol)
+            if (arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol })
             {
                 types.Add(typeSymbol);
             }
@@ -173,7 +173,7 @@ public class GenericTypeResolver
             return argumentType.AllInterfaces.Any(i =>
                 SymbolEqualityComparer.Default.Equals(i, constraintType));
         }
-        else if (constraintType.TypeKind == TypeKind.Class)
+        if (constraintType.TypeKind == TypeKind.Class)
         {
             var baseType = argumentType.BaseType;
             while (baseType != null)

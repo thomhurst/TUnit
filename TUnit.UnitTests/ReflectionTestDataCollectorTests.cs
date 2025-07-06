@@ -305,8 +305,7 @@ public class ReflectionGenericTests
 
         // Assert
         var genericMethodTest = tests.FirstOrDefault(t =>
-            t.TestMethodName == "GenericMethodTest" &&
-            t.TestClassType.IsGenericTypeDefinition);
+            t is { TestMethodName: "GenericMethodTest", TestClassType.IsGenericTypeDefinition: true });
 
         await Assert.That(genericMethodTest).IsNotNull();
         await Assert.That(genericMethodTest!.GenericMethodInfo).IsNotNull();

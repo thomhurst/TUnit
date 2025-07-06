@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Enums;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -69,12 +70,12 @@ public record AsyncDataSourceGeneratorContainer(
 
         if (ArgumentsType == ArgumentsType.ClassConstructor)
         {
-            sourceCodeWriter.Append($"{CodeGenerators.VariableNames.ClassDataIndex}++;");
+            sourceCodeWriter.Append($"{VariableNames.ClassDataIndex}++;");
         }
 
         if (ArgumentsType == ArgumentsType.Method)
         {
-            sourceCodeWriter.Append($"{CodeGenerators.VariableNames.TestMethodDataIndex}++;");
+            sourceCodeWriter.Append($"{VariableNames.TestMethodDataIndex}++;");
         }
     }
 
@@ -227,7 +228,7 @@ public record AsyncDataSourceGeneratorContainer(
         sourceCodeWriter.Append("new DataGeneratorMetadata");
         sourceCodeWriter.AppendLine();
         sourceCodeWriter.Append("{");
-        sourceCodeWriter.Append($"Type = global::TUnit.Core.Enums.DataGeneratorType.Property,");
+        sourceCodeWriter.Append("Type = global::TUnit.Core.Enums.DataGeneratorType.Property,");
         sourceCodeWriter.Append("TestBuilderContext = testBuilderContextAccessor,");
         sourceCodeWriter.Append("TestInformation = testInformation,");
 

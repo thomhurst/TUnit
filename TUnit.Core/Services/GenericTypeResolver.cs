@@ -40,7 +40,10 @@ public class GenericTypeResolver : IGenericTypeResolver
                 // For null arguments with generic parameters, we need more context
                 // Try to infer from constraints or other arguments
                 var constraints = parameterType.GetGenericParameterConstraints();
-                if (constraints.Length == 1 && !constraints[0].IsInterface)
+                if (constraints is
+                    [
+                        { IsInterface: false }
+                    ])
                 {
                     // If there's exactly one non-interface constraint, we might be able to use it
                     typeMapping[parameterType] = constraints[0];

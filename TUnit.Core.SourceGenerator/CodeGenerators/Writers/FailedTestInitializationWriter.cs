@@ -10,7 +10,7 @@ public static class FailedTestInitializationWriter
     {
         var testId = testSourceDataModel.TestId;
 
-        sourceBuilder.Append($"discoveryFailures.Add(new DiscoveryFailure");
+        sourceBuilder.Append("discoveryFailures.Add(new DiscoveryFailure");
         sourceBuilder.Append("{");
         sourceBuilder.Append($"TestId = $\"{testId}\",");
         sourceBuilder.Append($"Exception = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.ClassMetadata.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception),");

@@ -10,7 +10,7 @@ public class TUnitConfiguration
     /// <summary>
     /// Enable verbose diagnostics during source generation
     /// </summary>
-    public bool EnableVerboseDiagnostics { get; set; } = false;
+    public bool EnableVerboseDiagnostics { get; set; }
 
     // Hardcoded optimal defaults (no longer configurable):
     // - No generic depth limits (unlimited)

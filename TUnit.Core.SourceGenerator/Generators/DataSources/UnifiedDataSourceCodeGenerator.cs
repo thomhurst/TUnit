@@ -151,8 +151,7 @@ public sealed class UnifiedDataSourceCodeGenerator : IDataSourceCodeGenerator
 
         // Check if the async enumerable returns object?[]
         var asyncEnumType = methodSymbol.ReturnType as INamedTypeSymbol;
-        if (asyncEnumType != null &&
-            asyncEnumType.TypeArguments.Length > 0 &&
+        if (asyncEnumType is { TypeArguments.Length: > 0 } &&
             IsObjectArrayType(asyncEnumType.TypeArguments[0]))
         {
             // Already returns IAsyncEnumerable<object?[]> - use directly
@@ -187,10 +186,10 @@ public sealed class UnifiedDataSourceCodeGenerator : IDataSourceCodeGenerator
     private void GenerateTaskOfEnumerableDataSource(CodeWriter writer, string methodCall, ITypeSymbol returnType)
     {
         var taskType = returnType as INamedTypeSymbol;
-        if (taskType != null && taskType.TypeArguments.Length > 0)
+        if (taskType is { TypeArguments.Length: > 0 })
         {
             var innerType = taskType.TypeArguments[0] as INamedTypeSymbol;
-            if (innerType != null && innerType.IsGenericType && innerType.TypeArguments.Length > 0 &&
+            if (innerType is { IsGenericType: true, TypeArguments.Length: > 0 } &&
                 IsObjectArrayType(innerType.TypeArguments[0]))
             {
                 // Already returns Task<IEnumerable<object?[]>>
@@ -212,10 +211,10 @@ public sealed class UnifiedDataSourceCodeGenerator : IDataSourceCodeGenerator
     private void GenerateValueTaskOfEnumerableDataSource(CodeWriter writer, string methodCall, ITypeSymbol returnType)
     {
         var valueTaskType = returnType as INamedTypeSymbol;
-        if (valueTaskType != null && valueTaskType.TypeArguments.Length > 0)
+        if (valueTaskType is { TypeArguments.Length: > 0 })
         {
             var innerType = valueTaskType.TypeArguments[0] as INamedTypeSymbol;
-            if (innerType != null && innerType.IsGenericType && innerType.TypeArguments.Length > 0 &&
+            if (innerType is { IsGenericType: true, TypeArguments.Length: > 0 } &&
                 IsObjectArrayType(innerType.TypeArguments[0]))
             {
                 // Already returns ValueTask<IEnumerable<object?[]>> - convert to Task
@@ -242,7 +241,7 @@ public sealed class UnifiedDataSourceCodeGenerator : IDataSourceCodeGenerator
 
         // Properties should only provide a single value, not multiple
         // The first value from the enumerable is used for property injection
-        writer.AppendLine($"new DelegateDataSource(() => {{");
+        writer.AppendLine("new DelegateDataSource(() => {");
         writer.Indent();
         writer.AppendLine($"var values = global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays({propertyAccess}).ToArray();");
         writer.AppendLine("return System.Linq.Enumerable.Take(values, 1);");
@@ -259,7 +258,7 @@ public sealed class UnifiedDataSourceCodeGenerator : IDataSourceCodeGenerator
         }
 
         // Use the same ConvertToObjectArrays pattern as method data sources
-        writer.AppendLine($"new DelegateDataSource(() => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(");
+        writer.AppendLine("new DelegateDataSource(() => global::TUnit.Core.Helpers.DataConversionHelper.ConvertToObjectArrays(");
         writer.Indent();
 
         // Generate the raw data - single value or array of values
@@ -418,7 +417,7 @@ public sealed class UnifiedDataSourceCodeGenerator : IDataSourceCodeGenerator
 
     private bool IsTaskOfEnumerable(ITypeSymbol type)
     {
-        if (type is INamedTypeSymbol namedType && namedType.Name == "Task" && namedType.TypeArguments.Length == 1)
+        if (type is INamedTypeSymbol { Name: "Task", TypeArguments.Length: 1 } namedType)
         {
             var innerType = namedType.TypeArguments[0];
             return innerType is INamedTypeSymbol innerNamed &&
@@ -429,7 +428,7 @@ public sealed class UnifiedDataSourceCodeGenerator : IDataSourceCodeGenerator
 
     private bool IsValueTaskOfEnumerable(ITypeSymbol type)
     {
-        if (type is INamedTypeSymbol namedType && namedType.Name == "ValueTask" && namedType.TypeArguments.Length == 1)
+        if (type is INamedTypeSymbol { Name: "ValueTask", TypeArguments.Length: 1 } namedType)
         {
             var innerType = namedType.TypeArguments[0];
             return innerType is INamedTypeSymbol innerNamed &&
@@ -450,7 +449,7 @@ public sealed class UnifiedDataSourceCodeGenerator : IDataSourceCodeGenerator
 
     private ITypeSymbol[] GetTupleElements(ITypeSymbol type)
     {
-        if (type is INamedTypeSymbol namedType && namedType.IsTupleType)
+        if (type is INamedTypeSymbol { IsTupleType: true } namedType)
         {
             return namedType.TupleElements.Select(e => e.Type).ToArray();
         }

@@ -10,7 +10,7 @@ public class CodeWriter : ICodeWriter
 {
     private readonly StringBuilder _builder = new();
     private readonly string _indentString;
-    internal int _indentLevel = 0; // Keep old name for compatibility
+    internal int _indentLevel; // Keep old name for compatibility
     private bool _isNewLine = true;
 
     public CodeWriter(string indentString = "    ", bool includeHeader = true)

@@ -27,7 +27,10 @@ public class ArgumentsDataProviderGenerator : IDataProviderGenerator
     {
         var args = attribute.ConstructorArguments;
         // ArgumentsAttribute constructor takes params object?[]
-        if (args.Length == 1 && args[0].Kind == TypedConstantKind.Array)
+        if (args is
+            [
+                { Kind: TypedConstantKind.Array } _
+            ])
         {
             // Handle params array case
             var values = args[0].Values;

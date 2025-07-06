@@ -72,7 +72,7 @@ internal static class AsyncDataSourceHelper
         var returnType = method.ReturnType;
 
         // Check for Task<IEnumerable<T>>
-        if (returnType is INamedTypeSymbol namedType && namedType.Name == "Task" && namedType.IsGenericType)
+        if (returnType is INamedTypeSymbol { Name: "Task", IsGenericType: true } namedType)
         {
             var innerType = namedType.TypeArguments.FirstOrDefault();
             if (innerType is INamedTypeSymbol innerNamed && IsEnumerableType(innerNamed))
@@ -82,7 +82,7 @@ internal static class AsyncDataSourceHelper
         }
 
         // Check for ValueTask<IEnumerable<T>>
-        if (returnType is INamedTypeSymbol valueTaskType && valueTaskType.Name == "ValueTask" && valueTaskType.IsGenericType)
+        if (returnType is INamedTypeSymbol { Name: "ValueTask", IsGenericType: true } valueTaskType)
         {
             var innerType = valueTaskType.TypeArguments.FirstOrDefault();
             if (innerType is INamedTypeSymbol innerNamed && IsEnumerableType(innerNamed))
@@ -92,7 +92,7 @@ internal static class AsyncDataSourceHelper
         }
 
         // Check for IAsyncEnumerable<T>
-        if (returnType is INamedTypeSymbol asyncEnumerable && asyncEnumerable.Name == "IAsyncEnumerable" && asyncEnumerable.IsGenericType)
+        if (returnType is INamedTypeSymbol { Name: "IAsyncEnumerable", IsGenericType: true })
         {
             return true;
         }
@@ -102,6 +102,6 @@ internal static class AsyncDataSourceHelper
 
     private static bool IsEnumerableType(INamedTypeSymbol type)
     {
-        return type.Name == "IEnumerable" && type.IsGenericType;
+        return type is { Name: "IEnumerable", IsGenericType: true };
     }
 }

@@ -71,7 +71,7 @@ public class TestMetadataGenerationContext
     private static string SanitizeForFilename(string name)
     {
         // Replace all invalid filename characters with underscores
-        var invalid = System.IO.Path.GetInvalidFileNameChars()
+        var invalid = Path.GetInvalidFileNameChars()
             .Concat(['<', '>', '(', ')', '[', ']', '{', '}', ',', ' ', '`', '.'])
             .Distinct();
 
@@ -207,7 +207,7 @@ public class TestMetadataGenerationContext
                         .OfType<IMethodSymbol>()
                         .FirstOrDefault();
 
-                    if (method != null && method.IsStatic)
+                    if (method is { IsStatic: true })
                     {
                         // Static method - can be resolved at compile time
                         return false;
@@ -216,7 +216,10 @@ public class TestMetadataGenerationContext
                 // If we can't find it or it's not static, requires runtime
                 return true;
             }
-            else if (args.Length == 2 && args[0].Value == null)
+            if (args is
+                [
+                    { Value: null } _, _
+                ])
             {
                 // Method on test class - need to check if it's static
                 return true; // For now, assume it could be instance method

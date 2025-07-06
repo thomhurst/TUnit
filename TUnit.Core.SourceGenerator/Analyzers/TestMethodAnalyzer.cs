@@ -25,7 +25,7 @@ public class TestMethodAnalyzer : ITestAnalyzer
         var typeSymbol = methodSymbol.ContainingType;
 
         // Skip abstract classes, static methods, and open generic types
-        if (typeSymbol.IsAbstract || methodSymbol.IsStatic || (typeSymbol.IsGenericType && typeSymbol.TypeParameters.Length > 0))
+        if (typeSymbol.IsAbstract || methodSymbol.IsStatic || typeSymbol is { IsGenericType: true, TypeParameters.Length: > 0 })
         {
             return null;
         }
@@ -99,7 +99,7 @@ public class TestMethodAnalyzer : ITestAnalyzer
         var timeoutAttribute = methodSymbol.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "TimeoutAttribute");
 
-        if (timeoutAttribute != null && timeoutAttribute.ConstructorArguments.Length > 0)
+        if (timeoutAttribute is { ConstructorArguments.Length: > 0 })
         {
             if (timeoutAttribute.ConstructorArguments[0].Value is int milliseconds)
             {
@@ -115,7 +115,7 @@ public class TestMethodAnalyzer : ITestAnalyzer
         var repeatAttribute = methodSymbol.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute");
 
-        if (repeatAttribute != null && repeatAttribute.ConstructorArguments.Length > 0)
+        if (repeatAttribute is { ConstructorArguments.Length: > 0 })
         {
             if (repeatAttribute.ConstructorArguments[0].Value is int count)
             {

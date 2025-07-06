@@ -131,7 +131,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     private static IEnumerable<TestMetadata> DiscoverTestsInAssembly(Assembly assembly)
     {
         var types = assembly.GetTypes()
-            .Where(t => !t.IsAbstract && t.IsClass);
+            .Where(t => t is { IsAbstract: false, IsClass: true });
 
         foreach (var type in types)
         {

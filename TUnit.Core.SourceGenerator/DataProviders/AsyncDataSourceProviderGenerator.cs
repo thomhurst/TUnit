@@ -87,7 +87,7 @@ public class AsyncDataSourceProviderGenerator : IDataProviderGenerator
 
         // Set other required properties
         writer.Append($"TestInformation = {GenerateMethodMetadataUsingWriter(context.TestInfo)}, ");
-        writer.Append($"Type = TUnit.Core.Enums.DataGeneratorType.ClassParameters ");
+        writer.Append("Type = TUnit.Core.Enums.DataGeneratorType.ClassParameters ");
         writer.Append("})");
     }
 
@@ -123,7 +123,7 @@ public class AsyncDataSourceProviderGenerator : IDataProviderGenerator
 
         // Set other required properties
         writer.Append($"TestInformation = {GenerateMethodMetadataUsingWriter(context.TestInfo)}, ");
-        writer.Append($"Type = TUnit.Core.Enums.DataGeneratorType.TestParameters ");
+        writer.Append("Type = TUnit.Core.Enums.DataGeneratorType.TestParameters ");
         writer.Append("})");
     }
 

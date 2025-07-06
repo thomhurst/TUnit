@@ -118,7 +118,7 @@ internal sealed class GenericTypeResolver
     private void AnalyzeGenericTestClassUsage(INamedTypeSymbol classSymbol)
     {
         // Check if this is a concrete instantiation of a generic test class
-        if (classSymbol.BaseType != null && classSymbol.BaseType.IsGenericType)
+        if (classSymbol.BaseType is { IsGenericType: true })
         {
             var baseType = classSymbol.BaseType;
             if (HasTestMethods(baseType.OriginalDefinition))
@@ -387,7 +387,7 @@ internal sealed class GenericTypeResolver
         if (enumerableInterface?.TypeArguments.FirstOrDefault() is ITypeSymbol elementType)
         {
             // Handle tuple types like (T1, T2)
-            if (elementType is INamedTypeSymbol namedType && namedType.IsTupleType)
+            if (elementType is INamedTypeSymbol { IsTupleType: true } namedType)
             {
                 return namedType.TupleElements.Select(e => e.Type).ToArray();
             }
@@ -427,7 +427,7 @@ internal sealed class GenericTypeResolver
         var typeArgs = new List<ITypeSymbol>();
         foreach (var arg in attribute.ConstructorArguments)
         {
-            if (arg.Kind == TypedConstantKind.Type && arg.Value is ITypeSymbol typeSymbol)
+            if (arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol })
             {
                 typeArgs.Add(typeSymbol);
             }
@@ -521,7 +521,7 @@ internal sealed class GenericTypeResolver
         writer.Indent();
 
         writer.AppendLine($"TestId = \"GenericTest<{typeArgsDisplay}>\",");
-        writer.AppendLine($"TestName = \"GenericTest\",");
+        writer.AppendLine("TestName = \"GenericTest\",");
         writer.AppendLine($"TestClassType = typeof({testInfo.OriginalType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}<{typeArgsDisplay}>),");
         writer.AppendLine($"TestMethodName = \"{testInfo.TestMethods.FirstOrDefault()?.Name ?? "Unknown"}\",");
         writer.AppendLine("FilePath = string.Empty,"); // Would need syntax reference for actual file path
@@ -543,8 +543,8 @@ internal sealed class GenericTypeResolver
         writer.AppendLine("AfterClass = Array.Empty<HookMetadata>(),");
         writer.Unindent();
         writer.AppendLine("},");
-        writer.AppendLine($"InstanceFactory = null, // Would need generic-aware factory");
-        writer.AppendLine($"TestInvoker = null, // Would need generic-aware invoker");
+        writer.AppendLine("InstanceFactory = null, // Would need generic-aware factory");
+        writer.AppendLine("TestInvoker = null, // Would need generic-aware invoker");
 
         writer.Unindent();
         writer.AppendLine("};");

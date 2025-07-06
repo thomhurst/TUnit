@@ -49,7 +49,7 @@ public static class GenericTestInvocationWriter
         sourceBuilder.Append("MethodMetadata = testInformation,");
         sourceBuilder.Append($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.Append($"TestLineNumber = {testSourceDataModel.LineNumber},");
-        sourceBuilder.Append($"TestClassFactory = () => resettableClassFactory.Value,");
+        sourceBuilder.Append("TestClassFactory = () => resettableClassFactory.Value,");
         sourceBuilder.Append($"TestMethodInvoker = (classInstance, cancellationToken) => AsyncConvert.Convert(() => classInstance.{testSourceDataModel.MethodName}({testSourceDataModel.MethodVariablesWithCancellationToken()})),");
         sourceBuilder.Append($"ClassArgumentsProvider = () => new object?[] {{ {testSourceDataModel.ClassArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()} }},");
         sourceBuilder.Append($"MethodArgumentsProvider = () => new object?[] {{ {testSourceDataModel.MethodArguments.DataVariables.Select(x => x.Name).ToCommaSeparatedString()} }},");

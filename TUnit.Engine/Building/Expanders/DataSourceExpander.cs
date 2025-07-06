@@ -269,7 +269,10 @@ public sealed class DataSourceExpander : IDataSourceExpander
     [UnconditionalSuppressMessage("AOT", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicFields' in call to 'System.Type.GetFields()'", Justification = "Tuple fields are always public and available")]
     private static object?[] UnwrapTuples(object?[] args)
     {
-        if (args.Length == 1 && args[0] != null)
+        if (args is
+            [
+                not null
+            ])
         {
             var argType = args[0]!.GetType();
             if (argType.IsValueType && argType.Name.StartsWith("ValueTuple`"))

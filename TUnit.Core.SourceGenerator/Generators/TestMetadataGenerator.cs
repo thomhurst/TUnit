@@ -52,49 +52,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(inferredGenericTests, static (context, testMethod) => GenerateTestMethodSource(context, testMethod));
     }
 
-    private static bool IsTestClass(SyntaxNode node)
-    {
-        if (node is not ClassDeclarationSyntax classDecl)
-        {
-            return false;
-        }
-
-        // Check if the class has any test methods
-        return classDecl.Members.OfType<MethodDeclarationSyntax>()
-            .Any(method => method.AttributeLists.Any(al =>
-                al.Attributes.Any(a =>
-                    a.Name.ToString().EndsWith("Test") ||
-                    a.Name.ToString().EndsWith("TestAttribute"))));
-    }
-
-    private static bool IsTestMethod(SyntaxNode node)
-    {
-        return node is MethodDeclarationSyntax method &&
-               method.AttributeLists.Any(al =>
-                   al.Attributes.Any(a =>
-                       a.Name.ToString().EndsWith("Test") ||
-                       a.Name.ToString().EndsWith("TestAttribute")));
-    }
-
-    private static bool HasGenerateGenericTestAttribute(SyntaxNode node)
-    {
-        if (node is ClassDeclarationSyntax classDecl)
-        {
-            return classDecl.AttributeLists.Any(al =>
-                al.Attributes.Any(a =>
-                    a.Name.ToString().Contains("GenerateGenericTest")));
-        }
-
-        if (node is MethodDeclarationSyntax methodDecl)
-        {
-            return methodDecl.AttributeLists.Any(al =>
-                al.Attributes.Any(a =>
-                    a.Name.ToString().Contains("GenerateGenericTest")));
-        }
-
-        return false;
-    }
-
     private static bool IsGenericTestMethodOrClass(SyntaxNode node)
     {
         if (node is ClassDeclarationSyntax classDecl)
@@ -127,12 +84,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodSyntax = (MethodDeclarationSyntax)context.TargetNode;
         var methodSymbol = context.TargetSymbol as IMethodSymbol;
 
-        if (methodSymbol?.ContainingType == null)
-        {
-            return null;
-        }
+        var containingType = methodSymbol?.ContainingType;
 
-        var containingType = methodSymbol.ContainingType as INamedTypeSymbol;
         if (containingType == null)
         {
             return null;
@@ -146,13 +99,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Skip generic types without explicit instantiation
         // Check for open generic types (types with unbound type parameters)
-        if (containingType.IsGenericType && containingType.TypeParameters.Length > 0)
+        if (containingType is { IsGenericType: true, TypeParameters.Length: > 0 })
         {
             return null;
         }
 
         // Also check if any type arguments are type parameters (e.g., T)
-        if (containingType is INamedTypeSymbol namedType && namedType.IsGenericType)
+        if (containingType is INamedTypeSymbol { IsGenericType: true } namedType)
         {
             if (namedType.TypeArguments.Any(arg => arg.TypeKind == TypeKind.TypeParameter))
             {
@@ -169,7 +122,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 return null;
             }
 
-            if (currentType is INamedTypeSymbol baseNamedType && baseNamedType.IsGenericType)
+            if (currentType is INamedTypeSymbol { IsGenericType: true } baseNamedType)
             {
                 if (baseNamedType.TypeArguments.Any(arg => arg.TypeKind == TypeKind.TypeParameter))
                 {
@@ -181,7 +134,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Skip generic methods without explicit instantiation
-        if (methodSymbol is IMethodSymbol method && method.IsGenericMethod)
+        if (methodSymbol is IMethodSymbol { IsGenericMethod: true })
         {
             return null;
         }
@@ -195,7 +148,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         return new TestMethodMetadata
         {
-            MethodSymbol = methodSymbol as IMethodSymbol ?? throw new InvalidOperationException("Symbol is not a method"),
+            MethodSymbol = methodSymbol ?? throw new InvalidOperationException("Symbol is not a method"),
             TypeSymbol = containingType,
             MethodSyntax = methodSyntax
         };
@@ -208,13 +161,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (context.TargetNode is ClassDeclarationSyntax classDecl)
         {
             var classSymbol = context.TargetSymbol as INamedTypeSymbol;
-            if (classSymbol == null)
-            {
-                return null;
-            }
 
             // Get all generic test methods in the class
-            var namedTypeSymbol = classSymbol as INamedTypeSymbol;
+            var namedTypeSymbol = classSymbol;
             if (namedTypeSymbol == null)
             {
                 return null;
@@ -348,12 +297,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else if (context.Node is MethodDeclarationSyntax methodDecl)
         {
             var methodSymbol = context.SemanticModel.GetDeclaredSymbol(methodDecl) as IMethodSymbol;
-            if (methodSymbol?.ContainingType == null)
-            {
-                return null;
-            }
 
-            var containingType = methodSymbol.ContainingType as INamedTypeSymbol;
+            var containingType = methodSymbol?.ContainingType;
             if (containingType == null || containingType.IsAbstract)
             {
                 return null;
@@ -408,7 +353,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             try
             {
-                if (arg.Kind == TypedConstantKind.Type && arg.Value is ITypeSymbol typeSymbol)
+                if (arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol })
                 {
                     typeArgs.Add(typeSymbol);
                 }
@@ -417,7 +362,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // Handle array of types
                     foreach (var arrayElement in arg.Values)
                     {
-                        if (arrayElement.Kind == TypedConstantKind.Type && arrayElement.Value is ITypeSymbol arrayTypeSymbol)
+                        if (arrayElement is { Kind: TypedConstantKind.Type, Value: ITypeSymbol arrayTypeSymbol })
                         {
                             typeArgs.Add(arrayTypeSymbol);
                         }
@@ -427,7 +372,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             catch (InvalidOperationException)
             {
                 // If it's an array but we tried to access Value, skip it
-                continue;
             }
         }
 

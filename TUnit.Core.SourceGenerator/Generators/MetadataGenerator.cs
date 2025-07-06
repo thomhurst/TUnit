@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -147,7 +148,7 @@ public sealed class MetadataGenerator
         if (ContainsTypeParameter(testInfo.TypeSymbol))
         {
             // This shouldn't happen with proper filtering, but provide a fallback
-            writer.AppendLine($"TestClassType = typeof(object),");
+            writer.AppendLine("TestClassType = typeof(object),");
         }
         else
         {
@@ -310,7 +311,10 @@ public sealed class MetadataGenerator
             {
                 // Non-generic version
                 var args = attr.ConstructorArguments;
-                if (args.Length == 1 && args[0].Type?.Name == "String")
+                if (args is
+                    [
+                        { Type.Name: "String" } _
+                    ])
                 {
                     // DependsOnAttribute(string testName)
                     var testName = args[0].Value?.ToString();
@@ -320,7 +324,10 @@ public sealed class MetadataGenerator
                         testDependencies.Add($"TestDependency.FromMethodName(\"{testName}\")");
                     }
                 }
-                else if (args.Length >= 1 && args[0].Type?.Name == "Type")
+                else if (args is
+                         [
+                             { Type.Name: "Type" } _, ..
+                         ])
                 {
                     // DependsOnAttribute(Type testClass) or DependsOnAttribute(Type testClass, string testName)
                     var classType = args[0].Value as ITypeSymbol;
@@ -332,7 +339,10 @@ public sealed class MetadataGenerator
                             // Depends on all tests in the class
                             testDependencies.Add($"TestDependency.FromClass(typeof({className}))");
                         }
-                        else if (args.Length >= 2 && args[1].Type?.Name == "String")
+                        else if (args is
+                                 [
+                                     _, { Type.Name: "String" } _, ..
+                                 ])
                         {
                             var testName = args[1].Value?.ToString();
                             if (!string.IsNullOrEmpty(testName))
@@ -545,7 +555,7 @@ public sealed class MetadataGenerator
             var isShared = sharedType != "None";
 
             // Get the type to instantiate from the generic attribute
-            if (attr.AttributeClass is INamedTypeSymbol namedType && namedType.IsGenericType && namedType.TypeArguments.Length > 0)
+            if (attr.AttributeClass is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: > 0 } namedType)
             {
                 var dataType = namedType.TypeArguments[0];
                 writer.AppendLine($"DataSource = new DelegateDataSource(() => new object?[][] {{ new object?[] {{ new {dataType.ToDisplayString()}() }} }}, {isShared.ToString().ToLower()})");
@@ -614,14 +624,14 @@ public sealed class MetadataGenerator
             if (attr.AttributeClass?.Name == "ArgumentsAttribute" && attr.ConstructorArguments.Length > 0)
             {
                 // ArgumentsAttribute provides the values directly
-                var values = attr.ConstructorArguments.Select(arg => CodeGenerators.Helpers.TypedConstantParser.GetRawTypedConstantValue(arg)).ToList();
+                var values = attr.ConstructorArguments.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg)).ToList();
                 var valuesStr = string.Join(", ", values);
                 writer.AppendLine($"DataSource = new DelegateDataSource(() => new object?[][] {{ new object?[] {{ {valuesStr} }} }}, false)");
             }
             else
             {
                 // For other data attributes, just return empty for now
-                writer.AppendLine($"DataSource = new DelegateDataSource(() => new object?[][] {{ new object?[] {{ null }} }}, false)");
+                writer.AppendLine("DataSource = new DelegateDataSource(() => new object?[][] { new object?[] { null } }, false)");
             }
         }
     }
@@ -776,7 +786,7 @@ public sealed class MetadataGenerator
                 {
                     writer.Append(", ");
                 }
-                writer.Append(CodeGenerators.Helpers.TypedConstantParser.GetRawTypedConstantValue(attributeData.ConstructorArguments[i]));
+                writer.Append(TypedConstantParser.GetRawTypedConstantValue(attributeData.ConstructorArguments[i]));
             }
             writer.Append(")");
         }
@@ -792,7 +802,7 @@ public sealed class MetadataGenerator
                     writer.Append(", ");
                 }
                 var namedArg = attributeData.NamedArguments[i];
-                writer.Append($"{namedArg.Key} = {CodeGenerators.Helpers.TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)}");
+                writer.Append($"{namedArg.Key} = {TypedConstantParser.GetRawTypedConstantValue(namedArg.Value)}");
             }
             writer.Append(" }");
         }
@@ -967,7 +977,7 @@ public sealed class MetadataGenerator
     {
         return typeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
-            .Where(p => p.SetMethod != null && p.SetMethod.IsInitOnly && p.GetAttributes()
+            .Where(p => p.SetMethod is { IsInitOnly: true } && p.GetAttributes()
                 .Any(a => a.AttributeClass?.AllInterfaces.Any(i => i.Name == "IDataAttribute") == true
                     || a.AttributeClass?.Name == "ClassDataSourceAttribute"
                     || a.AttributeClass?.Name == "MethodDataSourceAttribute"))

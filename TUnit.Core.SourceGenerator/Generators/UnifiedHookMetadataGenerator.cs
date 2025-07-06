@@ -93,8 +93,8 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
     {
         // Filter out hooks from abstract generic classes
         var validDirectHooks = directHooks.Where(h =>
-            !(h.TypeSymbol.IsAbstract && h.TypeSymbol.IsGenericType &&
-              h.TypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))).ToList();
+            !(h.TypeSymbol is { IsAbstract: true, IsGenericType: true } &&
+                h.TypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))).ToList();
 
         // Just return the direct hooks - no need to walk inheritance during registration
         // Inheritance will be handled at execution time in GetHooksForType
@@ -523,7 +523,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         using (writer.BeginBlock("private static void InitializeHookDictionaries()"))
         {
             // Group hooks by the type where they are declared
-            var hooksByType = hooks.GroupBy(h => h.TypeSymbol as ISymbol, SymbolEqualityComparer.Default);
+            var hooksByType = hooks.GroupBy(h => h.TypeSymbol, SymbolEqualityComparer.Default);
 
             foreach (var typeGroup in hooksByType)
             {
@@ -1174,8 +1174,8 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
     {
         var returnType = method.ReturnType;
         return returnType.Name == "Task" || returnType.Name == "ValueTask" ||
-               (returnType is INamedTypeSymbol namedType && namedType.IsGenericType &&
-                (namedType.ConstructedFrom.Name == "Task" || namedType.ConstructedFrom.Name == "ValueTask"));
+               (returnType is INamedTypeSymbol { IsGenericType: true } namedType &&
+                   (namedType.ConstructedFrom.Name == "Task" || namedType.ConstructedFrom.Name == "ValueTask"));
     }
 
     private static string GetTypeDisplayString(INamedTypeSymbol typeSymbol)

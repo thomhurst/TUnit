@@ -165,7 +165,7 @@ public class InheritsTestsGenerator : IIncrementalGenerator
 
                 // Generate test metadata
                 w2.AppendLine("// Create the test metadata object first without problematic array properties");
-                using (w2.BeginObjectInitializer("var metadata = new DynamicTestMetadata", ";"))
+                using (w2.BeginObjectInitializer("var metadata = new DynamicTestMetadata"))
                 {
                     w2.AppendLine($"TestIdTemplate = \"{GetFullTypeName(classSymbol)}.{methodSymbol.Name}_{{{{TestIndex}}}}\",");
                     w2.AppendLine($"TestClassTypeReference = {CodeGenerationHelpers.GenerateTypeReference(classSymbol)},");
@@ -210,12 +210,12 @@ public class InheritsTestsGenerator : IIncrementalGenerator
                             w4.AppendBlock("Assembly = new AssemblyMetadata", w5 =>
                             {
                                 w5.AppendLine($"Name = \"{classSymbol.ContainingAssembly.Name}\",");
-                                w5.AppendLine($"Attributes = System.Array.Empty<global::TUnit.Core.AttributeMetadata>()");
+                                w5.AppendLine("Attributes = System.Array.Empty<global::TUnit.Core.AttributeMetadata>()");
                             });
                             w4.AppendLine(",");
 
                             // Generate Parameters (for class constructor)
-                            w4.AppendLine($"Parameters = System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
+                            w4.AppendLine("Parameters = System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
                             w4.AppendLine($"Properties = {CodeGenerationHelpers.GeneratePropertyMetadataArray(classSymbol)},");
                             w4.AppendLine("Parent = null");
                         });
@@ -260,7 +260,7 @@ public class InheritsTestsGenerator : IIncrementalGenerator
                     w2.AppendLine($"TestLineNumber = {classInfo.LineNumber},");
                     w2.AppendLine($"ClassDataSources = {CodeGenerationHelpers.GenerateClassDataSourceProviders(classSymbol)},");
                     w2.AppendLine($"MethodDataSources = {CodeGenerationHelpers.GenerateMethodDataSourceProviders(methodSymbol)},");
-                    w2.AppendLine($"PropertyDataSources = new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.Interfaces.IDataSource>(),");
+                    w2.AppendLine("PropertyDataSources = new System.Collections.Generic.Dictionary<System.Reflection.PropertyInfo, global::TUnit.Core.Interfaces.IDataSource>(),");
 
                     // Extract timeout, skip info, and repeat count
                     var (isSkipped, skipReason) = CodeGenerationHelpers.ExtractSkipInfo(methodSymbol);

@@ -163,12 +163,7 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
     private ExtractedDataSource? ExtractPropertyDataSource(IPropertySymbol? property,
         DataSourceLevel level, TestMethodMetadata testContext)
     {
-        if (property == null)
-        {
-            return null;
-        }
-
-        var dataSourceAttribute = property.GetAttributes()
+        var dataSourceAttribute = property?.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "DataSourceForAttribute");
 
         if (dataSourceAttribute == null)
@@ -237,7 +232,7 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
         if (returnType is INamedTypeSymbol namedType)
         {
             // Check for IAsyncEnumerable<T>
-            if (namedType.IsGenericType && namedType.Name == "IAsyncEnumerable")
+            if (namedType is { IsGenericType: true, Name: "IAsyncEnumerable" })
             {
                 return true;
             }
@@ -246,9 +241,7 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
             if ((namedType.Name == "Task" || namedType.Name == "ValueTask") && namedType.IsGenericType)
             {
                 var typeArg = namedType.TypeArguments.FirstOrDefault();
-                if (typeArg is INamedTypeSymbol innerType &&
-                    innerType.IsGenericType &&
-                    innerType.Name == "IEnumerable")
+                if (typeArg is INamedTypeSymbol { IsGenericType: true, Name: "IEnumerable" })
                 {
                     return true;
                 }
@@ -261,8 +254,6 @@ public sealed class UnifiedDataSourceExtractor : IDataSourceExtractor
     private bool IsAsyncType(ITypeSymbol type)
     {
         return type.Name == "IAsyncEnumerable" ||
-               (type is INamedTypeSymbol namedType &&
-                namedType.IsGenericType &&
-                namedType.Name == "IAsyncEnumerable");
+               type is INamedTypeSymbol { IsGenericType: true, Name: "IAsyncEnumerable" };
     }
 }

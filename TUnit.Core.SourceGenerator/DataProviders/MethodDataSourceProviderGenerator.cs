@@ -22,7 +22,10 @@ public class MethodDataSourceProviderGenerator : IDataProviderGenerator
 
         writer.Append("new TUnit.Core.MethodDataProvider(() => ");
 
-        if (args.Length == 2 && args[0].Value != null)
+        if (args is
+            [
+                { Value: not null } _, _
+            ])
         {
             // Type and method name
             var type = args[0].Value as ITypeSymbol;
@@ -30,7 +33,7 @@ public class MethodDataSourceProviderGenerator : IDataProviderGenerator
 
             // Find the method to check if it's static
             var method = type?.GetMembers(methodName!).OfType<IMethodSymbol>().FirstOrDefault();
-            if (method != null && method.IsStatic)
+            if (method is { IsStatic: true })
             {
                 writer.Append($"{type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}.{methodName}()");
             }
@@ -40,7 +43,10 @@ public class MethodDataSourceProviderGenerator : IDataProviderGenerator
                 writer.Append($"new {type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}().{methodName}()");
             }
         }
-        else if (args.Length == 1 || (args.Length == 2 && args[0].Value == null))
+        else if (args.Length == 1 || args is
+                 [
+                     { Value: null } _, _
+                 ])
         {
             // Just method name - refers to a method on the test class
             var methodName = args.Length == 1 ? args[0].Value?.ToString() : args[1].Value?.ToString();

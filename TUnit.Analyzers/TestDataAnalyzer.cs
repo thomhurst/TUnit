@@ -574,8 +574,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         // Handle object[] case - when a data source returns IEnumerable<object[]>,
         // each object[] contains the arguments for one test invocation
-        if (type is IArrayTypeSymbol arrayType &&
-            arrayType.ElementType.SpecialType == SpecialType.System_Object)
+        if (type is IArrayTypeSymbol { ElementType.SpecialType: SpecialType.System_Object })
         {
             // Return empty array to indicate that type checking should be skipped
             // since object[] can contain any types that will be checked at runtime

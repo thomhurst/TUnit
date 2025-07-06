@@ -703,7 +703,7 @@ internal static class CodeGenerationHelpers
         {
             return typeParameter.DeclaringMethod.TypeParameters.IndexOf(typeParameter);
         }
-        else if (typeParameter.DeclaringType != null)
+        if (typeParameter.DeclaringType != null)
         {
             return typeParameter.DeclaringType.TypeParameters.IndexOf(typeParameter);
         }

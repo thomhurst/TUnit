@@ -41,7 +41,7 @@ public static class AsyncConvert
     {
         var task = action();
 
-        if (task.IsCompleted && !task.IsFaulted)
+        if (task is { IsCompleted: true, IsFaulted: false })
         {
             return default;
         }
