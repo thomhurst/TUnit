@@ -568,8 +568,37 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("},");
 
-        // CreateExecutableTest factory (null for now, will be handled by TestBuilder)
-        writer.AppendLine("CreateExecutableTest = null");
+        // CreateExecutableTest factory to create strongly-typed ExecutableTest<T>
+        writer.AppendLine($"CreateExecutableTest = (context, metadata) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"var typedMetadata = (TestMetadata<{className}>)metadata;");
+        writer.AppendLine($"return new global::TUnit.Engine.ExecutableTest<{className}>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Set all required properties from context
+        writer.AppendLine("TestId = context.TestId,");
+        writer.AppendLine("DisplayName = context.DisplayName,");
+        writer.AppendLine("Arguments = context.Arguments,");
+        writer.AppendLine("ClassArguments = context.ClassArguments,");
+        writer.AppendLine("PropertyValues = context.PropertyValues,");
+        writer.AppendLine("BeforeTestHooks = context.BeforeTestHooks,");
+        writer.AppendLine("AfterTestHooks = context.AfterTestHooks,");
+        writer.AppendLine("Context = context.Context,");
+        
+        // Set the metadata property (not TypedMetadata which is read-only)
+        writer.AppendLine("Metadata = typedMetadata,");
+        
+        // Set typed properties
+        writer.AppendLine($"CreateTypedInstance = async () => typedMetadata.InstanceFactory == null ? throw new InvalidOperationException(\"No instance factory\") : await Task.FromResult(({className})typedMetadata.InstanceFactory(context.ClassArguments)),");
+        writer.AppendLine("InvokeTypedTest = typedMetadata.InvokeTypedTest ?? throw new InvalidOperationException(\"No typed test invoker\"),");
+        writer.AppendLine("TypedPropertySetters = typedMetadata.PropertySetters");
+        
+        writer.Unindent();
+        writer.AppendLine("};");
+        writer.Unindent();
+        writer.AppendLine("}");
     }
 
     private static IEnumerable<AttributeData> GetDataSourceAttributes(ISymbol symbol)
