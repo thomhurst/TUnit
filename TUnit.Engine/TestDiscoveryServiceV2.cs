@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
@@ -11,7 +12,7 @@ namespace TUnit.Engine;
 /// </summary>
 public sealed class TestDiscoveryServiceV2 : IDataProducer
 {
-    private const int DiscoveryTimeoutSeconds = 30;
+    private const int DiscoveryTimeoutSeconds = 60;
     private readonly UnifiedTestBuilderPipeline _testBuilderPipeline;
 
     public string Uid => "TUnit";
@@ -32,7 +33,12 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer
     /// </summary>
     public async Task<IEnumerable<ExecutableTest>> DiscoverTests()
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(DiscoveryTimeoutSeconds));
+        using var cts = new CancellationTokenSource();
+
+        if (!Debugger.IsAttached)
+        {
+            cts.CancelAfter(TimeSpan.FromSeconds(DiscoveryTimeoutSeconds));
+        }
 
         try
         {
