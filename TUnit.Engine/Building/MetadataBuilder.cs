@@ -19,12 +19,10 @@ internal static class MetadataBuilder
             Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.FullName ?? "Unknown", () => new AssemblyMetadata
             {
                 Name = type.Assembly.GetName().Name ?? "Unknown",
-                Attributes = []
             }),
             Parameters = [],
             Properties = [],
             Parent = null,
-            Attributes = []
         });
     }
 
@@ -36,7 +34,6 @@ internal static class MetadataBuilder
         {
             Name = $"param{index}",
             TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
-            Attributes = [],
             ReflectionInfo = null!
         }).ToArray();
 
@@ -50,7 +47,6 @@ internal static class MetadataBuilder
             GenericTypeCount = 0,
             ReturnTypeReference = TypeReference.CreateConcrete(typeof(Task).AssemblyQualifiedName ?? typeof(Task).FullName ?? "System.Threading.Tasks.Task"),
             ReturnType = typeof(Task),
-            Attributes = []
         };
     }
 }

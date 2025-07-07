@@ -17,7 +17,7 @@ public static class GenericTestInvocationWriter
         sourceBuilder.Append("var testInformation = ");
 
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder,
-            testSourceDataModel.TestGenerationContext.Context,
+            testSourceDataModel.TestGenerationContext.Context.SemanticModel.Compilation,
             testSourceDataModel.ClassMetadata, testSourceDataModel.MethodMetadata,
             testSourceDataModel.GenericSubstitutions, ';');
 

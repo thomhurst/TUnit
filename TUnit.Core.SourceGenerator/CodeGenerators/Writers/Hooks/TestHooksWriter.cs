@@ -22,7 +22,7 @@ public class TestHooksWriter : BaseHookWriter
 
             sourceBuilder.Append("{");
             sourceBuilder.Append("MethodInfo = ");
-            SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
+            SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context.SemanticModel.Compilation, model.ClassType, model.Method, null, ',');
 
             sourceBuilder.Append($"Body = (context, cancellationToken) => AsyncConvert.Convert(() => {model.FullyQualifiedTypeName}.{model.MethodName}({GetArgs(model)})),");
 
@@ -40,7 +40,7 @@ public class TestHooksWriter : BaseHookWriter
         sourceBuilder.Append("{");
         sourceBuilder.Append($"ClassType = typeof({model.FullyQualifiedTypeName}),");
         sourceBuilder.Append("MethodInfo = ");
-        SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context, model.ClassType, model.Method, null, ',');
+        SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context.SemanticModel.Compilation, model.ClassType, model.Method, null, ',');
 
 
         if (model.ClassType.IsGenericDefinition())

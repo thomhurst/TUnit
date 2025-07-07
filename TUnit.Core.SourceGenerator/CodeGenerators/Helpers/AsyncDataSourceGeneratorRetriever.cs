@@ -22,7 +22,7 @@ public static class AsyncDataSourceGeneratorRetriever
     {
         return new AsyncDataSourceGeneratorContainer
         (
-            Context: context,
+            Compilation: context.SemanticModel.Compilation,
             AttributeData: attributeData,
             ArgumentsType: argumentsType,
             ParameterOrPropertyTypes: parameterOrPropertyTypes,
