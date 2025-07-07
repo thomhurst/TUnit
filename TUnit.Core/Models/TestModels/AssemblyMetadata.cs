@@ -36,6 +36,4 @@ public record AssemblyMetadata
     }
 
     public required string Name { get; init; }
-
-    public required AttributeMetadata[] Attributes { get; init; }
 }

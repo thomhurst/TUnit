@@ -34,7 +34,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             .ToList();
 
         var newTests = new List<TestMetadata>();
-        
+
         foreach (var assembly in assemblies)
         {
             lock (_lock)
@@ -46,7 +46,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 _scannedAssemblies.Add(assembly);
             }
-            
+
             try
             {
                 var testsInAssembly = DiscoverTestsInAssembly(assembly);
@@ -106,7 +106,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         // Skip system and framework assemblies
-        if (name.StartsWith("System.") || 
+        if (name.StartsWith("System.") ||
             name.StartsWith("Microsoft.") ||
             name.StartsWith("netstandard") ||
             name.StartsWith("mscorlib"))
@@ -162,7 +162,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var testId = GenerateTestId(testClass, testMethod);
         var testName = GenerateTestName(testClass, testMethod);
-        
+
         var metadata = new ReflectionTestMetadata(testClass, testMethod)
         {
             TestId = testId,
@@ -189,7 +189,13 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             LineNumber = ExtractLineNumber(testMethod),
             GenericTypeInfo = ExtractGenericTypeInfo(testClass),
             GenericMethodInfo = ExtractGenericMethodInfo(testMethod),
-            GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments()
+            GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
+            AttributeFactory = () =>
+            [
+                ..testMethod.GetCustomAttributes(),
+                ..testClass.GetCustomAttributes(),
+                ..testClass.Assembly.GetCustomAttributes(),
+            ]
         };
 
         return metadata;
@@ -199,7 +205,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var className = testClass.FullName ?? testClass.Name;
         var methodName = testMethod.Name;
-        
+
         var parameters = testMethod.GetParameters();
         if (parameters.Length == 0)
         {
@@ -218,22 +224,22 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     private static string[] ExtractCategories(Type testClass, MethodInfo testMethod)
     {
         var categories = new HashSet<string>();
-        
+
         // Get categories from assembly
         var assemblyCategories = testClass.Assembly.GetCustomAttributes<CategoryAttribute>();
         foreach (var attr in assemblyCategories)
             categories.Add(attr.Category);
-        
+
         // Get categories from class
         var classCategories = testClass.GetCustomAttributes<CategoryAttribute>();
         foreach (var attr in classCategories)
             categories.Add(attr.Category);
-        
+
         // Get categories from method
         var methodCategories = testMethod.GetCustomAttributes<CategoryAttribute>();
         foreach (var attr in methodCategories)
             categories.Add(attr.Category);
-        
+
         return categories.ToArray();
     }
 
@@ -246,7 +252,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             skipReason = methodSkip.Reason;
             return true;
         }
-        
+
         // Check class-level skip
         var classSkip = testClass.GetCustomAttribute<SkipAttribute>();
         if (classSkip != null)
@@ -254,7 +260,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             skipReason = classSkip.Reason;
             return true;
         }
-        
+
         // Check assembly-level skip
         var assemblySkip = testClass.Assembly.GetCustomAttribute<SkipAttribute>();
         if (assemblySkip != null)
@@ -262,7 +268,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             skipReason = assemblySkip.Reason;
             return true;
         }
-        
+
         skipReason = null;
         return false;
     }
@@ -343,35 +349,35 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     private static TestDependency[] ExtractDependencies(Type testClass, MethodInfo testMethod)
     {
         var dependencies = new List<TestDependency>();
-        
+
         // Get dependencies from method
         var methodDependencies = testMethod.GetCustomAttributes<DependsOnAttribute>();
         foreach (var attr in methodDependencies)
         {
             dependencies.Add(attr.ToTestDependency());
         }
-        
+
         // Get dependencies from class
         var classDependencies = testClass.GetCustomAttributes<DependsOnAttribute>();
         foreach (var attr in classDependencies)
         {
             dependencies.Add(attr.ToTestDependency());
         }
-        
+
         return dependencies.ToArray();
     }
 
     private static TestDataSource[] ExtractMethodDataSources(MethodInfo testMethod)
     {
         var dataSources = new List<TestDataSource>();
-        
+
         // Get Arguments attributes
         var argumentsAttrs = testMethod.GetCustomAttributes<ArgumentsAttribute>();
         foreach (var attr in argumentsAttrs)
         {
             dataSources.Add(new StaticTestDataSource([attr.Values]));
         }
-        
+
         // Get MethodDataSource attributes
         var methodDataAttrs = testMethod.GetCustomAttributes<MethodDataSourceAttribute>();
         foreach (var attr in methodDataAttrs)
@@ -382,7 +388,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 dataSources.Add(dataSource);
             }
         }
-        
+
         // Get ClassDataSource attributes
         var classDataAttrs = testMethod.GetCustomAttributes<ClassDataSourceAttribute>();
         foreach (var attr in classDataAttrs)
@@ -393,21 +399,21 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 dataSources.Add(dataSource);
             }
         }
-        
+
         return dataSources.ToArray();
     }
 
     private static TestDataSource[] ExtractClassDataSources(Type testClass)
     {
         var dataSources = new List<TestDataSource>();
-        
+
         // Get Arguments attributes on class
         var argumentsAttrs = testClass.GetCustomAttributes<ArgumentsAttribute>();
         foreach (var attr in argumentsAttrs)
         {
             dataSources.Add(new StaticTestDataSource([attr.Values]));
         }
-        
+
         // Get MethodDataSource attributes on class
         var methodDataAttrs = testClass.GetCustomAttributes<MethodDataSourceAttribute>();
         foreach (var attr in methodDataAttrs)
@@ -418,7 +424,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 dataSources.Add(dataSource);
             }
         }
-        
+
         // Get ClassDataSource attributes on class
         var classDataAttrs = testClass.GetCustomAttributes<ClassDataSourceAttribute>();
         foreach (var attr in classDataAttrs)
@@ -429,7 +435,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 dataSources.Add(dataSource);
             }
         }
-        
+
         return dataSources.ToArray();
     }
 
@@ -437,21 +443,21 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     private static PropertyDataSource[] ExtractPropertyDataSources([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass)
     {
         var propertyDataSources = new List<PropertyDataSource>();
-        
+
         var properties = testClass.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
             .Where(p => p.CanWrite);
-        
+
         foreach (var property in properties)
         {
             var dataSources = new List<TestDataSource>();
-            
+
             // Get Arguments attributes on property
             var argumentsAttrs = property.GetCustomAttributes<ArgumentsAttribute>();
             foreach (var attr in argumentsAttrs)
             {
                 dataSources.Add(new StaticTestDataSource([attr.Values]));
             }
-            
+
             // Get MethodDataSource attributes on property
             var methodDataAttrs = property.GetCustomAttributes<MethodDataSourceAttribute>();
             foreach (var attr in methodDataAttrs)
@@ -462,7 +468,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     dataSources.Add(dataSource);
                 }
             }
-            
+
             // Get ClassDataSource attributes on property
             var classDataAttrs = property.GetCustomAttributes<ClassDataSourceAttribute>();
             foreach (var attr in classDataAttrs)
@@ -473,7 +479,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     dataSources.Add(dataSource);
                 }
             }
-            
+
             // If property has data sources, create a PropertyDataSource for each
             foreach (var dataSource in dataSources)
             {
@@ -485,25 +491,25 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 });
             }
         }
-        
+
         return propertyDataSources.ToArray();
     }
-    
+
     [UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.NonPublicMethods' in call to 'System.Type.GetMethod(String, BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods', 'DynamicallyAccessedMemberTypes.NonPublicMethods' in call to 'System.Type.GetMethod(String, BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     [UnconditionalSuppressMessage("Trimming", "IL2067:'type' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicParameterlessConstructor' in call to 'System.Activator.CreateInstance(Type)'", Justification = "Reflection mode requires dynamic access")]
     private static TestDataSource? CreateMethodDataSource(MethodDataSourceAttribute attr, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type defaultClass)
     {
         var targetClass = attr.ClassProvidingDataSource ?? defaultClass;
-        var method = targetClass.GetMethod(attr.MethodNameProvidingDataSource, 
+        var method = targetClass.GetMethod(attr.MethodNameProvidingDataSource,
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
-        
+
         if (method == null)
         {
             Console.WriteLine($"Warning: Method {attr.MethodNameProvidingDataSource} not found on type {targetClass.FullName}");
             return null;
         }
-        
+
         // Check if method is static or if we need an instance
         object? instance = null;
         if (!method.IsStatic)
@@ -518,10 +524,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 return null;
             }
         }
-        
+
         // Determine return type and create appropriate data source
         var returnType = method.ReturnType;
-        
+
         if (returnType == typeof(Task<IEnumerable<object?[]>>))
         {
             var factory = CreateTaskDataSourceFactory(method, instance, attr.Arguments);
@@ -544,7 +550,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             return new DelegateDataSource(factory);
         }
     }
-    
+
     [UnconditionalSuppressMessage("Trimming", "IL2072:'type' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicParameterlessConstructor' in call to 'System.Activator.CreateInstance(Type)'", Justification = "Reflection mode requires dynamic access")]
     private static TestDataSource? CreateClassDataSource(ClassDataSourceAttribute attr)
     {
@@ -566,7 +572,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             return null;
         }
     }
-    
+
     private static Func<IEnumerable<object?[]>> CreateSyncDataSourceFactory(MethodInfo method, object? instance, object?[] args)
     {
         return () =>
@@ -579,7 +585,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             return [];
         };
     }
-    
+
     private static Func<Task<IEnumerable<object?[]>>> CreateTaskDataSourceFactory(MethodInfo method, object? instance, object?[] args)
     {
         return () =>
@@ -592,7 +598,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             return Task.FromResult(Enumerable.Empty<object?[]>());
         };
     }
-    
+
     private static Func<CancellationToken, IAsyncEnumerable<object?[]>> CreateAsyncDataSourceFactory(MethodInfo method, object? instance, object?[] args)
     {
         return (cancellationToken) =>
@@ -605,13 +611,13 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             return EmptyAsyncEnumerable();
         };
     }
-    
+
     private static Func<IEnumerable<object?[]>> CreateWrappedDataSourceFactory(MethodInfo method, object? instance, object?[] args)
     {
         return () =>
         {
             var result = method.Invoke(instance, args);
-            
+
             // If result is a tuple or single value, wrap it
             if (result != null && result.GetType().Name.StartsWith("ValueTuple"))
             {
@@ -621,7 +627,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 var values = fields.Select(f => f.GetValue(result)).ToArray();
                 return [[values]];
             }
-            
+
             // Single value
             return [[result]];
         };
@@ -636,12 +642,12 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             return null;
         }
 
-        var ctor = constructors.FirstOrDefault(c => c.GetParameters().Length == 0) 
+        var ctor = constructors.FirstOrDefault(c => c.GetParameters().Length == 0)
                    ?? constructors.First();
 
         var parameters = ctor.GetParameters();
         var paramExpr = Expression.Parameter(typeof(object[]), "args");
-        
+
         var argExpressions = new Expression[parameters.Length];
         for (var i = 0; i < parameters.Length; i++)
         {
@@ -652,9 +658,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var newExpr = Expression.New(ctor, argExpressions);
         var lambdaExpr = Expression.Lambda<Func<object?[], object>>(
-            Expression.Convert(newExpr, typeof(object)), 
+            Expression.Convert(newExpr, typeof(object)),
             paramExpr);
-            
+
         return lambdaExpr.Compile();
     }
 
@@ -664,13 +670,13 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         var instanceParam = Expression.Parameter(typeof(object), "instance");
         var argsParam = Expression.Parameter(typeof(object[]), "args");
 
-        var instanceExpr = testMethod.IsStatic 
-            ? null 
+        var instanceExpr = testMethod.IsStatic
+            ? null
             : Expression.Convert(instanceParam, testClass);
 
         var parameters = testMethod.GetParameters();
         var argExpressions = new Expression[parameters.Length];
-        
+
         for (var i = 0; i < parameters.Length; i++)
         {
             var indexExpr = Expression.ArrayIndex(argsParam, Expression.Constant(i));
@@ -695,7 +701,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             );
             body = blockExpr;
         }
-        else if (testMethod.ReturnType.IsGenericType && 
+        else if (testMethod.ReturnType.IsGenericType &&
                  testMethod.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
         {
             body = Expression.Call(
@@ -741,15 +747,15 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         var afterClassHooks = new List<HookMetadata>();
         var beforeTestHooks = new List<HookMetadata>();
         var afterTestHooks = new List<HookMetadata>();
-        
+
         // Discover assembly-level hooks
         var assemblyMethods = testClass.Assembly.GetTypes()
             .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance))
             .ToList();
-        
+
         // Discover class and test level hooks
         var classMethods = GetMethodsFromClassHierarchy(testClass);
-        
+
         foreach (var method in classMethods.Concat(assemblyMethods).Distinct())
         {
             var beforeAttr = method.GetCustomAttribute<BeforeAttribute>();
@@ -769,7 +775,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     }
                 }
             }
-            
+
             var afterAttr = method.GetCustomAttribute<AfterAttribute>();
             if (afterAttr != null)
             {
@@ -788,7 +794,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
             }
         }
-        
+
         return new TestHooks
         {
             BeforeClass = beforeClassHooks.OrderBy(h => h.Order).ToArray(),
@@ -797,33 +803,33 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             AfterTest = afterTestHooks.OrderBy(h => h.Order).ToArray()
         };
     }
-    
+
     [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods', 'DynamicallyAccessedMemberTypes.NonPublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     [UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods', 'DynamicallyAccessedMemberTypes.NonPublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     private static IEnumerable<MethodInfo> GetMethodsFromClassHierarchy([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type type)
     {
         var methods = new List<MethodInfo>();
         var currentType = type;
-        
+
         while (currentType != null && currentType != typeof(object))
         {
             methods.AddRange(currentType.GetMethods(
-                BindingFlags.Public | BindingFlags.NonPublic | 
-                BindingFlags.Instance | BindingFlags.Static | 
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.Static |
                 BindingFlags.DeclaredOnly));
             currentType = currentType.BaseType;
         }
-        
+
         return methods;
     }
-    
+
     private static HookMetadata? CreateHookMetadata(MethodInfo method, HookAttribute hookAttr, bool isBeforeHook)
     {
         // Hook invokers are no longer supported in reflection mode
         // Hooks require source-generated context-specific delegates
         return null;
     }
-    
+
     // CreateHookInvoker removed - hooks are no longer supported in reflection mode
     // Hooks require source-generated context-specific delegates
     /*
@@ -832,7 +838,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var instanceParam = Expression.Parameter(typeof(object), "instance");
         var contextParam = Expression.Parameter(typeof(HookContext), "context");
-        
+
         // Check parameters
         var parameters = method.GetParameters();
         if (parameters.Length > 1)
@@ -840,7 +846,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             Console.WriteLine($"Warning: Hook method {method.Name} has too many parameters");
             return null;
         }
-        
+
         Expression? callExpr;
         if (parameters.Length == 0)
         {
@@ -849,7 +855,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 ? Expression.Call(method)
                 : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method);
         }
-        else if (parameters[0].ParameterType == typeof(HookContext) || 
+        else if (parameters[0].ParameterType == typeof(HookContext) ||
                  parameters[0].ParameterType.IsAssignableFrom(typeof(HookContext)))
         {
             // HookContext parameter
@@ -870,7 +876,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             Console.WriteLine($"Warning: Hook method {method.Name} has unsupported parameter type {parameters[0].ParameterType}");
             return null;
         }
-        
+
         // Convert return type to Task
         Expression body;
         if (method.ReturnType == typeof(Task))
@@ -893,21 +899,21 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             Console.WriteLine($"Warning: Hook method {method.Name} has unsupported return type {method.ReturnType}");
             return null;
         }
-        
+
         var lambda = Expression.Lambda<Func<object?, HookContext, Task>>(
             body,
             instanceParam,
             contextParam);
-            
+
         return lambda.Compile();
     }
     */
-    
+
     private static bool IsAsyncMethod(MethodInfo method)
     {
-        return method.ReturnType == typeof(Task) || 
+        return method.ReturnType == typeof(Task) ||
                method.ReturnType == typeof(ValueTask) ||
-               (method.ReturnType.IsGenericType && 
+               (method.ReturnType.IsGenericType &&
                 method.ReturnType.GetGenericTypeDefinition() == typeof(Task<>));
     }
 
@@ -935,7 +941,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var genericParams = testClass.GetGenericArguments();
         var constraints = new GenericParameterConstraints[genericParams.Length];
-        
+
         for (var i = 0; i < genericParams.Length; i++)
         {
             var param = genericParams[i];
@@ -950,7 +956,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 HasNotNullConstraint = false // .NET doesn't expose this via reflection
             };
         }
-        
+
         return new GenericTypeInfo
         {
             ParameterNames = genericParams.Select(p => p.Name).ToArray(),
@@ -969,7 +975,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         var genericParams = method.GetGenericArguments();
         var constraints = new GenericParameterConstraints[genericParams.Length];
         var parameterPositions = new List<int>();
-        
+
         // Map generic parameters to method argument positions
         var methodParams = method.GetParameters();
         for (var i = 0; i < methodParams.Length; i++)
@@ -980,7 +986,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 parameterPositions.Add(i);
             }
         }
-        
+
         for (var i = 0; i < genericParams.Length; i++)
         {
             var param = genericParams[i];
@@ -995,7 +1001,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 HasNotNullConstraint = false // .NET doesn't expose this via reflection
             };
         }
-        
+
         return new GenericMethodInfo
         {
             ParameterNames = genericParams.Select(p => p.Name).ToArray(),
@@ -1003,7 +1009,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             ParameterPositions = parameterPositions.ToArray()
         };
     }
-    
+
     private static async IAsyncEnumerable<object?[]> EmptyAsyncEnumerable()
     {
         await Task.CompletedTask;

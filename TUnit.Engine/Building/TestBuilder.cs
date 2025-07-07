@@ -73,7 +73,7 @@ public sealed class TestBuilder : ITestBuilder
             AfterTestHooks = afterTestHooks,
             Context = context
         };
-        
+
         return metadata.CreateExecutableTestFactory(creationContext, metadata);
     }
 
@@ -82,12 +82,12 @@ public sealed class TestBuilder : ITestBuilder
         var allArgs = new List<object?>();
         allArgs.AddRange(combination.ClassData);
         allArgs.AddRange(combination.MethodData);
-        
+
         if (allArgs.Count == 0)
         {
             return string.Empty;
         }
-        
+
         return string.Join(", ", allArgs.Select(arg => arg?.ToString() ?? "null"));
     }
 
@@ -150,7 +150,8 @@ public sealed class TestBuilder : ITestBuilder
             TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task),
             ClassMetadata = MetadataBuilder.CreateClassMetadata(metadata),
-            MethodMetadata = MetadataBuilder.CreateMethodMetadata(metadata)
+            MethodMetadata = MetadataBuilder.CreateMethodMetadata(metadata),
+            Attributes =  metadata.AttributeFactory.Invoke()
         };
 
         foreach (var category in metadata.Categories)
@@ -159,8 +160,8 @@ public sealed class TestBuilder : ITestBuilder
         }
 
         var context = new TestContext(
-            metadata.TestName, 
-            displayName, 
+            metadata.TestName,
+            displayName,
             CancellationToken.None,
             _serviceProvider ?? new TUnit.Core.Services.TestServiceProvider())
         {
@@ -173,16 +174,12 @@ public sealed class TestBuilder : ITestBuilder
 
     private async Task InvokeDiscoveryEventReceiversAsync(TestMetadata metadata, TestContext context)
     {
-        var attributes = metadata.AttributeFactory?.Invoke() ?? Array.Empty<Attribute>();
-        
-        context.TestDetails.Attributes = attributes;
-
         var discoveredContext = new DiscoveredTestContext(
             context.TestDetails.TestName,
             context.TestDetails.DisplayName ?? context.TestDetails.TestName,
             context.TestDetails);
 
-        foreach (var attribute in attributes)
+        foreach (var attribute in context.TestDetails.Attributes)
         {
             if (attribute is ITestDiscoveryEventReceiver receiver)
             {
@@ -198,7 +195,7 @@ public sealed class TestBuilder : ITestBuilder
         }
 
         discoveredContext.TransferTo(context);
-        
+
         if (context.TestDetails.DisplayName != discoveredContext.DisplayName)
         {
             context.TestDetails.DisplayName = discoveredContext.DisplayName;
@@ -226,7 +223,8 @@ public sealed class TestBuilder : ITestBuilder
             TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task),
             ClassMetadata = MetadataBuilder.CreateClassMetadata(metadata),
-            MethodMetadata = MetadataBuilder.CreateMethodMetadata(metadata)
+            MethodMetadata = MetadataBuilder.CreateMethodMetadata(metadata),
+            Attributes = [],
         };
 
         var context = new TestContext(

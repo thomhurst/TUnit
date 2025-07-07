@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Enums;
@@ -11,10 +11,20 @@ namespace TUnit.Core;
 /// </summary>
 public class TestContext : Context
 {
+    public TestContext(string testName, string displayName, CancellationToken cancellationToken, IServiceProvider serviceProvider) : base(null)
+    {
+        TestName = testName;
+        DisplayName = displayName;
+        CancellationToken = cancellationToken;
+        _serviceProvider = serviceProvider;
+    }
+
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
+
     internal static readonly Dictionary<string, string> InternalParametersDictionary = new();
 
     private readonly StringWriter _outputWriter = new();
+
     private readonly StringWriter _errorWriter = new();
 
     /// <summary>
@@ -73,7 +83,6 @@ public class TestContext : Context
     /// Display name including parameters
     /// </summary>
     public string DisplayName { get; }
-
 
 
     /// <summary>
@@ -162,14 +171,6 @@ public class TestContext : Context
     {
         TestName = testName;
         DisplayName = displayName;
-    }
-
-    public TestContext(string testName, string displayName, CancellationToken cancellationToken, IServiceProvider serviceProvider) : base(null)
-    {
-        TestName = testName;
-        DisplayName = displayName;
-        CancellationToken = cancellationToken;
-        _serviceProvider = serviceProvider;
     }
 
     /// <summary>

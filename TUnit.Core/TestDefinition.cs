@@ -3,20 +3,14 @@ namespace TUnit.Core;
 /// <summary>
 /// Marker interface for test definitions
 /// </summary>
-public interface ITestDefinition
-{
-}
+public interface ITestDefinition;
 
 /// <summary>
 /// Base test definition
 /// </summary>
-public class TestDefinition : ITestDefinition
-{
-}
+public class TestDefinition : ITestDefinition;
 
 /// <summary>
 /// Generic test definition
 /// </summary>
-public class TestDefinition<T> : TestDefinition where T : class
-{
-}
+public class TestDefinition<T> : TestDefinition where T : class;

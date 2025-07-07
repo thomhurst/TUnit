@@ -96,4 +96,4 @@ public class MyTests
 /// This solves the MethodDataSource AOT problem by generating the invocation code
 /// rather than trying to execute the methods at compile time.
 /// </summary>
-public static class AotMethodDataSourceBenefits { }
+public static class AotMethodDataSourceBenefits;

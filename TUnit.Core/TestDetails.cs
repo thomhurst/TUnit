@@ -27,18 +27,14 @@ public class TestDetails
     public List<string> Categories { get; } =
     [
     ];
-    public Dictionary<string, List<string>> CustomProperties { get; } = new Dictionary<string, List<string>>();
+    public Dictionary<string, List<string>> CustomProperties { get; } = new();
     public Type[]? TestClassParameterTypes { get; set; }
 
-    // Missing properties for compatibility
-    public IReadOnlyList<Attribute> Attributes { get; set; } = new List<Attribute>();
+    public required IReadOnlyList<Attribute> Attributes { get; init; }
     public object?[] ClassMetadataArguments => TestClassArguments;
-    public IReadOnlyList<IDataAttribute> DataAttributes { get; set; } = new List<IDataAttribute>();
 }
 
 /// <summary>
 /// Generic version of TestDetails for compatibility with tests
 /// </summary>
-public class TestDetails<T> : TestDetails where T : class
-{
-}
+public class TestDetails<T> : TestDetails where T : class;

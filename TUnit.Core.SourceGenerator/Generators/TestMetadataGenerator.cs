@@ -1,8 +1,10 @@
+using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -17,9 +19,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // Register post-initialization output for base types
-        context.RegisterPostInitializationOutput(GenerateBaseTypes);
-
         // Find all test methods using the more performant ForAttributeWithMetadataName
         var testMethodsProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
@@ -38,15 +37,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate one source file per test method
         context.RegisterSourceOutput(testMethodsProvider, static (context, testMethod) => GenerateTestMethodSource(context, testMethod));
-        
+
         // Generate test methods for inherited tests
         context.RegisterSourceOutput(inheritsTestsClassesProvider, static (context, classInfo) => GenerateInheritedTestSources(context, classInfo));
-    }
-
-    private static void GenerateBaseTypes(IncrementalGeneratorPostInitializationContext context)
-    {
-        // Generate any base types needed for the simplified approach
-        // For now, we'll keep this empty as we're using existing types
     }
 
     private static TestMethodMetadata? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context)
@@ -98,7 +91,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             var writer = new CodeWriter();
             GenerateFileHeader(writer);
-            GenerateSimplifiedTestMetadata(writer, testMethod);
+            GenerateSimplifiedTestMetadata(writer, context, testMethod);
 
             var fileName = $"Simplified_{testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_{Guid.NewGuid():N}.g.cs";
             context.AddSource(fileName, SourceText.From(writer.ToString(), Encoding.UTF8));
@@ -141,7 +134,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
 
-    private static void GenerateSimplifiedTestMetadata(CodeWriter writer, TestMethodMetadata testMethod)
+    private static void GenerateSimplifiedTestMetadata(CodeWriter writer, GeneratorAttributeSyntaxContext context, TestMethodMetadata testMethod)
     {
         var className = testMethod.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var methodName = testMethod.MethodSymbol.Name;
@@ -160,7 +153,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
 
         // Generate the TestMetadata<T> with DataCombinationGenerator
-        GenerateTestMetadataInstance(writer, testMethod, className, combinationGuid);
+        GenerateTestMetadataInstance(writer, context, testMethod, className, combinationGuid);
 
         writer.AppendLine("return tests;");
         writer.Unindent();
@@ -177,7 +170,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateModuleInitializer(writer, testMethod, guid);
     }
 
-    private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className, string combinationGuid)
+    private static void GenerateTestMetadataInstance(CodeWriter writer, GeneratorAttributeSyntaxContext context, TestMethodMetadata testMethod, string className, string combinationGuid)
     {
         var methodName = testMethod.MethodSymbol.Name;
         var testId = $"{className}.{methodName}";
@@ -192,20 +185,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
 
         // Add basic metadata
-        GenerateBasicMetadata(writer, testMethod);
+        GenerateBasicMetadata(writer, context, testMethod);
 
         // Generate typed invokers and factory
         GenerateTypedInvokers(writer, testMethod, className);
 
         writer.Unindent();
         writer.AppendLine("};");
-        
+
         // Set the DataCombinationGenerator after construction
         writer.AppendLine($"metadata.SetDataCombinationGenerator(() => GenerateCombinations_{combinationGuid}());");
         writer.AppendLine("tests.Add(metadata);");
     }
 
-    private static void GenerateBasicMetadata(CodeWriter writer, TestMethodMetadata testMethod)
+    private static void GenerateBasicMetadata(CodeWriter writer, GeneratorAttributeSyntaxContext context, TestMethodMetadata testMethod)
     {
         var methodSymbol = testMethod.MethodSymbol;
 
@@ -216,7 +209,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("RetryCount = 0,");
         writer.AppendLine("CanRunInParallel = true,");
         writer.AppendLine("Dependencies = Array.Empty<TestDependency>(),");
-        writer.AppendLine("AttributeFactory = null,");
+        writer.AppendLine("AttributeFactory = () =>");
+        writer.AppendLine("[");
+        writer.Indent();
+
+        var attributes = methodSymbol.GetAttributes()
+            .Concat(testMethod.TypeSymbol.GetAttributes())
+            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
+            .ToImmutableArray();
+
+        AttributeWriter.WriteAttributes(writer, context, attributes);
+
+        writer.Unindent();
+        writer.AppendLine("],");
 
         // Legacy data sources (empty in new approach)
         writer.AppendLine("DataSources = Array.Empty<TestDataSource>(),");
@@ -297,7 +302,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine("// Generate data combinations from attributes");
         writer.AppendLine("var methodCombinations = new List<TestDataCombination>();");
         writer.AppendLine("var classCombinations = new List<TestDataCombination>();");
@@ -343,7 +348,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("}");
         writer.Unindent();
         writer.AppendLine("}");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine("catch (Exception ex)");
@@ -369,7 +374,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 try
                 {
                     List<string> formattedArgs = new List<string>();
-                    
+
                     // ArgumentsAttribute typically has a params object[] constructor
                     // So all arguments come through as a single array TypedConstant
                     if (attr.ConstructorArguments.Length == 1 && attr.ConstructorArguments[0].Kind == TypedConstantKind.Array)
@@ -449,7 +454,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (constant.Kind == TypedConstantKind.Array)
         {
-            var elementType = constant.Type is IArrayTypeSymbol arrayType 
+            var elementType = constant.Type is IArrayTypeSymbol arrayType
                 ? arrayType.ElementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
                 : "object";
             var values = constant.Values.Select(FormatConstantValue);
@@ -576,7 +581,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"return new global::TUnit.Core.ExecutableTest<{className}>");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         // Set all required properties from context
         writer.AppendLine("TestId = context.TestId,");
         writer.AppendLine("DisplayName = context.DisplayName,");
@@ -586,15 +591,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("BeforeTestHooks = context.BeforeTestHooks,");
         writer.AppendLine("AfterTestHooks = context.AfterTestHooks,");
         writer.AppendLine("Context = context.Context,");
-        
+
         // Set the metadata property (not TypedMetadata which is read-only)
         writer.AppendLine("Metadata = typedMetadata,");
-        
+
         // Set typed properties
         writer.AppendLine($"CreateTypedInstance = async () => typedMetadata.InstanceFactory == null ? throw new InvalidOperationException(\"No instance factory\") : await Task.FromResult(({className})typedMetadata.InstanceFactory(context.ClassArguments)),");
         writer.AppendLine("InvokeTypedTest = typedMetadata.InvokeTypedTest ?? throw new InvalidOperationException(\"No typed test invoker\"),");
         writer.AppendLine("TypedPropertySetters = typedMetadata.PropertySetters");
-        
+
         writer.Unindent();
         writer.AppendLine("};");
         writer.Unindent();
@@ -728,7 +733,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     continue;
                 }
-                
+
                 // Check if method has Test attribute
                 var hasTestAttribute = method.GetAttributes()
                     .Any(attr => attr.AttributeClass?.Name == "TestAttribute" &&

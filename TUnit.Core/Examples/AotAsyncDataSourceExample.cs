@@ -167,4 +167,4 @@ public class MyAsyncTests
 /// This solves the AsyncDataSourceGenerator AOT problem by generating the instantiation
 /// and invocation code rather than trying to execute generators at compile time.
 /// </summary>
-public static class AotAsyncDataSourceBenefits { }
+public static class AotAsyncDataSourceBenefits;

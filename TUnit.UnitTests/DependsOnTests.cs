@@ -14,8 +14,13 @@ public class DependsOnTests
             TestMethodName = "TestMethod",
             TestName = "TestMethod",
             ParameterCount = 0,
-            ParameterTypes = [],
-            TestMethodParameterTypes = []
+            ParameterTypes =
+            [
+            ],
+            TestMethodParameterTypes =
+            [
+            ],
+            AttributeFactory = () => []
         };
         var dependentTest = new TestMetadata<DependsOnTests>
         {
@@ -24,8 +29,13 @@ public class DependsOnTests
             TestMethodName = "DependentTest",
             TestName = "DependentTest",
             ParameterCount = 0,
-            ParameterTypes = [],
-            TestMethodParameterTypes = []
+            ParameterTypes =
+            [
+            ],
+            TestMethodParameterTypes =
+            [
+            ],
+            AttributeFactory = () => []
         };
 
         // Act
@@ -47,8 +57,13 @@ public class DependsOnTests
             TestMethodName = "TestMethod",
             TestName = "TestMethod",
             ParameterCount = 0,
-            ParameterTypes = [],
-            TestMethodParameterTypes = []
+            ParameterTypes =
+            [
+            ],
+            TestMethodParameterTypes =
+            [
+            ],
+            AttributeFactory = () => []
         };
         var dependentTest = new TestMetadata<DependsOnTests>
         {
@@ -57,8 +72,13 @@ public class DependsOnTests
             TestMethodName = "DependentTest",
             TestName = "DependentTest",
             ParameterCount = 0,
-            ParameterTypes = [],
-            TestMethodParameterTypes = []
+            ParameterTypes =
+            [
+            ],
+            TestMethodParameterTypes =
+            [
+            ],
+            AttributeFactory = () => []
         };
 
         // Act
@@ -80,8 +100,13 @@ public class DependsOnTests
             TestMethodName = "AnyTestMethod",
             TestName = "AnyTestMethod",
             ParameterCount = 0,
-            ParameterTypes = [],
-            TestMethodParameterTypes = []
+            ParameterTypes =
+            [
+            ],
+            TestMethodParameterTypes =
+            [
+            ],
+            AttributeFactory = () => []
         };
 
         // Act
@@ -103,8 +128,13 @@ public class DependsOnTests
             TestMethodName = "TestMethod",
             TestName = "TestMethod",
             ParameterCount = 0,
-            ParameterTypes = [],
-            TestMethodParameterTypes = []
+            ParameterTypes =
+            [
+            ],
+            TestMethodParameterTypes =
+            [
+            ],
+            AttributeFactory = () => []
         };
 
         // Act - same test as dependent
@@ -126,8 +156,13 @@ public class DependsOnTests
             TestMethodName = "SpecificMethod",
             TestName = "SpecificMethod",
             ParameterCount = 0,
-            ParameterTypes = [],
-            TestMethodParameterTypes = []
+            ParameterTypes =
+            [
+            ],
+            TestMethodParameterTypes =
+            [
+            ],
+            AttributeFactory = () => []
         };
 
         // Act
@@ -154,8 +189,17 @@ public class DependsOnTests
             TestMethodName = "OverloadedMethod",
             TestName = "OverloadedMethod",
             ParameterCount = 2,
-            ParameterTypes = new[] { typeof(string), typeof(int) },
-            TestMethodParameterTypes = new[] { "System.String", "System.Int32" }
+            ParameterTypes = new[]
+            {
+                typeof(string),
+                typeof(int)
+            },
+            TestMethodParameterTypes = new[]
+            {
+                "System.String",
+                "System.Int32"
+            },
+            AttributeFactory = () => []
         };
 
         // Act
@@ -182,8 +226,15 @@ public class DependsOnTests
             TestMethodName = "OverloadedMethod",
             TestName = "OverloadedMethod",
             ParameterCount = 1,
-            ParameterTypes = new[] { typeof(string) },
-            TestMethodParameterTypes = new[] { "System.String" }
+            ParameterTypes = new[]
+            {
+                typeof(string)
+            },
+            TestMethodParameterTypes = new[]
+            {
+                "System.String"
+            },
+            AttributeFactory = () => []
         };
 
         // Act
@@ -233,8 +284,13 @@ public class DependsOnTests
             TestMethodName = "InheritedTest",
             TestName = "InheritedTest",
             ParameterCount = 0,
-            ParameterTypes = [],
-            TestMethodParameterTypes = []
+            ParameterTypes =
+            [
+            ],
+            TestMethodParameterTypes =
+            [
+            ],
+            AttributeFactory = () => []
         };
 
         // Act
@@ -256,8 +312,13 @@ public class DependsOnTests
             TestMethodName = "Test",
             TestName = "Test",
             ParameterCount = 0,
-            ParameterTypes = [],
-            TestMethodParameterTypes = []
+            ParameterTypes =
+            [
+            ],
+            TestMethodParameterTypes =
+            [
+            ],
+            AttributeFactory = () => []
         };
 
         // Act
@@ -279,8 +340,13 @@ public class DependsOnTests
             TestMethodName = "BaseMethod",
             TestName = "BaseMethod",
             ParameterCount = 0,
-            ParameterTypes = [],
-            TestMethodParameterTypes = []
+            ParameterTypes =
+            [
+            ],
+            TestMethodParameterTypes =
+            [
+            ],
+            AttributeFactory = () => []
         };
 
         // Act

@@ -527,7 +527,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
             foreach (var typeGroup in hooksByType)
             {
-                var typeSymbol = (INamedTypeSymbol)typeGroup.Key;
+                var typeSymbol = (INamedTypeSymbol)typeGroup.Key!;
 
                 // Skip generic types with unresolved type parameters
                 if (HasUnresolvedTypeParameters(typeSymbol))

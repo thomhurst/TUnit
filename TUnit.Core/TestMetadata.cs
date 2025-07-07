@@ -135,7 +135,7 @@ public abstract class TestMetadata
     /// <summary>
     /// Factory to create attribute instances applied to this test (for discovery event receivers)
     /// </summary>
-    public Func<Attribute[]>? AttributeFactory { get; init; }
+    public required Func<Attribute[]> AttributeFactory { get; init; }
 
     /// <summary>
     /// Property setters dictionary for property injection

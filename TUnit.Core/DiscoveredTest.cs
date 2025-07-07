@@ -1,4 +1,4 @@
-using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -15,6 +15,4 @@ public abstract class DiscoveredTest
 /// <summary>
 /// Generic version of DiscoveredTest
 /// </summary>
-public class DiscoveredTest<T> : DiscoveredTest where T : class
-{
-}
+public class DiscoveredTest<T> : DiscoveredTest where T : class;

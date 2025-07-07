@@ -1,6 +1,6 @@
 using TUnit.Core.Enums;
 
-namespace TUnit.Core.Models;
+namespace TUnit.Core;
 
 /// <summary>
 /// Unified model representing a test variation that works across both source generation and reflection modes.
@@ -86,14 +86,12 @@ public sealed class TestVariation
     /// <summary>
     /// Category tags for this test.
     /// </summary>
-    public IReadOnlyList<string> Categories { get; init; } = [
-    ];
+    public IReadOnlyList<string> Categories { get; init; } = [];
 
     /// <summary>
     /// Attributes applied to this test method.
     /// </summary>
-    public IReadOnlyList<AttributeMetadata> Attributes { get; init; } = [
-    ];
+    public IReadOnlyList<Attribute> Attributes { get; init; } = [];
 
     /// <summary>
     /// Source generation specific data (only populated in source generation mode).

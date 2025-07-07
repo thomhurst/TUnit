@@ -17,8 +17,6 @@ public abstract record MemberMetadata
 
     public required string Name { get; init; }
 
-    public required AttributeMetadata[] Attributes { get; init; }
-
     protected virtual bool PrintMembers(StringBuilder stringBuilder)
     {
         stringBuilder.Append($"Type = {Type.Name},");

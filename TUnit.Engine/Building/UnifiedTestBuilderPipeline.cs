@@ -78,7 +78,8 @@ public sealed class UnifiedTestBuilderPipeline
             TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task),
             ClassMetadata = MetadataBuilder.CreateClassMetadata(metadata),
-            MethodMetadata = MetadataBuilder.CreateMethodMetadata(metadata)
+            MethodMetadata = MetadataBuilder.CreateMethodMetadata(metadata),
+            Attributes = [],
         };
 
         var context = new TestContext(

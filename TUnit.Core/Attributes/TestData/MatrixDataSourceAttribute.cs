@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using TUnit.Core.Enums;
+using TUnit.Core.Extensions;
 
 namespace TUnit.Core;
 
@@ -21,8 +23,13 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
             throw new Exception("[MatrixDataSource] only supports parameterised tests");
         }
 
+        var testInformation = dataGeneratorMetadata.TestInformation;
+
+        var classType = testInformation.Class.Type;
+
         var exclusions = GetExclusions(dataGeneratorMetadata.Type == DataGeneratorType.TestParameters
-        ? dataGeneratorMetadata.TestInformation.Attributes : dataGeneratorMetadata.TestInformation.Class.Attributes);
+            ? classType.GetMethod(testInformation.Name, testInformation.Parameters.Select(x => x.Type).ToArray())!.GetCustomAttributesSafe()
+            : classType.GetCustomAttributesSafe());
 
         foreach (var row in GetMatrixValues(parameterInformation.Select(p => GetAllArguments(dataGeneratorMetadata, p))))
         {
@@ -35,10 +42,9 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         }
     }
 
-    private object?[][] GetExclusions(AttributeMetadata[] attributes)
+    private object?[][] GetExclusions(IEnumerable<Attribute> attributes)
     {
         return attributes
-            .Select(a => a.Instance)
             .OfType<MatrixExclusionAttribute>()
             .Select(x => x.Objects)
             .ToArray();
@@ -47,8 +53,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
     private IReadOnlyList<object?> GetAllArguments(DataGeneratorMetadata dataGeneratorMetadata,
         ParameterMetadata sourceGeneratedParameterInformation)
     {
-        var matrixAttribute = sourceGeneratedParameterInformation.Attributes
-            .Select(a => a.Instance)
+        var matrixAttribute = sourceGeneratedParameterInformation.ReflectionInfo.GetCustomAttributesSafe()
             .OfType<MatrixAttribute>()
             .FirstOrDefault();
 

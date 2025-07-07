@@ -12,19 +12,6 @@ public class AttributeWriter
     public static void WriteAttributes(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
         ImmutableArray<AttributeData> attributeDatas)
     {
-        var dataAttributeInterface =
-            context.SemanticModel.Compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.IAsyncDataSourceGeneratorAttribute
-                .WithoutGlobalPrefix);
-
-        attributeDatas = attributeDatas.RemoveAll(x => x.AttributeClass?.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, dataAttributeInterface)) == true);
-
-        if (attributeDatas.Length == 0)
-        {
-            sourceCodeWriter.Append("[],");
-            return;
-        }
-
-        sourceCodeWriter.Append("[");
         for (var index = 0; index < attributeDatas.Length; index++)
         {
             var attributeData = attributeDatas[index];
@@ -38,12 +25,9 @@ public class AttributeWriter
 
             if (index != attributeDatas.Length - 1)
             {
-                sourceCodeWriter.Append(",");
+                sourceCodeWriter.AppendLine(",");
             }
-
-            sourceCodeWriter.AppendLine();
         }
-        sourceCodeWriter.Append("],");
     }
 
     public static void WriteAttributeMetadatas(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,

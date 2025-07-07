@@ -35,9 +35,7 @@ public abstract class DynamicTest
 /// <summary>
 /// Generic dynamic test
 /// </summary>
-public abstract class DynamicTest<T> : DynamicTest where T : class
-{
-}
+public abstract class DynamicTest<T> : DynamicTest where T : class;
 
 /// <summary>
 /// Concrete dynamic test implementation for runtime use

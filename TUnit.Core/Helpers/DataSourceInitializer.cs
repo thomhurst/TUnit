@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Enums;
+using TUnit.Core.Extensions;
 
 namespace TUnit.Core.Helpers;
 
@@ -56,8 +57,7 @@ internal static class DataSourceInitializer
                 // If property is null and has a data source attribute, generate the value
                 if (propertyValue is null)
                 {
-                    var dataAttribute = property.Attributes
-                        .FirstOrDefault(x => x.AttributeType.IsAssignableTo(typeof(IAsyncDataSourceGeneratorAttribute)));
+                    var dataAttribute = property.ReflectionInfo.GetCustomAttributesSafe().FirstOrDefault(x => x.GetType().IsAssignableTo(typeof(IAsyncDataSourceGeneratorAttribute)));
 
                     if (dataAttribute is not null)
                     {
@@ -129,15 +129,15 @@ internal static class DataSourceInitializer
     /// </summary>
     private static async Task<object?> GeneratePropertyValueAsync(
         object instance,
-        AttributeMetadata attributeMetadata,
+        Attribute attribute,
         PropertyMetadata propertyMetadata,
         InitializationContext context)
     {
-        var dataAttribute = (IAsyncDataSourceGeneratorAttribute) attributeMetadata.Instance;
+        var dataAttribute = (IAsyncDataSourceGeneratorAttribute) attribute;
 
-        if (attributeMetadata.ClassMetadata is not null)
+        if (propertyMetadata.ClassMetadata is not null)
         {
-            await InitializeDependenciesAsync(dataAttribute, attributeMetadata.ClassMetadata, context);
+            await InitializeDependenciesAsync(dataAttribute, propertyMetadata.ClassMetadata, context);
         }
 
         var generatorMetadata = new DataGeneratorMetadata
