@@ -35,12 +35,6 @@ public interface ISourceGeneratedTestRegistry
     /// <param name="setter">Setter delegate for the property</param>
     void RegisterPropertySetter(string testId, string propertyName, Action<object, object?> setter);
 
-    /// <summary>
-    /// Registers pre-resolved data for a test.
-    /// </summary>
-    /// <param name="testId">Unique identifier for the test</param>
-    /// <param name="resolvedData">The pre-resolved test data</param>
-    void RegisterResolvedData(string testId, CompileTimeResolvedData resolvedData);
 
     /// <summary>
     /// Gets a registered class factory.
@@ -70,12 +64,6 @@ public interface ISourceGeneratedTestRegistry
     /// <returns>Dictionary of property setters</returns>
     IDictionary<string, Action<object, object?>> GetPropertySetters(string testId);
 
-    /// <summary>
-    /// Gets pre-resolved data for a test.
-    /// </summary>
-    /// <param name="testId">Unique identifier for the test</param>
-    /// <returns>The pre-resolved data if found, null otherwise</returns>
-    CompileTimeResolvedData? GetResolvedData(string testId);
 
     /// <summary>
     /// Gets all registered test IDs.

@@ -66,11 +66,6 @@ public class TestExecutionRegistry : ISourceGeneratedTestRegistry
         data.PropertySetters.TryAdd(propertyName, setter);
     }
 
-    public void RegisterResolvedData(string testId, CompileTimeResolvedData resolvedData)
-    {
-        var data = GetOrCreateTestData(testId);
-        data.ResolvedData = resolvedData;
-    }
 
     public Func<object>? GetClassFactory(string testId)
     {
@@ -97,10 +92,6 @@ public class TestExecutionRegistry : ISourceGeneratedTestRegistry
             ?? new Dictionary<string, Action<object, object?>>();
     }
 
-    public CompileTimeResolvedData? GetResolvedData(string testId)
-    {
-        return GetTestData(testId)?.ResolvedData;
-    }
 
     public IReadOnlyCollection<string> GetRegisteredTestIds()
     {

@@ -24,10 +24,6 @@ public class TestExecutionData
     /// </summary>
     public ConcurrentDictionary<string, Action<object, object?>> PropertySetters { get; } = new();
 
-    /// <summary>
-    /// Pre-resolved data from compile time
-    /// </summary>
-    public CompileTimeResolvedData? ResolvedData { get; set; }
 
     /// <summary>
     /// Method data resolver for MethodDataSource support
