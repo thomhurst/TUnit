@@ -99,7 +99,8 @@
       "Bash(git rebase:*)",
       "mcp__desktop-commander__search_files",
       "Bash(cp:*)",
-      "Bash(diff:*)"
+      "Bash(diff:*)",
+      "Bash(git reset:*)"
     ],
     "deny": []
   }

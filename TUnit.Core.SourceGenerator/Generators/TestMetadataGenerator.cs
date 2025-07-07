@@ -107,7 +107,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 Location.None,
                 className,
                 methodName,
-                ex.Message));
+                ex.ToString())); // Use ToString() to get full stack trace for debugging
         }
     }
 
@@ -281,6 +281,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static void GenerateDataSourceCombinations(CodeWriter writer, TestMethodMetadata testMethod,
         IEnumerable<AttributeData> methodAttributes, IEnumerable<AttributeData> classAttributes)
     {
+        writer.AppendLine("try");
+        writer.AppendLine("{");
+        writer.Indent();
+        
         writer.AppendLine("// Generate data combinations from attributes");
         writer.AppendLine("var methodCombinations = new List<TestDataCombination>();");
         writer.AppendLine("var classCombinations = new List<TestDataCombination>();");
@@ -326,6 +330,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("}");
         writer.Unindent();
         writer.AppendLine("}");
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("catch (Exception ex)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("// If combination generation fails, add a single empty combination");
+        writer.AppendLine("combinations.Add(new TestDataCombination());");
+        writer.Unindent();
+        writer.AppendLine("}");
     }
 
     private static void GenerateAttributeDataCombinations(CodeWriter writer, AttributeData attr, int index,
@@ -337,28 +351,64 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // Generate Arguments combinations
             writer.AppendLine($"// ArgumentsAttribute {index}");
-            if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Values.Length > 0)
+            if (attr.ConstructorArguments.Length > 0)
             {
-                var values = attr.ConstructorArguments[0].Values;
-                writer.AppendLine($"{listName}.Add(new TestDataCombination");
-                writer.AppendLine("{");
-                writer.Indent();
+                try
+                {
+                    List<string> formattedArgs = new List<string>();
+                    
+                    // ArgumentsAttribute typically has a params object[] constructor
+                    // So all arguments come through as a single array TypedConstant
+                    if (attr.ConstructorArguments.Length == 1 && attr.ConstructorArguments[0].Kind == TypedConstantKind.Array)
+                    {
+                        // Unwrap the params array
+                        foreach (var value in attr.ConstructorArguments[0].Values)
+                        {
+                            formattedArgs.Add(FormatConstantValue(value));
+                        }
+                    }
+                    else
+                    {
+                        // Handle non-params case (shouldn't normally happen with ArgumentsAttribute)
+                        formattedArgs = attr.ConstructorArguments
+                            .Select(FormatConstantValue)
+                            .ToList();
+                    }
 
-                if (isClassLevel)
-                {
-                    writer.AppendLine($"ClassData = new object?[] {{ {string.Join(", ", values.Select(FormatConstantValue))} }},");
-                    writer.AppendLine("MethodData = Array.Empty<object?>(),");
+                    writer.AppendLine($"{listName}.Add(new TestDataCombination");
+                    writer.AppendLine("{");
+                    writer.Indent();
+
+                    if (isClassLevel)
+                    {
+                        writer.AppendLine($"ClassData = new object?[] {{ {string.Join(", ", formattedArgs)} }},");
+                        writer.AppendLine("MethodData = Array.Empty<object?>(),");
+                    }
+                    else
+                    {
+                        writer.AppendLine("ClassData = Array.Empty<object?>(),");
+                        writer.AppendLine($"MethodData = new object?[] {{ {string.Join(", ", formattedArgs)} }},");
+                    }
+
+                    writer.AppendLine($"DataSourceIndices = new[] {{ {index} }},");
+                    writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
+                    writer.Unindent();
+                    writer.AppendLine("});");
                 }
-                else
+                catch (Exception ex)
                 {
+                    // If we can't process the arguments, generate an empty combination with a comment
+                    writer.AppendLine($"// Error processing ArgumentsAttribute at index {index}: {ex.Message}");
+                    writer.AppendLine($"{listName}.Add(new TestDataCombination");
+                    writer.AppendLine("{");
+                    writer.Indent();
                     writer.AppendLine("ClassData = Array.Empty<object?>(),");
-                    writer.AppendLine($"MethodData = new object?[] {{ {string.Join(", ", values.Select(FormatConstantValue))} }},");
+                    writer.AppendLine("MethodData = Array.Empty<object?>(),");
+                    writer.AppendLine($"DataSourceIndices = new[] {{ {index} }},");
+                    writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
+                    writer.Unindent();
+                    writer.AppendLine("});");
                 }
-
-                writer.AppendLine($"DataSourceIndices = new[] {{ {index} }},");
-                writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
-                writer.Unindent();
-                writer.AppendLine("});");
             }
         }
         else
@@ -379,9 +429,23 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static string FormatConstantValue(TypedConstant constant)
     {
-        if (constant.IsNull)
+        if (constant.IsNull || constant.Value == null)
         {
             return "null";
+        }
+
+        if (constant.Kind == TypedConstantKind.Array)
+        {
+            var elementType = constant.Type is IArrayTypeSymbol arrayType 
+                ? arrayType.ElementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                : "object";
+            var values = constant.Values.Select(FormatConstantValue);
+            return $"new {elementType}[] {{ {string.Join(", ", values)} }}";
+        }
+
+        if (constant.Kind == TypedConstantKind.Type && constant.Value is ITypeSymbol typeSymbol)
+        {
+            return $"typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
         }
 
         if (constant.Value is string str)
@@ -442,17 +506,70 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var hasParameterlessConstructor = constructors.Any(c => c.Parameters.Length == 0);
         var primaryConstructor = constructors.FirstOrDefault(c => c.Parameters.Length > 0) ?? constructors.FirstOrDefault();
 
+        // Find required properties
+        var requiredProperties = testMethod.TypeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(p => !p.IsStatic && p.IsRequired && p.SetMethod != null)
+            .ToList();
+
         // Instance factory
         if (hasParameterlessConstructor || primaryConstructor == null)
         {
-            writer.AppendLine($"InstanceFactory = args => new {className}(),");
+            if (requiredProperties.Any())
+            {
+                // Has required properties - use object initializer with nulls
+                writer.AppendLine($"InstanceFactory = args => new {className}");
+                writer.AppendLine("{");
+                writer.Indent();
+                foreach (var prop in requiredProperties)
+                {
+                    if (prop.Type.IsValueType && !IsNullableValueType(prop.Type))
+                    {
+                        writer.AppendLine($"{prop.Name} = default!,");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"{prop.Name} = null!,");
+                    }
+                }
+                writer.Unindent();
+                writer.AppendLine("},");
+            }
+            else
+            {
+                writer.AppendLine($"InstanceFactory = args => new {className}(),");
+            }
         }
         else
         {
             // Constructor has parameters - pass args
             var ctorParams = primaryConstructor.Parameters.Select((p, i) =>
                 $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]").ToArray();
-            writer.AppendLine($"InstanceFactory = args => new {className}({string.Join(", ", ctorParams)}),");
+            
+            if (requiredProperties.Any())
+            {
+                // Has both constructor params and required properties
+                writer.AppendLine($"InstanceFactory = args => new {className}({string.Join(", ", ctorParams)})");
+                writer.AppendLine("{");
+                writer.Indent();
+                foreach (var prop in requiredProperties)
+                {
+                    if (prop.Type.IsValueType && !IsNullableValueType(prop.Type))
+                    {
+                        writer.AppendLine($"{prop.Name} = default!,");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"{prop.Name} = null!,");
+                    }
+                }
+                writer.Unindent();
+                writer.AppendLine("},");
+            }
+            else
+            {
+                writer.AppendLine($"InstanceFactory = args => new {className}({string.Join(", ", ctorParams)}),");
+            }
         }
 
         // Test invoker
@@ -548,6 +665,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                returnTypeName.StartsWith("System.Threading.Tasks.ValueTask") ||
                returnTypeName.StartsWith("Task<") ||
                returnTypeName.StartsWith("ValueTask<");
+    }
+
+    private static bool IsNullableValueType(ITypeSymbol type)
+    {
+        return type is INamedTypeSymbol namedType &&
+               namedType.IsGenericType &&
+               namedType.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T;
     }
 }
 
