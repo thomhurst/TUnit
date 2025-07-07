@@ -110,27 +110,15 @@ public sealed class TestBuilder : ITestBuilder
 
     private static string GenerateTestId(TestMetadata metadata, TestDataCombination combination)
     {
-        var parts = new List<string> { metadata.TestId };
+        var methodMetadata = metadata.MethodMetadata;
 
-        // Build unique ID parts based on the specific indices
-        var idParts = new List<string>();
-        
-        if (combination.ClassDataSourceIndex >= 0)
-        {
-            idParts.Add($"c{combination.ClassDataSourceIndex}.{combination.ClassLoopIndex}");
-        }
-        
-        if (combination.MethodDataSourceIndex >= 0)
-        {
-            idParts.Add($"m{combination.MethodDataSourceIndex}.{combination.MethodLoopIndex}");
-        }
-        
-        if (idParts.Count > 0)
-        {
-            parts.Add(string.Join("_", idParts));
-        }
+        var classMetadata = methodMetadata.Class;
 
-        return string.Join("_", parts);
+        var constructorParameters = classMetadata.Parameters.Select(x => x.Type);
+
+        var methodParameters = methodMetadata.Parameters.Select(x => x.Type);
+
+        return $"{methodMetadata.Class.Namespace}.{metadata.TestClassType.Name}({string.Join(", ", constructorParameters)}).{combination.ClassDataSourceIndex}.{combination.ClassLoopIndex}.{metadata.TestMethodName}({string.Join(", ", methodParameters)}).{combination.MethodDataSourceIndex}.{combination.MethodLoopIndex}";
     }
 
     private static string GenerateDisplayName(TestMetadata metadata, string argumentsDisplayText)
