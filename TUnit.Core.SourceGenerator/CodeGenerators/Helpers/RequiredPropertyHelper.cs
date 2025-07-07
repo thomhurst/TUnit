@@ -16,7 +16,7 @@ public static class RequiredPropertyHelper
         {
             var typeRequiredProperties = currentType.GetMembers()
                 .OfType<IPropertySymbol>()
-                .Where(p => p.IsRequired && p.SetMethod?.IsInitOnly == true);
+                .Where(p => p.IsRequired && p.SetMethod != null);
 
             requiredProperties.AddRange(typeRequiredProperties);
             currentType = currentType.BaseType;

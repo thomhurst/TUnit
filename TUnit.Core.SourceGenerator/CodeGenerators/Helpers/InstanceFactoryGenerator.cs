@@ -28,10 +28,10 @@ public static class InstanceFactoryGenerator
         }
         else
         {
-            // For classes with default constructor, check for required properties
-            var requiredPropertiesWithDataSource = RequiredPropertyHelper.GetRequiredPropertiesWithDataSource(typeSymbol);
+            // For classes with default constructor, check for ALL required properties
+            var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(typeSymbol);
             
-            if (!requiredPropertiesWithDataSource.Any())
+            if (!requiredProperties.Any())
             {
                 writer.AppendLine($"InstanceFactory = args => new {className}(),");
             }
@@ -41,7 +41,7 @@ public static class InstanceFactoryGenerator
                 writer.AppendLine("{");
                 writer.Indent();
                 
-                foreach (var property in requiredPropertiesWithDataSource)
+                foreach (var property in requiredProperties)
                 {
                     var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
                     writer.AppendLine($"{property.Name} = {defaultValue},");
@@ -76,7 +76,10 @@ public static class InstanceFactoryGenerator
         writer.AppendLine("{");
         writer.Indent();
         
-        if (constructor.Parameters.Length == 0)
+        // Check for required properties
+        var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(constructor.ContainingType);
+        
+        if (constructor.Parameters.Length == 0 && !requiredProperties.Any())
         {
             writer.AppendLine($"return new {className}();");
         }
@@ -94,7 +97,26 @@ public static class InstanceFactoryGenerator
                 writer.Append($"({paramType})args[{i}]");
             }
             
-            writer.AppendLine(");");
+            writer.Append(")");
+            
+            // Add object initializer for required properties
+            if (requiredProperties.Any())
+            {
+                writer.AppendLine();
+                writer.AppendLine("{");
+                writer.Indent();
+                
+                foreach (var property in requiredProperties)
+                {
+                    var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
+                    writer.AppendLine($"{property.Name} = {defaultValue},");
+                }
+                
+                writer.Unindent();
+                writer.Append("}");
+            }
+            
+            writer.AppendLine(";");
         }
         
         writer.Unindent();

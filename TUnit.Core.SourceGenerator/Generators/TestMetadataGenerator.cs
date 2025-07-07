@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -513,76 +514,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodName = testMethod.MethodSymbol.Name;
         var parameters = testMethod.MethodSymbol.Parameters;
 
-        // Find the constructor
-        var constructors = testMethod.TypeSymbol.Constructors.Where(c => !c.IsStatic).ToList();
-        var hasParameterlessConstructor = constructors.Any(c => c.Parameters.Length == 0);
-        var primaryConstructor = constructors.FirstOrDefault(c => c.Parameters.Length > 0) ?? constructors.FirstOrDefault();
-
-        // Find required properties
-        var requiredProperties = testMethod.TypeSymbol.GetMembers()
-            .OfType<IPropertySymbol>()
-            .Where(p => !p.IsStatic && p.IsRequired && p.SetMethod != null)
-            .ToList();
-
-        // Instance factory
-        if (hasParameterlessConstructor || primaryConstructor == null)
-        {
-            if (requiredProperties.Any())
-            {
-                // Has required properties - use object initializer with nulls
-                writer.AppendLine($"InstanceFactory = args => new {className}");
-                writer.AppendLine("{");
-                writer.Indent();
-                foreach (var prop in requiredProperties)
-                {
-                    if (prop.Type.IsValueType && !IsNullableValueType(prop.Type))
-                    {
-                        writer.AppendLine($"{prop.Name} = default!,");
-                    }
-                    else
-                    {
-                        writer.AppendLine($"{prop.Name} = null!,");
-                    }
-                }
-                writer.Unindent();
-                writer.AppendLine("},");
-            }
-            else
-            {
-                writer.AppendLine($"InstanceFactory = args => new {className}(),");
-            }
-        }
-        else
-        {
-            // Constructor has parameters - pass args
-            var ctorParams = primaryConstructor.Parameters.Select((p, i) =>
-                $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]").ToArray();
-            
-            if (requiredProperties.Any())
-            {
-                // Has both constructor params and required properties
-                writer.AppendLine($"InstanceFactory = args => new {className}({string.Join(", ", ctorParams)})");
-                writer.AppendLine("{");
-                writer.Indent();
-                foreach (var prop in requiredProperties)
-                {
-                    if (prop.Type.IsValueType && !IsNullableValueType(prop.Type))
-                    {
-                        writer.AppendLine($"{prop.Name} = default!,");
-                    }
-                    else
-                    {
-                        writer.AppendLine($"{prop.Name} = null!,");
-                    }
-                }
-                writer.Unindent();
-                writer.AppendLine("},");
-            }
-            else
-            {
-                writer.AppendLine($"InstanceFactory = args => new {className}({string.Join(", ", ctorParams)}),");
-            }
-        }
+        // Use centralized instance factory generator
+        InstanceFactoryGenerator.GenerateInstanceFactory(writer, testMethod.TypeSymbol);
 
         // Test invoker
         var isAsync = IsAsyncMethod(testMethod.MethodSymbol);
