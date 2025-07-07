@@ -418,18 +418,26 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Report diagnostic with full stack trace for debugging
             var methodName = testMethod?.MethodSymbol?.Name ?? "Unknown";
             var className = testMethod?.TypeSymbol?.Name ?? "Unknown";
-            var errorMessage = $"Failed to generate test source for {className}.{methodName}: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
+            var fullException = ex.ToString(); // This includes both message and stack trace
+            
+            // Also write to a temp file for debugging
+            try
+            {
+                System.IO.File.WriteAllText($"generator-error-{DateTime.Now:yyyyMMdd-HHmmss}.log", 
+                    $"Test: {className}.{methodName}\nException: {fullException}");
+            }
+            catch { /* ignore file write errors */ }
 
             var diagnostic = Diagnostic.Create(
                 new DiagnosticDescriptor(
                     "TU0001",
-                    "Test Generation Failed",
+                    "Test Generation Failed", 
                     "Failed to generate test metadata: {0}",
                     "TUnit.Generation",
                     DiagnosticSeverity.Error,
                     isEnabledByDefault: true),
                 Location.None,
-                errorMessage);
+                fullException);
 
             context.ReportDiagnostic(diagnostic);
         }
