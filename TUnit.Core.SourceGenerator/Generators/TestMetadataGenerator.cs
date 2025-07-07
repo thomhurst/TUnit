@@ -27,8 +27,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetTestMethodMetadata(ctx))
             .Where(static m => m is not null);
 
+        // Find classes with [InheritsTests] attribute
+        var inheritsTestsClassesProvider = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                "TUnit.Core.InheritsTestsAttribute",
+                predicate: static (node, _) => node is ClassDeclarationSyntax,
+                transform: static (ctx, _) => GetInheritsTestsClassMetadata(ctx))
+            .Where(static m => m is not null);
+
         // Generate one source file per test method
         context.RegisterSourceOutput(testMethodsProvider, static (context, testMethod) => GenerateTestMethodSource(context, testMethod));
+        
+        // Generate test methods for inherited tests
+        context.RegisterSourceOutput(inheritsTestsClassesProvider, static (context, classInfo) => GenerateInheritedTestSources(context, classInfo));
     }
 
     private static void GenerateBaseTypes(IncrementalGeneratorPostInitializationContext context)
@@ -674,6 +685,96 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                namedType.IsGenericType &&
                namedType.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T;
     }
+
+    private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context)
+    {
+        var classSyntax = (ClassDeclarationSyntax)context.TargetNode;
+        var classSymbol = context.TargetSymbol as INamedTypeSymbol;
+
+        if (classSymbol == null)
+        {
+            return null;
+        }
+
+        // Skip abstract classes
+        if (classSymbol.IsAbstract)
+        {
+            return null;
+        }
+
+        // Skip generic types without explicit instantiation
+        if (classSymbol is { IsGenericType: true, TypeParameters.Length: > 0 })
+        {
+            return null;
+        }
+
+        return new InheritsTestsClassMetadata
+        {
+            TypeSymbol = classSymbol,
+            ClassSyntax = classSyntax
+        };
+    }
+
+    private static void GenerateInheritedTestSources(SourceProductionContext context, InheritsTestsClassMetadata? classInfo)
+    {
+        if (classInfo?.TypeSymbol == null)
+        {
+            return;
+        }
+
+        // Find all test methods in base classes
+        var inheritedTestMethods = new List<IMethodSymbol>();
+        CollectInheritedTestMethods(classInfo.TypeSymbol, inheritedTestMethods);
+
+        // Generate test metadata for each inherited test method
+        foreach (var method in inheritedTestMethods)
+        {
+            var testMethodMetadata = new TestMethodMetadata
+            {
+                MethodSymbol = method,
+                TypeSymbol = classInfo.TypeSymbol,
+                MethodSyntax = null! // We don't have the syntax for inherited methods
+            };
+
+            GenerateTestMethodSource(context, testMethodMetadata);
+        }
+    }
+
+    private static void CollectInheritedTestMethods(INamedTypeSymbol derivedClass, List<IMethodSymbol> testMethods)
+    {
+        var currentType = derivedClass.BaseType;
+
+        while (currentType != null && currentType.SpecialType != SpecialType.System_Object)
+        {
+            // Skip if base type is an open generic type
+            if (currentType.IsUnboundGenericType ||
+                (currentType.IsGenericType && currentType.TypeArguments.Any(arg => arg.TypeKind == TypeKind.TypeParameter)))
+            {
+                currentType = currentType.BaseType;
+                continue;
+            }
+
+            // Get all methods from the base class
+            var methods = currentType.GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where(m => !m.IsStatic && m.MethodKind == MethodKind.Ordinary);
+
+            foreach (var method in methods)
+            {
+                // Check if method has Test attribute
+                var hasTestAttribute = method.GetAttributes()
+                    .Any(attr => attr.AttributeClass?.Name == "TestAttribute" &&
+                                attr.AttributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core");
+
+                if (hasTestAttribute)
+                {
+                    testMethods.Add(method);
+                }
+            }
+
+            currentType = currentType.BaseType;
+        }
+    }
 }
 
 /// <summary>
@@ -684,4 +785,13 @@ public class TestMethodMetadata
     public required IMethodSymbol MethodSymbol { get; init; }
     public required INamedTypeSymbol TypeSymbol { get; init; }
     public required MethodDeclarationSyntax MethodSyntax { get; init; }
+}
+
+/// <summary>
+/// Metadata for a class with [InheritsTests] attribute
+/// </summary>
+public class InheritsTestsClassMetadata
+{
+    public required INamedTypeSymbol TypeSymbol { get; init; }
+    public required ClassDeclarationSyntax ClassSyntax { get; init; }
 }
