@@ -13,9 +13,6 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
 
-/// <summary>
-/// Service provider for the TUnit framework
-/// </summary>
 internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 {
     private readonly Dictionary<Type, object> _services = new();
@@ -29,6 +26,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitMessageBus MessageBus { get; }
     public EngineCancellationToken CancellationToken { get; }
     public TestFilterService TestFilterService { get; }
+    public IHookCollectionService HookCollectionService { get; }
+    public HookOrchestrator HookOrchestrator { get; }
 
     public TUnitServiceProvider(
         IExtension extension,
@@ -61,7 +60,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create test services using unified architecture
         Register<ITestInvoker>(new TestInvoker());
-        Register<IHookCollectionService>(new HookCollectionService());
+        HookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
+        HookOrchestrator = Register(new HookOrchestrator(HookCollectionService, Logger));
 
         // Detect execution mode from command line or environment
         var executionMode = GetExecutionMode(CommandLineOptions);
