@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Enums;
@@ -7,29 +6,26 @@ using TUnit.Engine.Building.Interfaces;
 namespace TUnit.Engine.Building;
 
 /// <summary>
-/// Main pipeline that orchestrates the unified test building process
+/// Main pipeline that orchestrates the unified test building process using the simplified approach
 /// </summary>
 public sealed class UnifiedTestBuilderPipeline
 {
     private readonly ITestDataCollector _dataCollector;
     private readonly IGenericTypeResolver _genericResolver;
-    private readonly IDataSourceExpander _dataSourceExpander;
     private readonly ITestBuilder _testBuilder;
 
     public UnifiedTestBuilderPipeline(
         ITestDataCollector dataCollector,
         IGenericTypeResolver genericResolver,
-        IDataSourceExpander dataSourceExpander,
         ITestBuilder testBuilder)
     {
         _dataCollector = dataCollector ?? throw new ArgumentNullException(nameof(dataCollector));
         _genericResolver = genericResolver ?? throw new ArgumentNullException(nameof(genericResolver));
-        _dataSourceExpander = dataSourceExpander ?? throw new ArgumentNullException(nameof(dataSourceExpander));
         _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
     }
 
     /// <summary>
-    /// Builds all executable tests through the pipeline
+    /// Builds all executable tests through the simplified pipeline
     /// </summary>
     public async Task<IEnumerable<ExecutableTest>> BuildTestsAsync()
     {
@@ -39,27 +35,21 @@ public sealed class UnifiedTestBuilderPipeline
         // Stage 2: Resolve generic types
         var resolvedMetadata = await _genericResolver.ResolveGenericsAsync(collectedMetadata);
 
-        // Stage 3 & 4: Expand data sources and build tests
+        // Stage 3: Generate data combinations and build tests using the simplified approach
         var executableTests = new List<ExecutableTest>();
 
         foreach (var metadata in resolvedMetadata)
         {
             try
             {
-                // Stage 3: Expand data sources for this test
-                var expandedDataSets = await _dataSourceExpander.ExpandDataSourcesAsync(metadata);
-
-                // Stage 4: Build executable test for each variation
-                foreach (var expandedData in expandedDataSets)
-                {
-                    var executableTest = await _testBuilder.BuildTestAsync(expandedData);
-                    executableTests.Add(executableTest);
-                }
+                // Use TestBuilder's BuildTestsFromMetadataAsync which handles DataCombinationGenerator delegation
+                var testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(metadata);
+                executableTests.AddRange(testsFromMetadata);
             }
             catch (Exception ex)
             {
-                // Create a failed test node for data source expansion failures
-                var failedTest = CreateFailedTestForDataSourceError(metadata, ex);
+                // Create a failed test for data generation failures
+                var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
                 executableTests.Add(failedTest);
             }
         }
@@ -67,10 +57,10 @@ public sealed class UnifiedTestBuilderPipeline
         return executableTests;
     }
 
-    private static ExecutableTest CreateFailedTestForDataSourceError(TestMetadata metadata, Exception exception)
+    private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
-        var testId = metadata.TestId ?? $"{metadata.TestClassType.FullName}.{metadata.TestMethodName}_DataSourceError";
-        var displayName = $"{metadata.TestName} [DATA SOURCE ERROR]";
+        var testId = metadata.TestId ?? $"{metadata.TestClassType.FullName}.{metadata.TestMethodName}_DataGenerationError";
+        var displayName = $"{metadata.TestName} [DATA GENERATION ERROR]";
 
         // Create a minimal test context for failed test
         var testDetails = new TestDetails
@@ -141,13 +131,11 @@ public static class UnifiedTestBuilderPipelineFactory
     {
         var dataCollector = TestDataCollectorFactory.Create(executionMode, assembliesToScan);
         var genericResolver = new Resolvers.AotGenericTypeResolver();
-        var dataSourceExpander = new Expanders.DataSourceExpander();
         var testBuilder = new TestBuilder(serviceProvider);
 
         return new UnifiedTestBuilderPipeline(
             dataCollector,
             genericResolver,
-            dataSourceExpander,
             testBuilder);
     }
 
@@ -181,13 +169,11 @@ public static class UnifiedTestBuilderPipelineFactory
     {
         var dataCollector = await TestDataCollectorFactory.CreateAutoDetectAsync(assembliesToScan);
         var genericResolver = new Resolvers.AotGenericTypeResolver();
-        var dataSourceExpander = new Expanders.DataSourceExpander();
         var testBuilder = new TestBuilder(serviceProvider);
 
         return new UnifiedTestBuilderPipeline(
             dataCollector,
             genericResolver,
-            dataSourceExpander,
             testBuilder);
     }
 }

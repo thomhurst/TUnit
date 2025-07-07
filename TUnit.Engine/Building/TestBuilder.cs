@@ -18,17 +18,62 @@ public sealed class TestBuilder : ITestBuilder
         _serviceProvider = serviceProvider;
     }
 
+
+    /// <summary>
+    /// Builds all executable tests from a single TestMetadata using its DataCombinationGenerator delegate.
+    /// This is the new simplified approach that replaces DataSourceExpander.
+    /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection is only used as a fallback for non-AOT scenarios")]
-    public async Task<ExecutableTest> BuildTestAsync(ExpandedTestData expandedData)
+    public async Task<IEnumerable<ExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata)
     {
-        var metadata = expandedData.Metadata;
+        var tests = new List<ExecutableTest>();
 
+        // Check if this is a typed metadata with DataCombinationGenerator
+        if (metadata is TestMetadata<object> typedMetadata)
+        {
+            var dataGeneratorProp = metadata.GetType().GetProperty("DataCombinationGenerator");
+            if (dataGeneratorProp?.GetValue(metadata) is Delegate dataCombinationGenerator)
+            {
+                try
+                {
+                    // Invoke the DataCombinationGenerator delegate
+                    var invokeMethod = dataCombinationGenerator.GetType().GetMethod("Invoke");
+                    if (invokeMethod?.Invoke(dataCombinationGenerator, null) is IEnumerable<TestDataCombination> combinations)
+                    {
+                        foreach (var combination in combinations)
+                        {
+                            var test = await BuildTestAsync(metadata, combination);
+                            tests.Add(test);
+                        }
+                        return tests;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // If data combination generation fails, create a failed test
+                    var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
+                    tests.Add(failedTest);
+                    return tests;
+                }
+            }
+        }
+
+        // Fallback: Create a single test without data combinations (no arguments)
+        var defaultCombination = new TestDataCombination();
+        var defaultTest = await BuildTestAsync(metadata, defaultCombination);
+        tests.Add(defaultTest);
+        return tests;
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection is only used as a fallback for non-AOT scenarios")]
+    public async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestDataCombination combination)
+    {
         // Generate unique test ID
-        var testId = GenerateTestId(metadata, expandedData.DataSourceIndices);
+        var testId = GenerateTestId(metadata, combination.DataSourceIndices);
 
-        var displayName = GenerateDisplayName(metadata, expandedData.ArgumentsDisplayText);
+        var displayName = GenerateDisplayName(metadata, GetArgumentsDisplayText(combination));
 
-        var createInstance = CreateInstanceFactory(metadata, expandedData);
+        var createInstance = CreateInstanceFactory(metadata, combination);
 
         var context = await CreateTestContextAsync(testId, displayName, metadata, createInstance);
 
@@ -47,16 +92,13 @@ public sealed class TestBuilder : ITestBuilder
                 var createExecutableTestValue = createExecutableTestProp.GetValue(metadata);
                 if (createExecutableTestValue != null)
                 {
-                    var typedMethodArgs = expandedData.MethodArgumentsFactory() ?? Array.Empty<object?>();
-                    var typedClassArgs = expandedData.ClassArgumentsFactory() ?? Array.Empty<object?>();
-                    
                     var creationContext = new ExecutableTestCreationContext
                     {
                         TestId = testId,
                         DisplayName = displayName,
-                        Arguments = typedMethodArgs!,
-                        ClassArguments = typedClassArgs!,
-                        PropertyValues = new Dictionary<string, object?>(),
+                        Arguments = combination.MethodData,
+                        ClassArguments = combination.ClassData,
+                        PropertyValues = combination.PropertyValues,
                         BeforeTestHooks = beforeTestHooks,
                         AfterTestHooks = afterTestHooks,
                         Context = context
@@ -84,17 +126,15 @@ public sealed class TestBuilder : ITestBuilder
         }
         
         // Fallback to DynamicExecutableTest for non-typed metadata
-        var methodArgs = expandedData.MethodArgumentsFactory() ?? Array.Empty<object?>();
-        var classArgs = expandedData.ClassArgumentsFactory() ?? Array.Empty<object?>();
         
         var dynamicExecutableTest = new DynamicExecutableTest(createInstance, metadata.TestInvoker!)
         {
             TestId = testId,
             DisplayName = displayName,
             Metadata = metadata,
-            Arguments = methodArgs,
-            ClassArguments = classArgs,
-            PropertyValues = new Dictionary<string, object?>(),
+            Arguments = combination.MethodData,
+            ClassArguments = combination.ClassData,
+            PropertyValues = combination.PropertyValues,
             BeforeTestHooks = beforeTestHooks,
             AfterTestHooks = afterTestHooks,
             Context = context
@@ -103,7 +143,22 @@ public sealed class TestBuilder : ITestBuilder
         return dynamicExecutableTest;
     }
 
-    private Func<Task<object>> CreateInstanceFactory(TestMetadata metadata, ExpandedTestData expandedData)
+    private static string GetArgumentsDisplayText(TestDataCombination combination)
+    {
+        var allArgs = new List<object?>();
+        allArgs.AddRange(combination.ClassData);
+        allArgs.AddRange(combination.MethodData);
+        
+        if (allArgs.Count == 0)
+        {
+            return string.Empty;
+        }
+        
+        return string.Join(", ", allArgs.Select(arg => arg?.ToString() ?? "null"));
+    }
+
+
+    private Func<Task<object>> CreateInstanceFactory(TestMetadata metadata, TestDataCombination combination)
     {
         if (metadata.InstanceFactory == null)
         {
@@ -114,23 +169,15 @@ public sealed class TestBuilder : ITestBuilder
 
         return () =>
         {
-            var classArgs = expandedData.ClassArgumentsFactory();
-            
             object instance;
-            if (expandedData.PropertyFactories.Any())
+            if (combination.PropertyValues.Any())
             {
-                var propertyValues = new Dictionary<string, object?>();
-                foreach (var kvp in expandedData.PropertyFactories)
-                {
-                    propertyValues[kvp.Key] = kvp.Value();
-                }
-                
-                var argsWithProperties = classArgs.Concat(new object[] { propertyValues }).ToArray();
+                var argsWithProperties = combination.ClassData.Concat(new object[] { combination.PropertyValues }).ToArray();
                 instance = metadata.InstanceFactory(argsWithProperties);
             }
             else
             {
-                instance = metadata.InstanceFactory(classArgs);
+                instance = metadata.InstanceFactory(combination.ClassData);
             }
             
             return Task.FromResult(instance);
@@ -138,31 +185,6 @@ public sealed class TestBuilder : ITestBuilder
     }
 
 
-    private async Task InjectPropertiesAsync(object instance, TestMetadata metadata, Dictionary<string, Func<object?>> propertyFactories)
-    {
-        foreach (var kvp in propertyFactories)
-        {
-            var propertyName = kvp.Key;
-            var valueFactory = kvp.Value;
-            
-            if (metadata.PropertySetters.TryGetValue(propertyName, out var setter))
-            {
-                var value = valueFactory();
-                setter(instance, value);
-            }
-            else
-            {
-                var injection = metadata.PropertyInjections.FirstOrDefault(pi => pi.PropertyName == propertyName);
-                if (injection != null)
-                {
-                    var value = valueFactory();
-                    injection.Setter(instance, value);
-                }
-            }
-        }
-        
-        await Task.CompletedTask;
-    }
 
     private async Task<Func<TestContext, CancellationToken, Task>[]> CreateTestHooksAsync(Type testClassType, bool isBeforeHook)
     {
@@ -274,5 +296,51 @@ public sealed class TestBuilder : ITestBuilder
         {
             context.TestDetails.DisplayName = discoveredContext.DisplayName;
         }
+    }
+
+    private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
+    {
+        var testId = metadata.TestId ?? $"{metadata.TestClassType.FullName}.{metadata.TestMethodName}_DataGenerationError";
+        var displayName = $"{metadata.TestName} [DATA GENERATION ERROR]";
+
+        // Create a minimal test context for failed test
+        var testDetails = new TestDetails
+        {
+            TestId = testId,
+            TestName = metadata.TestName,
+            ClassType = metadata.TestClassType,
+            MethodName = metadata.TestMethodName,
+            ClassInstance = null,
+            TestMethodArguments = [],
+            TestClassArguments = [],
+            DisplayName = displayName,
+            TestFilePath = metadata.FilePath ?? "Unknown",
+            TestLineNumber = metadata.LineNumber ?? 0,
+            TestMethodParameterTypes = metadata.ParameterTypes,
+            ReturnType = typeof(Task),
+            ClassMetadata = MetadataBuilder.CreateClassMetadata(metadata),
+            MethodMetadata = MetadataBuilder.CreateMethodMetadata(metadata)
+        };
+
+        var context = new TestContext(
+            metadata.TestName,
+            displayName,
+            CancellationToken.None,
+            new TUnit.Core.Services.TestServiceProvider())
+        {
+            TestDetails = testDetails
+        };
+
+        return new FailedExecutableTest(exception)
+        {
+            TestId = testId,
+            DisplayName = displayName,
+            Metadata = metadata,
+            Arguments = [],
+            ClassArguments = [],
+            BeforeTestHooks = [],
+            AfterTestHooks = [],
+            Context = context
+        };
     }
 }

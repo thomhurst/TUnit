@@ -37,4 +37,10 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
     /// Factory delegate that creates an ExecutableTest for this metadata
     /// </summary>
     public Func<ExecutableTestCreationContext, TestMetadata<T>, object>? CreateExecutableTest { get; init; }
+
+    /// <summary>
+    /// Generator delegate that produces all data combinations for this test.
+    /// Replaces the previous DataSources and ClassDataSources arrays with runtime generation.
+    /// </summary>
+    public Func<IEnumerable<TestDataCombination>>? DataCombinationGenerator { get; init; }
 }
