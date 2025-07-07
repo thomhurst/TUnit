@@ -252,6 +252,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("},");
 
+        // Method metadata
+        writer.Append("MethodMetadata = ");
+        SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
+        
         // Empty hooks for now
         writer.AppendLine("Hooks = new TestHooks");
         writer.AppendLine("{");

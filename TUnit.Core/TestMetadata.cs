@@ -118,6 +118,11 @@ public abstract class TestMetadata
     public int? LineNumber { get; init; }
 
     /// <summary>
+    /// Metadata about the test method
+    /// </summary>
+    public MethodMetadata? MethodMetadata { get; init; }
+
+    /// <summary>
     /// Generic type information if the test class is generic
     /// </summary>
     public GenericTypeInfo? GenericTypeInfo { get; init; }
