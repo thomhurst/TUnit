@@ -14,7 +14,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     private readonly Type _testClass;
     private readonly MethodInfo _testMethod;
     private Func<IAsyncEnumerable<TestDataCombination>>? _dataCombinationGenerator;
-    private Func<ExecutableTestCreationContext, TestMetadata, object>? _createExecutableTestFactory;
+    private Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest>? _createExecutableTestFactory;
 
     public ReflectionTestMetadata(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass, 
@@ -36,7 +36,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
     }
 
-    public override Func<ExecutableTestCreationContext, TestMetadata, object> CreateExecutableTestFactory
+    public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
     {
         get
         {
@@ -81,7 +81,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         };
     }
 
-    private object CreateExecutableTest(ExecutableTestCreationContext context, TestMetadata metadata)
+    private ExecutableTest CreateExecutableTest(ExecutableTestCreationContext context, TestMetadata metadata)
     {
         // Create instance factory that uses reflection
         #pragma warning disable CS1998 // Async method lacks 'await' operators

@@ -54,9 +54,7 @@ public sealed class TestBuilder : ITestBuilder
 
         var displayName = GenerateDisplayName(metadata, GetArgumentsDisplayText(combination));
 
-        var createInstance = CreateInstanceFactory(metadata, combination);
-
-        var context = await CreateTestContextAsync(testId, displayName, metadata, createInstance);
+        var context = await CreateTestContextAsync(testId, displayName, metadata);
 
         await InvokeDiscoveryEventReceiversAsync(metadata, context);
 
@@ -76,32 +74,7 @@ public sealed class TestBuilder : ITestBuilder
             Context = context
         };
         
-        var result = metadata.CreateExecutableTestFactory(creationContext, metadata);
-        
-        // If factory returns an ExecutableTest, use it
-        if (result is ExecutableTest executableTest)
-        {
-            return executableTest;
-        }
-        
-        // If factory returns null, create a DynamicExecutableTest
-        if (result == null && metadata.TestInvoker != null)
-        {
-            return new DynamicExecutableTest(createInstance, metadata.TestInvoker)
-            {
-                TestId = testId,
-                DisplayName = displayName,
-                Metadata = metadata,
-                Arguments = combination.MethodData,
-                ClassArguments = combination.ClassData,
-                PropertyValues = combination.PropertyValues,
-                BeforeTestHooks = beforeTestHooks,
-                AfterTestHooks = afterTestHooks,
-                Context = context
-            };
-        }
-        
-        throw new InvalidOperationException($"CreateExecutableTestFactory returned unexpected type or TestInvoker is null for {metadata.TestName}");
+        return metadata.CreateExecutableTestFactory(creationContext, metadata);
     }
 
     private static string GetArgumentsDisplayText(TestDataCombination combination)
@@ -118,32 +91,6 @@ public sealed class TestBuilder : ITestBuilder
         return string.Join(", ", allArgs.Select(arg => arg?.ToString() ?? "null"));
     }
 
-
-    private Func<Task<object>> CreateInstanceFactory(TestMetadata metadata, TestDataCombination combination)
-    {
-        if (metadata.InstanceFactory == null)
-        {
-            throw new InvalidOperationException(
-                $"No instance factory provided for test class {metadata.TestClassType}. " +
-                "Ensure tests are either source-generated or discovered via reflection with proper factory initialization.");
-        }
-
-        return () =>
-        {
-            object instance;
-            if (combination.PropertyValues.Any())
-            {
-                var argsWithProperties = combination.ClassData.Concat(new object[] { combination.PropertyValues }).ToArray();
-                instance = metadata.InstanceFactory(argsWithProperties);
-            }
-            else
-            {
-                instance = metadata.InstanceFactory(combination.ClassData);
-            }
-            
-            return Task.FromResult(instance);
-        };
-    }
 
 
 
@@ -186,8 +133,7 @@ public sealed class TestBuilder : ITestBuilder
         return displayName;
     }
 
-    private async Task<TestContext> CreateTestContextAsync(string testId, string displayName, TestMetadata metadata, 
-        Func<Task<object>> createInstance)
+    private async Task<TestContext> CreateTestContextAsync(string testId, string displayName, TestMetadata metadata)
     {
         var testDetails = new TestDetails
         {

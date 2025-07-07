@@ -157,8 +157,9 @@ public abstract class TestMetadata
     /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.
     /// Used by TestBuilder to create strongly-typed executable tests without reflection.
+    /// Must never be null.
     /// </summary>
-    public abstract Func<ExecutableTestCreationContext, TestMetadata, object> CreateExecutableTestFactory { get; }
+    public abstract Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory { get; }
 }
 
 // TestDataSource classes have been moved to TestDataSources.cs

@@ -1,3 +1,5 @@
+using TUnit.Core;
+
 namespace TUnit.Engine.Scheduling;
 
 /// <summary>

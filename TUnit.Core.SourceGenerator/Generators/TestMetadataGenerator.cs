@@ -573,7 +573,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine($"var typedMetadata = (TestMetadata<{className}>)metadata;");
-        writer.AppendLine($"return new global::TUnit.Engine.ExecutableTest<{className}>");
+        writer.AppendLine($"return new global::TUnit.Core.ExecutableTest<{className}>");
         writer.AppendLine("{");
         writer.Indent();
         

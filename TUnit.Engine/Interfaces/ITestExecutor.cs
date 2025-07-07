@@ -1,5 +1,6 @@
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
+using TUnit.Core;
 
 namespace TUnit.Engine;
 

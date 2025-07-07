@@ -1,6 +1,4 @@
-using TUnit.Core;
-
-namespace TUnit.Engine;
+namespace TUnit.Core;
 
 /// <summary>
 /// Strongly typed executable test that provides type-safe test execution

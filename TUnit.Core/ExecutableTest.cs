@@ -1,6 +1,4 @@
-using TUnit.Core;
-
-namespace TUnit.Engine;
+namespace TUnit.Core;
 
 /// <summary>
 /// A fully prepared test ready for execution, containing all necessary data and invokers

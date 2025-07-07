@@ -1,4 +1,4 @@
-﻿namespace TUnit.Engine;
+﻿namespace TUnit.Core;
 
 /// <summary>
 /// Test execution state

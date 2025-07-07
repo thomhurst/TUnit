@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.Logging;
 

@@ -1,9 +1,9 @@
-namespace TUnit.Engine;
+namespace TUnit.Core;
 
 /// <summary>
 /// Dynamic executable test that works with runtime type information
 /// </summary>
-internal sealed class DynamicExecutableTest : ExecutableTest
+public sealed class DynamicExecutableTest : ExecutableTest
 {
     private readonly Func<Task<object>> _createInstance;
     private readonly Func<object, object?[], Task> _invokeTest;

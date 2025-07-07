@@ -63,8 +63,9 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
 
     /// <summary>
     /// Strongly-typed factory delegate that creates an ExecutableTest for this metadata
+    /// Must never be null.
     /// </summary>
-    public Func<ExecutableTestCreationContext, TestMetadata<T>, object>? CreateExecutableTest { get; init; }
+    public Func<ExecutableTestCreationContext, TestMetadata<T>, ExecutableTest>? CreateExecutableTest { get; init; }
 
     /// <summary>
     /// Backing field for the DataCombinationGenerator property
@@ -98,17 +99,16 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
     /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.
     /// </summary>
-    public override Func<ExecutableTestCreationContext, TestMetadata, object> CreateExecutableTestFactory
+    public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
     {
         get
         {
             if (CreateExecutableTest != null)
             {
-                return (context, metadata) => CreateExecutableTest(context, (TestMetadata<T>)metadata)!;
+                return (context, metadata) => CreateExecutableTest(context, (TestMetadata<T>)metadata);
             }
             
-            // Return null to signal that TestBuilder should create a DynamicExecutableTest
-            return (context, metadata) => null!;
+            throw new InvalidOperationException($"CreateExecutableTest factory is not set for {typeof(T).Name}");
         }
     }
 
