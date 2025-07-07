@@ -163,7 +163,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         var testId = GenerateTestId(testClass, testMethod);
         var testName = GenerateTestName(testClass, testMethod);
         
-        var metadata = new TestMetadata
+        var metadata = new ReflectionTestMetadata(testClass, testMethod)
         {
             TestId = testId,
             TestName = testName,

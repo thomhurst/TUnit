@@ -170,7 +170,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodName = testMethod.MethodSymbol.Name;
         var testId = $"{className}.{methodName}";
 
-        writer.AppendLine($"tests.Add(new TestMetadata<{className}>");
+        writer.AppendLine($"var metadata = new TestMetadata<{className}>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -182,14 +182,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Add basic metadata
         GenerateBasicMetadata(writer, testMethod);
 
-        // Generate the DataCombinationGenerator delegate with the guid
-        writer.AppendLine($"DataCombinationGenerator = () => GenerateCombinations_{combinationGuid}(),");
-
         // Generate typed invokers and factory
         GenerateTypedInvokers(writer, testMethod, className);
 
         writer.Unindent();
-        writer.AppendLine("});");
+        writer.AppendLine("};");
+        
+        // Set the DataCombinationGenerator after construction
+        writer.AppendLine($"metadata.SetDataCombinationGenerator(() => GenerateCombinations_{combinationGuid}());");
+        writer.AppendLine("tests.Add(metadata);");
     }
 
     private static void GenerateBasicMetadata(CodeWriter writer, TestMethodMetadata testMethod)

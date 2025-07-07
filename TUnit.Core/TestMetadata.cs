@@ -3,7 +3,7 @@ namespace TUnit.Core;
 /// <summary>
 /// Unified metadata for a test, fully AOT-compatible with no reflection dependencies
 /// </summary>
-public class TestMetadata
+public abstract class TestMetadata
 {
     /// <summary>
     /// Unique identifier for the test
@@ -147,6 +147,18 @@ public class TestMetadata
     /// Enhanced property injection data including setters and value factories
     /// </summary>
     public PropertyInjectionData[] PropertyInjections { get; init; } = [];
+
+    /// <summary>
+    /// Generator delegate that produces all data combinations for this test.
+    /// Used by TestBuilder to expand test data without reflection.
+    /// </summary>
+    public abstract Func<IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator { get; }
+
+    /// <summary>
+    /// Factory delegate that creates an ExecutableTest for this metadata.
+    /// Used by TestBuilder to create strongly-typed executable tests without reflection.
+    /// </summary>
+    public abstract Func<ExecutableTestCreationContext, TestMetadata, object> CreateExecutableTestFactory { get; }
 }
 
 // TestDataSource classes have been moved to TestDataSources.cs

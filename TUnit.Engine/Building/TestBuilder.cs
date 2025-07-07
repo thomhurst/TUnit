@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building.Interfaces;
@@ -23,49 +22,31 @@ public sealed class TestBuilder : ITestBuilder
     /// Builds all executable tests from a single TestMetadata using its DataCombinationGenerator delegate.
     /// This is the new simplified approach that replaces DataSourceExpander.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection is only used as a fallback for non-AOT scenarios")]
     public async Task<IEnumerable<ExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata)
     {
         var tests = new List<ExecutableTest>();
 
-        // Check if this is a typed metadata with DataCombinationGenerator
-        if (metadata is ITypedTestMetadata)
+        try
         {
-            var dataGeneratorProp = metadata.GetType().GetProperty("DataCombinationGenerator");
-            if (dataGeneratorProp?.GetValue(metadata) is Delegate dataCombinationGenerator)
+            // Use the DataCombinationGenerator directly - no reflection needed
+            var asyncCombinations = metadata.DataCombinationGenerator();
+            await foreach (var combination in asyncCombinations)
             {
-                try
-                {
-                    // Invoke the DataCombinationGenerator delegate
-                    var invokeMethod = dataCombinationGenerator.GetType().GetMethod("Invoke");
-                    if (invokeMethod?.Invoke(dataCombinationGenerator, null) is IAsyncEnumerable<TestDataCombination> asyncCombinations)
-                    {
-                        await foreach (var combination in asyncCombinations)
-                        {
-                            var test = await BuildTestAsync(metadata, combination);
-                            tests.Add(test);
-                        }
-                        return tests;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // If data combination generation fails, create a failed test
-                    var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
-                    tests.Add(failedTest);
-                    return tests;
-                }
+                var test = await BuildTestAsync(metadata, combination);
+                tests.Add(test);
             }
         }
+        catch (Exception ex)
+        {
+            // If data combination generation fails, create a failed test
+            var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
+            tests.Add(failedTest);
+            return tests;
+        }
 
-        // Fallback: Create a single test without data combinations (no arguments)
-        var defaultCombination = new TestDataCombination();
-        var defaultTest = await BuildTestAsync(metadata, defaultCombination);
-        tests.Add(defaultTest);
         return tests;
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection is only used as a fallback for non-AOT scenarios")]
     public async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestDataCombination combination)
     {
         // Generate unique test ID
@@ -82,56 +63,11 @@ public sealed class TestBuilder : ITestBuilder
         var beforeTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: true);
         var afterTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: false);
 
-        // Check if we have a typed metadata with CreateExecutableTest factory
-        if (metadata is ITypedTestMetadata)
-        {
-            // Get the actual CreateExecutableTest delegate via the interface
-            var createExecutableTestProp = metadata.GetType().GetProperty("CreateExecutableTest");
-            if (createExecutableTestProp != null)
-            {
-                var createExecutableTestValue = createExecutableTestProp.GetValue(metadata);
-                if (createExecutableTestValue != null)
-                {
-                    var creationContext = new ExecutableTestCreationContext
-                    {
-                        TestId = testId,
-                        DisplayName = displayName,
-                        Arguments = combination.MethodData,
-                        ClassArguments = combination.ClassData,
-                        PropertyValues = combination.PropertyValues,
-                        BeforeTestHooks = beforeTestHooks,
-                        AfterTestHooks = afterTestHooks,
-                        Context = context
-                    };
-                    
-                    // Try to invoke it dynamically
-                    try
-                    {
-                        var methodInfo = createExecutableTestValue.GetType().GetMethod("Invoke");
-                        if (methodInfo != null)
-                        {
-                            var executableTest = methodInfo.Invoke(createExecutableTestValue, new object[] { creationContext, metadata }) as ExecutableTest;
-                            if (executableTest != null)
-                            {
-                                return executableTest;
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // Fall back to DynamicExecutableTest
-                    }
-                }
-            }
-        }
-        
-        // Fallback to DynamicExecutableTest for non-typed metadata
-        
-        var dynamicExecutableTest = new DynamicExecutableTest(createInstance, metadata.TestInvoker!)
+        // Use the CreateExecutableTestFactory directly - no reflection needed
+        var creationContext = new ExecutableTestCreationContext
         {
             TestId = testId,
             DisplayName = displayName,
-            Metadata = metadata,
             Arguments = combination.MethodData,
             ClassArguments = combination.ClassData,
             PropertyValues = combination.PropertyValues,
@@ -139,8 +75,33 @@ public sealed class TestBuilder : ITestBuilder
             AfterTestHooks = afterTestHooks,
             Context = context
         };
-
-        return dynamicExecutableTest;
+        
+        var result = metadata.CreateExecutableTestFactory(creationContext, metadata);
+        
+        // If factory returns an ExecutableTest, use it
+        if (result is ExecutableTest executableTest)
+        {
+            return executableTest;
+        }
+        
+        // If factory returns null, create a DynamicExecutableTest
+        if (result == null && metadata.TestInvoker != null)
+        {
+            return new DynamicExecutableTest(createInstance, metadata.TestInvoker)
+            {
+                TestId = testId,
+                DisplayName = displayName,
+                Metadata = metadata,
+                Arguments = combination.MethodData,
+                ClassArguments = combination.ClassData,
+                PropertyValues = combination.PropertyValues,
+                BeforeTestHooks = beforeTestHooks,
+                AfterTestHooks = afterTestHooks,
+                Context = context
+            };
+        }
+        
+        throw new InvalidOperationException($"CreateExecutableTestFactory returned unexpected type or TestInvoker is null for {metadata.TestName}");
     }
 
     private static string GetArgumentsDisplayText(TestDataCombination combination)
