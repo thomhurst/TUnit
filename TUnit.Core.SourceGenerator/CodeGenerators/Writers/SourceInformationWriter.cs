@@ -33,8 +33,6 @@ public static class SourceInformationWriter
         sourceCodeWriter.Append($"Name = \"{namedTypeSymbol.Name}\",");
         sourceCodeWriter.Append($"Namespace = \"{namedTypeSymbol.ContainingNamespace.ToDisplayString()}\",");
 
-        sourceCodeWriter.Append("Attributes = ");
-        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, compilation, namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(type => type.GetAttributes()).ToImmutableArray(), "Class", namedTypeSymbol.Name, namedTypeSymbol.ToDisplayString());
 
         sourceCodeWriter.Append("Parameters = ");
         var parameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters
@@ -86,9 +84,6 @@ public static class SourceInformationWriter
         sourceCodeWriter.Append("{");
         sourceCodeWriter.Append($"Name = \"{assembly.Name}\",");
 
-        sourceCodeWriter.Append("Attributes = ");
-        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, compilation, assembly.GetAttributes(), "Assembly", assembly.Name);
-
         sourceCodeWriter.Append("}),");
     }
 
@@ -104,9 +99,6 @@ public static class SourceInformationWriter
         sourceCodeWriter.Append($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
         sourceCodeWriter.Append($"ReturnType = typeof({methodSymbol.ReturnType.GloballyQualified()}),");
         sourceCodeWriter.Append($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ReturnType)},");
-
-        sourceCodeWriter.Append("Attributes = ");
-        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, compilation, methodSymbol.GetAttributes(), "Method", methodSymbol.Name, namedTypeSymbol.ToDisplayString());
 
         sourceCodeWriter.Append("Parameters = ");
         var parameters = methodSymbol.Parameters;
@@ -170,9 +162,6 @@ public static class SourceInformationWriter
         sourceCodeWriter.Append($"IsStatic = {property.IsStatic.ToString().ToLower()},");
         sourceCodeWriter.Append($"Getter = {GetPropertyAccessor(namedTypeSymbol, property)},");
 
-        sourceCodeWriter.Append("Attributes = ");
-        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, compilation, property.GetAttributes(), "Property", property.Name, namedTypeSymbol.ToDisplayString());
-
         // For now, always set ClassMetadata to null to avoid circular references
         // The ClassMetadata will be available through the cache if needed at runtime
         sourceCodeWriter.Append("ClassMetadata = null,");
@@ -205,15 +194,6 @@ public static class SourceInformationWriter
         sourceCodeWriter.Append("{");
         sourceCodeWriter.Append($"Name = \"{parameter.Name}\",");
         sourceCodeWriter.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(parameter.Type)},");
-
-        sourceCodeWriter.Append("Attributes = ");
-        var containingType = parameter.ContainingSymbol switch
-        {
-            IMethodSymbol method => method.ContainingType,
-            IPropertySymbol property => property.ContainingType,
-            _ => null
-        };
-        AttributeWriter.WriteAttributeMetadatas(sourceCodeWriter, context, parameter.GetAttributes(), "Parameter", parameter.Name, containingType?.ToDisplayString());
 
         sourceCodeWriter.Append("ReflectionInfo = null!,");
 

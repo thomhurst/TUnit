@@ -32,7 +32,6 @@ internal static class CodeGenerationHelpers
                 {
                     writer.AppendLine($"Name = \"{param.Name}\",");
                     writer.AppendLine($"TypeReference = {GenerateTypeReference(param.Type)},");
-                    writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(param.GetAttributes(), param, writer._indentLevel)},");
                     var paramTypesArray = GenerateParameterTypesArray(method);
                     if (paramTypesArray == "null")
                     {
@@ -47,134 +46,6 @@ internal static class CodeGenerationHelpers
             }
         }
         return writer.ToString().TrimEnd(); // Trim trailing newline for inline use
-    }
-
-    /// <summary>
-    /// Generates C# code for an AttributeMetadata array from attributes.
-    /// </summary>
-    public static string GenerateAttributeMetadataArray(ImmutableArray<AttributeData> attributes, ISymbol? targetSymbol, int writerIndentLevel)
-    {
-        var relevantAttributes = attributes
-            .Where(attr => !IsCompilerGeneratedAttribute(attr))
-            .ToList();
-
-        if (relevantAttributes.Count == 0)
-        {
-            return "System.Array.Empty<global::TUnit.Core.AttributeMetadata>()";
-        }
-
-        using var writer = new CodeWriter(includeHeader: false);
-
-        writer.SetIndentLevel(writerIndentLevel);
-
-        using (writer.BeginArrayInitializer("new global::TUnit.Core.AttributeMetadata[]"))
-        {
-            foreach (var attr in relevantAttributes)
-            {
-                var attributeCode = GenerateAttributeMetadata(attr, targetSymbol);
-                if (!string.IsNullOrEmpty(attributeCode))
-                {
-                    writer.Append(attributeCode);
-                }
-            }
-        }
-        return writer.ToString().TrimEnd();
-    }
-
-    /// <summary>
-    /// Determines the TestAttributeTarget based on the symbol kind.
-    /// </summary>
-    private static string DetermineTargetElement(ISymbol? symbol)
-    {
-        if (symbol == null)
-        {
-            return "Assembly";
-        }
-
-        return symbol.Kind switch
-        {
-            SymbolKind.Method => symbol is IMethodSymbol { MethodKind: MethodKind.Constructor }
-                ? "Constructor"
-                : "Method",
-            SymbolKind.NamedType => symbol is INamedTypeSymbol namedType ? namedType.TypeKind switch
-            {
-                TypeKind.Class => "Class",
-                TypeKind.Struct => "Struct",
-                TypeKind.Interface => "Interface",
-                TypeKind.Enum => "Enum",
-                TypeKind.Delegate => "Delegate",
-                _ => "Class"
-            } : "Class",
-            SymbolKind.Property => "Property",
-            SymbolKind.Field => "Field",
-            SymbolKind.Event => "Event",
-            SymbolKind.Parameter => "Parameter",
-            SymbolKind.Assembly => "Assembly",
-            SymbolKind.NetModule => "Module",
-            SymbolKind.TypeParameter => "GenericParameter",
-            _ => "Method"
-        };
-    }
-
-    /// <summary>
-    /// Generates C# code for a single AttributeMetadata.
-    /// </summary>
-    private static string GenerateAttributeMetadata(AttributeData attr, ISymbol? targetSymbol = null)
-    {
-        using var writer = new CodeWriter("", includeHeader: false);
-        writer.SetIndentLevel(3); // Start with indent level 3 for nested objects
-
-        // Determine the target element based on the symbol
-        var targetElement = DetermineTargetElement(targetSymbol);
-
-        // Extract constructor arguments and named arguments
-        var constructorArgs = ExtractConstructorArgumentsArray(attr);
-        var namedArgs = ExtractNamedArgumentsDictionary(attr);
-
-        // Generate unified attribute metadata
-        using (writer.BeginObjectInitializer("new global::TUnit.Core.AttributeMetadata", ","))
-        {
-            writer.AppendLine($"Instance = {GenerateAttributeInstantiation(attr)},");
-            writer.AppendLine($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement},");
-            writer.AppendLine($"ConstructorArguments = {constructorArgs},");
-            writer.AppendLine($"NamedArguments = {namedArgs}");
-        }
-
-        return writer.ToString();
-    }
-
-    /// <summary>
-    /// Extracts constructor arguments as a C# array string.
-    /// </summary>
-    private static string ExtractConstructorArgumentsArray(AttributeData attr)
-    {
-        if (attr.ConstructorArguments.Length == 0)
-        {
-            return "System.Array.Empty<object?>()";
-        }
-
-        var args = attr.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue);
-        return $"new object?[] {{ {string.Join(", ", args)} }}";
-    }
-
-    /// <summary>
-    /// Extracts named arguments as a C# dictionary string.
-    /// </summary>
-    private static string ExtractNamedArgumentsDictionary(AttributeData attr)
-    {
-        if (attr.NamedArguments.Length == 0)
-        {
-            return "null";
-        }
-
-        using var writer = new CodeWriter("", includeHeader: false);
-        writer.Append("new System.Collections.Generic.Dictionary<string, object?> { ");
-        foreach (var na in attr.NamedArguments)
-        {
-            writer.Append($"{{ \"{na.Key}\", {TypedConstantParser.GetRawTypedConstantValue(na.Value)} }}, ");
-        }
-        writer.Append("}");
-        return writer.ToString().Trim();
     }
 
     /// <summary>
@@ -312,7 +183,6 @@ internal static class CodeGenerationHelpers
                     writer.AppendLine($"ReflectionInfo = typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"),");
                     writer.AppendLine("IsStatic = false,");
                     writer.AppendLine($"Getter = obj => ((({typeSymbol.GloballyQualified()})obj).{prop.Name}),");
-                    writer.AppendLine($"Attributes = {GenerateAttributeMetadataArray(prop.GetAttributes(), prop, writer._indentLevel)}");
                 }
             }
         }

@@ -30,43 +30,6 @@ public class AttributeWriter
         }
     }
 
-    public static void WriteAttributeMetadatas(ICodeWriter sourceCodeWriter, Compilation compilation,
-        ImmutableArray<AttributeData> attributeDatas, string targetElement, string? targetMemberName = null, string? targetTypeName = null, bool includeClassMetadata = false)
-    {
-        var dataAttributeInterface =
-            compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.IAsyncDataSourceGeneratorAttribute
-                .WithoutGlobalPrefix);
-
-        attributeDatas = attributeDatas.RemoveAll(x => x.AttributeClass?.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, dataAttributeInterface)) == true);
-
-        if (attributeDatas.Length == 0)
-        {
-            sourceCodeWriter.Append("[],");
-            return;
-        }
-
-        sourceCodeWriter.Append("[");
-        for (var index = 0; index < attributeDatas.Length; index++)
-        {
-            var attributeData = attributeDatas[index];
-
-            if (attributeData.ApplicationSyntaxReference is null)
-            {
-                continue;
-            }
-
-            WriteAttributeMetadata(sourceCodeWriter, compilation, attributeData, targetElement, targetMemberName, targetTypeName, includeClassMetadata);
-
-            if (index != attributeDatas.Length - 1)
-            {
-                sourceCodeWriter.Append(",");
-            }
-
-            sourceCodeWriter.AppendLine();
-        }
-        sourceCodeWriter.Append("],");
-    }
-
     public static void WriteAttribute(ICodeWriter sourceCodeWriter, Compilation compilation,
         AttributeData attributeData)
     {
@@ -247,56 +210,5 @@ public class AttributeWriter
         sourceCodeWriter.Append("{");
         sourceCodeWriter.Append($"{formattedNamedArgs}");
         sourceCodeWriter.Append("}");
-    }
-
-    // Write test attributes with special filtering and formatting
-    public static void WriteTestAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
-        ImmutableArray<AttributeData> attributeDatas, string targetElement, string? targetMemberName = null, ITypeSymbol? targetType = null)
-    {
-        // Filter out attributes that don't have application syntax reference (except mscorlib)
-        var filteredAttributes = attributeDatas.Where(x =>
-            x.ApplicationSyntaxReference is not null ||
-            x.AttributeClass?.ContainingAssembly?.Identity.Name == "mscorlib").ToImmutableArray();
-
-        var targetTypeName = targetType?.GloballyQualified();
-
-        // Use the enhanced WriteAttributeMetadatas with ClassMetadata support
-        WriteAttributeMetadatas(sourceCodeWriter, compilation, filteredAttributes, targetElement, targetMemberName, targetTypeName, includeClassMetadata: true);
-    }
-
-    // Helper methods for different contexts (previously in TestAttributeWriter)
-    public static void WriteAssemblyTestAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
-        IAssemblySymbol assembly)
-    {
-        var attributes = assembly.GetAttributes();
-        WriteTestAttributes(sourceCodeWriter, compilation, attributes, "Assembly", assembly.Name);
-    }
-
-    public static void WriteTypeTestAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
-        ITypeSymbol type)
-    {
-        var attributes = type.GetAttributes();
-        WriteTestAttributes(sourceCodeWriter, compilation, attributes, "Class", type.Name, type);
-    }
-
-    public static void WriteMethodTestAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
-        IMethodSymbol method)
-    {
-        var attributes = method.GetAttributes();
-        WriteTestAttributes(sourceCodeWriter, compilation, attributes, "Method", method.Name, method.ContainingType);
-    }
-
-    public static void WritePropertyTestAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
-        IPropertySymbol property)
-    {
-        var attributes = property.GetAttributes();
-        WriteTestAttributes(sourceCodeWriter, compilation, attributes, "Property", property.Name, property.ContainingType);
-    }
-
-    public static void WriteParameterTestAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
-        IParameterSymbol parameter)
-    {
-        var attributes = parameter.GetAttributes();
-        WriteTestAttributes(sourceCodeWriter, compilation, attributes, "Parameter", parameter.Name, parameter.ContainingType);
     }
 }

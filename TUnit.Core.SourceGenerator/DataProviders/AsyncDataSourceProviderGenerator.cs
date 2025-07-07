@@ -78,7 +78,6 @@ public class AsyncDataSourceProviderGenerator : IDataProviderGenerator
                 writer.Append($"Name = \"{param.Name}\", ");
                 writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(param.Type)}, ");
                 writer.Append($"ReflectionInfo = typeof({context.TestInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}).GetConstructor({GenerateParameterTypesArray(constructor.Parameters)})!.GetParameters()[{i}], ");
-                writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(param.GetAttributes(), param, 0)} ");
                 writer.Append("}");
             }
         }
@@ -115,7 +114,6 @@ public class AsyncDataSourceProviderGenerator : IDataProviderGenerator
             writer.Append($"Name = \"{param.Name}\", ");
             writer.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(param.Type)}, ");
             writer.Append($"ReflectionInfo = typeof({context.TestInfo.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted))}).GetMethod(\"{context.TestInfo.MethodSymbol.Name}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, {GenerateParameterTypesArray(context.TestInfo.MethodSymbol)}, null)!.GetParameters()[{i}], ");
-            writer.Append($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(param.GetAttributes(), param, 0)} ");
             writer.Append("}");
         }
 

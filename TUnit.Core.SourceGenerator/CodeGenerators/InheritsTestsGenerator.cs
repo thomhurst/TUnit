@@ -203,7 +203,6 @@ public class InheritsTestsGenerator : IIncrementalGenerator
                             w4.AppendLine($"Name = \"{classSymbol.Name}\",");
                             w4.AppendLine($"Type = typeof({GetFullTypeName(classSymbol)}) ?? typeof(object),");
                             w4.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(classSymbol)},");
-                            w4.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(classSymbol.GetAttributes(), classSymbol, w3.IndentLevel)},");
                             w4.AppendLine($"Namespace = \"{classSymbol.ContainingNamespace?.ToDisplayString() ?? ""}\",");
 
                             // Generate Assembly metadata
@@ -220,7 +219,6 @@ public class InheritsTestsGenerator : IIncrementalGenerator
                             w4.AppendLine("Parent = null");
                         });
                         w3.AppendLine(",");
-                        w3.AppendLine($"Attributes = {CodeGenerationHelpers.GenerateAttributeMetadataArray(methodSymbol.GetAttributes(), methodSymbol, w3.IndentLevel)},");
 
                         // For methods on generic types, we need to look up the method on the base type where it's declared
                         // The runtime will handle finding the correct method on the derived type
