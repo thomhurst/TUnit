@@ -9,15 +9,42 @@ namespace TUnit.Core;
 /// <typeparam name="T">The type of the test class</typeparam>
 public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
 {
+    private Func<object?[], T>? _instanceFactory;
+    private Func<T, object?[], Task>? _testInvoker;
+
     /// <summary>
     /// Strongly typed instance factory
     /// </summary>
-    public new Func<object[], T>? InstanceFactory { get; init; }
+    public new Func<object?[], T>? InstanceFactory 
+    { 
+        get => _instanceFactory;
+        init
+        {
+            _instanceFactory = value;
+            // Also set the base class property with a wrapper
+            if (value != null)
+            {
+                base.InstanceFactory = args => value(args);
+            }
+        }
+    }
 
     /// <summary>
     /// Strongly typed test invoker
     /// </summary>
-    public new Func<T, object?[], Task>? TestInvoker { get; init; }
+    public new Func<T, object?[], Task>? TestInvoker 
+    { 
+        get => _testInvoker;
+        init
+        {
+            _testInvoker = value;
+            // Also set the base class property with a wrapper
+            if (value != null)
+            {
+                base.TestInvoker = (instance, args) => value((T)instance, args);
+            }
+        }
+    }
 
     /// <summary>
     /// Property setters for this test class
