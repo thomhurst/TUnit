@@ -42,5 +42,5 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
     /// Generator delegate that produces all data combinations for this test.
     /// Replaces the previous DataSources and ClassDataSources arrays with runtime generation.
     /// </summary>
-    public Func<IEnumerable<TestDataCombination>>? DataCombinationGenerator { get; init; }
+    public Func<IAsyncEnumerable<TestDataCombination>>? DataCombinationGenerator { get; init; }
 }

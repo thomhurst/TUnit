@@ -38,9 +38,9 @@ public sealed class TestBuilder : ITestBuilder
                 {
                     // Invoke the DataCombinationGenerator delegate
                     var invokeMethod = dataCombinationGenerator.GetType().GetMethod("Invoke");
-                    if (invokeMethod?.Invoke(dataCombinationGenerator, null) is IEnumerable<TestDataCombination> combinations)
+                    if (invokeMethod?.Invoke(dataCombinationGenerator, null) is IAsyncEnumerable<TestDataCombination> asyncCombinations)
                     {
-                        foreach (var combination in combinations)
+                        await foreach (var combination in asyncCombinations)
                         {
                             var test = await BuildTestAsync(metadata, combination);
                             tests.Add(test);

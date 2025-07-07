@@ -1,7 +1,7 @@
 using System.Reflection;
 using TUnit.Core;
 
-namespace TUnit.Core.SourceGenerator.DataSourceGenerators;
+namespace TUnit.Core.DataSourceGenerators;
 
 /// <summary>
 /// Generates TestDataCombination objects for MethodDataSourceAttribute.
@@ -9,8 +9,10 @@ namespace TUnit.Core.SourceGenerator.DataSourceGenerators;
 /// </summary>
 public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAttribute>
 {
-    public IEnumerable<TestDataCombination> GenerateDataCombinations(MethodDataSourceAttribute attribute, DataSourceGenerationContext context)
+    public async IAsyncEnumerable<TestDataCombination> GenerateDataCombinationsAsync(MethodDataSourceAttribute attribute, DataSourceGenerationContext context)
     {
+        await Task.Yield(); // Make it properly async
+        
         var sourceType = attribute.ClassProvidingDataSource ?? context.TestClassType;
         var method = sourceType.GetMethod(attribute.MethodNameProvidingDataSource, 
             BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
@@ -43,7 +45,7 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
                 };
             }
         }
-        else if (result is IEnumerable enumerable)
+        else if (result is System.Collections.IEnumerable enumerable)
         {
             var index = 0;
             foreach (var item in enumerable)

@@ -1,6 +1,6 @@
 using TUnit.Core;
 
-namespace TUnit.Core.SourceGenerator.DataSourceGenerators;
+namespace TUnit.Core.DataSourceGenerators;
 
 /// <summary>
 /// Generates TestDataCombination objects for ArgumentsAttribute.
@@ -8,8 +8,10 @@ namespace TUnit.Core.SourceGenerator.DataSourceGenerators;
 /// </summary>
 public class ArgumentsDataSourceGenerator : IDataSourceGenerator<ArgumentsAttribute>
 {
-    public IEnumerable<TestDataCombination> GenerateDataCombinations(ArgumentsAttribute attribute, DataSourceGenerationContext context)
+    public async IAsyncEnumerable<TestDataCombination> GenerateDataCombinationsAsync(ArgumentsAttribute attribute, DataSourceGenerationContext context)
     {
+        await Task.Yield(); // Make it properly async
+        
         yield return new TestDataCombination
         {
             MethodData = attribute.Values,

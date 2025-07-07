@@ -1,6 +1,4 @@
-using TUnit.Core;
-
-namespace TUnit.Core.SourceGenerator.DataSourceGenerators;
+namespace TUnit.Core.DataSourceGenerators;
 
 /// <summary>
 /// Interface for generating TestDataCombination objects from specific attribute types.
@@ -16,8 +14,23 @@ public interface IDataSourceGenerator<TAttribute> where TAttribute : TestDataAtt
     /// </summary>
     /// <param name="attribute">The attribute instance containing the data source configuration</param>
     /// <param name="context">Context information about the test being generated</param>
-    /// <returns>An enumerable of TestDataCombination objects</returns>
-    IEnumerable<TestDataCombination> GenerateDataCombinations(TAttribute attribute, DataSourceGenerationContext context);
+    /// <returns>An async enumerable of TestDataCombination objects</returns>
+    IAsyncEnumerable<TestDataCombination> GenerateDataCombinationsAsync(TAttribute attribute, DataSourceGenerationContext context);
+}
+
+/// <summary>
+/// Interface for generating TestDataCombination objects from async data source attributes.
+/// Specialized for IAsyncDataSourceGeneratorAttribute which doesn't extend TestDataAttribute.
+/// </summary>
+public interface IAsyncDataSourceGenerator
+{
+    /// <summary>
+    /// Generates TestDataCombination objects from the given async attribute.
+    /// </summary>
+    /// <param name="attribute">The async attribute instance</param>
+    /// <param name="context">Context information about the test being generated</param>
+    /// <returns>An async enumerable of TestDataCombination objects</returns>
+    IAsyncEnumerable<TestDataCombination> GenerateDataCombinationsAsync(IAsyncDataSourceGeneratorAttribute attribute, DataSourceGenerationContext context);
 }
 
 /// <summary>
