@@ -120,7 +120,7 @@ public abstract class TestMetadata
     /// <summary>
     /// Metadata about the test method
     /// </summary>
-    public MethodMetadata? MethodMetadata { get; init; }
+    public required MethodMetadata MethodMetadata { get; init; }
 
     /// <summary>
     /// Generic type information if the test class is generic

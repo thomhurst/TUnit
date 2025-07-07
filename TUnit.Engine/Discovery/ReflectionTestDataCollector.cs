@@ -195,7 +195,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 ..testMethod.GetCustomAttributes(),
                 ..testClass.GetCustomAttributes(),
                 ..testClass.Assembly.GetCustomAttributes(),
-            ]
+            ],
+            MethodMetadata = BuildMethodMetadata(testClass, testMethod)
         };
 
         return metadata;
@@ -1014,5 +1015,73 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         await Task.CompletedTask;
         yield break;
+    }
+
+    private static MethodMetadata BuildMethodMetadata(Type testClass, MethodInfo testMethod)
+    {
+        var parameters = testMethod.GetParameters()
+            .Select(p => new ParameterMetadata<object>
+            {
+                Name = p.Name ?? string.Empty,
+                TypeReference = new TypeReference
+                {
+                    AssemblyQualifiedName = p.ParameterType.AssemblyQualifiedName,
+                    IsGenericParameter = p.ParameterType.IsGenericParameter,
+                    GenericParameterPosition = p.ParameterType.IsGenericParameter ? p.ParameterType.GenericParameterPosition : 0,
+                    IsMethodGenericParameter = p.ParameterType.IsGenericParameter && p.ParameterType.DeclaringMethod != null,
+                    GenericParameterName = p.ParameterType.IsGenericParameter ? p.ParameterType.Name : null
+                },
+                ReflectionInfo = p
+            })
+            .Cast<ParameterMetadata>()
+            .ToArray();
+
+        var classMetadata = new ClassMetadata
+        {
+            Type = testClass,
+            TypeReference = new TypeReference
+            {
+                AssemblyQualifiedName = testClass.AssemblyQualifiedName,
+                IsGenericParameter = testClass.IsGenericParameter,
+                GenericParameterPosition = testClass.IsGenericParameter ? testClass.GenericParameterPosition : 0,
+                IsMethodGenericParameter = false,
+                GenericParameterName = testClass.IsGenericParameter ? testClass.Name : null
+            },
+            Name = testClass.Name,
+            Namespace = testClass.Namespace ?? string.Empty,
+            Assembly = new AssemblyMetadata
+            {
+                Name = testClass.Assembly.GetName().Name ?? string.Empty
+            },
+            Parent = null,
+            Parameters = Array.Empty<ParameterMetadata>(),
+            Properties = Array.Empty<PropertyMetadata>()
+        };
+
+        return new MethodMetadata
+        {
+            Type = testClass,
+            TypeReference = new TypeReference
+            {
+                AssemblyQualifiedName = testClass.AssemblyQualifiedName,
+                IsGenericParameter = testClass.IsGenericParameter,
+                GenericParameterPosition = testClass.IsGenericParameter ? testClass.GenericParameterPosition : 0,
+                IsMethodGenericParameter = false,
+                GenericParameterName = testClass.IsGenericParameter ? testClass.Name : null
+            },
+            Name = testMethod.Name,
+            GenericTypeCount = testMethod.GetGenericArguments().Length,
+            ReturnType = testMethod.ReturnType,
+            ReturnTypeReference = new TypeReference
+            {
+                AssemblyQualifiedName = testMethod.ReturnType.AssemblyQualifiedName,
+                IsGenericParameter = testMethod.ReturnType.IsGenericParameter,
+                GenericParameterPosition = testMethod.ReturnType.IsGenericParameter ? testMethod.ReturnType.GenericParameterPosition : 0,
+                IsMethodGenericParameter = testMethod.ReturnType.IsGenericParameter && testMethod.ReturnType.DeclaringMethod != null,
+                GenericParameterName = testMethod.ReturnType.IsGenericParameter ? testMethod.ReturnType.Name : null
+            },
+            Parameters = parameters,
+            Class = classMetadata
+        };
     }
 }
