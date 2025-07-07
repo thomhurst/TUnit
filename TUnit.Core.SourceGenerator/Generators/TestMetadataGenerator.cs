@@ -134,6 +134,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var className = testMethod.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var methodName = testMethod.MethodSymbol.Name;
         var guid = Guid.NewGuid().ToString("N");
+        var combinationGuid = Guid.NewGuid().ToString("N").Substring(0, 8);
 
         writer.AppendLine($"internal sealed class {testMethod.TypeSymbol.Name}_{methodName}_TestSource_{guid} : ITestSource");
         writer.AppendLine("{");
@@ -147,11 +148,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
 
         // Generate the TestMetadata<T> with DataCombinationGenerator
-        GenerateTestMetadataInstance(writer, testMethod, className);
+        GenerateTestMetadataInstance(writer, testMethod, className, combinationGuid);
 
         writer.AppendLine("return tests;");
         writer.Unindent();
         writer.AppendLine("}");
+
+        // Generate the data combination method inside the class
+        writer.AppendLine();
+        GenerateDataCombinationMethod(writer, testMethod, combinationGuid);
 
         writer.Unindent();
         writer.AppendLine("}");
@@ -160,7 +165,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateModuleInitializer(writer, testMethod, guid);
     }
 
-    private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className)
+    private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className, string combinationGuid)
     {
         var methodName = testMethod.MethodSymbol.Name;
         var testId = $"{className}.{methodName}";
@@ -177,8 +182,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Add basic metadata
         GenerateBasicMetadata(writer, testMethod);
 
-        // Generate the DataCombinationGenerator delegate
-        GenerateDataCombinationGenerator(writer, testMethod);
+        // Generate the DataCombinationGenerator delegate with the guid
+        writer.AppendLine($"DataCombinationGenerator = () => GenerateCombinations_{combinationGuid}(),");
 
         // Generate typed invokers and factory
         GenerateTypedInvokers(writer, testMethod, className);
@@ -239,9 +244,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
 
-    private static void GenerateDataCombinationGenerator(CodeWriter writer, TestMethodMetadata testMethod)
+
+    private static void GenerateDataCombinationMethod(CodeWriter writer, TestMethodMetadata testMethod, string guid)
     {
-        writer.AppendLine("DataCombinationGenerator = () =>");
+        writer.AppendLine($"private static async IAsyncEnumerable<TestDataCombination> GenerateCombinations_{guid}()");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -262,9 +268,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             GenerateDataSourceCombinations(writer, testMethod, methodAttributes, classAttributes);
         }
 
-        writer.AppendLine("return combinations;");
+        writer.AppendLine("foreach (var combination in combinations)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("yield return combination;");
         writer.Unindent();
-        writer.AppendLine("},");
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
     }
 
     private static void GenerateDataSourceCombinations(CodeWriter writer, TestMethodMetadata testMethod,
@@ -375,12 +386,47 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (constant.Value is string str)
         {
-            return $"\"{str.Replace("\"", "\\\"")}\"";
+            return $"\"{str.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\t", "\\t")}\"";
         }
 
         if (constant.Value is char ch)
         {
             return $"'{ch}'";
+        }
+
+        if (constant.Value is bool b)
+        {
+            return b ? "true" : "false";
+        }
+
+        if (constant.Value is float f)
+        {
+            return $"{f}f";
+        }
+
+        if (constant.Value is double d)
+        {
+            return $"{d}d";
+        }
+
+        if (constant.Value is decimal dec)
+        {
+            return $"{dec}m";
+        }
+
+        if (constant.Value is long l)
+        {
+            return $"{l}L";
+        }
+
+        if (constant.Value is uint u)
+        {
+            return $"{u}u";
+        }
+
+        if (constant.Value is ulong ul)
+        {
+            return $"{ul}ul";
         }
 
         return constant.Value?.ToString() ?? "null";
@@ -391,24 +437,43 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodName = testMethod.MethodSymbol.Name;
         var parameters = testMethod.MethodSymbol.Parameters;
 
+        // Find the constructor
+        var constructors = testMethod.TypeSymbol.Constructors.Where(c => !c.IsStatic).ToList();
+        var hasParameterlessConstructor = constructors.Any(c => c.Parameters.Length == 0);
+        var primaryConstructor = constructors.FirstOrDefault(c => c.Parameters.Length > 0) ?? constructors.FirstOrDefault();
+
         // Instance factory
-        writer.AppendLine($"InstanceFactory = args => new {className}(),");
+        if (hasParameterlessConstructor || primaryConstructor == null)
+        {
+            writer.AppendLine($"InstanceFactory = args => new {className}(),");
+        }
+        else
+        {
+            // Constructor has parameters - pass args
+            var ctorParams = primaryConstructor.Parameters.Select((p, i) =>
+                $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]").ToArray();
+            writer.AppendLine($"InstanceFactory = args => new {className}({string.Join(", ", ctorParams)}),");
+        }
 
         // Test invoker
+        var isAsync = IsAsyncMethod(testMethod.MethodSymbol);
         writer.AppendLine("TestInvoker = async (instance, args) =>");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine($"var typedInstance = ({className})instance;");
 
-        if (parameters.Length == 0)
+        var methodCall = parameters.Length == 0
+            ? $"typedInstance.{methodName}()"
+            : $"typedInstance.{methodName}({string.Join(", ", parameters.Select((p, i) => $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]"))})";
+
+        if (isAsync)
         {
-            writer.AppendLine($"await typedInstance.{methodName}();");
+            writer.AppendLine($"await {methodCall};");
         }
         else
         {
-            var paramCasts = parameters.Select((p, i) =>
-                $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]").ToArray();
-            writer.AppendLine($"await typedInstance.{methodName}({string.Join(", ", paramCasts)});");
+            writer.AppendLine($"{methodCall};");
+            writer.AppendLine("await Task.CompletedTask;");
         }
 
         writer.Unindent();
@@ -424,15 +489,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        if (parameters.Length == 0)
+        var typedMethodCall = parameters.Length == 0
+            ? $"instance.{methodName}()"
+            : $"instance.{methodName}({string.Join(", ", parameters.Select((p, i) => $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]"))})";
+
+        if (isAsync)
         {
-            writer.AppendLine($"await instance.{methodName}();");
+            writer.AppendLine($"await {typedMethodCall};");
         }
         else
         {
-            var paramCasts = parameters.Select((p, i) =>
-                $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]").ToArray();
-            writer.AppendLine($"await instance.{methodName}({string.Join(", ", paramCasts)});");
+            writer.AppendLine($"{typedMethodCall};");
+            writer.AppendLine("await Task.CompletedTask;");
         }
 
         writer.Unindent();
@@ -465,6 +533,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("}");
         writer.Unindent();
         writer.AppendLine("}");
+    }
+
+    private static bool IsAsyncMethod(IMethodSymbol method)
+    {
+        var returnType = method.ReturnType;
+        if (returnType == null)
+        {
+            return false;
+        }
+
+        var returnTypeName = returnType.ToDisplayString();
+        return returnTypeName.StartsWith("System.Threading.Tasks.Task") ||
+               returnTypeName.StartsWith("System.Threading.Tasks.ValueTask") ||
+               returnTypeName.StartsWith("Task<") ||
+               returnTypeName.StartsWith("ValueTask<");
     }
 }
 
