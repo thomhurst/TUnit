@@ -98,7 +98,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 
                 // Fallback to cast for non-member values
                 var formattedValue = FormatPrimitive(value);
-                return formattedValue.StartsWith("-") 
+                return formattedValue != null && formattedValue.StartsWith("-") 
                     ? $"({targetType.ToDisplayString(FullyQualifiedFormat)})({formattedValue})"
                     : $"({targetType.ToDisplayString(FullyQualifiedFormat)}){formattedValue}";
             }
@@ -133,7 +133,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
 
         // Fallback to cast syntax
         var formattedValue = FormatPrimitive(constant.Value);
-        return formattedValue.StartsWith("-")
+        return formattedValue != null && formattedValue.StartsWith("-")
             ? $"({enumType.ToDisplayString(FullyQualifiedFormat)})({formattedValue})"
             : $"({enumType.ToDisplayString(FullyQualifiedFormat)}){formattedValue}";
     }

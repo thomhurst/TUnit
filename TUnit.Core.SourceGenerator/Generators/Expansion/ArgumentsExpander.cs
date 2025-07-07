@@ -65,7 +65,12 @@ public sealed class ArgumentsExpander : ITestExpander
 
         if (args.Length == 1 && args[0].Kind == TypedConstantKind.Array)
         {
-            return args[0].Values.Select(v => ExtractTypedConstantValue(v)).ToArray();
+            var arrayValues = args[0].Values;
+            if (arrayValues.IsDefault)
+            {
+                return new object?[] { null };
+            }
+            return arrayValues.Select(v => ExtractTypedConstantValue(v)).ToArray();
         }
         
         return args.Select(arg => ExtractTypedConstantValue(arg)).ToArray();
