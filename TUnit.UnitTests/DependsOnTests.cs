@@ -7,7 +7,7 @@ public class DependsOnTests
     {
         // Arrange
         var dependency = TestDependency.FromMethodName("TestMethod");
-        var testMetadata = new TestMetadata
+        var testMetadata = new TestMetadata<DependsOnTests>
         {
             TestId = "test1",
             TestClassType = typeof(DependsOnTests),
@@ -17,7 +17,7 @@ public class DependsOnTests
             ParameterTypes = [],
             TestMethodParameterTypes = []
         };
-        var dependentTest = new TestMetadata
+        var dependentTest = new TestMetadata<DependsOnTests>
         {
             TestId = "test2",
             TestClassType = typeof(DependsOnTests),
@@ -40,7 +40,7 @@ public class DependsOnTests
     {
         // Arrange
         var dependency = TestDependency.FromMethodName("TestMethod");
-        var testMetadata = new TestMetadata
+        var testMetadata = new TestMetadata<string>
         {
             TestId = "test1",
             TestClassType = typeof(string), // Different class
@@ -50,7 +50,7 @@ public class DependsOnTests
             ParameterTypes = [],
             TestMethodParameterTypes = []
         };
-        var dependentTest = new TestMetadata
+        var dependentTest = new TestMetadata<DependsOnTests>
         {
             TestId = "test2",
             TestClassType = typeof(DependsOnTests),
@@ -73,7 +73,7 @@ public class DependsOnTests
     {
         // Arrange
         var dependency = TestDependency.FromClass(typeof(DependsOnTests));
-        var testMetadata = new TestMetadata
+        var testMetadata = new TestMetadata<DependsOnTests>
         {
             TestId = "test1",
             TestClassType = typeof(DependsOnTests),
@@ -96,7 +96,7 @@ public class DependsOnTests
     {
         // Arrange
         var dependency = TestDependency.FromClass(typeof(DependsOnTests));
-        var testMetadata = new TestMetadata
+        var testMetadata = new TestMetadata<DependsOnTests>
         {
             TestId = "test1",
             TestClassType = typeof(DependsOnTests),
@@ -119,7 +119,7 @@ public class DependsOnTests
     {
         // Arrange
         var dependency = TestDependency.FromClassAndMethod(typeof(DependsOnTests), "SpecificMethod");
-        var testMetadata = new TestMetadata
+        var testMetadata = new TestMetadata<DependsOnTests>
         {
             TestId = "test1",
             TestClassType = typeof(DependsOnTests),
@@ -147,7 +147,7 @@ public class DependsOnTests
             MethodName = "OverloadedMethod",
             MethodParameters = new[] { typeof(string), typeof(int) }
         };
-        var testMetadata = new TestMetadata
+        var testMetadata = new TestMetadata<DependsOnTests>
         {
             TestId = "test1",
             TestClassType = typeof(DependsOnTests),
@@ -175,7 +175,7 @@ public class DependsOnTests
             MethodName = "OverloadedMethod",
             MethodParameters = new[] { typeof(string), typeof(int) }
         };
-        var testMetadata = new TestMetadata
+        var testMetadata = new TestMetadata<DependsOnTests>
         {
             TestId = "test1",
             TestClassType = typeof(DependsOnTests),
@@ -226,7 +226,7 @@ public class DependsOnTests
     {
         // Arrange
         var dependency = TestDependency.FromClass(typeof(BaseTestClass));
-        var testMetadata = new TestMetadata
+        var testMetadata = new TestMetadata<DerivedTestClass>
         {
             TestId = "test1",
             TestClassType = typeof(DerivedTestClass), // Derived class
@@ -249,7 +249,7 @@ public class DependsOnTests
     {
         // Arrange
         var dependency = TestDependency.FromClass(typeof(GenericBaseClass<>));
-        var testMetadata = new TestMetadata
+        var testMetadata = new TestMetadata<DerivedFromGenericClass>
         {
             TestId = "test1",
             TestClassType = typeof(DerivedFromGenericClass), // Derived from GenericBaseClass<string>
@@ -272,7 +272,7 @@ public class DependsOnTests
     {
         // Arrange
         var dependency = TestDependency.FromClassAndMethod(typeof(BaseTestClass), "BaseMethod");
-        var testMetadata = new TestMetadata
+        var testMetadata = new TestMetadata<DerivedTestClass>
         {
             TestId = "test1",
             TestClassType = typeof(DerivedTestClass), // Method is inherited from base
