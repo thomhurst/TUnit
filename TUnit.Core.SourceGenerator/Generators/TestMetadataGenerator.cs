@@ -2,7 +2,6 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -11,7 +10,7 @@ namespace TUnit.Core.SourceGenerator.Generators;
 /// with a DataCombinationGenerator delegate for runtime data expansion.
 /// </summary>
 [Generator]
-public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
+public sealed class TestMetadataGenerator : IIncrementalGenerator
 {
     private const string GeneratedNamespace = "TUnit.Generated";
 
@@ -96,14 +95,14 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
         {
             var methodName = testMethod?.MethodSymbol?.Name ?? "Unknown";
             var className = testMethod?.TypeSymbol?.Name ?? "Unknown";
-            
+
             context.ReportDiagnostic(Diagnostic.Create(
                 new DiagnosticDescriptor(
-                    "TUNIT0999", 
-                    "Source Generation Error", 
-                    "Failed to generate test metadata for {0}.{1}: {2}", 
-                    "TUnit", 
-                    DiagnosticSeverity.Error, 
+                    "TUNIT0999",
+                    "Source Generation Error",
+                    "Failed to generate test metadata for {0}.{1}: {2}",
+                    "TUnit",
+                    DiagnosticSeverity.Error,
                     true),
                 Location.None,
                 className,
@@ -174,7 +173,7 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestName = \"{methodName}\",");
         writer.AppendLine($"TestClassType = typeof({className}),");
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
-        
+
         // Add basic metadata
         GenerateBasicMetadata(writer, testMethod);
 
@@ -191,7 +190,7 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
     private static void GenerateBasicMetadata(CodeWriter writer, TestMethodMetadata testMethod)
     {
         var methodSymbol = testMethod.MethodSymbol;
-        
+
         writer.AppendLine("Categories = Array.Empty<string>(),");
         writer.AppendLine("IsSkipped = false,");
         writer.AppendLine("SkipReason = null,");
@@ -200,12 +199,12 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("CanRunInParallel = true,");
         writer.AppendLine("Dependencies = Array.Empty<TestDependency>(),");
         writer.AppendLine("AttributeFactory = null,");
-        
+
         // Legacy data sources (empty in new approach)
         writer.AppendLine("DataSources = Array.Empty<TestDataSource>(),");
         writer.AppendLine("ClassDataSources = Array.Empty<TestDataSource>(),");
         writer.AppendLine("PropertyDataSources = Array.Empty<PropertyDataSource>(),");
-        
+
         // Parameter types
         writer.AppendLine("ParameterTypes = new Type[]");
         writer.AppendLine("{");
@@ -216,7 +215,7 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
         }
         writer.Unindent();
         writer.AppendLine("},");
-        
+
         // String parameter types
         writer.AppendLine("TestMethodParameterTypes = new string[]");
         writer.AppendLine("{");
@@ -227,7 +226,7 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
         }
         writer.Unindent();
         writer.AppendLine("},");
-        
+
         // Empty hooks for now
         writer.AppendLine("Hooks = new TestHooks");
         writer.AppendLine("{");
@@ -247,7 +246,7 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
         writer.Indent();
 
         writer.AppendLine("var combinations = new List<TestDataCombination>();");
-        
+
         // Get all data source attributes on method and class
         var methodAttributes = GetDataSourceAttributes(testMethod.MethodSymbol);
         var classAttributes = GetDataSourceAttributes(testMethod.TypeSymbol);
@@ -268,13 +267,13 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
 
-    private static void GenerateDataSourceCombinations(CodeWriter writer, TestMethodMetadata testMethod, 
+    private static void GenerateDataSourceCombinations(CodeWriter writer, TestMethodMetadata testMethod,
         IEnumerable<AttributeData> methodAttributes, IEnumerable<AttributeData> classAttributes)
     {
         writer.AppendLine("// Generate data combinations from attributes");
         writer.AppendLine("var methodCombinations = new List<TestDataCombination>();");
         writer.AppendLine("var classCombinations = new List<TestDataCombination>();");
-        
+
         // Generate method data combinations
         var methodAttrs = methodAttributes.ToList();
         for (int i = 0; i < methodAttrs.Count; i++)
@@ -282,15 +281,15 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
             var attr = methodAttrs[i];
             GenerateAttributeDataCombinations(writer, attr, i, "methodCombinations", isClassLevel: false);
         }
-        
-        // Generate class data combinations  
+
+        // Generate class data combinations
         var classAttrs = classAttributes.ToList();
         for (int i = 0; i < classAttrs.Count; i++)
         {
             var attr = classAttrs[i];
             GenerateAttributeDataCombinations(writer, attr, i, "classCombinations", isClassLevel: true);
         }
-        
+
         // Generate cartesian product
         writer.AppendLine();
         writer.AppendLine("// Generate cartesian product of class and method combinations");
@@ -318,11 +317,11 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("}");
     }
 
-    private static void GenerateAttributeDataCombinations(CodeWriter writer, AttributeData attr, int index, 
+    private static void GenerateAttributeDataCombinations(CodeWriter writer, AttributeData attr, int index,
         string listName, bool isClassLevel)
     {
         var attributeClassName = attr.AttributeClass?.Name;
-        
+
         if (attributeClassName == "ArgumentsAttribute")
         {
             // Generate Arguments combinations
@@ -333,7 +332,7 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"{listName}.Add(new TestDataCombination");
                 writer.AppendLine("{");
                 writer.Indent();
-                
+
                 if (isClassLevel)
                 {
                     writer.AppendLine($"ClassData = new object?[] {{ {string.Join(", ", values.Select(FormatConstantValue))} }},");
@@ -344,7 +343,7 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
                     writer.AppendLine("ClassData = Array.Empty<object?>(),");
                     writer.AppendLine($"MethodData = new object?[] {{ {string.Join(", ", values.Select(FormatConstantValue))} }},");
                 }
-                
+
                 writer.AppendLine($"DataSourceIndices = new[] {{ {index} }},");
                 writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
                 writer.Unindent();
@@ -373,17 +372,17 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
         {
             return "null";
         }
-        
+
         if (constant.Value is string str)
         {
             return $"\"{str.Replace("\"", "\\\"")}\"";
         }
-        
+
         if (constant.Value is char ch)
         {
             return $"'{ch}'";
         }
-        
+
         return constant.Value?.ToString() ?? "null";
     }
 
@@ -391,61 +390,61 @@ public sealed class SimplifiedTestMetadataGenerator : IIncrementalGenerator
     {
         var methodName = testMethod.MethodSymbol.Name;
         var parameters = testMethod.MethodSymbol.Parameters;
-        
+
         // Instance factory
         writer.AppendLine($"InstanceFactory = args => new {className}(),");
-        
+
         // Test invoker
         writer.AppendLine("TestInvoker = async (instance, args) =>");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine($"var typedInstance = ({className})instance;");
-        
+
         if (parameters.Length == 0)
         {
             writer.AppendLine($"await typedInstance.{methodName}();");
         }
         else
         {
-            var paramCasts = parameters.Select((p, i) => 
+            var paramCasts = parameters.Select((p, i) =>
                 $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]").ToArray();
             writer.AppendLine($"await typedInstance.{methodName}({string.Join(", ", paramCasts)});");
         }
-        
+
         writer.Unindent();
         writer.AppendLine("},");
-        
+
         // Property setters (empty for now)
         writer.AppendLine($"PropertySetters = new Dictionary<string, Action<{className}, object?>>(),");
         writer.AppendLine("PropertyInjections = Array.Empty<PropertyInjectionData>(),");
-        
+
         // Typed invokers
         writer.AppendLine("CreateTypedInstance = null,");
         writer.AppendLine($"InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         if (parameters.Length == 0)
         {
             writer.AppendLine($"await instance.{methodName}();");
         }
         else
         {
-            var paramCasts = parameters.Select((p, i) => 
+            var paramCasts = parameters.Select((p, i) =>
                 $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]").ToArray();
             writer.AppendLine($"await instance.{methodName}({string.Join(", ", paramCasts)});");
         }
-        
+
         writer.Unindent();
         writer.AppendLine("},");
-        
+
         // CreateExecutableTest factory (null for now, will be handled by TestBuilder)
         writer.AppendLine("CreateExecutableTest = null");
     }
 
     private static IEnumerable<AttributeData> GetDataSourceAttributes(ISymbol symbol)
     {
-        return symbol.GetAttributes().Where(a => 
+        return symbol.GetAttributes().Where(a =>
             a.AttributeClass?.Name?.EndsWith("Attribute") == true &&
             (a.AttributeClass.Name.Contains("Arguments") ||
              a.AttributeClass.Name.Contains("DataSource")));

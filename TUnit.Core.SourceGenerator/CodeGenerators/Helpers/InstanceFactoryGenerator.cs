@@ -1,5 +1,4 @@
 using Microsoft.CodeAnalysis;
-using System.Linq;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
