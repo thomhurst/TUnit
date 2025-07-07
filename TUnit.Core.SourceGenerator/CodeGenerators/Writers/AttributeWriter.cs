@@ -168,9 +168,21 @@ public class AttributeWriter
 
             sourceCodeWriter.Append($"{propertySymbol.Name} = ");
 
-            var innerAttribute = GetAttributeObjectInitializer(compilation, dataSourceAttribute);
-
-            sourceCodeWriter.Append(AsyncDataSourceGeneratorContainer.GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(innerAttribute, compilation, attributeData.AttributeClass!, propertySymbol, true));
+            var propertyType = propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var isNullable = propertySymbol.Type.NullableAnnotation == NullableAnnotation.Annotated;
+            
+            if (propertySymbol.Type.IsReferenceType && !isNullable)
+            {
+                sourceCodeWriter.Append($"null!,");
+            }
+            else if (propertySymbol.Type.IsValueType && !isNullable)
+            {
+                sourceCodeWriter.Append($"default({propertyType}),");
+            }
+            else
+            {
+                sourceCodeWriter.Append("null,");
+            }
         }
     }
 
