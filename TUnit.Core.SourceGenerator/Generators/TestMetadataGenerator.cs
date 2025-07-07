@@ -694,6 +694,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var method in methods)
             {
+                // Skip generic methods - they can't be instantiated without concrete type arguments
+                if (method.IsGenericMethod)
+                {
+                    continue;
+                }
+                
                 // Check if method has Test attribute
                 var hasTestAttribute = method.GetAttributes()
                     .Any(attr => attr.AttributeClass?.Name == "TestAttribute" &&
