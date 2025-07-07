@@ -50,7 +50,7 @@ public sealed class TestBuilder : ITestBuilder
     public async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestDataCombination combination)
     {
         // Generate unique test ID
-        var testId = GenerateTestId(metadata, combination.DataSourceIndices);
+        var testId = GenerateTestId(metadata, combination);
 
         var displayName = GenerateDisplayName(metadata, GetArgumentsDisplayText(combination));
 
@@ -108,14 +108,26 @@ public sealed class TestBuilder : ITestBuilder
         return hooks.ToArray();
     }
 
-    private static string GenerateTestId(TestMetadata metadata, int[] dataSourceIndices)
+    private static string GenerateTestId(TestMetadata metadata, TestDataCombination combination)
     {
         var parts = new List<string> { metadata.TestId };
 
-        if (dataSourceIndices.Length > 0)
+        // Build unique ID parts based on the specific indices
+        var idParts = new List<string>();
+        
+        if (combination.ClassDataSourceIndex >= 0)
         {
-            var dsIndexPart = string.Join(".", dataSourceIndices);
-            parts.Add($"ds{dsIndexPart}");
+            idParts.Add($"c{combination.ClassDataSourceIndex}.{combination.ClassLoopIndex}");
+        }
+        
+        if (combination.MethodDataSourceIndex >= 0)
+        {
+            idParts.Add($"m{combination.MethodDataSourceIndex}.{combination.MethodLoopIndex}");
+        }
+        
+        if (idParts.Count > 0)
+        {
+            parts.Add(string.Join("_", idParts));
         }
 
         return string.Join("_", parts);

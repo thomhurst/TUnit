@@ -17,10 +17,28 @@ public class TestDataCombination
     public object?[] MethodData { get; init; } = Array.Empty<object?>();
 
     /// <summary>
-    /// Data source indices for deterministic test ID generation.
-    /// Used to create unique identifiers like TestId_ds{index1}.{index2}.{index3}
+    /// The index of the data source attribute applied to the method.
+    /// -1 if no method data source is present.
     /// </summary>
-    public int[] DataSourceIndices { get; init; } = Array.Empty<int>();
+    public int MethodDataSourceIndex { get; init; } = -1;
+
+    /// <summary>
+    /// The index of the data source attribute applied to the class.
+    /// -1 if no class data source is present.
+    /// </summary>
+    public int ClassDataSourceIndex { get; init; } = -1;
+
+    /// <summary>
+    /// The loop index within the method data source if it returns multiple rows.
+    /// 0 for the first row, 1 for the second, etc.
+    /// </summary>
+    public int MethodLoopIndex { get; init; } = 0;
+
+    /// <summary>
+    /// The loop index within the class data source if it returns multiple rows.
+    /// 0 for the first row, 1 for the second, etc.
+    /// </summary>
+    public int ClassLoopIndex { get; init; } = 0;
 
     /// <summary>
     /// Property values to be injected into the test class instance.

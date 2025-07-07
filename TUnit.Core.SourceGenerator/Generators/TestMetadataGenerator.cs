@@ -342,7 +342,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Indent();
         writer.AppendLine("ClassData = classCombination.ClassData,");
         writer.AppendLine("MethodData = methodCombination.MethodData,");
-        writer.AppendLine("DataSourceIndices = classCombination.DataSourceIndices.Concat(methodCombination.DataSourceIndices).ToArray(),");
+        writer.AppendLine("ClassDataSourceIndex = classCombination.ClassDataSourceIndex,");
+        writer.AppendLine("ClassLoopIndex = classCombination.ClassLoopIndex,");
+        writer.AppendLine("MethodDataSourceIndex = methodCombination.MethodDataSourceIndex,");
+        writer.AppendLine("MethodLoopIndex = methodCombination.MethodLoopIndex,");
         writer.AppendLine("PropertyValues = classCombination.PropertyValues.Concat(methodCombination.PropertyValues).ToDictionary(kvp => kvp.Key, kvp => kvp.Value)");
         writer.Unindent();
         writer.AppendLine("});");
@@ -403,14 +406,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     {
                         writer.AppendLine($"ClassData = new object?[] {{ {string.Join(", ", formattedArgs)} }},");
                         writer.AppendLine("MethodData = Array.Empty<object?>(),");
+                        writer.AppendLine($"ClassDataSourceIndex = {index},");
+                        writer.AppendLine("ClassLoopIndex = 0,");
+                        writer.AppendLine("MethodDataSourceIndex = -1,");
+                        writer.AppendLine("MethodLoopIndex = 0,");
                     }
                     else
                     {
                         writer.AppendLine("ClassData = Array.Empty<object?>(),");
                         writer.AppendLine($"MethodData = new object?[] {{ {string.Join(", ", formattedArgs)} }},");
+                        writer.AppendLine("ClassDataSourceIndex = -1,");
+                        writer.AppendLine("ClassLoopIndex = 0,");
+                        writer.AppendLine($"MethodDataSourceIndex = {index},");
+                        writer.AppendLine("MethodLoopIndex = 0,");
                     }
 
-                    writer.AppendLine($"DataSourceIndices = new[] {{ {index} }},");
                     writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
                     writer.Unindent();
                     writer.AppendLine("});");
@@ -424,7 +434,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     writer.Indent();
                     writer.AppendLine("ClassData = Array.Empty<object?>(),");
                     writer.AppendLine("MethodData = Array.Empty<object?>(),");
-                    writer.AppendLine($"DataSourceIndices = new[] {{ {index} }},");
+                    writer.AppendLine($"ClassDataSourceIndex = {(isClassLevel ? index : -1)},");
+                    writer.AppendLine("ClassLoopIndex = 0,");
+                    writer.AppendLine($"MethodDataSourceIndex = {(isClassLevel ? -1 : index)},");
+                    writer.AppendLine("MethodLoopIndex = 0,");
                     writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
                     writer.Unindent();
                     writer.AppendLine("});");
@@ -440,7 +453,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Indent();
             writer.AppendLine("ClassData = Array.Empty<object?>(),");
             writer.AppendLine("MethodData = Array.Empty<object?>(),");
-            writer.AppendLine($"DataSourceIndices = new[] {{ {index} }},");
+            writer.AppendLine($"ClassDataSourceIndex = {(isClassLevel ? index : -1)},");
+            writer.AppendLine("ClassLoopIndex = 0,");
+            writer.AppendLine($"MethodDataSourceIndex = {(isClassLevel ? -1 : index)},");
+            writer.AppendLine("MethodLoopIndex = 0,");
             writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
             writer.Unindent();
             writer.AppendLine("});");

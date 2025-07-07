@@ -33,21 +33,25 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
         
         if (result is IEnumerable<object?[]> objectArrays)
         {
-            var index = 0;
+            var loopIndex = 0;
             foreach (var objectArray in objectArrays)
             {
                 yield return new TestDataCombination
                 {
                     MethodData = objectArray,
                     ClassData = Array.Empty<object?>(),
-                    DataSourceIndices = new[] { context.DataSourceIndex, index++ },
+                    MethodDataSourceIndex = context.DataSourceIndex,
+                    MethodLoopIndex = loopIndex,
+                    ClassDataSourceIndex = -1,
+                    ClassLoopIndex = 0,
                     PropertyValues = new Dictionary<string, object?>()
                 };
+                loopIndex++;
             }
         }
         else if (result is System.Collections.IEnumerable enumerable)
         {
-            var index = 0;
+            var loopIndex = 0;
             foreach (var item in enumerable)
             {
                 object?[] methodData;
@@ -64,9 +68,13 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
                 {
                     MethodData = methodData,
                     ClassData = Array.Empty<object?>(),
-                    DataSourceIndices = new[] { context.DataSourceIndex, index++ },
+                    MethodDataSourceIndex = context.DataSourceIndex,
+                    MethodLoopIndex = loopIndex,
+                    ClassDataSourceIndex = -1,
+                    ClassLoopIndex = 0,
                     PropertyValues = new Dictionary<string, object?>()
                 };
+                loopIndex++;
             }
         }
         else

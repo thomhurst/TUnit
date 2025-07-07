@@ -16,7 +16,10 @@ public class ArgumentsDataSourceGenerator : IDataSourceGenerator<ArgumentsAttrib
         {
             MethodData = attribute.Values,
             ClassData = Array.Empty<object?>(),
-            DataSourceIndices = new[] { context.DataSourceIndex },
+            MethodDataSourceIndex = context.DataSourceIndex,
+            MethodLoopIndex = 0, // ArgumentsAttribute only returns one row
+            ClassDataSourceIndex = -1,
+            ClassLoopIndex = 0,
             PropertyValues = new Dictionary<string, object?>()
         };
     }

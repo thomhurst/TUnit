@@ -65,7 +65,10 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 MethodData = Array.Empty<object?>(),
                 ClassData = Array.Empty<object?>(),
                 PropertyValues = new Dictionary<string, object?>(),
-                DataSourceIndices = Array.Empty<int>()
+                MethodDataSourceIndex = -1,
+                MethodLoopIndex = 0,
+                ClassDataSourceIndex = -1,
+                ClassLoopIndex = 0
             };
             yield break;
         }
@@ -77,7 +80,10 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             MethodData = Array.Empty<object?>(),
             ClassData = Array.Empty<object?>(),
             PropertyValues = new Dictionary<string, object?>(),
-            DataSourceIndices = Array.Empty<int>()
+            MethodDataSourceIndex = -1,
+            MethodLoopIndex = 0,
+            ClassDataSourceIndex = -1,
+            ClassLoopIndex = 0
         };
     }
 

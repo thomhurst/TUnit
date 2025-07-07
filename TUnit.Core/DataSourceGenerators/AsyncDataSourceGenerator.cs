@@ -27,7 +27,7 @@ public class AsyncDataSourceGenerator : IAsyncDataSourceGenerator
 
     private static async IAsyncEnumerable<TestDataCombination> ConvertAsyncEnumerableToDataCombinationsAsync(IAsyncEnumerable<Func<Task<object?[]?>>> asyncEnumerable, int dataSourceIndex)
     {
-        var index = 0;
+        var loopIndex = 0;
 
         await foreach (var factoryFunc in asyncEnumerable)
         {
@@ -39,9 +39,13 @@ public class AsyncDataSourceGenerator : IAsyncDataSourceGenerator
                 {
                     MethodData = methodData ?? Array.Empty<object?>(),
                     ClassData = Array.Empty<object?>(),
-                    DataSourceIndices = new[] { dataSourceIndex, index++ },
+                    MethodDataSourceIndex = dataSourceIndex,
+                    MethodLoopIndex = loopIndex,
+                    ClassDataSourceIndex = -1,
+                    ClassLoopIndex = 0,
                     PropertyValues = new Dictionary<string, object?>()
                 };
+                loopIndex++;
             }
         }
     }
