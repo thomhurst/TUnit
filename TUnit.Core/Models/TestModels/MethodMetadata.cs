@@ -4,9 +4,6 @@ using System.Text;
 
 namespace TUnit.Core;
 
-[Obsolete]
-public record SourceGeneratedMethodInformation : MethodMetadata;
-
 [DebuggerDisplay("{Type}.{Name}")]
 public record MethodMetadata : MemberMetadata
 {

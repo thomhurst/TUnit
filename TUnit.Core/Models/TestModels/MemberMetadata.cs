@@ -3,9 +3,6 @@ using System.Text;
 
 namespace TUnit.Core;
 
-[Obsolete]
-public abstract record SourceGeneratedMemberInformation : MemberMetadata;
-
 public abstract record MemberMetadata
 {
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors

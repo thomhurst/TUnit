@@ -8,7 +8,7 @@ using TUnit.Core.SourceGenerator.Extensions;
 namespace TUnit.Core.SourceGenerator.Models.Arguments;
 
 public record AsyncDataSourceGeneratorContainer(
-    GeneratorAttributeSyntaxContext Context,
+    Compilation Compilation,
     AttributeData AttributeData,
     ArgumentsType ArgumentsType,
     ImmutableArray<ITypeSymbol> ParameterOrPropertyTypes,
@@ -40,7 +40,7 @@ public record AsyncDataSourceGeneratorContainer(
         sourceCodeWriter.Append("TestInformation = testInformation,");
 
         sourceCodeWriter.Append("MembersToGenerate = ");
-        SourceInformationWriter.GenerateMembers(sourceCodeWriter, Context, ClassMetadata, Parameters, null, ArgumentsType);
+        SourceInformationWriter.GenerateMembers(sourceCodeWriter, Compilation, ClassMetadata, Parameters, null, ArgumentsType);
 
         sourceCodeWriter.Append("TestSessionId = sessionId,");
         sourceCodeWriter.Append("TestClassInstance = classInstance,");
@@ -54,7 +54,7 @@ public record AsyncDataSourceGeneratorContainer(
             ref variableIndex);
 
         sourceCodeWriter.Append($"{dataAttr.Type} {dataAttr.Name} = ");
-        AttributeWriter.WriteAttribute(sourceCodeWriter, Context, AttributeData);
+        AttributeWriter.WriteAttribute(sourceCodeWriter, Compilation, AttributeData);
         sourceCodeWriter.Append(";");
         sourceCodeWriter.AppendLine();
 
@@ -88,7 +88,7 @@ public record AsyncDataSourceGeneratorContainer(
                 ref variableIndex);
 
             sourceCodeWriter.Append($"{attr.Type} {attr.Name} = ");
-            AttributeWriter.WriteAttribute(sourceCodeWriter, Context, AttributeData);
+            AttributeWriter.WriteAttribute(sourceCodeWriter, Compilation, AttributeData);
             sourceCodeWriter.Append(";");
             sourceCodeWriter.AppendLine();
 
@@ -101,7 +101,7 @@ public record AsyncDataSourceGeneratorContainer(
 
             sourceCodeWriter.Append($"{dataSourceVariable.Type} {dataSourceVariable.Name} = ");
 
-            sourceCodeWriter.Append(GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(attr.Name, Context, ClassMetadata, Property, false));
+            sourceCodeWriter.Append(GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(attr.Name, Compilation, ClassMetadata, Property, false));
             sourceCodeWriter.AppendLine();
 
             // Initialize the property value if it implements IAsyncInitializer
@@ -162,7 +162,7 @@ public record AsyncDataSourceGeneratorContainer(
         }
     }
 
-    public static string GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(string attributeVariableName, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IPropertySymbol property, bool isNested)
+    public static string GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(string attributeVariableName, Compilation compilation, INamedTypeSymbol namedTypeSymbol, IPropertySymbol property, bool isNested)
     {
         var sourceCodeWriter = new CodeWriter("", includeHeader: false);
 
@@ -172,7 +172,7 @@ public record AsyncDataSourceGeneratorContainer(
 
         sourceCodeWriter.Append("await (async () => {");
         sourceCodeWriter.Append($"var enumerator = ((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){attributeVariableName}).GenerateAsync(");
-        WriteDataGeneratorMetadataProperty(sourceCodeWriter, context, namedTypeSymbol, property);
+        WriteDataGeneratorMetadataProperty(sourceCodeWriter, compilation, namedTypeSymbol, property);
         sourceCodeWriter.Append(").GetAsyncEnumerator();");
         sourceCodeWriter.AppendLine();
         sourceCodeWriter.Append("try");
@@ -216,7 +216,7 @@ public record AsyncDataSourceGeneratorContainer(
         return sourceCodeWriter.ToString();
     }
 
-    public static void WriteDataGeneratorMetadataProperty(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
+    public static void WriteDataGeneratorMetadataProperty(ICodeWriter sourceCodeWriter, Compilation compilation, INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
     {
         sourceCodeWriter.Append("new DataGeneratorMetadata");
         sourceCodeWriter.AppendLine();
@@ -226,7 +226,7 @@ public record AsyncDataSourceGeneratorContainer(
         sourceCodeWriter.Append("TestInformation = testInformation,");
 
         sourceCodeWriter.Append("MembersToGenerate = ");
-        SourceInformationWriter.GenerateMembers(sourceCodeWriter, context, namedTypeSymbol, ImmutableArray<IParameterSymbol>.Empty, property, ArgumentsType.Property);
+        SourceInformationWriter.GenerateMembers(sourceCodeWriter, compilation, namedTypeSymbol, ImmutableArray<IParameterSymbol>.Empty, property, ArgumentsType.Property);
 
         sourceCodeWriter.Append("TestSessionId = sessionId,");
         sourceCodeWriter.Append("TestClassInstance = classInstance,");

@@ -4,9 +4,6 @@ using System.Reflection;
 
 namespace TUnit.Core;
 
-[Obsolete]
-public record SourceGeneratedPropertyInformation : PropertyMetadata;
-
 [DebuggerDisplay("{Type} {Name})")]
 public record PropertyMetadata : MemberMetadata
 {

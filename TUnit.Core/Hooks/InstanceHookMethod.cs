@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Hooks;
@@ -17,13 +18,7 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
     [field: AllowNull, MaybeNull]
     public string Name => field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})";
 
-    public Attribute[] MethodAttributes => MethodInfo.Attributes.Select(a => a.Instance).ToArray();
-    public Attribute[] ClassAttributes => MethodInfo.Class.Attributes.Select(a => a.Instance).ToArray();
-    public Attribute[] AssemblyAttributes => MethodInfo.Class.Assembly.Attributes.Select(a => a.Instance).ToArray();
-
-    [field: AllowNull, MaybeNull]
-    public IEnumerable<Attribute> Attributes => field ??=
-        [.. MethodAttributes, .. ClassAttributes, .. AssemblyAttributes];
+    [field: AllowNull, MaybeNull] public IEnumerable<Attribute> Attributes => field ??= MethodInfo.GetCustomAttributes();
 
     public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => Attributes.OfType<TAttribute>().FirstOrDefault();
 

@@ -3,9 +3,6 @@ using System.Diagnostics;
 
 namespace TUnit.Core;
 
-[Obsolete]
-public record SourceGeneratedAssemblyInformation : AssemblyMetadata;
-
 [DebuggerDisplay("{Name})")]
 public record AssemblyMetadata
 {

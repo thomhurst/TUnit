@@ -9,7 +9,7 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
 public class AttributeWriter
 {
-    public static void WriteAttributes(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+    public static void WriteAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
         ImmutableArray<AttributeData> attributeDatas)
     {
         for (var index = 0; index < attributeDatas.Length; index++)
@@ -21,7 +21,7 @@ public class AttributeWriter
                 continue;
             }
 
-            WriteAttribute(sourceCodeWriter, context, attributeData);
+            WriteAttribute(sourceCodeWriter, compilation, attributeData);
 
             if (index != attributeDatas.Length - 1)
             {
@@ -30,11 +30,11 @@ public class AttributeWriter
         }
     }
 
-    public static void WriteAttributeMetadatas(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+    public static void WriteAttributeMetadatas(ICodeWriter sourceCodeWriter, Compilation compilation,
         ImmutableArray<AttributeData> attributeDatas, string targetElement, string? targetMemberName = null, string? targetTypeName = null, bool includeClassMetadata = false)
     {
         var dataAttributeInterface =
-            context.SemanticModel.Compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.IAsyncDataSourceGeneratorAttribute
+            compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.IAsyncDataSourceGeneratorAttribute
                 .WithoutGlobalPrefix);
 
         attributeDatas = attributeDatas.RemoveAll(x => x.AttributeClass?.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, dataAttributeInterface)) == true);
@@ -55,7 +55,7 @@ public class AttributeWriter
                 continue;
             }
 
-            WriteAttributeMetadata(sourceCodeWriter, context, attributeData, targetElement, targetMemberName, targetTypeName, includeClassMetadata);
+            WriteAttributeMetadata(sourceCodeWriter, compilation, attributeData, targetElement, targetMemberName, targetTypeName, includeClassMetadata);
 
             if (index != attributeDatas.Length - 1)
             {
@@ -67,18 +67,18 @@ public class AttributeWriter
         sourceCodeWriter.Append("],");
     }
 
-    public static void WriteAttribute(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+    public static void WriteAttribute(ICodeWriter sourceCodeWriter, Compilation compilation,
         AttributeData attributeData)
     {
-        sourceCodeWriter.Append(GetAttributeObjectInitializer(context, attributeData));
+        sourceCodeWriter.Append(GetAttributeObjectInitializer(compilation, attributeData));
     }
 
-    public static void WriteAttributeMetadata(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+    public static void WriteAttributeMetadata(ICodeWriter sourceCodeWriter, Compilation compilation,
         AttributeData attributeData, string targetElement, string? targetMemberName, string? targetTypeName, bool includeClassMetadata = false)
     {
         sourceCodeWriter.Append("new global::TUnit.Core.AttributeMetadata");
         sourceCodeWriter.Append(" { ");
-        sourceCodeWriter.Append($"Instance = {GetAttributeObjectInitializer(context, attributeData)}, ");
+        sourceCodeWriter.Append($"Instance = {GetAttributeObjectInitializer(compilation, attributeData)}, ");
         sourceCodeWriter.Append($"TargetElement = global::TUnit.Core.TestAttributeTarget.{targetElement}, ");
 
         if (targetMemberName != null)
@@ -95,7 +95,7 @@ public class AttributeWriter
         if (includeClassMetadata && attributeData.AttributeClass?.ContainingNamespace?.ToDisplayString()?.StartsWith("System") != true)
         {
             sourceCodeWriter.Append("ClassMetadata = ");
-            SourceInformationWriter.GenerateClassInformation(sourceCodeWriter, context, attributeData.AttributeClass!);
+            SourceInformationWriter.GenerateClassInformation(sourceCodeWriter, compilation, attributeData.AttributeClass!);
             sourceCodeWriter.Append(", ");
         }
 
@@ -124,7 +124,7 @@ public class AttributeWriter
         sourceCodeWriter.Append("}");
     }
 
-    public static string GetAttributeObjectInitializer(GeneratorAttributeSyntaxContext context,
+    public static string GetAttributeObjectInitializer(Compilation compilation,
         AttributeData attributeData)
     {
         var sourceCodeWriter = new CodeWriter("", includeHeader: false);
@@ -133,7 +133,7 @@ public class AttributeWriter
 
         if (syntax is null)
         {
-            WriteAttributeWithoutSyntax(sourceCodeWriter, context, attributeData);
+            WriteAttributeWithoutSyntax(sourceCodeWriter, attributeData);
             return sourceCodeWriter.ToString();
         }
 
@@ -148,9 +148,9 @@ public class AttributeWriter
 
         var attributeName = attributeData.AttributeClass!.GloballyQualified();
 
-        var formattedConstructorArgs = string.Join(", ", constructorArgs.Select(x => FormatConstructorArgument(context, x)));
+        var formattedConstructorArgs = string.Join(", ", constructorArgs.Select(x => FormatConstructorArgument(compilation, x)));
 
-        var formattedProperties = properties.Select(x => FormatProperty(context, x)).ToArray();
+        var formattedProperties = properties.Select(x => FormatProperty(compilation, x)).ToArray();
 
         sourceCodeWriter.Append($"new {attributeName}({formattedConstructorArgs})");
 
@@ -167,7 +167,7 @@ public class AttributeWriter
             sourceCodeWriter.Append($"{property},");
         }
 
-        WriteDataSourceGeneratorProperties(sourceCodeWriter, context, attributeData);
+        WriteDataSourceGeneratorProperties(sourceCodeWriter, compilation, attributeData);
 
         sourceCodeWriter.Append("}");
 
@@ -189,7 +189,7 @@ public class AttributeWriter
         return false;
     }
 
-    private static void WriteDataSourceGeneratorProperties(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context, AttributeData attributeData)
+    private static void WriteDataSourceGeneratorProperties(ICodeWriter sourceCodeWriter, Compilation compilation, AttributeData attributeData)
     {
         foreach (var propertySymbol in attributeData.AttributeClass?.GetMembers().OfType<IPropertySymbol>() ?? [])
         {
@@ -205,29 +205,28 @@ public class AttributeWriter
 
             sourceCodeWriter.Append($"{propertySymbol.Name} = ");
 
-            var innerAttribute = GetAttributeObjectInitializer(context, dataSourceAttribute);
+            var innerAttribute = GetAttributeObjectInitializer(compilation, dataSourceAttribute);
 
-            sourceCodeWriter.Append(AsyncDataSourceGeneratorContainer.GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(innerAttribute, context, attributeData.AttributeClass!, propertySymbol, true));
+            sourceCodeWriter.Append(AsyncDataSourceGeneratorContainer.GetPropertyAssignmentFromAsyncDataSourceGeneratorAttribute(innerAttribute, compilation, attributeData.AttributeClass!, propertySymbol, true));
         }
     }
 
-    private static string FormatConstructorArgument(GeneratorAttributeSyntaxContext context, AttributeArgumentSyntax attributeArgumentSyntax)
+    private static string FormatConstructorArgument(Compilation compilation, AttributeArgumentSyntax attributeArgumentSyntax)
     {
         if (attributeArgumentSyntax.NameColon is not null)
         {
-            return $"{attributeArgumentSyntax.NameColon!.Name}: {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(context.SemanticModel))!.ToFullString()}";
+            return $"{attributeArgumentSyntax.NameColon!.Name}: {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(compilation.GetSemanticModel(attributeArgumentSyntax.SyntaxTree)))!.ToFullString()}";
         }
 
-        return attributeArgumentSyntax.Accept(new FullyQualifiedWithGlobalPrefixRewriter(context.SemanticModel))!.ToFullString();
+        return attributeArgumentSyntax.Accept(new FullyQualifiedWithGlobalPrefixRewriter(compilation.GetSemanticModel(attributeArgumentSyntax.SyntaxTree)))!.ToFullString();
     }
 
-    private static string FormatProperty(GeneratorAttributeSyntaxContext context, AttributeArgumentSyntax attributeArgumentSyntax)
+    private static string FormatProperty(Compilation compilation, AttributeArgumentSyntax attributeArgumentSyntax)
     {
-        return $"{attributeArgumentSyntax.NameEquals!.Name} = {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(context.SemanticModel))!.ToFullString()}";
+        return $"{attributeArgumentSyntax.NameEquals!.Name} = {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(compilation.GetSemanticModel(attributeArgumentSyntax.SyntaxTree)))!.ToFullString()}";
     }
 
-    public static void WriteAttributeWithoutSyntax(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
-    AttributeData attributeData)
+    public static void WriteAttributeWithoutSyntax(ICodeWriter sourceCodeWriter, AttributeData attributeData)
     {
         var attributeName = attributeData.AttributeClass!.GloballyQualified();
 
@@ -251,7 +250,7 @@ public class AttributeWriter
     }
 
     // Write test attributes with special filtering and formatting
-    public static void WriteTestAttributes(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+    public static void WriteTestAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
         ImmutableArray<AttributeData> attributeDatas, string targetElement, string? targetMemberName = null, ITypeSymbol? targetType = null)
     {
         // Filter out attributes that don't have application syntax reference (except mscorlib)
@@ -262,42 +261,42 @@ public class AttributeWriter
         var targetTypeName = targetType?.GloballyQualified();
 
         // Use the enhanced WriteAttributeMetadatas with ClassMetadata support
-        WriteAttributeMetadatas(sourceCodeWriter, context, filteredAttributes, targetElement, targetMemberName, targetTypeName, includeClassMetadata: true);
+        WriteAttributeMetadatas(sourceCodeWriter, compilation, filteredAttributes, targetElement, targetMemberName, targetTypeName, includeClassMetadata: true);
     }
 
     // Helper methods for different contexts (previously in TestAttributeWriter)
-    public static void WriteAssemblyTestAttributes(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+    public static void WriteAssemblyTestAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
         IAssemblySymbol assembly)
     {
         var attributes = assembly.GetAttributes();
-        WriteTestAttributes(sourceCodeWriter, context, attributes, "Assembly", assembly.Name);
+        WriteTestAttributes(sourceCodeWriter, compilation, attributes, "Assembly", assembly.Name);
     }
 
-    public static void WriteTypeTestAttributes(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+    public static void WriteTypeTestAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
         ITypeSymbol type)
     {
         var attributes = type.GetAttributes();
-        WriteTestAttributes(sourceCodeWriter, context, attributes, "Class", type.Name, type);
+        WriteTestAttributes(sourceCodeWriter, compilation, attributes, "Class", type.Name, type);
     }
 
-    public static void WriteMethodTestAttributes(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+    public static void WriteMethodTestAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
         IMethodSymbol method)
     {
         var attributes = method.GetAttributes();
-        WriteTestAttributes(sourceCodeWriter, context, attributes, "Method", method.Name, method.ContainingType);
+        WriteTestAttributes(sourceCodeWriter, compilation, attributes, "Method", method.Name, method.ContainingType);
     }
 
-    public static void WritePropertyTestAttributes(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+    public static void WritePropertyTestAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
         IPropertySymbol property)
     {
         var attributes = property.GetAttributes();
-        WriteTestAttributes(sourceCodeWriter, context, attributes, "Property", property.Name, property.ContainingType);
+        WriteTestAttributes(sourceCodeWriter, compilation, attributes, "Property", property.Name, property.ContainingType);
     }
 
-    public static void WriteParameterTestAttributes(ICodeWriter sourceCodeWriter, GeneratorAttributeSyntaxContext context,
+    public static void WriteParameterTestAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
         IParameterSymbol parameter)
     {
         var attributes = parameter.GetAttributes();
-        WriteTestAttributes(sourceCodeWriter, context, attributes, "Parameter", parameter.Name, parameter.ContainingType);
+        WriteTestAttributes(sourceCodeWriter, compilation, attributes, "Parameter", parameter.Name, parameter.ContainingType);
     }
 }

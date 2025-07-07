@@ -4,15 +4,6 @@ using System.Reflection;
 
 namespace TUnit.Core;
 
-[Obsolete]
-public record SourceGeneratedParameterInformation([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
-    | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.PublicProperties)]Type Type) : ParameterMetadata(Type);
-
-public record SourceGeneratedParameterInformation<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
-    | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.PublicProperties)] T> : ParameterMetadata<T>;
-
 [DebuggerDisplay("{Type} {Name})")]
 public record ParameterMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods

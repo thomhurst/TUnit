@@ -36,10 +36,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Where(static m => m is not null);
 
         // Generate one source file per test method
-        context.RegisterSourceOutput(testMethodsProvider, static (context, testMethod) => GenerateTestMethodSource(context, testMethod));
+        context.RegisterSourceOutput(testMethodsProvider.Combine(context.CompilationProvider),
+            static (context, tuple) => GenerateTestMethodSource(context, tuple.Right, tuple.Left));
 
         // Generate test methods for inherited tests
-        context.RegisterSourceOutput(inheritsTestsClassesProvider, static (context, classInfo) => GenerateInheritedTestSources(context, classInfo));
+        context.RegisterSourceOutput(inheritsTestsClassesProvider.Combine(context.CompilationProvider),
+            static (context, tuple) => GenerateInheritedTestSources(context, tuple.Right, tuple.Left));
     }
 
     private static TestMethodMetadata? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context)
@@ -80,7 +82,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         };
     }
 
-    private static void GenerateTestMethodSource(SourceProductionContext context, TestMethodMetadata? testMethod)
+    private static void GenerateTestMethodSource(SourceProductionContext context, Compilation compilation, TestMethodMetadata? testMethod)
     {
         try
         {
@@ -91,7 +93,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             var writer = new CodeWriter();
             GenerateFileHeader(writer);
-            GenerateSimplifiedTestMetadata(writer, context, testMethod);
+            GenerateSimplifiedTestMetadata(writer, compilation, testMethod);
 
             var fileName = $"Simplified_{testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_{Guid.NewGuid():N}.g.cs";
             context.AddSource(fileName, SourceText.From(writer.ToString(), Encoding.UTF8));
@@ -134,7 +136,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
 
-    private static void GenerateSimplifiedTestMetadata(CodeWriter writer, GeneratorAttributeSyntaxContext context, TestMethodMetadata testMethod)
+    private static void GenerateSimplifiedTestMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
     {
         var className = testMethod.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var methodName = testMethod.MethodSymbol.Name;
@@ -153,7 +155,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
 
         // Generate the TestMetadata<T> with DataCombinationGenerator
-        GenerateTestMetadataInstance(writer, context, testMethod, className, combinationGuid);
+        GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
 
         writer.AppendLine("return tests;");
         writer.Unindent();
@@ -170,7 +172,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateModuleInitializer(writer, testMethod, guid);
     }
 
-    private static void GenerateTestMetadataInstance(CodeWriter writer, GeneratorAttributeSyntaxContext context, TestMethodMetadata testMethod, string className, string combinationGuid)
+    private static void GenerateTestMetadataInstance(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod, string className, string combinationGuid)
     {
         var methodName = testMethod.MethodSymbol.Name;
         var testId = $"{className}.{methodName}";
@@ -185,7 +187,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
 
         // Add basic metadata
-        GenerateBasicMetadata(writer, context, testMethod);
+        GenerateBasicMetadata(writer, compilation, testMethod);
 
         // Generate typed invokers and factory
         GenerateTypedInvokers(writer, testMethod, className);
@@ -198,7 +200,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("tests.Add(metadata);");
     }
 
-    private static void GenerateBasicMetadata(CodeWriter writer, GeneratorAttributeSyntaxContext context, TestMethodMetadata testMethod)
+    private static void GenerateBasicMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
     {
         var methodSymbol = testMethod.MethodSymbol;
 
@@ -218,7 +220,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
             .ToImmutableArray();
 
-        AttributeWriter.WriteAttributes(writer, context, attributes);
+        AttributeWriter.WriteAttributes(writer, compilation, attributes);
 
         writer.Unindent();
         writer.AppendLine("],");
@@ -682,7 +684,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         };
     }
 
-    private static void GenerateInheritedTestSources(SourceProductionContext context, InheritsTestsClassMetadata? classInfo)
+    private static void GenerateInheritedTestSources(SourceProductionContext context, Compilation compilation, InheritsTestsClassMetadata? classInfo)
     {
         if (classInfo?.TypeSymbol == null)
         {
@@ -703,7 +705,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 MethodSyntax = null! // We don't have the syntax for inherited methods
             };
 
-            GenerateTestMethodSource(context, testMethodMetadata);
+            GenerateTestMethodSource(context, compilation, testMethodMetadata);
         }
     }
 

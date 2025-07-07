@@ -12,18 +12,15 @@ public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClas
     {
         Type = typeof(ILastTestInClassEventReceiver),
         TypeReference = TypeReference.CreateConcrete(typeof(ILastTestInClassEventReceiver).AssemblyQualifiedName!),
-        Attributes = [],
         Name = nameof(lastTestInClassEventReceiver.OnLastTestInClass),
         Parameters = [new ParameterMetadata<ClassHookContext>
         {
             TypeReference = TypeReference.CreateConcrete(typeof(ClassHookContext).AssemblyQualifiedName!),
-            Attributes = [],
             Name = "context",
             ReflectionInfo = typeof(ILastTestInClassEventReceiver).GetMethod(nameof(ILastTestInClassEventReceiver.OnLastTestInClass))!.GetParameters()[0],
         }, new ParameterMetadata<TestContext>
         {
             TypeReference = TypeReference.CreateConcrete(typeof(TestContext).AssemblyQualifiedName!),
-            Attributes = [],
             Name = "testContext",
             ReflectionInfo = typeof(ILastTestInClassEventReceiver).GetMethod(nameof(ILastTestInClassEventReceiver.OnLastTestInClass))!.GetParameters()[0],
         }],
@@ -38,9 +35,7 @@ public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClas
             Assembly = new AssemblyMetadata
             {
                 Name = "TUnit.Core",
-                Attributes = [],
             },
-            Attributes = [],
             Namespace = "TUnit.Core.Interfaces",
             Name = "ILastTestInClassEventReceiver",
             Parameters = [],
