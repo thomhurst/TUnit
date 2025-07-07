@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace TUnit.Core.DataSourceGenerators;
 
 /// <summary>
@@ -38,6 +40,7 @@ public interface IAsyncDataSourceGenerator
 /// </summary>
 public class DataSourceGenerationContext
 {
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
     /// <summary>
     /// The type of the test class
     /// </summary>
