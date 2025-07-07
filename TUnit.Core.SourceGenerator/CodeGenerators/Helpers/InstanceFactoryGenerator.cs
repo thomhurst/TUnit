@@ -17,9 +17,15 @@ public static class InstanceFactoryGenerator
         
         if (typeSymbol.HasParameterizedConstructor())
         {
-            // For classes with constructor parameters, leave InstanceFactory null
-            // The TestBuilder will handle instance creation with proper constructor arguments
-            writer.AppendLine("InstanceFactory = null,");
+            var constructor = GetPrimaryConstructor(typeSymbol);
+            if (constructor != null)
+            {
+                GenerateTypedConstructorCall(writer, className, constructor);
+            }
+            else
+            {
+                writer.AppendLine("InstanceFactory = null,");
+            }
         }
         else
         {
@@ -46,5 +52,53 @@ public static class InstanceFactoryGenerator
                 writer.AppendLine("},");
             }
         }
+    }
+    
+    private static IMethodSymbol? GetPrimaryConstructor(ITypeSymbol typeSymbol)
+    {
+        var constructors = typeSymbol.GetMembers()
+            .OfType<IMethodSymbol>()
+            .Where(m => m.MethodKind == MethodKind.Constructor && !m.IsStatic)
+            .OrderByDescending(c => c.Parameters.Length)
+            .ToList();
+        
+        if (constructors.Count == 1)
+        {
+            return constructors[0];
+        }
+        
+        var publicConstructors = constructors.Where(c => c.DeclaredAccessibility == Accessibility.Public).ToList();
+        return publicConstructors.Count == 1 ? publicConstructors[0] : publicConstructors.FirstOrDefault();
+    }
+    
+    private static void GenerateTypedConstructorCall(CodeWriter writer, string className, IMethodSymbol constructor)
+    {
+        writer.AppendLine("InstanceFactory = args =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        if (constructor.Parameters.Length == 0)
+        {
+            writer.AppendLine($"return new {className}();");
+        }
+        else
+        {
+            writer.Append($"return new {className}(");
+            
+            for (int i = 0; i < constructor.Parameters.Length; i++)
+            {
+                if (i > 0) writer.Append(", ");
+                
+                var param = constructor.Parameters[i];
+                var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                
+                writer.Append($"({paramType})args[{i}]");
+            }
+            
+            writer.AppendLine(");");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("},");
     }
 }
