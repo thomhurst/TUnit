@@ -29,7 +29,7 @@ public sealed class TestBuilder : ITestBuilder
         var tests = new List<ExecutableTest>();
 
         // Check if this is a typed metadata with DataCombinationGenerator
-        if (metadata is TestMetadata<object> typedMetadata)
+        if (metadata is ITypedTestMetadata)
         {
             var dataGeneratorProp = metadata.GetType().GetProperty("DataCombinationGenerator");
             if (dataGeneratorProp?.GetValue(metadata) is Delegate dataCombinationGenerator)
@@ -83,7 +83,7 @@ public sealed class TestBuilder : ITestBuilder
         var afterTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: false);
 
         // Check if we have a typed metadata with CreateExecutableTest factory
-        if (metadata is TestMetadata<object> baseTypedMetadata)
+        if (metadata is ITypedTestMetadata)
         {
             // Get the actual CreateExecutableTest delegate via the interface
             var createExecutableTestProp = metadata.GetType().GetProperty("CreateExecutableTest");
