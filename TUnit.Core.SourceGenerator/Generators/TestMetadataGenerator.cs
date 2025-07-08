@@ -540,6 +540,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var methodName = testMethod.MethodSymbol.Name;
         var parameters = testMethod.MethodSymbol.Parameters;
+        
+        // Check if last parameter is CancellationToken (regardless of whether it has a default value)
+        var hasCancellationToken = parameters.Length > 0 && 
+            parameters.Last().Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "global::System.Threading.CancellationToken";
+        
+        // Parameters that come from args (excluding CancellationToken)
+        var parametersFromArgs = hasCancellationToken 
+            ? parameters.Take(parameters.Length - 1).ToArray()
+            : parameters.ToArray();
 
         // Use centralized instance factory generator
         InstanceFactoryGenerator.GenerateInstanceFactory(writer, testMethod.TypeSymbol);
@@ -551,9 +560,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Indent();
         writer.AppendLine($"var typedInstance = ({className})instance;");
 
-        if (parameters.Length == 0)
+        if (parametersFromArgs.Length == 0)
         {
-            var methodCall = $"typedInstance.{methodName}()";
+            var methodCall = hasCancellationToken
+                ? $"typedInstance.{methodName}(System.Threading.CancellationToken.None)"
+                : $"typedInstance.{methodName}()";
             if (isAsync)
             {
                 writer.AppendLine($"await {methodCall};");
@@ -566,8 +577,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // Count required parameters (those without default values)
-            var requiredParamCount = parameters.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional);
+            // Count required parameters (those without default values, excluding CancellationToken)
+            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional);
             
             // Generate runtime logic to handle variable argument counts
             writer.AppendLine("// Invoke with only the arguments that were provided");
@@ -575,14 +586,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
             
-            // Generate cases for each valid argument count (from required params up to total params)
-            for (int argCount = requiredParamCount; argCount <= parameters.Length; argCount++)
+            // Generate cases for each valid argument count (from required params up to total params from args)
+            for (int argCount = requiredParamCount; argCount <= parametersFromArgs.Length; argCount++)
             {
                 writer.AppendLine($"case {argCount}:");
                 writer.Indent();
                 
-                var argsToPass = parameters.Take(argCount)
+                var argsToPass = parametersFromArgs.Take(argCount)
                     .Select((p, i) => $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]");
+                
+                // Add CancellationToken if present
+                if (hasCancellationToken)
+                {
+                    argsToPass = argsToPass.Concat(new[] { "System.Threading.CancellationToken.None" });
+                }
+                
                 var methodCall = $"typedInstance.{methodName}({string.Join(", ", argsToPass)})";
                 
                 if (isAsync)
@@ -599,13 +617,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             
             writer.AppendLine("default:");
             writer.Indent();
-            if (requiredParamCount == parameters.Length)
+            if (requiredParamCount == parametersFromArgs.Length)
             {
-                writer.AppendLine($"throw new ArgumentException($\"Expected exactly {parameters.Length} arguments, but got {{args.Length}}\");");
+                writer.AppendLine($"throw new ArgumentException($\"Expected exactly {parametersFromArgs.Length} arguments, but got {{args.Length}}\");");
             }
             else
             {
-                writer.AppendLine($"throw new ArgumentException($\"Expected between {requiredParamCount} and {parameters.Length} arguments, but got {{args.Length}}\");");
+                writer.AppendLine($"throw new ArgumentException($\"Expected between {requiredParamCount} and {parametersFromArgs.Length} arguments, but got {{args.Length}}\");");
             }
             writer.Unindent();
             
@@ -631,9 +649,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        if (parameters.Length == 0)
+        if (parametersFromArgs.Length == 0)
         {
-            var typedMethodCall = $"instance.{methodName}()";
+            var typedMethodCall = hasCancellationToken
+                ? $"instance.{methodName}(cancellationToken)"
+                : $"instance.{methodName}()";
             if (isAsync)
             {
                 writer.AppendLine($"await {typedMethodCall};");
@@ -646,8 +666,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // Count required parameters (those without default values)
-            var requiredParamCount = parameters.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional);
+            // Count required parameters (those without default values, excluding CancellationToken)
+            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional);
             
             // Generate runtime logic to handle variable argument counts
             writer.AppendLine("// Invoke with only the arguments that were provided");
@@ -655,14 +675,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
             
-            // Generate cases for each valid argument count (from required params up to total params)
-            for (int argCount = requiredParamCount; argCount <= parameters.Length; argCount++)
+            // Generate cases for each valid argument count (from required params up to total params from args)
+            for (int argCount = requiredParamCount; argCount <= parametersFromArgs.Length; argCount++)
             {
                 writer.AppendLine($"case {argCount}:");
                 writer.Indent();
                 
-                var argsToPass = parameters.Take(argCount)
+                var argsToPass = parametersFromArgs.Take(argCount)
                     .Select((p, i) => $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]");
+                
+                // Add CancellationToken if present
+                if (hasCancellationToken)
+                {
+                    argsToPass = argsToPass.Concat(new[] { "cancellationToken" });
+                }
+                
                 var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";
                 
                 if (isAsync)
@@ -679,13 +706,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             
             writer.AppendLine("default:");
             writer.Indent();
-            if (requiredParamCount == parameters.Length)
+            if (requiredParamCount == parametersFromArgs.Length)
             {
-                writer.AppendLine($"throw new ArgumentException($\"Expected exactly {parameters.Length} arguments, but got {{args.Length}}\");");
+                writer.AppendLine($"throw new ArgumentException($\"Expected exactly {parametersFromArgs.Length} arguments, but got {{args.Length}}\");");
             }
             else
             {
-                writer.AppendLine($"throw new ArgumentException($\"Expected between {requiredParamCount} and {parameters.Length} arguments, but got {{args.Length}}\");");
+                writer.AppendLine($"throw new ArgumentException($\"Expected between {requiredParamCount} and {parametersFromArgs.Length} arguments, but got {{args.Length}}\");");
             }
             writer.Unindent();
             
