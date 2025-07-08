@@ -551,18 +551,71 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Indent();
         writer.AppendLine($"var typedInstance = ({className})instance;");
 
-        var methodCall = parameters.Length == 0
-            ? $"typedInstance.{methodName}()"
-            : $"typedInstance.{methodName}({string.Join(", ", parameters.Select((p, i) => $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]"))})";
-
-        if (isAsync)
+        if (parameters.Length == 0)
         {
-            writer.AppendLine($"await {methodCall};");
+            var methodCall = $"typedInstance.{methodName}()";
+            if (isAsync)
+            {
+                writer.AppendLine($"await {methodCall};");
+            }
+            else
+            {
+                writer.AppendLine($"{methodCall};");
+                writer.AppendLine("await Task.CompletedTask;");
+            }
         }
         else
         {
-            writer.AppendLine($"{methodCall};");
-            writer.AppendLine("await Task.CompletedTask;");
+            // Count required parameters (those without default values)
+            var requiredParamCount = parameters.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional);
+            
+            // Generate runtime logic to handle variable argument counts
+            writer.AppendLine("// Invoke with only the arguments that were provided");
+            writer.AppendLine("switch (args.Length)");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            // Generate cases for each valid argument count (from required params up to total params)
+            for (int argCount = requiredParamCount; argCount <= parameters.Length; argCount++)
+            {
+                writer.AppendLine($"case {argCount}:");
+                writer.Indent();
+                
+                var argsToPass = parameters.Take(argCount)
+                    .Select((p, i) => $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]");
+                var methodCall = $"typedInstance.{methodName}({string.Join(", ", argsToPass)})";
+                
+                if (isAsync)
+                {
+                    writer.AppendLine($"await {methodCall};");
+                }
+                else
+                {
+                    writer.AppendLine($"{methodCall};");
+                }
+                writer.AppendLine("break;");
+                writer.Unindent();
+            }
+            
+            writer.AppendLine("default:");
+            writer.Indent();
+            if (requiredParamCount == parameters.Length)
+            {
+                writer.AppendLine($"throw new ArgumentException($\"Expected exactly {parameters.Length} arguments, but got {{args.Length}}\");");
+            }
+            else
+            {
+                writer.AppendLine($"throw new ArgumentException($\"Expected between {requiredParamCount} and {parameters.Length} arguments, but got {{args.Length}}\");");
+            }
+            writer.Unindent();
+            
+            writer.Unindent();
+            writer.AppendLine("}");
+            
+            if (!isAsync)
+            {
+                writer.AppendLine("await Task.CompletedTask;");
+            }
         }
 
         writer.Unindent();
@@ -578,18 +631,71 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        var typedMethodCall = parameters.Length == 0
-            ? $"instance.{methodName}()"
-            : $"instance.{methodName}({string.Join(", ", parameters.Select((p, i) => $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]"))})";
-
-        if (isAsync)
+        if (parameters.Length == 0)
         {
-            writer.AppendLine($"await {typedMethodCall};");
+            var typedMethodCall = $"instance.{methodName}()";
+            if (isAsync)
+            {
+                writer.AppendLine($"await {typedMethodCall};");
+            }
+            else
+            {
+                writer.AppendLine($"{typedMethodCall};");
+                writer.AppendLine("await Task.CompletedTask;");
+            }
         }
         else
         {
-            writer.AppendLine($"{typedMethodCall};");
-            writer.AppendLine("await Task.CompletedTask;");
+            // Count required parameters (those without default values)
+            var requiredParamCount = parameters.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional);
+            
+            // Generate runtime logic to handle variable argument counts
+            writer.AppendLine("// Invoke with only the arguments that were provided");
+            writer.AppendLine("switch (args.Length)");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            // Generate cases for each valid argument count (from required params up to total params)
+            for (int argCount = requiredParamCount; argCount <= parameters.Length; argCount++)
+            {
+                writer.AppendLine($"case {argCount}:");
+                writer.Indent();
+                
+                var argsToPass = parameters.Take(argCount)
+                    .Select((p, i) => $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]");
+                var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";
+                
+                if (isAsync)
+                {
+                    writer.AppendLine($"await {typedMethodCall};");
+                }
+                else
+                {
+                    writer.AppendLine($"{typedMethodCall};");
+                }
+                writer.AppendLine("break;");
+                writer.Unindent();
+            }
+            
+            writer.AppendLine("default:");
+            writer.Indent();
+            if (requiredParamCount == parameters.Length)
+            {
+                writer.AppendLine($"throw new ArgumentException($\"Expected exactly {parameters.Length} arguments, but got {{args.Length}}\");");
+            }
+            else
+            {
+                writer.AppendLine($"throw new ArgumentException($\"Expected between {requiredParamCount} and {parameters.Length} arguments, but got {{args.Length}}\");");
+            }
+            writer.Unindent();
+            
+            writer.Unindent();
+            writer.AppendLine("}");
+            
+            if (!isAsync)
+            {
+                writer.AppendLine("await Task.CompletedTask;");
+            }
         }
 
         writer.Unindent();
