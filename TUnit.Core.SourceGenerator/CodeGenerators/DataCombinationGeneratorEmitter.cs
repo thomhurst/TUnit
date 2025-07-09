@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
+using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
@@ -147,20 +148,26 @@ public static class DataCombinationGeneratorEmitter
 
     private static void EmitDataSourceCombination(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol)
     {
-        var attributeClassName = attr.AttributeClass?.Name;
+        if (attr.AttributeClass == null)
+        {
+            EmitEmptyCombination(writer, index, listName, isClassLevel);
+            return;
+        }
 
-        if (attributeClassName == "ArgumentsAttribute")
+        var fullyQualifiedName = attr.AttributeClass.GloballyQualifiedNonGeneric();
+
+        if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
         {
             EmitArgumentsAttribute(writer, attr, index, listName, isClassLevel);
         }
-        else if (attributeClassName == "MethodDataSourceAttribute")
+        else if (fullyQualifiedName == "global::TUnit.Core.MethodDataSourceAttribute")
         {
             EmitMethodDataSource(writer, attr, index, listName, isClassLevel, typeSymbol);
         }
         else if (IsAsyncDataSourceGeneratorAttribute(attr.AttributeClass))
         {
             // Check if it's an async untyped data source generator
-            if (InheritsFrom(attr.AttributeClass, "AsyncUntypedDataSourceGeneratorAttribute"))
+            if (IsAsyncUntypedDataSourceGeneratorAttribute(attr.AttributeClass))
             {
                 EmitAsyncUntypedDataSourceGeneratorAttribute(writer, attr, index, listName, isClassLevel);
             }
@@ -172,7 +179,7 @@ public static class DataCombinationGeneratorEmitter
         }
         else
         {
-            writer.AppendLine($"// Unsupported data source: {attributeClassName}");
+            writer.AppendLine($"// Unsupported data source: {fullyQualifiedName}");
             EmitEmptyCombination(writer, index, listName, isClassLevel);
         }
     }
@@ -321,7 +328,7 @@ public static class DataCombinationGeneratorEmitter
             var propertyName = propData.Property.Name;
             var attr = propData.DataSourceAttribute;
             
-            if (attr.AttributeClass?.Name == "ArgumentsAttribute")
+            if (attr.AttributeClass != null && attr.AttributeClass.GloballyQualifiedNonGeneric() == "global::TUnit.Core.ArgumentsAttribute")
             {
                 if (attr.ConstructorArguments.Length > 0)
                 {
@@ -574,52 +581,39 @@ public static class DataCombinationGeneratorEmitter
         if (attributeClass == null) return false;
         
         // Check if it's AsyncDataSourceGeneratorAttribute or inherits from it
-        return InheritsFrom(attributeClass, "AsyncDataSourceGeneratorAttribute") || 
-               InheritsFrom(attributeClass, "AsyncUntypedDataSourceGeneratorAttribute");
+        return attributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") || 
+               attributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute");
     }
     
-    private static bool InheritsFrom(INamedTypeSymbol? type, string baseTypeName)
+    private static bool IsAsyncUntypedDataSourceGeneratorAttribute(INamedTypeSymbol? attributeClass)
     {
-        var current = type;
-        while (current != null)
-        {
-            if (current.Name == baseTypeName)
-            {
-                return true;
-            }
-            current = current.BaseType;
-        }
-        return false;
+        if (attributeClass == null) return false;
+        
+        return attributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute");
     }
     
     private static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)
     {
         if (attributeClass == null) return false;
         
-        var name = attributeClass.Name;
+        var fullyQualifiedName = attributeClass.GloballyQualifiedNonGeneric();
         
-        // Check direct name matches
-        if (name == "ArgumentsAttribute" ||
-            name == "MethodDataSourceAttribute" ||
-            name == "AsyncDataSourceGeneratorAttribute" ||
-            name == "AsyncUntypedDataSourceGeneratorAttribute" ||
-            name == "NonTypedDataSourceGeneratorAttribute")
+        // Check direct fully qualified name matches
+        if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute" ||
+            fullyQualifiedName == "global::TUnit.Core.MethodDataSourceAttribute" ||
+            fullyQualifiedName == "global::TUnit.Core.AsyncDataSourceGeneratorAttribute" ||
+            fullyQualifiedName == "global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute" ||
+            fullyQualifiedName == "global::TUnit.Core.NonTypedDataSourceGeneratorAttribute")
         {
             return true;
         }
         
-        // Check if this inherits from any data source attribute
-        var baseType = attributeClass.BaseType;
-        while (baseType != null)
-        {
-            if (IsDataSourceAttribute(baseType))
-            {
-                return true;
-            }
-            baseType = baseType.BaseType;
-        }
-        
-        return false;
+        // Check if this inherits from any data source attribute using the extension method
+        return attributeClass.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") ||
+               attributeClass.IsOrInherits("global::TUnit.Core.MethodDataSourceAttribute") ||
+               attributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
+               attributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute") ||
+               attributeClass.IsOrInherits("global::TUnit.Core.NonTypedDataSourceGeneratorAttribute");
     }
 
     private static bool HasRuntimeGenerators(
