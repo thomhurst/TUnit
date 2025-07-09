@@ -100,7 +100,8 @@
       "mcp__desktop-commander__search_files",
       "Bash(cp:*)",
       "Bash(diff:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(echo $?)"
     ],
     "deny": []
   }

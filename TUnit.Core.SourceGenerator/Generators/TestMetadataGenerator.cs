@@ -638,7 +638,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Indent();
             if (requiredParamCount == parametersFromArgs.Length)
             {
-                writer.AppendLine($"throw new ArgumentException($\"Expected exactly {parametersFromArgs.Length} arguments, but got {{args.Length}}\");");
+                writer.AppendLine($"throw new ArgumentException($\"Expected exactly {parametersFromArgs.Length} argument{(parametersFromArgs.Length == 1 ? "" : "s")}, but got {{args.Length}}\");");
             }
             else
             {
@@ -746,7 +746,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Indent();
             if (requiredParamCount == parametersFromArgs.Length)
             {
-                writer.AppendLine($"throw new ArgumentException($\"Expected exactly {parametersFromArgs.Length} arguments, but got {{args.Length}}\");");
+                writer.AppendLine($"throw new ArgumentException($\"Expected exactly {parametersFromArgs.Length} argument{(parametersFromArgs.Length == 1 ? "" : "s")}, but got {{args.Length}}\");");
             }
             else
             {
