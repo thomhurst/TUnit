@@ -1,4 +1,5 @@
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Scheduling;
 
@@ -18,6 +19,10 @@ public sealed class TestExecutionState
     public HashSet<string> Dependents { get; }
     public DateTime EnqueueTime { get; set; }
     public CancellationTokenSource? TimeoutCts { get; set; }
+    
+    public IParallelConstraint? Constraint { get; init; }
+    public string? ConstraintKey { get; init; }
+    public int Order { get; init; }
 
     public TestExecutionState(ExecutableTest test)
     {
@@ -28,6 +33,22 @@ public sealed class TestExecutionState
         [
         ];
         EnqueueTime = DateTime.UtcNow;
+        
+        Constraint = test.Context.ParallelConstraint;
+        Order = Constraint switch
+        {
+            NotInParallelConstraint nip => nip.Order,
+            ParallelGroupConstraint pg => pg.Order,
+            _ => int.MaxValue / 2
+        };
+        
+        ConstraintKey = Constraint switch
+        {
+            NotInParallelConstraint nip when nip.NotInParallelConstraintKeys.Count > 0 => 
+                string.Join(",", nip.NotInParallelConstraintKeys.OrderBy(k => k)),
+            ParallelGroupConstraint pg => pg.Group,
+            _ => null
+        };
     }
 
     /// <summary>

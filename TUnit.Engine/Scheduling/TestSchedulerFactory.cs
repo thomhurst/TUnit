@@ -1,5 +1,6 @@
 using TUnit.Core;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Scheduling;
 
@@ -27,7 +28,10 @@ internal static class TestSchedulerFactory
                 configuration.MaxParallelism)
             : new FixedParallelismStrategy(configuration.MaxParallelism);
 
-        return new DagTestScheduler(
+        var groupingService = new TestGroupingService();
+        
+        return new OrderedConstraintTestScheduler(
+            groupingService,
             parallelismStrategy,
             logger,
             configuration.TestTimeout);

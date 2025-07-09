@@ -1,13 +1,14 @@
-﻿using System.Collections.Concurrent;
-using TUnit.Core;
+﻿using TUnit.Core;
 
 namespace TUnit.Engine.Models;
 
 internal record GroupedTests
 {
-    public required IReadOnlyCollection<DiscoveredTest> AllValidTests { get; init; }
-    public required PriorityQueue<DiscoveredTest, int> NotInParallel { get; init; }
-    public required IDictionary<ConstraintKeysCollection, PriorityQueue<DiscoveredTest, int>> KeyedNotInParallel { get; init; }
-    public required IList<DiscoveredTest> Parallel { get; init; }
-    public required ConcurrentDictionary<ParallelGroupConstraint, List<DiscoveredTest>> ParallelGroups { get; set; }
+    public required IList<ExecutableTest> Parallel { get; init; }
+    
+    public required PriorityQueue<ExecutableTest, int> NotInParallel { get; init; }
+    
+    public required IDictionary<string, PriorityQueue<ExecutableTest, int>> KeyedNotInParallel { get; init; }
+    
+    public required IDictionary<string, SortedDictionary<int, List<ExecutableTest>>> ParallelGroups { get; init; }
 }
