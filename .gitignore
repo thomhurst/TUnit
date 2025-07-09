@@ -409,3 +409,7 @@ SourceGeneratedViewer
 # Requirements gathering folder
 requirements/
 **/SourceGeneratedViewer/
+
+# TUnit test output files
+TUnit.TestProject/TestDiscovery*.txt
+TUnit.TestProject/TestSession*.txt
