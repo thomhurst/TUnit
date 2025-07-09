@@ -47,12 +47,6 @@ public class TestDataCombination
     public Dictionary<string, object?> PropertyValues { get; init; } = new();
 
     /// <summary>
-    /// Indicates if this combination requires runtime data generation
-    /// from data source generator attributes like MatrixDataSourceAttribute
-    /// </summary>
-    public bool IsRuntimeGenerated { get; init; }
-
-    /// <summary>
     /// Exception that occurred during data generation, if any.
     /// When set, this combination represents a failed data generation attempt.
     /// </summary>

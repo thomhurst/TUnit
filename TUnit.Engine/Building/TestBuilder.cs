@@ -34,29 +34,16 @@ public sealed class TestBuilder : ITestBuilder
             var asyncCombinations = metadata.DataCombinationGenerator();
             await foreach (var combination in asyncCombinations)
             {
-                // Check if this combination requires runtime data generation
-                if (combination.IsRuntimeGenerated)
+                // Check if this combination has a data generation exception
+                if (combination.DataGenerationException != null)
                 {
-                    // Handle runtime data source generators
-                    await foreach (var runtimeCombination in GenerateRuntimeCombinations(metadata))
-                    {
-                        var test = await BuildTestAsync(metadata, runtimeCombination);
-                        tests.Add(test);
-                    }
+                    var failedTest = CreateFailedTestForDataGenerationError(metadata, combination.DataGenerationException, combination.DisplayName);
+                    tests.Add(failedTest);
                 }
                 else
                 {
-                    // Check if this combination has a data generation exception
-                    if (combination.DataGenerationException != null)
-                    {
-                        var failedTest = CreateFailedTestForDataGenerationError(metadata, combination.DataGenerationException, combination.DisplayName);
-                        tests.Add(failedTest);
-                    }
-                    else
-                    {
-                        var test = await BuildTestAsync(metadata, combination);
-                        tests.Add(test);
-                    }
+                    var test = await BuildTestAsync(metadata, combination);
+                    tests.Add(test);
                 }
             }
         }
@@ -113,18 +100,6 @@ public sealed class TestBuilder : ITestBuilder
         }
 
         return string.Join(", ", allArgs.Select(arg => arg?.ToString() ?? "null"));
-    }
-
-    [UnconditionalSuppressMessage("AOT", "IL2072", Justification = "Type information is preserved by source generation")]
-    private async IAsyncEnumerable<TestDataCombination> GenerateRuntimeCombinations(TestMetadata metadata)
-    {
-        await foreach (var combination in RuntimeDataSourceHelper.GenerateDataCombinationsAsync(
-            metadata.TestClassType,
-            metadata.TestMethodName,
-            metadata.AttributeFactory))
-        {
-            yield return combination;
-        }
     }
 
     private async Task<Func<TestContext, CancellationToken, Task>[]> CreateTestHooksAsync(Type testClassType, bool isBeforeHook)
