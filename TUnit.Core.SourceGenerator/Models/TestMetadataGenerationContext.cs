@@ -218,7 +218,7 @@ public class TestMetadataGenerationContext
             }
             if (args is
                 [
-                    { Value: null } _, _
+                    { Value: null }, _
                 ])
             {
                 // Method on test class - need to check if it's static

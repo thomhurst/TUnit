@@ -53,7 +53,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine("var methodCombinations = new List<TestDataCombination>();");
         writer.AppendLine("var classCombinations = new List<TestDataCombination>();");
         writer.AppendLine("var propertyCombinations = new List<TestDataCombination>();");
@@ -69,9 +69,9 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("if (classCombinations.Count == 0) classCombinations.Add(new TestDataCombination());");
         writer.AppendLine("if (propertyCombinations.Count == 0) propertyCombinations.Add(new TestDataCombination());");
         writer.AppendLine();
-        
+
         EmitCartesianProduct(writer);
-        
+
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine("catch (Exception ex)");
@@ -137,12 +137,12 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine();
         writer.AppendLine("// Property data sources");
         writer.AppendLine("var propertyValues = new Dictionary<string, object?>();");
-        
+
         foreach (var propData in propertyDataSources)
         {
             EmitPropertyDataSource(writer, propData, typeSymbol);
         }
-        
+
         writer.AppendLine("propertyCombinations.Add(new TestDataCombination { PropertyValues = propertyValues });");
     }
 
@@ -187,23 +187,22 @@ public static class DataCombinationGeneratorEmitter
     private static void EmitArgumentsAttribute(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel)
     {
         writer.AppendLine($"// ArgumentsAttribute {index}");
-        
+
         try
         {
-            if (attr.ConstructorArguments.Length == 0)
-            {
-                EmitEmptyCombination(writer, index, listName, isClassLevel);
-                return;
-            }
-
             var formattedArgs = new List<string>();
-            
-            if (attr.ConstructorArguments.Length == 1 && attr.ConstructorArguments[0].Kind == TypedConstantKind.Array)
+
+            if (attr.ConstructorArguments is { IsDefaultOrEmpty: true }
+                or [{ IsNull: true }])
             {
-                foreach (var value in attr.ConstructorArguments[0].Values)
-                {
-                    formattedArgs.Add(FormatConstantValue(value));
-                }
+                formattedArgs = ["null"];
+            }
+            else if (attr.ConstructorArguments is
+                [
+                    { Kind: TypedConstantKind.Array }
+                ])
+            {
+                formattedArgs.AddRange(attr.ConstructorArguments[0].Values.Select(FormatConstantValue));
             }
             else
             {
@@ -213,7 +212,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine($"{listName}.Add(new TestDataCombination");
             writer.AppendLine("{");
             writer.Indent();
-            
+
             if (isClassLevel)
             {
                 writer.AppendLine($"ClassData = new object?[] {{ {string.Join(", ", formattedArgs)} }},");
@@ -224,7 +223,7 @@ public static class DataCombinationGeneratorEmitter
                 writer.AppendLine($"MethodData = new object?[] {{ {string.Join(", ", formattedArgs)} }},");
                 writer.AppendLine($"MethodDataSourceIndex = {index},");
             }
-            
+
             writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
             writer.Unindent();
             writer.AppendLine("});");
@@ -239,7 +238,7 @@ public static class DataCombinationGeneratorEmitter
     private static void EmitMethodDataSource(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol)
     {
         writer.AppendLine($"// MethodDataSourceAttribute {index}");
-        
+
         if (attr.ConstructorArguments.Length < 1)
         {
             EmitEmptyCombination(writer, index, listName, isClassLevel);
@@ -253,11 +252,11 @@ public static class DataCombinationGeneratorEmitter
             return;
         }
 
-        var isStatic = attr.ConstructorArguments.Length > 1 && 
-                      attr.ConstructorArguments[1].Value is bool b && b;
+        var isStatic = attr.ConstructorArguments.Length > 1 &&
+            attr.ConstructorArguments[1].Value is bool and true;
 
         writer.AppendLine($"// Calling method: {methodName} (static: {isStatic})");
-        
+
         if (isStatic)
         {
             EmitStaticMethodDataSource(writer, methodName, index, listName, isClassLevel, typeSymbol);
@@ -276,11 +275,11 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("await foreach (var data in dataEnumerable)");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         if (isClassLevel)
         {
             writer.AppendLine("ClassData = data,");
@@ -293,11 +292,11 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine($"MethodDataSourceIndex = {index},");
             writer.AppendLine("MethodLoopIndex = loopIndex++,");
         }
-        
+
         writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
         writer.Unindent();
         writer.AppendLine("});");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
     }
@@ -308,7 +307,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("// Instance methods are not supported in the unified compile-time data generation approach");
         writer.AppendLine("// because they require a test class instance which doesn't exist at compile time.");
         writer.AppendLine("// Consider using static methods for data sources instead.");
-        
+
         writer.AppendLine("errorCombination = new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
@@ -327,7 +326,7 @@ public static class DataCombinationGeneratorEmitter
         {
             var propertyName = propData.Property.Name;
             var attr = propData.DataSourceAttribute;
-            
+
             if (attr.AttributeClass != null && attr.AttributeClass.GloballyQualifiedNonGeneric() == "global::TUnit.Core.ArgumentsAttribute")
             {
                 if (attr.ConstructorArguments.Length > 0)
@@ -358,7 +357,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         // Create an instance of the generator and call GenerateAsync
         var attributeType = attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
         writer.AppendLine($"var generator = new {attributeType}();");
@@ -374,7 +373,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("ClassInstanceArguments = null");
         writer.Unindent();
         writer.AppendLine("};");
-        
+
         writer.AppendLine("await foreach (var dataSourceFunc in generator.GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
@@ -382,7 +381,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         if (isClassLevel)
         {
             writer.AppendLine("ClassData = data ?? Array.Empty<object?>(),");
@@ -395,12 +394,12 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine($"MethodDataSourceIndex = {index},");
             writer.AppendLine($"MethodLoopIndex = {listName}.Count");
         }
-        
+
         writer.Unindent();
         writer.AppendLine("});");
         writer.Unindent();
         writer.AppendLine("}");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine("catch (Exception ex)");
@@ -423,7 +422,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         // Create an instance of the generator and call GenerateDataSources
         var attributeType = attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
         writer.AppendLine($"var generator = new {attributeType}();");
@@ -439,7 +438,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("ClassInstanceArguments = null");
         writer.Unindent();
         writer.AppendLine("};");
-        
+
         writer.AppendLine("await foreach (var dataSourceFunc in ((IAsyncDataSourceGeneratorAttribute)generator).GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
@@ -447,7 +446,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         if (isClassLevel)
         {
             writer.AppendLine("ClassData = data ?? Array.Empty<object?>(),");
@@ -460,12 +459,12 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine($"MethodDataSourceIndex = {index},");
             writer.AppendLine($"MethodLoopIndex = {listName}.Count");
         }
-        
+
         writer.Unindent();
         writer.AppendLine("});");
         writer.Unindent();
         writer.AppendLine("}");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine("catch (Exception ex)");
@@ -487,7 +486,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         if (isClassLevel)
         {
             writer.AppendLine($"ClassDataSourceIndex = {index},");
@@ -496,7 +495,7 @@ public static class DataCombinationGeneratorEmitter
         {
             writer.AppendLine($"MethodDataSourceIndex = {index},");
         }
-        
+
         writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
         writer.Unindent();
         writer.AppendLine("});");
@@ -514,13 +513,13 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("foreach (var propertyCombination in propertyCombinations)");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine("var mergedProperties = new Dictionary<string, object?>();");
         writer.AppendLine("foreach (var kvp in classCombination.PropertyValues) mergedProperties[kvp.Key] = kvp.Value;");
         writer.AppendLine("foreach (var kvp in methodCombination.PropertyValues) mergedProperties[kvp.Key] = kvp.Value;");
         writer.AppendLine("foreach (var kvp in propertyCombination.PropertyValues) mergedProperties[kvp.Key] = kvp.Value;");
         writer.AppendLine();
-        
+
         writer.AppendLine("allCombinations.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
@@ -535,7 +534,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("DisplayName = classCombination.DisplayName ?? methodCombination.DisplayName ?? propertyCombination.DisplayName");
         writer.Unindent();
         writer.AppendLine("});");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
         writer.Unindent();
@@ -554,14 +553,14 @@ public static class DataCombinationGeneratorEmitter
     private static ImmutableArray<PropertyWithDataSource> GetPropertyDataSources(INamedTypeSymbol typeSymbol)
     {
         var properties = new List<PropertyWithDataSource>();
-        
+
         foreach (var member in typeSymbol.GetMembers())
         {
             if (member is IPropertySymbol property)
             {
                 var dataSourceAttr = property.GetAttributes()
                     .FirstOrDefault(a => IsDataSourceAttribute(a.AttributeClass));
-                    
+
                 if (dataSourceAttr != null)
                 {
                     properties.Add(new PropertyWithDataSource
@@ -572,66 +571,44 @@ public static class DataCombinationGeneratorEmitter
                 }
             }
         }
-        
+
         return properties.ToImmutableArray();
     }
 
     private static bool IsAsyncDataSourceGeneratorAttribute(INamedTypeSymbol? attributeClass)
     {
         if (attributeClass == null) return false;
-        
+
         // Check if it's AsyncDataSourceGeneratorAttribute or inherits from it
-        return attributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") || 
+        return attributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
                attributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute");
     }
-    
+
     private static bool IsAsyncUntypedDataSourceGeneratorAttribute(INamedTypeSymbol? attributeClass)
     {
         if (attributeClass == null) return false;
-        
+
         return attributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute");
     }
-    
+
     private static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)
     {
         if (attributeClass == null) return false;
-        
+
         var fullyQualifiedName = attributeClass.GloballyQualifiedNonGeneric();
-        
+
         // Check direct fully qualified name matches
-        if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute" ||
-            fullyQualifiedName == "global::TUnit.Core.MethodDataSourceAttribute" ||
-            fullyQualifiedName == "global::TUnit.Core.AsyncDataSourceGeneratorAttribute" ||
-            fullyQualifiedName == "global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute" ||
-            fullyQualifiedName == "global::TUnit.Core.NonTypedDataSourceGeneratorAttribute")
+        if (fullyQualifiedName is "global::TUnit.Core.ArgumentsAttribute"
+            or "global::TUnit.Core.MethodDataSourceAttribute")
         {
             return true;
         }
-        
+
         // Check if this inherits from any data source attribute using the extension method
         return attributeClass.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") ||
                attributeClass.IsOrInherits("global::TUnit.Core.MethodDataSourceAttribute") ||
                attributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
-               attributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute") ||
-               attributeClass.IsOrInherits("global::TUnit.Core.NonTypedDataSourceGeneratorAttribute");
-    }
-
-    private static bool HasRuntimeGenerators(
-        ImmutableArray<AttributeData> methodDataSources,
-        ImmutableArray<AttributeData> classDataSources,
-        ImmutableArray<PropertyWithDataSource> propertyDataSources)
-    {
-        return methodDataSources.Any(a => IsRuntimeGenerator(a.AttributeClass)) ||
-               classDataSources.Any(a => IsRuntimeGenerator(a.AttributeClass)) ||
-               propertyDataSources.Any(p => IsRuntimeGenerator(p.DataSourceAttribute.AttributeClass));
-    }
-
-    private static bool IsRuntimeGenerator(INamedTypeSymbol? attributeClass)
-    {
-        if (attributeClass == null) return false;
-        
-        // All data source generators can now be handled at compile time
-        return false;
+               attributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute");
     }
 
     private static string FormatConstantValue(TypedConstant constant)
@@ -652,7 +629,7 @@ public static class DataCombinationGeneratorEmitter
                 return $"new {elementType}[] {{ {string.Join(", ", values)} }}";
             }
 
-            if (constant.Kind == TypedConstantKind.Type && constant.Value is ITypeSymbol typeSymbol)
+            if (constant is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol })
             {
                 return $"typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
             }

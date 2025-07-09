@@ -24,7 +24,7 @@ public class MethodDataSourceProviderGenerator : IDataProviderGenerator
 
         if (args is
             [
-                { Value: not null } _, _
+                { Value: not null }, _
             ])
         {
             // Type and method name
@@ -45,7 +45,7 @@ public class MethodDataSourceProviderGenerator : IDataProviderGenerator
         }
         else if (args.Length == 1 || args is
                  [
-                     { Value: null } _, _
+                     { Value: null }, _
                  ])
         {
             // Just method name - refers to a method on the test class

@@ -29,7 +29,7 @@ public class ArgumentsDataProviderGenerator : IDataProviderGenerator
         // ArgumentsAttribute constructor takes params object?[]
         if (args is
             [
-                { Kind: TypedConstantKind.Array } _
+                { Kind: TypedConstantKind.Array }
             ])
         {
             // Handle params array case
