@@ -24,7 +24,7 @@ public static class RuntimeDataSourceHelper
         Func<Attribute[]> attributeFactory)
     {
         var attributes = attributeFactory();
-        var dataSourceGenerators = attributes.OfType<AsyncUntypedDataSourceGeneratorAttribute>().ToList();
+        var dataSourceGenerators = attributes.OfType<IAsyncDataSourceGeneratorAttribute>().ToList();
         
         if (!dataSourceGenerators.Any())
         {

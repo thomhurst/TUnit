@@ -166,6 +166,11 @@ public static class DataCombinationGeneratorEmitter
         {
             EmitMethodDataSource(writer, attr, index, listName, isClassLevel);
         }
+        else if (attributeClassName != null && attributeClassName.EndsWith("DataSourceGeneratorAttribute"))
+        {
+            // Handle any data source generator attribute at compile time
+            EmitDataSourceGeneratorAttribute(writer, attr, index, listName, isClassLevel);
+        }
         else
         {
             writer.AppendLine($"// Unsupported data source: {attributeClassName}");
@@ -344,6 +349,66 @@ public static class DataCombinationGeneratorEmitter
         }
     }
 
+    private static void EmitDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel)
+    {
+        writer.AppendLine($"// DataSourceGeneratorAttribute {index}");
+        writer.AppendLine("try");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Create an instance of the generator and call GenerateDataSources
+        var attributeType = attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+        writer.AppendLine($"var generator = new {attributeType}();");
+        writer.AppendLine("var dataGeneratorMetadata = new DataGeneratorMetadata");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("Type = DataGeneratorType.TestParameters,");
+        writer.AppendLine("TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext())");
+        writer.Unindent();
+        writer.AppendLine("};");
+        
+        writer.AppendLine("foreach (var dataSourceFunc in generator.GenerateDataSources(dataGeneratorMetadata))");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("var data = dataSourceFunc();");
+        writer.AppendLine($"{listName}.Add(new TestDataCombination");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        if (isClassLevel)
+        {
+            writer.AppendLine("ClassData = new[] { data },");
+            writer.AppendLine($"ClassDataSourceIndex = {index},");
+            writer.AppendLine($"ClassLoopIndex = {listName}.Count");
+        }
+        else
+        {
+            writer.AppendLine("MethodData = new[] { data },");
+            writer.AppendLine($"MethodDataSourceIndex = {index},");
+            writer.AppendLine($"MethodLoopIndex = {listName}.Count");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("});");
+        writer.Unindent();
+        writer.AppendLine("}");
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("catch (Exception ex)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("errorCombination = new TestDataCombination");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("DataGenerationException = ex,");
+        writer.AppendLine($"DisplayName = \"Data generation error: \" + ex.Message");
+        writer.Unindent();
+        writer.AppendLine("};");
+        writer.Unindent();
+        writer.AppendLine("}");
+    }
+
     private static void EmitEmptyCombination(CodeWriter writer, int index, string listName, bool isClassLevel)
     {
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
@@ -465,8 +530,9 @@ public static class DataCombinationGeneratorEmitter
         if (attributeClass == null) return false;
         
         var name = attributeClass.Name;
-        return name == "AsyncDataSourceGeneratorAttribute" ||
-               name == "AsyncUntypedDataSourceGeneratorAttribute" ||
+        // Only AsyncUntypedDataSourceGeneratorAttribute is truly runtime-only
+        // AsyncDataSourceGeneratorAttribute and DataSourceGeneratorAttribute can be handled at compile time
+        return name == "AsyncUntypedDataSourceGeneratorAttribute" ||
                name == "NonTypedDataSourceGeneratorAttribute";
     }
 
