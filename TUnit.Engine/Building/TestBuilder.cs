@@ -46,8 +46,17 @@ public sealed class TestBuilder : ITestBuilder
                 }
                 else
                 {
-                    var test = await BuildTestAsync(metadata, combination);
-                    tests.Add(test);
+                    // Check if this combination has a data generation exception
+                    if (combination.DataGenerationException != null)
+                    {
+                        var failedTest = CreateFailedTestForDataGenerationError(metadata, combination.DataGenerationException, combination.DisplayName);
+                        tests.Add(failedTest);
+                    }
+                    else
+                    {
+                        var test = await BuildTestAsync(metadata, combination);
+                        tests.Add(test);
+                    }
                 }
             }
         }
@@ -228,8 +237,13 @@ public sealed class TestBuilder : ITestBuilder
 
     private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
+        return CreateFailedTestForDataGenerationError(metadata, exception, null);
+    }
+
+    private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, string? customDisplayName)
+    {
         var testId = metadata.TestId ?? $"{metadata.TestClassType.FullName}.{metadata.TestMethodName}_DataGenerationError";
-        var displayName = $"{metadata.TestName} [DATA GENERATION ERROR]";
+        var displayName = customDisplayName ?? $"{metadata.TestName} [DATA GENERATION ERROR]";
 
         // Create a minimal test context for failed test
         var testDetails = new TestDetails

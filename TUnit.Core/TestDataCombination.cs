@@ -51,4 +51,15 @@ public class TestDataCombination
     /// from data source generator attributes like MatrixDataSourceAttribute
     /// </summary>
     public bool IsRuntimeGenerated { get; init; }
+
+    /// <summary>
+    /// Exception that occurred during data generation, if any.
+    /// When set, this combination represents a failed data generation attempt.
+    /// </summary>
+    public Exception? DataGenerationException { get; init; }
+
+    /// <summary>
+    /// Custom display name for this combination, typically used for error cases.
+    /// </summary>
+    public string? DisplayName { get; init; }
 }
