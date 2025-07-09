@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
+using TUnit.Core.Data;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building.Interfaces;
@@ -60,6 +61,9 @@ public sealed class TestBuilder : ITestBuilder
 
     public async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestDataCombination combination)
     {
+        // Track all objects from data sources
+        TrackDataSourceObjects(combination);
+        
         // Generate unique test ID
         var testId = GenerateTestId(metadata, combination);
 
@@ -260,5 +264,12 @@ public sealed class TestBuilder : ITestBuilder
             AfterTestHooks = [],
             Context = context
         };
+    }
+    
+    private static void TrackDataSourceObjects(TestDataCombination combination)
+    {
+        ActiveObjectTracker.IncrementUsage(combination.ClassData);
+        ActiveObjectTracker.IncrementUsage(combination.MethodData);
+        ActiveObjectTracker.IncrementUsage(combination.PropertyValues.Values);
     }
 }

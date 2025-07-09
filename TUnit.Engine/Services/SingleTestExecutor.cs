@@ -2,6 +2,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Data;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 
@@ -98,6 +99,7 @@ public class SingleTestExecutor : ISingleTestExecutor
         finally
         {
             await ExecuteAfterTestHooksAsync(test.AfterTestHooks, test.Context!, cancellationToken);
+            await DecrementAndDisposeTrackedObjectsAsync(test);
         }
     }
 
@@ -227,6 +229,44 @@ public class SingleTestExecutor : ISingleTestExecutor
         else
         {
             await testAction();
+        }
+    }
+    
+    private async Task DecrementAndDisposeTrackedObjectsAsync(ExecutableTest test)
+    {
+        var objectsToCheck = new List<object?>();
+        objectsToCheck.AddRange(test.ClassArguments);
+        objectsToCheck.AddRange(test.Arguments);
+        
+        if (test.Context?.TestDetails.TestClassInjectedPropertyArguments != null)
+        {
+            objectsToCheck.AddRange(test.Context.TestDetails.TestClassInjectedPropertyArguments.Values);
+        }
+        
+        foreach (var obj in objectsToCheck)
+        {
+            if (obj == null)
+            {
+                continue;
+            }
+            
+            if (ActiveObjectTracker.TryGetCounter(obj, out var counter))
+            {
+                var count = counter!.Decrement();
+                if (count == 0)
+                {
+                    ActiveObjectTracker.RemoveObject(obj);
+                    
+                    if (obj is IAsyncDisposable asyncDisposable)
+                    {
+                        await asyncDisposable.DisposeAsync();
+                    }
+                    else if (obj is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                    }
+                }
+            }
         }
     }
 }
