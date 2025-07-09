@@ -101,7 +101,9 @@
       "Bash(cp:*)",
       "Bash(diff:*)",
       "Bash(git reset:*)",
-      "Bash(echo $?)"
+      "Bash(echo $?)",
+      "Bash(csc:*)",
+      "Bash(./test-fix.exe)"
     ],
     "deny": []
   }

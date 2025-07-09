@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
@@ -59,9 +60,9 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("var propertyCombinations = new List<TestDataCombination>();");
         writer.AppendLine();
 
-        EmitMethodDataCombinations(writer, methodDataSources, typeSymbol);
-        EmitClassDataCombinations(writer, classDataSources, typeSymbol);
-        EmitPropertyDataCombinations(writer, propertyDataSources, typeSymbol);
+        EmitMethodDataCombinations(writer, methodDataSources, methodSymbol, typeSymbol);
+        EmitClassDataCombinations(writer, classDataSources, methodSymbol, typeSymbol);
+        EmitPropertyDataCombinations(writer, propertyDataSources, methodSymbol, typeSymbol);
 
         writer.AppendLine();
         writer.AppendLine("// Ensure we have at least one combination of each type");
@@ -108,28 +109,28 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("}");
     }
 
-    private static void EmitMethodDataCombinations(CodeWriter writer, ImmutableArray<AttributeData> methodDataSources, INamedTypeSymbol typeSymbol)
+    private static void EmitMethodDataCombinations(CodeWriter writer, ImmutableArray<AttributeData> methodDataSources, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         writer.AppendLine("// Method data sources");
         for (int i = 0; i < methodDataSources.Length; i++)
         {
             var attr = methodDataSources[i];
-            EmitDataSourceCombination(writer, attr, i, "methodCombinations", isClassLevel: false, typeSymbol);
+            EmitDataSourceCombination(writer, attr, i, "methodCombinations", isClassLevel: false, methodSymbol, typeSymbol);
         }
     }
 
-    private static void EmitClassDataCombinations(CodeWriter writer, ImmutableArray<AttributeData> classDataSources, INamedTypeSymbol typeSymbol)
+    private static void EmitClassDataCombinations(CodeWriter writer, ImmutableArray<AttributeData> classDataSources, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         writer.AppendLine();
         writer.AppendLine("// Class data sources");
         for (int i = 0; i < classDataSources.Length; i++)
         {
             var attr = classDataSources[i];
-            EmitDataSourceCombination(writer, attr, i, "classCombinations", isClassLevel: true, typeSymbol);
+            EmitDataSourceCombination(writer, attr, i, "classCombinations", isClassLevel: true, methodSymbol, typeSymbol);
         }
     }
 
-    private static void EmitPropertyDataCombinations(CodeWriter writer, ImmutableArray<PropertyWithDataSource> propertyDataSources, INamedTypeSymbol typeSymbol)
+    private static void EmitPropertyDataCombinations(CodeWriter writer, ImmutableArray<PropertyWithDataSource> propertyDataSources, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         if (!propertyDataSources.Any())
             return;
@@ -146,7 +147,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("propertyCombinations.Add(new TestDataCombination { PropertyValues = propertyValues });");
     }
 
-    private static void EmitDataSourceCombination(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol)
+    private static void EmitDataSourceCombination(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         if (attr.AttributeClass == null)
         {
@@ -169,12 +170,12 @@ public static class DataCombinationGeneratorEmitter
             // Check if it's an async untyped data source generator
             if (IsAsyncUntypedDataSourceGeneratorAttribute(attr.AttributeClass))
             {
-                EmitAsyncUntypedDataSourceGeneratorAttribute(writer, attr, index, listName, isClassLevel);
+                EmitAsyncUntypedDataSourceGeneratorAttribute(writer, attr, index, listName, isClassLevel, methodSymbol, typeSymbol);
             }
             else
             {
                 // It's a typed AsyncDataSourceGeneratorAttribute (including DataSourceGeneratorAttribute)
-                EmitAsyncDataSourceGeneratorAttribute(writer, attr, index, listName, isClassLevel);
+                EmitAsyncDataSourceGeneratorAttribute(writer, attr, index, listName, isClassLevel, methodSymbol, typeSymbol);
             }
         }
         else
@@ -351,7 +352,7 @@ public static class DataCombinationGeneratorEmitter
         }
     }
 
-    private static void EmitAsyncUntypedDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel)
+    private static void EmitAsyncUntypedDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         writer.AppendLine($"// AsyncUntypedDataSourceGeneratorAttribute {index}");
         writer.AppendLine("try");
@@ -361,13 +362,62 @@ public static class DataCombinationGeneratorEmitter
         // Create an instance of the generator and call GenerateAsync
         var attributeType = attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
         writer.AppendLine($"var generator = new {attributeType}();");
+        
+        writer.AppendLine("// Create TestInformation for the data generator");
+        writer.Append("var testInformation = ");
+        TestInformationGenerator.GenerateTestInformation(writer, methodSymbol, typeSymbol);
+        writer.AppendLine(";");
+        writer.AppendLine();
+        
+        writer.AppendLine("// Create MembersToGenerate array based on whether it's class or method level");
+        writer.AppendLine("var membersToGenerate = new MemberMetadata[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        if (isClassLevel)
+        {
+            writer.AppendLine("// For class-level data sources, we need constructor parameters");
+            var constructorParams = typeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters;
+            if (constructorParams != null && constructorParams.Value.Length > 0)
+            {
+                foreach (var param in constructorParams.Value)
+                {
+                    writer.AppendLine($"new ParameterMetadata(typeof({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}))");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"Name = \"{param.Name}\",");
+                    writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(param.Type)},");
+                    writer.AppendLine("ReflectionInfo = null!");
+                    writer.Unindent();
+                    writer.AppendLine("},");
+                }
+            }
+        }
+        else
+        {
+            writer.AppendLine("// For method-level data sources, we need method parameters");
+            foreach (var param in methodSymbol.Parameters)
+            {
+                writer.AppendLine($"new ParameterMetadata(typeof({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}))");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"Name = \"{param.Name}\",");
+                writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(param.Type)},");
+                writer.AppendLine("ReflectionInfo = null!");
+                writer.Unindent();
+                writer.AppendLine("},");
+            }
+        }
+        writer.Unindent();
+        writer.AppendLine("};");
+        writer.AppendLine();
+        
         writer.AppendLine("var dataGeneratorMetadata = new DataGeneratorMetadata");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("Type = DataGeneratorType.TestParameters,");
+        writer.AppendLine($"Type = DataGeneratorType.{(isClassLevel ? "ClassParameters" : "TestParameters")},");
         writer.AppendLine("TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),");
-        writer.AppendLine("MembersToGenerate = Array.Empty<MemberMetadata>(),");
-        writer.AppendLine("TestInformation = default!,"); // This will be replaced at runtime
+        writer.AppendLine("MembersToGenerate = membersToGenerate,");
+        writer.AppendLine("TestInformation = testInformation,");
         writer.AppendLine("TestSessionId = Guid.NewGuid().ToString(),");
         writer.AppendLine("TestClassInstance = null,");
         writer.AppendLine("ClassInstanceArguments = null");
@@ -417,7 +467,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("}");
     }
 
-    private static void EmitAsyncDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel)
+    private static void EmitAsyncDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         writer.AppendLine($"// AsyncDataSourceGeneratorAttribute {index}");
         writer.AppendLine("try");
@@ -427,13 +477,62 @@ public static class DataCombinationGeneratorEmitter
         // Create an instance of the generator and call GenerateDataSources
         var attributeType = attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
         writer.AppendLine($"var generator = new {attributeType}();");
+        
+        writer.AppendLine("// Create TestInformation for the data generator");
+        writer.Append("var testInformation = ");
+        TestInformationGenerator.GenerateTestInformation(writer, methodSymbol, typeSymbol);
+        writer.AppendLine(";");
+        writer.AppendLine();
+        
+        writer.AppendLine("// Create MembersToGenerate array based on whether it's class or method level");
+        writer.AppendLine("var membersToGenerate = new MemberMetadata[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        if (isClassLevel)
+        {
+            writer.AppendLine("// For class-level data sources, we need constructor parameters");
+            var constructorParams = typeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters;
+            if (constructorParams != null && constructorParams.Value.Length > 0)
+            {
+                foreach (var param in constructorParams.Value)
+                {
+                    writer.AppendLine($"new ParameterMetadata(typeof({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}))");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"Name = \"{param.Name}\",");
+                    writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(param.Type)},");
+                    writer.AppendLine("ReflectionInfo = null!");
+                    writer.Unindent();
+                    writer.AppendLine("},");
+                }
+            }
+        }
+        else
+        {
+            writer.AppendLine("// For method-level data sources, we need method parameters");
+            foreach (var param in methodSymbol.Parameters)
+            {
+                writer.AppendLine($"new ParameterMetadata(typeof({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}))");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"Name = \"{param.Name}\",");
+                writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(param.Type)},");
+                writer.AppendLine("ReflectionInfo = null!");
+                writer.Unindent();
+                writer.AppendLine("},");
+            }
+        }
+        writer.Unindent();
+        writer.AppendLine("};");
+        writer.AppendLine();
+        
         writer.AppendLine("var dataGeneratorMetadata = new DataGeneratorMetadata");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("Type = DataGeneratorType.TestParameters,");
+        writer.AppendLine($"Type = DataGeneratorType.{(isClassLevel ? "ClassParameters" : "TestParameters")},");
         writer.AppendLine("TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),");
-        writer.AppendLine("MembersToGenerate = Array.Empty<MemberMetadata>(),");
-        writer.AppendLine("TestInformation = default!,"); // This will be replaced at runtime
+        writer.AppendLine("MembersToGenerate = membersToGenerate,");
+        writer.AppendLine("TestInformation = testInformation,");
         writer.AppendLine("TestSessionId = Guid.NewGuid().ToString(),");
         writer.AppendLine("TestClassInstance = null,");
         writer.AppendLine("ClassInstanceArguments = null");
