@@ -127,9 +127,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("using System;");
         writer.AppendLine("using System.Collections.Generic;");
         writer.AppendLine("using System.Linq;");
+        writer.AppendLine("using System.Reflection;");
         writer.AppendLine("using System.Threading;");
         writer.AppendLine("using System.Threading.Tasks;");
         writer.AppendLine("using global::TUnit.Core;");
+        writer.AppendLine("using global::TUnit.Core.Enums;");
+        writer.AppendLine("using global::TUnit.Core.Interfaces;");
         writer.AppendLine("using global::TUnit.Core.Interfaces.SourceGenerator;");
         writer.AppendLine();
         writer.AppendLine($"namespace {GeneratedNamespace};");
@@ -271,11 +274,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateDataCombinationMethod(CodeWriter writer, TestMethodMetadata testMethod, string guid)
     {
-        writer.AppendLine($"private static async IAsyncEnumerable<TestDataCombination> GenerateCombinations_{guid}()");
+        writer.AppendLine($"private async IAsyncEnumerable<TestDataCombination> GenerateCombinations_{guid}()");
         writer.AppendLine("{");
         writer.Indent();
-
-        writer.AppendLine("var combinations = new List<TestDataCombination>();");
 
         // Get all data source attributes on method and class
         var methodAttributes = GetDataSourceAttributes(testMethod.MethodSymbol);
@@ -284,20 +285,40 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (!methodAttributes.Any() && !classAttributes.Any())
         {
             // No data sources - single empty combination
-            writer.AppendLine("combinations.Add(new TestDataCombination());");
+            writer.AppendLine("yield return new TestDataCombination();");
         }
         else
         {
-            // Generate combinations from data source attributes
-            GenerateDataSourceCombinations(writer, testMethod, methodAttributes, classAttributes);
+            // Check if we have any runtime data source generators
+            var hasRuntimeGenerators = methodAttributes.Any(a => IsDataSourceGeneratorAttribute(a.AttributeClass)) ||
+                                      classAttributes.Any(a => IsDataSourceGeneratorAttribute(a.AttributeClass));
+            
+            if (hasRuntimeGenerators)
+            {
+                // Runtime will need to handle data source generators
+                writer.AppendLine("// Runtime data source generators detected");
+                writer.AppendLine("// The TestBuilder will handle these at runtime");
+                writer.AppendLine("yield return new TestDataCombination");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("IsRuntimeGenerated = true");
+                writer.Unindent();
+                writer.AppendLine("};");
+            }
+            else
+            {
+                // Generate compile-time combinations only
+                writer.AppendLine("var combinations = new List<TestDataCombination>();");
+                GenerateDataSourceCombinations(writer, testMethod, methodAttributes, classAttributes);
+                writer.AppendLine("foreach (var combination in combinations)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("yield return combination;");
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
         }
 
-        writer.AppendLine("foreach (var combination in combinations)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("yield return combination;");
-        writer.Unindent();
-        writer.AppendLine("}");
         writer.Unindent();
         writer.AppendLine("}");
     }
@@ -318,7 +339,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         for (int i = 0; i < methodAttrs.Count; i++)
         {
             var attr = methodAttrs[i];
-            GenerateAttributeDataCombinations(writer, attr, i, "methodCombinations", isClassLevel: false);
+            GenerateAttributeDataCombinations(writer, attr, i, "methodCombinations", isClassLevel: false, testMethod);
         }
 
         // Generate class data combinations
@@ -326,7 +347,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         for (int i = 0; i < classAttrs.Count; i++)
         {
             var attr = classAttrs[i];
-            GenerateAttributeDataCombinations(writer, attr, i, "classCombinations", isClassLevel: true);
+            GenerateAttributeDataCombinations(writer, attr, i, "classCombinations", isClassLevel: true, testMethod);
         }
 
         // Generate cartesian product
@@ -370,7 +391,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     private static void GenerateAttributeDataCombinations(CodeWriter writer, AttributeData attr, int index,
-        string listName, bool isClassLevel)
+        string listName, bool isClassLevel, TestMethodMetadata testMethod)
     {
         var attributeClassName = attr.AttributeClass?.Name;
 
@@ -448,6 +469,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
         }
+        else if (IsDataSourceGeneratorAttribute(attr.AttributeClass))
+        {
+            // Handle UntypedDataSourceGeneratorAttribute and its subclasses
+            // These will be processed at runtime, skip for now
+            writer.AppendLine($"// {attributeClassName} - will be processed at runtime");
+        }
         else
         {
             // For now, add a placeholder for other attribute types
@@ -466,6 +493,26 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("});");
         }
     }
+
+    private static bool IsDataSourceGeneratorAttribute(INamedTypeSymbol? attributeClass)
+    {
+        if (attributeClass == null) return false;
+        
+        var currentType = attributeClass;
+        while (currentType != null)
+        {
+            if (currentType.Name == "UntypedDataSourceGeneratorAttribute" ||
+                currentType.Name == "AsyncUntypedDataSourceGeneratorAttribute" ||
+                currentType.Name == "NonTypedDataSourceGeneratorAttribute")
+            {
+                return true;
+            }
+            currentType = currentType.BaseType;
+        }
+        
+        return false;
+    }
+
 
     private static string FormatConstantValue(TypedConstant constant)
     {

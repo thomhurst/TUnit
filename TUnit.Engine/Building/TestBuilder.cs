@@ -1,4 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Interfaces;
@@ -32,8 +34,21 @@ public sealed class TestBuilder : ITestBuilder
             var asyncCombinations = metadata.DataCombinationGenerator();
             await foreach (var combination in asyncCombinations)
             {
-                var test = await BuildTestAsync(metadata, combination);
-                tests.Add(test);
+                // Check if this combination requires runtime data generation
+                if (combination.IsRuntimeGenerated)
+                {
+                    // Handle runtime data source generators
+                    await foreach (var runtimeCombination in GenerateRuntimeCombinations(metadata))
+                    {
+                        var test = await BuildTestAsync(metadata, runtimeCombination);
+                        tests.Add(test);
+                    }
+                }
+                else
+                {
+                    var test = await BuildTestAsync(metadata, combination);
+                    tests.Add(test);
+                }
             }
         }
         catch (Exception ex)
@@ -91,8 +106,17 @@ public sealed class TestBuilder : ITestBuilder
         return string.Join(", ", allArgs.Select(arg => arg?.ToString() ?? "null"));
     }
 
-
-
+    [UnconditionalSuppressMessage("AOT", "IL2072", Justification = "Type information is preserved by source generation")]
+    private async IAsyncEnumerable<TestDataCombination> GenerateRuntimeCombinations(TestMetadata metadata)
+    {
+        await foreach (var combination in RuntimeDataSourceHelper.GenerateDataCombinationsAsync(
+            metadata.TestClassType,
+            metadata.TestMethodName,
+            metadata.AttributeFactory))
+        {
+            yield return combination;
+        }
+    }
 
     private async Task<Func<TestContext, CancellationToken, Task>[]> CreateTestHooksAsync(Type testClassType, bool isBeforeHook)
     {

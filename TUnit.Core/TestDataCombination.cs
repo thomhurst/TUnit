@@ -45,4 +45,10 @@ public class TestDataCombination
     /// Key: property name, Value: property value
     /// </summary>
     public Dictionary<string, object?> PropertyValues { get; init; } = new();
+
+    /// <summary>
+    /// Indicates if this combination requires runtime data generation
+    /// from data source generator attributes like MatrixDataSourceAttribute
+    /// </summary>
+    public bool IsRuntimeGenerated { get; init; }
 }
