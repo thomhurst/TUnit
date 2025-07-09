@@ -157,22 +157,18 @@ public static class DataCombinationGeneratorEmitter
         {
             EmitMethodDataSource(writer, attr, index, listName, isClassLevel, typeSymbol);
         }
-        else if (IsDataSourceGeneratorAttribute(attr.AttributeClass))
+        else if (IsAsyncDataSourceGeneratorAttribute(attr.AttributeClass))
         {
             // Check if it's an async untyped data source generator
-            var baseType = attr.AttributeClass?.BaseType;
-            while (baseType != null)
+            if (InheritsFrom(attr.AttributeClass, "AsyncUntypedDataSourceGeneratorAttribute"))
             {
-                if (baseType.Name == "AsyncUntypedDataSourceGeneratorAttribute")
-                {
-                    EmitAsyncUntypedDataSourceGeneratorAttribute(writer, attr, index, listName, isClassLevel);
-                    return;
-                }
-                baseType = baseType.BaseType;
+                EmitAsyncUntypedDataSourceGeneratorAttribute(writer, attr, index, listName, isClassLevel);
             }
-            
-            // Otherwise, it's a regular data source generator
-            EmitDataSourceGeneratorAttribute(writer, attr, index, listName, isClassLevel);
+            else
+            {
+                // It's a typed AsyncDataSourceGeneratorAttribute (including DataSourceGeneratorAttribute)
+                EmitAsyncDataSourceGeneratorAttribute(writer, attr, index, listName, isClassLevel);
+            }
         }
         else
         {
@@ -414,9 +410,9 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("}");
     }
 
-    private static void EmitDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel)
+    private static void EmitAsyncDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel)
     {
-        writer.AppendLine($"// DataSourceGeneratorAttribute {index}");
+        writer.AppendLine($"// AsyncDataSourceGeneratorAttribute {index}");
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
@@ -573,23 +569,26 @@ public static class DataCombinationGeneratorEmitter
         return properties.ToImmutableArray();
     }
 
-    private static bool IsDataSourceGeneratorAttribute(INamedTypeSymbol? attributeClass)
+    private static bool IsAsyncDataSourceGeneratorAttribute(INamedTypeSymbol? attributeClass)
     {
         if (attributeClass == null) return false;
         
-        // Check if it's DataSourceGeneratorAttribute or inherits from it
-        var current = attributeClass;
+        // Check if it's AsyncDataSourceGeneratorAttribute or inherits from it
+        return InheritsFrom(attributeClass, "AsyncDataSourceGeneratorAttribute") || 
+               InheritsFrom(attributeClass, "AsyncUntypedDataSourceGeneratorAttribute");
+    }
+    
+    private static bool InheritsFrom(INamedTypeSymbol? type, string baseTypeName)
+    {
+        var current = type;
         while (current != null)
         {
-            if (current.Name == "DataSourceGeneratorAttribute" ||
-                current.Name == "AsyncDataSourceGeneratorAttribute" ||
-                current.Name == "AsyncUntypedDataSourceGeneratorAttribute")
+            if (current.Name == baseTypeName)
             {
                 return true;
             }
             current = current.BaseType;
         }
-        
         return false;
     }
     
@@ -604,14 +603,7 @@ public static class DataCombinationGeneratorEmitter
             name == "MethodDataSourceAttribute" ||
             name == "AsyncDataSourceGeneratorAttribute" ||
             name == "AsyncUntypedDataSourceGeneratorAttribute" ||
-            name == "NonTypedDataSourceGeneratorAttribute" ||
-            name == "DataSourceGeneratorAttribute")
-        {
-            return true;
-        }
-        
-        // Check for custom attributes that end with DataSourceGeneratorAttribute
-        if (name.EndsWith("DataSourceGeneratorAttribute"))
+            name == "NonTypedDataSourceGeneratorAttribute")
         {
             return true;
         }
