@@ -702,6 +702,26 @@ public static class DataCombinationGeneratorEmitter
                 return $"{ul}ul";
             }
 
+            if (constant.Value is byte byteValue)
+            {
+                return $"(byte){byteValue}";
+            }
+
+            if (constant.Value is sbyte sbyteValue)
+            {
+                return $"(sbyte){sbyteValue}";
+            }
+
+            if (constant.Value is short shortValue)
+            {
+                return $"(short){shortValue}";
+            }
+
+            if (constant.Value is ushort ushortValue)
+            {
+                return $"(ushort){ushortValue}";
+            }
+
             return constant.Value?.ToString() ?? "null";
         }
         catch
