@@ -563,7 +563,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (parametersFromArgs.Length == 0)
         {
             var methodCall = hasCancellationToken
-                ? $"typedInstance.{methodName}(System.Threading.CancellationToken.None)"
+                ? $"typedInstance.{methodName}(global::TUnit.Core.TestContext.Current?.CancellationToken ?? System.Threading.CancellationToken.None)"
                 : $"typedInstance.{methodName}()";
             if (isAsync)
             {
@@ -592,13 +592,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"case {argCount}:");
                 writer.Indent();
                 
-                var argsToPass = parametersFromArgs.Take(argCount)
-                    .Select((p, i) => $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]");
+                // Build the arguments to pass, including default values for optional parameters
+                var argsToPass = new List<string>();
+                for (int i = 0; i < parametersFromArgs.Length; i++)
+                {
+                    var param = parametersFromArgs[i];
+                    if (i < argCount)
+                    {
+                        // Use the provided argument
+                        argsToPass.Add($"({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]");
+                    }
+                    else if (param.HasExplicitDefaultValue)
+                    {
+                        // Use the default value
+                        argsToPass.Add(GetDefaultValueString(param));
+                    }
+                    else
+                    {
+                        // This shouldn't happen if we set up requiredParamCount correctly
+                        argsToPass.Add($"default({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                    }
+                }
                 
                 // Add CancellationToken if present
                 if (hasCancellationToken)
                 {
-                    argsToPass = argsToPass.Concat(new[] { "System.Threading.CancellationToken.None" });
+                    argsToPass.Add("global::TUnit.Core.TestContext.Current?.CancellationToken ?? System.Threading.CancellationToken.None");
                 }
                 
                 var methodCall = $"typedInstance.{methodName}({string.Join(", ", argsToPass)})";
@@ -681,13 +700,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"case {argCount}:");
                 writer.Indent();
                 
-                var argsToPass = parametersFromArgs.Take(argCount)
-                    .Select((p, i) => $"({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]");
+                // Build the arguments to pass, including default values for optional parameters
+                var argsToPass = new List<string>();
+                for (int i = 0; i < parametersFromArgs.Length; i++)
+                {
+                    var param = parametersFromArgs[i];
+                    if (i < argCount)
+                    {
+                        // Use the provided argument
+                        argsToPass.Add($"({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]");
+                    }
+                    else if (param.HasExplicitDefaultValue)
+                    {
+                        // Use the default value
+                        argsToPass.Add(GetDefaultValueString(param));
+                    }
+                    else
+                    {
+                        // This shouldn't happen if we set up requiredParamCount correctly
+                        argsToPass.Add($"default({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                    }
+                }
                 
                 // Add CancellationToken if present
                 if (hasCancellationToken)
                 {
-                    argsToPass = argsToPass.Concat(new[] { "cancellationToken" });
+                    argsToPass.Add("cancellationToken");
                 }
                 
                 var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";
@@ -806,6 +844,69 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return type is INamedTypeSymbol namedType &&
                namedType.IsGenericType &&
                namedType.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T;
+    }
+
+    private static string GetDefaultValueString(IParameterSymbol parameter)
+    {
+        if (!parameter.HasExplicitDefaultValue)
+        {
+            return $"default({parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
+        }
+
+        var defaultValue = parameter.ExplicitDefaultValue;
+        if (defaultValue == null)
+        {
+            return "null";
+        }
+
+        var type = parameter.Type;
+        
+        // Handle string
+        if (type.SpecialType == SpecialType.System_String)
+        {
+            return $"\"{defaultValue.ToString().Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
+        }
+        
+        // Handle char
+        if (type.SpecialType == SpecialType.System_Char)
+        {
+            return $"'{defaultValue}'";
+        }
+        
+        // Handle bool
+        if (type.SpecialType == SpecialType.System_Boolean)
+        {
+            return defaultValue.ToString().ToLowerInvariant();
+        }
+        
+        // Handle numeric types with proper suffixes
+        if (type.SpecialType == SpecialType.System_Single)
+        {
+            return $"{defaultValue}f";
+        }
+        if (type.SpecialType == SpecialType.System_Double)
+        {
+            return $"{defaultValue}d";
+        }
+        if (type.SpecialType == SpecialType.System_Decimal)
+        {
+            return $"{defaultValue}m";
+        }
+        if (type.SpecialType == SpecialType.System_Int64)
+        {
+            return $"{defaultValue}L";
+        }
+        if (type.SpecialType == SpecialType.System_UInt32)
+        {
+            return $"{defaultValue}u";
+        }
+        if (type.SpecialType == SpecialType.System_UInt64)
+        {
+            return $"{defaultValue}ul";
+        }
+        
+        // Default for other types
+        return defaultValue.ToString();
     }
 
     private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context)
