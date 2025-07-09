@@ -214,7 +214,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("TimeoutMs = null,");
         writer.AppendLine("RetryCount = 0,");
         writer.AppendLine("CanRunInParallel = true,");
-        writer.AppendLine("Dependencies = Array.Empty<TestDependency>(),");
+        
+        // Generate dependencies
+        GenerateDependencies(writer, compilation, methodSymbol);
+        
         writer.AppendLine("AttributeFactory = () =>");
         writer.AppendLine("[");
         writer.Indent();
@@ -574,6 +577,151 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return type is INamedTypeSymbol namedType &&
                namedType.IsGenericType &&
                namedType.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T;
+    }
+
+    private static void GenerateDependencies(CodeWriter writer, Compilation compilation, IMethodSymbol methodSymbol)
+    {
+        var dependsOnAttributes = methodSymbol.GetAttributes()
+            .Where(attr => attr.AttributeClass?.Name == "DependsOnAttribute" &&
+                          attr.AttributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core")
+            .ToList();
+
+        if (!dependsOnAttributes.Any())
+        {
+            writer.AppendLine("Dependencies = Array.Empty<TestDependency>(),");
+            return;
+        }
+
+        writer.AppendLine("Dependencies = new TestDependency[]");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        for (var i = 0; i < dependsOnAttributes.Count; i++)
+        {
+            var attr = dependsOnAttributes[i];
+            GenerateTestDependency(writer, compilation, attr);
+            
+            if (i < dependsOnAttributes.Count - 1)
+            {
+                writer.AppendLine(",");
+            }
+        }
+
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+
+    private static void GenerateTestDependency(CodeWriter writer, Compilation compilation, AttributeData attributeData)
+    {
+        var constructorArgs = attributeData.ConstructorArguments;
+        
+        // Handle the different constructor overloads of DependsOnAttribute
+        if (constructorArgs.Length == 1)
+        {
+            var arg = constructorArgs[0];
+            if (arg.Type?.Name == "String")
+            {
+                // DependsOnAttribute(string testName) - dependency on test in same class
+                var testName = arg.Value?.ToString() ?? "";
+                writer.AppendLine($"new TestDependency {{ MethodName = \"{testName}\" }}");
+            }
+            else if (arg.Type?.TypeKind == TypeKind.Class || arg.Type?.Name == "Type")
+            {
+                // DependsOnAttribute(Type testClass) - dependency on all tests in a class
+                var classType = arg.Value as ITypeSymbol;
+                if (classType != null)
+                {
+                    var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    var genericArity = classType is INamedTypeSymbol namedType && namedType.IsGenericType 
+                        ? namedType.Arity 
+                        : 0;
+                    writer.AppendLine($"new TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity} }}");
+                }
+            }
+        }
+        else if (constructorArgs.Length == 2)
+        {
+            var firstArg = constructorArgs[0];
+            var secondArg = constructorArgs[1];
+            
+            if (firstArg.Type?.Name == "String" && secondArg.Type is IArrayTypeSymbol)
+            {
+                // DependsOnAttribute(string testName, Type[] parameterTypes)
+                var testName = firstArg.Value?.ToString() ?? "";
+                writer.Append($"new TestDependency {{ MethodName = \"{testName}\"");
+                
+                // Handle parameter types
+                if (secondArg.Values.Length > 0)
+                {
+                    writer.Append(", MethodParameters = new Type[] { ");
+                    for (var i = 0; i < secondArg.Values.Length; i++)
+                    {
+                        if (secondArg.Values[i].Value is ITypeSymbol paramType)
+                        {
+                            writer.Append($"typeof({paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                            if (i < secondArg.Values.Length - 1)
+                            {
+                                writer.Append(", ");
+                            }
+                        }
+                    }
+                    writer.AppendLine(" }");
+                }
+                
+                writer.AppendLine(" }");
+            }
+            else if (firstArg.Type?.TypeKind == TypeKind.Class || firstArg.Type?.Name == "Type")
+            {
+                // DependsOnAttribute(Type testClass, string testName)
+                var classType = firstArg.Value as ITypeSymbol;
+                var testName = secondArg.Value?.ToString() ?? "";
+                
+                if (classType != null)
+                {
+                    var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    var genericArity = classType is INamedTypeSymbol namedType && namedType.IsGenericType 
+                        ? namedType.Arity 
+                        : 0;
+                    writer.AppendLine($"new TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\" }}");
+                }
+            }
+        }
+        else if (constructorArgs.Length == 3)
+        {
+            // DependsOnAttribute(Type testClass, string testName, Type[] parameterTypes)
+            var classType = constructorArgs[0].Value as ITypeSymbol;
+            var testName = constructorArgs[1].Value?.ToString() ?? "";
+            
+            if (classType != null)
+            {
+                var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var genericArity = classType is INamedTypeSymbol namedType && namedType.IsGenericType 
+                    ? namedType.Arity 
+                    : 0;
+                writer.Append($"new TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\"");
+                
+                // Handle parameter types
+                var paramTypesArg = constructorArgs[2];
+                if (paramTypesArg.Values.Length > 0)
+                {
+                    writer.Append(", MethodParameters = new Type[] { ");
+                    for (var i = 0; i < paramTypesArg.Values.Length; i++)
+                    {
+                        if (paramTypesArg.Values[i].Value is ITypeSymbol paramType)
+                        {
+                            writer.Append($"typeof({paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                            if (i < paramTypesArg.Values.Length - 1)
+                            {
+                                writer.Append(", ");
+                            }
+                        }
+                    }
+                    writer.AppendLine(" }");
+                }
+                
+                writer.AppendLine(" }");
+            }
+        }
     }
 
     private static string GetDefaultValueString(IParameterSymbol parameter)
