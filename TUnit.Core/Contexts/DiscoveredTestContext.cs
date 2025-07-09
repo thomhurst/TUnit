@@ -1,3 +1,4 @@
+using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -18,6 +19,7 @@ public class DiscoveredTestContext
     private Type? _displayNameFormatter;
     private Func<TestContext, Exception, int, Task<bool>>? _shouldRetryFunc;
     private IParallelConstraint? _parallelConstraint;
+    private Priority _priority = Priority.Normal;
 
     public string TestName { get; }
     public string DisplayName { get; private set; }
@@ -92,6 +94,11 @@ public class DiscoveredTestContext
     {
         RunOnTestDiscovery = runOnDiscovery;
     }
+    
+    public void SetPriority(Priority priority)
+    {
+        _priority = priority;
+    }
 
 
     /// <summary>
@@ -107,6 +114,7 @@ public class DiscoveredTestContext
         testContext.DisplayNameFormatter = _displayNameFormatter;
         testContext.ShouldRetryFunc = _shouldRetryFunc;
         testContext.ParallelConstraint = _parallelConstraint;
+        testContext.ExecutionPriority = _priority;
         testContext.RunOnTestDiscovery = RunOnTestDiscovery;
 
         foreach (var formatter in _argumentDisplayFormatters)

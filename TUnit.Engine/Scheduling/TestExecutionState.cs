@@ -1,4 +1,5 @@
 using TUnit.Core;
+using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Scheduling;
@@ -23,6 +24,7 @@ public sealed class TestExecutionState
     public IParallelConstraint? Constraint { get; init; }
     public string? ConstraintKey { get; init; }
     public int Order { get; init; }
+    public Priority Priority { get; init; }
 
     public TestExecutionState(ExecutableTest test)
     {
@@ -49,6 +51,8 @@ public sealed class TestExecutionState
             ParallelGroupConstraint pg => pg.Group,
             _ => null
         };
+        
+        Priority = test.Context.ExecutionPriority;
     }
 
     /// <summary>

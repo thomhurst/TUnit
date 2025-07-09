@@ -137,58 +137,88 @@ internal sealed class OrderedConstraintTestScheduler : ITestScheduler
             _testTimeout,
             cancellationToken);
 
-        var tasks = new List<Task>();
+        // Group all tests by priority (higher priority values execute first)
+        var testsByPriority = graph.Values
+            .GroupBy(state => state.Priority)
+            .OrderByDescending(g => g.Key)
+            .ToList();
 
-        // Execute parallel tests (no constraints)
-        if (groupedTests.Parallel.Any())
+        // Execute tests in priority order
+        foreach (var priorityGroup in testsByPriority)
         {
-            tasks.Add(ExecuteParallelTestsAsync(
-                groupedTests.Parallel,
-                graph,
-                constraintExecutor,
-                cancellationToken));
+            if (cancellationToken.IsCancellationRequested)
+                break;
+                
+            var priorityTasks = new List<Task>();
+            var testsInPriority = priorityGroup.ToDictionary(s => s.Test.TestId);
+
+            // Create grouped tests for this priority level
+            var allTestsDict = graph.Values.ToDictionary(s => s.Test.TestId, s => s.Test);
+            var priorityGroupedTests = CreatePriorityGroupedTests(allTestsDict, testsInPriority);
+
+            // Execute parallel tests (no constraints) for this priority
+            if (priorityGroupedTests.Parallel.Any())
+            {
+                priorityTasks.Add(ExecuteParallelTestsAsync(
+                    priorityGroupedTests.Parallel,
+                    graph,
+                    constraintExecutor,
+                    cancellationToken));
+            }
+
+            // Execute global NotInParallel tests (ordered) for this priority
+            if (priorityGroupedTests.NotInParallel.Count > 0)
+            {
+                priorityTasks.Add(ExecuteOrderedNotInParallelTestsAsync(
+                    priorityGroupedTests.NotInParallel,
+                    graph,
+                    constraintExecutor,
+                    "__global_not_in_parallel__",
+                    cancellationToken));
+            }
+
+            // Execute keyed NotInParallel tests (ordered within each key) for this priority
+            foreach (var kvp in priorityGroupedTests.KeyedNotInParallel)
+            {
+                var key = kvp.Key;
+                var queue = kvp.Value;
+                
+                priorityTasks.Add(ExecuteOrderedNotInParallelTestsAsync(
+                    queue,
+                    graph,
+                    constraintExecutor,
+                    key,
+                    cancellationToken));
+            }
+
+            // Execute ParallelGroups (ordered between groups, parallel within groups) for this priority
+            foreach (var groupKvp in priorityGroupedTests.ParallelGroups)
+            {
+                var groupName = groupKvp.Key;
+                var orderGroups = groupKvp.Value;
+                
+                priorityTasks.Add(ExecuteParallelGroupAsync(
+                    groupName,
+                    orderGroups,
+                    graph,
+                    constraintExecutor,
+                    cancellationToken));
+            }
+
+            // Wait for all tests in this priority level to complete before moving to next priority
+            await Task.WhenAll(priorityTasks);
         }
+    }
 
-        // Execute global NotInParallel tests (ordered)
-        if (groupedTests.NotInParallel.Count > 0)
-        {
-            tasks.Add(ExecuteOrderedNotInParallelTestsAsync(
-                groupedTests.NotInParallel,
-                graph,
-                constraintExecutor,
-                "__global_not_in_parallel__",
-                cancellationToken));
-        }
-
-        // Execute keyed NotInParallel tests (ordered within each key)
-        foreach (var kvp in groupedTests.KeyedNotInParallel)
-        {
-            var key = kvp.Key;
-            var queue = kvp.Value;
+    private GroupedTests CreatePriorityGroupedTests(
+        Dictionary<string, ExecutableTest> allTests, 
+        Dictionary<string, TestExecutionState> priorityTests)
+    {
+        var testsForPriority = allTests.Values
+            .Where(t => priorityTests.ContainsKey(t.TestId))
+            .ToList();
             
-            tasks.Add(ExecuteOrderedNotInParallelTestsAsync(
-                queue,
-                graph,
-                constraintExecutor,
-                key,
-                cancellationToken));
-        }
-
-        // Execute ParallelGroups (ordered between groups, parallel within groups)
-        foreach (var groupKvp in groupedTests.ParallelGroups)
-        {
-            var groupName = groupKvp.Key;
-            var orderGroups = groupKvp.Value;
-            
-            tasks.Add(ExecuteParallelGroupAsync(
-                groupName,
-                orderGroups,
-                graph,
-                constraintExecutor,
-                cancellationToken));
-        }
-
-        await Task.WhenAll(tasks);
+        return _groupingService.GroupTestsByConstraintsAsync(testsForPriority).Result;
     }
 
     private async Task ExecuteParallelTestsAsync(

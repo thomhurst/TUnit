@@ -129,6 +129,11 @@ public class TestContext : Context
     /// Parallel execution constraint
     /// </summary>
     public IParallelConstraint? ParallelConstraint { get; set; }
+    
+    /// <summary>
+    /// Execution priority (higher values execute first)
+    /// </summary>
+    public Priority ExecutionPriority { get; set; } = Priority.Normal;
 
     /// <summary>
     /// Class context
