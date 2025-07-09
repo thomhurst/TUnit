@@ -112,10 +112,12 @@ public static class DataCombinationGeneratorEmitter
     private static void EmitMethodDataCombinations(CodeWriter writer, ImmutableArray<AttributeData> methodDataSources, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         writer.AppendLine("// Method data sources");
+        writer.AppendLine("int methodDataSourceCounter = 0;");
+        writer.AppendLine("int classDataSourceCounter = 0;");
         for (int i = 0; i < methodDataSources.Length; i++)
         {
             var attr = methodDataSources[i];
-            EmitDataSourceCombination(writer, attr, i, "methodCombinations", isClassLevel: false, methodSymbol, typeSymbol);
+            EmitDataSourceCombination(writer, attr, "methodCombinations", isClassLevel: false, methodSymbol, typeSymbol);
         }
     }
 
@@ -123,10 +125,12 @@ public static class DataCombinationGeneratorEmitter
     {
         writer.AppendLine();
         writer.AppendLine("// Class data sources");
+        writer.AppendLine("classDataSourceCounter = 0;");
+        writer.AppendLine("methodDataSourceCounter = 0;");
         for (int i = 0; i < classDataSources.Length; i++)
         {
             var attr = classDataSources[i];
-            EmitDataSourceCombination(writer, attr, i, "classCombinations", isClassLevel: true, methodSymbol, typeSymbol);
+            EmitDataSourceCombination(writer, attr, "classCombinations", isClassLevel: true, methodSymbol, typeSymbol);
         }
     }
 
@@ -147,47 +151,68 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("propertyCombinations.Add(new TestDataCombination { PropertyValues = propertyValues });");
     }
 
-    private static void EmitDataSourceCombination(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
+    private static void EmitDataSourceCombination(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
-        if (attr.AttributeClass == null)
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Emit code to get the current indices
+        writer.AppendLine("// Get current indices and increment the appropriate counter");
+        writer.AppendLine("var currentClassIndex = classDataSourceCounter;");
+        writer.AppendLine("var currentMethodIndex = methodDataSourceCounter;");
+        
+        if (isClassLevel)
         {
-            EmitEmptyCombination(writer, index, listName, isClassLevel);
-            return;
-        }
-
-        var fullyQualifiedName = attr.AttributeClass.GloballyQualifiedNonGeneric();
-
-        if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
-        {
-            EmitArgumentsAttribute(writer, attr, index, listName, isClassLevel);
-        }
-        else if (fullyQualifiedName == "global::TUnit.Core.MethodDataSourceAttribute")
-        {
-            EmitMethodDataSource(writer, attr, index, listName, isClassLevel, typeSymbol);
-        }
-        else if (IsAsyncDataSourceGeneratorAttribute(attr.AttributeClass))
-        {
-            // Check if it's an async untyped data source generator
-            if (IsAsyncUntypedDataSourceGeneratorAttribute(attr.AttributeClass))
-            {
-                EmitAsyncUntypedDataSourceGeneratorAttribute(writer, attr, index, listName, isClassLevel, methodSymbol, typeSymbol);
-            }
-            else
-            {
-                // It's a typed AsyncDataSourceGeneratorAttribute (including DataSourceGeneratorAttribute)
-                EmitAsyncDataSourceGeneratorAttribute(writer, attr, index, listName, isClassLevel, methodSymbol, typeSymbol);
-            }
+            writer.AppendLine("classDataSourceCounter++;");
         }
         else
         {
-            writer.AppendLine($"// Unsupported data source: {fullyQualifiedName}");
-            EmitEmptyCombination(writer, index, listName, isClassLevel);
+            writer.AppendLine("methodDataSourceCounter++;");
         }
+
+        if (attr.AttributeClass == null)
+        {
+            EmitEmptyCombination(writer, listName);
+        }
+        else
+        {
+            var fullyQualifiedName = attr.AttributeClass.GloballyQualifiedNonGeneric();
+
+            if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
+            {
+                EmitArgumentsAttribute(writer, attr, listName, isClassLevel);
+            }
+            else if (fullyQualifiedName == "global::TUnit.Core.MethodDataSourceAttribute")
+            {
+                EmitMethodDataSource(writer, attr, listName, isClassLevel, typeSymbol);
+            }
+            else if (IsAsyncDataSourceGeneratorAttribute(attr.AttributeClass))
+            {
+                // Check if it's an async untyped data source generator
+                if (IsAsyncUntypedDataSourceGeneratorAttribute(attr.AttributeClass))
+                {
+                    EmitAsyncUntypedDataSourceGeneratorAttribute(writer, attr, listName, isClassLevel, methodSymbol, typeSymbol);
+                }
+                else
+                {
+                    // It's a typed AsyncDataSourceGeneratorAttribute (including DataSourceGeneratorAttribute)
+                    EmitAsyncDataSourceGeneratorAttribute(writer, attr, listName, isClassLevel, methodSymbol, typeSymbol);
+                }
+            }
+            else
+            {
+                writer.AppendLine($"// Unsupported data source: {fullyQualifiedName}");
+                EmitEmptyCombination(writer, listName);
+            }
+        }
+
+        writer.Unindent();
+        writer.AppendLine("}");
     }
 
-    private static void EmitArgumentsAttribute(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel)
+    private static void EmitArgumentsAttribute(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel)
     {
-        writer.AppendLine($"// ArgumentsAttribute {index}");
+        writer.AppendLine("// ArgumentsAttribute");
 
         try
         {
@@ -217,13 +242,19 @@ public static class DataCombinationGeneratorEmitter
             if (isClassLevel)
             {
                 writer.AppendLine($"ClassData = new object?[] {{ {string.Join(", ", formattedArgs)} }},");
-                writer.AppendLine($"ClassDataSourceIndex = {index},");
             }
             else
             {
                 writer.AppendLine($"MethodData = new object?[] {{ {string.Join(", ", formattedArgs)} }},");
-                writer.AppendLine($"MethodDataSourceIndex = {index},");
             }
+
+            // Always write both indices
+            writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
+            writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
+            
+            // Always write both loop indices (0 for Arguments attribute since it's not a loop)
+            writer.AppendLine("ClassLoopIndex = 0,");
+            writer.AppendLine("MethodLoopIndex = 0,");
 
             writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
             writer.Unindent();
@@ -231,25 +262,25 @@ public static class DataCombinationGeneratorEmitter
         }
         catch
         {
-            writer.AppendLine($"// Error processing ArgumentsAttribute at index {index}");
-            EmitEmptyCombination(writer, index, listName, isClassLevel);
+            writer.AppendLine("// Error processing ArgumentsAttribute");
+            EmitEmptyCombination(writer, listName);
         }
     }
 
-    private static void EmitMethodDataSource(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol)
+    private static void EmitMethodDataSource(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol)
     {
-        writer.AppendLine($"// MethodDataSourceAttribute {index}");
+        writer.AppendLine("// MethodDataSourceAttribute");
 
         if (attr.ConstructorArguments.Length < 1)
         {
-            EmitEmptyCombination(writer, index, listName, isClassLevel);
+            EmitEmptyCombination(writer, listName);
             return;
         }
 
         var methodName = attr.ConstructorArguments[0].Value?.ToString();
         if (string.IsNullOrEmpty(methodName))
         {
-            EmitEmptyCombination(writer, index, listName, isClassLevel);
+            EmitEmptyCombination(writer, listName);
             return;
         }
 
@@ -260,19 +291,20 @@ public static class DataCombinationGeneratorEmitter
 
         if (isStatic)
         {
-            EmitStaticMethodDataSource(writer, methodName, index, listName, isClassLevel, typeSymbol);
+            EmitStaticMethodDataSource(writer, methodName, listName, isClassLevel, typeSymbol);
         }
         else
         {
-            EmitInstanceMethodDataSource(writer, methodName, index, listName, isClassLevel, typeSymbol);
+            EmitInstanceMethodDataSource(writer, methodName, listName, isClassLevel, typeSymbol);
         }
     }
 
-    private static void EmitStaticMethodDataSource(CodeWriter writer, string methodName, int index, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol)
+    private static void EmitStaticMethodDataSource(CodeWriter writer, string methodName, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol)
     {
         var fullyQualifiedTypeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         writer.AppendLine($"var dataEnumerable = {fullyQualifiedTypeName}.{methodName}();");
-        writer.AppendLine("int loopIndex = 0;");
+        writer.AppendLine("int classLoopCounter = 0;");
+        writer.AppendLine("int methodLoopCounter = 0;");
         writer.AppendLine("await foreach (var data in dataEnumerable)");
         writer.AppendLine("{");
         writer.Indent();
@@ -284,14 +316,26 @@ public static class DataCombinationGeneratorEmitter
         if (isClassLevel)
         {
             writer.AppendLine("ClassData = data,");
-            writer.AppendLine($"ClassDataSourceIndex = {index},");
-            writer.AppendLine("ClassLoopIndex = loopIndex++,");
         }
         else
         {
             writer.AppendLine("MethodData = data,");
-            writer.AppendLine($"MethodDataSourceIndex = {index},");
-            writer.AppendLine("MethodLoopIndex = loopIndex++,");
+        }
+
+        // Always write both indices
+        writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
+        writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
+        
+        // Always write both loop indices
+        if (isClassLevel)
+        {
+            writer.AppendLine("ClassLoopIndex = classLoopCounter++,");
+            writer.AppendLine("MethodLoopIndex = methodLoopCounter = 0,");
+        }
+        else
+        {
+            writer.AppendLine("ClassLoopIndex = classLoopCounter,");
+            writer.AppendLine("MethodLoopIndex = methodLoopCounter++,");
         }
 
         writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
@@ -302,7 +346,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("}");
     }
 
-    private static void EmitInstanceMethodDataSource(CodeWriter writer, string methodName, int index, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol)
+    private static void EmitInstanceMethodDataSource(CodeWriter writer, string methodName, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol)
     {
         writer.AppendLine($"// Instance method: {methodName}");
         writer.AppendLine("// Instance methods are not supported in the unified compile-time data generation approach");
@@ -352,9 +396,9 @@ public static class DataCombinationGeneratorEmitter
         }
     }
 
-    private static void EmitAsyncUntypedDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
+    private static void EmitAsyncUntypedDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
-        writer.AppendLine($"// AsyncUntypedDataSourceGeneratorAttribute {index}");
+        writer.AppendLine("// AsyncUntypedDataSourceGeneratorAttribute");
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
@@ -424,7 +468,8 @@ public static class DataCombinationGeneratorEmitter
         writer.Unindent();
         writer.AppendLine("};");
 
-        writer.AppendLine("int loopIndex = 0;");
+        writer.AppendLine("int classLoopCounter = 0;");
+        writer.AppendLine("int methodLoopCounter = 0;");
         writer.AppendLine("await foreach (var dataSourceFunc in generator.GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
@@ -436,14 +481,26 @@ public static class DataCombinationGeneratorEmitter
         if (isClassLevel)
         {
             writer.AppendLine("ClassData = data ?? Array.Empty<object?>(),");
-            writer.AppendLine($"ClassDataSourceIndex = {index},");
-            writer.AppendLine("ClassLoopIndex = loopIndex++");
         }
         else
         {
             writer.AppendLine("MethodData = data ?? Array.Empty<object?>(),");
-            writer.AppendLine($"MethodDataSourceIndex = {index},");
-            writer.AppendLine("MethodLoopIndex = loopIndex++");
+        }
+
+        // Always write both indices
+        writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
+        writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
+        
+        // Always write both loop indices
+        if (isClassLevel)
+        {
+            writer.AppendLine("ClassLoopIndex = classLoopCounter++,");
+            writer.AppendLine("MethodLoopIndex = methodLoopCounter = 0");
+        }
+        else
+        {
+            writer.AppendLine("ClassLoopIndex = classLoopCounter,");
+            writer.AppendLine("MethodLoopIndex = methodLoopCounter++");
         }
 
         writer.Unindent();
@@ -467,9 +524,9 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("}");
     }
 
-    private static void EmitAsyncDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, int index, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
+    private static void EmitAsyncDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
-        writer.AppendLine($"// AsyncDataSourceGeneratorAttribute {index}");
+        writer.AppendLine("// AsyncDataSourceGeneratorAttribute");
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
@@ -539,7 +596,8 @@ public static class DataCombinationGeneratorEmitter
         writer.Unindent();
         writer.AppendLine("};");
 
-        writer.AppendLine("int loopIndex = 0;");
+        writer.AppendLine("int classLoopCounter = 0;");
+        writer.AppendLine("int methodLoopCounter = 0;");
         writer.AppendLine("await foreach (var dataSourceFunc in ((IAsyncDataSourceGeneratorAttribute)generator).GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
@@ -551,14 +609,26 @@ public static class DataCombinationGeneratorEmitter
         if (isClassLevel)
         {
             writer.AppendLine("ClassData = data ?? Array.Empty<object?>(),");
-            writer.AppendLine($"ClassDataSourceIndex = {index},");
-            writer.AppendLine("ClassLoopIndex = loopIndex++");
         }
         else
         {
             writer.AppendLine("MethodData = data ?? Array.Empty<object?>(),");
-            writer.AppendLine($"MethodDataSourceIndex = {index},");
-            writer.AppendLine("MethodLoopIndex = loopIndex++");
+        }
+
+        // Always write both indices
+        writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
+        writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
+        
+        // Always write both loop indices
+        if (isClassLevel)
+        {
+            writer.AppendLine("ClassLoopIndex = classLoopCounter++,");
+            writer.AppendLine("MethodLoopIndex = methodLoopCounter = 0");
+        }
+        else
+        {
+            writer.AppendLine("ClassLoopIndex = classLoopCounter,");
+            writer.AppendLine("MethodLoopIndex = methodLoopCounter++");
         }
 
         writer.Unindent();
@@ -582,20 +652,19 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("}");
     }
 
-    private static void EmitEmptyCombination(CodeWriter writer, int index, string listName, bool isClassLevel)
+    private static void EmitEmptyCombination(CodeWriter writer, string listName)
     {
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
 
-        if (isClassLevel)
-        {
-            writer.AppendLine($"ClassDataSourceIndex = {index},");
-        }
-        else
-        {
-            writer.AppendLine($"MethodDataSourceIndex = {index},");
-        }
+        // Always write both indices
+        writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
+        writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
+        
+        // Always write both loop indices (0 for empty combination)
+        writer.AppendLine("ClassLoopIndex = 0,");
+        writer.AppendLine("MethodLoopIndex = 0,");
 
         writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
         writer.Unindent();
