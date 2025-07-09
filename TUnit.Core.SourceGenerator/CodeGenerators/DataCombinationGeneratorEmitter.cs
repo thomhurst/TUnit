@@ -374,6 +374,7 @@ public static class DataCombinationGeneratorEmitter
         writer.Unindent();
         writer.AppendLine("};");
 
+        writer.AppendLine("int loopIndex = 0;");
         writer.AppendLine("await foreach (var dataSourceFunc in generator.GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
@@ -386,13 +387,13 @@ public static class DataCombinationGeneratorEmitter
         {
             writer.AppendLine("ClassData = data ?? Array.Empty<object?>(),");
             writer.AppendLine($"ClassDataSourceIndex = {index},");
-            writer.AppendLine($"ClassLoopIndex = {listName}.Count");
+            writer.AppendLine("ClassLoopIndex = loopIndex++");
         }
         else
         {
             writer.AppendLine("MethodData = data ?? Array.Empty<object?>(),");
             writer.AppendLine($"MethodDataSourceIndex = {index},");
-            writer.AppendLine($"MethodLoopIndex = {listName}.Count");
+            writer.AppendLine("MethodLoopIndex = loopIndex++");
         }
 
         writer.Unindent();
@@ -439,6 +440,7 @@ public static class DataCombinationGeneratorEmitter
         writer.Unindent();
         writer.AppendLine("};");
 
+        writer.AppendLine("int loopIndex = 0;");
         writer.AppendLine("await foreach (var dataSourceFunc in ((IAsyncDataSourceGeneratorAttribute)generator).GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
@@ -451,13 +453,13 @@ public static class DataCombinationGeneratorEmitter
         {
             writer.AppendLine("ClassData = data ?? Array.Empty<object?>(),");
             writer.AppendLine($"ClassDataSourceIndex = {index},");
-            writer.AppendLine($"ClassLoopIndex = {listName}.Count");
+            writer.AppendLine("ClassLoopIndex = loopIndex++");
         }
         else
         {
             writer.AppendLine("MethodData = data ?? Array.Empty<object?>(),");
             writer.AppendLine($"MethodDataSourceIndex = {index},");
-            writer.AppendLine($"MethodLoopIndex = {listName}.Count");
+            writer.AppendLine("MethodLoopIndex = loopIndex++");
         }
 
         writer.Unindent();
