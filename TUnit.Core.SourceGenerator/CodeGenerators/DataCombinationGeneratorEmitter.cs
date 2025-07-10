@@ -732,7 +732,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("var mergedProperties = new Dictionary<string, Func<object?>>();");
+        writer.AppendLine("var mergedProperties = new Dictionary<string, Func<Task<object?>>>();");
         writer.AppendLine("foreach (var kvp in classCombination.PropertyValueFactories) mergedProperties[kvp.Key] = kvp.Value;");
         writer.AppendLine("foreach (var kvp in methodCombination.PropertyValueFactories) mergedProperties[kvp.Key] = kvp.Value;");
         writer.AppendLine("foreach (var kvp in propertyCombination.PropertyValueFactories) mergedProperties[kvp.Key] = kvp.Value;");

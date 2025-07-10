@@ -104,7 +104,8 @@
       "Bash(echo $?)",
       "Bash(csc:*)",
       "Bash(./test-fix.exe)",
-      "mcp__desktop-commander__read_output"
+      "mcp__desktop-commander__read_output",
+      "Bash(git revert:*)"
     ],
     "deny": []
   }
