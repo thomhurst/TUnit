@@ -56,4 +56,10 @@ public class TestDataCombination
     /// Custom display name for this combination, typically used for error cases.
     /// </summary>
     public string? DisplayName { get; init; }
+
+    /// <summary>
+    /// The repeat index for tests using the RepeatAttribute.
+    /// 0 for the first run, 1 for the second, etc.
+    /// </summary>
+    public int RepeatIndex { get; init; } = 0;
 }

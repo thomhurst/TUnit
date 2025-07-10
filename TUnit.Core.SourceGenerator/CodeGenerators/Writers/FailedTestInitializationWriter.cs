@@ -8,11 +8,11 @@ public static class FailedTestInitializationWriter
     public static void GenerateFailedTestCode(ICodeWriter sourceBuilder,
         TestSourceDataModel testSourceDataModel)
     {
-        var testId = testSourceDataModel.TestId;
+        var testId = $"{testSourceDataModel.ClassMetadata.ContainingNamespace}.{testSourceDataModel.ClassMetadata.Name}.{testSourceDataModel.MethodName}_InitializationFailure";
 
         sourceBuilder.Append("discoveryFailures.Add(new DiscoveryFailure");
         sourceBuilder.Append("{");
-        sourceBuilder.Append($"TestId = $\"{testId}\",");
+        sourceBuilder.Append($"TestId = \"{testId}\",");
         sourceBuilder.Append($"Exception = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.ClassMetadata.Name}.{testSourceDataModel.MethodName} failed to initialize\", exception),");
         sourceBuilder.Append($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.Append($"TestLineNumber = {testSourceDataModel.LineNumber},");
@@ -24,13 +24,13 @@ public static class FailedTestInitializationWriter
     public static void GenerateFailedTestCode(ICodeWriter sourceBuilder,
         DynamicTestSourceDataModel testSourceDataModel)
     {
-        var testId = $"{testSourceDataModel.Class.GloballyQualified()}{testSourceDataModel.Method.Name}";
+        var testId = $"{testSourceDataModel.Class.ContainingNamespace}.{testSourceDataModel.Class.Name}.{testSourceDataModel.Method.Name}_InitializationFailure";
 
         sourceBuilder.Append("return");
         sourceBuilder.Append("[");
         sourceBuilder.Append($"new FailedDynamicTest<{testSourceDataModel.Class.GloballyQualified()}>");
         sourceBuilder.Append("{");
-        sourceBuilder.Append($"TestId = @\"{testId}\",");
+        sourceBuilder.Append($"TestId = \"{testId}\",");
         sourceBuilder.Append($"MethodName = $\"{testSourceDataModel.Method.Name}\",");
         sourceBuilder.Append($"Exception = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.Class.Name}.{testSourceDataModel.Method.Name} failed to initialize\", exception),");
         sourceBuilder.Append($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");

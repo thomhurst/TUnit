@@ -179,13 +179,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static void GenerateTestMetadataInstance(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod, string className, string combinationGuid)
     {
         var methodName = testMethod.MethodSymbol.Name;
-        var testId = $"{className}.{methodName}";
-
         writer.AppendLine($"var metadata = new TestMetadata<{className}>");
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine($"TestId = \"{testId}\",");
         writer.AppendLine($"TestName = \"{methodName}\",");
         writer.AppendLine($"TestClassType = typeof({className}),");
         writer.AppendLine($"TestMethodName = \"{methodName}\",");

@@ -14,7 +14,6 @@ public class DependsOnTests
 
         return new TestMetadata<T>
         {
-            TestId = testId,
             TestClassType = typeof(T),
             TestMethodName = methodName,
             TestName = methodName,

@@ -26,14 +26,21 @@ public static class DataCombinationGeneratorEmitter
         var classDataSources = GetDataSourceAttributes(typeSymbol);
         var propertyDataSources = GetPropertyDataSources(typeSymbol);
 
+        // Get repeat count from RepeatAttribute
+        var repeatCount = GetRepeatCount(methodSymbol, typeSymbol);
+
         if (!methodDataSources.Any() && !classDataSources.Any() && !propertyDataSources.Any())
         {
-            writer.AppendLine("yield return new TestDataCombination();");
+            // No data sources, but might have repeat
+            for (var repeatIndex = 0; repeatIndex <= repeatCount; repeatIndex++)
+            {
+                writer.AppendLine($"yield return new TestDataCombination {{ RepeatIndex = {repeatIndex} }};");
+            }
         }
         else
         {
             // All data sources are now handled at compile time
-            EmitCompileTimeCombinations(writer, methodSymbol, typeSymbol, methodDataSources, classDataSources, propertyDataSources);
+            EmitCompileTimeCombinations(writer, methodSymbol, typeSymbol, methodDataSources, classDataSources, propertyDataSources, repeatCount);
         }
 
         writer.Unindent();
@@ -46,7 +53,8 @@ public static class DataCombinationGeneratorEmitter
         INamedTypeSymbol typeSymbol,
         ImmutableArray<AttributeData> methodDataSources,
         ImmutableArray<AttributeData> classDataSources,
-        ImmutableArray<PropertyWithDataSource> propertyDataSources)
+        ImmutableArray<PropertyWithDataSource> propertyDataSources,
+        int repeatCount)
     {
         writer.AppendLine("// Generate all data combinations at compile time");
         writer.AppendLine("var allCombinations = new List<TestDataCombination>();");
@@ -93,16 +101,50 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("if (errorCombination != null)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("yield return errorCombination;");
+        writer.AppendLine("// Apply repeat for error cases too");
+        writer.AppendLine($"for (var repeatIndex = 0; repeatIndex <= {repeatCount}; repeatIndex++)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("yield return new TestDataCombination");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("DataGenerationException = errorCombination.DataGenerationException,");
+        writer.AppendLine("DisplayName = errorCombination.DisplayName,");
+        writer.AppendLine("RepeatIndex = repeatIndex");
+        writer.Unindent();
+        writer.AppendLine("};");
+        writer.Unindent();
+        writer.AppendLine("}");
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine("else");
         writer.AppendLine("{");
         writer.Indent();
+        writer.AppendLine("// Apply repeat if specified");
+        writer.AppendLine($"for (var repeatIndex = 0; repeatIndex <= {repeatCount}; repeatIndex++)");
+        writer.AppendLine("{");
+        writer.Indent();
         writer.AppendLine("foreach (var combination in allCombinations)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("yield return combination;");
+        writer.AppendLine("// Clone the combination with the repeat index");
+        writer.AppendLine("yield return new TestDataCombination");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("ClassData = combination.ClassData,");
+        writer.AppendLine("MethodData = combination.MethodData,");
+        writer.AppendLine("ClassDataSourceIndex = combination.ClassDataSourceIndex,");
+        writer.AppendLine("MethodDataSourceIndex = combination.MethodDataSourceIndex,");
+        writer.AppendLine("ClassLoopIndex = combination.ClassLoopIndex,");
+        writer.AppendLine("MethodLoopIndex = combination.MethodLoopIndex,");
+        writer.AppendLine("PropertyValues = combination.PropertyValues,");
+        writer.AppendLine("DataGenerationException = combination.DataGenerationException,");
+        writer.AppendLine("DisplayName = combination.DisplayName,");
+        writer.AppendLine("RepeatIndex = repeatIndex");
+        writer.Unindent();
+        writer.AppendLine("};");
+        writer.Unindent();
+        writer.AppendLine("}");
         writer.Unindent();
         writer.AppendLine("}");
         writer.Unindent();
@@ -875,6 +917,34 @@ public static class DataCombinationGeneratorEmitter
         {
             return "null";
         }
+    }
+
+    private static int GetRepeatCount(IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
+    {
+        // Check method first, then class, then assembly
+        var repeatAttr = methodSymbol.GetAttributes()
+            .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == "TUnit.Core.RepeatAttribute");
+
+        if (repeatAttr == null)
+        {
+            repeatAttr = typeSymbol.GetAttributes()
+                .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == "TUnit.Core.RepeatAttribute");
+        }
+
+        if (repeatAttr == null)
+        {
+            repeatAttr = typeSymbol.ContainingAssembly.GetAttributes()
+                .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == "TUnit.Core.RepeatAttribute");
+        }
+
+        if (repeatAttr?.ConstructorArguments.Length > 0 && 
+            repeatAttr.ConstructorArguments[0].Value is int repeatTimes && 
+            repeatTimes > 0)
+        {
+            return repeatTimes;
+        }
+
+        return 0; // Default: no repeat
     }
 
     private struct PropertyWithDataSource

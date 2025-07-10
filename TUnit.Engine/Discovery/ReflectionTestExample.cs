@@ -29,7 +29,7 @@ internal static class ReflectionTestExample
         
         foreach (var test in tests.Take(5)) // Show first 5 tests
         {
-            Console.WriteLine($"  - {test.TestId}");
+            Console.WriteLine($"  - {test.TestClassType.Name}.{test.TestMethodName}");
             Console.WriteLine($"    Class: {test.TestClassType.Name}");
             Console.WriteLine($"    Method: {test.TestMethodName}");
             if (test.Categories.Length > 0)

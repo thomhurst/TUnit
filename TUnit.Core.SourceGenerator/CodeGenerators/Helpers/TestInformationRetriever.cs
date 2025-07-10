@@ -17,6 +17,12 @@ public static class TestInformationRetriever
 
     public static string GetTestId(TestGenerationContext testGenerationContext)
     {
+        // Test IDs are now generated at runtime by TestIdentifierService
+        return string.Empty;
+    }
+
+    private static string GetTestIdOld(TestGenerationContext testGenerationContext)
+    {
         using var writer = new CodeWriter("", includeHeader: false);
         writer.SetIndentLevel(1); // For inline expression
 

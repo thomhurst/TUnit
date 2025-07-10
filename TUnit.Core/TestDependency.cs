@@ -161,7 +161,8 @@ public sealed class TestDependency : IEquatable<TestDependency>
         if (ClassType != null && string.IsNullOrEmpty(MethodName) && dependentTest != null)
         {
             // If depending on all tests in a class, exclude self
-            if (test.TestId == dependentTest.TestId)
+            if (test.TestClassType == dependentTest.TestClassType && 
+                test.TestMethodName == dependentTest.TestMethodName)
             {
                 return false;
             }

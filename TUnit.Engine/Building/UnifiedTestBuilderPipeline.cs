@@ -2,6 +2,7 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building;
 
@@ -59,7 +60,7 @@ public sealed class UnifiedTestBuilderPipeline
 
     private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
-        var testId = metadata.TestId ?? $"{metadata.TestClassType.FullName}.{metadata.TestMethodName}_DataGenerationError";
+        var testId = TestIdentifierService.GenerateFailedTestId(metadata);
         var displayName = $"{metadata.TestName} [DATA GENERATION ERROR]";
 
         // Create a minimal test context for failed test

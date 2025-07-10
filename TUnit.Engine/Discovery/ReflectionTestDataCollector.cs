@@ -160,12 +160,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static TestMetadata BuildTestMetadata(Type testClass, MethodInfo testMethod)
     {
-        var testId = GenerateTestId(testClass, testMethod);
         var testName = GenerateTestName(testClass, testMethod);
 
         var metadata = new ReflectionTestMetadata(testClass, testMethod)
         {
-            TestId = testId,
             TestName = testName,
             TestClassType = testClass,
             TestMethodName = testMethod.Name,
@@ -202,22 +200,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return metadata;
     }
 
-    private static string GenerateTestId(Type testClass, MethodInfo testMethod)
-    {
-        var className = testClass.FullName ?? testClass.Name;
-        var methodName = testMethod.Name;
-
-        var parameters = testMethod.GetParameters();
-        if (parameters.Length == 0)
-        {
-            return $"{className}.{methodName}";
-        }
-
-        var paramTypes = string.Join(", ", parameters.Select(p => p.ParameterType.Name));
-        return $"{className}.{methodName}({paramTypes})";
-    }
-
-    private static string GenerateTestName(Type testClass, MethodInfo testMethod)
+private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     {
         return $"{testClass.Name}.{testMethod.Name}";
     }

@@ -66,7 +66,7 @@ public sealed class TestBuilder : ITestBuilder
         TrackDataSourceObjects(combination);
         
         // Generate unique test ID
-        var testId = GenerateTestId(metadata, combination);
+        var testId = TestIdentifierService.GenerateTestId(metadata, combination);
 
         var displayName = GenerateDisplayName(metadata, GetArgumentsDisplayText(combination));
 
@@ -121,18 +121,6 @@ public sealed class TestBuilder : ITestBuilder
         return hooks.ToArray();
     }
 
-    private static string GenerateTestId(TestMetadata metadata, TestDataCombination combination)
-    {
-        var methodMetadata = metadata.MethodMetadata;
-
-        var classMetadata = methodMetadata.Class;
-
-        var constructorParameters = classMetadata.Parameters.Select(x => x.Type);
-
-        var methodParameters = methodMetadata.Parameters.Select(x => x.Type);
-
-        return $"{methodMetadata.Class.Namespace}.{metadata.TestClassType.Name}({string.Join(", ", constructorParameters)}).{combination.ClassDataSourceIndex}.{combination.ClassLoopIndex}.{metadata.TestMethodName}({string.Join(", ", methodParameters)}).{combination.MethodDataSourceIndex}.{combination.MethodLoopIndex}";
-    }
 
     private static string GenerateDisplayName(TestMetadata metadata, string argumentsDisplayText)
     {
@@ -233,7 +221,7 @@ public sealed class TestBuilder : ITestBuilder
 
     private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, string? customDisplayName)
     {
-        var testId = metadata.TestId ?? $"{metadata.TestClassType.FullName}.{metadata.TestMethodName}_DataGenerationError";
+        var testId = TestIdentifierService.GenerateFailedTestId(metadata);
         var displayName = customDisplayName ?? $"{metadata.TestName} [DATA GENERATION ERROR]";
 
         // Create a minimal test context for failed test

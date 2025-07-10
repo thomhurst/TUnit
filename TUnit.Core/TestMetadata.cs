@@ -6,11 +6,6 @@ namespace TUnit.Core;
 public abstract class TestMetadata
 {
     /// <summary>
-    /// Unique identifier for the test
-    /// </summary>
-    public required string TestId { get; init; }
-
-    /// <summary>
     /// Display name for the test
     /// </summary>
     public required string TestName { get; init; }
