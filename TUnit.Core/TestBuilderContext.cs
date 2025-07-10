@@ -20,7 +20,7 @@ public record TestBuilderContext
     public Dictionary<string, object?> ObjectBag { get; } = [];
     public TestContextEvents Events { get; } = new();
 
-    public List<IDataAttribute> DataAttributes { get; } = [];
+    public IDataAttribute? DataAttribute { get; set; }
 
     /// <summary>
     /// Gets the test method name, if available.

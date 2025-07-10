@@ -60,7 +60,7 @@ public record AsyncDataSourceGeneratorContainer(
 
         sourceCodeWriter.AppendLine();
 
-        sourceCodeWriter.Append($"testBuilderContext.DataAttributes.Add({dataAttr.Name});");
+        sourceCodeWriter.Append($"testBuilderContext.DataAttribute = {dataAttr.Name};");
         sourceCodeWriter.AppendLine();
 
         sourceCodeWriter.Append($"var {arrayVariableName} = ((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute){dataAttr.Name}).GenerateAsync({dataGeneratorMetadataVariableName});");
@@ -92,7 +92,7 @@ public record AsyncDataSourceGeneratorContainer(
             sourceCodeWriter.Append(";");
             sourceCodeWriter.AppendLine();
 
-            sourceCodeWriter.Append($"testBuilderContext.DataAttributes.Add({attr.Name});");
+            sourceCodeWriter.Append($"testBuilderContext.DataAttribute = {attr.Name};");
             sourceCodeWriter.AppendLine();
 
             // Use the property type instead of var to avoid CS0815

@@ -37,7 +37,13 @@ dotnet run -- --fail-fast                     # Stop on first failure
 dotnet run -- --maximum-parallel-tests 10     # Control parallelism
 dotnet run -- --report-trx --coverage         # Generate reports
 dotnet run -- --treenode-filter "TestName"    # Run specific test by exact name
-dotnet run -- --treenode-filter/*/*/*PartialName*/*  # Filter tests by partial name pattern
+
+# IMPORTANT: treenode-filter syntax requires SPACE after flag and 4 segments: /Assembly/Namespace/ClassName/MethodName
+# Use wildcards (*) for any segment you want to match all of
+# Examples:
+dotnet run -- --treenode-filter /TUnit.TestProject/TUnit.TestProject/MyTestClass/MyTestMethod  # Exact match
+dotnet run -- --treenode-filter /*/*/*AsyncDataSourceExampleTests*/*  # Match any class containing "AsyncDataSourceExampleTests"
+dotnet run -- --treenode-filter /*/*/*/*TestMethod  # Match any method ending with "TestMethod"
 
 # Build NuGet packages
 dotnet pack -c Release
