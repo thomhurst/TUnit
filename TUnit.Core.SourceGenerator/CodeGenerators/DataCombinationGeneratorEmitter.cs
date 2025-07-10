@@ -515,18 +515,21 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("await foreach (var dataSourceFunc in generator.GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("var data = await dataSourceFunc();");
+        writer.AppendLine("// Get initial data to determine array length");
+        writer.AppendLine("var initialData = await dataSourceFunc();");
+        writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
+        writer.AppendLine();
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
 
         if (isClassLevel)
         {
-            writer.AppendLine("ClassDataFactories = (data ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),");
+            writer.AppendLine("ClassDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<object?>(() => dataSourceFunc().GetAwaiter().GetResult()?[index])).ToArray(),");
         }
         else
         {
-            writer.AppendLine("MethodDataFactories = (data ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),");
+            writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<object?>(() => dataSourceFunc().GetAwaiter().GetResult()?[index])).ToArray(),");
         }
 
         // Always write both indices
@@ -643,18 +646,21 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("await foreach (var dataSourceFunc in ((IAsyncDataSourceGeneratorAttribute)generator).GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("var data = await dataSourceFunc();");
+        writer.AppendLine("// Get initial data to determine array length");
+        writer.AppendLine("var initialData = await dataSourceFunc();");
+        writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
+        writer.AppendLine();
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
 
         if (isClassLevel)
         {
-            writer.AppendLine("ClassDataFactories = (data ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),");
+            writer.AppendLine("ClassDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<object?>(() => dataSourceFunc().GetAwaiter().GetResult()?[index])).ToArray(),");
         }
         else
         {
-            writer.AppendLine("MethodDataFactories = (data ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),");
+            writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<object?>(() => dataSourceFunc().GetAwaiter().GetResult()?[index])).ToArray(),");
         }
 
         // Always write both indices
