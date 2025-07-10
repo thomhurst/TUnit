@@ -518,6 +518,16 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("// For SharedType.None, we must not pre-materialize the data");
         writer.AppendLine("// as that would create a single instance that gets shared");
         writer.AppendLine();
+
+        if (!isClassLevel)
+        {
+            writer.AppendLine("// For method data, we need to know the array length");
+            writer.AppendLine("// Call once to get length, then create factories");
+            writer.AppendLine("var initialData = await dataSourceFunc();");
+            writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
+            writer.AppendLine();
+        }
+
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
@@ -536,10 +546,6 @@ public static class DataCombinationGeneratorEmitter
         }
         else
         {
-            writer.AppendLine("// For method data, we need to know the array length");
-            writer.AppendLine("// Call once to get length, then create factories");
-            writer.AppendLine("var initialData = await dataSourceFunc();");
-            writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
             writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await dataSourceFunc())?[index])).ToArray(),");
         }
 
@@ -660,6 +666,16 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("// For SharedType.None, we must not pre-materialize the data");
         writer.AppendLine("// as that would create a single instance that gets shared");
         writer.AppendLine();
+
+        if (!isClassLevel)
+        {
+            writer.AppendLine("// For method data, we need to know the array length");
+            writer.AppendLine("// Call once to get length, then create factories");
+            writer.AppendLine("var initialData = await dataSourceFunc();");
+            writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
+            writer.AppendLine();
+        }
+
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
@@ -678,10 +694,6 @@ public static class DataCombinationGeneratorEmitter
         }
         else
         {
-            writer.AppendLine("// For method data, we need to know the array length");
-            writer.AppendLine("// Call once to get length, then create factories");
-            writer.AppendLine("var initialData = await dataSourceFunc();");
-            writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
             writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await dataSourceFunc())?[index])).ToArray(),");
         }
 
