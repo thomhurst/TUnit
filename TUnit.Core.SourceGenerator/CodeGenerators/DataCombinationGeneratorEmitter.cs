@@ -357,11 +357,11 @@ public static class DataCombinationGeneratorEmitter
 
         if (isClassLevel)
         {
-            writer.AppendLine("ClassDataFactories = data.Select<object?, Func<object?>>(item => () => item).ToArray(),");
+            writer.AppendLine("ClassDataFactories = data.Select<object?, Func<Task<object?>>>(item => () => Task.FromResult(item)).ToArray(),");
         }
         else
         {
-            writer.AppendLine("MethodDataFactories = data.Select<object?, Func<object?>>(item => () => item).ToArray(),");
+            writer.AppendLine("MethodDataFactories = data.Select<object?, Func<Task<object?>>>(item => () => Task.FromResult(item)).ToArray(),");
         }
 
         // Always write both indices
