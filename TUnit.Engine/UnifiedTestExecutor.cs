@@ -89,6 +89,28 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             hookOrchestrator = new HookOrchestrator(hookCollectionService, _logger);
         }
 
+        // Get EventReceiverOrchestrator if available
+        var eventReceiverOrchestrator = _serviceProvider?.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
+
+        // Initialize test counts for first/last event receivers
+        if (eventReceiverOrchestrator != null)
+        {
+            var testContexts = testList.Where(t => t.Context != null).Select(t => t.Context!);
+            eventReceiverOrchestrator.InitializeTestCounts(testContexts);
+        }
+
+        // Invoke test registered event receivers for all tests that passed filtering
+        if (eventReceiverOrchestrator != null)
+        {
+            foreach (var test in testList)
+            {
+                if (test.Context != null)
+                {
+                    await eventReceiverOrchestrator.InvokeTestRegisteredEventReceiversAsync(test.Context, cancellationToken);
+                }
+            }
+        }
+
         try
         {
             if (hookOrchestrator != null)

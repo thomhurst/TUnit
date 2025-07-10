@@ -28,6 +28,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TestFilterService TestFilterService { get; }
     public IHookCollectionService HookCollectionService { get; }
     public HookOrchestrator HookOrchestrator { get; }
+    public EventReceiverOrchestrator EventReceiverOrchestrator { get; }
 
     public TUnitServiceProvider(
         IExtension extension,
@@ -62,6 +63,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         Register<ITestInvoker>(new TestInvoker());
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
         HookOrchestrator = Register(new HookOrchestrator(HookCollectionService, Logger));
+        EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
 
         // Detect execution mode from command line or environment
         var executionMode = GetExecutionMode(CommandLineOptions);
@@ -75,7 +77,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create single test executor with ExecutionContext support
         var singleTestExecutor = Register<ISingleTestExecutor>(
-            new SingleTestExecutor(Logger));
+            new SingleTestExecutor(Logger, EventReceiverOrchestrator));
 
         TestExecutor = Register(new UnifiedTestExecutor(
             singleTestExecutor,

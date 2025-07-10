@@ -16,7 +16,7 @@ public partial class Tests
     [Test]
     public Task Engine_Library_Has_No_API_Changes()
     {
-        return VerifyPublicApi(typeof(Engine.SingleTestExecutor).Assembly);
+        return VerifyPublicApi(typeof(Engine.Logging.TUnitFrameworkLogger).Assembly);
     }
 
     [Test]

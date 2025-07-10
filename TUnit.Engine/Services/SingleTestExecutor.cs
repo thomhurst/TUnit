@@ -5,21 +5,24 @@ using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
 
 /// <summary>
 /// Test executor that properly handles ExecutionContext restoration for AsyncLocal support
 /// </summary>
-public class SingleTestExecutor : ISingleTestExecutor
+internal class SingleTestExecutor : ISingleTestExecutor
 {
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestResultFactory _resultFactory;
+    private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private SessionUid? _sessionUid;
 
-    public SingleTestExecutor(TUnitFrameworkLogger logger)
+    public SingleTestExecutor(TUnitFrameworkLogger logger, EventReceiverOrchestrator eventReceiverOrchestrator)
     {
         _logger = logger;
+        _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _resultFactory = new TestResultFactory();
     }
 
@@ -42,12 +45,38 @@ public class SingleTestExecutor : ISingleTestExecutor
 
         test.StartTime = DateTimeOffset.Now;
         test.State = TestState.Running;
+        
+        // Invoke first test event receivers if this is the first test
+        if (test.Context != null)
+        {
+            var classContext = test.Context.ClassContext;
+            if (classContext != null)
+            {
+                var assemblyContext = classContext.AssemblyContext;
+                var sessionContext = assemblyContext.TestSessionContext;
+                
+                // First test in session
+                await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
+                
+                // First test in assembly
+                await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
+                
+                // First test in class
+                await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
+            }
+        }
+        
+        // Invoke test start event receivers
+        if (test.Context != null)
+        {
+            await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken);
+        }
 
         try
         {
             if (test.Metadata.IsSkipped)
             {
-                return HandleSkippedTest(test);
+                return await HandleSkippedTestAsync(test, cancellationToken);
             }
 
             await ExecuteTestWithHooksAsync(test, cancellationToken);
@@ -59,18 +88,48 @@ public class SingleTestExecutor : ISingleTestExecutor
         finally
         {
             test.EndTime = DateTimeOffset.Now;
+            
+            // Invoke test end event receivers
+            if (test.Context != null)
+            {
+                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken);
+                
+                // Invoke last test event receivers if this is the last test
+                var classContext = test.Context.ClassContext;
+                if (classContext != null)
+                {
+                    var assemblyContext = classContext.AssemblyContext;
+                    var sessionContext = assemblyContext.TestSessionContext;
+                    
+                    // Last test in class
+                    await _eventReceiverOrchestrator.InvokeLastTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
+                    
+                    // Last test in assembly
+                    await _eventReceiverOrchestrator.InvokeLastTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
+                    
+                    // Last test in session
+                    await _eventReceiverOrchestrator.InvokeLastTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
+                }
+            }
         }
 
         return CreateUpdateMessage(test);
     }
 
-    private TestNodeUpdateMessage HandleSkippedTest(ExecutableTest test)
+    private async Task<TestNodeUpdateMessage> HandleSkippedTestAsync(ExecutableTest test, CancellationToken cancellationToken)
     {
         test.State = TestState.Skipped;
         test.Result = _resultFactory.CreateSkippedResult(
             test.StartTime!.Value,
             test.Metadata.SkipReason ?? "Test skipped");
         test.EndTime = DateTimeOffset.Now;
+        
+        // Invoke test skipped event receivers
+        if (test.Context != null)
+        {
+            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
+        }
+        
         return CreateUpdateMessage(test);
     }
 

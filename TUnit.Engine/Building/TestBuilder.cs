@@ -5,6 +5,7 @@ using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Interfaces;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building;
 
@@ -191,17 +192,28 @@ public sealed class TestBuilder : ITestBuilder
             context.TestDetails.DisplayName ?? context.TestDetails.TestName,
             context.TestDetails);
 
-        foreach (var attribute in context.TestDetails.Attributes)
+        // Try to get EventReceiverOrchestrator from service provider
+        var eventReceiverOrchestrator = _serviceProvider?.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
+        if (eventReceiverOrchestrator != null)
         {
-            if (attribute is ITestDiscoveryEventReceiver receiver)
+            // Use the orchestrator for consistency with other event receivers
+            await eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
+        }
+        else
+        {
+            // Fallback to attribute-only if orchestrator not available
+            foreach (var attribute in context.TestDetails.Attributes)
             {
-                try
+                if (attribute is ITestDiscoveryEventReceiver receiver)
                 {
-                    await receiver.OnTestDiscovered(discoveredContext);
-                }
-                catch (Exception ex)
-                {
-                    _ = ex;
+                    try
+                    {
+                        await receiver.OnTestDiscovered(discoveredContext);
+                    }
+                    catch (Exception ex)
+                    {
+                        _ = ex;
+                    }
                 }
             }
         }
