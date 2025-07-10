@@ -515,18 +515,17 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("await foreach (var dataSourceFunc in generator.GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("var data = await dataSourceFunc();");
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
 
         if (isClassLevel)
         {
-            writer.AppendLine("ClassDataFactories = (data ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),");
+            writer.AppendLine("ClassDataFactories = new Func<object?>[] { () => dataSourceFunc().GetAwaiter().GetResult()?[0] },");
         }
         else
         {
-            writer.AppendLine("MethodDataFactories = (data ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),");
+            writer.AppendLine("MethodDataFactories = new Func<object?>[] { () => dataSourceFunc().GetAwaiter().GetResult()?[0] },");
         }
 
         // Always write both indices
@@ -643,18 +642,17 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("await foreach (var dataSourceFunc in ((IAsyncDataSourceGeneratorAttribute)generator).GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("var data = await dataSourceFunc();");
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
 
         if (isClassLevel)
         {
-            writer.AppendLine("ClassDataFactories = (data ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),");
+            writer.AppendLine("ClassDataFactories = new Func<object?>[] { () => dataSourceFunc().GetAwaiter().GetResult()?[0] },");
         }
         else
         {
-            writer.AppendLine("MethodDataFactories = (data ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),");
+            writer.AppendLine("MethodDataFactories = new Func<object?>[] { () => dataSourceFunc().GetAwaiter().GetResult()?[0] },");
         }
 
         // Always write both indices
