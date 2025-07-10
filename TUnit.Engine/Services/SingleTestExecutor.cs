@@ -46,6 +46,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
         test.StartTime = DateTimeOffset.Now;
         test.State = TestState.Running;
         
+        // Initialize all eligible objects before test starts
+        if (test.Context != null)
+        {
+            await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
+        }
+        
         // Invoke first test event receivers if this is the first test
         if (test.Context != null)
         {

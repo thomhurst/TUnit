@@ -25,6 +25,23 @@ internal sealed class EventReceiverOrchestrator
         _logger = logger;
     }
 
+    public async ValueTask InitializeAllEligibleObjectsAsync(TestContext context, CancellationToken cancellationToken)
+    {
+        var eligibleObjects = context.GetEligibleEventObjects();
+        
+        foreach (var obj in eligibleObjects)
+        {
+            try
+            {
+                await ObjectInitializer.InitializeAsync(obj, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error initializing object of type {obj.GetType().Name}: {ex.Message}");
+            }
+        }
+    }
+
     public async ValueTask InvokeTestStartEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
         var eventReceivers = context.GetEligibleEventObjects()
