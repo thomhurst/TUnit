@@ -143,6 +143,9 @@ public static class Rules
     public static readonly DiagnosticDescriptor OpenGenericTypeNotAotCompatible =
         CreateDescriptor("TUnit0060", UsageCategory, DiagnosticSeverity.Error);
 
+    public static readonly DiagnosticDescriptor BlockingAsyncCall =
+        CreateDescriptor("TUnit0200", UsageCategory, DiagnosticSeverity.Warning);
+
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(

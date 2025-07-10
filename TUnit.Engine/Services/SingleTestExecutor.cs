@@ -78,6 +78,10 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
             await ExecuteTestWithHooksAsync(test, cancellationToken);
         }
+        catch (OperationCanceledException ex) when (test.Metadata.TimeoutMs.HasValue)
+        {
+            HandleTestFailure(test, ex);
+        }
         catch (Exception ex)
         {
             HandleTestFailure(test, ex);
@@ -236,45 +240,56 @@ internal class SingleTestExecutor : ISingleTestExecutor
     private async Task InvokeTestWithTimeout(ExecutableTest test, object instance, CancellationToken cancellationToken)
     {
         var discoveredTest = test.Context.InternalDiscoveredTest;
+        var testAction = test.Metadata.TimeoutMs.HasValue
+            ? CreateTimeoutTestAction(test, instance, cancellationToken)
+            : CreateNormalTestAction(test, instance, cancellationToken);
 
-        Func<ValueTask> testAction;
-        if (test.Metadata.TimeoutMs.HasValue)
+        await InvokeWithTestExecutor(discoveredTest, test.Context, testAction);
+    }
+
+    private Func<ValueTask> CreateTimeoutTestAction(ExecutableTest test, object instance, CancellationToken cancellationToken)
+    {
+        return async () =>
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(test.Metadata.TimeoutMs.Value);
+            cts.CancelAfter(test.Metadata.TimeoutMs!.Value);
 
-            testAction = async () =>
+            var testTask = test.InvokeTestAsync(instance, cts.Token);
+            var timeoutTask = Task.Delay(test.Metadata.TimeoutMs.Value, cancellationToken);
+            var completedTask = await Task.WhenAny(testTask, timeoutTask);
+
+            if (completedTask == timeoutTask)
             {
-                var testTask = test.InvokeTestAsync(instance, cts.Token);
-                var timeoutTask = Task.Delay(test.Metadata.TimeoutMs.Value, cancellationToken);
-                var completedTask = await Task.WhenAny(testTask, timeoutTask);
+                cts.Cancel();
+                await AttemptToCompleteTestTask(testTask);
+                throw new OperationCanceledException($"Test '{test.DisplayName}' exceeded timeout of {test.Metadata.TimeoutMs.Value}ms");
+            }
 
-                if (completedTask == timeoutTask)
-                {
-                    cts.Cancel();
+            await testTask;
+        };
+    }
 
-                    try
-                    {
-                        await testTask;
-                    }
-                    catch
-                    {
-                    }
+    private Func<ValueTask> CreateNormalTestAction(ExecutableTest test, object instance, CancellationToken cancellationToken)
+    {
+        return async () => await test.InvokeTestAsync(instance, cancellationToken);
+    }
 
-                    throw new OperationCanceledException($"Test '{test.DisplayName}' exceeded timeout of {test.Metadata.TimeoutMs.Value}ms");
-                }
-
-                await testTask;
-            };
-        }
-        else
+    private async Task AttemptToCompleteTestTask(Task testTask)
+    {
+        try
         {
-            testAction = async () => await test.InvokeTestAsync(instance, cancellationToken);
+            await testTask;
         }
+        catch
+        {
+        }
+    }
 
+    private async Task InvokeWithTestExecutor(DiscoveredTest? discoveredTest, TestContext context, Func<ValueTask> testAction)
+    {
         if (discoveredTest?.TestExecutor != null)
         {
-            await discoveredTest.TestExecutor.ExecuteTest(test.Context, testAction);
+            await discoveredTest.TestExecutor.ExecuteTest(context, testAction);
         }
         else
         {

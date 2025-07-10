@@ -20,7 +20,7 @@ namespace TUnit.Engine;
 /// <summary>
 /// Simplified test executor that works directly with ExecutableTest
 /// </summary>
-internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
+internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDisposable, IAsyncDisposable
 {
     private readonly ISingleTestExecutor _singleTestExecutor;
     private readonly ICommandLineOptions _commandLineOptions;
@@ -83,69 +83,14 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             testList = await ApplyFilterAsync(testList, filter);
         }
 
-        HookOrchestrator? hookOrchestrator = null;
-        if (_serviceProvider?.GetService(typeof(IHookCollectionService)) is IHookCollectionService hookCollectionService)
-        {
-            hookOrchestrator = new HookOrchestrator(hookCollectionService, _logger);
-        }
-
-        // Get EventReceiverOrchestrator if available
-        var eventReceiverOrchestrator = _serviceProvider?.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
-
-        // Initialize test counts for first/last event receivers
-        if (eventReceiverOrchestrator != null)
-        {
-            var testContexts = testList.Where(t => t.Context != null).Select(t => t.Context!);
-            eventReceiverOrchestrator.InitializeTestCounts(testContexts);
-        }
-
-        // Invoke test registered event receivers for all tests that passed filtering
-        if (eventReceiverOrchestrator != null)
-        {
-            foreach (var test in testList)
-            {
-                if (test.Context != null)
-                {
-                    await eventReceiverOrchestrator.InvokeTestRegisteredEventReceiversAsync(test.Context, cancellationToken);
-                }
-            }
-        }
+        var hookOrchestrator = CreateHookOrchestrator();
+        await InitializeEventReceivers(testList, cancellationToken);
 
         try
         {
-            if (hookOrchestrator != null)
-            {
-                hookOrchestrator.SetTotalTestCount(testList.Count);
-                await hookOrchestrator.InitializeContextsWithTestsAsync(testList, cancellationToken);
-                await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
-            }
-
-            var isFailFastEnabled = IsFailFastEnabled();
-
-            Scheduling.ITestExecutor executorAdapter = hookOrchestrator != null
-                ? new HookOrchestratingTestExecutorAdapter(
-                    _singleTestExecutor,
-                    messageBus,
-                    _sessionUid ?? new SessionUid(Guid.NewGuid().ToString()),
-                    isFailFastEnabled,
-                    _failFastCancellationSource,
-                    _logger,
-                    hookOrchestrator)
-                : new FailFastTestExecutorAdapter(
-                    _singleTestExecutor,
-                    messageBus,
-                    _sessionUid ?? new SessionUid(Guid.NewGuid().ToString()),
-                    isFailFastEnabled,
-                    _failFastCancellationSource,
-                    _logger);
-
-            // Combine cancellation tokens
-            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-                cancellationToken,
-                _failFastCancellationSource.Token);
-
-            // Schedule and execute tests
-            await _testScheduler.ScheduleAndExecuteAsync(testList, executorAdapter, linkedCts.Token);
+            await PrepareHookOrchestrator(hookOrchestrator, testList, cancellationToken);
+            var executorAdapter = CreateExecutorAdapter(hookOrchestrator, messageBus);
+            await ExecuteTestsCore(testList, executorAdapter, cancellationToken);
         }
         finally
         {
@@ -154,6 +99,81 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
                 await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cancellationToken);
             }
         }
+    }
+
+    private HookOrchestrator? CreateHookOrchestrator()
+    {
+        if (_serviceProvider?.GetService(typeof(IHookCollectionService)) is IHookCollectionService hookCollectionService)
+        {
+            return new HookOrchestrator(hookCollectionService, _logger);
+        }
+        return null;
+    }
+
+    private async Task InitializeEventReceivers(List<ExecutableTest> testList, CancellationToken cancellationToken)
+    {
+        var eventReceiverOrchestrator = _serviceProvider?.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
+        if (eventReceiverOrchestrator == null)
+        {
+            return;
+        }
+
+        // Initialize test counts for first/last event receivers
+        var testContexts = testList.Where(t => t.Context != null).Select(t => t.Context!);
+        eventReceiverOrchestrator.InitializeTestCounts(testContexts);
+
+        // Invoke test registered event receivers for all tests that passed filtering
+        foreach (var test in testList)
+        {
+            if (test.Context != null)
+            {
+                await eventReceiverOrchestrator.InvokeTestRegisteredEventReceiversAsync(test.Context, cancellationToken);
+            }
+        }
+    }
+
+    private async Task PrepareHookOrchestrator(HookOrchestrator? hookOrchestrator, List<ExecutableTest> testList, CancellationToken cancellationToken)
+    {
+        if (hookOrchestrator != null)
+        {
+            hookOrchestrator.SetTotalTestCount(testList.Count);
+            await hookOrchestrator.InitializeContextsWithTestsAsync(testList, cancellationToken);
+            await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
+        }
+    }
+
+    private Scheduling.ITestExecutor CreateExecutorAdapter(HookOrchestrator? hookOrchestrator, IMessageBus messageBus)
+    {
+        var isFailFastEnabled = IsFailFastEnabled();
+        var sessionUid = _sessionUid ?? new SessionUid(Guid.NewGuid().ToString());
+
+        return hookOrchestrator != null
+            ? new HookOrchestratingTestExecutorAdapter(
+                _singleTestExecutor,
+                messageBus,
+                sessionUid,
+                isFailFastEnabled,
+                _failFastCancellationSource,
+                _logger,
+                hookOrchestrator)
+            : new FailFastTestExecutorAdapter(
+                _singleTestExecutor,
+                messageBus,
+                sessionUid,
+                isFailFastEnabled,
+                _failFastCancellationSource,
+                _logger);
+    }
+
+    private async Task ExecuteTestsCore(List<ExecutableTest> testList, Scheduling.ITestExecutor executorAdapter, CancellationToken cancellationToken)
+    {
+        // Combine cancellation tokens
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken,
+            _failFastCancellationSource.Token);
+
+        // Schedule and execute tests
+        await _testScheduler.ScheduleAndExecuteAsync(testList, executorAdapter, linkedCts.Token);
     }
 
     private bool IsFailFastEnabled()
@@ -309,4 +329,28 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer
             "Reflection mode has been removed for AOT compatibility. Use source generation mode only.");
     }
 
+    private bool _disposed;
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _failFastCancellationSource?.Dispose();
+        _disposed = true;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        if (_disposed)
+        {
+            return default;
+        }
+
+        _failFastCancellationSource?.Dispose();
+        _disposed = true;
+        return default;
+    }
 }

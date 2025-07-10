@@ -128,7 +128,7 @@ internal sealed class OrderedConstraintTestScheduler : ITestScheduler
         var runningConstraintKeys = new ConcurrentDictionary<string, int>();
         var executedTests = new ConcurrentDictionary<string, bool>();
         
-        var constraintExecutor = new ConstraintExecutor(
+        using var constraintExecutor = new ConstraintExecutor(
             graph,
             executor,
             runningConstraintKeys,
@@ -154,7 +154,7 @@ internal sealed class OrderedConstraintTestScheduler : ITestScheduler
 
             // Create grouped tests for this priority level
             var allTestsDict = graph.Values.ToDictionary(s => s.Test.TestId, s => s.Test);
-            var priorityGroupedTests = CreatePriorityGroupedTests(allTestsDict, testsInPriority);
+            var priorityGroupedTests = await CreatePriorityGroupedTestsAsync(allTestsDict, testsInPriority);
 
             // Execute parallel tests (no constraints) for this priority
             if (priorityGroupedTests.Parallel.Any())
@@ -210,7 +210,7 @@ internal sealed class OrderedConstraintTestScheduler : ITestScheduler
         }
     }
 
-    private GroupedTests CreatePriorityGroupedTests(
+    private async Task<GroupedTests> CreatePriorityGroupedTestsAsync(
         Dictionary<string, ExecutableTest> allTests, 
         Dictionary<string, TestExecutionState> priorityTests)
     {
@@ -218,7 +218,7 @@ internal sealed class OrderedConstraintTestScheduler : ITestScheduler
             .Where(t => priorityTests.ContainsKey(t.TestId))
             .ToList();
             
-        return _groupingService.GroupTestsByConstraintsAsync(testsForPriority).Result;
+        return await _groupingService.GroupTestsByConstraintsAsync(testsForPriority);
     }
 
     private async Task ExecuteParallelTestsAsync(
@@ -286,7 +286,7 @@ internal sealed class OrderedConstraintTestScheduler : ITestScheduler
         }
     }
 
-    private class ConstraintExecutor
+    private class ConstraintExecutor : IDisposable
     {
         private readonly Dictionary<string, TestExecutionState> _graph;
         private readonly ITestExecutor _executor;
@@ -393,6 +393,15 @@ internal sealed class OrderedConstraintTestScheduler : ITestScheduler
                     }
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            foreach (var semaphore in _constraintSemaphores.Values)
+            {
+                semaphore?.Dispose();
+            }
+            _constraintSemaphores.Clear();
         }
     }
 }

@@ -229,8 +229,25 @@ public sealed class TestBuilder : ITestBuilder
         var testId = TestIdentifierService.GenerateFailedTestId(metadata);
         var displayName = customDisplayName ?? $"{metadata.TestName} [DATA GENERATION ERROR]";
 
-        // Create a minimal test context for failed test
-        var testDetails = new TestDetails
+        var testDetails = CreateFailedTestDetails(metadata, testId, displayName);
+        var context = CreateFailedTestContext(metadata, testDetails, displayName);
+
+        return new FailedExecutableTest(exception)
+        {
+            TestId = testId,
+            DisplayName = displayName,
+            Metadata = metadata,
+            Arguments = [],
+            ClassArguments = [],
+            BeforeTestHooks = [],
+            AfterTestHooks = [],
+            Context = context
+        };
+    }
+
+    private static TestDetails CreateFailedTestDetails(TestMetadata metadata, string testId, string displayName)
+    {
+        return new TestDetails
         {
             TestId = testId,
             TestName = metadata.TestName,
@@ -248,26 +265,17 @@ public sealed class TestBuilder : ITestBuilder
             MethodMetadata = MetadataBuilder.CreateMethodMetadata(metadata),
             Attributes = [],
         };
+    }
 
-        var context = new TestContext(
+    private static TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails, string displayName)
+    {
+        return new TestContext(
             metadata.TestName,
             displayName,
             CancellationToken.None,
             new TUnit.Core.Services.TestServiceProvider())
         {
             TestDetails = testDetails
-        };
-
-        return new FailedExecutableTest(exception)
-        {
-            TestId = testId,
-            DisplayName = displayName,
-            Metadata = metadata,
-            Arguments = [],
-            ClassArguments = [],
-            BeforeTestHooks = [],
-            AfterTestHooks = [],
-            Context = context
         };
     }
     
