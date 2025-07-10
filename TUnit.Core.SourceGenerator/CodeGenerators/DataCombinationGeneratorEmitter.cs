@@ -298,7 +298,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("ClassLoopIndex = 0,");
             writer.AppendLine("MethodLoopIndex = 0,");
 
-            writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<object?>>()");
+            writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()");
             writer.Unindent();
             writer.AppendLine("});");
         }
