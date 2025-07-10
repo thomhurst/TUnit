@@ -103,7 +103,8 @@
       "Bash(git reset:*)",
       "Bash(echo $?)",
       "Bash(csc:*)",
-      "Bash(./test-fix.exe)"
+      "Bash(./test-fix.exe)",
+      "mcp__desktop-commander__read_output"
     ],
     "deny": []
   }
