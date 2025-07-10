@@ -14,13 +14,13 @@ public class ArgumentsDataSourceGenerator : IDataSourceGenerator<ArgumentsAttrib
         
         yield return new TestDataCombination
         {
-            MethodDataFactories = attribute.Values.Select<object?, Func<object?>>(value => () => value).ToArray(),
-            ClassDataFactories = Array.Empty<Func<object?>>(),
+            MethodDataFactories = attribute.Values.Select<object?, Func<Task<object?>>>(value => () => Task.FromResult(value)).ToArray(),
+            ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
             MethodDataSourceIndex = context.DataSourceIndex,
             MethodLoopIndex = 0, // ArgumentsAttribute only returns one row
             ClassDataSourceIndex = -1,
             ClassLoopIndex = 0,
-            PropertyValueFactories = new Dictionary<string, Func<object?>>()
+            PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()
         };
     }
 }

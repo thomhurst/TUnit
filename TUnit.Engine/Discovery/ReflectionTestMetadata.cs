@@ -62,9 +62,9 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         {
             yield return new TestDataCombination
             {
-                MethodDataFactories = Array.Empty<Func<object?>>(),
-                ClassDataFactories = Array.Empty<Func<object?>>(),
-                PropertyValueFactories = new Dictionary<string, Func<object?>>(),
+                MethodDataFactories = Array.Empty<Func<Task<object?>>>(),
+                ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
+                PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),
                 MethodDataSourceIndex = -1,
                 MethodLoopIndex = 0,
                 ClassDataSourceIndex = -1,
@@ -77,9 +77,9 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         // For now, just yield empty combination
         yield return new TestDataCombination
         {
-            MethodDataFactories = Array.Empty<Func<object?>>(),
-            ClassDataFactories = Array.Empty<Func<object?>>(),
-            PropertyValueFactories = new Dictionary<string, Func<object?>>(),
+            MethodDataFactories = Array.Empty<Func<Task<object?>>>(),
+            ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
+            PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),
             MethodDataSourceIndex = -1,
             MethodLoopIndex = 0,
             ClassDataSourceIndex = -1,

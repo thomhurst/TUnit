@@ -183,7 +183,7 @@ public static class DataCombinationGeneratorEmitter
 
         writer.AppendLine();
         writer.AppendLine("// Property data sources");
-        writer.AppendLine("var propertyValues = new Dictionary<string, Func<object?>>();");
+        writer.AppendLine("var propertyValues = new Dictionary<string, Func<Task<object?>>>();");
 
         foreach (var propData in propertyDataSources)
         {
@@ -283,11 +283,11 @@ public static class DataCombinationGeneratorEmitter
 
             if (isClassLevel)
             {
-                writer.AppendLine($"ClassDataFactories = new Func<object?>[] {{ {string.Join(", ", formattedArgs.Select(arg => $"() => {arg}"))} }},");
+                writer.AppendLine($"ClassDataFactories = new Func<Task<object?>>[] {{ {string.Join(", ", formattedArgs.Select(arg => $"() => Task.FromResult<object?>({arg})"))} }},");
             }
             else
             {
-                writer.AppendLine($"MethodDataFactories = new Func<object?>[] {{ {string.Join(", ", formattedArgs.Select(arg => $"() => {arg}"))} }},");
+                writer.AppendLine($"MethodDataFactories = new Func<Task<object?>>[] {{ {string.Join(", ", formattedArgs.Select(arg => $"() => Task.FromResult<object?>({arg})"))} }},");
             }
 
             // Always write both indices
@@ -380,7 +380,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("MethodLoopIndex = methodLoopCounter++,");
         }
 
-        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<object?>>()");
+        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()");
         writer.Unindent();
         writer.AppendLine("});");
 
@@ -422,12 +422,12 @@ public static class DataCombinationGeneratorEmitter
                         attr.ConstructorArguments[0].Values.Length > 0)
                     {
                         var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0]);
-                        writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => {value};");
+                        writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>({value});");
                     }
                     else if (attr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
                     {
                         var value = FormatConstantValue(attr.ConstructorArguments[0]);
-                        writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => {value};");
+                        writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>({value});");
                     }
                 }
             }
@@ -525,11 +525,11 @@ public static class DataCombinationGeneratorEmitter
 
         if (isClassLevel)
         {
-            writer.AppendLine("ClassDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<object?>(() => dataSourceFunc().GetAwaiter().GetResult()?[index])).ToArray(),");
+            writer.AppendLine("ClassDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await dataSourceFunc())?[index])).ToArray(),");
         }
         else
         {
-            writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<object?>(() => dataSourceFunc().GetAwaiter().GetResult()?[index])).ToArray(),");
+            writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await dataSourceFunc())?[index])).ToArray(),");
         }
 
         // Always write both indices
@@ -656,11 +656,11 @@ public static class DataCombinationGeneratorEmitter
 
         if (isClassLevel)
         {
-            writer.AppendLine("ClassDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<object?>(() => dataSourceFunc().GetAwaiter().GetResult()?[index])).ToArray(),");
+            writer.AppendLine("ClassDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await dataSourceFunc())?[index])).ToArray(),");
         }
         else
         {
-            writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<object?>(() => dataSourceFunc().GetAwaiter().GetResult()?[index])).ToArray(),");
+            writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await dataSourceFunc())?[index])).ToArray(),");
         }
 
         // Always write both indices
@@ -714,7 +714,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("ClassLoopIndex = 0,");
         writer.AppendLine("MethodLoopIndex = 0,");
 
-        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<object?>>()");
+        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()");
         writer.Unindent();
         writer.AppendLine("});");
     }
@@ -741,8 +741,8 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("allCombinations.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("ClassDataFactories = classCombination.ClassDataFactories ?? Array.Empty<Func<object?>>(),");
-        writer.AppendLine("MethodDataFactories = methodCombination.MethodDataFactories ?? Array.Empty<Func<object?>>(),");
+        writer.AppendLine("ClassDataFactories = classCombination.ClassDataFactories ?? Array.Empty<Func<Task<object?>>>(),");
+        writer.AppendLine("MethodDataFactories = methodCombination.MethodDataFactories ?? Array.Empty<Func<Task<object?>>>(),");
         writer.AppendLine("ClassDataSourceIndex = classCombination.ClassDataSourceIndex,");
         writer.AppendLine("ClassLoopIndex = classCombination.ClassLoopIndex,");
         writer.AppendLine("MethodDataSourceIndex = methodCombination.MethodDataSourceIndex,");

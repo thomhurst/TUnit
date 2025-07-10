@@ -10,13 +10,13 @@ public class TestDataCombination
     /// Factory functions that create constructor arguments for the test class instance.
     /// Each function is invoked to get a fresh instance for test isolation.
     /// </summary>
-    public Func<object?>[] ClassDataFactories { get; init; } = Array.Empty<Func<object?>>();
+    public Func<Task<object?>>[] ClassDataFactories { get; init; } = Array.Empty<Func<Task<object?>>>();
 
     /// <summary>
     /// Factory functions that create arguments for the test method invocation.
     /// Each function is invoked to get a fresh instance for test isolation.
     /// </summary>
-    public Func<object?>[] MethodDataFactories { get; init; } = Array.Empty<Func<object?>>();
+    public Func<Task<object?>>[] MethodDataFactories { get; init; } = Array.Empty<Func<Task<object?>>>();
 
     /// <summary>
     /// The index of the data source attribute applied to the method.
@@ -46,7 +46,7 @@ public class TestDataCombination
     /// Factory functions for property values to be injected into the test class instance.
     /// Key: property name, Value: factory function that creates the property value
     /// </summary>
-    public Dictionary<string, Func<object?>> PropertyValueFactories { get; init; } = new();
+    public Dictionary<string, Func<Task<object?>>> PropertyValueFactories { get; init; } = new();
 
     /// <summary>
     /// Exception that occurred during data generation, if any.

@@ -63,9 +63,13 @@ public sealed class TestBuilder : ITestBuilder
     public async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestDataCombination combination)
     {
         // Create fresh instances from factories
-        var classArguments = combination.ClassDataFactories.Select(f => f()).ToArray();
-        var methodArguments = combination.MethodDataFactories.Select(f => f()).ToArray();
-        var propertyValues = combination.PropertyValueFactories.ToDictionary(kvp => kvp.Key, kvp => kvp.Value());
+        var classArguments = await Task.WhenAll(combination.ClassDataFactories.Select(f => f()));
+        var methodArguments = await Task.WhenAll(combination.MethodDataFactories.Select(f => f()));
+        var propertyValues = new Dictionary<string, object?>();
+        foreach (var kvp in combination.PropertyValueFactories)
+        {
+            propertyValues[kvp.Key] = await kvp.Value();
+        }
         
         // Track all objects from data sources
         TrackDataSourceObjects(classArguments, methodArguments, propertyValues);
@@ -73,7 +77,7 @@ public sealed class TestBuilder : ITestBuilder
         // Generate unique test ID
         var testId = TestIdentifierService.GenerateTestId(metadata, combination);
 
-        var displayName = GenerateDisplayName(metadata, GetArgumentsDisplayText(combination));
+        var displayName = GenerateDisplayName(metadata, await GetArgumentsDisplayTextAsync(combination));
 
         var context = await CreateTestContextAsync(testId, displayName, metadata);
 
@@ -98,11 +102,11 @@ public sealed class TestBuilder : ITestBuilder
         return metadata.CreateExecutableTestFactory(creationContext, metadata);
     }
 
-    private static string GetArgumentsDisplayText(TestDataCombination combination)
+    private static async Task<string> GetArgumentsDisplayTextAsync(TestDataCombination combination)
     {
         var allArgs = new List<object?>();
-        allArgs.AddRange(combination.ClassDataFactories.Select(f => f()));
-        allArgs.AddRange(combination.MethodDataFactories.Select(f => f()));
+        allArgs.AddRange(await Task.WhenAll(combination.ClassDataFactories.Select(f => f())));
+        allArgs.AddRange(await Task.WhenAll(combination.MethodDataFactories.Select(f => f())));
 
         if (allArgs.Count == 0)
         {

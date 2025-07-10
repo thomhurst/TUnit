@@ -35,17 +35,19 @@ public class AsyncUntypedDataSourceGenerator : IAsyncDataSourceGenerator
         {
             if (factoryFunc != null)
             {
-                var methodData = await factoryFunc();
+                // Get initial data to determine array length
+                var initialData = await factoryFunc();
+                var dataLength = initialData?.Length ?? 0;
 
                 yield return new TestDataCombination
                 {
-                    MethodDataFactories = (methodData ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),
-                    ClassDataFactories = Array.Empty<Func<object?>>(),
+                    MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await factoryFunc())?[index])).ToArray(),
+                    ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
                     MethodDataSourceIndex = dataSourceIndex,
                     MethodLoopIndex = loopIndex,
                     ClassDataSourceIndex = -1,
                     ClassLoopIndex = 0,
-                    PropertyValueFactories = new Dictionary<string, Func<object?>>()
+                    PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()
                 };
                 loopIndex++;
             }

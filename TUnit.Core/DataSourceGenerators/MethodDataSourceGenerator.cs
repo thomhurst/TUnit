@@ -38,13 +38,13 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
             {
                 yield return new TestDataCombination
                 {
-                    MethodDataFactories = objectArray.Select<object?, Func<object?>>(item => () => item).ToArray(),
-                    ClassDataFactories = Array.Empty<Func<object?>>(),
+                    MethodDataFactories = objectArray.Select<object?, Func<Task<object?>>>(item => () => Task.FromResult(item)).ToArray(),
+                    ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
                     MethodDataSourceIndex = context.DataSourceIndex,
                     MethodLoopIndex = loopIndex,
                     ClassDataSourceIndex = -1,
                     ClassLoopIndex = 0,
-                    PropertyValueFactories = new Dictionary<string, Func<object?>>()
+                    PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()
                 };
                 loopIndex++;
             }
@@ -66,13 +66,13 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
 
                 yield return new TestDataCombination
                 {
-                    MethodDataFactories = methodData.Select<object?, Func<object?>>(item => () => item).ToArray(),
-                    ClassDataFactories = Array.Empty<Func<object?>>(),
+                    MethodDataFactories = methodData.Select<object?, Func<Task<object?>>>(item => () => Task.FromResult(item)).ToArray(),
+                    ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
                     MethodDataSourceIndex = context.DataSourceIndex,
                     MethodLoopIndex = loopIndex,
                     ClassDataSourceIndex = -1,
                     ClassLoopIndex = 0,
-                    PropertyValueFactories = new Dictionary<string, Func<object?>>()
+                    PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()
                 };
                 loopIndex++;
             }
