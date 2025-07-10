@@ -515,9 +515,8 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("await foreach (var dataSourceFunc in generator.GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("// Get initial data to determine array length");
-        writer.AppendLine("var initialData = await dataSourceFunc();");
-        writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
+        writer.AppendLine("// For SharedType.None, we must not pre-materialize the data");
+        writer.AppendLine("// as that would create a single instance that gets shared");
         writer.AppendLine();
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
@@ -525,10 +524,22 @@ public static class DataCombinationGeneratorEmitter
 
         if (isClassLevel)
         {
-            writer.AppendLine("ClassDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await dataSourceFunc())?[index])).ToArray(),");
+            writer.AppendLine("// Create a single factory that calls dataSourceFunc each time");
+            writer.AppendLine("// This ensures SharedType.None creates new instances");
+            writer.AppendLine("ClassDataFactories = new[] { new Func<Task<object?>>(async () =>");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("var data = await dataSourceFunc();");
+            writer.AppendLine("return data?[0];");
+            writer.Unindent();
+            writer.AppendLine("}) },");
         }
         else
         {
+            writer.AppendLine("// For method data, we need to know the array length");
+            writer.AppendLine("// Call once to get length, then create factories");
+            writer.AppendLine("var initialData = await dataSourceFunc();");
+            writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
             writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await dataSourceFunc())?[index])).ToArray(),");
         }
 
@@ -646,9 +657,8 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("await foreach (var dataSourceFunc in ((IAsyncDataSourceGeneratorAttribute)generator).GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("// Get initial data to determine array length");
-        writer.AppendLine("var initialData = await dataSourceFunc();");
-        writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
+        writer.AppendLine("// For SharedType.None, we must not pre-materialize the data");
+        writer.AppendLine("// as that would create a single instance that gets shared");
         writer.AppendLine();
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
@@ -656,10 +666,22 @@ public static class DataCombinationGeneratorEmitter
 
         if (isClassLevel)
         {
-            writer.AppendLine("ClassDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await dataSourceFunc())?[index])).ToArray(),");
+            writer.AppendLine("// Create a single factory that calls dataSourceFunc each time");
+            writer.AppendLine("// This ensures SharedType.None creates new instances");
+            writer.AppendLine("ClassDataFactories = new[] { new Func<Task<object?>>(async () =>");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("var data = await dataSourceFunc();");
+            writer.AppendLine("return data?[0];");
+            writer.Unindent();
+            writer.AppendLine("}) },");
         }
         else
         {
+            writer.AppendLine("// For method data, we need to know the array length");
+            writer.AppendLine("// Call once to get length, then create factories");
+            writer.AppendLine("var initialData = await dataSourceFunc();");
+            writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
             writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await dataSourceFunc())?[index])).ToArray(),");
         }
 
