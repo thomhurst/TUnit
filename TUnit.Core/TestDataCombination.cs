@@ -7,14 +7,16 @@ namespace TUnit.Core;
 public class TestDataCombination
 {
     /// <summary>
-    /// Constructor arguments for the test class instance
+    /// Factory functions that create constructor arguments for the test class instance.
+    /// Each function is invoked to get a fresh instance for test isolation.
     /// </summary>
-    public object?[] ClassData { get; init; } = Array.Empty<object?>();
+    public Func<object?>[] ClassDataFactories { get; init; } = Array.Empty<Func<object?>>();
 
     /// <summary>
-    /// Arguments for the test method invocation
+    /// Factory functions that create arguments for the test method invocation.
+    /// Each function is invoked to get a fresh instance for test isolation.
     /// </summary>
-    public object?[] MethodData { get; init; } = Array.Empty<object?>();
+    public Func<object?>[] MethodDataFactories { get; init; } = Array.Empty<Func<object?>>();
 
     /// <summary>
     /// The index of the data source attribute applied to the method.
@@ -41,10 +43,10 @@ public class TestDataCombination
     public int ClassLoopIndex { get; init; } = 0;
 
     /// <summary>
-    /// Property values to be injected into the test class instance.
-    /// Key: property name, Value: property value
+    /// Factory functions for property values to be injected into the test class instance.
+    /// Key: property name, Value: factory function that creates the property value
     /// </summary>
-    public Dictionary<string, object?> PropertyValues { get; init; } = new();
+    public Dictionary<string, Func<object?>> PropertyValueFactories { get; init; } = new();
 
     /// <summary>
     /// Exception that occurred during data generation, if any.

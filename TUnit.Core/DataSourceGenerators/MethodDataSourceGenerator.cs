@@ -38,13 +38,13 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
             {
                 yield return new TestDataCombination
                 {
-                    MethodData = objectArray,
-                    ClassData = Array.Empty<object?>(),
+                    MethodDataFactories = objectArray.Select<object?, Func<object?>>(item => () => item).ToArray(),
+                    ClassDataFactories = Array.Empty<Func<object?>>(),
                     MethodDataSourceIndex = context.DataSourceIndex,
                     MethodLoopIndex = loopIndex,
                     ClassDataSourceIndex = -1,
                     ClassLoopIndex = 0,
-                    PropertyValues = new Dictionary<string, object?>()
+                    PropertyValueFactories = new Dictionary<string, Func<object?>>()
                 };
                 loopIndex++;
             }
@@ -66,13 +66,13 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
 
                 yield return new TestDataCombination
                 {
-                    MethodData = methodData,
-                    ClassData = Array.Empty<object?>(),
+                    MethodDataFactories = methodData.Select<object?, Func<object?>>(item => () => item).ToArray(),
+                    ClassDataFactories = Array.Empty<Func<object?>>(),
                     MethodDataSourceIndex = context.DataSourceIndex,
                     MethodLoopIndex = loopIndex,
                     ClassDataSourceIndex = -1,
                     ClassLoopIndex = 0,
-                    PropertyValues = new Dictionary<string, object?>()
+                    PropertyValueFactories = new Dictionary<string, Func<object?>>()
                 };
                 loopIndex++;
             }

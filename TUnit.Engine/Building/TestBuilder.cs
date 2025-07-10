@@ -62,8 +62,13 @@ public sealed class TestBuilder : ITestBuilder
 
     public async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestDataCombination combination)
     {
+        // Create fresh instances from factories
+        var classArguments = combination.ClassDataFactories.Select(f => f()).ToArray();
+        var methodArguments = combination.MethodDataFactories.Select(f => f()).ToArray();
+        var propertyValues = combination.PropertyValueFactories.ToDictionary(kvp => kvp.Key, kvp => kvp.Value());
+        
         // Track all objects from data sources
-        TrackDataSourceObjects(combination);
+        TrackDataSourceObjects(classArguments, methodArguments, propertyValues);
         
         // Generate unique test ID
         var testId = TestIdentifierService.GenerateTestId(metadata, combination);
@@ -82,9 +87,9 @@ public sealed class TestBuilder : ITestBuilder
         {
             TestId = testId,
             DisplayName = displayName,
-            Arguments = combination.MethodData,
-            ClassArguments = combination.ClassData,
-            PropertyValues = combination.PropertyValues,
+            Arguments = methodArguments,
+            ClassArguments = classArguments,
+            PropertyValues = propertyValues,
             BeforeTestHooks = beforeTestHooks,
             AfterTestHooks = afterTestHooks,
             Context = context
@@ -96,8 +101,8 @@ public sealed class TestBuilder : ITestBuilder
     private static string GetArgumentsDisplayText(TestDataCombination combination)
     {
         var allArgs = new List<object?>();
-        allArgs.AddRange(combination.ClassData);
-        allArgs.AddRange(combination.MethodData);
+        allArgs.AddRange(combination.ClassDataFactories.Select(f => f()));
+        allArgs.AddRange(combination.MethodDataFactories.Select(f => f()));
 
         if (allArgs.Count == 0)
         {
@@ -266,10 +271,10 @@ public sealed class TestBuilder : ITestBuilder
         };
     }
     
-    private static void TrackDataSourceObjects(TestDataCombination combination)
+    private static void TrackDataSourceObjects(object?[] classArguments, object?[] methodArguments, Dictionary<string, object?> propertyValues)
     {
-        ActiveObjectTracker.IncrementUsage(combination.ClassData);
-        ActiveObjectTracker.IncrementUsage(combination.MethodData);
-        ActiveObjectTracker.IncrementUsage(combination.PropertyValues.Values);
+        ActiveObjectTracker.IncrementUsage(classArguments);
+        ActiveObjectTracker.IncrementUsage(methodArguments);
+        ActiveObjectTracker.IncrementUsage(propertyValues.Values);
     }
 }

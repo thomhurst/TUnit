@@ -131,13 +131,13 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("yield return new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("ClassData = combination.ClassData,");
-        writer.AppendLine("MethodData = combination.MethodData,");
+        writer.AppendLine("ClassDataFactories = combination.ClassDataFactories,");
+        writer.AppendLine("MethodDataFactories = combination.MethodDataFactories,");
         writer.AppendLine("ClassDataSourceIndex = combination.ClassDataSourceIndex,");
         writer.AppendLine("MethodDataSourceIndex = combination.MethodDataSourceIndex,");
         writer.AppendLine("ClassLoopIndex = combination.ClassLoopIndex,");
         writer.AppendLine("MethodLoopIndex = combination.MethodLoopIndex,");
-        writer.AppendLine("PropertyValues = combination.PropertyValues,");
+        writer.AppendLine("PropertyValueFactories = combination.PropertyValueFactories,");
         writer.AppendLine("DataGenerationException = combination.DataGenerationException,");
         writer.AppendLine("DisplayName = combination.DisplayName,");
         writer.AppendLine("RepeatIndex = repeatIndex");
@@ -183,14 +183,14 @@ public static class DataCombinationGeneratorEmitter
 
         writer.AppendLine();
         writer.AppendLine("// Property data sources");
-        writer.AppendLine("var propertyValues = new Dictionary<string, object?>();");
+        writer.AppendLine("var propertyValues = new Dictionary<string, Func<object?>>();");
 
         foreach (var propData in propertyDataSources)
         {
             EmitPropertyDataSource(writer, propData, typeSymbol);
         }
 
-        writer.AppendLine("propertyCombinations.Add(new TestDataCombination { PropertyValues = propertyValues });");
+        writer.AppendLine("propertyCombinations.Add(new TestDataCombination { PropertyValueFactories = propertyValues });");
     }
 
     private static void EmitDataSourceCombination(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
@@ -283,11 +283,11 @@ public static class DataCombinationGeneratorEmitter
 
             if (isClassLevel)
             {
-                writer.AppendLine($"ClassData = new object?[] {{ {string.Join(", ", formattedArgs)} }},");
+                writer.AppendLine($"ClassDataFactories = new Func<object?>[] {{ {string.Join(", ", formattedArgs.Select(arg => $"() => {arg}"))} }},");
             }
             else
             {
-                writer.AppendLine($"MethodData = new object?[] {{ {string.Join(", ", formattedArgs)} }},");
+                writer.AppendLine($"MethodDataFactories = new Func<object?>[] {{ {string.Join(", ", formattedArgs.Select(arg => $"() => {arg}"))} }},");
             }
 
             // Always write both indices
@@ -298,7 +298,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("ClassLoopIndex = 0,");
             writer.AppendLine("MethodLoopIndex = 0,");
 
-            writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
+            writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<object?>>()");
             writer.Unindent();
             writer.AppendLine("});");
         }
@@ -357,11 +357,11 @@ public static class DataCombinationGeneratorEmitter
 
         if (isClassLevel)
         {
-            writer.AppendLine("ClassData = data,");
+            writer.AppendLine("ClassDataFactories = data.Select<object?, Func<object?>>(item => () => item).ToArray(),");
         }
         else
         {
-            writer.AppendLine("MethodData = data,");
+            writer.AppendLine("MethodDataFactories = data.Select<object?, Func<object?>>(item => () => item).ToArray(),");
         }
 
         // Always write both indices
@@ -380,7 +380,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("MethodLoopIndex = methodLoopCounter++,");
         }
 
-        writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
+        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<object?>>()");
         writer.Unindent();
         writer.AppendLine("});");
 
@@ -422,12 +422,12 @@ public static class DataCombinationGeneratorEmitter
                         attr.ConstructorArguments[0].Values.Length > 0)
                     {
                         var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0]);
-                        writer.AppendLine($"propertyValues[\"{propertyName}\"] = {value};");
+                        writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => {value};");
                     }
                     else if (attr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
                     {
                         var value = FormatConstantValue(attr.ConstructorArguments[0]);
-                        writer.AppendLine($"propertyValues[\"{propertyName}\"] = {value};");
+                        writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => {value};");
                     }
                 }
             }
@@ -522,11 +522,11 @@ public static class DataCombinationGeneratorEmitter
 
         if (isClassLevel)
         {
-            writer.AppendLine("ClassData = data ?? Array.Empty<object?>(),");
+            writer.AppendLine("ClassDataFactories = (data ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),");
         }
         else
         {
-            writer.AppendLine("MethodData = data ?? Array.Empty<object?>(),");
+            writer.AppendLine("MethodDataFactories = (data ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),");
         }
 
         // Always write both indices
@@ -650,11 +650,11 @@ public static class DataCombinationGeneratorEmitter
 
         if (isClassLevel)
         {
-            writer.AppendLine("ClassData = data ?? Array.Empty<object?>(),");
+            writer.AppendLine("ClassDataFactories = (data ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),");
         }
         else
         {
-            writer.AppendLine("MethodData = data ?? Array.Empty<object?>(),");
+            writer.AppendLine("MethodDataFactories = (data ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),");
         }
 
         // Always write both indices
@@ -708,7 +708,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("ClassLoopIndex = 0,");
         writer.AppendLine("MethodLoopIndex = 0,");
 
-        writer.AppendLine("PropertyValues = new Dictionary<string, object?>()");
+        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<object?>>()");
         writer.Unindent();
         writer.AppendLine("});");
     }
@@ -726,22 +726,22 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("var mergedProperties = new Dictionary<string, object?>();");
-        writer.AppendLine("foreach (var kvp in classCombination.PropertyValues) mergedProperties[kvp.Key] = kvp.Value;");
-        writer.AppendLine("foreach (var kvp in methodCombination.PropertyValues) mergedProperties[kvp.Key] = kvp.Value;");
-        writer.AppendLine("foreach (var kvp in propertyCombination.PropertyValues) mergedProperties[kvp.Key] = kvp.Value;");
+        writer.AppendLine("var mergedProperties = new Dictionary<string, Func<object?>>();");
+        writer.AppendLine("foreach (var kvp in classCombination.PropertyValueFactories) mergedProperties[kvp.Key] = kvp.Value;");
+        writer.AppendLine("foreach (var kvp in methodCombination.PropertyValueFactories) mergedProperties[kvp.Key] = kvp.Value;");
+        writer.AppendLine("foreach (var kvp in propertyCombination.PropertyValueFactories) mergedProperties[kvp.Key] = kvp.Value;");
         writer.AppendLine();
 
         writer.AppendLine("allCombinations.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("ClassData = classCombination.ClassData ?? Array.Empty<object?>(),");
-        writer.AppendLine("MethodData = methodCombination.MethodData ?? Array.Empty<object?>(),");
+        writer.AppendLine("ClassDataFactories = classCombination.ClassDataFactories ?? Array.Empty<Func<object?>>(),");
+        writer.AppendLine("MethodDataFactories = methodCombination.MethodDataFactories ?? Array.Empty<Func<object?>>(),");
         writer.AppendLine("ClassDataSourceIndex = classCombination.ClassDataSourceIndex,");
         writer.AppendLine("ClassLoopIndex = classCombination.ClassLoopIndex,");
         writer.AppendLine("MethodDataSourceIndex = methodCombination.MethodDataSourceIndex,");
         writer.AppendLine("MethodLoopIndex = methodCombination.MethodLoopIndex,");
-        writer.AppendLine("PropertyValues = mergedProperties,");
+        writer.AppendLine("PropertyValueFactories = mergedProperties,");
         writer.AppendLine("DataGenerationException = classCombination.DataGenerationException ?? methodCombination.DataGenerationException ?? propertyCombination.DataGenerationException,");
         writer.AppendLine("DisplayName = classCombination.DisplayName ?? methodCombination.DisplayName ?? propertyCombination.DisplayName");
         writer.Unindent();

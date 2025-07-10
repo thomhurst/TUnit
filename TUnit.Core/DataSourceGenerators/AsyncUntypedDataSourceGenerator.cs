@@ -39,13 +39,13 @@ public class AsyncUntypedDataSourceGenerator : IAsyncDataSourceGenerator
 
                 yield return new TestDataCombination
                 {
-                    MethodData = methodData ?? Array.Empty<object?>(),
-                    ClassData = Array.Empty<object?>(),
+                    MethodDataFactories = (methodData ?? Array.Empty<object?>()).Select<object?, Func<object?>>(item => () => item).ToArray(),
+                    ClassDataFactories = Array.Empty<Func<object?>>(),
                     MethodDataSourceIndex = dataSourceIndex,
                     MethodLoopIndex = loopIndex,
                     ClassDataSourceIndex = -1,
                     ClassLoopIndex = 0,
-                    PropertyValues = new Dictionary<string, object?>()
+                    PropertyValueFactories = new Dictionary<string, Func<object?>>()
                 };
                 loopIndex++;
             }
