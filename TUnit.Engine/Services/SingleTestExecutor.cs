@@ -47,36 +47,27 @@ internal class SingleTestExecutor : ISingleTestExecutor
         test.State = TestState.Running;
         
         // Initialize all eligible objects before test starts
-        if (test.Context != null)
-        {
-            await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
-        }
+        await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context!, cancellationToken);
         
         // Invoke first test event receivers if this is the first test
-        if (test.Context != null)
+        var classContext = test.Context!.ClassContext;
+        if (classContext != null)
         {
-            var classContext = test.Context.ClassContext;
-            if (classContext != null)
-            {
-                var assemblyContext = classContext.AssemblyContext;
-                var sessionContext = assemblyContext.TestSessionContext;
-                
-                // First test in session
-                await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
-                
-                // First test in assembly
-                await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
-                
-                // First test in class
-                await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
-            }
+            var assemblyContext = classContext.AssemblyContext;
+            var sessionContext = assemblyContext.TestSessionContext;
+            
+            // First test in session
+            await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
+            
+            // First test in assembly
+            await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
+            
+            // First test in class
+            await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
         }
         
         // Invoke test start event receivers
-        if (test.Context != null)
-        {
-            await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken);
-        }
+        await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context!, cancellationToken);
 
         try
         {
@@ -96,26 +87,23 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.EndTime = DateTimeOffset.Now;
             
             // Invoke test end event receivers
-            if (test.Context != null)
+            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
+            
+            // Invoke last test event receivers if this is the last test
+            var endClassContext = test.Context!.ClassContext;
+            if (endClassContext != null)
             {
-                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken);
+                var endAssemblyContext = endClassContext.AssemblyContext;
+                var endSessionContext = endAssemblyContext.TestSessionContext;
                 
-                // Invoke last test event receivers if this is the last test
-                var classContext = test.Context.ClassContext;
-                if (classContext != null)
-                {
-                    var assemblyContext = classContext.AssemblyContext;
-                    var sessionContext = assemblyContext.TestSessionContext;
-                    
-                    // Last test in class
-                    await _eventReceiverOrchestrator.InvokeLastTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
-                    
-                    // Last test in assembly
-                    await _eventReceiverOrchestrator.InvokeLastTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
-                    
-                    // Last test in session
-                    await _eventReceiverOrchestrator.InvokeLastTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
-                }
+                // Last test in class
+                await _eventReceiverOrchestrator.InvokeLastTestInClassEventReceiversAsync(test.Context, endClassContext, cancellationToken);
+                
+                // Last test in assembly
+                await _eventReceiverOrchestrator.InvokeLastTestInAssemblyEventReceiversAsync(test.Context, endAssemblyContext, cancellationToken);
+                
+                // Last test in session
+                await _eventReceiverOrchestrator.InvokeLastTestInSessionEventReceiversAsync(test.Context, endSessionContext, cancellationToken);
             }
         }
 
@@ -131,10 +119,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         test.EndTime = DateTimeOffset.Now;
         
         // Invoke test skipped event receivers
-        if (test.Context != null)
-        {
-            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
-        }
+        await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context!, cancellationToken);
         
         return CreateUpdateMessage(test);
     }
