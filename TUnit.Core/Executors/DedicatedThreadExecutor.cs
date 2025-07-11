@@ -83,14 +83,19 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                     return;
                 }
 
-                try
+                if (task.IsFaulted)
                 {
-                    task.GetAwaiter().GetResult();
-                    tcs.SetResult(null);
+                    tcs.SetException(task.Exception!.InnerExceptions.Count == 1 
+                        ? task.Exception.InnerException! 
+                        : task.Exception);
                 }
-                catch (Exception ex)
+                else if (task.IsCanceled)
                 {
-                    tcs.SetException(ex);
+                    tcs.SetCanceled();
+                }
+                else
+                {
+                    tcs.SetResult(null);
                 }
             }
             finally
