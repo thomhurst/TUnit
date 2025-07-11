@@ -28,49 +28,6 @@ public class TestFinder : ITestFinder
     }
     
     /// <summary>
-    /// Gets all test contexts that match the specified predicate
-    /// </summary>
-    public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
-    {
-        return _allTests.Where(predicate);
-    }
-    
-    /// <summary>
-    /// Gets all test contexts with the specified test name
-    /// </summary>
-    public List<TestContext> GetTestsByName(string testName)
-    {
-        if (_testsByName.TryGetValue(testName, out var tests))
-        {
-            return new List<TestContext>(tests);
-        }
-        return new List<TestContext>();
-    }
-    
-    /// <summary>
-    /// Gets all test contexts with the specified test name and class type
-    /// </summary>
-    public List<TestContext> GetTestsByName(string testName, Type classType)
-    {
-        if (_testsByName.TryGetValue(testName, out var tests))
-        {
-            return tests.Where(t => t.TestDetails?.ClassType == classType).ToList();
-        }
-        return new List<TestContext>();
-    }
-    
-    /// <summary>
-    /// Reregisters a test with new arguments
-    /// </summary>
-    public async Task ReregisterTestWithArguments(TestContext context, object?[]? methodArguments, Dictionary<string, object?>? objectBag)
-    {
-        // For now, we just register the updated context
-        // In a real implementation, this would create a new test variation
-        RegisterTest(context);
-        await Task.CompletedTask;
-    }
-    
-    /// <summary>
     /// Gets all test contexts for the specified class type
     /// </summary>
     public IEnumerable<TestContext> GetTests(Type classType)
@@ -86,6 +43,14 @@ public class TestFinder : ITestFinder
     {
         var paramTypes = methodParameterTypes?.ToArray() ?? Array.Empty<Type>();
         var classParamTypes = classParameterTypes?.ToArray() ?? Array.Empty<Type>();
+        
+        // If no parameter types are specified, match by name and class type only
+        if (paramTypes.Length == 0 && classParamTypes.Length == 0)
+        {
+            return _allTests.Where(t => 
+                t.TestName == testName &&
+                t.TestDetails?.ClassType == classType).ToArray();
+        }
         
         return _allTests.Where(t => 
             t.TestName == testName &&

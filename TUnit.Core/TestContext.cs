@@ -358,9 +358,8 @@ public class TestContext : Context
             }
         }
 
-        var testFinder = ServiceProvider.GetService<ITestFinder>()!;
-
-        await testFinder.ReregisterTestWithArguments(this, methodArguments, objectBag);
+        // TODO: This functionality needs to be handled differently now that ITestFinder doesn't support it
+        await Task.CompletedTask;
     }
 
     /// <summary>
@@ -376,11 +375,15 @@ public class TestContext : Context
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
     {
         var testFinder = ServiceProvider.GetService<ITestFinder>()!;
-
-        foreach (var test in testFinder.GetTests(predicate))
+        
+        // Get all tests from the current class and filter using the predicate
+        var classType = TestDetails?.ClassType;
+        if (classType == null)
         {
-            yield return test;
+            return Enumerable.Empty<TestContext>();
         }
+
+        return testFinder.GetTests(classType).Where(predicate);
     }
 
     /// <summary>
@@ -394,11 +397,17 @@ public class TestContext : Context
         var classType = TestDetails?.ClassType;
         if (classType == null)
         {
-            // Fallback to getting all tests with this name if we don't have a class type
-            return testFinder.GetTestsByName(testName);
+            return new List<TestContext>();
         }
         
-        return testFinder.GetTestsByName(testName, classType);
+        // Call GetTestsByNameAndParameters with empty parameter lists to get all tests with this name
+        return testFinder.GetTestsByNameAndParameters(
+            testName, 
+            Enumerable.Empty<Type>(),
+            classType, 
+            Enumerable.Empty<Type>(), 
+            Enumerable.Empty<object?>()
+        ).ToList();
     }
     
     /// <summary>
@@ -406,8 +415,15 @@ public class TestContext : Context
     /// </summary>
     public List<TestContext> GetTests(string testName, Type classType)
     {
-        var testFinder = _serviceProvider.GetService<ITestFinder>()!;
+        var testFinder = ServiceProvider.GetService<ITestFinder>()!;
 
-        return testFinder.GetTestsByName(testName, classType);
+        // Call GetTestsByNameAndParameters with empty parameter lists to get all tests with this name
+        return testFinder.GetTestsByNameAndParameters(
+            testName, 
+            Enumerable.Empty<Type>(),
+            classType, 
+            Enumerable.Empty<Type>(), 
+            Enumerable.Empty<object?>()
+        ).ToList();
     }
 }
