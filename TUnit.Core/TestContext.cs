@@ -362,29 +362,13 @@ public class TestContext : Context
             }
         }
 
-        // If we have access to the test registry, create a new test variation
-        try
+        // Use the test discovery service if available
+        var discoveryService = _serviceProvider?.GetService(typeof(ITestDiscoveryService)) as ITestDiscoveryService;
+        if (discoveryService != null)
         {
-            var registryType = Type.GetType("TUnit.Engine.Services.TestRegistry, TUnit.Engine");
-            if (registryType != null)
-            {
-                var instanceProperty = registryType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-                var registry = instanceProperty?.GetValue(null);
-                if (registry != null)
-                {
-                    var reregisterMethod = registryType.GetMethod("ReregisterTestWithArguments");
-                    if (reregisterMethod != null)
-                    {
-                        await (Task) reregisterMethod.Invoke(registry, [this, methodArguments, objectBag])!;
-                    }
-                }
-            }
+            await discoveryService.ReregisterTestWithArguments(this, methodArguments, objectBag);
         }
-        catch
-        {
-            // Fallback if registry is not available - just update local state
-            // This maintains backward compatibility
-        }
+        // Otherwise just the local state update is sufficient
     }
 
     /// <summary>
@@ -399,35 +383,11 @@ public class TestContext : Context
     /// </summary>
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
     {
-        IEnumerable<TestContext>? registryResult = null;
-
-        // Try to use the test registry if available
-        try
+        // Use the test discovery service if available
+        var discoveryService = _serviceProvider?.GetService(typeof(ITestDiscoveryService)) as ITestDiscoveryService;
+        if (discoveryService != null)
         {
-            var registryType = Type.GetType("TUnit.Engine.Services.TestRegistry, TUnit.Engine");
-            if (registryType != null)
-            {
-                var instanceProperty = registryType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-                var registry = instanceProperty?.GetValue(null);
-                if (registry != null)
-                {
-                    var getTestsMethod = registryType.GetMethod("GetTests");
-                    if (getTestsMethod != null)
-                    {
-                        registryResult = (IEnumerable<TestContext>) getTestsMethod.Invoke(registry, [predicate])!;
-                    }
-                }
-            }
-        }
-        catch
-        {
-            // Fallback to local context
-        }
-
-        // Return registry results if available
-        if (registryResult != null)
-        {
-            foreach (var test in registryResult)
+            foreach (var test in discoveryService.GetTests(predicate))
             {
                 yield return test;
             }
@@ -446,27 +406,11 @@ public class TestContext : Context
     /// </summary>
     public List<TestContext> GetTests(string testName)
     {
-        // Try to use the test registry if available
-        try
+        // Use the test discovery service if available
+        var discoveryService = _serviceProvider?.GetService(typeof(ITestDiscoveryService)) as ITestDiscoveryService;
+        if (discoveryService != null)
         {
-            var registryType = Type.GetType("TUnit.Engine.Services.TestRegistry, TUnit.Engine");
-            if (registryType != null)
-            {
-                var instanceProperty = registryType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
-                var registry = instanceProperty?.GetValue(null);
-                if (registry != null)
-                {
-                    var getTestsByNameMethod = registryType.GetMethod("GetTestsByName");
-                    if (getTestsByNameMethod != null)
-                    {
-                        return (List<TestContext>) getTestsByNameMethod.Invoke(registry, [testName])!;
-                    }
-                }
-            }
-        }
-        catch
-        {
-            // Fallback to local context
+            return discoveryService.GetTestsByName(testName);
         }
 
         // Fallback: just check current context

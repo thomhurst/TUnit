@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
@@ -31,6 +32,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public IHookCollectionService HookCollectionService { get; }
     public HookOrchestrator HookOrchestrator { get; }
     public EventReceiverOrchestrator EventReceiverOrchestrator { get; }
+    public ITestDiscoveryService TestDiscoveryService { get; }
 
     public TUnitServiceProvider(
         IExtension extension,
@@ -65,6 +67,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             context));
 
         CancellationToken = Register(new EngineCancellationToken());
+        
+        // Create test discovery service
+        TestDiscoveryService = Register<ITestDiscoveryService>(new TestDiscoveryService());
 
         // Create test services using unified architecture
         Register<ITestInvoker>(new TestInvoker());
