@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
@@ -21,6 +22,51 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine($"private async IAsyncEnumerable<TestDataCombination> GenerateCombinations_{methodGuid}()");
         writer.AppendLine("{");
         writer.Indent();
+        
+        // Helper method to invoke Func<T> if needed
+        writer.AppendLine("object? InvokeIfFunc(object? value)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("if (value == null) return null;");
+        writer.AppendLine("var type = value.GetType();");
+        writer.AppendLine("if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("var invokeMethod = type.GetMethod(\"Invoke\");");
+        writer.AppendLine("return invokeMethod?.Invoke(value, Array.Empty<object>());");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("return value;");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        
+        // Helper method to handle tuple values for method and class arguments
+        writer.AppendLine("Func<Task<object?>>[] HandleTupleValue(object? value, bool shouldUnwrap)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("if (!shouldUnwrap || value == null)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("return new[] { () => Task.FromResult<object?>(value) };");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        writer.AppendLine("// Check if it's a tuple and unwrap it");
+        writer.AppendLine("var unwrapped = global::TUnit.Core.Helpers.TupleHelper.UnwrapTuple(value);");
+        writer.AppendLine("if (unwrapped.Length > 1)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("// Multiple values from tuple - create a factory for each");
+        writer.AppendLine("return unwrapped.Select(v => new Func<Task<object?>>(() => Task.FromResult<object?>(v))).ToArray();");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        writer.AppendLine("// Single value or not a tuple");
+        writer.AppendLine("return new[] { () => Task.FromResult<object?>(value) };");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
 
         var methodDataSources = GetDataSourceAttributes(methodSymbol);
         var classDataSources = GetDataSourceAttributes(typeSymbol);
@@ -222,9 +268,13 @@ public static class DataCombinationGeneratorEmitter
 
             if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
             {
-                EmitArgumentsAttribute(writer, attr, listName, isClassLevel);
+                EmitArgumentsAttribute(writer, attr, listName, isClassLevel, methodSymbol, typeSymbol);
             }
             else if (fullyQualifiedName == "global::TUnit.Core.MethodDataSourceAttribute")
+            {
+                EmitMethodDataSource(writer, attr, listName, isClassLevel, typeSymbol);
+            }
+            else if (fullyQualifiedName == "global::TUnit.Core.InstanceMethodDataSourceAttribute")
             {
                 EmitMethodDataSource(writer, attr, listName, isClassLevel, typeSymbol);
             }
@@ -252,13 +302,18 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("}");
     }
 
-    private static void EmitArgumentsAttribute(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel)
+    private static void EmitArgumentsAttribute(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         writer.AppendLine("// ArgumentsAttribute");
 
         try
         {
             var formattedArgs = new List<string>();
+            
+            // Get the parameter types - for method data sources, use method parameters; for class data sources, use constructor parameters
+            var parameters = isClassLevel 
+                ? typeSymbol.Constructors.FirstOrDefault(c => !c.IsStatic)?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty
+                : methodSymbol.Parameters;
 
             if (attr.ConstructorArguments is { IsDefaultOrEmpty: true }
                 or [{ IsNull: true }])
@@ -270,11 +325,20 @@ public static class DataCombinationGeneratorEmitter
                     { Kind: TypedConstantKind.Array }
                 ])
             {
-                formattedArgs.AddRange(attr.ConstructorArguments[0].Values.Select(FormatConstantValue));
+                var values = attr.ConstructorArguments[0].Values;
+                for (int i = 0; i < values.Length; i++)
+                {
+                    var targetType = i < parameters.Length ? parameters[i].Type : null;
+                    formattedArgs.Add(FormatConstantValueWithType(values[i], targetType));
+                }
             }
             else
             {
-                formattedArgs = attr.ConstructorArguments.Select(FormatConstantValue).ToList();
+                for (int i = 0; i < attr.ConstructorArguments.Length; i++)
+                {
+                    var targetType = i < parameters.Length ? parameters[i].Type : null;
+                    formattedArgs.Add(FormatConstantValueWithType(attr.ConstructorArguments[i], targetType));
+                }
             }
 
             writer.AppendLine($"{listName}.Add(new TestDataCombination");
@@ -326,85 +390,172 @@ public static class DataCombinationGeneratorEmitter
             return;
         }
 
-        var isStatic = attr.ConstructorArguments.Length > 1 &&
-            attr.ConstructorArguments[1].Value is bool and true;
+        // Determine which type contains the method
+        var methodClass = GetMethodClass(attr, typeSymbol);
+        
+        // Find the method on the type
+        var dataSourceMethod = methodClass
+            .GetMembers(methodName!)
+            .OfType<IMethodSymbol>()
+            .FirstOrDefault();
+            
+        if (dataSourceMethod == null)
+        {
+            writer.AppendLine($"// Method '{methodName}' not found");
+            EmitEmptyCombination(writer, listName);
+            return;
+        }
+
+        var isStatic = dataSourceMethod.IsStatic;
 
         writer.AppendLine($"// Calling method: {methodName} (static: {isStatic})");
 
         if (isStatic)
         {
-            EmitStaticMethodDataSource(writer, methodName, listName, isClassLevel, typeSymbol);
+            EmitStaticMethodDataSource(writer, methodName!, listName, isClassLevel, methodClass, dataSourceMethod, attr);
         }
         else
         {
-            EmitInstanceMethodDataSource(writer, methodName, listName, isClassLevel, typeSymbol);
+            EmitInstanceMethodDataSource(writer, methodName!, listName, isClassLevel, methodClass, dataSourceMethod, attr);
         }
     }
+    
+    private static ITypeSymbol GetMethodClass(AttributeData methodDataAttribute, INamedTypeSymbol typeContainingAttribute)
+    {
+        if (methodDataAttribute.AttributeClass?.IsGenericType is true)
+        {
+            return methodDataAttribute.AttributeClass.TypeArguments[0];
+        }
 
-    private static void EmitStaticMethodDataSource(CodeWriter writer, string methodName, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol)
+        if (methodDataAttribute.ConstructorArguments.Length is 2)
+        {
+            return (ITypeSymbol)methodDataAttribute.ConstructorArguments[0].Value!;
+        }
+
+        return typeContainingAttribute;
+    }
+
+    private static void EmitStaticMethodDataSource(CodeWriter writer, string methodName, string listName, bool isClassLevel, ITypeSymbol typeSymbol, IMethodSymbol dataSourceMethod, AttributeData attr)
     {
         var fullyQualifiedTypeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        writer.AppendLine($"var dataEnumerable = {fullyQualifiedTypeName}.{methodName}();");
-        writer.AppendLine("int classLoopCounter = 0;");
-        writer.AppendLine("int methodLoopCounter = 0;");
-        writer.AppendLine("await foreach (var data in dataEnumerable)");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine($"{listName}.Add(new TestDataCombination");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        if (isClassLevel)
-        {
-            writer.AppendLine("ClassDataFactories = data.Select<object?, Func<Task<object?>>>(item => () => Task.FromResult(item)).ToArray(),");
-        }
-        else
-        {
-            writer.AppendLine("MethodDataFactories = data.Select<object?, Func<Task<object?>>>(item => () => Task.FromResult(item)).ToArray(),");
-        }
-
-        // Always write both indices
-        writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
-        writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
         
-        // Always write both loop indices
-        if (isClassLevel)
+        // Get the Arguments property from the attribute
+        var argumentsProperty = attr.NamedArguments.FirstOrDefault(x => x.Key == "Arguments");
+        var hasArguments = argumentsProperty.Key != null && !argumentsProperty.Value.IsNull;
+        
+        // Build the method call with arguments if any
+        var methodCall = $"{fullyQualifiedTypeName}.{methodName}(";
+        if (hasArguments && argumentsProperty.Value.Kind == TypedConstantKind.Array)
         {
-            writer.AppendLine("ClassLoopIndex = classLoopCounter++,");
-            writer.AppendLine("MethodLoopIndex = methodLoopCounter = 0,");
+            var arguments = new List<string>();
+            foreach (var arg in argumentsProperty.Value.Values)
+            {
+                arguments.Add(FormatConstantValue(arg));
+            }
+            methodCall += string.Join(", ", arguments);
+        }
+        methodCall += ")";
+        
+        // Check if the method returns an enumerable type
+        var isEnumerable = IsEnumerable(dataSourceMethod.ReturnType);
+        var isAsyncEnumerable = IsAsyncEnumerable(dataSourceMethod.ReturnType);
+        
+        if (isEnumerable || isAsyncEnumerable)
+        {
+            // Method returns enumerable - iterate over it
+            writer.AppendLine($"var dataEnumerable = {methodCall};");
+            writer.AppendLine("int classLoopCounter = 0;");
+            writer.AppendLine("int methodLoopCounter = 0;");
+            
+            if (isAsyncEnumerable)
+            {
+                writer.AppendLine("await foreach (var data in dataEnumerable)");
+            }
+            else
+            {
+                writer.AppendLine("foreach (var data in dataEnumerable)");
+            }
+            writer.AppendLine("{");
+            writer.Indent();
+
+            writer.AppendLine($"{listName}.Add(new TestDataCombination");
+            writer.AppendLine("{");
+            writer.Indent();
+
+            if (isClassLevel)
+            {
+                writer.AppendLine("ClassDataFactories = HandleTupleValue(InvokeIfFunc(data), true),");
+            }
+            else
+            {
+                writer.AppendLine("MethodDataFactories = HandleTupleValue(InvokeIfFunc(data), true),");
+            }
+
+            // Always write both indices
+            writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
+            writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
+            
+            // Always write both loop indices
+            if (isClassLevel)
+            {
+                writer.AppendLine("ClassLoopIndex = classLoopCounter++,");
+                writer.AppendLine("MethodLoopIndex = methodLoopCounter = 0,");
+            }
+            else
+            {
+                writer.AppendLine("ClassLoopIndex = classLoopCounter,");
+                writer.AppendLine("MethodLoopIndex = methodLoopCounter++,");
+            }
+
+            writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()");
+            writer.Unindent();
+            writer.AppendLine("});");
+
+            writer.Unindent();
+            writer.AppendLine("}");
         }
         else
         {
-            writer.AppendLine("ClassLoopIndex = classLoopCounter,");
-            writer.AppendLine("MethodLoopIndex = methodLoopCounter++,");
+            // Method returns single value
+            writer.AppendLine($"var dataValue = {methodCall};");
+            writer.AppendLine($"{listName}.Add(new TestDataCombination");
+            writer.AppendLine("{");
+            writer.Indent();
+
+            if (isClassLevel)
+            {
+                writer.AppendLine("ClassDataFactories = HandleTupleValue(InvokeIfFunc(dataValue), true),");
+            }
+            else
+            {
+                writer.AppendLine("MethodDataFactories = HandleTupleValue(InvokeIfFunc(dataValue), true),");
+            }
+
+            // Always write both indices
+            writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
+            writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
+            
+            // Always write both loop indices (0 since it's a single value)
+            writer.AppendLine("ClassLoopIndex = 0,");
+            writer.AppendLine("MethodLoopIndex = 0,");
+
+            writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()");
+            writer.Unindent();
+            writer.AppendLine("});");
         }
-
-        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()");
-        writer.Unindent();
-        writer.AppendLine("});");
-
-        writer.Unindent();
-        writer.AppendLine("}");
     }
 
-    private static void EmitInstanceMethodDataSource(CodeWriter writer, string methodName, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol)
+    private static void EmitInstanceMethodDataSource(CodeWriter writer, string methodName, string listName, bool isClassLevel, ITypeSymbol typeSymbol, IMethodSymbol dataSourceMethod, AttributeData attr)
     {
         writer.AppendLine($"// Instance method: {methodName}");
         writer.AppendLine("// Instance methods are not supported in the unified compile-time data generation approach");
         writer.AppendLine("// because they require a test class instance which doesn't exist at compile time.");
         writer.AppendLine("// Consider using static methods for data sources instead.");
 
-        writer.AppendLine("errorCombination = new TestDataCombination");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("DataGenerationException = new NotSupportedException(");
+        writer.AppendLine("throw new NotSupportedException(");
         writer.AppendLine($"    \"Instance method '{methodName}' cannot be used as a data source. \" +");
         writer.AppendLine("    \"Instance methods require a test class instance which is not available at compile time. \" +");
-        writer.AppendLine("    \"Please use static methods for data sources.\"),");
-        writer.AppendLine($"DisplayName = \"[INSTANCE METHOD NOT SUPPORTED: {methodName}]\"");
-        writer.Unindent();
-        writer.AppendLine("};");
+        writer.AppendLine("    \"Please use static methods for data sources.\");");
     }
 
     private static void EmitPropertyDataSource(CodeWriter writer, PropertyWithDataSource propData, INamedTypeSymbol typeSymbol)
@@ -540,13 +691,23 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("var data = await dataSourceFunc();");
-            writer.AppendLine("return data?[0];");
+            writer.AppendLine("if (data == null || data.Length == 0) return null;");
+            writer.AppendLine("var instance = data[0];");
+            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
+            writer.AppendLine("return instance;");
             writer.Unindent();
             writer.AppendLine("}) },");
         }
         else
         {
-            writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await dataSourceFunc())?[index])).ToArray(),");
+            writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () =>");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("var data = await dataSourceFunc();");
+            writer.AppendLine("if (data == null || index >= data.Length) return null;");
+            writer.AppendLine("return data[index];");
+            writer.Unindent();
+            writer.AppendLine("})).ToArray(),");
         }
 
         // Always write both indices
@@ -688,13 +849,25 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("var data = await dataSourceFunc();");
-            writer.AppendLine("return data?[0];");
+            writer.AppendLine("if (data == null || data.Length == 0) return null;");
+            writer.AppendLine("var instance = data[0];");
+            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
+            writer.AppendLine("return instance;");
             writer.Unindent();
             writer.AppendLine("}) },");
         }
         else
         {
-            writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await dataSourceFunc())?[index])).ToArray(),");
+            writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () =>");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("var data = await dataSourceFunc();");
+            writer.AppendLine("if (data == null || index >= data.Length) return null;");
+            writer.AppendLine("var instance = data[index];");
+            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
+            writer.AppendLine("return instance;");
+            writer.Unindent();
+            writer.AppendLine("})).ToArray(),");
         }
 
         // Always write both indices
@@ -863,7 +1036,37 @@ public static class DataCombinationGeneratorEmitter
                attributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute");
     }
 
+    private static readonly TypedConstantFormatter _formatter = new();
+    
     private static string FormatConstantValue(TypedConstant constant)
+    {
+        try
+        {
+            // Use the formatter for consistent handling
+            return _formatter.FormatForCode(constant);
+        }
+        catch
+        {
+            // Fallback to simple string representation
+            return constant.Value?.ToString() ?? "null";
+        }
+    }
+    
+    private static string FormatConstantValueWithType(TypedConstant constant, ITypeSymbol? targetType)
+    {
+        try
+        {
+            // Use the formatter with target type for proper conversions
+            return _formatter.FormatForCode(constant, targetType);
+        }
+        catch
+        {
+            // Fallback to simple string representation
+            return constant.Value?.ToString() ?? "null";
+        }
+    }
+    
+    private static string FormatConstantValueOld(TypedConstant constant)
     {
         try
         {
@@ -991,5 +1194,69 @@ public static class DataCombinationGeneratorEmitter
     {
         public IPropertySymbol Property { get; init; }
         public AttributeData DataSourceAttribute { get; init; }
+    }
+    
+    private static bool IsAsyncEnumerable(ITypeSymbol typeSymbol)
+    {
+        if (typeSymbol is not INamedTypeSymbol namedType)
+        {
+            return false;
+        }
+
+        // Check if it implements IAsyncEnumerable<T>
+        var asyncEnumerableInterface = namedType.AllInterfaces
+            .FirstOrDefault(i => i.IsGenericType && 
+                                 i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>");
+        
+        if (asyncEnumerableInterface != null)
+        {
+            return true;
+        }
+
+        // Check if the type itself is IAsyncEnumerable<T>
+        if (namedType.IsGenericType && 
+            namedType.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>")
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
+    private static bool IsEnumerable(ITypeSymbol typeSymbol)
+    {
+        // Arrays are enumerable
+        if (typeSymbol is IArrayTypeSymbol)
+        {
+            return true;
+        }
+        
+        if (typeSymbol is not INamedTypeSymbol namedType)
+        {
+            return false;
+        }
+
+        // Check if it implements IEnumerable<T>
+        var enumerableInterface = namedType.AllInterfaces
+            .FirstOrDefault(i => i.IsGenericType && 
+                                 i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>");
+        
+        if (enumerableInterface != null)
+        {
+            return true;
+        }
+
+        // Check if the type itself is IEnumerable<T>
+        if (namedType.IsGenericType && 
+            namedType.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>")
+        {
+            return true;
+        }
+        
+        // Check for non-generic IEnumerable
+        var nonGenericEnumerable = namedType.AllInterfaces
+            .FirstOrDefault(i => i.ToDisplayString() == "System.Collections.IEnumerable");
+            
+        return nonGenericEnumerable != null;
     }
 }

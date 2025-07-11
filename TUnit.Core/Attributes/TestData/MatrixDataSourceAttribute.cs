@@ -53,6 +53,11 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
     private IReadOnlyList<object?> GetAllArguments(DataGeneratorMetadata dataGeneratorMetadata,
         ParameterMetadata sourceGeneratedParameterInformation)
     {
+        if (sourceGeneratedParameterInformation.ReflectionInfo == null)
+        {
+            throw new InvalidOperationException($"Parameter reflection information is not available for parameter '{sourceGeneratedParameterInformation.Name}'. This typically occurs when using instance method data sources which are not supported at compile time.");
+        }
+
         var matrixAttribute = sourceGeneratedParameterInformation.ReflectionInfo.GetCustomAttributesSafe()
             .OfType<MatrixAttribute>()
             .FirstOrDefault();

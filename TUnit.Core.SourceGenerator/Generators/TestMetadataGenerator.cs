@@ -206,8 +206,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodSymbol = testMethod.MethodSymbol;
 
         writer.AppendLine("Categories = Array.Empty<string>(),");
-        writer.AppendLine("IsSkipped = false,");
-        writer.AppendLine("SkipReason = null,");
         writer.AppendLine("TimeoutMs = null,");
         writer.AppendLine("RetryCount = 0,");
         writer.AppendLine("CanRunInParallel = true,");
@@ -337,7 +335,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (i < argCount)
                     {
                         // Use the provided argument
-                        argsToPass.Add($"({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]");
+                        argsToPass.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>(args[{i}])");
                     }
                     else if (param.HasExplicitDefaultValue)
                     {
@@ -445,7 +443,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (i < argCount)
                     {
                         // Use the provided argument
-                        argsToPass.Add($"({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]");
+                        argsToPass.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>(args[{i}])");
                     }
                     else if (param.HasExplicitDefaultValue)
                     {
@@ -526,7 +524,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("Metadata = typedMetadata,");
 
         // Set typed properties
-        writer.AppendLine($"CreateTypedInstance = async () => typedMetadata.InstanceFactory == null ? throw new InvalidOperationException(\"No instance factory\") : await Task.FromResult(({className})typedMetadata.InstanceFactory(context.ClassArguments)),");
+        writer.AppendLine($"CreateTypedInstance = async () =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("if (typedMetadata.InstanceFactory == null)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("throw new InvalidOperationException(\"No instance factory\");");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine($"var instance = ({className})typedMetadata.InstanceFactory(context.ClassArguments);");
+        writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
+        writer.AppendLine("return instance;");
+        writer.Unindent();
+        writer.AppendLine("},");
         writer.AppendLine("InvokeTypedTest = typedMetadata.InvokeTypedTest ?? throw new InvalidOperationException(\"No typed test invoker\"),");
         writer.AppendLine("TypedPropertySetters = typedMetadata.PropertySetters");
 
