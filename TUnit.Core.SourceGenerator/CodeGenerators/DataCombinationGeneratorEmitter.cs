@@ -22,7 +22,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine($"private async IAsyncEnumerable<TestDataCombination> GenerateCombinations_{methodGuid}()");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         // Helper method to invoke Func<T> if needed
         writer.AppendLine("object? InvokeIfFunc(object? value)");
         writer.AppendLine("{");
@@ -40,7 +40,7 @@ public static class DataCombinationGeneratorEmitter
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
-        
+
         // Helper method to handle tuple values for method and class arguments
         writer.AppendLine("Func<Task<object?>>[] HandleTupleValue(object? value, bool shouldUnwrap)");
         writer.AppendLine("{");
@@ -202,7 +202,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("// Method data sources");
         writer.AppendLine("int methodDataSourceCounter = 0;");
         writer.AppendLine("int classDataSourceCounter = 0;");
-        for (int i = 0; i < methodDataSources.Length; i++)
+        for (var i = 0; i < methodDataSources.Length; i++)
         {
             var attr = methodDataSources[i];
             EmitDataSourceCombination(writer, attr, "methodCombinations", isClassLevel: false, methodSymbol, typeSymbol);
@@ -215,7 +215,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("// Class data sources");
         writer.AppendLine("classDataSourceCounter = 0;");
         writer.AppendLine("methodDataSourceCounter = 0;");
-        for (int i = 0; i < classDataSources.Length; i++)
+        for (var i = 0; i < classDataSources.Length; i++)
         {
             var attr = classDataSources[i];
             EmitDataSourceCombination(writer, attr, "classCombinations", isClassLevel: true, methodSymbol, typeSymbol);
@@ -243,12 +243,12 @@ public static class DataCombinationGeneratorEmitter
     {
         writer.AppendLine("{");
         writer.Indent();
-        
+
         // Emit code to get the current indices
         writer.AppendLine("// Get current indices and increment the appropriate counter");
         writer.AppendLine("var currentClassIndex = classDataSourceCounter;");
         writer.AppendLine("var currentMethodIndex = methodDataSourceCounter;");
-        
+
         if (isClassLevel)
         {
             writer.AppendLine("classDataSourceCounter++;");
@@ -309,9 +309,9 @@ public static class DataCombinationGeneratorEmitter
         try
         {
             var formattedArgs = new List<string>();
-            
+
             // Get the parameter types - for method data sources, use method parameters; for class data sources, use constructor parameters
-            var parameters = isClassLevel 
+            var parameters = isClassLevel
                 ? typeSymbol.Constructors.FirstOrDefault(c => !c.IsStatic)?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty
                 : methodSymbol.Parameters;
 
@@ -326,7 +326,7 @@ public static class DataCombinationGeneratorEmitter
                 ])
             {
                 var values = attr.ConstructorArguments[0].Values;
-                for (int i = 0; i < values.Length; i++)
+                for (var i = 0; i < values.Length; i++)
                 {
                     var targetType = i < parameters.Length ? parameters[i].Type : null;
                     formattedArgs.Add(FormatConstantValueWithType(values[i], targetType));
@@ -334,7 +334,7 @@ public static class DataCombinationGeneratorEmitter
             }
             else
             {
-                for (int i = 0; i < attr.ConstructorArguments.Length; i++)
+                for (var i = 0; i < attr.ConstructorArguments.Length; i++)
                 {
                     var targetType = i < parameters.Length ? parameters[i].Type : null;
                     formattedArgs.Add(FormatConstantValueWithType(attr.ConstructorArguments[i], targetType));
@@ -357,7 +357,7 @@ public static class DataCombinationGeneratorEmitter
             // Always write both indices
             writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
             writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
-            
+
             // Always write both loop indices (0 for Arguments attribute since it's not a loop)
             writer.AppendLine("ClassLoopIndex = 0,");
             writer.AppendLine("MethodLoopIndex = 0,");
@@ -395,7 +395,7 @@ public static class DataCombinationGeneratorEmitter
             // MethodDataSource(string) overload
             methodName = attr.ConstructorArguments[0].Value?.ToString();
         }
-        
+
         if (string.IsNullOrEmpty(methodName))
         {
             EmitEmptyCombination(writer, listName);
@@ -404,13 +404,13 @@ public static class DataCombinationGeneratorEmitter
 
         // Determine which type contains the method
         var methodClass = GetMethodClass(attr, typeSymbol);
-        
+
         // Find the method on the type
         var dataSourceMethod = methodClass
             .GetMembers(methodName!)
             .OfType<IMethodSymbol>()
             .FirstOrDefault();
-            
+
         if (dataSourceMethod == null)
         {
             writer.AppendLine($"// Method '{methodName}' not found");
@@ -431,7 +431,7 @@ public static class DataCombinationGeneratorEmitter
             EmitInstanceMethodDataSource(writer, methodName!, listName, isClassLevel, methodClass, dataSourceMethod, attr);
         }
     }
-    
+
     private static ITypeSymbol GetMethodClass(AttributeData methodDataAttribute, INamedTypeSymbol typeContainingAttribute)
     {
         if (methodDataAttribute.AttributeClass?.IsGenericType is true)
@@ -450,11 +450,11 @@ public static class DataCombinationGeneratorEmitter
     private static void EmitStaticMethodDataSource(CodeWriter writer, string methodName, string listName, bool isClassLevel, ITypeSymbol typeSymbol, IMethodSymbol dataSourceMethod, AttributeData attr)
     {
         var fullyQualifiedTypeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        
+
         // Get the Arguments property from the attribute
         var argumentsProperty = attr.NamedArguments.FirstOrDefault(x => x.Key == "Arguments");
         var hasArguments = argumentsProperty.Key != null && !argumentsProperty.Value.IsNull;
-        
+
         // Build the method call with arguments if any
         var methodCall = $"{fullyQualifiedTypeName}.{methodName}(";
         if (hasArguments && argumentsProperty.Value.Kind == TypedConstantKind.Array)
@@ -467,18 +467,18 @@ public static class DataCombinationGeneratorEmitter
             methodCall += string.Join(", ", arguments);
         }
         methodCall += ")";
-        
+
         // Check if the method returns an enumerable type
         var isEnumerable = IsEnumerable(dataSourceMethod.ReturnType);
         var isAsyncEnumerable = IsAsyncEnumerable(dataSourceMethod.ReturnType);
-        
+
         if (isEnumerable || isAsyncEnumerable)
         {
             // Method returns enumerable - iterate over it
             writer.AppendLine($"var dataEnumerable = {methodCall};");
             writer.AppendLine("int classLoopCounter = 0;");
             writer.AppendLine("int methodLoopCounter = 0;");
-            
+
             if (isAsyncEnumerable)
             {
                 writer.AppendLine("await foreach (var data in dataEnumerable)");
@@ -506,7 +506,7 @@ public static class DataCombinationGeneratorEmitter
             // Always write both indices
             writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
             writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
-            
+
             // Always write both loop indices
             if (isClassLevel)
             {
@@ -546,7 +546,7 @@ public static class DataCombinationGeneratorEmitter
             // Always write both indices
             writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
             writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
-            
+
             // Always write both loop indices (0 since it's a single value)
             writer.AppendLine("ClassLoopIndex = 0,");
             writer.AppendLine("MethodLoopIndex = 0,");
@@ -611,13 +611,13 @@ public static class DataCombinationGeneratorEmitter
         // Create an instance of the generator and call GenerateAsync
         var attributeType = attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
         writer.AppendLine($"var generator = new {attributeType}();");
-        
+
         writer.AppendLine("// Create TestInformation for the data generator");
         writer.Append("var testInformation = ");
         TestInformationGenerator.GenerateTestInformation(writer, methodSymbol, typeSymbol);
         writer.AppendLine(";");
         writer.AppendLine();
-        
+
         writer.AppendLine("// Create MembersToGenerate array based on whether it's class or method level");
         writer.AppendLine("var membersToGenerate = new MemberMetadata[]");
         writer.AppendLine("{");
@@ -659,7 +659,7 @@ public static class DataCombinationGeneratorEmitter
         writer.Unindent();
         writer.AppendLine("};");
         writer.AppendLine();
-        
+
         writer.AppendLine("var dataGeneratorMetadata = new DataGeneratorMetadata");
         writer.AppendLine("{");
         writer.Indent();
@@ -725,7 +725,7 @@ public static class DataCombinationGeneratorEmitter
         // Always write both indices
         writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
         writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
-        
+
         // Always write both loop indices
         if (isClassLevel)
         {
@@ -769,13 +769,13 @@ public static class DataCombinationGeneratorEmitter
         // Create an instance of the generator and call GenerateDataSources
         var attributeType = attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
         writer.AppendLine($"var generator = new {attributeType}();");
-        
+
         writer.AppendLine("// Create TestInformation for the data generator");
         writer.Append("var testInformation = ");
         TestInformationGenerator.GenerateTestInformation(writer, methodSymbol, typeSymbol);
         writer.AppendLine(";");
         writer.AppendLine();
-        
+
         writer.AppendLine("// Create MembersToGenerate array based on whether it's class or method level");
         writer.AppendLine("var membersToGenerate = new MemberMetadata[]");
         writer.AppendLine("{");
@@ -817,7 +817,7 @@ public static class DataCombinationGeneratorEmitter
         writer.Unindent();
         writer.AppendLine("};");
         writer.AppendLine();
-        
+
         writer.AppendLine("var dataGeneratorMetadata = new DataGeneratorMetadata");
         writer.AppendLine("{");
         writer.Indent();
@@ -885,7 +885,7 @@ public static class DataCombinationGeneratorEmitter
         // Always write both indices
         writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
         writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
-        
+
         // Always write both loop indices
         if (isClassLevel)
         {
@@ -928,7 +928,7 @@ public static class DataCombinationGeneratorEmitter
         // Always write both indices
         writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
         writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
-        
+
         // Always write both loop indices (0 for empty combination)
         writer.AppendLine("ClassLoopIndex = 0,");
         writer.AppendLine("MethodLoopIndex = 0,");
@@ -1049,7 +1049,7 @@ public static class DataCombinationGeneratorEmitter
     }
 
     private static readonly TypedConstantFormatter _formatter = new();
-    
+
     private static string FormatConstantValue(TypedConstant constant)
     {
         try
@@ -1063,7 +1063,7 @@ public static class DataCombinationGeneratorEmitter
             return constant.Value?.ToString() ?? "null";
         }
     }
-    
+
     private static string FormatConstantValueWithType(TypedConstant constant, ITypeSymbol? targetType)
     {
         try
@@ -1077,7 +1077,7 @@ public static class DataCombinationGeneratorEmitter
             return constant.Value?.ToString() ?? "null";
         }
     }
-    
+
     private static string FormatConstantValueOld(TypedConstant constant)
     {
         try
@@ -1192,8 +1192,8 @@ public static class DataCombinationGeneratorEmitter
                 .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == "TUnit.Core.RepeatAttribute");
         }
 
-        if (repeatAttr?.ConstructorArguments.Length > 0 && 
-            repeatAttr.ConstructorArguments[0].Value is int repeatTimes && 
+        if (repeatAttr?.ConstructorArguments.Length > 0 &&
+            repeatAttr.ConstructorArguments[0].Value is int repeatTimes &&
             repeatTimes > 0)
         {
             return repeatTimes;
@@ -1207,7 +1207,7 @@ public static class DataCombinationGeneratorEmitter
         public IPropertySymbol Property { get; init; }
         public AttributeData DataSourceAttribute { get; init; }
     }
-    
+
     private static bool IsAsyncEnumerable(ITypeSymbol typeSymbol)
     {
         if (typeSymbol is not INamedTypeSymbol namedType)
@@ -1217,16 +1217,16 @@ public static class DataCombinationGeneratorEmitter
 
         // Check if it implements IAsyncEnumerable<T>
         var asyncEnumerableInterface = namedType.AllInterfaces
-            .FirstOrDefault(i => i.IsGenericType && 
+            .FirstOrDefault(i => i.IsGenericType &&
                                  i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>");
-        
+
         if (asyncEnumerableInterface != null)
         {
             return true;
         }
 
         // Check if the type itself is IAsyncEnumerable<T>
-        if (namedType.IsGenericType && 
+        if (namedType.IsGenericType &&
             namedType.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>")
         {
             return true;
@@ -1234,7 +1234,7 @@ public static class DataCombinationGeneratorEmitter
 
         return false;
     }
-    
+
     private static bool IsEnumerable(ITypeSymbol typeSymbol)
     {
         // Arrays are enumerable
@@ -1242,7 +1242,7 @@ public static class DataCombinationGeneratorEmitter
         {
             return true;
         }
-        
+
         if (typeSymbol is not INamedTypeSymbol namedType)
         {
             return false;
@@ -1250,25 +1250,25 @@ public static class DataCombinationGeneratorEmitter
 
         // Check if it implements IEnumerable<T>
         var enumerableInterface = namedType.AllInterfaces
-            .FirstOrDefault(i => i.IsGenericType && 
+            .FirstOrDefault(i => i.IsGenericType &&
                                  i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>");
-        
+
         if (enumerableInterface != null)
         {
             return true;
         }
 
         // Check if the type itself is IEnumerable<T>
-        if (namedType.IsGenericType && 
+        if (namedType.IsGenericType &&
             namedType.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>")
         {
             return true;
         }
-        
+
         // Check for non-generic IEnumerable
         var nonGenericEnumerable = namedType.AllInterfaces
             .FirstOrDefault(i => i.ToDisplayString() == "System.Collections.IEnumerable");
-            
+
         return nonGenericEnumerable != null;
     }
 }

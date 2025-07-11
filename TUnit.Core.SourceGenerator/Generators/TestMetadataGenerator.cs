@@ -209,10 +209,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("TimeoutMs = null,");
         writer.AppendLine("RetryCount = 0,");
         writer.AppendLine("CanRunInParallel = true,");
-        
+
         // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
-        
+
         writer.AppendLine("AttributeFactory = () =>");
         writer.AppendLine("[");
         writer.Indent();
@@ -257,7 +257,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Method metadata
         writer.Append("MethodMetadata = ");
         SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
-        
+
         // Empty hooks for now
         writer.AppendLine("Hooks = new TestHooks");
         writer.AppendLine("{");
@@ -275,13 +275,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var methodName = testMethod.MethodSymbol.Name;
         var parameters = testMethod.MethodSymbol.Parameters;
-        
+
         // Check if last parameter is CancellationToken (regardless of whether it has a default value)
-        var hasCancellationToken = parameters.Length > 0 && 
+        var hasCancellationToken = parameters.Length > 0 &&
             parameters.Last().Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "global::System.Threading.CancellationToken";
-        
+
         // Parameters that come from args (excluding CancellationToken)
-        var parametersFromArgs = hasCancellationToken 
+        var parametersFromArgs = hasCancellationToken
             ? parameters.Take(parameters.Length - 1).ToArray()
             : parameters.ToArray();
 
@@ -314,22 +314,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // Count required parameters (those without default values, excluding CancellationToken)
             var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional);
-            
+
             // Generate runtime logic to handle variable argument counts
             writer.AppendLine("// Invoke with only the arguments that were provided");
             writer.AppendLine("switch (args.Length)");
             writer.AppendLine("{");
             writer.Indent();
-            
+
             // Generate cases for each valid argument count (from required params up to total params from args)
-            for (int argCount = requiredParamCount; argCount <= parametersFromArgs.Length; argCount++)
+            for (var argCount = requiredParamCount; argCount <= parametersFromArgs.Length; argCount++)
             {
                 writer.AppendLine($"case {argCount}:");
                 writer.Indent();
-                
+
                 // Build the arguments to pass, including default values for optional parameters
                 var argsToPass = new List<string>();
-                for (int i = 0; i < parametersFromArgs.Length; i++)
+                for (var i = 0; i < parametersFromArgs.Length; i++)
                 {
                     var param = parametersFromArgs[i];
                     if (i < argCount)
@@ -348,15 +348,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         argsToPass.Add($"default({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
                     }
                 }
-                
+
                 // Add CancellationToken if present
                 if (hasCancellationToken)
                 {
                     argsToPass.Add("global::TUnit.Core.TestContext.Current?.CancellationToken ?? System.Threading.CancellationToken.None");
                 }
-                
+
                 var methodCall = $"typedInstance.{methodName}({string.Join(", ", argsToPass)})";
-                
+
                 if (isAsync)
                 {
                     writer.AppendLine($"await {methodCall};");
@@ -368,7 +368,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("break;");
                 writer.Unindent();
             }
-            
+
             writer.AppendLine("default:");
             writer.Indent();
             if (requiredParamCount == parametersFromArgs.Length)
@@ -380,10 +380,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"throw new ArgumentException($\"Expected between {requiredParamCount} and {parametersFromArgs.Length} arguments, but got {{args.Length}}\");");
             }
             writer.Unindent();
-            
+
             writer.Unindent();
             writer.AppendLine("}");
-            
+
             if (!isAsync)
             {
                 writer.AppendLine("await Task.CompletedTask;");
@@ -422,22 +422,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // Count required parameters (those without default values, excluding CancellationToken)
             var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional);
-            
+
             // Generate runtime logic to handle variable argument counts
             writer.AppendLine("// Invoke with only the arguments that were provided");
             writer.AppendLine("switch (args.Length)");
             writer.AppendLine("{");
             writer.Indent();
-            
+
             // Generate cases for each valid argument count (from required params up to total params from args)
-            for (int argCount = requiredParamCount; argCount <= parametersFromArgs.Length; argCount++)
+            for (var argCount = requiredParamCount; argCount <= parametersFromArgs.Length; argCount++)
             {
                 writer.AppendLine($"case {argCount}:");
                 writer.Indent();
-                
+
                 // Build the arguments to pass, including default values for optional parameters
                 var argsToPass = new List<string>();
-                for (int i = 0; i < parametersFromArgs.Length; i++)
+                for (var i = 0; i < parametersFromArgs.Length; i++)
                 {
                     var param = parametersFromArgs[i];
                     if (i < argCount)
@@ -456,15 +456,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         argsToPass.Add($"default({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
                     }
                 }
-                
+
                 // Add CancellationToken if present
                 if (hasCancellationToken)
                 {
                     argsToPass.Add("cancellationToken");
                 }
-                
+
                 var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";
-                
+
                 if (isAsync)
                 {
                     writer.AppendLine($"await {typedMethodCall};");
@@ -476,7 +476,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("break;");
                 writer.Unindent();
             }
-            
+
             writer.AppendLine("default:");
             writer.Indent();
             if (requiredParamCount == parametersFromArgs.Length)
@@ -488,10 +488,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"throw new ArgumentException($\"Expected between {requiredParamCount} and {parametersFromArgs.Length} arguments, but got {{args.Length}}\");");
             }
             writer.Unindent();
-            
+
             writer.Unindent();
             writer.AppendLine("}");
-            
+
             if (!isAsync)
             {
                 writer.AppendLine("await Task.CompletedTask;");
@@ -608,7 +608,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             var attr = dependsOnAttributes[i];
             GenerateTestDependency(writer, compilation, attr);
-            
+
             if (i < dependsOnAttributes.Count - 1)
             {
                 writer.AppendLine(",");
@@ -622,7 +622,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static void GenerateTestDependency(CodeWriter writer, Compilation compilation, AttributeData attributeData)
     {
         var constructorArgs = attributeData.ConstructorArguments;
-        
+
         // Handle the different constructor overloads of DependsOnAttribute
         if (constructorArgs.Length == 1)
         {
@@ -640,8 +640,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 if (classType != null)
                 {
                     var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                    var genericArity = classType is INamedTypeSymbol namedType && namedType.IsGenericType 
-                        ? namedType.Arity 
+                    var genericArity = classType is INamedTypeSymbol namedType && namedType.IsGenericType
+                        ? namedType.Arity
                         : 0;
                     writer.AppendLine($"new TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity} }}");
                 }
@@ -651,13 +651,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             var firstArg = constructorArgs[0];
             var secondArg = constructorArgs[1];
-            
+
             if (firstArg.Type?.Name == "String" && secondArg.Type is IArrayTypeSymbol)
             {
                 // DependsOnAttribute(string testName, Type[] parameterTypes)
                 var testName = firstArg.Value?.ToString() ?? "";
                 writer.Append($"new TestDependency {{ MethodName = \"{testName}\"");
-                
+
                 // Handle parameter types
                 if (secondArg.Values.Length > 0)
                 {
@@ -675,7 +675,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                     writer.AppendLine(" }");
                 }
-                
+
                 writer.AppendLine(" }");
             }
             else if (firstArg.Type?.TypeKind == TypeKind.Class || firstArg.Type?.Name == "Type")
@@ -683,12 +683,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // DependsOnAttribute(Type testClass, string testName)
                 var classType = firstArg.Value as ITypeSymbol;
                 var testName = secondArg.Value?.ToString() ?? "";
-                
+
                 if (classType != null)
                 {
                     var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                    var genericArity = classType is INamedTypeSymbol namedType && namedType.IsGenericType 
-                        ? namedType.Arity 
+                    var genericArity = classType is INamedTypeSymbol namedType && namedType.IsGenericType
+                        ? namedType.Arity
                         : 0;
                     writer.AppendLine($"new TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\" }}");
                 }
@@ -699,15 +699,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // DependsOnAttribute(Type testClass, string testName, Type[] parameterTypes)
             var classType = constructorArgs[0].Value as ITypeSymbol;
             var testName = constructorArgs[1].Value?.ToString() ?? "";
-            
+
             if (classType != null)
             {
                 var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                var genericArity = classType is INamedTypeSymbol namedType && namedType.IsGenericType 
-                    ? namedType.Arity 
+                var genericArity = classType is INamedTypeSymbol namedType && namedType.IsGenericType
+                    ? namedType.Arity
                     : 0;
                 writer.Append($"new TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\"");
-                
+
                 // Handle parameter types
                 var paramTypesArg = constructorArgs[2];
                 if (paramTypesArg.Values.Length > 0)
@@ -726,7 +726,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                     writer.AppendLine(" }");
                 }
-                
+
                 writer.AppendLine(" }");
             }
         }
@@ -746,25 +746,25 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         var type = parameter.Type;
-        
+
         // Handle string
         if (type.SpecialType == SpecialType.System_String)
         {
             return $"\"{defaultValue.ToString().Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
         }
-        
+
         // Handle char
         if (type.SpecialType == SpecialType.System_Char)
         {
             return $"'{defaultValue}'";
         }
-        
+
         // Handle bool
         if (type.SpecialType == SpecialType.System_Boolean)
         {
             return defaultValue.ToString().ToLowerInvariant();
         }
-        
+
         // Handle numeric types with proper suffixes
         if (type.SpecialType == SpecialType.System_Single)
         {
@@ -790,7 +790,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             return $"{defaultValue}ul";
         }
-        
+
         // Default for other types
         return defaultValue.ToString();
     }
