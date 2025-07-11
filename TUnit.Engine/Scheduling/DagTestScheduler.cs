@@ -122,24 +122,29 @@ public sealed class DagTestScheduler : ITestScheduler
         ITestExecutor executor,
         CancellationToken cancellationToken)
     {
+        using var notificationSystem = new WorkNotificationSystem();
         var readyQueue = new ConcurrentQueue<TestExecutionState>();
-        var completionTracker = new TestCompletionTracker(graph, readyQueue);
+        var completionTracker = new TestCompletionTracker(graph, readyQueue, notificationSystem);
 
         // Handle pre-failed tests (e.g., from dependency resolution failures)
         foreach (var state in graph.Values.Where(s => s.Test.State == TestState.Failed))
         {
             state.State = TestState.Failed;
-            completionTracker.OnTestCompleted(state);
+            await completionTracker.OnTestCompletedAsync(state);
         }
 
         // Enqueue tests with no dependencies
         foreach (var state in graph.Values.Where(s => s.RemainingDependencies == 0 && s.Test.State != TestState.Failed))
         {
             readyQueue.Enqueue(state);
+            await notificationSystem.NotifyWorkAvailableAsync(
+                new WorkNotification { Source = WorkNotification.WorkSource.GlobalQueue });
         }
 
         // Start worker tasks
-        var workers = CreateWorkers(readyQueue, graph, executor, completionTracker, cancellationToken);
+        var workers = CreateOptimizedWorkers(
+            readyQueue, graph, executor, completionTracker, 
+            notificationSystem, cancellationToken);
 
         try
         {
@@ -150,13 +155,18 @@ public sealed class DagTestScheduler : ITestScheduler
             // This is expected when cancellation is requested (either user or fail-fast)
             await _logger.LogInformationAsync("Test execution cancelled");
         }
+        finally
+        {
+            notificationSystem.CompleteNotifications();
+        }
     }
 
-    private Task[] CreateWorkers(
+    private Task[] CreateOptimizedWorkers(
         ConcurrentQueue<TestExecutionState> readyQueue,
         Dictionary<string, TestExecutionState> graph,
         ITestExecutor executor,
         TestCompletionTracker completionTracker,
+        WorkNotificationSystem notificationSystem,
         CancellationToken cancellationToken)
     {
         var workerCount = _parallelismStrategy.CurrentParallelism;
@@ -165,7 +175,7 @@ public sealed class DagTestScheduler : ITestScheduler
 
         for (var i = 0; i < workerCount; i++)
         {
-            workStealingQueues[i] = new WorkStealingQueue<TestExecutionState>();
+            workStealingQueues[i] = new WorkStealingQueue<TestExecutionState>(notificationSystem);
         }
 
         for (var i = 0; i < workerCount; i++)
@@ -173,13 +183,14 @@ public sealed class DagTestScheduler : ITestScheduler
             var workerId = i;
             workers[i] = Task.Run(async () =>
             {
-                await WorkerLoopAsync(
+                await OptimizedWorkerLoopAsync(
                     workerId,
                     readyQueue,
                     workStealingQueues,
                     graph,
                     executor,
                     completionTracker,
+                    notificationSystem,
                     cancellationToken);
             }, cancellationToken);
         }
@@ -187,52 +198,79 @@ public sealed class DagTestScheduler : ITestScheduler
         return workers;
     }
 
-    private async Task WorkerLoopAsync(
+    private async Task OptimizedWorkerLoopAsync(
         int workerId,
         ConcurrentQueue<TestExecutionState> globalQueue,
         WorkStealingQueue<TestExecutionState>[] workStealingQueues,
         Dictionary<string, TestExecutionState> graph,
         ITestExecutor executor,
         TestCompletionTracker completionTracker,
+        WorkNotificationSystem notificationSystem,
         CancellationToken cancellationToken)
     {
         var localQueue = workStealingQueues[workerId];
+        var consecutiveEmptyAttempts = 0;
 
         while (!cancellationToken.IsCancellationRequested)
         {
             TestExecutionState? state = null;
 
-            // Try local queue first
-            if (localQueue.TryDequeue(out state) ||
-                // Then global queue
-                globalQueue.TryDequeue(out state) ||
-                // Finally steal from others
-                TryStealWork(workerId, workStealingQueues, out state))
+            // Try to get work without waiting
+            if (TryGetWork(workerId, localQueue, globalQueue, workStealingQueues, out state))
             {
-                if (state != null)
-                {
-                    await ExecuteTestWithTimeoutAsync(state, executor, completionTracker, cancellationToken);
-                }
+                consecutiveEmptyAttempts = 0;
+                await ExecuteTestWithTimeoutAsync(state!, executor, completionTracker, cancellationToken);
             }
             else if (completionTracker.AllTestsCompleted)
             {
-                // No more work
+                // All work done
                 break;
             }
             else
             {
-                // Wait for new work
+                // Wait for work notification
+                consecutiveEmptyAttempts++;
+                
+                // Use exponential backoff for spurious wakeups
+                var timeout = TimeSpan.FromMilliseconds(Math.Min(100, consecutiveEmptyAttempts * 10));
+                
                 try
                 {
-                    await Task.Delay(10, cancellationToken);
+                    using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    timeoutCts.CancelAfter(timeout);
+                    
+                    var notification = await notificationSystem.WaitForWorkAsync(timeoutCts.Token);
+                    
+                    if (notification == null && completionTracker.AllTestsCompleted)
+                    {
+                        break;
+                    }
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                 {
-                    // Expected when cancellation is requested
                     break;
                 }
             }
         }
+    }
+
+    private bool TryGetWork(
+        int workerId,
+        WorkStealingQueue<TestExecutionState> localQueue,
+        ConcurrentQueue<TestExecutionState> globalQueue,
+        WorkStealingQueue<TestExecutionState>[] allQueues,
+        out TestExecutionState? state)
+    {
+        // Try local queue first (fastest)
+        if (localQueue.TryDequeue(out state))
+            return true;
+            
+        // Then global queue
+        if (globalQueue.TryDequeue(out state))
+            return true;
+            
+        // Finally try stealing (most expensive)
+        return TryStealWork(workerId, allQueues, out state);
     }
 
     private bool TryStealWork(
@@ -288,7 +326,7 @@ public sealed class DagTestScheduler : ITestScheduler
         }
         finally
         {
-            completionTracker.OnTestCompleted(state);
+            await completionTracker.OnTestCompletedAsync(state);
         }
     }
 }

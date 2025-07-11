@@ -6,20 +6,23 @@ namespace TUnit.Engine.Scheduling;
 /// <summary>
 /// Tracks test completion and manages dependency resolution
 /// </summary>
-public sealed class TestCompletionTracker
+internal sealed class TestCompletionTracker
 {
     private readonly Dictionary<string, TestExecutionState> _graph;
     private readonly ConcurrentQueue<TestExecutionState> _readyQueue;
+    private readonly WorkNotificationSystem? _notificationSystem;
     private readonly object _lock = new();
     private int _completedCount;
     private int _totalCount;
 
     public TestCompletionTracker(
         Dictionary<string, TestExecutionState> graph,
-        ConcurrentQueue<TestExecutionState> readyQueue)
+        ConcurrentQueue<TestExecutionState> readyQueue,
+        WorkNotificationSystem? notificationSystem = null)
     {
         _graph = graph;
         _readyQueue = readyQueue;
+        _notificationSystem = notificationSystem;
         _totalCount = graph.Count;
     }
 
@@ -27,6 +30,37 @@ public sealed class TestCompletionTracker
     public int TotalCount => _totalCount;
     public bool AllTestsCompleted => _completedCount >= _totalCount;
 
+    public async ValueTask OnTestCompletedAsync(TestExecutionState completedTest)
+    {
+        Interlocked.Increment(ref _completedCount);
+
+        // Process dependents
+        foreach (var dependentId in completedTest.Dependents)
+        {
+            if (_graph.TryGetValue(dependentId, out var dependentState))
+            {
+                var remaining = dependentState.DecrementRemainingDependencies();
+
+                if (remaining == 0)
+                {
+                    // Test is ready to run
+                    _readyQueue.Enqueue(dependentState);
+                    
+                    // Notify workers immediately
+                    if (_notificationSystem != null)
+                    {
+                        await _notificationSystem.NotifyWorkAvailableAsync(
+                            new WorkNotification 
+                            { 
+                                Source = WorkNotification.WorkSource.NewlyReady,
+                                Priority = 1 
+                            });
+                    }
+                }
+            }
+        }
+    }
+    
     public void OnTestCompleted(TestExecutionState completedTest)
     {
         Interlocked.Increment(ref _completedCount);

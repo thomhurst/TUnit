@@ -15,7 +15,7 @@
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" />
     <PackageReference Include="Microsoft.Testing.Platform" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == 'net9.0'">
+  <ItemGroup>
     <PackageReference Include="System.Threading.Channels" />
   </ItemGroup>
   <ItemGroup>
