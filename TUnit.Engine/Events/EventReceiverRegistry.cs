@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces;
 
@@ -33,6 +34,7 @@ internal sealed class EventReceiverRegistry
     /// <summary>
     /// Register event receivers from a collection of objects
     /// </summary>
+    [RequiresUnreferencedCode("Reflects on receiver type to find event interfaces")]
     public void RegisterReceivers(IEnumerable<object> objects)
     {
         _lock.EnterWriteLock();
@@ -52,6 +54,7 @@ internal sealed class EventReceiverRegistry
     /// <summary>
     /// Register a single event receiver
     /// </summary>
+    [RequiresUnreferencedCode("Reflects on receiver type to find event interfaces")]
     public void RegisterReceiver(object receiver)
     {
         _lock.EnterWriteLock();
@@ -65,13 +68,13 @@ internal sealed class EventReceiverRegistry
         }
     }
     
+    [RequiresUnreferencedCode("Reflects on receiver type to find event interfaces")]
     private void RegisterReceiverInternal(object receiver)
     {
         UpdateEventFlags(receiver);
         
         // Register for each interface type the object implements
-        var interfaces = receiver.GetType().GetInterfaces()
-            .Where(i => typeof(IEventReceiver).IsAssignableFrom(i) && i != typeof(IEventReceiver));
+        var interfaces = GetEventReceiverInterfaces(receiver.GetType());
             
         foreach (var interfaceType in interfaces)
         {
@@ -174,6 +177,13 @@ internal sealed class EventReceiverRegistry
             _registeredEvents |= EventTypes.FirstTestInClass;
         if (receiver is ILastTestInClassEventReceiver)
             _registeredEvents |= EventTypes.LastTestInClass;
+    }
+    
+    [RequiresUnreferencedCode("Reflects on receiver type to find event interfaces")]
+    private static IEnumerable<Type> GetEventReceiverInterfaces(Type receiverType)
+    {
+        return receiverType.GetInterfaces()
+            .Where(i => typeof(IEventReceiver).IsAssignableFrom(i) && i != typeof(IEventReceiver));
     }
     
     public void Dispose()

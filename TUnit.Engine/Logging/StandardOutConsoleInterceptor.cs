@@ -5,7 +5,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Logging;
 
-internal class StandardOutConsoleInterceptor : ConsoleInterceptor
+internal class StandardOutConsoleInterceptor : OptimizedConsoleInterceptor
 {
     public static StandardOutConsoleInterceptor Instance { get; private set; } = null!;
 

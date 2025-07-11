@@ -5,7 +5,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Logging;
 
-internal class StandardErrorConsoleInterceptor : ConsoleInterceptor
+internal class StandardErrorConsoleInterceptor : OptimizedConsoleInterceptor
 {
     public static StandardErrorConsoleInterceptor Instance { get; private set; } = null!;
 

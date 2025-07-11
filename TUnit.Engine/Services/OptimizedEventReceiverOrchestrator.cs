@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
@@ -32,6 +33,7 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
         _logger = logger;
     }
 
+    [RequiresUnreferencedCode("Event receiver registration requires reflection")]
     public async ValueTask InitializeAllEligibleObjectsAsync(TestContext context, CancellationToken cancellationToken)
     {
         var eligibleObjects = context.GetEligibleEventObjects();
