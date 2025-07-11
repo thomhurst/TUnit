@@ -18,6 +18,7 @@ internal class ClassDataSources
     public (T, SharedType, string) GetItemForIndexAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
     {
         var shared = sharedTypes.ElementAtOrDefault(index);
+
         var key = shared == SharedType.Keyed ? GetKey(index, sharedTypes, keys) : string.Empty;
 
         return
