@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Engine.Building.Interfaces;
@@ -56,6 +57,65 @@ public sealed class UnifiedTestBuilderPipeline
         }
 
         return executableTests;
+    }
+    
+    /// <summary>
+    /// Builds executable tests as a stream through the pipeline
+    /// </summary>
+    public async IAsyncEnumerable<ExecutableTest> BuildTestsStreamAsync(
+        string testSessionId,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        // Stream from collectors
+        await foreach (var metadata in CollectTestsStreamAsync(testSessionId, cancellationToken))
+        {
+            // Resolve generic types for this metadata
+            var resolvedMetadataList = await _genericResolver.ResolveGenericsAsync(new[] { metadata });
+            
+            foreach (var resolvedMetadata in resolvedMetadataList)
+            {
+                // Build executable tests
+                IEnumerable<ExecutableTest> testsFromMetadata;
+                try
+                {
+                    testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(resolvedMetadata);
+                }
+                catch (Exception ex)
+                {
+                    testsFromMetadata = new[] { CreateFailedTestForDataGenerationError(resolvedMetadata, ex) };
+                }
+                
+                foreach (var test in testsFromMetadata)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    yield return test;
+                }
+            }
+        }
+    }
+    
+    private async IAsyncEnumerable<TestMetadata> CollectTestsStreamAsync(
+        string testSessionId,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        // Check if collector supports streaming
+        if (_dataCollector is IStreamingTestDataCollector streamingCollector)
+        {
+            await foreach (var test in streamingCollector.CollectTestsStreamAsync(testSessionId, cancellationToken))
+            {
+                yield return test;
+            }
+        }
+        else
+        {
+            // Fall back to collection-based for non-streaming collectors
+            var tests = await _dataCollector.CollectTestsAsync(testSessionId);
+            foreach (var test in tests)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                yield return test;
+            }
+        }
     }
 
     private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
