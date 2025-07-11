@@ -1,5 +1,5 @@
-﻿using Microsoft.Testing.Platform.CommandLine;
-using TUnit.Core;
+﻿using TUnit.Core;
+using TUnit.Engine.Services;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
 
@@ -18,7 +18,7 @@ internal class StandardErrorConsoleInterceptor : ConsoleInterceptor
         DefaultError = Console.Error;
     }
 
-    public StandardErrorConsoleInterceptor(ICommandLineOptions commandLineOptions) : base(commandLineOptions)
+    public StandardErrorConsoleInterceptor(VerbosityService verbosityService) : base(verbosityService)
     {
         Instance = this;
     }

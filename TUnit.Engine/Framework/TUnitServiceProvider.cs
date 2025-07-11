@@ -20,6 +20,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     // Core services
     public TUnitFrameworkLogger Logger { get; }
     public ICommandLineOptions CommandLineOptions { get; }
+    public VerbosityService VerbosityService { get; }
     public TestDiscoveryServiceV2 DiscoveryService { get; }
     public UnifiedTestBuilderPipeline TestBuilderPipeline { get; }
     public UnifiedTestExecutor TestExecutor { get; }
@@ -43,11 +44,13 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
 
         // Create core services
+        VerbosityService = Register(new VerbosityService(CommandLineOptions));
+        
         Logger = Register(new TUnitFrameworkLogger(
             extension,
             outputDevice,
             loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
-            CommandLineOptions));
+            VerbosityService));
 
         TestFilterService = Register(new TestFilterService(loggerFactory));
 
@@ -91,6 +94,21 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var sessionUid = context.Request.Session.SessionUid;
         singleTestExecutor.SetSessionId(sessionUid);
         TestExecutor.SetSessionId(sessionUid);
+        
+        // Initialize console interceptors
+        InitializeConsoleInterceptors();
+    }
+    
+    private void InitializeConsoleInterceptors()
+    {
+        var outInterceptor = new StandardOutConsoleInterceptor(VerbosityService);
+        var errorInterceptor = new StandardErrorConsoleInterceptor(VerbosityService);
+        
+        outInterceptor.Initialize();
+        errorInterceptor.Initialize();
+        
+        Register(outInterceptor);
+        Register(errorInterceptor);
     }
 
     public object? GetService(Type serviceType)

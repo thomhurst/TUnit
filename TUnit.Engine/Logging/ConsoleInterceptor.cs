@@ -1,12 +1,11 @@
 ﻿using System.Text;
-using Microsoft.Testing.Platform.CommandLine;
-using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Services;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
 
 namespace TUnit.Engine.Logging;
 
-internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOptions) : TextWriter
+internal abstract class ConsoleInterceptor(VerbosityService verbosityService) : TextWriter
 {
     public override Encoding Encoding => RedirectedOut?.Encoding ?? Encoding.UTF8;
 
@@ -31,7 +30,7 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
 
     private void WriteCore<T>(T value, Action<TextWriter, T> writeAction)
     {
-        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
+        if (!verbosityService.HideTestOutput)
         {
             writeAction(GetOriginalOut(), value);
         }
@@ -44,7 +43,7 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
 
     private async Task WriteAsyncCore<T>(T value, Func<TextWriter, T, Task> writeAction)
     {
-        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
+        if (!verbosityService.HideTestOutput)
         {
             await writeAction(GetOriginalOut(), value);
         }
@@ -85,7 +84,7 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
 
     public override void WriteLine()
     {
-        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
+        if (!verbosityService.HideTestOutput)
         {
             GetOriginalOut().WriteLine();
         }
@@ -170,7 +169,7 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
 #if NET
     public override void Write(ReadOnlySpan<char> buffer)
     {
-        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
+        if (!verbosityService.HideTestOutput)
         {
             GetOriginalOut().Write(buffer);
         }
@@ -186,7 +185,7 @@ internal abstract class ConsoleInterceptor(ICommandLineOptions commandLineOption
 
     public override void WriteLine(ReadOnlySpan<char> buffer)
     {
-        if (!commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput))
+        if (!verbosityService.HideTestOutput)
         {
             GetOriginalOut().WriteLine(buffer);
         }
