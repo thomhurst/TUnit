@@ -7,6 +7,7 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Engine.Building;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
@@ -45,6 +46,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create core services
         VerbosityService = Register(new VerbosityService(CommandLineOptions));
+        
+        // Initialize DiscoveryDiagnostics with VerbosityService
+        DiscoveryDiagnostics.Initialize(VerbosityService);
         
         Logger = Register(new TUnitFrameworkLogger(
             extension,

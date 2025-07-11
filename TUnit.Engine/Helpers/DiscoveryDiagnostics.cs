@@ -1,3 +1,5 @@
+using TUnit.Engine.Services;
+
 namespace TUnit.Engine.Helpers;
 
 /// <summary>
@@ -9,8 +11,16 @@ internal static class DiscoveryDiagnostics
     private static readonly List<DiscoveryEvent> _events =
     [
     ];
+    private static VerbosityService? _verbosityService;
 
     public static bool IsEnabled { get; set; } = Environment.GetEnvironmentVariable("TUNIT_DISCOVERY_DIAGNOSTICS") == "1";
+
+    public static void Initialize(VerbosityService verbosityService)
+    {
+        _verbosityService = verbosityService;
+        // Override environment variable setting with verbosity service
+        IsEnabled = IsEnabled || (_verbosityService?.EnableDiscoveryDiagnostics ?? false);
+    }
 
     public static void RecordEvent(string eventName, string details = "")
     {
@@ -55,13 +65,22 @@ internal static class DiscoveryDiagnostics
     {
         RecordEvent("PotentialHang", $"Location: {location}, Elapsed: {elapsedSeconds}s");
 
-        // Also write to console for immediate visibility
-        Console.Error.WriteLine($"[TUnit] WARNING: Potential hang detected at {location} after {elapsedSeconds} seconds");
+        // Also write to console for immediate visibility if verbosity allows
+        if (_verbosityService == null || !_verbosityService.HideTestOutput)
+        {
+            Console.Error.WriteLine($"[TUnit] WARNING: Potential hang detected at {location} after {elapsedSeconds} seconds");
+        }
     }
 
     public static void DumpDiagnostics()
     {
         if (!IsEnabled)
+        {
+            return;
+        }
+
+        // Only output to console if verbosity allows
+        if (_verbosityService != null && _verbosityService.HideTestOutput)
         {
             return;
         }
