@@ -22,13 +22,11 @@ public class SimpleHookTest
     [BeforeEvery(HookType.Test)]
     public static void BeforeEachTestStatic()
     {
-        Console.WriteLine("Static BeforeEvery test hook executed");
     }
 
     [AfterEvery(HookType.Test)]
     public static void AfterEachTestStatic()
     {
-        Console.WriteLine("Static AfterEvery test hook executed");
     }
 
     [Before(HookType.Class)]

@@ -9,7 +9,6 @@ public class HookGeneratorTest
     public static void BeforeEachTest()
     {
         _beforeTestCount++;
-        Console.WriteLine($"BeforeEvery test hook executed. Count: {_beforeTestCount}");
     }
 
     [AfterEvery(HookType.Test)]
@@ -17,7 +16,6 @@ public class HookGeneratorTest
     {
         _afterTestCount++;
         await Task.Delay(1);
-        Console.WriteLine($"AfterEvery test hook executed. Count: {_afterTestCount}");
     }
 
     [Before(HookType.Class)]
