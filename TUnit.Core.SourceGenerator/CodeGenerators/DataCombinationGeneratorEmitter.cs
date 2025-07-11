@@ -19,7 +19,7 @@ public static class DataCombinationGeneratorEmitter
         INamedTypeSymbol typeSymbol,
         string methodGuid)
     {
-        writer.AppendLine($"private async IAsyncEnumerable<TestDataCombination> GenerateCombinations_{methodGuid}()");
+        writer.AppendLine($"private async IAsyncEnumerable<TestDataCombination> GenerateCombinations_{methodGuid}(string testSessionId)");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -667,7 +667,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),");
         writer.AppendLine("MembersToGenerate = membersToGenerate,");
         writer.AppendLine("TestInformation = testInformation,");
-        writer.AppendLine("TestSessionId = Guid.NewGuid().ToString(),");
+        writer.AppendLine("TestSessionId = testSessionId,");
         writer.AppendLine("TestClassInstance = null,");
         writer.AppendLine("ClassInstanceArguments = null");
         writer.Unindent();
@@ -825,7 +825,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),");
         writer.AppendLine("MembersToGenerate = membersToGenerate,");
         writer.AppendLine("TestInformation = testInformation,");
-        writer.AppendLine("TestSessionId = Guid.NewGuid().ToString(),");
+        writer.AppendLine("TestSessionId = testSessionId,");
         writer.AppendLine("TestClassInstance = null,");
         writer.AppendLine("ClassInstanceArguments = null");
         writer.Unindent();

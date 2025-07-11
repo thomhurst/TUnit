@@ -197,7 +197,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("};");
 
         // Set the DataCombinationGenerator after construction
-        writer.AppendLine($"metadata.SetDataCombinationGenerator(() => GenerateCombinations_{combinationGuid}());");
+        writer.AppendLine($"metadata.SetDataCombinationGenerator(() => GenerateCombinations_{combinationGuid}(testSessionId));");
         writer.AppendLine("tests.Add(metadata);");
     }
 
