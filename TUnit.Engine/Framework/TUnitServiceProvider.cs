@@ -1,3 +1,4 @@
+using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
@@ -82,6 +83,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             CommandLineOptions,
             VerbosityService,
             frameworkServiceProvider,
+            capabilities.GetCapability<ITrxReportCapability>()!,
             context));
 
         CancellationToken = Register(new EngineCancellationToken());
