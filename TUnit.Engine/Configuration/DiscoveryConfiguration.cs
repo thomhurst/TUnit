@@ -7,6 +7,34 @@ namespace TUnit.Engine.Configuration;
 /// </summary>
 public static class DiscoveryConfiguration
 {
+    // Cache environment variables at static initialization to avoid repeated lookups
+    private static readonly string? _cachedDiscoveryDiagnosticsEnvVar = Environment.GetEnvironmentVariable("TUNIT_DISCOVERY_DIAGNOSTICS");
+    private static readonly string? _cachedDiscoveryTimeoutEnvVar = Environment.GetEnvironmentVariable("TUNIT_DISCOVERY_TIMEOUT_SECONDS");
+    private static readonly string? _cachedDataSourceTimeoutEnvVar = Environment.GetEnvironmentVariable("TUNIT_DATA_SOURCE_TIMEOUT_SECONDS");
+    
+    // Cache CI environment variables at startup
+    private static readonly string?[] _cachedCiEnvVars = {
+        Environment.GetEnvironmentVariable("CI"),
+        Environment.GetEnvironmentVariable("CONTINUOUS_INTEGRATION"),
+        Environment.GetEnvironmentVariable("BUILD_ID"),
+        Environment.GetEnvironmentVariable("BUILD_NUMBER"),
+        Environment.GetEnvironmentVariable("GITHUB_ACTIONS"),
+        Environment.GetEnvironmentVariable("GITLAB_CI"),
+        Environment.GetEnvironmentVariable("AZURE_PIPELINES"),
+        Environment.GetEnvironmentVariable("JENKINS_URL"),
+        Environment.GetEnvironmentVariable("TEAMCITY_VERSION"),
+        Environment.GetEnvironmentVariable("APPVEYOR"),
+        Environment.GetEnvironmentVariable("CIRCLECI"),
+        Environment.GetEnvironmentVariable("TRAVIS")
+    };
+    
+    // Cache container environment variables at startup
+    private static readonly string?[] _cachedContainerEnvVars = {
+        Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"),
+        Environment.GetEnvironmentVariable("CONTAINER"),
+        Environment.GetEnvironmentVariable("KUBERNETES_SERVICE_HOST")
+    };
+
     /// <summary>
     /// Maximum time allowed for overall test discovery (auto-scaled based on system)
     /// </summary>
@@ -20,7 +48,7 @@ public static class DiscoveryConfiguration
     /// <summary>
     /// Whether to enable discovery diagnostics (default: environment variable TUNIT_DISCOVERY_DIAGNOSTICS)
     /// </summary>
-    public static bool EnableDiagnostics { get; set; } = Environment.GetEnvironmentVariable("TUNIT_DISCOVERY_DIAGNOSTICS") == "1";
+    public static bool EnableDiagnostics { get; set; } = _cachedDiscoveryDiagnosticsEnvVar == "1";
 
     /// <summary>
     /// Creates an intelligent circuit breaker for discovery operations
@@ -78,21 +106,28 @@ public static class DiscoveryConfiguration
 
     private static bool IsRunningInCI()
     {
-        var ciEnvVars = new[] 
-        { 
-            "CI", "CONTINUOUS_INTEGRATION", "BUILD_ID", "BUILD_NUMBER",
-            "GITHUB_ACTIONS", "GITLAB_CI", "AZURE_PIPELINES", "JENKINS_URL",
-            "TEAMCITY_VERSION", "APPVEYOR", "CIRCLECI", "TRAVIS"
-        };
-
-        return ciEnvVars.Any(envVar => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envVar)));
+        // Use cached environment variables instead of repeated lookups
+        for (int i = 0; i < _cachedCiEnvVars.Length; i++)
+        {
+            if (!string.IsNullOrEmpty(_cachedCiEnvVars[i]))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static bool IsRunningInContainer()
     {
-        var containerEnvVars = new[] { "DOTNET_RUNNING_IN_CONTAINER", "CONTAINER", "KUBERNETES_SERVICE_HOST" };
-        
-        return containerEnvVars.Any(envVar => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envVar)));
+        // Use cached environment variables instead of repeated lookups
+        for (int i = 0; i < _cachedContainerEnvVars.Length; i++)
+        {
+            if (!string.IsNullOrEmpty(_cachedContainerEnvVars[i]))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     /// <summary>
@@ -100,12 +135,12 @@ public static class DiscoveryConfiguration
     /// </summary>
     public static void ConfigureFromEnvironment()
     {
-        if (int.TryParse(Environment.GetEnvironmentVariable("TUNIT_DISCOVERY_TIMEOUT_SECONDS"), out var timeoutSec))
+        if (int.TryParse(_cachedDiscoveryTimeoutEnvVar, out var timeoutSec))
         {
             DiscoveryTimeout = TimeSpan.FromSeconds(timeoutSec);
         }
 
-        if (int.TryParse(Environment.GetEnvironmentVariable("TUNIT_DATA_SOURCE_TIMEOUT_SECONDS"), out var dataTimeoutSec))
+        if (int.TryParse(_cachedDataSourceTimeoutEnvVar, out var dataTimeoutSec))
         {
             DataSourceTimeout = TimeSpan.FromSeconds(dataTimeoutSec);
         }

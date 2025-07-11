@@ -77,6 +77,9 @@ public sealed class VerbosityService
                $"Discovery diagnostics: {EnableDiscoveryDiagnostics})";
     }
 
+    // Cache environment variables at startup to avoid repeated lookups
+    private static readonly string? _cachedDiscoveryDiagnosticsEnvVar = Environment.GetEnvironmentVariable("TUNIT_DISCOVERY_DIAGNOSTICS");
+    
     private static TUnitVerbosity GetVerbosityFromCommandLine(ICommandLineOptions commandLineOptions)
     {
         if (commandLineOptions.TryGetOptionArgumentList(VerbosityCommandProvider.Verbosity, out var args) && args.Length > 0)
@@ -84,8 +87,8 @@ public sealed class VerbosityService
             return VerbosityCommandProvider.ParseVerbosity(args);
         }
 
-        // Check legacy environment variable for backwards compatibility
-        if (Environment.GetEnvironmentVariable("TUNIT_DISCOVERY_DIAGNOSTICS") == "1")
+        // Check cached legacy environment variable for backwards compatibility
+        if (_cachedDiscoveryDiagnosticsEnvVar == "1")
         {
             return TUnitVerbosity.Debug;
         }
