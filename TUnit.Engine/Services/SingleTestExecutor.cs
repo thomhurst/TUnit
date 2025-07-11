@@ -212,6 +212,24 @@ internal class SingleTestExecutor : ISingleTestExecutor
         var testNode = test.Context!.ToTestNode()
             .WithProperty(GetTestNodeState(test));
 
+        // Include captured console output
+        var standardOutput = test.Context!.GetStandardOutput();
+        var errorOutput = test.Context!.GetErrorOutput();
+        
+        if (!string.IsNullOrEmpty(standardOutput))
+        {
+#pragma warning disable TPEXP
+            testNode = testNode.WithProperty(new StandardOutputProperty(standardOutput));
+#pragma warning restore TPEXP
+        }
+        
+        if (!string.IsNullOrEmpty(errorOutput))
+        {
+#pragma warning disable TPEXP
+            testNode = testNode.WithProperty(new StandardErrorProperty(errorOutput));
+#pragma warning restore TPEXP
+        }
+
         var sessionUid = _sessionUid ?? CreateSessionUid(test);
 
         return new TestNodeUpdateMessage(
