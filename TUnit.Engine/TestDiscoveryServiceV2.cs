@@ -31,7 +31,7 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer
     /// <summary>
     /// Discovers all tests using the unified pipeline
     /// </summary>
-    public async Task<IEnumerable<ExecutableTest>> DiscoverTests()
+    public async Task<IEnumerable<ExecutableTest>> DiscoverTests(string testSessionId)
     {
         using var cts = new CancellationTokenSource();
 
@@ -42,7 +42,7 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer
 
         try
         {
-            return await DiscoverTestsWithTimeout(cts.Token);
+            return await DiscoverTestsWithTimeout(testSessionId, cts.Token);
         }
         catch (OperationCanceledException)
         {
@@ -52,12 +52,12 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer
         }
     }
 
-    private async Task<IEnumerable<ExecutableTest>> DiscoverTestsWithTimeout(CancellationToken cancellationToken)
+    private async Task<IEnumerable<ExecutableTest>> DiscoverTestsWithTimeout(string testSessionId, CancellationToken cancellationToken)
     {
         // Use the pipeline to build all tests
         var allTests = new List<ExecutableTest>();
 
-        await foreach (var test in BuildTestsAsync(cancellationToken))
+        await foreach (var test in BuildTestsAsync(testSessionId, cancellationToken))
         {
             allTests.Add(test);
         }
@@ -70,10 +70,10 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer
         return allTests;
     }
 
-    private async IAsyncEnumerable<ExecutableTest> BuildTestsAsync(
+    private async IAsyncEnumerable<ExecutableTest> BuildTestsAsync(string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var executableTests = await _testBuilderPipeline.BuildTestsAsync();
+        var executableTests = await _testBuilderPipeline.BuildTestsAsync(testSessionId);
 
         foreach (var test in executableTests)
         {

@@ -16,7 +16,7 @@ public class ReflectionTestDataCollectorTests
         var collector = new ReflectionTestDataCollector();
 
         // Act
-        var tests = (await collector.CollectTestsAsync()).ToList();
+        var tests = (await collector.CollectTestsAsync("123")).ToList();
 
         // Assert
         await Assert.That(tests).IsNotNull();
@@ -37,7 +37,7 @@ public class ReflectionTestDataCollectorTests
         var collector = new ReflectionTestDataCollector();
 
         // Act
-        var tests = (await collector.CollectTestsAsync()).ToList();
+        var tests = (await collector.CollectTestsAsync("123")).ToList();
 
         // Assert
         var thisTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsCategories));
@@ -54,7 +54,7 @@ public class ReflectionTestDataCollectorTests
         var collector = new ReflectionTestDataCollector();
 
         // Act
-        var tests = (await collector.CollectTestsAsync()).ToList();
+        var tests = (await collector.CollectTestsAsync("123")).ToList();
 
         // Assert
         var thisTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsTimeout));
@@ -77,7 +77,7 @@ public class ReflectionTestDataCollectorTests
         var collector = new ReflectionTestDataCollector();
 
         // Act
-        var tests = (await collector.CollectTestsAsync()).ToList();
+        var tests = (await collector.CollectTestsAsync("123")).ToList();
 
         // Assert
         var skippedTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsSkipAttribute));
@@ -102,7 +102,7 @@ public class ReflectionTestDataCollectorTests
         var collector = new ReflectionTestDataCollector();
 
         // Act
-        var tests = (await collector.CollectTestsAsync()).ToList();
+        var tests = (await collector.CollectTestsAsync("123")).ToList();
 
         // Assert
         var paramTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsArgumentsDataSource));
@@ -128,7 +128,7 @@ public class ReflectionTestDataCollectorTests
         var collector = new ReflectionTestDataCollector();
 
         // Act
-        var tests = (await collector.CollectTestsAsync()).ToList();
+        var tests = (await collector.CollectTestsAsync("123")).ToList();
 
         // Assert
         var thisTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsRetryCount));
@@ -144,7 +144,7 @@ public class ReflectionTestDataCollectorTests
         var collector = new ReflectionTestDataCollector();
 
         // Act
-        var tests = (await collector.CollectTestsAsync()).ToList();
+        var tests = (await collector.CollectTestsAsync("123")).ToList();
 
         // Assert
         var thisTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsNotInParallel));
@@ -183,7 +183,7 @@ public class ReflectionTestDataCollectorTests
         var collector = new ReflectionTestDataCollector();
 
         // Act
-        var tests = (await collector.CollectTestsAsync()).ToList();
+        var tests = (await collector.CollectTestsAsync("123")).ToList();
 
         // Assert
         var methodDataTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsMethodDataSource));
@@ -241,7 +241,7 @@ public class ReflectionHookTests
         var collector = new ReflectionTestDataCollector();
 
         // Act
-        var tests = (await collector.CollectTestsAsync()).ToList();
+        var tests = (await collector.CollectTestsAsync("123")).ToList();
 
         // Assert
         var thisTest = tests.FirstOrDefault(t =>
@@ -281,7 +281,7 @@ public class ReflectionGenericTests
         var collector = new ReflectionTestDataCollector();
 
         // Act
-        var tests = (await collector.CollectTestsAsync()).ToList();
+        var tests = (await collector.CollectTestsAsync("123")).ToList();
 
         // Assert
         var genericTest = tests.FirstOrDefault(t =>
@@ -301,7 +301,7 @@ public class ReflectionGenericTests
         var collector = new ReflectionTestDataCollector();
 
         // Act
-        var tests = (await collector.CollectTestsAsync()).ToList();
+        var tests = (await collector.CollectTestsAsync("123")).ToList();
 
         // Assert
         var genericMethodTest = tests.FirstOrDefault(t =>

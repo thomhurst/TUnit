@@ -8,7 +8,7 @@ namespace TUnit.Engine.Building.Collectors;
 /// </summary>
 public sealed class AotTestDataCollector : ITestDataCollector
 {
-    public async Task<IEnumerable<TestMetadata>> CollectTestsAsync()
+    public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
         var allTests = new List<TestMetadata>();
 
@@ -17,7 +17,7 @@ public sealed class AotTestDataCollector : ITestDataCollector
         {
             try
             {
-                var tests = await testSource.GetTestsAsync();
+                var tests = await testSource.GetTestsAsync(testSessionId);
                 allTests.AddRange(tests);
             }
             catch (Exception ex)

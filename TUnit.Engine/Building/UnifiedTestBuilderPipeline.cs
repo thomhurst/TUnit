@@ -28,10 +28,10 @@ public sealed class UnifiedTestBuilderPipeline
     /// <summary>
     /// Builds all executable tests through the simplified pipeline
     /// </summary>
-    public async Task<IEnumerable<ExecutableTest>> BuildTestsAsync()
+    public async Task<IEnumerable<ExecutableTest>> BuildTestsAsync(string testSessionId)
     {
         // Stage 1: Collect test metadata
-        var collectedMetadata = await _dataCollector.CollectTestsAsync();
+        var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId);
 
         // Stage 2: Resolve generic types
         var resolvedMetadata = await _genericResolver.ResolveGenericsAsync(collectedMetadata);
@@ -166,10 +166,11 @@ public static class UnifiedTestBuilderPipelineFactory
     /// Creates a pipeline with automatic mode detection
     /// </summary>
     public static async Task<UnifiedTestBuilderPipeline> CreateAutoDetectPipelineAsync(
+        string testSessionId,
         IServiceProvider? serviceProvider = null,
         Assembly[]? assembliesToScan = null)
     {
-        var dataCollector = await TestDataCollectorFactory.CreateAutoDetectAsync(assembliesToScan);
+        var dataCollector = await TestDataCollectorFactory.CreateAutoDetectAsync(testSessionId, assembliesToScan);
         var genericResolver = new Resolvers.AotGenericTypeResolver();
         var testBuilder = new TestBuilder(serviceProvider);
 

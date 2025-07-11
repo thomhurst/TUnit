@@ -2,5 +2,5 @@
 
 public interface ITestSource
 {
-    ValueTask<List<TestMetadata>> GetTestsAsync();
+    ValueTask<List<TestMetadata>> GetTestsAsync(string testSessionId);
 }

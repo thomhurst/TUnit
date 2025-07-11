@@ -34,7 +34,7 @@ internal sealed class TestRequestHandler : IRequestHandler
         {
             await serviceProvider.HookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(context.CancellationToken);
 
-            var allTests = await serviceProvider.DiscoveryService.DiscoverTests();
+            var allTests = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value);
 
             foreach (var test in allTests)
             {
@@ -54,7 +54,7 @@ internal sealed class TestRequestHandler : IRequestHandler
         RunTestExecutionRequest request,
         ExecuteRequestContext context)
     {
-        var allTests = (await serviceProvider.DiscoveryService.DiscoverTests()).ToArray();
+        var allTests = (await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value)).ToArray();
 
         var filteredTests = serviceProvider.TestFilterService.FilterTests(request, allTests);
 
@@ -62,10 +62,7 @@ internal sealed class TestRequestHandler : IRequestHandler
         foreach (var test in filteredTests)
         {
             context.CancellationToken.ThrowIfCancellationRequested();
-            if (test.Context != null)
-            {
-                await serviceProvider.MessageBus.Discovered(test.Context);
-            }
+            await serviceProvider.MessageBus.Discovered(test.Context);
         }
 
         // Execute tests (executor will apply the same filter internally)

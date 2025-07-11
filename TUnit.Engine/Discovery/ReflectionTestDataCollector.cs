@@ -18,7 +18,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     private static readonly object _lock = new();
     private static bool _assemblyLoadHandlerRegistered;
 
-    public Task<IEnumerable<TestMetadata>> CollectTestsAsync()
+    public Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
         lock (_lock)
         {
@@ -39,12 +39,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             lock (_lock)
             {
-                if (_scannedAssemblies.Contains(assembly))
+                if (!_scannedAssemblies.Add(assembly))
                 {
                     continue;
                 }
-
-                _scannedAssemblies.Add(assembly);
             }
 
             try

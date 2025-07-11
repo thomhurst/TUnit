@@ -151,7 +151,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("public async ValueTask<List<TestMetadata>> GetTestsAsync()");
+        writer.AppendLine("public async ValueTask<List<TestMetadata>> GetTestsAsync(string testSessionId)");
         writer.AppendLine("{");
         writer.Indent();
 

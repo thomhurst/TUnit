@@ -11,5 +11,5 @@ public interface ITestDataCollector
     /// Collects all test metadata from the configured source
     /// </summary>
     /// <returns>Collection of test metadata ready for processing</returns>
-    Task<IEnumerable<TestMetadata>> CollectTestsAsync();
+    Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId);
 }

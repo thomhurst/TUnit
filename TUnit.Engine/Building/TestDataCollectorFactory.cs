@@ -35,18 +35,18 @@ public static class TestDataCollectorFactory
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026:Using member 'TUnit.Engine.Discovery.ReflectionTestDataCollector.ReflectionTestDataCollector()' which has 'RequiresUnreferencedCodeAttribute' can break functionality when trimming application code", Justification = "Reflection mode is a fallback and cannot support trimming")]
     [UnconditionalSuppressMessage("AOT", "IL3050:Using member 'TUnit.Engine.Discovery.ReflectionTestDataCollector.ReflectionTestDataCollector()' which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling", Justification = "Reflection mode is a fallback and cannot support AOT")]
-    public static async Task<ITestDataCollector> CreateAutoDetectAsync(Assembly[]? assembliesToScan = null)
+    public static async Task<ITestDataCollector> CreateAutoDetectAsync(string testSessionId, Assembly[]? assembliesToScan = null)
     {
         // Try AOT mode first (check if any tests were registered)
         var aotCollector = new AotTestDataCollector();
-        var aotTests = await aotCollector.CollectTestsAsync();
-        
+        var aotTests = await aotCollector.CollectTestsAsync(testSessionId);
+
         if (aotTests.Any())
         {
             // Tests were found via source generation
             return aotCollector;
         }
-        
+
         // Fall back to reflection mode
         return new ReflectionTestDataCollector();
     }

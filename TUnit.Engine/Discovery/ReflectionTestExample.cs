@@ -18,15 +18,15 @@ internal static class ReflectionTestExample
     public static async Task RunExample()
     {
         Console.WriteLine("=== ReflectionTestDataCollector Example ===");
-        
+
         // Create a reflection-based test data collector
         var collector = TestDataCollectorFactory.Create(TestExecutionMode.Reflection);
-        
+
         // Collect all tests using reflection
-        var tests = await collector.CollectTestsAsync();
-        
+        var tests = await collector.CollectTestsAsync("123");
+
         Console.WriteLine($"Found {tests.Count()} tests via reflection:");
-        
+
         foreach (var test in tests.Take(5)) // Show first 5 tests
         {
             Console.WriteLine($"  - {test.TestClassType.Name}.{test.TestMethodName}");
@@ -62,7 +62,7 @@ namespace TUnit.Engine.Discovery.Examples
         {
             Console.WriteLine("Simple test executed");
         }
-        
+
         [Test]
         [Category("Integration")]
         [Timeout(5000)]
@@ -71,7 +71,7 @@ namespace TUnit.Engine.Discovery.Examples
             await Task.Delay(100);
             Console.WriteLine("Async test with attributes executed");
         }
-        
+
         [Test]
         [Arguments(1, 2, 3)]
         [Arguments(4, 5, 6)]
@@ -79,7 +79,7 @@ namespace TUnit.Engine.Discovery.Examples
         {
             Console.WriteLine($"Parameterized test: {a}, {b}, {c}");
         }
-        
+
         [Test]
         [Skip("Example of skipped test")]
         public void SkippedTest()
@@ -87,7 +87,7 @@ namespace TUnit.Engine.Discovery.Examples
             // This won't execute
         }
     }
-    
+
     public class TestsWithHooks
     {
         [Before(HookType.Class)]
@@ -95,26 +95,26 @@ namespace TUnit.Engine.Discovery.Examples
         {
             Console.WriteLine("Before class hook");
         }
-        
+
         [Before(HookType.Test)]
         public void BeforeEachTest()
         {
             Console.WriteLine("Before test hook");
         }
-        
+
         [Test]
         public void TestWithHooks()
         {
             Console.WriteLine("Test with hooks executed");
         }
-        
+
         [After(HookType.Test)]
         public void AfterEachTest()
         {
             Console.WriteLine("After test hook");
         }
     }
-    
+
     public class GenericTests<T>
     {
         [Test]

@@ -309,7 +309,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
             new TestInvoker());
 
         var discoveryService = new TestDiscoveryServiceV2(pipeline);
-        var tests = await discoveryService.DiscoverTests();
+        var tests = await discoveryService.DiscoverTests(request.Session.SessionUid.Value);
 
         await ExecuteTests(tests, request.Filter, messageBus, cancellationToken);
     }
