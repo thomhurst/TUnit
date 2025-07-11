@@ -17,7 +17,7 @@ public class TestContext : Context
         TestName = testName;
         DisplayName = displayName;
         CancellationToken = cancellationToken;
-        _serviceProvider = serviceProvider;
+        ServiceProvider = serviceProvider;
     }
 
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
@@ -164,14 +164,12 @@ public class TestContext : Context
     internal DiscoveredTest? InternalDiscoveredTest { get; set; }
 
     /// <summary>
-    /// Service provider (simplified)
-    /// </summary>
-    private readonly IServiceProvider _serviceProvider;
-
-    /// <summary>
     /// Gets the service provider for dependency injection
     /// </summary>
-    public IServiceProvider ServiceProvider => _serviceProvider;
+    public IServiceProvider ServiceProvider
+    {
+        get;
+    }
 
     public TestContext(string testName, string displayName) : this(testName, displayName, CancellationToken.None, new TestServiceProvider())
     {
@@ -208,7 +206,7 @@ public class TestContext : Context
     /// </summary>
     public T? GetService<T>() where T : class
     {
-        return _serviceProvider.GetService(typeof(T)) as T;
+        return ServiceProvider.GetService(typeof(T)) as T;
     }
 
     /// <summary>
@@ -360,7 +358,7 @@ public class TestContext : Context
             }
         }
 
-        var testFinder = _serviceProvider.GetService<ITestFinder>()!;
+        var testFinder = ServiceProvider.GetService<ITestFinder>()!;
 
         await testFinder.ReregisterTestWithArguments(this, methodArguments, objectBag);
     }
@@ -377,7 +375,7 @@ public class TestContext : Context
     /// </summary>
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
     {
-        var testFinder = _serviceProvider.GetService<ITestFinder>()!;
+        var testFinder = ServiceProvider.GetService<ITestFinder>()!;
 
         foreach (var test in testFinder.GetTests(predicate))
         {
@@ -390,7 +388,7 @@ public class TestContext : Context
     /// </summary>
     public List<TestContext> GetTests(string testName)
     {
-        var testFinder = _serviceProvider.GetService<ITestFinder>()!;
+        var testFinder = ServiceProvider.GetService<ITestFinder>()!;
 
         // Use the current test's class type by default
         var classType = TestDetails?.ClassType;
