@@ -1,17 +1,16 @@
-﻿using Microsoft.Testing.Platform.CommandLine;
-using Microsoft.Testing.Platform.Extensions;
+﻿using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.OutputDevice;
-using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Services;
 using LogLevel = TUnit.Core.Logging.LogLevel;
 
 namespace TUnit.Engine.Logging;
 
-public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger, ICommandLineOptions commandLineOptions)
+public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger, VerbosityService verbosityService)
     : IOutputDeviceDataProducer, global::TUnit.Core.Logging.ILogger
 {
-    private readonly bool _hideTestOutput = commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput);
+    private readonly bool _hideTestOutput = verbosityService.HideTestOutput;
 
     private readonly MTPLoggerAdapter _adapter = new(logger);
 
