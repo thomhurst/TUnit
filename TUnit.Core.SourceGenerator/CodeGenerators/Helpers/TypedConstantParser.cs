@@ -1,15 +1,24 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 public static class TypedConstantParser
 {
+    private static readonly TypedConstantFormatter _formatter = new();
+    
     public static string GetTypedConstantValue(SemanticModel semanticModel,
         (TypedConstant typedConstant, AttributeArgumentSyntax a) element, ITypeSymbol? parameterType)
     {
+        // For constant values, use the formatter which handles type conversions properly
+        if (element.typedConstant.Kind == TypedConstantKind.Primitive)
+        {
+            return _formatter.FormatForCode(element.typedConstant, parameterType);
+        }
+
         var argumentExpression = element.a.Expression;
 
         var newExpression = argumentExpression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
@@ -59,28 +68,8 @@ public static class TypedConstantParser
 
     public static string GetRawTypedConstantValue(TypedConstant typedConstant)
     {
-        if (typedConstant.IsNull)
-        {
-            return "null";
-        }
-
-        switch (typedConstant.Kind)
-        {
-            case TypedConstantKind.Primitive:
-                return FormatPrimitive(typedConstant);
-            case TypedConstantKind.Enum:
-                return $"({typedConstant.Type!.GloballyQualified()})({typedConstant.Value})";
-            case TypedConstantKind.Type:
-                return $"typeof({((ITypeSymbol) typedConstant.Value!).GloballyQualified()})";
-            case TypedConstantKind.Array:
-                var elements = typedConstant.Values.Select(GetRawTypedConstantValue);
-                var elementType = (typedConstant.Type as IArrayTypeSymbol)?.ElementType.GloballyQualified() ?? "object";
-                return $"new {elementType}[] {{ {string.Join(", ", elements)} }}";
-            case TypedConstantKind.Error:
-                return "default";
-            default:
-                throw new NotSupportedException($"Unsupported TypedConstantKind: {typedConstant.Kind}");
-        }
+        // Use the formatter for consistent handling
+        return _formatter.FormatForCode(typedConstant);
     }
 
     private static string FormatPrimitive(TypedConstant typedConstant)

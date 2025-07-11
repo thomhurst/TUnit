@@ -383,7 +383,19 @@ public static class DataCombinationGeneratorEmitter
             return;
         }
 
-        var methodName = attr.ConstructorArguments[0].Value?.ToString();
+        // Method name can be in different positions depending on overload
+        string? methodName = null;
+        if (attr.ConstructorArguments.Length == 2 && attr.ConstructorArguments[0].Value is ITypeSymbol)
+        {
+            // MethodDataSource(Type, string) overload
+            methodName = attr.ConstructorArguments[1].Value?.ToString();
+        }
+        else if (attr.ConstructorArguments.Length >= 1)
+        {
+            // MethodDataSource(string) overload
+            methodName = attr.ConstructorArguments[0].Value?.ToString();
+        }
+        
         if (string.IsNullOrEmpty(methodName))
         {
             EmitEmptyCombination(writer, listName);

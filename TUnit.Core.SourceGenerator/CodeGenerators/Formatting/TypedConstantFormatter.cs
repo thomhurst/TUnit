@@ -101,16 +101,63 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                     : $"({targetType.ToDisplayString(FullyQualifiedFormat)}){formattedValue}";
             }
 
-            // Float types
-            if (targetType.SpecialType == SpecialType.System_Single)
+            // Special handling for char to numeric conversions
+            if (value is char charValue)
             {
-                return $"{value}f";
+                switch (targetType.SpecialType)
+                {
+                    case SpecialType.System_Byte:
+                        return $"(byte){(int)charValue}";
+                    case SpecialType.System_SByte:
+                        return $"(sbyte){(int)charValue}";
+                    case SpecialType.System_Int16:
+                        return $"(short){(int)charValue}";
+                    case SpecialType.System_UInt16:
+                        return $"(ushort){(int)charValue}";
+                    case SpecialType.System_Int32:
+                        return $"{(int)charValue}";
+                    case SpecialType.System_UInt32:
+                        return $"{(uint)charValue}u";
+                    case SpecialType.System_Int64:
+                        return $"{(long)charValue}L";
+                    case SpecialType.System_UInt64:
+                        return $"{(ulong)charValue}UL";
+                    case SpecialType.System_Single:
+                        return $"{(float)charValue}f";
+                    case SpecialType.System_Double:
+                        return $"{(double)charValue}d";
+                    case SpecialType.System_Decimal:
+                        return $"{(decimal)charValue}m";
+                }
             }
 
-            // Decimal types
-            if (targetType.SpecialType == SpecialType.System_Decimal)
+            // Handle numeric type conversions
+            switch (targetType.SpecialType)
             {
-                return $"{value}m";
+                case SpecialType.System_Byte:
+                    return $"(byte){value}";
+                case SpecialType.System_SByte:
+                    return $"(sbyte){value}";
+                case SpecialType.System_Int16:
+                    return $"(short){value}";
+                case SpecialType.System_UInt16:
+                    return $"(ushort){value}";
+                case SpecialType.System_Int32:
+                    // Int32 is the default for integer literals, no cast needed unless value is not int32
+                    return value is int ? value.ToString()! : $"(int){value}";
+                case SpecialType.System_UInt32:
+                    return $"{value}u";
+                case SpecialType.System_Int64:
+                    return $"{value}L";
+                case SpecialType.System_UInt64:
+                    return $"{value}UL";
+                case SpecialType.System_Single:
+                    return $"{value}f";
+                case SpecialType.System_Double:
+                    // Double is default for floating-point literals
+                    return value.ToString()!;
+                case SpecialType.System_Decimal:
+                    return $"{value}m";
             }
         }
 

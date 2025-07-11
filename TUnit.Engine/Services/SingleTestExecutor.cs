@@ -71,7 +71,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
         try
         {
-            if (test.Metadata.IsSkipped)
+            if (!string.IsNullOrEmpty(test.Context?.SkipReason))
             {
                 return await HandleSkippedTestAsync(test, cancellationToken);
             }
@@ -119,7 +119,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         test.State = TestState.Skipped;
         test.Result = _resultFactory.CreateSkippedResult(
             test.StartTime!.Value,
-            test.Metadata.SkipReason ?? "Test skipped");
+            test.Context?.SkipReason ?? "Test skipped");
         test.EndTime = DateTimeOffset.Now;
         
         // Invoke test skipped event receivers

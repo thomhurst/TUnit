@@ -94,7 +94,7 @@ public static class InstanceFactoryGenerator
                 var param = constructor.Parameters[i];
                 var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 
-                writer.Append($"({paramType})args[{i}]");
+                writer.Append($"global::TUnit.Core.Helpers.CastHelper.Cast<{paramType}>(args[{i}])");
             }
             
             writer.Append(")");
