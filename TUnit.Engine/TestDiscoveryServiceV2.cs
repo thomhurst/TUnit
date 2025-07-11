@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Extensions.Messages;
@@ -14,6 +15,8 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer
 {
     private const int DiscoveryTimeoutSeconds = 60;
     private readonly UnifiedTestBuilderPipeline _testBuilderPipeline;
+    private readonly ConcurrentBag<ExecutableTest> _cachedTests = new();
+    private bool _discoveryCompleted;
 
     public string Uid => "TUnit";
     public string Version => "2.0.0";
@@ -54,12 +57,19 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer
 
     private async Task<IEnumerable<ExecutableTest>> DiscoverTestsWithTimeout(string testSessionId, CancellationToken cancellationToken)
     {
+        // If discovery has already been completed, return cached tests
+        if (_discoveryCompleted)
+        {
+            return _cachedTests.ToList();
+        }
+
         // Use the pipeline to build all tests
         var allTests = new List<ExecutableTest>();
 
         await foreach (var test in BuildTestsAsync(testSessionId, cancellationToken))
         {
             allTests.Add(test);
+            _cachedTests.Add(test);
         }
 
         // No longer using TestRegistry - tests are managed directly
@@ -67,6 +77,7 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer
         // Resolve dependencies between tests
         ResolveDependencies(allTests);
 
+        _discoveryCompleted = true;
         return allTests;
     }
 
@@ -159,5 +170,13 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer
 
         // Remove duplicates while preserving order
         return result.Distinct().ToList();
+    }
+
+    /// <summary>
+    /// Gets all cached test contexts for use by TestFinder
+    /// </summary>
+    public IEnumerable<TestContext> GetCachedTestContexts()
+    {
+        return _cachedTests.Select(t => t.Context);
     }
 }

@@ -67,9 +67,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             context));
 
         CancellationToken = Register(new EngineCancellationToken());
-        
-        // Create test finder service
-        TestFinder = Register<ITestFinder>(new TestFinder());
 
         // Create test services using unified architecture
         Register<ITestInvoker>(new TestInvoker());
@@ -86,6 +83,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 executionMode, this, assembliesToScan: null));
 
         DiscoveryService = Register(new TestDiscoveryServiceV2(TestBuilderPipeline));
+        
+        // Create test finder service after discovery service so it can use its cache
+        TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
 
         // Create single test executor with ExecutionContext support
         var singleTestExecutor = Register<ISingleTestExecutor>(
