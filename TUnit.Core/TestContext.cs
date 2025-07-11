@@ -166,17 +166,15 @@ public class TestContext : Context
     /// <summary>
     /// Service provider (simplified)
     /// </summary>
-    private readonly IServiceProvider? _serviceProvider;
+    private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
     /// Gets the service provider for dependency injection
     /// </summary>
-    public IServiceProvider? ServiceProvider => _serviceProvider;
+    public IServiceProvider ServiceProvider => _serviceProvider;
 
-    public TestContext(string testName, string displayName) : base(null)
+    public TestContext(string testName, string displayName) : this(testName, displayName, CancellationToken.None, new TestServiceProvider())
     {
-        TestName = testName;
-        DisplayName = displayName;
     }
 
     /// <summary>
@@ -210,7 +208,7 @@ public class TestContext : Context
     /// </summary>
     public T? GetService<T>() where T : class
     {
-        return _serviceProvider?.GetService(typeof(T)) as T;
+        return _serviceProvider.GetService(typeof(T)) as T;
     }
 
     /// <summary>
@@ -362,7 +360,7 @@ public class TestContext : Context
             }
         }
 
-        var discoveryService = _serviceProvider?.GetService<ITestDiscoveryService>()!;
+        var discoveryService = _serviceProvider.GetService<ITestDiscoveryService>()!;
 
         await discoveryService.ReregisterTestWithArguments(this, methodArguments, objectBag);
     }
@@ -379,7 +377,7 @@ public class TestContext : Context
     /// </summary>
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
     {
-        var discoveryService = _serviceProvider?.GetService<ITestDiscoveryService>()!;
+        var discoveryService = _serviceProvider.GetService<ITestDiscoveryService>()!;
 
         foreach (var test in discoveryService.GetTests(predicate))
         {
@@ -392,7 +390,7 @@ public class TestContext : Context
     /// </summary>
     public List<TestContext> GetTests(string testName)
     {
-        var discoveryService = _serviceProvider?.GetService<ITestDiscoveryService>()!;
+        var discoveryService = _serviceProvider.GetService<ITestDiscoveryService>()!;
 
         return discoveryService.GetTestsByName(testName);
     }
