@@ -4,8 +4,7 @@ namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
 public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>
-    : DataSourceGeneratorAttribute<T>,
-        ISharedDataSourceAttribute
+    : DataSourceGeneratorAttribute<T>
 {
     public SharedType Shared { get; set; } = SharedType.None;
     public string Key { get; set; } = string.Empty;
@@ -25,7 +24,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
 [UnconditionalSuppressMessage("Trimming", "IL2109:Type derives from type with 'RequiresUnreferencedCodeAttribute' which can break functionality when trimming application code",
     Justification = "The specific constructors (1-5 parameters) are AOT-compatible when used with typeof() expressions. Only the params constructor is incompatible.")]
-public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribute, ISharedDataSourceAttribute
+public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribute
 {
     private readonly Type[] _types;
 

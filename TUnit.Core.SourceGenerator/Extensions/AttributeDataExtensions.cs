@@ -9,9 +9,8 @@ public static class AttributeDataExtensions
     [
         WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithGlobalPrefix,
         WellKnownFullyQualifiedClassNames.MethodDataSourceAttribute.WithGlobalPrefix,
-        WellKnownFullyQualifiedClassNames.ClassDataSourceAttribute.WithGlobalPrefix,
-        WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix,
-        WellKnownFullyQualifiedClassNames.DataSourceGeneratorAttribute.WithGlobalPrefix,
+        WellKnownFullyQualifiedClassNames.AsyncDataSourceGeneratorAttribute.WithGlobalPrefix,
+        WellKnownFullyQualifiedClassNames.AsyncUntypedDataSourceGeneratorAttribute.WithGlobalPrefix,
     ];
 
     public static string? GetFullyQualifiedAttributeTypeName(this AttributeData? attributeData)

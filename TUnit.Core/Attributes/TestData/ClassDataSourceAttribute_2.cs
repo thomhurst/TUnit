@@ -6,7 +6,7 @@ namespace TUnit.Core;
 public sealed class ClassDataSourceAttribute<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T1,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T2>
-    : DataSourceGeneratorAttribute<T1, T2>, ISharedDataSourceAttribute
+    : DataSourceGeneratorAttribute<T1, T2>
     where T1 : new()
     where T2 : new()
 {

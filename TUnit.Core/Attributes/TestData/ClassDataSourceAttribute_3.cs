@@ -7,7 +7,7 @@ public sealed class ClassDataSourceAttribute<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T1,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T2,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T3>
-    : DataSourceGeneratorAttribute<T1, T2, T3>, ISharedDataSourceAttribute
+    : DataSourceGeneratorAttribute<T1, T2, T3>
     where T1 : new()
     where T2 : new()
     where T3 : new()

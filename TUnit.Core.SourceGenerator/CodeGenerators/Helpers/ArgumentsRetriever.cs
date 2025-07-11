@@ -59,22 +59,6 @@ public static class ArgumentsRetriever
                 }
 
                 else if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
-                             .DataSourceGeneratorAttribute.WithGlobalPrefix) == true)
-                {
-                    yield return DataSourceGeneratorRetriever.Parse(context,
-                        testClass,
-                        testMethod,
-                        parameters,
-                        property,
-                        parameterOrPropertyTypes,
-                        dataAttribute,
-                        argumentsType,
-                        index,
-                        propertyName,
-                        true);
-                }
-
-                else if (dataAttribute.AttributeClass?.IsOrInherits(WellKnownFullyQualifiedClassNames
                         .AsyncDataSourceGeneratorAttribute.WithGlobalPrefix) == true)
                 {
                     yield return AsyncDataSourceGeneratorRetriever.Parse(context,
