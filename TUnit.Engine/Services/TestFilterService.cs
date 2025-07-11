@@ -24,7 +24,15 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
 
         _logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
 
-        var filteredTests = testNodes.Where(x => MatchesTest(testExecutionFilter, x)).ToArray();
+        // Create pre-sized list if we can estimate the size
+        var filteredTests = new List<ExecutableTest>();
+        foreach (var test in testNodes)
+        {
+            if (MatchesTest(testExecutionFilter, test))
+            {
+                filteredTests.Add(test);
+            }
+        }
 
         return filteredTests;
     }

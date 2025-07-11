@@ -8,10 +8,9 @@ namespace TUnit.Engine.Scheduling;
 /// </summary>
 internal sealed class TestCompletionTracker
 {
-    private readonly Dictionary<string, TestExecutionState> _graph;
+    private readonly ConcurrentDictionary<string, TestExecutionState> _graph;
     private readonly ConcurrentQueue<TestExecutionState> _readyQueue;
     private readonly WorkNotificationSystem? _notificationSystem;
-    private readonly object _lock = new();
     private int _completedCount;
     private int _totalCount;
 
@@ -20,7 +19,7 @@ internal sealed class TestCompletionTracker
         ConcurrentQueue<TestExecutionState> readyQueue,
         WorkNotificationSystem? notificationSystem = null)
     {
-        _graph = graph;
+        _graph = new ConcurrentDictionary<string, TestExecutionState>(graph);
         _readyQueue = readyQueue;
         _notificationSystem = notificationSystem;
         _totalCount = graph.Count;
@@ -83,11 +82,9 @@ internal sealed class TestCompletionTracker
 
     public IEnumerable<TestExecutionState> GetIncompleteTests()
     {
-        lock (_lock)
-        {
-            return _graph.Values
-                .Where(s => s.State != TestState.Passed && s.State != TestState.Failed && s.State != TestState.Skipped)
-                .ToList();
-        }
+        // ConcurrentDictionary.Values is thread-safe
+        return _graph.Values
+            .Where(s => s.State != TestState.Passed && s.State != TestState.Failed && s.State != TestState.Skipped)
+            .ToList();
     }
 }

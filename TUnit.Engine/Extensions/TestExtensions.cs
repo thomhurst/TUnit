@@ -26,8 +26,7 @@ internal static class TestExtensions
                     AssemblyFullName: testDetails.ClassMetadata?.Type.Assembly.FullName ?? testDetails.ClassType?.Assembly.FullName ?? "UnknownAssembly",
                     TypeName: testContext.GetClassTypeName(),
                     MethodName: testDetails.TestName,
-                    ParameterTypeFullNames: testDetails.TestMethodParameterTypes?.Select(x => x.FullName!).ToArray() ?? [
-                    ],
+                    ParameterTypeFullNames: CreateParameterTypeArray(testDetails.TestMethodParameterTypes),
                     ReturnTypeFullName: testDetails.ReturnType.FullName ?? "void",
                     MethodArity: testDetails.MethodMetadata.GenericTypeCount
                     ),
@@ -67,5 +66,21 @@ internal static class TestExtensions
     {
         testNode.Properties.Add(property);
         return testNode;
+    }
+
+    /// <summary>
+    /// Efficiently create parameter type array without LINQ materialization
+    /// </summary>
+    private static string[] CreateParameterTypeArray(IReadOnlyList<Type>? parameterTypes)
+    {
+        if (parameterTypes == null || parameterTypes.Count == 0)
+            return [];
+
+        var array = new string[parameterTypes.Count];
+        for (int i = 0; i < parameterTypes.Count; i++)
+        {
+            array[i] = parameterTypes[i].FullName!;
+        }
+        return array;
     }
 }

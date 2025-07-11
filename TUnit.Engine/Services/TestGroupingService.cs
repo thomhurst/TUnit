@@ -16,7 +16,8 @@ internal sealed class TestGroupingService : ITestGroupingService
 {
     public Task<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<ExecutableTest> tests)
     {
-        var allTests = tests.ToList();
+        // Use collection directly if already materialized, otherwise create efficient list
+        var allTests = tests as IReadOnlyList<ExecutableTest> ?? tests.ToList();
         var notInParallelQueue = new PriorityQueue<ExecutableTest, int>();
         var keyedNotInParallelQueues = new Dictionary<string, PriorityQueue<ExecutableTest, int>>();
         var parallelTests = new List<ExecutableTest>();

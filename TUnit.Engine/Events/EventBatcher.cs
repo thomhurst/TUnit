@@ -5,7 +5,7 @@ namespace TUnit.Engine.Events;
 /// <summary>
 /// Batches events for efficient processing
 /// </summary>
-internal sealed class EventBatcher<TEvent> : IDisposable where TEvent : class
+internal sealed class EventBatcher<TEvent> : IAsyncDisposable, IDisposable where TEvent : class
 {
     private readonly Channel<TEvent> _eventChannel;
     private readonly Func<IReadOnlyList<TEvent>, ValueTask> _batchProcessor;
@@ -155,20 +155,36 @@ internal sealed class EventBatcher<TEvent> : IDisposable where TEvent : class
         await _processingTask.ConfigureAwait(false);
     }
     
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         _eventChannel.Writer.TryComplete();
         _shutdownCts.Cancel();
         
         try
         {
-            _processingTask.Wait(TimeSpan.FromSeconds(5));
+            // Properly await the task instead of blocking
+#if NET6_0_OR_GREATER
+            await _processingTask.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+#else
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            await _processingTask.ConfigureAwait(false);
+#endif
         }
         catch
         {
-            // Best effort
+            // Best effort shutdown
         }
         
         _shutdownCts.Dispose();
+    }
+    
+    public void Dispose()
+    {
+        // Synchronous dispose - best effort without blocking
+        _eventChannel.Writer.TryComplete();
+        _shutdownCts.Cancel();
+        _shutdownCts.Dispose();
+        
+        // Note: For proper cleanup, use DisposeAsync() instead
     }
 }
