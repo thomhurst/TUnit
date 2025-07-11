@@ -23,51 +23,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("{");
         writer.Indent();
 
-        // Helper method to invoke Func<T> if needed
-        writer.AppendLine("object? InvokeIfFunc(object? value)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("if (value == null) return null;");
-        writer.AppendLine("var type = value.GetType();");
-        writer.AppendLine("if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("var invokeMethod = type.GetMethod(\"Invoke\");");
-        writer.AppendLine("return invokeMethod?.Invoke(value, Array.Empty<object>());");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine("return value;");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-
-        // Helper method to handle tuple values for method and class arguments
-        writer.AppendLine("Func<Task<object?>>[] HandleTupleValue(object? value, bool shouldUnwrap)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("if (!shouldUnwrap || value == null)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("return new[] { () => Task.FromResult<object?>(value) };");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-        writer.AppendLine("// Check if it's a tuple and unwrap it");
-        writer.AppendLine("var unwrapped = global::TUnit.Core.Helpers.TupleHelper.UnwrapTuple(value);");
-        writer.AppendLine("if (unwrapped.Length > 1)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("// Multiple values from tuple - create a factory for each");
-        writer.AppendLine("return unwrapped.Select(v => new Func<Task<object?>>(() => Task.FromResult<object?>(v))).ToArray();");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-        writer.AppendLine("// Single value or not a tuple");
-        writer.AppendLine("return new[] { () => Task.FromResult<object?>(value) };");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-
         var methodDataSources = GetDataSourceAttributes(methodSymbol);
         var classDataSources = GetDataSourceAttributes(typeSymbol);
         var propertyDataSources = GetPropertyDataSources(typeSymbol);
@@ -496,11 +451,11 @@ public static class DataCombinationGeneratorEmitter
 
             if (isClassLevel)
             {
-                writer.AppendLine("ClassDataFactories = HandleTupleValue(InvokeIfFunc(data), true),");
+                writer.AppendLine("ClassDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.HandleTupleValue(global::TUnit.Core.Helpers.DataSourceHelpers.InvokeIfFunc(data), true),");
             }
             else
             {
-                writer.AppendLine("MethodDataFactories = HandleTupleValue(InvokeIfFunc(data), true),");
+                writer.AppendLine("MethodDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.HandleTupleValue(global::TUnit.Core.Helpers.DataSourceHelpers.InvokeIfFunc(data), true),");
             }
 
             // Always write both indices
@@ -536,11 +491,11 @@ public static class DataCombinationGeneratorEmitter
 
             if (isClassLevel)
             {
-                writer.AppendLine("ClassDataFactories = HandleTupleValue(InvokeIfFunc(dataValue), true),");
+                writer.AppendLine("ClassDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.HandleTupleValue(global::TUnit.Core.Helpers.DataSourceHelpers.InvokeIfFunc(dataValue), true),");
             }
             else
             {
-                writer.AppendLine("MethodDataFactories = HandleTupleValue(InvokeIfFunc(dataValue), true),");
+                writer.AppendLine("MethodDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.HandleTupleValue(global::TUnit.Core.Helpers.DataSourceHelpers.InvokeIfFunc(dataValue), true),");
             }
 
             // Always write both indices
