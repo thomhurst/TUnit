@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Services;
 
 namespace TUnit.Core;
 
@@ -129,7 +130,7 @@ public class TestContext : Context
     /// Parallel execution constraint
     /// </summary>
     public IParallelConstraint? ParallelConstraint { get; set; }
-    
+
     /// <summary>
     /// Execution priority (higher values execute first)
     /// </summary>
@@ -165,7 +166,7 @@ public class TestContext : Context
     /// <summary>
     /// Service provider (simplified)
     /// </summary>
-    private IServiceProvider? _serviceProvider;
+    private readonly IServiceProvider? _serviceProvider;
 
     /// <summary>
     /// Gets the service provider for dependency injection
@@ -236,7 +237,7 @@ public class TestContext : Context
     /// <summary>
     /// Lock object for thread safety
     /// </summary>
-    public object Lock { get; } = new object();
+    public object Lock { get; } = new();
 
     /// <summary>
     /// Test timings
@@ -248,7 +249,7 @@ public class TestContext : Context
     /// <summary>
     /// Test artifacts
     /// </summary>
-    public Dictionary<string, object?> Artifacts { get; } = new Dictionary<string, object?>();
+    public Dictionary<string, object?> Artifacts { get; } = new();
 
     /// <summary>
     /// Gets the test display name
@@ -261,7 +262,7 @@ public class TestContext : Context
     /// <summary>
     /// Object bag for storing arbitrary data
     /// </summary>
-    public Dictionary<string, object?> ObjectBag { get; } = new Dictionary<string, object?>();
+    public Dictionary<string, object?> ObjectBag { get; } = new();
 
     /// <summary>
     /// Whether to report this test result
@@ -348,7 +349,6 @@ public class TestContext : Context
     /// </summary>
     public async Task ReregisterTestWithArguments(object?[]? methodArguments = null, Dictionary<string, object?>? objectBag = null)
     {
-        // Update local state immediately
         if (methodArguments != null)
         {
             TestDetails.TestMethodArguments = methodArguments;
@@ -362,13 +362,9 @@ public class TestContext : Context
             }
         }
 
-        // Use the test discovery service if available
-        var discoveryService = _serviceProvider?.GetService(typeof(ITestDiscoveryService)) as ITestDiscoveryService;
-        if (discoveryService != null)
-        {
-            await discoveryService.ReregisterTestWithArguments(this, methodArguments, objectBag);
-        }
-        // Otherwise just the local state update is sufficient
+        var discoveryService = _serviceProvider?.GetService<ITestDiscoveryService>()!;
+
+        await discoveryService.ReregisterTestWithArguments(this, methodArguments, objectBag);
     }
 
     /// <summary>
@@ -383,21 +379,11 @@ public class TestContext : Context
     /// </summary>
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
     {
-        // Use the test discovery service if available
-        var discoveryService = _serviceProvider?.GetService(typeof(ITestDiscoveryService)) as ITestDiscoveryService;
-        if (discoveryService != null)
-        {
-            foreach (var test in discoveryService.GetTests(predicate))
-            {
-                yield return test;
-            }
-            yield break;
-        }
+        var discoveryService = _serviceProvider?.GetService<ITestDiscoveryService>()!;
 
-        // Fallback: just check current context
-        if (predicate(this))
+        foreach (var test in discoveryService.GetTests(predicate))
         {
-            yield return this;
+            yield return test;
         }
     }
 
@@ -406,19 +392,8 @@ public class TestContext : Context
     /// </summary>
     public List<TestContext> GetTests(string testName)
     {
-        // Use the test discovery service if available
-        var discoveryService = _serviceProvider?.GetService(typeof(ITestDiscoveryService)) as ITestDiscoveryService;
-        if (discoveryService != null)
-        {
-            return discoveryService.GetTestsByName(testName);
-        }
+        var discoveryService = _serviceProvider?.GetService<ITestDiscoveryService>()!;
 
-        // Fallback: just check current context
-        var result = new List<TestContext>();
-        if (TestName == testName)
-        {
-            result.Add(this);
-        }
-        return result;
+        return discoveryService.GetTestsByName(testName);
     }
 }

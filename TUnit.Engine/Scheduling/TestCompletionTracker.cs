@@ -10,7 +10,7 @@ public sealed class TestCompletionTracker
 {
     private readonly Dictionary<string, TestExecutionState> _graph;
     private readonly ConcurrentQueue<TestExecutionState> _readyQueue;
-    private readonly object _lock = new object();
+    private readonly object _lock = new();
     private int _completedCount;
     private int _totalCount;
 

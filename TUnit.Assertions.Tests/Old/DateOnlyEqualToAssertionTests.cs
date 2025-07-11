@@ -5,7 +5,7 @@ namespace TUnit.Assertions.UnitTests;
 
 public class DateOnlyEqualToAssertionTests
 {
-    private static readonly DateOnly TestDate = new DateOnly(2020, 12, 31);
+    private static readonly DateOnly TestDate = new(2020, 12, 31);
     
     [Test]
     public async Task EqualsTo_Success()

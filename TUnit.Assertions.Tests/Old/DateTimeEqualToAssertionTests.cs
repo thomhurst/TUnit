@@ -2,7 +2,7 @@
 
 public class DateTimeEqualToAssertionTests
 {
-    private static readonly DateTime TestDateTime = new DateTime(2020, 12, 31, 23, 59, 59);
+    private static readonly DateTime TestDateTime = new(2020, 12, 31, 23, 59, 59);
     [Test]
     public async Task EqualsTo_Success()
     {

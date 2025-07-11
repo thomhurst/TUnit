@@ -28,13 +28,13 @@ public abstract class StringMatcher
     ///     Supports * to match zero or more characters and ? to match exactly one character.
     /// </summary>
     public static WildcardMatch AsWildcard(string pattern)
-        => new WildcardMatch(pattern);
+        => new(pattern);
 
     /// <summary>
     ///     A <see cref="Regex"> match.
     /// </summary>
     public static RegexMatch AsRegex([StringSyntax("regex")] string pattern)
-        => new RegexMatch(pattern);
+        => new(pattern);
 
     public sealed class WildcardMatch : StringMatcher
     {

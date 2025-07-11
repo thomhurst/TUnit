@@ -11,6 +11,7 @@ public abstract class DataSourceGeneratorAttribute<T> : AsyncDataSourceGenerator
         {
             yield return () => Task.FromResult(generateDataSource());
         }
+
         await Task.CompletedTask;
     }
 }
@@ -26,6 +27,7 @@ public abstract class DataSourceGeneratorAttribute<T1, T2> : AsyncDataSourceGene
         {
             yield return () => Task.FromResult(generateDataSource());
         }
+
         await Task.CompletedTask;
     }
 }
@@ -57,6 +59,7 @@ public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4> : AsyncDataSo
         {
             yield return () => Task.FromResult(generateDataSource());
         }
+
         await Task.CompletedTask;
     }
 }
@@ -72,6 +75,7 @@ public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : AsyncDa
         {
             yield return () => Task.FromResult(generateDataSource());
         }
+
         await Task.CompletedTask;
     }
 }

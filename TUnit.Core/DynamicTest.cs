@@ -7,7 +7,7 @@ namespace TUnit.Core;
 /// </summary>
 public class DiscoveryResult
 {
-    public static DiscoveryResult Empty => new DiscoveryResult();
+    public static DiscoveryResult Empty => new();
 }
 
 /// <summary>

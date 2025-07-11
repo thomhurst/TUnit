@@ -7,7 +7,7 @@ public sealed class AdaptiveParallelismStrategy : IParallelismStrategy
 {
     private readonly int _minParallelism;
     private readonly int _maxParallelism;
-    private readonly object _lock = new object();
+    private readonly object _lock = new();
     private int _currentParallelism;
     private double _lastThroughput;
     private DateTime _lastAdjustment;

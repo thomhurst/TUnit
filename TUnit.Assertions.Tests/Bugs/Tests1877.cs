@@ -7,8 +7,8 @@ public class Tests1877
     [Test]
     public async Task Test()
     {
-        IEnumerable<MyRecord> x = [new MyRecord("A"), new MyRecord("B"), new MyRecord("C")];
-        IEnumerable<MyRecord> y = [new MyRecord("C"), new MyRecord("B"), new MyRecord("A")];
+        IEnumerable<MyRecord> x = [new("A"), new("B"), new("C")];
+        IEnumerable<MyRecord> y = [new("C"), new("B"), new("A")];
 
         await Assert.That(x).IsEquivalentTo(y, CollectionOrdering.Any);
     }

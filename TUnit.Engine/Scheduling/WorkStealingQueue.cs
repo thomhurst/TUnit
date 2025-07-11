@@ -5,7 +5,7 @@ namespace TUnit.Engine.Scheduling;
 /// </summary>
 public sealed class WorkStealingQueue<T> where T : class
 {
-    private readonly ConcurrentDeque<T> _deque = new ConcurrentDeque<T>();
+    private readonly ConcurrentDeque<T> _deque = new();
 
     public void Enqueue(T item)
     {
