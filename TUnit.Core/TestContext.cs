@@ -360,9 +360,9 @@ public class TestContext : Context
             }
         }
 
-        var discoveryService = _serviceProvider.GetService<ITestDiscoveryService>()!;
+        var testFinder = _serviceProvider.GetService<ITestFinder>()!;
 
-        await discoveryService.ReregisterTestWithArguments(this, methodArguments, objectBag);
+        await testFinder.ReregisterTestWithArguments(this, methodArguments, objectBag);
     }
 
     /// <summary>
@@ -377,21 +377,39 @@ public class TestContext : Context
     /// </summary>
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
     {
-        var discoveryService = _serviceProvider.GetService<ITestDiscoveryService>()!;
+        var testFinder = _serviceProvider.GetService<ITestFinder>()!;
 
-        foreach (var test in discoveryService.GetTests(predicate))
+        foreach (var test in testFinder.GetTests(predicate))
         {
             yield return test;
         }
     }
 
     /// <summary>
-    /// Gets tests by name
+    /// Gets tests by name from the same test class
     /// </summary>
     public List<TestContext> GetTests(string testName)
     {
-        var discoveryService = _serviceProvider.GetService<ITestDiscoveryService>()!;
+        var testFinder = _serviceProvider.GetService<ITestFinder>()!;
 
-        return discoveryService.GetTestsByName(testName);
+        // Use the current test's class type by default
+        var classType = TestDetails?.ClassType;
+        if (classType == null)
+        {
+            // Fallback to getting all tests with this name if we don't have a class type
+            return testFinder.GetTestsByName(testName);
+        }
+        
+        return testFinder.GetTestsByName(testName, classType);
+    }
+    
+    /// <summary>
+    /// Gets tests by name from a specific test class
+    /// </summary>
+    public List<TestContext> GetTests(string testName, Type classType)
+    {
+        var testFinder = _serviceProvider.GetService<ITestFinder>()!;
+
+        return testFinder.GetTestsByName(testName, classType);
     }
 }

@@ -32,7 +32,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public IHookCollectionService HookCollectionService { get; }
     public HookOrchestrator HookOrchestrator { get; }
     public EventReceiverOrchestrator EventReceiverOrchestrator { get; }
-    public ITestDiscoveryService TestDiscoveryService { get; }
+    public ITestFinder TestFinder { get; }
 
     public TUnitServiceProvider(
         IExtension extension,
@@ -68,8 +68,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         CancellationToken = Register(new EngineCancellationToken());
         
-        // Create test discovery service
-        TestDiscoveryService = Register<ITestDiscoveryService>(new TestDiscoveryService());
+        // Create test finder service
+        TestFinder = Register<ITestFinder>(new TestFinder());
 
         // Create test services using unified architecture
         Register<ITestInvoker>(new TestInvoker());
