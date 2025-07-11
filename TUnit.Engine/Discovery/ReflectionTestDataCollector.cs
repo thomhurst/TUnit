@@ -3,6 +3,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Helpers;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Discovery;
 
@@ -17,6 +19,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     private static readonly List<TestMetadata> _discoveredTests = new();
     private static readonly object _lock = new();
     private static bool _assemblyLoadHandlerRegistered;
+    private static readonly ExpressionCacheService _expressionCache = new();
 
     public Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
@@ -60,6 +63,15 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         lock (_lock)
         {
             _discoveredTests.AddRange(newTests);
+            
+            // Log expression cache statistics
+            if (DiscoveryDiagnostics.IsEnabled)
+            {
+                var stats = _expressionCache.GetCacheStatistics();
+                DiscoveryDiagnostics.RecordEvent("ExpressionCacheStats", 
+                    $"Instance Factories: {stats.InstanceFactories}, Test Invokers: {stats.TestInvokers}");
+            }
+            
             return Task.FromResult<IEnumerable<TestMetadata>>(_discoveredTests.ToList());
         }
     }
@@ -87,6 +99,14 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             lock (_lock)
             {
                 _discoveredTests.AddRange(tests);
+                
+                // Log expression cache statistics for dynamically loaded assemblies
+                if (DiscoveryDiagnostics.IsEnabled)
+                {
+                    var stats = _expressionCache.GetCacheStatistics();
+                    DiscoveryDiagnostics.RecordEvent("ExpressionCacheStats (Dynamic)", 
+                        $"Instance Factories: {stats.InstanceFactories}, Test Invokers: {stats.TestInvokers}");
+                }
             }
         }
         catch (Exception ex)
@@ -627,6 +647,11 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         var ctor = constructors.FirstOrDefault(c => c.GetParameters().Length == 0)
                    ?? constructors.First();
 
+        return _expressionCache.GetOrCreateInstanceFactory(ctor, CompileInstanceFactory);
+    }
+
+    private static Func<object?[], object> CompileInstanceFactory(ConstructorInfo ctor)
+    {
         var parameters = ctor.GetParameters();
         var paramExpr = Expression.Parameter(typeof(object[]), "args");
 
@@ -648,6 +673,12 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
     [UnconditionalSuppressMessage("AOT", "IL3050:Using member 'System.Linq.Expressions.Expression.Call(Type, String, Type[], params Expression[])' which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling", Justification = "Reflection mode cannot support AOT")]
     private static Func<object, object?[], Task>? CreateTestInvoker(Type testClass, MethodInfo testMethod)
+    {
+        return _expressionCache.GetOrCreateTestInvoker(testClass, testMethod, 
+            key => CompileTestInvoker(key.Item1, key.Item2));
+    }
+
+    private static Func<object, object?[], Task> CompileTestInvoker(Type testClass, MethodInfo testMethod)
     {
         var instanceParam = Expression.Parameter(typeof(object), "instance");
         var argsParam = Expression.Parameter(typeof(object[]), "args");
