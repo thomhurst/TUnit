@@ -608,9 +608,9 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("{");
         writer.Indent();
 
-        // Create an instance of the generator and call GenerateAsync
-        var attributeType = attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
-        writer.AppendLine($"var generator = new {attributeType}();");
+        // Create an instance of the generator with all properties from the attribute
+        var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
+        writer.AppendLine($"var generator = {generatorCode};");
 
         writer.AppendLine("// Create TestInformation for the data generator");
         writer.Append("var testInformation = ");
@@ -766,9 +766,9 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("{");
         writer.Indent();
 
-        // Create an instance of the generator and call GenerateDataSources
-        var attributeType = attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
-        writer.AppendLine($"var generator = new {attributeType}();");
+        // Create an instance of the generator with all properties from the attribute
+        var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
+        writer.AppendLine($"var generator = {generatorCode};");
 
         writer.AppendLine("// Create TestInformation for the data generator");
         writer.Append("var testInformation = ");

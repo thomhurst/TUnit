@@ -51,7 +51,7 @@ internal static class CodeGenerationHelpers
     /// <summary>
     /// Generates direct instantiation code for attributes.
     /// </summary>
-    private static string GenerateAttributeInstantiation(AttributeData attr)
+    public static string GenerateAttributeInstantiation(AttributeData attr)
     {
         var typeName = attr.AttributeClass!.GloballyQualified();
         using var writer = new CodeWriter("", includeHeader: false);
