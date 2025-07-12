@@ -25,4 +25,18 @@ public class ThrowInDelegateValueAssertionTests
                          but An exception was thrown during the assertion: System.Exception: No
                          """);
     }
+
+    [Test]
+    public async Task ThrowInDelegateValueAssertion_RespectsCaseInsensitiveMessage()
+    {
+        var assertion = async () => await Assert.That(() =>
+        {
+            throw new Exception("No");
+            return true;
+        }).IsEqualTo(true);
+
+        await Assert.That(assertion)
+            .Throws<AssertionException>()
+            .WithMessageContaining("SYSTEM.EXCEPTION", StringComparison.OrdinalIgnoreCase);
+    }
 }
