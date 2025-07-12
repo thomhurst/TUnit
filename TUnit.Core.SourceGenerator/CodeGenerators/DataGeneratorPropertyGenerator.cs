@@ -11,83 +11,100 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
     {
         var classDataSourceClasses = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (node, _) => node is AttributeSyntax,
+                predicate: static (node, _) => node is ClassDeclarationSyntax
+                    or RecordDeclarationSyntax
+                    or StructDeclarationSyntax,
                 transform: GetClassesWithDataSourceProperties)
-            .SelectMany(static (symbols, _) => symbols)
+            .SelectMany(static (s, _) => s)
             .WithComparer(SymbolEqualityComparer.Default);
 
-        context.RegisterSourceOutput(classDataSourceClasses, GeneratePropertyInitializer);
+        context.RegisterSourceOutput(classDataSourceClasses, GeneratePropertyInitializer!);
     }
 
     private static IEnumerable<INamedTypeSymbol> GetClassesWithDataSourceProperties(GeneratorSyntaxContext context, CancellationToken cancellationToken)
     {
-        if (context.Node is not AttributeSyntax attributeSyntax)
-        {
-            return [];
-        }
-
         var semanticModel = context.SemanticModel;
 
-        if(semanticModel.GetSymbolInfo(attributeSyntax).Symbol is not IMethodSymbol attributeConstructorSymbol)
+        if (semanticModel.GetDeclaredSymbol(context.Node) is not INamedTypeSymbol classSymbol)
         {
             return [];
         }
 
-        var attributeClass = attributeConstructorSymbol.ContainingType;
-
-        if (attributeClass == null)
-        {
-            return [];
-        }
-
-        if (!IsDataSourceGeneratorAttribute(attributeClass, out var attributeBaseType))
-        {
-            return [];
-        }
-
-        if (attributeBaseType?.IsGenericType is not true)
-        {
-            return [];
-        }
-
-        return attributeBaseType.TypeArguments
-            .Where(x => x is not ITypeParameterSymbol)
-            .OfType<INamedTypeSymbol>()
-            .Where(HasDataGeneratorProperties);
+        return CollectClass(classSymbol, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
     }
 
-    private static bool HasDataGeneratorProperties(ITypeSymbol type)
+    private static IEnumerable<INamedTypeSymbol> CollectClass(INamedTypeSymbol namedTypeSymbol, HashSet<ITypeSymbol> hashSet)
     {
-        if (type is not INamedTypeSymbol namedTypeSymbol)
+        if (namedTypeSymbol.IsGenericDefinition())
         {
-            return false;
+            yield break;
         }
 
-        return namedTypeSymbol.GetMembers()
+        var propertiesWithDataSource = namedTypeSymbol
+            .GetMembersIncludingBase()
             .OfType<IPropertySymbol>()
-            .Any(property => property.GetAttributes().Any(attr => IsDataSourceGeneratorAttribute(attr.AttributeClass, out _)));
-    }
+            .Where(p => p.GetAttributes().Any(a => a.IsDataSourceAttribute()))
+            .ToArray();
 
-    private static bool IsDataSourceGeneratorAttribute(INamedTypeSymbol? attributeClass, out INamedTypeSymbol? attributeBaseType)
-    {
-        if (attributeClass == null)
-        {
-            attributeBaseType = null;
-            return false;
-        }
+        var nestedTypes = namedTypeSymbol
+            .GetMembersIncludingBase()
+            .OfType<IPropertySymbol>()
+            .Select(x => x.Type)
+            .OfType<INamedTypeSymbol>()
+            .Where(x => IsOrHasEvent(x, hashSet))
+            .ToArray();
 
-        foreach (var type in attributeClass.GetSelfAndBaseTypes())
+        // Also check properties with data source attributes
+        var dataSourcePropertyTypes = propertiesWithDataSource
+            .Select(x => x.Type)
+            .OfType<INamedTypeSymbol>()
+            .Where(x => !hashSet.Contains(x))
+            .ToArray();
+
+        var allNestedTypes = nestedTypes.Concat(dataSourcePropertyTypes).Distinct(SymbolEqualityComparer.Default).Cast<INamedTypeSymbol>().ToArray();
+
+        foreach (var nestedType in allNestedTypes)
         {
-            if(type.Interfaces.Any(i =>
-                i.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "global::TUnit.Core.IDataSourceGeneratorAttribute"))
+            foreach (var typeSymbol in CollectClass(nestedType, hashSet))
             {
-                attributeBaseType = type;
-                return true;
+                yield return typeSymbol;
             }
         }
 
-        attributeBaseType = null;
-        return false;
+        if (allNestedTypes.Length > 0 || propertiesWithDataSource.Length > 0)
+        {
+            yield return namedTypeSymbol;
+        }
+    }
+
+    private static bool IsOrHasEvent(INamedTypeSymbol propertyType, HashSet<ITypeSymbol> visitedTypes)
+    {
+        if (propertyType.SpecialType is not SpecialType.None
+            and not SpecialType.System_IDisposable)
+        {
+            return false;
+        }
+
+        if (propertyType.IsGenericDefinition() || !visitedTypes.Add(propertyType))
+        {
+            return false;
+        }
+
+        if (propertyType.AllInterfaces.Any(p =>
+                p.GloballyQualified() == "global::TUnit.Core.Interfaces.IAsyncInitializer" ||
+                p.GloballyQualified() == "global::System.IAsyncDisposable" ||
+                p.GloballyQualified() == "global::System.IDisposable" ||
+                p.GloballyQualified() == "global::TUnit.Core.Interfaces.IEventReceiver"))
+        {
+            return true;
+        }
+
+        return propertyType
+            .GetMembersIncludingBase()
+            .OfType<IPropertySymbol>()
+            .Select(x => x.Type)
+            .OfType<INamedTypeSymbol>()
+            .Any(x => IsOrHasEvent(x, visitedTypes));
     }
 
     private void GeneratePropertyInitializer(SourceProductionContext context, INamedTypeSymbol type)
@@ -96,31 +113,29 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
         {
             using var sourceBuilder = new SourceCodeWriter();
 
-            sourceBuilder.WriteLine("// <auto-generated/>");
-            sourceBuilder.WriteLine("#pragma warning disable");
-            sourceBuilder.WriteLine("using global::System;");
-            sourceBuilder.WriteLine("using global::System.Collections.Generic;");
-            sourceBuilder.WriteLine("using global::TUnit.Core;");
+            sourceBuilder.Write("using global::System;");
+            sourceBuilder.Write("using global::System.Collections.Generic;");
+            sourceBuilder.Write("using global::TUnit.Core;");
             sourceBuilder.WriteLine();
 
             var initializerClassName = $"{type.Name}PropertyInitializer_{Guid.NewGuid():N}";
 
-            sourceBuilder.WriteLine("namespace TUnit.SourceGenerated;");
+            sourceBuilder.Write("namespace TUnit.SourceGenerated;");
             sourceBuilder.WriteLine();
-            sourceBuilder.WriteLine("[global::System.Diagnostics.StackTraceHidden]");
-            sourceBuilder.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-            sourceBuilder.WriteLine($"file static class {initializerClassName}");
-            sourceBuilder.WriteLine("{");
+            sourceBuilder.Write("[global::System.Diagnostics.StackTraceHidden]");
+            sourceBuilder.Write("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
+            sourceBuilder.Write($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(TestsGenerator).Assembly.GetName().Version}\")]");
+            sourceBuilder.Write($"file static class {initializerClassName}");
+            sourceBuilder.Write("{");
 
-            // Generate the initialization method
-            sourceBuilder.WriteLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-            sourceBuilder.WriteLine("public static void InitializeProperties()");
-            sourceBuilder.WriteLine("{");
+            sourceBuilder.Write("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+            sourceBuilder.Write("public static void InitializeProperties()");
+            sourceBuilder.Write("{");
 
-            RegisterProperty(type, sourceBuilder);
+            RegisterProperty(type, sourceBuilder, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
 
-            sourceBuilder.WriteLine("}");
-            sourceBuilder.WriteLine("}");
+            sourceBuilder.Write("}");
+            sourceBuilder.Write("}");
 
             context.AddSource($"PropertyInitializer_{initializerClassName}.g.cs", sourceBuilder.ToString());
         }
@@ -135,24 +150,28 @@ public class DataGeneratorPropertyGenerator : IIncrementalGenerator
                 isEnabledByDefault: true);
 
             context.ReportDiagnostic(Diagnostic.Create(descriptor, null, ex.ToString()));
+
+            throw;
         }
     }
 
-    private static void RegisterProperty(INamedTypeSymbol type, SourceCodeWriter sourceBuilder)
+    private static void RegisterProperty(INamedTypeSymbol type, SourceCodeWriter sourceBuilder, HashSet<ITypeSymbol> visitedTypes)
     {
-        sourceBuilder.WriteLine($"global::TUnit.Core.SourceRegistrar.RegisterProperty<{type.GloballyQualified()}>();");
-
-        foreach (var propertySymbol in type.GetSelfAndBaseTypes().SelectMany(x => x.GetMembers()).OfType<IPropertySymbol>())
+        if (!visitedTypes.Add(type))
         {
-            if (!propertySymbol.GetAttributes().Any(x => IsDataSourceGeneratorAttribute(x.AttributeClass, out _)))
-            {
-                continue;
-            }
+            return;
+        }
 
-            if (propertySymbol.Type is INamedTypeSymbol namedTypePropertySymbol)
-            {
-                RegisterProperty(namedTypePropertySymbol, sourceBuilder);
-            }
+        sourceBuilder.Write($"global::TUnit.Core.SourceRegistrar.RegisterProperty<{type.GloballyQualified()}>();");
+
+        foreach (var propertySymbol in type
+                     .GetMembersIncludingBase()
+                     .OfType<IPropertySymbol>()
+                     .Select(x => x.Type)
+                     .OfType<INamedTypeSymbol>()
+                     .Where(x => IsOrHasEvent(x, visitedTypes)))
+        {
+                RegisterProperty(propertySymbol, sourceBuilder, visitedTypes);
         }
     }
 }

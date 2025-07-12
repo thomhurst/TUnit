@@ -36,7 +36,8 @@ dotnet run -- --list-tests                    # List all tests
 dotnet run -- --fail-fast                     # Stop on first failure
 dotnet run -- --maximum-parallel-tests 10     # Control parallelism
 dotnet run -- --report-trx --coverage         # Generate reports
-dotnet run -- --treenode-filter "TestName"    # Run specific test
+dotnet run -- --treenode-filter "TestName"    # Run specific test by exact name
+dotnet run -- --treenode-filter/*/*/*PartialName*/*  # Filter tests by partial name pattern
 
 # Build NuGet packages
 dotnet pack -c Release
@@ -114,6 +115,10 @@ When working on TUnit:
 5. **Platform Integration**: Ensure compatibility with Microsoft.Testing.Platform capabilities
 6. **Performance**: TUnit prioritizes performance - avoid runtime reflection where possible
 7. **Async Support**: All public APIs should support async operations properly
+8. **Async Best Practices**: 
+   - Never use `GetAwaiter().GetResult()` or `.Result` on tasks - always use proper async/await to avoid deadlocks
+   - When in a sync context that needs async functionality, refactor method signatures to be async rather than trying to execute async code synchronously
+   - TUnit supports async all the way through the stack - embrace it!
 
 ## Key Files and Locations
 

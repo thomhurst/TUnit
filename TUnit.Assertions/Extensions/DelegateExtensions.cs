@@ -11,8 +11,8 @@ internal static class DelegateExtensions
 
         try
         {
-            await Task.Run(action);
-            
+            await Task.Factory.StartNew(action);
+
             var end = DateTimeOffset.Now;
 
             return (null, null, actualExpression, start, end);
@@ -24,7 +24,7 @@ internal static class DelegateExtensions
             return (null, e, actualExpression, start, end);
         }
     }
-    
+
     public static async ValueTask<AssertionData> AsAssertionData(this Func<Task> action, string? actualExpression)
     {
         var start = DateTimeOffset.Now;
@@ -32,7 +32,7 @@ internal static class DelegateExtensions
         try
         {
             await action();
-            
+
             var end = DateTimeOffset.Now;
 
             return (null, null, actualExpression, start, end);
@@ -44,7 +44,7 @@ internal static class DelegateExtensions
             return (null, e, actualExpression, start, end);
         }
     }
-    
+
     public static async ValueTask<AssertionData> AsAssertionData<T>(this Func<Task<T>> action, string? actualExpression)
     {
         var start = DateTimeOffset.Now;
@@ -52,9 +52,9 @@ internal static class DelegateExtensions
         try
         {
             var result = await action();
-            
+
             var end = DateTimeOffset.Now;
-            
+
             return (result, null, actualExpression, start, end);
         }
         catch (Exception e)
@@ -64,15 +64,15 @@ internal static class DelegateExtensions
             return (null, e, actualExpression, start, end);
         }
     }
-    
+
     public static async ValueTask<AssertionData> AsAssertionData<T>(this Func<T> action, string? actualExpression)
     {
         var start = DateTimeOffset.Now;
 
         try
         {
-            var result = await Task.Run(action);
-            
+            var result = await Task.Factory.StartNew(action);
+
             var end = DateTimeOffset.Now;
 
             return (result, null, actualExpression, start, end);
@@ -84,7 +84,7 @@ internal static class DelegateExtensions
             return (null, e, actualExpression, start, end);
         }
     }
-    
+
     public static ValueTask<AssertionData> AsAssertionData<T>(this T t, string? actualExpression)
     {
         var start = DateTimeOffset.Now;

@@ -1,5 +1,4 @@
-﻿[  
-namespace System.Runtime.CompilerServices;
+﻿namespace System.Runtime.CompilerServices;
 
 using System;
 using System.Diagnostics;
@@ -7,7 +6,9 @@ using System.Diagnostics.CodeAnalysis;
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 sealed class ModuleInitializerAttribute : Attribute;
-  
+
+// ===== FILE SEPARATOR =====
+
 namespace System.Diagnostics;
 
 using System;
@@ -20,4 +21,3 @@ using System.Diagnostics.CodeAnalysis;
     AttributeTargets.Struct,
     Inherited = false)]
 sealed class StackTraceHiddenAttribute : Attribute;
-]

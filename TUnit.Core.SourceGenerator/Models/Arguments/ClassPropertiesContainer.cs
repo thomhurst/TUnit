@@ -46,14 +46,14 @@ public record ClassPropertiesContainer(
             return;
         }
         
-        sourceCodeWriter.WriteLine("{");
+        sourceCodeWriter.Write("{");
         
         foreach (var (propertySymbol, argumentsContainer) in InnerContainers.Where(x => !x.PropertySymbol.IsStatic))
         {
             var firstElement = argumentsContainer.DataVariables.ElementAt(0).Name;
-            sourceCodeWriter.WriteLine($"{propertySymbol.Name} = global::TUnit.Core.Helpers.CastHelper.Cast<{propertySymbol.Type.GloballyQualified()}>({firstElement}),");
+            sourceCodeWriter.Write($"{propertySymbol.Name} = global::TUnit.Core.Helpers.CastHelper.Cast<{propertySymbol.Type.GloballyQualified()}>({firstElement}),");
         }
 
-        sourceCodeWriter.WriteLine("}");
+        sourceCodeWriter.Write("}");
     }
 }

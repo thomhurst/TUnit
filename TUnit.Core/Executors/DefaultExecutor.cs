@@ -3,7 +3,7 @@ namespace TUnit.Core;
 public class DefaultExecutor : GenericAbstractExecutor
 {
     public static readonly DefaultExecutor Instance = new();
-    
+
     private DefaultExecutor()
     {
     }

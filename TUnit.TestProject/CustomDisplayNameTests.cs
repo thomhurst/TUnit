@@ -73,7 +73,7 @@ public class CustomDisplayNameTests
 
     public class MyGenerator : DataSourceGeneratorAttribute<string>, ITestDiscoveryEventReceiver
     {
-        public override IEnumerable<Func<string>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+        protected override IEnumerable<Func<string>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
             yield return () => "Super Secret Password";
         }
