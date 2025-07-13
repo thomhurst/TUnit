@@ -451,11 +451,11 @@ public static class DataCombinationGeneratorEmitter
 
             if (isClassLevel)
             {
-                writer.AppendLine("ClassDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.HandleTupleValue(global::TUnit.Core.Helpers.DataSourceHelpers.InvokeIfFunc(data), true),");
+                writer.AppendLine("ClassDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(data),");
             }
             else
             {
-                writer.AppendLine("MethodDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.HandleTupleValue(global::TUnit.Core.Helpers.DataSourceHelpers.InvokeIfFunc(data), true),");
+                writer.AppendLine("MethodDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(data),");
             }
 
             // Always write both indices
@@ -491,11 +491,11 @@ public static class DataCombinationGeneratorEmitter
 
             if (isClassLevel)
             {
-                writer.AppendLine("ClassDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.HandleTupleValue(global::TUnit.Core.Helpers.DataSourceHelpers.InvokeIfFunc(dataValue), true),");
+                writer.AppendLine("ClassDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(dataValue),");
             }
             else
             {
-                writer.AppendLine("MethodDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.HandleTupleValue(global::TUnit.Core.Helpers.DataSourceHelpers.InvokeIfFunc(dataValue), true),");
+                writer.AppendLine("MethodDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(dataValue),");
             }
 
             // Always write both indices
@@ -649,28 +649,9 @@ public static class DataCombinationGeneratorEmitter
         {
             var fullyQualifiedType = targetType?.GloballyQualifiedNonGeneric() ?? typeSymbol.GloballyQualifiedNonGeneric();
             writer.AppendLine($"var data = {fullyQualifiedType}.{methodName}();");
-            writer.AppendLine("if (data is System.Collections.IEnumerable enumerable && !(data is string))");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("var enumerator = enumerable.GetEnumerator();");
-            writer.AppendLine("if (enumerator.MoveNext())");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("var value = enumerator.Current;");
-            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(value);");
-            writer.AppendLine("return value;");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("else");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(data);");
-            writer.AppendLine("return data;");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("return null;");
+            
+            // Use AOT-compatible helper method that handles all the complexity
+            writer.AppendLine("return await global::TUnit.Core.Helpers.DataSourceHelpers.ProcessDataSourceResultGeneric(data);");
         }
         
         writer.Unindent();

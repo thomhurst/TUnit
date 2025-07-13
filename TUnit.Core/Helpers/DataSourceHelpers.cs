@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core.Helpers;
@@ -37,10 +38,27 @@ public static class DataSourceHelpers
                 return funcDateTime();
             case Func<Guid> funcGuid:
                 return funcGuid();
+            
+            // Handle common tuple function types
+            case Func<(object?, object?)> funcTuple2:
+                return funcTuple2();
+            case Func<(object?, object?, object?)> funcTuple3:
+                return funcTuple3();
+            case Func<(object?, object?, object?, object?)> funcTuple4:
+                return funcTuple4();
+            case Func<(object?, object?, object?, object?, object?)> funcTuple5:
+                return funcTuple5();
+            case Func<(object?, object?, object?, object?, object?, object?)> funcTuple6:
+                return funcTuple6();
+            case Func<(object?, object?, object?, object?, object?, object?, object?)> funcTuple7:
+                return funcTuple7();
+                
             case Func<object> func:
                 return func();
             default:
-                // For non-Func types or unsupported Func types, return as-is
+                // For non-Func types, return as-is
+                // Note: We avoid reflection here for AOT compatibility
+                // If additional Func<T> types are needed, they should be added explicitly above
                 return value;
         }
     }
@@ -158,4 +176,95 @@ public static class DataSourceHelpers
     
     public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6, T7>(ValueTuple<T1, T2, T3, T4, T5, T6, T7> tuple)
         => new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7 };
+
+    /// <summary>
+    /// AOT-compatible data source processor for when the return type is known at compile time
+    /// </summary>
+    public static async Task<object?> ProcessDataSourceResult<T>(T data)
+    {
+        if (data == null) 
+            return null;
+
+        // If it's a Func<TResult>, invoke it first
+        var actualData = InvokeIfFunc(data);
+        
+        // Initialize the object if it implements IAsyncInitializer
+        await ObjectInitializer.InitializeAsync(actualData);
+        
+        return actualData;
+    }
+
+    /// <summary>
+    /// AOT-compatible data source processor for IEnumerable types known at compile time
+    /// </summary>
+    public static async Task<object?> ProcessEnumerableDataSource<T>(IEnumerable<T> enumerable)
+    {
+        if (enumerable == null) 
+            return null;
+
+        var enumerator = enumerable.GetEnumerator();
+        if (enumerator.MoveNext())
+        {
+            var value = enumerator.Current;
+            await ObjectInitializer.InitializeAsync(value);
+            return value;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// AOT-compatible data source processor that handles any type by checking if it's enumerable
+    /// </summary>
+    public static async Task<object?> ProcessDataSourceResultGeneric<T>(T data)
+    {
+        if (data == null) 
+            return null;
+
+        // If it's a Func<TResult>, invoke it first
+        var actualData = InvokeIfFunc(data);
+        
+        // Handle IEnumerable types (but not string)
+        if (actualData is IEnumerable enumerable && actualData is not string)
+        {
+            var enumerator = enumerable.GetEnumerator();
+            if (enumerator.MoveNext())
+            {
+                var value = enumerator.Current;
+                await ObjectInitializer.InitializeAsync(value);
+                return value;
+            }
+            return null;
+        }
+        
+        // For non-enumerable types, just initialize and return
+        await ObjectInitializer.InitializeAsync(actualData);
+        return actualData;
+    }
+
+    /// <summary>
+    /// AOT-compatible method that processes data and returns factories for test data combination
+    /// Replaces the complex HandleTupleValue + InvokeIfFunc pattern
+    /// </summary>
+    public static Func<Task<object?>>[] ProcessTestDataSource<T>(T data)
+    {
+        if (data == null)
+        {
+            return new[] { () => Task.FromResult<object?>(null) };
+        }
+
+        // If it's a Func<TResult>, invoke it first
+        var actualData = InvokeIfFunc(data);
+        
+        // Use AOT-compatible tuple unwrapping
+        var unwrapped = UnwrapTupleAot(actualData);
+        if (unwrapped.Length > 1)
+        {
+            // Multiple values from tuple - create a factory for each
+            return unwrapped.Select(v => new Func<Task<object?>>(() => Task.FromResult<object?>(v))).ToArray();
+        }
+        
+        // Single value or not a tuple
+        return new[] { () => Task.FromResult<object?>(actualData) };
+    }
 }
