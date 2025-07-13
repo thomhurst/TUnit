@@ -134,11 +134,32 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
 
     private async Task PrepareHookOrchestrator(HookOrchestrator? hookOrchestrator, List<ExecutableTest> testList, CancellationToken cancellationToken)
     {
+        // Initialize static properties with data source attributes before any other session setup
+        await InitializeStaticPropertiesAsync(cancellationToken);
+        
         if (hookOrchestrator != null)
         {
             hookOrchestrator.SetTotalTestCount(testList.Count);
             await hookOrchestrator.InitializeContextsWithTestsAsync(testList, cancellationToken);
             await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
+        }
+    }
+
+    private async Task InitializeStaticPropertiesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Execute all registered global initializers (including static property initialization)
+            while (Sources.GlobalInitializers.TryDequeue(out var initializer))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await initializer();
+            }
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogErrorAsync($"Error during static property initialization: {ex}");
+            throw;
         }
     }
 

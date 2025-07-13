@@ -1077,7 +1077,46 @@ public static class DataCombinationGeneratorEmitter
             {
                 if (member is IPropertySymbol property && 
                     property.DeclaredAccessibility == Accessibility.Public &&
-                    property.SetMethod?.DeclaredAccessibility == Accessibility.Public)
+                    property.SetMethod?.DeclaredAccessibility == Accessibility.Public &&
+                    !property.IsStatic) // Only instance properties for test data combinations
+                {
+                    var dataSourceAttr = property.GetAttributes()
+                        .FirstOrDefault(a => IsDataSourceAttribute(a.AttributeClass));
+
+                    if (dataSourceAttr != null)
+                    {
+                        // Check if we already have this property (in case of overrides)
+                        if (!properties.Any(p => p.Property.Name == property.Name))
+                        {
+                            properties.Add(new PropertyWithDataSource
+                            {
+                                Property = property,
+                                DataSourceAttribute = dataSourceAttr
+                            });
+                        }
+                    }
+                }
+            }
+            currentType = currentType.BaseType;
+        }
+
+        return properties.ToImmutableArray();
+    }
+
+    private static ImmutableArray<PropertyWithDataSource> GetStaticPropertyDataSources(INamedTypeSymbol typeSymbol)
+    {
+        var properties = new List<PropertyWithDataSource>();
+
+        // Walk inheritance hierarchy to include base class static properties
+        var currentType = typeSymbol;
+        while (currentType != null)
+        {
+            foreach (var member in currentType.GetMembers())
+            {
+                if (member is IPropertySymbol property && 
+                    property.DeclaredAccessibility == Accessibility.Public &&
+                    property.SetMethod?.DeclaredAccessibility == Accessibility.Public &&
+                    property.IsStatic) // Only static properties for session initialization
                 {
                     var dataSourceAttr = property.GetAttributes()
                         .FirstOrDefault(a => IsDataSourceAttribute(a.AttributeClass));
@@ -1149,7 +1188,7 @@ public static class DataCombinationGeneratorEmitter
 
     private static readonly TypedConstantFormatter _formatter = new();
 
-    private static string FormatConstantValue(TypedConstant constant)
+    public static string FormatConstantValue(TypedConstant constant)
     {
         try
         {
@@ -1301,7 +1340,7 @@ public static class DataCombinationGeneratorEmitter
         return 0; // Default: no repeat
     }
 
-    private struct PropertyWithDataSource
+    public struct PropertyWithDataSource
     {
         public IPropertySymbol Property { get; init; }
         public AttributeData DataSourceAttribute { get; init; }
