@@ -271,19 +271,11 @@ public static class DataSourceHelpers
         // If it's a Func<TResult>, invoke it first
         var actualData = InvokeIfFunc(data);
 
-        // Only unwrap tuples, not arrays - arrays might be single arguments
-        if (IsTuple(actualData))
-        {
-            var unwrapped = UnwrapTupleAot(actualData);
-            if (unwrapped.Length > 1)
-            {
-                // Multiple values from tuple - create a factory for each
-                return unwrapped.Select(v => new Func<Task<object?>>(() => Task.FromResult<object?>(v))).ToArray();
-            }
-        }
-
-        // Single value, array as single argument, or not a tuple
-        return new[] { () => Task.FromResult<object?>(actualData) };
+        // Use ToObjectArray to handle tuples, arrays, and other types consistently
+        var unwrapped = ToObjectArray(actualData);
+        
+        // Create a factory for each unwrapped element
+        return unwrapped.Select(v => new Func<Task<object?>>(() => Task.FromResult(v))).ToArray();
     }
 
     /// <summary>
