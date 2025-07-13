@@ -63,8 +63,8 @@ public sealed class TestBuilder : ITestBuilder
     public async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestDataCombination combination)
     {
         // Create fresh instances from factories
-        var classArguments = await Task.WhenAll(combination.ClassDataFactories.Select(f => f()));
-        var methodArguments = await Task.WhenAll(combination.MethodDataFactories.Select(f => f()));
+        var classArguments = await CreateArgumentsFromFactoriesAsync(combination.ClassDataFactories);
+        var methodArguments = await CreateArgumentsFromFactoriesAsync(combination.MethodDataFactories);
         var propertyValues = new Dictionary<string, object?>();
         foreach (var kvp in combination.PropertyValueFactories)
         {
@@ -288,5 +288,32 @@ public sealed class TestBuilder : ITestBuilder
         ActiveObjectTracker.IncrementUsage(classArguments);
         ActiveObjectTracker.IncrementUsage(methodArguments);
         ActiveObjectTracker.IncrementUsage(propertyValues.Values);
+    }
+
+    /// <summary>
+    /// Efficiently create arguments array from factories without LINQ overhead
+    /// </summary>
+    private static async Task<object?[]> CreateArgumentsFromFactoriesAsync(IReadOnlyList<Func<Task<object?>>> factories)
+    {
+        if (factories.Count == 0)
+            return [];
+
+        var arguments = new object?[factories.Count];
+        var tasks = new Task<object?>[factories.Count];
+        
+        // Start all tasks
+        for (int i = 0; i < factories.Count; i++)
+        {
+            tasks[i] = factories[i]();
+        }
+        
+        // Wait for all and collect results - safe to use Result after WhenAll
+        var results = await Task.WhenAll(tasks);
+        for (int i = 0; i < results.Length; i++)
+        {
+            arguments[i] = results[i];
+        }
+        
+        return arguments;
     }
 }
