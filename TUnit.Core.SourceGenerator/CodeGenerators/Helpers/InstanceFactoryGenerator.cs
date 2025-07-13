@@ -87,14 +87,15 @@ public static class InstanceFactoryGenerator
         {
             writer.Append($"return new {className}(");
 
-            for (var i = 0; i < constructor.Parameters.Length; i++)
+            // Generate tuple-aware constructor arguments
+            var constructorArgs = TupleArgumentHelper.GenerateConstructorArgumentAccess(
+                constructor.Parameters.Select(p => p.Type).ToList(), 
+                "args");
+            
+            for (var i = 0; i < constructorArgs.Count; i++)
             {
                 if (i > 0) writer.Append(", ");
-
-                var param = constructor.Parameters[i];
-                var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-
-                writer.Append($"global::TUnit.Core.Helpers.CastHelper.Cast<{paramType}>(args[{i}])");
+                writer.Append(constructorArgs[i]);
             }
 
             writer.Append(")");

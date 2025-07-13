@@ -406,8 +406,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var param = parametersFromArgs[i];
                     if (i < argCount)
                     {
-                        // Use the provided argument
-                        argsToPass.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>(args[{i}])");
+                        // Use tuple-aware argument access
+                        var argumentExpressions = TupleArgumentHelper.GenerateArgumentAccess(param.Type, "args", i);
+                        argsToPass.AddRange(argumentExpressions);
                     }
                     else if (param.HasExplicitDefaultValue)
                     {
@@ -513,8 +514,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var param = parametersFromArgs[i];
                     if (i < argCount)
                     {
-                        // Use the provided argument
-                        argsToPass.Add($"global::TUnit.Core.Helpers.CastHelper.Cast<{param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>(args[{i}])");
+                        // Use tuple-aware argument access
+                        var argumentExpressions = TupleArgumentHelper.GenerateArgumentAccess(param.Type, "args", i);
+                        argsToPass.AddRange(argumentExpressions);
                     }
                     else if (param.HasExplicitDefaultValue)
                     {
