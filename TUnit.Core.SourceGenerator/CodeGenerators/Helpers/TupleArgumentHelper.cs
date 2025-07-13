@@ -53,10 +53,27 @@ public static class TupleArgumentHelper
     public static List<string> GenerateConstructorArgumentAccess(IList<ITypeSymbol> parameterTypes, string argumentsArrayName)
     {
         var argumentExpressions = new List<string>();
-        var argumentIndex = 0;
         
-        // ClassDataSource<T1,T2,T3,T4,T5> generates individual arguments in the array
-        // as [T1, T2, T3, T4, T5], not as a tuple
+        // For multiple parameters, use the runtime helper to handle both tuple and individual argument cases
+        if (parameterTypes.Count > 1 && parameterTypes.Count <= 10)
+        {
+            // Generate type arguments for the ExtractArguments method
+            var typeArgs = string.Join(", ", parameterTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+            
+            // Call the runtime helper method
+            var extractCall = $"TUnit.Core.Helpers.ConstructorArgumentsHelper.ExtractArguments<{typeArgs}>({argumentsArrayName})";
+            
+            // Access each tuple element
+            for (int i = 0; i < parameterTypes.Count; i++)
+            {
+                argumentExpressions.Add($"{extractCall}.Item{i + 1}");
+            }
+            
+            return argumentExpressions;
+        }
+        
+        // For single parameter or more than 10 parameters, use the standard approach
+        var argumentIndex = 0;
         foreach (var parameterType in parameterTypes)
         {
             if (IsTupleType(parameterType))
