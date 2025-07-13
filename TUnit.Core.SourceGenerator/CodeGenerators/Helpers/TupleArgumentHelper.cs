@@ -46,6 +46,8 @@ public static class TupleArgumentHelper
     /// <summary>
     /// Generates code to access constructor arguments that may include tuples.
     /// Returns expressions for accessing each individual argument.
+    /// Special case: If we have multiple constructor parameters but only one tuple data source,
+    /// we unwrap the tuple elements as args[0].Item1, args[0].Item2, etc.
     /// </summary>
     /// <param name="parameterTypes">The types of all constructor parameters</param>
     /// <param name="argumentsArrayName">The name of the arguments array (e.g., "args")</param>
@@ -53,8 +55,29 @@ public static class TupleArgumentHelper
     public static List<string> GenerateConstructorArgumentAccess(IList<ITypeSymbol> parameterTypes, string argumentsArrayName)
     {
         var argumentExpressions = new List<string>();
-        var argumentIndex = 0;
         
+        // Special case: Multiple constructor parameters with single tuple data source
+        // This happens when ClassDataSource<T1,T2,T3,T4,T5> returns (T1,T2,T3,T4,T5)
+        // but constructor expects individual T1, T2, T3, T4, T5 parameters
+        if (parameterTypes.Count > 1)
+        {
+            // For multiple parameters, assume they come from a single tuple in args[0]
+            // First, we need to construct the tuple type signature
+            var tupleTypeElements = string.Join(", ", parameterTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+            var tupleTypeName = $"({tupleTypeElements})";
+            
+            for (int i = 0; i < parameterTypes.Count; i++)
+            {
+                var parameterType = parameterTypes[i];
+                var itemProperty = $"Item{i + 1}";
+                var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{tupleTypeName}>({argumentsArrayName}[0]).{itemProperty}";
+                argumentExpressions.Add(castExpression);
+            }
+            return argumentExpressions;
+        }
+        
+        // Original logic for single parameters or individual tuple parameters
+        var argumentIndex = 0;
         foreach (var parameterType in parameterTypes)
         {
             if (IsTupleType(parameterType))
@@ -64,14 +87,14 @@ public static class TupleArgumentHelper
                 {
                     var tupleElement = tupleElements[i];
                     var itemProperty = $"Item{i + 1}";
-                    var castExpression = $"({tupleElement.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}){argumentsArrayName}[{argumentIndex}].{itemProperty}";
+                    var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{tupleElement.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argumentsArrayName}[{argumentIndex}].{itemProperty})";
                     argumentExpressions.Add(castExpression);
                 }
                 argumentIndex++;
             }
             else
             {
-                var castExpression = $"({parameterType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}){argumentsArrayName}[{argumentIndex}]";
+                var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argumentsArrayName}[{argumentIndex}])";
                 argumentExpressions.Add(castExpression);
                 argumentIndex++;
             }
