@@ -338,6 +338,8 @@ public class TestContext : Context
             ComputerName = Environment.MachineName,
             TestContext = this
         };
+
+        InternalExecutableTest.State = state;
     }
 
     /// <summary>
@@ -368,6 +370,8 @@ public class TestContext : Context
     public List<TestDetails> Dependencies { get; } =
     [
     ];
+
+    internal ExecutableTest InternalExecutableTest { get; set; } = null!;
 
     /// <summary>
     /// Gets tests matching the criteria

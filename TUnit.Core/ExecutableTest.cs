@@ -49,7 +49,7 @@ public abstract class ExecutableTest
     /// Hooks to run before the test method executes
     /// </summary>
     public required Func<TestContext, CancellationToken, Task>[] BeforeTestHooks { get; init; }
-    
+
     /// <summary>
     /// Hooks to run after the test method executes
     /// </summary>
@@ -58,7 +58,15 @@ public abstract class ExecutableTest
     /// <summary>
     /// Test execution context
     /// </summary>
-    public required TestContext Context { get; init; }
+    public required TestContext Context
+    {
+        get;
+        init
+        {
+            field = value;
+            value.InternalExecutableTest = this;
+        }
+    }
 
     /// <summary>
     /// Tests that must complete before this one can run
