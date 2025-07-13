@@ -44,9 +44,9 @@ public static class TupleArgumentHelper
     }
 
     /// <summary>
-    /// Generates code to access constructor arguments that may include tuples.
-    /// Returns expressions for accessing each individual argument.
-    /// Handles the case where ClassDataSource returns a single tuple containing all arguments.
+    /// Generates code to access constructor arguments.
+    /// Since data sources already unwrap tuples into individual arguments,
+    /// we simply access each argument by index.
     /// </summary>
     /// <param name="parameterTypes">The types of all constructor parameters</param>
     /// <param name="argumentsArrayName">The name of the arguments array (e.g., "args")</param>
@@ -55,52 +55,12 @@ public static class TupleArgumentHelper
     {
         var argumentExpressions = new List<string>();
         
-        // For multiple parameters from ClassDataSource, assume args[0] contains a tuple
-        if (parameterTypes.Count > 1)
+        // Data sources already provide unwrapped arguments, so we just access by index
+        for (int i = 0; i < parameterTypes.Count; i++)
         {
-            // Generate cast to tuple type and access individual items
-            var tupleTypeElements = string.Join(", ", parameterTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
-            var tupleTypeName = $"({tupleTypeElements})";
-            
-            // Generate conditional access - if args.Length == 1, treat as tuple, otherwise as individual args
-            for (int i = 0; i < parameterTypes.Count; i++)
-            {
-                var parameterType = parameterTypes[i];
-                var itemProperty = $"Item{i + 1}";
-                
-                // Generate code that checks args length and handles both cases
-                var expression = $"({argumentsArrayName}.Length == 1 ? " +
-                    $"TUnit.Core.Helpers.CastHelper.Cast<{tupleTypeName}>({argumentsArrayName}[0]).{itemProperty} : " +
-                    $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argumentsArrayName}[{i}]))";
-                
-                argumentExpressions.Add(expression);
-            }
-            
-            return argumentExpressions;
-        }
-        
-        // For single parameter, use standard approach
-        var argumentIndex = 0;
-        foreach (var parameterType in parameterTypes)
-        {
-            if (IsTupleType(parameterType))
-            {
-                var tupleElements = GetTupleElements(parameterType);
-                for (int i = 0; i < tupleElements.Count; i++)
-                {
-                    var tupleElement = tupleElements[i];
-                    var itemProperty = $"Item{i + 1}";
-                    var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{tupleElement.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argumentsArrayName}[{argumentIndex}].{itemProperty})";
-                    argumentExpressions.Add(castExpression);
-                }
-                argumentIndex++;
-            }
-            else
-            {
-                var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argumentsArrayName}[{argumentIndex}])";
-                argumentExpressions.Add(castExpression);
-                argumentIndex++;
-            }
+            var parameterType = parameterTypes[i];
+            var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argumentsArrayName}[{i}])";
+            argumentExpressions.Add(castExpression);
         }
         
         return argumentExpressions;
