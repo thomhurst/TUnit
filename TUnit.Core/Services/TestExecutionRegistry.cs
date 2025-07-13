@@ -60,12 +60,6 @@ public class TestExecutionRegistry : ISourceGeneratedTestRegistry
         data.MethodInvoker = invoker;
     }
 
-    public void RegisterPropertySetter(string testId, string propertyName, Action<object, object?> setter)
-    {
-        var data = GetOrCreateTestData(testId);
-        data.PropertySetters.TryAdd(propertyName, setter);
-    }
-
 
     public Func<object>? GetClassFactory(string testId)
     {
@@ -83,13 +77,6 @@ public class TestExecutionRegistry : ISourceGeneratedTestRegistry
     {
         var data = GetTestData(testId);
         return data?.MethodInvoker as Func<object, object?[], Task<object?>>;
-    }
-
-    public IDictionary<string, Action<object, object?>> GetPropertySetters(string testId)
-    {
-        var data = GetTestData(testId);
-        return data?.PropertySetters.ToDictionary(kvp => kvp.Key, kvp => kvp.Value) 
-            ?? new Dictionary<string, Action<object, object?>>();
     }
 
 

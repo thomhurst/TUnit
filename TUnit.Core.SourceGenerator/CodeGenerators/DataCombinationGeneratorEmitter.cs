@@ -554,6 +554,10 @@ public static class DataCombinationGeneratorEmitter
             {
                 EmitPropertyMethodDataSource(writer, propertyName, attr, typeSymbol);
             }
+            else if (fullyQualifiedName == "global::TUnit.Core.ClassDataSourceAttribute")
+            {
+                EmitPropertyClassDataSource(writer, propertyName, attr);
+            }
             else
             {
                 writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>(null); // Unsupported data source: {fullyQualifiedName}");
@@ -656,6 +660,65 @@ public static class DataCombinationGeneratorEmitter
         
         writer.Unindent();
         writer.AppendLine("};");
+    }
+
+    private static void EmitPropertyClassDataSource(CodeWriter writer, string propertyName, AttributeData attr)
+    {
+        writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => ");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // For generic ClassDataSource<T>, the type is in the generic type argument
+        if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
+        {
+            var dataSourceType = attr.AttributeClass.TypeArguments[0];
+            EmitClassDataSourceInstantiation(writer, dataSourceType);
+        }
+        // For non-generic ClassDataSource, the type is in the constructor arguments
+        else if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol dataSourceType)
+        {
+            EmitClassDataSourceInstantiation(writer, dataSourceType);
+        }
+        else
+        {
+            writer.AppendLine("return null;");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("};");
+    }
+
+    private static void EmitClassDataSourceInstantiation(CodeWriter writer, ITypeSymbol dataSourceType)
+    {
+        var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        
+        // Check if the type has required properties
+        var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(dataSourceType).ToList();
+        
+        if (requiredProperties.Any())
+        {
+            // Use object initializer syntax for required properties
+            writer.AppendLine($"var instance = new {fullyQualifiedType}()");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            foreach (var property in requiredProperties)
+            {
+                var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
+                writer.AppendLine($"{property.Name} = {defaultValue},");
+            }
+            
+            writer.Unindent();
+            writer.AppendLine("};");
+        }
+        else
+        {
+            // Simple constructor call for types without required properties
+            writer.AppendLine($"var instance = new {fullyQualifiedType}();");
+        }
+        
+        writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
+        writer.AppendLine("return instance;");
     }
 
     private static void EmitPropertyDataSourceGenerator(CodeWriter writer, string propertyName, AttributeData attr, IPropertySymbol property)
@@ -1061,7 +1124,7 @@ public static class DataCombinationGeneratorEmitter
     private static ImmutableArray<AttributeData> GetDataSourceAttributes(ISymbol symbol)
     {
         return symbol.GetAttributes()
-            .Where(a => IsDataSourceAttribute(a.AttributeClass))
+            .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
             .ToImmutableArray();
     }
 
@@ -1081,7 +1144,7 @@ public static class DataCombinationGeneratorEmitter
                     !property.IsStatic) // Only instance properties for test data combinations
                 {
                     var dataSourceAttr = property.GetAttributes()
-                        .FirstOrDefault(a => IsDataSourceAttribute(a.AttributeClass));
+                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
 
                     if (dataSourceAttr != null)
                     {
@@ -1119,7 +1182,7 @@ public static class DataCombinationGeneratorEmitter
                     property.IsStatic) // Only static properties for session initialization
                 {
                     var dataSourceAttr = property.GetAttributes()
-                        .FirstOrDefault(a => IsDataSourceAttribute(a.AttributeClass));
+                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
 
                     if (dataSourceAttr != null)
                     {
@@ -1166,25 +1229,6 @@ public static class DataCombinationGeneratorEmitter
                attributeClass.IsOrInherits("global::TUnit.Core.UntypedDataSourceGeneratorAttribute");
     }
 
-    private static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)
-    {
-        if (attributeClass == null) return false;
-
-        var fullyQualifiedName = attributeClass.GloballyQualifiedNonGeneric();
-
-        // Check direct fully qualified name matches
-        if (fullyQualifiedName is "global::TUnit.Core.ArgumentsAttribute"
-            or "global::TUnit.Core.MethodDataSourceAttribute")
-        {
-            return true;
-        }
-
-        // Check if this inherits from any data source attribute using the extension method
-        return attributeClass.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") ||
-               attributeClass.IsOrInherits("global::TUnit.Core.MethodDataSourceAttribute") ||
-               attributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
-               attributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute");
-    }
 
     private static readonly TypedConstantFormatter _formatter = new();
 

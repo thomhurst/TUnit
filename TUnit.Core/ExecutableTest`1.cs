@@ -32,11 +32,6 @@ public sealed class ExecutableTest<T> : ExecutableTest where T : class
     /// </summary>
     public required Func<T, object?[], CancellationToken, Task> InvokeTypedTest { get; init; }
 
-    /// <summary>
-    /// Strongly typed property setters
-    /// </summary>
-    public Dictionary<string, Action<T, object?>> TypedPropertySetters { get; init; } = new();
-
     /// <inheritdoc/>
     public override async Task<object> CreateInstanceAsync()
     {

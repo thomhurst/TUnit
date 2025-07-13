@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -154,6 +155,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
+        // Generate reflection-based field accessors for init-only properties with data source attributes
+        GenerateReflectionFieldAccessors(writer, testMethod.TypeSymbol, className);
+
         writer.AppendLine("public async ValueTask<List<TestMetadata>> GetTestsAsync(string testSessionId)");
         writer.AppendLine("{");
         writer.Indent();
@@ -201,17 +205,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Set the DataCombinationGenerator after construction
         writer.AppendLine($"metadata.SetDataCombinationGenerator(() => GenerateCombinations_{combinationGuid}(testSessionId));");
-        
-        // Populate base class PropertySetters with type-converting wrappers
-        writer.AppendLine("// Override base class PropertySetters with type-converting wrappers");
-        writer.AppendLine("foreach (var kvp in metadata.PropertySetters)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("var typedSetter = kvp.Value;");
-        writer.AppendLine($"((TestMetadata)metadata).PropertySetters[kvp.Key] = (object instance, object? value) => typedSetter(({className})instance, value);");
-        writer.Unindent();
-        writer.AppendLine("}");
-        
+
+
         writer.AppendLine("tests.Add(metadata);");
     }
 
@@ -294,36 +289,46 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Walk inheritance hierarchy to find properties with data source attributes
         var currentType = typeSymbol;
         var processedProperties = new HashSet<string>();
-        
+
         while (currentType != null)
         {
             foreach (var member in currentType.GetMembers())
             {
-                if (member is IPropertySymbol property && 
+                if (member is IPropertySymbol property &&
                     property.DeclaredAccessibility == Accessibility.Public &&
                     property.SetMethod?.DeclaredAccessibility == Accessibility.Public &&
                     !property.IsStatic &&
-                    !property.SetMethod.IsInitOnly &&
                     !processedProperties.Contains(property.Name))
                 {
                     var dataSourceAttr = property.GetAttributes()
-                        .FirstOrDefault(a => IsDataSourceAttribute(a.AttributeClass));
+                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
 
                     if (dataSourceAttr != null)
                     {
                         processedProperties.Add(property.Name);
                         var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                        
+
                         writer.AppendLine("new PropertyInjectionData");
                         writer.AppendLine("{");
                         writer.Indent();
                         writer.AppendLine($"PropertyName = \"{property.Name}\",");
                         writer.AppendLine($"PropertyType = typeof({propertyType}),");
-                        writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
-                        
+
+                        // Generate appropriate setter based on whether property is init-only
+                        if (property.SetMethod.IsInitOnly)
+                        {
+                            // For init-only properties, use reflection to set backing field
+                            writer.AppendLine($"Setter = (instance, value) => {property.Name}BackingField.SetValue(instance, value),");
+                        }
+                        else
+                        {
+                            // For regular properties, use normal property assignment
+                            writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
+                        }
+
                         // ValueFactory will be provided by the TestDataCombination at runtime
                         writer.AppendLine("ValueFactory = () => throw new InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\")");
-                        
+
                         writer.Unindent();
                         writer.AppendLine("},");
                     }
@@ -336,54 +341,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
 
-    private static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)
-    {
-        if (attributeClass == null) return false;
 
-        var fullyQualifiedName = attributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        
-        return fullyQualifiedName.StartsWith("TUnit.Core.ArgumentsAttribute") ||
-               fullyQualifiedName.StartsWith("TUnit.Core.MethodDataSourceAttribute") ||
-               fullyQualifiedName.StartsWith("TUnit.Core.InstanceMethodDataSourceAttribute") ||
-               fullyQualifiedName.StartsWith("TUnit.Core.ClassDataSourceAttribute") ||
-               attributeClass.IsOrInherits("TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
-               attributeClass.IsOrInherits("TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute") ||
-               attributeClass.IsOrInherits("TUnit.Core.DataSourceGeneratorAttribute") ||
-               attributeClass.IsOrInherits("TUnit.Core.UntypedDataSourceGeneratorAttribute");
-    }
-
-    private static void GeneratePropertySetters(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)
-    {
-        writer.AppendLine($"PropertySetters = new Dictionary<string, Action<{className}, object?>>");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Walk inheritance hierarchy to include base class properties
-        var currentType = typeSymbol;
-        var processedProperties = new HashSet<string>();
-        
-        while (currentType != null)
-        {
-            foreach (var member in currentType.GetMembers())
-            {
-                if (member is IPropertySymbol property && 
-                    property.DeclaredAccessibility == Accessibility.Public &&
-                    property.SetMethod?.DeclaredAccessibility == Accessibility.Public &&
-                    !property.IsStatic &&
-                    !property.SetMethod.IsInitOnly &&
-                    !processedProperties.Contains(property.Name))
-                {
-                    processedProperties.Add(property.Name);
-                    var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                    writer.AppendLine($"[\"{property.Name}\"] = (instance, value) => instance.{property.Name} = ({propertyType})value,");
-                }
-            }
-            currentType = currentType.BaseType;
-        }
-
-        writer.Unindent();
-        writer.AppendLine("},");
-    }
 
     private static void GenerateTypedInvokers(CodeWriter writer, TestMethodMetadata testMethod, string className)
     {
@@ -507,8 +465,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("},");
 
-        // Property setters for all public properties with public setters
-        GeneratePropertySetters(writer, testMethod.TypeSymbol, className);
         // Property injections for properties with data source attributes
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, className);
 
@@ -653,8 +609,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("return instance;");
         writer.Unindent();
         writer.AppendLine("},");
-        writer.AppendLine("InvokeTypedTest = typedMetadata.InvokeTypedTest ?? throw new InvalidOperationException(\"No typed test invoker\"),");
-        writer.AppendLine("TypedPropertySetters = typedMetadata.PropertySetters");
+        writer.AppendLine("InvokeTypedTest = typedMetadata.InvokeTypedTest ?? throw new InvalidOperationException(\"No typed test invoker\")");
 
         writer.Unindent();
         writer.AppendLine("};");
@@ -1003,6 +958,55 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
 
             currentType = currentType.BaseType;
+        }
+    }
+
+    /// <summary>
+    /// Generates reflection-based field accessors for init-only properties with data source attributes
+    /// </summary>
+    private static void GenerateReflectionFieldAccessors(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)
+    {
+        // Find all init-only properties with data source attributes
+        var initOnlyPropertiesWithDataSources = new List<IPropertySymbol>();
+
+        var currentType = typeSymbol;
+        while (currentType != null)
+        {
+            foreach (var member in currentType.GetMembers())
+            {
+                if (member is IPropertySymbol property &&
+                    property.DeclaredAccessibility == Accessibility.Public &&
+                    property.SetMethod?.DeclaredAccessibility == Accessibility.Public &&
+                    !property.IsStatic &&
+                    property.SetMethod.IsInitOnly)
+                {
+                    var dataSourceAttr = property.GetAttributes()
+                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
+
+                    if (dataSourceAttr != null)
+                    {
+                        initOnlyPropertiesWithDataSources.Add(property);
+                    }
+                }
+            }
+            currentType = currentType.BaseType;
+        }
+
+        // Generate cached FieldInfo static fields for each init-only property with data source
+        foreach (var property in initOnlyPropertiesWithDataSources)
+        {
+            var backingFieldName = $"<{property.Name}>k__BackingField";
+            
+            writer.AppendLine($"/// <summary>");
+            writer.AppendLine($"/// Cached FieldInfo for init-only property {property.Name} backing field");
+            writer.AppendLine($"/// </summary>");
+            writer.AppendLine($"[global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields)]");
+            writer.AppendLine($"private static readonly global::System.Reflection.FieldInfo {property.Name}BackingField = ");
+            writer.Indent();
+            writer.AppendLine($"typeof({className}).GetField(\"{backingFieldName}\", ");
+            writer.AppendLine($"global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic)!;");
+            writer.Unindent();
+            writer.AppendLine();
         }
     }
 }

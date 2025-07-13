@@ -47,11 +47,6 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
     }
 
     /// <summary>
-    /// Property setters for this test class
-    /// </summary>
-    public new Dictionary<string, Action<T, object?>> PropertySetters { get; init; } = new();
-
-    /// <summary>
     /// Typed instance creator for ExecutableTest<T>
     /// </summary>
     public Func<Task<T>>? CreateTypedInstance { get; init; }

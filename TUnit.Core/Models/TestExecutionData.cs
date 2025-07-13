@@ -20,12 +20,6 @@ public class TestExecutionData
     public Delegate? MethodInvoker { get; set; }
 
     /// <summary>
-    /// Property setters for dependency injection
-    /// </summary>
-    public ConcurrentDictionary<string, Action<object, object?>> PropertySetters { get; } = new();
-
-
-    /// <summary>
     /// Method data resolver for MethodDataSource support
     /// </summary>
     public Func<IReadOnlyList<object?[]>>? MethodDataResolver { get; set; }

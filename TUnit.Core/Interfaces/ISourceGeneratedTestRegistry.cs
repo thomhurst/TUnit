@@ -27,14 +27,6 @@ public interface ISourceGeneratedTestRegistry
     /// <param name="invoker">Invoker delegate for calling test methods</param>
     void RegisterMethodInvoker(string testId, Func<object, object?[], Task<object?>> invoker);
 
-    /// <summary>
-    /// Registers a property setter for dependency injection.
-    /// </summary>
-    /// <param name="testId">Unique identifier for the test</param>
-    /// <param name="propertyName">Name of the property to set</param>
-    /// <param name="setter">Setter delegate for the property</param>
-    void RegisterPropertySetter(string testId, string propertyName, Action<object, object?> setter);
-
 
     /// <summary>
     /// Gets a registered class factory.
@@ -56,13 +48,6 @@ public interface ISourceGeneratedTestRegistry
     /// <param name="testId">Unique identifier for the test</param>
     /// <returns>The method invoker if found, null otherwise</returns>
     Func<object, object?[], Task<object?>>? GetMethodInvoker(string testId);
-
-    /// <summary>
-    /// Gets registered property setters for a test.
-    /// </summary>
-    /// <param name="testId">Unique identifier for the test</param>
-    /// <returns>Dictionary of property setters</returns>
-    IDictionary<string, Action<object, object?>> GetPropertySetters(string testId);
 
 
     /// <summary>

@@ -138,12 +138,6 @@ public abstract class TestMetadata
     public required Func<Attribute[]> AttributeFactory { get; init; }
 
     /// <summary>
-    /// Property setters dictionary for property injection
-    /// Key is property name, value is setter delegate
-    /// </summary>
-    public Dictionary<string, Action<object, object?>> PropertySetters { get; init; } = new();
-
-    /// <summary>
     /// Enhanced property injection data including setters and value factories
     /// </summary>
     public PropertyInjectionData[] PropertyInjections { get; init; } = [];

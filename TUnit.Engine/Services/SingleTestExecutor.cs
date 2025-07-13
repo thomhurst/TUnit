@@ -45,27 +45,27 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
         test.StartTime = DateTimeOffset.Now;
         test.State = TestState.Running;
-        
+
         // Initialize all eligible objects before test starts
         await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context!, cancellationToken);
-        
+
         // Invoke first test event receivers if this is the first test
         var classContext = test.Context!.ClassContext;
         if (classContext != null)
         {
             var assemblyContext = classContext.AssemblyContext;
             var sessionContext = assemblyContext.TestSessionContext;
-            
+
             // First test in session
             await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
-            
+
             // First test in assembly
             await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
-            
+
             // First test in class
             await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
         }
-        
+
         // Invoke test start event receivers
         await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context!, cancellationToken);
 
@@ -89,23 +89,23 @@ internal class SingleTestExecutor : ISingleTestExecutor
         finally
         {
             test.EndTime = DateTimeOffset.Now;
-            
+
             // Invoke test end event receivers
             await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
-            
+
             // Invoke last test event receivers if this is the last test
             var endClassContext = test.Context!.ClassContext;
             if (endClassContext != null)
             {
                 var endAssemblyContext = endClassContext.AssemblyContext;
                 var endSessionContext = endAssemblyContext.TestSessionContext;
-                
+
                 // Last test in class
                 await _eventReceiverOrchestrator.InvokeLastTestInClassEventReceiversAsync(test.Context, endClassContext, cancellationToken);
-                
+
                 // Last test in assembly
                 await _eventReceiverOrchestrator.InvokeLastTestInAssemblyEventReceiversAsync(test.Context, endAssemblyContext, cancellationToken);
-                
+
                 // Last test in session
                 await _eventReceiverOrchestrator.InvokeLastTestInSessionEventReceiversAsync(test.Context, endSessionContext, cancellationToken);
             }
@@ -121,10 +121,10 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.StartTime!.Value,
             test.Context?.SkipReason ?? "Test skipped");
         test.EndTime = DateTimeOffset.Now;
-        
+
         // Invoke test skipped event receivers
         await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context!, cancellationToken);
-        
+
         return CreateUpdateMessage(test);
     }
 
@@ -218,14 +218,14 @@ internal class SingleTestExecutor : ISingleTestExecutor
         // Include captured console output
         var standardOutput = test.Context!.GetStandardOutput();
         var errorOutput = test.Context!.GetErrorOutput();
-        
+
         if (!string.IsNullOrEmpty(standardOutput))
         {
 #pragma warning disable TPEXP
             testNode = testNode.WithProperty(new StandardOutputProperty(standardOutput));
 #pragma warning restore TPEXP
         }
-        
+
         if (!string.IsNullOrEmpty(errorOutput))
         {
 #pragma warning disable TPEXP
@@ -317,7 +317,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             await testAction();
         }
     }
-    
+
     private async Task InjectPropertiesAsync(ExecutableTest test, object instance)
     {
         var propertyValues = test.Context?.TestDetails.TestClassInjectedPropertyArguments;
@@ -326,29 +326,29 @@ internal class SingleTestExecutor : ISingleTestExecutor
             return;
         }
 
-        // Get property setters from the test metadata
+        // Get property injections from the test metadata
         var metadata = test.Metadata;
-        if (metadata == null || metadata.PropertySetters == null || metadata.PropertySetters.Count == 0)
+        if (metadata.PropertyInjections.Length == 0)
         {
             return;
         }
 
         // Apply property values
-        foreach (var kvp in propertyValues)
+        foreach (var injection in metadata.PropertyInjections)
         {
-            if (metadata.PropertySetters.TryGetValue(kvp.Key, out var setter))
+            if (propertyValues.TryGetValue(injection.PropertyName, out var value))
             {
                 // Initialize nested properties first
-                if (kvp.Value != null)
+                if (value != null)
                 {
-                    await ObjectInitializer.InitializeAsync(kvp.Value);
+                    await ObjectInitializer.InitializeAsync(value);
                 }
-                
+
                 // Set the property value
-                setter(instance, kvp.Value);
+                injection.Setter(instance, value);
             }
         }
-        
+
         // Initialize the test instance after all properties are set
         await ObjectInitializer.InitializeAsync(instance);
     }
@@ -358,26 +358,26 @@ internal class SingleTestExecutor : ISingleTestExecutor
         var objectsToCheck = new List<object?>();
         objectsToCheck.AddRange(test.ClassArguments);
         objectsToCheck.AddRange(test.Arguments);
-        
+
         if (test.Context?.TestDetails.TestClassInjectedPropertyArguments != null)
         {
             objectsToCheck.AddRange(test.Context.TestDetails.TestClassInjectedPropertyArguments.Values);
         }
-        
+
         foreach (var obj in objectsToCheck)
         {
             if (obj == null)
             {
                 continue;
             }
-            
+
             if (ActiveObjectTracker.TryGetCounter(obj, out var counter))
             {
                 var count = counter!.Decrement();
                 if (count == 0)
                 {
                     ActiveObjectTracker.RemoveObject(obj);
-                    
+
                     if (obj is IAsyncDisposable asyncDisposable)
                     {
                         await asyncDisposable.DisposeAsync();
