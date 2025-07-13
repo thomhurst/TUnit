@@ -1,4 +1,4 @@
-﻿using TUnit.Core.Enums;
+﻿using TUnit.Core;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
@@ -40,7 +40,7 @@ public class ClassHooks
     public static async Task AfterHook2(ClassHookContext context)
     {
         await Assert.That(context.TestCount).IsEqualTo(1);
-        await Assert.That(context.Tests.Where(x => x.Result?.Status == Status.Passed)).HasCount().EqualTo(1);
+        await Assert.That(context.Tests.Where(x => x.Result?.State == TestState.Passed)).HasCount().EqualTo(1);
     }
 
     [After(Class), Timeout(30_000)]
@@ -53,7 +53,7 @@ public class ClassHooks
     public static async Task AfterHook4(ClassHookContext context, CancellationToken cancellationToken)
     {
         await Assert.That(context.TestCount).IsEqualTo(1);
-        await Assert.That(context.Tests.Where(x => x.Result?.Status == Status.Passed)).HasCount().EqualTo(1);
+        await Assert.That(context.Tests.Where(x => x.Result?.State == TestState.Passed)).HasCount().EqualTo(1);
     }
 
     [Test]

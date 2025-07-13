@@ -72,7 +72,7 @@ public static class JsonExtensions
             Exception = result.Exception?.ToJsonModel(),
             Output = result.Output,
             Start = result.Start,
-            Status = result.Status,
+            Status = result.State,
             ComputerName = result.ComputerName
         };
     }

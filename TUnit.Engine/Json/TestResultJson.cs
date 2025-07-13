@@ -1,10 +1,10 @@
-﻿using TUnit.Core.Enums;
+﻿using TUnit.Core;
 
 namespace TUnit.Engine.Json;
 
 public record TestResultJson
 {
-    public required Status Status { get; init; }
+    public required TestState Status { get; init; }
     public required DateTimeOffset? Start { get; init; }
     public required DateTimeOffset? End { get; init; }
     public required TimeSpan? Duration { get; init; }

@@ -60,7 +60,7 @@ public sealed class TestExecutorAdapter : ITestExecutor, IDataProducer
             test.State = TestState.Failed;
             test.Result = new TestResult
             {
-                Status = Core.Enums.Status.Failed,
+                State = TestState.Failed,
                 Start = test.StartTime,
                 End = DateTimeOffset.Now,
                 Duration = DateTimeOffset.Now - test.StartTime.GetValueOrDefault(),

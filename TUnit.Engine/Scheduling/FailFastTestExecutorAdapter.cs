@@ -2,7 +2,6 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
-using TUnit.Core.Enums;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 
@@ -65,7 +64,7 @@ internal sealed class FailFastTestExecutorAdapter : ITestExecutor, IDataProducer
             await _messageBus.PublishAsync(this, updateMessage);
 
             // Check if we should trigger fail-fast
-            if (_isFailFastEnabled && test.Result?.Status == Status.Failed)
+            if (_isFailFastEnabled && test.Result?.State == TestState.Failed)
             {
                 await _logger.LogErrorAsync($"Test {test.TestId} failed. Triggering fail-fast cancellation.");
                 _failFastCancellationSource.Cancel();
@@ -77,7 +76,7 @@ internal sealed class FailFastTestExecutorAdapter : ITestExecutor, IDataProducer
             test.State = TestState.Failed;
             test.Result = new TestResult
             {
-                Status = Status.Failed,
+                State = TestState.Failed,
                 Start = test.StartTime,
                 End = DateTimeOffset.Now,
                 Duration = DateTimeOffset.Now - test.StartTime.GetValueOrDefault(),

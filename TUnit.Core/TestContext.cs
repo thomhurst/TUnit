@@ -318,17 +318,17 @@ public class TestContext : Context
     /// </summary>
     public void OverrideResult(string reason)
     {
-        OverrideResult(Status.Passed, reason);
+        OverrideResult(TestState.Passed, reason);
     }
 
     /// <summary>
     /// Overrides the test result with specified status
     /// </summary>
-    public void OverrideResult(Status status, string reason)
+    public void OverrideResult(TestState state, string reason)
     {
         Result = new TestResult
         {
-            Status = status,
+            State = state,
             OverrideReason = reason,
             IsOverridden = true,
             Start = TestStart,

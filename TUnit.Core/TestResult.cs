@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using TUnit.Core.Enums;
 
 namespace TUnit.Core;
 
@@ -9,9 +8,9 @@ namespace TUnit.Core;
 public record TestResult
 {
     /// <summary>
-    /// Gets or sets the status of the test.
+    /// Gets or sets the state of the test result. Only final states should be used.
     /// </summary>
-    public required Status Status { get; init; }
+    public required TestState State { get; init; }
 
     /// <summary>
     /// Gets or sets the start time of the test.

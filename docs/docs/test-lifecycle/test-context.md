@@ -22,7 +22,7 @@ These results can be handy when you're cleaning up, but maybe only want to do so
 
 e.g.
 ```csharp
-if (TestContext.Current?.Result?.Status == Status.Failed)
+if (TestContext.Current?.Result?.State == TestState.Failed)
 {
     // Take a screenshot?
 }

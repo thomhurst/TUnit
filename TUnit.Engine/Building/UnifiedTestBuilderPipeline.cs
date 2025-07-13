@@ -165,7 +165,7 @@ public sealed class UnifiedTestBuilderPipeline
             State = TestState.Failed,
             Result = new TestResult
             {
-                Status = Status.Failed,
+                State = TestState.Failed,
                 Start = DateTimeOffset.UtcNow,
                 End = DateTimeOffset.UtcNow,
                 Duration = TimeSpan.Zero,

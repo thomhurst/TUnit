@@ -47,10 +47,10 @@ internal class SingleTestExecutor : ISingleTestExecutor
         test.State = TestState.Running;
 
         // Initialize all eligible objects before test starts
-        await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context!, cancellationToken);
+        await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
 
         // Invoke first test event receivers if this is the first test
-        var classContext = test.Context!.ClassContext;
+        var classContext = test.Context.ClassContext;
         if (classContext != null)
         {
             var assemblyContext = classContext.AssemblyContext;
@@ -67,7 +67,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
 
         // Invoke test start event receivers
-        await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context!, cancellationToken);
+        await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken);
 
         try
         {
@@ -212,12 +212,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
     private TestNodeUpdateMessage CreateUpdateMessage(ExecutableTest test)
     {
-        var testNode = test.Context!.ToTestNode()
+        var testNode = test.Context.ToTestNode()
             .WithProperty(GetTestNodeState(test));
 
         // Include captured console output
-        var standardOutput = test.Context!.GetStandardOutput();
-        var errorOutput = test.Context!.GetErrorOutput();
+        var standardOutput = test.Context.GetStandardOutput();
+        var errorOutput = test.Context.GetErrorOutput();
 
         if (!string.IsNullOrEmpty(standardOutput))
         {

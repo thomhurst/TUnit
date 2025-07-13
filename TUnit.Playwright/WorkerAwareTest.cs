@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using TUnit.Core;
-using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Playwright;
@@ -67,7 +66,7 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
 
     protected bool TestOk(TestContext testContext)
     {
-        return testContext.Result?.Status is Status.Passed or Status.Skipped;
+        return testContext.Result?.State is TestState.Passed or TestState.Skipped;
     }
 
     public ValueTask OnTestRegistered(TestRegisteredContext context)

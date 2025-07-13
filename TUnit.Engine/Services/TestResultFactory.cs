@@ -12,7 +12,7 @@ internal sealed class TestResultFactory : ITestResultFactory
         var endTime = DateTimeOffset.Now;
         return new TestResult
         {
-            Status = Core.Enums.Status.Passed,
+            State = TestState.Passed,
             Start = startTime,
             End = endTime,
             Duration = endTime - startTime,
@@ -26,7 +26,7 @@ internal sealed class TestResultFactory : ITestResultFactory
         var endTime = DateTimeOffset.Now;
         return new TestResult
         {
-            Status = Core.Enums.Status.Failed,
+            State = TestState.Failed,
             Start = startTime,
             End = endTime,
             Duration = endTime - startTime,
@@ -40,7 +40,7 @@ internal sealed class TestResultFactory : ITestResultFactory
         var endTime = DateTimeOffset.Now;
         return new TestResult
         {
-            Status = Core.Enums.Status.Skipped,
+            State = TestState.Skipped,
             Start = startTime,
             End = endTime,
             Duration = endTime - startTime,
@@ -55,7 +55,7 @@ internal sealed class TestResultFactory : ITestResultFactory
         var endTime = DateTimeOffset.Now;
         return new TestResult
         {
-            Status = Core.Enums.Status.Failed,
+            State = TestState.Timeout,
             Start = startTime,
             End = endTime,
             Duration = endTime - startTime,
