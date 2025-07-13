@@ -337,6 +337,12 @@ public static class DataSourceHelpers
             return array;
         }
 
+        // Don't treat strings as character arrays
+        if (item is string)
+        {
+            return [item];
+        }
+
         if (item is IEnumerable enumerable)
         {
             return enumerable.Cast<object?>().ToArray();
