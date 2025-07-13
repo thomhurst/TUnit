@@ -6,6 +6,7 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.String;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Engine;
 
 namespace TUnit.Assertions.Extensions;
 

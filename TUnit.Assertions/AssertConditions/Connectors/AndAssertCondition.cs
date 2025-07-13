@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.AssertConditions.Connectors;
+﻿using TUnit.Engine;
+
+namespace TUnit.Assertions.AssertConditions.Connectors;
 
 internal class AndAssertCondition : BaseAssertCondition
 {
