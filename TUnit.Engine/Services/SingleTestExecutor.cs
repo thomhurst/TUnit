@@ -134,6 +134,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
         test.Context!.TestDetails.ClassInstance = instance;
 
+        // Inject properties if any are defined
+        await InjectPropertiesAsync(test, instance);
+
         test.Context!.RestoreExecutionContext();
 
         try
@@ -315,6 +318,41 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
     }
     
+    private async Task InjectPropertiesAsync(ExecutableTest test, object instance)
+    {
+        var propertyValues = test.Context?.TestDetails.TestClassInjectedPropertyArguments;
+        if (propertyValues == null || propertyValues.Count == 0)
+        {
+            return;
+        }
+
+        // Get property setters from the test metadata
+        var metadata = test.Metadata;
+        if (metadata == null || metadata.PropertySetters == null || metadata.PropertySetters.Count == 0)
+        {
+            return;
+        }
+
+        // Apply property values
+        foreach (var kvp in propertyValues)
+        {
+            if (metadata.PropertySetters.TryGetValue(kvp.Key, out var setter))
+            {
+                // Initialize nested properties first
+                if (kvp.Value != null)
+                {
+                    await ObjectInitializer.InitializeAsync(kvp.Value);
+                }
+                
+                // Set the property value
+                setter(instance, kvp.Value);
+            }
+        }
+        
+        // Initialize the test instance after all properties are set
+        await ObjectInitializer.InitializeAsync(instance);
+    }
+
     private async Task DecrementAndDisposeTrackedObjectsAsync(ExecutableTest test)
     {
         var objectsToCheck = new List<object?>();

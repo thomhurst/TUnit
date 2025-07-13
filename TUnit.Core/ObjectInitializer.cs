@@ -23,12 +23,10 @@ public static class ObjectInitializer
 
     public static async ValueTask InitializeAsync(object? obj, CancellationToken cancellationToken = default)
     {
-        if (obj is not IAsyncInitializer asyncInitializer)
+        if (obj is IAsyncInitializer asyncInitializer)
         {
-            return;
+            await GetInitializationTask(obj, asyncInitializer);
         }
-
-        await GetInitializationTask(obj, asyncInitializer);
     }
 
     private static Task GetInitializationTask(object obj, IAsyncInitializer asyncInitializer)

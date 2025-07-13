@@ -80,6 +80,12 @@ public sealed class TestBuilder : ITestBuilder
         var displayName = GenerateDisplayName(metadata, await GetArgumentsDisplayTextAsync(combination));
 
         var context = await CreateTestContextAsync(testId, displayName, metadata);
+        
+        // Transfer property values to TestDetails
+        foreach (var kvp in propertyValues)
+        {
+            context.TestDetails.TestClassInjectedPropertyArguments[kvp.Key] = kvp.Value;
+        }
 
         await InvokeDiscoveryEventReceiversAsync(metadata, context);
 

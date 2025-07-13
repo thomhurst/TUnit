@@ -1,0 +1,21 @@
+{
+    "mcpServers": {
+        "zen": {
+            "command": "sh",
+            "args": [
+                "-c",
+                "exec $(which uvx || echo uvx) --from git+https://github.com/BeehiveInnovations/zen-mcp-server.git zen-mcp-server"
+            ],
+            "env": {
+                "GEMINI_API_KEY": "AIzaSyDWTV6VuZymX2X0MTW4Zgam70XZLubqWBc"
+            }
+        },
+        "sequential-thinking": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-sequential-thinking"
+            ]
+        }
+    }
+}

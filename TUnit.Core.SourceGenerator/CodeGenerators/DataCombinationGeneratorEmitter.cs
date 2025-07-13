@@ -188,7 +188,7 @@ public static class DataCombinationGeneratorEmitter
 
         foreach (var propData in propertyDataSources)
         {
-            EmitPropertyDataSource(writer, propData, typeSymbol);
+            EmitPropertyDataSource(writer, propData, typeSymbol, methodSymbol);
         }
 
         writer.AppendLine("propertyCombinations.Add(new TestDataCombination { PropertyValueFactories = propertyValues });");
@@ -525,36 +525,180 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("    \"Please use static methods for data sources.\");");
     }
 
-    private static void EmitPropertyDataSource(CodeWriter writer, PropertyWithDataSource propData, INamedTypeSymbol typeSymbol)
+    private static void EmitPropertyDataSource(CodeWriter writer, PropertyWithDataSource propData, INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol)
     {
         try
         {
             var propertyName = propData.Property.Name;
             var attr = propData.DataSourceAttribute;
 
-            if (attr.AttributeClass != null && attr.AttributeClass.GloballyQualifiedNonGeneric() == "global::TUnit.Core.ArgumentsAttribute")
+            if (attr.AttributeClass == null)
             {
-                if (attr.ConstructorArguments.Length > 0)
-                {
-                    if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
-                        attr.ConstructorArguments[0].Values.Length > 0)
-                    {
-                        var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0]);
-                        writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>({value});");
-                    }
-                    else if (attr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
-                    {
-                        var value = FormatConstantValue(attr.ConstructorArguments[0]);
-                        writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>({value});");
-                    }
-                }
+                writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>(null);");
+                return;
+            }
+
+            var fullyQualifiedName = attr.AttributeClass.GloballyQualifiedNonGeneric();
+
+            // Handle data source types that work with properties
+            if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
+            {
+                EmitPropertyArgumentsDataSource(writer, propertyName, attr);
+            }
+            else if (attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
+                     attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
+            {
+                EmitPropertyAsyncDataSource(writer, propertyName, attr);
+            }
+            else if (fullyQualifiedName == "global::TUnit.Core.MethodDataSourceAttribute")
+            {
+                EmitPropertyMethodDataSource(writer, propertyName, attr, typeSymbol);
+            }
+            else
+            {
+                writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>(null); // Unsupported data source: {fullyQualifiedName}");
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore errors in property data source processing
+            writer.AppendLine($"// Error processing property data source for {propData.Property.Name}: {ex.Message}");
+            writer.AppendLine($"propertyValues[\"{propData.Property.Name}\"] = () => Task.FromResult<object?>(null);");
         }
     }
+
+    private static void EmitPropertyArgumentsDataSource(CodeWriter writer, string propertyName, AttributeData attr)
+    {
+        if (attr.ConstructorArguments.Length > 0)
+        {
+            if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
+                attr.ConstructorArguments[0].Values.Length > 0)
+            {
+                var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0]);
+                writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>({value});");
+            }
+            else if (attr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
+            {
+                var value = FormatConstantValue(attr.ConstructorArguments[0]);
+                writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>({value});");
+            }
+        }
+        else
+        {
+            writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>(null);");
+        }
+    }
+
+    private static void EmitPropertyAsyncDataSource(CodeWriter writer, string propertyName, AttributeData attr)
+    {
+        writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => ");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // For generic data source attributes (e.g. ClassDataSource<T>), the type is in the generic type argument
+        if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
+        {
+            var dataSourceType = attr.AttributeClass.TypeArguments[0];
+            var fullyQualifiedType = dataSourceType.GloballyQualifiedNonGeneric();
+            writer.AppendLine($"var instance = new {fullyQualifiedType}();");
+            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
+            writer.AppendLine("return instance;");
+        }
+        // For non-generic data source attributes, the type is in the constructor arguments
+        else if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol dataSourceType)
+        {
+            var fullyQualifiedType = dataSourceType.GloballyQualifiedNonGeneric();
+            writer.AppendLine($"var instance = new {fullyQualifiedType}();");
+            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
+            writer.AppendLine("return instance;");
+        }
+        else
+        {
+            writer.AppendLine("return null;");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("};");
+    }
+
+    private static void EmitPropertyMethodDataSource(CodeWriter writer, string propertyName, AttributeData attr, INamedTypeSymbol typeSymbol)
+    {
+        writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => ");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        string? methodName = null;
+        ITypeSymbol? targetType = null;
+        
+        // Extract method name and target type from attribute
+        if (attr.ConstructorArguments.Length == 2 && attr.ConstructorArguments[0].Value is ITypeSymbol)
+        {
+            targetType = (ITypeSymbol)attr.ConstructorArguments[0].Value;
+            methodName = attr.ConstructorArguments[1].Value?.ToString();
+        }
+        else if (attr.ConstructorArguments.Length >= 1)
+        {
+            methodName = attr.ConstructorArguments[0].Value?.ToString();
+            targetType = typeSymbol;
+        }
+
+        if (string.IsNullOrEmpty(methodName))
+        {
+            writer.AppendLine("return null;");
+        }
+        else
+        {
+            var fullyQualifiedType = targetType?.GloballyQualifiedNonGeneric() ?? typeSymbol.GloballyQualifiedNonGeneric();
+            writer.AppendLine($"var data = {fullyQualifiedType}.{methodName}();");
+            writer.AppendLine("if (data is System.Collections.IEnumerable enumerable && !(data is string))");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("var enumerator = enumerable.GetEnumerator();");
+            writer.AppendLine("if (enumerator.MoveNext())");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("var value = enumerator.Current;");
+            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(value);");
+            writer.AppendLine("return value;");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(data);");
+            writer.AppendLine("return data;");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("return null;");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("};");
+    }
+
+    private static void EmitPropertyDataSourceGenerator(CodeWriter writer, string propertyName, AttributeData attr, IPropertySymbol property)
+    {
+        // For now, handle generic data source generators by creating simple instances
+        // This is a simplified implementation that can be enhanced later
+        if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol targetType)
+        {
+            var fullyQualifiedType = targetType.GloballyQualifiedNonGeneric();
+            writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => ");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"var instance = new {fullyQualifiedType}();");
+            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
+            writer.AppendLine("return instance;");
+            writer.Unindent();
+            writer.AppendLine("};");
+        }
+        else
+        {
+            writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>(null);");
+        }
+    }
+
 
     private static void EmitAsyncUntypedDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
@@ -944,22 +1088,34 @@ public static class DataCombinationGeneratorEmitter
     {
         var properties = new List<PropertyWithDataSource>();
 
-        foreach (var member in typeSymbol.GetMembers())
+        // Walk inheritance hierarchy to include base class properties
+        var currentType = typeSymbol;
+        while (currentType != null)
         {
-            if (member is IPropertySymbol property)
+            foreach (var member in currentType.GetMembers())
             {
-                var dataSourceAttr = property.GetAttributes()
-                    .FirstOrDefault(a => IsDataSourceAttribute(a.AttributeClass));
-
-                if (dataSourceAttr != null)
+                if (member is IPropertySymbol property && 
+                    property.DeclaredAccessibility == Accessibility.Public &&
+                    property.SetMethod?.DeclaredAccessibility == Accessibility.Public)
                 {
-                    properties.Add(new PropertyWithDataSource
+                    var dataSourceAttr = property.GetAttributes()
+                        .FirstOrDefault(a => IsDataSourceAttribute(a.AttributeClass));
+
+                    if (dataSourceAttr != null)
                     {
-                        Property = property,
-                        DataSourceAttribute = dataSourceAttr
-                    });
+                        // Check if we already have this property (in case of overrides)
+                        if (!properties.Any(p => p.Property.Name == property.Name))
+                        {
+                            properties.Add(new PropertyWithDataSource
+                            {
+                                Property = property,
+                                DataSourceAttribute = dataSourceAttr
+                            });
+                        }
+                    }
                 }
             }
+            currentType = currentType.BaseType;
         }
 
         return properties.ToImmutableArray();
@@ -979,6 +1135,15 @@ public static class DataCombinationGeneratorEmitter
         if (attributeClass == null) return false;
 
         return attributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute");
+    }
+
+    private static bool IsDataSourceGeneratorAttribute(INamedTypeSymbol? attributeClass)
+    {
+        if (attributeClass == null) return false;
+
+        // Check if it's DataSourceGeneratorAttribute or inherits from it
+        return attributeClass.IsOrInherits("global::TUnit.Core.DataSourceGeneratorAttribute") ||
+               attributeClass.IsOrInherits("global::TUnit.Core.UntypedDataSourceGeneratorAttribute");
     }
 
     private static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)

@@ -105,8 +105,15 @@
       "Bash(csc:*)",
       "Bash(./test-fix.exe)",
       "mcp__desktop-commander__read_output",
-      "Bash(git revert:*)"
+      "Bash(git revert:*)",
+      "Bash(Get-Date -Format \"yyyy-MM-dd-HHmm\")",
+      "Bash(dir:*)"
     ],
     "deny": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "zen",
+    "sequential-thinking"
+  ]
 }

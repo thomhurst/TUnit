@@ -10,7 +10,7 @@ public class HookSystemEnhancer
 {
     private readonly StringBuilder _stringBuilder = new();
 
-    public HookMetadataResult GenerateHooks(INamedTypeSymbol classSymbol, bool hasPropertyInjection)
+    public HookMetadataResult GenerateHooks(INamedTypeSymbol classSymbol)
     {
         var result = new HookMetadataResult();
 
@@ -20,31 +20,7 @@ public class HookSystemEnhancer
         var beforeTestHooks = FindHooksInHierarchy(classSymbol, "BeforeAttribute", isStatic: false);
         var afterTestHooks = FindHooksInHierarchy(classSymbol, "AfterAttribute", isStatic: false);
 
-        // Add property injection hooks if needed
-        if (hasPropertyInjection)
-        {
-            var safeClassName = classSymbol.Name.Replace(".", "_");
-
-            // Add property injection as a before test hook
-            result.BeforeTestHooks.Add(new HookInfo
-            {
-                Name = $"{safeClassName}_InjectProperties",
-                IsAsync = true,
-                ReturnsValueTask = false,
-                IsStatic = false,
-                Order = -1000 // Run before user hooks
-            });
-
-            // Add property disposal as an after test hook
-            result.AfterTestHooks.Add(new HookInfo
-            {
-                Name = $"{safeClassName}_DisposeProperties",
-                IsAsync = true,
-                ReturnsValueTask = false,
-                IsStatic = false,
-                Order = 1000 // Run after user hooks
-            });
-        }
+        // Property injection is now handled directly in the runtime, not through hooks
 
         // Process user hooks
         ProcessHooks(beforeClassHooks, result.BeforeClassHooks);
@@ -176,11 +152,15 @@ public class HookSystemEnhancer
             ("AfterTest", result.AfterTestHooks)
         };
 
-        foreach (var (_, hooks) in allHooks)
+        foreach (var (category, hooks) in allHooks)
         {
-            foreach (var hook in hooks.Where(h => h.MethodSymbol != null))
+            foreach (var hook in hooks)
             {
-                GenerateHookInvoker(classSymbol, hook);
+                if (hook.MethodSymbol != null)
+                {
+                    GenerateHookInvoker(classSymbol, hook);
+                }
+                // Property injection hooks are no longer generated here
             }
         }
 
@@ -251,6 +231,7 @@ public class HookSystemEnhancer
         // Register the hook
         _stringBuilder.AppendLine($"HookDelegateStorage.RegisterHook(\"{className}.{hook.Name}\", {invokerName});");
     }
+
 
     private List<IMethodSymbol> FindHooksInHierarchy(INamedTypeSymbol type, string attributeName, bool isStatic)
     {
