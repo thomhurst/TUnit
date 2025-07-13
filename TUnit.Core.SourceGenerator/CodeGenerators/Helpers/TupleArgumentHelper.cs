@@ -46,6 +46,7 @@ public static class TupleArgumentHelper
     /// <summary>
     /// Generates code to access constructor arguments that may include tuples.
     /// Returns expressions for accessing each individual argument.
+    /// Handles the case where ClassDataSource returns a single tuple containing all arguments.
     /// </summary>
     /// <param name="parameterTypes">The types of all constructor parameters</param>
     /// <param name="argumentsArrayName">The name of the arguments array (e.g., "args")</param>
@@ -54,25 +55,31 @@ public static class TupleArgumentHelper
     {
         var argumentExpressions = new List<string>();
         
-        // For multiple parameters, use the runtime helper to handle both tuple and individual argument cases
-        if (parameterTypes.Count > 1 && parameterTypes.Count <= 10)
+        // For multiple parameters from ClassDataSource, assume args[0] contains a tuple
+        if (parameterTypes.Count > 1)
         {
-            // Generate type arguments for the ExtractArguments method
-            var typeArgs = string.Join(", ", parameterTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+            // Generate cast to tuple type and access individual items
+            var tupleTypeElements = string.Join(", ", parameterTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+            var tupleTypeName = $"({tupleTypeElements})";
             
-            // Call the runtime helper method
-            var extractCall = $"TUnit.Core.Helpers.ConstructorArgumentsHelper.ExtractArguments<{typeArgs}>({argumentsArrayName})";
-            
-            // Access each tuple element
+            // Generate conditional access - if args.Length == 1, treat as tuple, otherwise as individual args
             for (int i = 0; i < parameterTypes.Count; i++)
             {
-                argumentExpressions.Add($"{extractCall}.Item{i + 1}");
+                var parameterType = parameterTypes[i];
+                var itemProperty = $"Item{i + 1}";
+                
+                // Generate code that checks args length and handles both cases
+                var expression = $"({argumentsArrayName}.Length == 1 ? " +
+                    $"TUnit.Core.Helpers.CastHelper.Cast<{tupleTypeName}>({argumentsArrayName}[0]).{itemProperty} : " +
+                    $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argumentsArrayName}[{i}]))";
+                
+                argumentExpressions.Add(expression);
             }
             
             return argumentExpressions;
         }
         
-        // For single parameter or more than 10 parameters, use the standard approach
+        // For single parameter, use standard approach
         var argumentIndex = 0;
         foreach (var parameterType in parameterTypes)
         {
