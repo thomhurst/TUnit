@@ -58,8 +58,50 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
     {
         if (!types.Any()) return;
 
+        // Collect all referenced target types
+        var referencedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+        foreach (var typeWithProps in types)
+        {
+            foreach (var prop in typeWithProps.Properties)
+            {
+                var attr = prop.DataSourceAttribute;
+                
+                // For generic data source attributes, get type from generic type argument
+                if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
+                {
+                    referencedTypes.Add(attr.AttributeClass.TypeArguments[0]);
+                }
+                // For non-generic data source attributes, get type from constructor arguments
+                else if (attr.ConstructorArguments.Length > 0)
+                {
+                    var firstArg = attr.ConstructorArguments[0];
+                    if (firstArg.Kind == TypedConstantKind.Type && firstArg.Value is ITypeSymbol targetType)
+                    {
+                        referencedTypes.Add(targetType);
+                    }
+                }
+            }
+        }
+        
+        // Create TypeWithDataSourceProperties entries for referenced types (with empty properties)
+        var allTypes = types.ToList();
+        foreach (var refType in referencedTypes)
+        {
+            if (!allTypes.Any(t => SymbolEqualityComparer.Default.Equals(t.TypeSymbol, refType)))
+            {
+                allTypes.Add(new TypeWithDataSourceProperties
+                {
+                    TypeSymbol = (INamedTypeSymbol)refType,
+                    Properties = new List<PropertyWithDataSource>()
+                });
+            }
+        }
+
+        // Filter out types that shouldn't have helpers generated
+        var filteredTypes = allTypes.Where(ShouldGenerateHelperFor).ToList();
+
         // Deduplicate types by their fully qualified name
-        var uniqueTypes = types
+        var uniqueTypes = filteredTypes
             .GroupBy(t => t.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
             .Select(g => g.First())
             .ToArray();
@@ -101,11 +143,112 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         context.AddSource("DataSourceHelpers.g.cs", sb.ToString());
     }
 
+    private static bool ShouldGenerateHelperFor(TypeWithDataSourceProperties typeInfo)
+    {
+        var typeSymbol = typeInfo.TypeSymbol;
+        
+        // Skip primitive types and built-in .NET types
+        if (typeSymbol.SpecialType != SpecialType.None)
+            return false;
+            
+        // Skip string specifically
+        if (typeSymbol.ToDisplayString() == "string")
+            return false;
+            
+        // Skip if it's a system type
+        var namespaceName = typeSymbol.ContainingNamespace?.ToDisplayString();
+        if (namespaceName?.StartsWith("System") == true && !namespaceName.StartsWith("System.Threading.Tasks"))
+            return false;
+            
+        // Skip test classes (classes that have TestAttribute or inherit from test base classes)
+        if (IsTestClass(typeSymbol))
+            return false;
+            
+        // Skip classes with complex constructor requirements that are likely test classes
+        if (HasComplexConstructorRequirements(typeSymbol))
+            return false;
+            
+        return true;
+    }
+
+    private static bool IsTestClass(INamedTypeSymbol typeSymbol)
+    {
+        // Check if the class or any of its methods have Test attributes
+        var hasTestAttribute = typeSymbol.GetAttributes().Any(attr => 
+            attr.AttributeClass?.Name.Contains("Test") == true);
+            
+        if (hasTestAttribute)
+            return true;
+            
+        // Check methods for test attributes
+        foreach (var member in typeSymbol.GetMembers().OfType<IMethodSymbol>())
+        {
+            if (member.GetAttributes().Any(attr => attr.AttributeClass?.Name.Contains("Test") == true))
+                return true;
+        }
+        
+        return false;
+    }
+
+    private static bool HasComplexConstructorRequirements(INamedTypeSymbol typeSymbol)
+    {
+        // If there's no parameterless constructor and all constructors have parameters,
+        // it's likely a complex type that we shouldn't generate helpers for
+        var constructors = typeSymbol.Constructors.Where(c => !c.IsStatic).ToList();
+        
+        if (!constructors.Any())
+            return true; // No constructors available
+            
+        // Check if there's a parameterless constructor
+        var hasParameterlessConstructor = constructors.Any(c => c.Parameters.Length == 0);
+        
+        if (hasParameterlessConstructor)
+            return false; // We can use the parameterless constructor
+            
+        // If all constructors require parameters, check if they're simple types we can handle
+        foreach (var constructor in constructors)
+        {
+            if (constructor.Parameters.All(p => CanProvideDefaultValue(p.Type)))
+                return false; // We can provide default values for all parameters
+        }
+        
+        return true; // Too complex to handle
+    }
+
+    private static bool CanProvideDefaultValue(ITypeSymbol type)
+    {
+        // We can provide default values for simple types
+        return type.SpecialType != SpecialType.None || 
+               type.TypeKind == TypeKind.Enum ||
+               type.CanBeReferencedByName;
+    }
+
     private static void GenerateTypeSpecificHelpers(StringBuilder sb, TypeWithDataSourceProperties typeInfo)
     {
         var typeSymbol = typeInfo.TypeSymbol;
         var fullyQualifiedTypeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var safeName = fullyQualifiedTypeName.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
+
+        // Separate data source properties into init-only and settable
+        var initOnlyProperties = new List<PropertyWithDataSource>();
+        var settableProperties = new List<PropertyWithDataSource>();
+        var staticProperties = new List<PropertyWithDataSource>();
+        
+        foreach (var prop in typeInfo.Properties)
+        {
+            if (prop.Property.IsStatic)
+            {
+                staticProperties.Add(prop);
+            }
+            else if (prop.Property.SetMethod?.IsInitOnly == true)
+            {
+                initOnlyProperties.Add(prop);
+            }
+            else
+            {
+                settableProperties.Add(prop);
+            }
+        }
 
         // Generate CreateAndInitialize method
         sb.AppendLine($"    /// <summary>");
@@ -114,45 +257,152 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         sb.AppendLine($"    public static async Task<{fullyQualifiedTypeName}> CreateAndInitializeAsync_{safeName}(global::TUnit.Core.MethodMetadata testInformation, string testSessionId)");
         sb.AppendLine("    {");
         
-        // Handle required properties
+        // Handle constructor requirements and init-only properties in object initializer
         var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(typeSymbol).ToList();
-        if (requiredProperties.Any())
+        var hasInitOnlyDataSourceProps = initOnlyProperties.Any();
+        
+        // Check for constructor parameters
+        var constructors = typeSymbol.Constructors.Where(c => !c.IsStatic).ToList();
+        var parameterlessConstructor = constructors.FirstOrDefault(c => c.Parameters.Length == 0);
+        var constructorWithDefaults = constructors.FirstOrDefault(c => c.Parameters.All(p => CanProvideDefaultValue(p.Type)));
+        
+        if (parameterlessConstructor != null)
         {
-            sb.AppendLine($"        var instance = new {fullyQualifiedTypeName}()");
-            sb.AppendLine("        {");
-            foreach (var prop in requiredProperties)
+            // Use parameterless constructor
+            if (requiredProperties.Any() || hasInitOnlyDataSourceProps)
             {
-                var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(prop.Type);
-                sb.AppendLine($"            {prop.Name} = {defaultValue},");
+                sb.AppendLine($"        var instance = new {fullyQualifiedTypeName}()");
+                sb.AppendLine("        {");
+                
+                // Get names of init-only data source properties to avoid duplicates
+                var initOnlyPropertyNames = initOnlyProperties.Select(p => p.Property.Name).ToHashSet();
+                
+                // Add required properties (only those not handled by data source properties)
+                foreach (var prop in requiredProperties)
+                {
+                    if (!initOnlyPropertyNames.Contains(prop.Name))
+                    {
+                        var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(prop.Type);
+                        sb.AppendLine($"            {prop.Name} = {defaultValue},");
+                    }
+                }
+                
+                // Add init-only data source properties
+                foreach (var propInfo in initOnlyProperties)
+                {
+                    GenerateInitOnlyPropertyAssignment(sb, propInfo);
+                }
+                
+                sb.AppendLine("        };");
             }
-            sb.AppendLine("        };");
+            else
+            {
+                sb.AppendLine($"        var instance = new {fullyQualifiedTypeName}();");
+            }
+        }
+        else if (constructorWithDefaults != null)
+        {
+            // Use constructor with default values
+            var constructorArgs = constructorWithDefaults.Parameters
+                .Select(p => GetDefaultValueForType(p.Type))
+                .ToList();
+                
+            if (requiredProperties.Any() || hasInitOnlyDataSourceProps)
+            {
+                sb.AppendLine($"        var instance = new {fullyQualifiedTypeName}({string.Join(", ", constructorArgs)})");
+                sb.AppendLine("        {");
+                
+                // Get names of init-only data source properties to avoid duplicates
+                var initOnlyPropertyNames = initOnlyProperties.Select(p => p.Property.Name).ToHashSet();
+                
+                // Add required properties (only those not handled by data source properties)
+                foreach (var prop in requiredProperties)
+                {
+                    if (!initOnlyPropertyNames.Contains(prop.Name))
+                    {
+                        var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(prop.Type);
+                        sb.AppendLine($"            {prop.Name} = {defaultValue},");
+                    }
+                }
+                
+                // Add init-only data source properties
+                foreach (var propInfo in initOnlyProperties)
+                {
+                    GenerateInitOnlyPropertyAssignment(sb, propInfo);
+                }
+                
+                sb.AppendLine("        };");
+            }
+            else
+            {
+                sb.AppendLine($"        var instance = new {fullyQualifiedTypeName}({string.Join(", ", constructorArgs)});");
+            }
         }
         else
         {
-            sb.AppendLine($"        var instance = new {fullyQualifiedTypeName}();");
+            // No suitable constructor found, use reflection or activator
+            sb.AppendLine($"        var instance = ({fullyQualifiedTypeName})System.Activator.CreateInstance(typeof({fullyQualifiedTypeName}), true);");
+            
+            // Get names of init-only data source properties to avoid duplicates
+            var initOnlyPropertyNames = initOnlyProperties.Select(p => p.Property.Name).ToHashSet();
+            
+            // Set required properties if needed (only those not handled by data source properties)
+            foreach (var prop in requiredProperties)
+            {
+                if (!initOnlyPropertyNames.Contains(prop.Name))
+                {
+                    var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(prop.Type);
+                    sb.AppendLine($"        instance.{prop.Name} = {defaultValue};");
+                }
+            }
         }
 
-        // Initialize data source properties
+        // Initialize settable data source properties
         sb.AppendLine($"        await InitializePropertiesAsync_{safeName}(instance, testInformation, testSessionId);");
+        
+        // Initialize static properties
+        if (staticProperties.Any())
+        {
+            sb.AppendLine($"        await InitializeStaticPropertiesAsync_{safeName}(testInformation, testSessionId);");
+        }
+        
         sb.AppendLine("        await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
         sb.AppendLine("        return instance;");
         sb.AppendLine("    }");
         sb.AppendLine();
 
-        // Generate InitializeProperties method
+        // Generate InitializeProperties method for instance properties
         sb.AppendLine($"    /// <summary>");
         sb.AppendLine($"    /// Initializes data source properties on an existing instance of {typeSymbol.Name}");
         sb.AppendLine($"    /// </summary>");
         sb.AppendLine($"    public static async Task InitializePropertiesAsync_{safeName}({fullyQualifiedTypeName} instance, global::TUnit.Core.MethodMetadata testInformation, string testSessionId)");
         sb.AppendLine("    {");
 
-        foreach (var propInfo in typeInfo.Properties)
+        foreach (var propInfo in settableProperties)
         {
             GeneratePropertyInitialization(sb, propInfo, safeName);
         }
 
         sb.AppendLine("    }");
         sb.AppendLine();
+        
+        // Generate InitializeStaticProperties method if needed
+        if (staticProperties.Any())
+        {
+            sb.AppendLine($"    /// <summary>");
+            sb.AppendLine($"    /// Initializes static data source properties for {typeSymbol.Name}");
+            sb.AppendLine($"    /// </summary>");
+            sb.AppendLine($"    public static async Task InitializeStaticPropertiesAsync_{safeName}(global::TUnit.Core.MethodMetadata testInformation, string testSessionId)");
+            sb.AppendLine("    {");
+
+            foreach (var propInfo in staticProperties)
+            {
+                GenerateStaticPropertyInitialization(sb, propInfo, fullyQualifiedTypeName);
+            }
+
+            sb.AppendLine("    }");
+            sb.AppendLine();
+        }
     }
 
     private static void GeneratePropertyInitialization(StringBuilder sb, PropertyWithDataSource propInfo, string typeSafeName)
@@ -200,15 +450,19 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             sb.AppendLine("        }");
         }
         // For non-generic data source attributes, get type from constructor arguments
-        else if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol dataSourceType)
+        else if (attr.ConstructorArguments.Length > 0)
         {
-            var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-            
-            sb.AppendLine("        {");
-            sb.AppendLine($"            var dataSourceInstance = await CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
-            sb.AppendLine($"            instance.{property.Name} = dataSourceInstance;");
-            sb.AppendLine("        }");
+            var firstArg = attr.ConstructorArguments[0];
+            if (firstArg.Kind == TypedConstantKind.Type && firstArg.Value is ITypeSymbol dataSourceType)
+            {
+                var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
+                
+                sb.AppendLine("        {");
+                sb.AppendLine($"            var dataSourceInstance = await CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
+                sb.AppendLine($"            instance.{property.Name} = dataSourceInstance;");
+                sb.AppendLine("        }");
+            }
         }
     }
 
@@ -251,22 +505,224 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             sb.AppendLine("        }");
         }
         // For non-generic ClassDataSource, get type from constructor arguments
-        else if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol dataSourceType)
+        else if (attr.ConstructorArguments.Length > 0)
         {
+            var firstArg = attr.ConstructorArguments[0];
+            if (firstArg.Kind == TypedConstantKind.Type && firstArg.Value is ITypeSymbol dataSourceType)
+            {
+                var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
+                
+                sb.AppendLine("        {");
+                sb.AppendLine($"            var dataSourceInstance = await CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
+                sb.AppendLine($"            instance.{property.Name} = dataSourceInstance;");
+                sb.AppendLine("        }");
+            }
+        }
+    }
+
+    private static void GenerateInitOnlyPropertyAssignment(StringBuilder sb, PropertyWithDataSource propInfo)
+    {
+        var property = propInfo.Property;
+        var attr = propInfo.DataSourceAttribute;
+        var propertyName = property.Name;
+
+        if (attr.AttributeClass == null) return;
+
+        var fullyQualifiedName = attr.AttributeClass.GloballyQualifiedNonGeneric();
+
+        sb.AppendLine($"            // Initialize {propertyName} property (init-only)");
+        
+        if (attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
+            attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
+        {
+            // For async data sources, we need to generate a temporary value since we can't await in object initializer
+            sb.AppendLine($"            {propertyName} = default!,");
+        }
+        else if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
+        {
+            GenerateArgumentsPropertyAssignment(sb, propInfo);
+        }
+        else if (fullyQualifiedName == "global::TUnit.Core.ClassDataSourceAttribute")
+        {
+            // For class data sources, we need to generate a temporary value since we can't await in object initializer
+            sb.AppendLine($"            {propertyName} = default!,");
+        }
+        else
+        {
+            sb.AppendLine($"            {propertyName} = default!,");
+        }
+    }
+
+    private static void GenerateArgumentsPropertyAssignment(StringBuilder sb, PropertyWithDataSource propInfo)
+    {
+        var property = propInfo.Property;
+        var attr = propInfo.DataSourceAttribute;
+        
+        if (attr.ConstructorArguments.Length > 0)
+        {
+            if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
+                attr.ConstructorArguments[0].Values.Length > 0)
+            {
+                var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0]);
+                sb.AppendLine($"            {property.Name} = {value},");
+            }
+            else if (attr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
+            {
+                var value = FormatConstantValue(attr.ConstructorArguments[0]);
+                sb.AppendLine($"            {property.Name} = {value},");
+            }
+        }
+    }
+
+    private static void GenerateStaticPropertyInitialization(StringBuilder sb, PropertyWithDataSource propInfo, string fullyQualifiedTypeName)
+    {
+        var property = propInfo.Property;
+        var attr = propInfo.DataSourceAttribute;
+        var propertyName = property.Name;
+
+        if (attr.AttributeClass == null) return;
+
+        var fullyQualifiedName = attr.AttributeClass.GloballyQualifiedNonGeneric();
+
+        sb.AppendLine($"        // Initialize static {propertyName} property");
+        
+        if (attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
+            attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
+        {
+            GenerateStaticAsyncDataSourcePropertyInit(sb, propInfo, fullyQualifiedTypeName);
+        }
+        else if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
+        {
+            GenerateStaticArgumentsPropertyInit(sb, propInfo, fullyQualifiedTypeName);
+        }
+        else if (fullyQualifiedName == "global::TUnit.Core.ClassDataSourceAttribute")
+        {
+            GenerateStaticClassDataSourcePropertyInit(sb, propInfo, fullyQualifiedTypeName);
+        }
+    }
+
+    private static void GenerateStaticAsyncDataSourcePropertyInit(StringBuilder sb, PropertyWithDataSource propInfo, string fullyQualifiedTypeName)
+    {
+        var property = propInfo.Property;
+        var attr = propInfo.DataSourceAttribute;
+        
+        // For generic data source attributes, get the type from generic type argument
+        if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
+        {
+            var dataSourceType = attr.AttributeClass.TypeArguments[0];
             var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
             
             sb.AppendLine("        {");
             sb.AppendLine($"            var dataSourceInstance = await CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
-            sb.AppendLine($"            instance.{property.Name} = dataSourceInstance;");
+            sb.AppendLine($"            {fullyQualifiedTypeName}.{property.Name} = dataSourceInstance;");
             sb.AppendLine("        }");
         }
+        // For non-generic data source attributes, get type from constructor arguments
+        else if (attr.ConstructorArguments.Length > 0)
+        {
+            var firstArg = attr.ConstructorArguments[0];
+            if (firstArg.Kind == TypedConstantKind.Type && firstArg.Value is ITypeSymbol dataSourceType)
+            {
+                var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
+                
+                sb.AppendLine("        {");
+                sb.AppendLine($"            var dataSourceInstance = await CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
+                sb.AppendLine($"            {fullyQualifiedTypeName}.{property.Name} = dataSourceInstance;");
+                sb.AppendLine("        }");
+            }
+        }
+    }
+
+    private static void GenerateStaticArgumentsPropertyInit(StringBuilder sb, PropertyWithDataSource propInfo, string fullyQualifiedTypeName)
+    {
+        var property = propInfo.Property;
+        var attr = propInfo.DataSourceAttribute;
+        
+        if (attr.ConstructorArguments.Length > 0)
+        {
+            if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
+                attr.ConstructorArguments[0].Values.Length > 0)
+            {
+                var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0]);
+                sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = {value};");
+            }
+            else if (attr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
+            {
+                var value = FormatConstantValue(attr.ConstructorArguments[0]);
+                sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = {value};");
+            }
+        }
+    }
+
+    private static void GenerateStaticClassDataSourcePropertyInit(StringBuilder sb, PropertyWithDataSource propInfo, string fullyQualifiedTypeName)
+    {
+        var property = propInfo.Property;
+        var attr = propInfo.DataSourceAttribute;
+        
+        // For generic ClassDataSource<T>, get type from generic type argument
+        if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
+        {
+            var dataSourceType = attr.AttributeClass.TypeArguments[0];
+            var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
+            
+            sb.AppendLine("        {");
+            sb.AppendLine($"            var dataSourceInstance = await CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
+            sb.AppendLine($"            {fullyQualifiedTypeName}.{property.Name} = dataSourceInstance;");
+            sb.AppendLine("        }");
+        }
+        // For non-generic ClassDataSource, get type from constructor arguments
+        else if (attr.ConstructorArguments.Length > 0)
+        {
+            var firstArg = attr.ConstructorArguments[0];
+            if (firstArg.Kind == TypedConstantKind.Type && firstArg.Value is ITypeSymbol dataSourceType)
+            {
+                var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
+                
+                sb.AppendLine("        {");
+                sb.AppendLine($"            var dataSourceInstance = await CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
+                sb.AppendLine($"            {fullyQualifiedTypeName}.{property.Name} = dataSourceInstance;");
+                sb.AppendLine("        }");
+            }
+        }
+    }
+
+    private static string GetDefaultValueForType(ITypeSymbol type)
+    {
+        return type.SpecialType switch
+        {
+            SpecialType.System_Boolean => "false",
+            SpecialType.System_Byte => "(byte)0",
+            SpecialType.System_SByte => "(sbyte)0",
+            SpecialType.System_Int16 => "(short)0",
+            SpecialType.System_UInt16 => "(ushort)0",
+            SpecialType.System_Int32 => "0",
+            SpecialType.System_UInt32 => "0U",
+            SpecialType.System_Int64 => "0L",
+            SpecialType.System_UInt64 => "0UL",
+            SpecialType.System_Single => "0f",
+            SpecialType.System_Double => "0d",
+            SpecialType.System_Decimal => "0m",
+            SpecialType.System_Char => "'\\0'",
+            SpecialType.System_String => "\"\"",
+            SpecialType.System_DateTime => "default(System.DateTime)",
+            _ when type.TypeKind == TypeKind.Enum => $"default({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})",
+            _ when type.CanBeReferencedByName => $"default({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})",
+            _ => "null"
+        };
     }
 
     private static string FormatConstantValue(TypedConstant constant)
     {
         return constant.Kind switch
         {
+            TypedConstantKind.Primitive when constant.Value is string str => $"\"{str}\"",
+            TypedConstantKind.Primitive when constant.Value is char ch => $"'{ch}'",
+            TypedConstantKind.Primitive when constant.Value is bool b => b.ToString().ToLowerInvariant(),
             TypedConstantKind.Primitive => constant.Value?.ToString() ?? "null",
             TypedConstantKind.Enum => $"({constant.Type!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}){constant.Value}",
             TypedConstantKind.Type => $"typeof({((ITypeSymbol)constant.Value!).ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})",

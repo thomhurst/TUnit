@@ -681,12 +681,12 @@ public static class DataCombinationGeneratorEmitter
         if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
-            EmitClassDataSourceInstantiation(writer, dataSourceType);
+            EmitClassDataSourceInstantiation(writer, dataSourceType, usePropertyTestInformation: true);
         }
         // For non-generic ClassDataSource, the type is in the constructor arguments
         else if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol dataSourceType)
         {
-            EmitClassDataSourceInstantiation(writer, dataSourceType);
+            EmitClassDataSourceInstantiation(writer, dataSourceType, usePropertyTestInformation: true);
         }
         else
         {
@@ -697,11 +697,12 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("};");
     }
 
-    private static void EmitClassDataSourceInstantiation(CodeWriter writer, ITypeSymbol dataSourceType)
+    private static void EmitClassDataSourceInstantiation(CodeWriter writer, ITypeSymbol dataSourceType, bool usePropertyTestInformation = false)
     {
         var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-        writer.AppendLine($"return await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
+        var testInfoVar = usePropertyTestInformation ? "propertyTestInformation" : "testInformation";
+        writer.AppendLine($"return await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}({testInfoVar}, testSessionId);");
     }
 
     private static void EmitPropertyDataSourceGenerator(CodeWriter writer, string propertyName, AttributeData attr, IPropertySymbol property)
@@ -712,7 +713,7 @@ public static class DataCombinationGeneratorEmitter
         {
             var fullyQualifiedType = targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-            writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
+            writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(propertyTestInformation, testSessionId);");
         }
         else
         {
