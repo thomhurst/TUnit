@@ -52,6 +52,12 @@ internal static class TestIdentifierService
 
     public static string GenerateFailedTestId(TestMetadata metadata)
     {
+        // For backward compatibility, use default combination values
+        return GenerateFailedTestId(metadata, new TestDataCombination());
+    }
+    
+    public static string GenerateFailedTestId(TestMetadata metadata, TestDataCombination combination)
+    {
         var methodMetadata = metadata.MethodMetadata;
         var classMetadata = methodMetadata.Class;
         
@@ -78,9 +84,19 @@ internal static class TestIdentifierService
         sb.Append(methodMetadata.Class.Namespace)
           .Append('.')
           .Append(classTypeWithParameters)
-          .Append(".0.0.")
+          .Append('.')
+          .Append(combination.ClassDataSourceIndex)
+          .Append('.')
+          .Append(combination.ClassLoopIndex)
+          .Append('.')
           .Append(methodWithParameters)
-          .Append(".0.0.0_DataGenerationError");
+          .Append('.')
+          .Append(combination.MethodDataSourceIndex)
+          .Append('.')
+          .Append(combination.MethodLoopIndex)
+          .Append('.')
+          .Append(combination.RepeatIndex)
+          .Append("_DataGenerationError");
           
         return sb.ToString();
     }

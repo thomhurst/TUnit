@@ -39,7 +39,7 @@ public sealed class TestBuilder : ITestBuilder
                 // Check if this combination has a data generation exception
                 if (combination.DataGenerationException != null)
                 {
-                    var failedTest = CreateFailedTestForDataGenerationError(metadata, combination.DataGenerationException, combination.DisplayName);
+                    var failedTest = CreateFailedTestForDataGenerationError(metadata, combination.DataGenerationException, combination, combination.DisplayName);
                     tests.Add(failedTest);
                 }
                 else
@@ -236,7 +236,12 @@ public sealed class TestBuilder : ITestBuilder
 
     private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, string? customDisplayName)
     {
-        var testId = TestIdentifierService.GenerateFailedTestId(metadata);
+        return CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination(), customDisplayName);
+    }
+    
+    private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination, string? customDisplayName)
+    {
+        var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
         var displayName = customDisplayName ?? $"{metadata.TestName} [DATA GENERATION ERROR]";
 
         var testDetails = CreateFailedTestDetails(metadata, testId, displayName);

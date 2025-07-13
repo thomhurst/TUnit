@@ -754,18 +754,18 @@ public static class DataCombinationGeneratorEmitter
         // Create an instance of the generator with all properties from the attribute
         var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
         writer.AppendLine($"var generator = {generatorCode};");
-        
-        // Initialize nested data source properties if any
-        if (attr.AttributeClass != null)
-        {
-            EmitNestedDataSourceInitialization(writer, attr.AttributeClass, "generator");
-        }
 
         writer.AppendLine("// Create TestInformation for the data generator");
         writer.Append("var testInformation = ");
         TestInformationGenerator.GenerateTestInformation(writer, methodSymbol, typeSymbol);
         writer.AppendLine(";");
         writer.AppendLine();
+        
+        // Initialize nested data source properties if any (after testInformation is created)
+        if (attr.AttributeClass != null)
+        {
+            EmitNestedDataSourceInitialization(writer, attr.AttributeClass, "generator", methodSymbol, typeSymbol);
+        }
 
         writer.AppendLine("// Create MembersToGenerate array based on whether it's class or method level");
         writer.AppendLine("var membersToGenerate = new MemberMetadata[]");
@@ -918,18 +918,18 @@ public static class DataCombinationGeneratorEmitter
         // Create an instance of the generator with all properties from the attribute
         var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
         writer.AppendLine($"var generator = {generatorCode};");
-        
-        // Initialize nested data source properties if any
-        if (attr.AttributeClass != null)
-        {
-            EmitNestedDataSourceInitialization(writer, attr.AttributeClass, "generator");
-        }
 
         writer.AppendLine("// Create TestInformation for the data generator");
         writer.Append("var testInformation = ");
         TestInformationGenerator.GenerateTestInformation(writer, methodSymbol, typeSymbol);
         writer.AppendLine(";");
         writer.AppendLine();
+        
+        // Initialize nested data source properties if any (after testInformation is created)
+        if (attr.AttributeClass != null)
+        {
+            EmitNestedDataSourceInitialization(writer, attr.AttributeClass, "generator", methodSymbol, typeSymbol);
+        }
 
         writer.AppendLine("// Create MembersToGenerate array based on whether it's class or method level");
         writer.AppendLine("var membersToGenerate = new MemberMetadata[]");
@@ -1466,12 +1466,12 @@ public static class DataCombinationGeneratorEmitter
         return nonGenericEnumerable != null;
     }
     
-    private static void EmitNestedDataSourceInitialization(CodeWriter writer, INamedTypeSymbol typeSymbol, string instanceName)
+    private static void EmitNestedDataSourceInitialization(CodeWriter writer, INamedTypeSymbol typeSymbol, string instanceName, IMethodSymbol methodSymbol, INamedTypeSymbol containingTypeSymbol)
     {
-        EmitNestedDataSourceInitializationRecursive(writer, typeSymbol, instanceName, 0);
+        EmitNestedDataSourceInitializationRecursive(writer, typeSymbol, instanceName, 0, methodSymbol, containingTypeSymbol);
     }
     
-    private static void EmitNestedDataSourceInitializationRecursive(CodeWriter writer, INamedTypeSymbol typeSymbol, string instanceName, int depth)
+    private static void EmitNestedDataSourceInitializationRecursive(CodeWriter writer, INamedTypeSymbol typeSymbol, string instanceName, int depth, IMethodSymbol methodSymbol, INamedTypeSymbol containingTypeSymbol)
     {
         var dataSourceProperties = typeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
@@ -1486,6 +1486,8 @@ public static class DataCombinationGeneratorEmitter
         
         writer.AppendLine();
         writer.AppendLine("// Initialize nested data source properties");
+        
+        // testInformation should already be defined in the parent scope when this is called
         
         var propertyIndex = 0;
         foreach (var property in dataSourceProperties)
@@ -1516,7 +1518,7 @@ public static class DataCombinationGeneratorEmitter
                 .Any(p => p.DeclaredAccessibility == Accessibility.Public && p.SetMethod != null
                     && p.GetAttributes().Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))))
             {
-                EmitNestedDataSourceInitializationRecursive(writer, dataSourceAttr.AttributeClass, $"dataSourceGenerator_{varName}", depth + 1);
+                EmitNestedDataSourceInitializationRecursive(writer, dataSourceAttr.AttributeClass, $"dataSourceGenerator_{varName}", depth + 1, methodSymbol, containingTypeSymbol);
             }
             
             // Create metadata for the generator
@@ -1526,7 +1528,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("Type = global::TUnit.Core.Enums.DataGeneratorType.Property,");
             writer.AppendLine("TestBuilderContext = new global::TUnit.Core.TestBuilderContextAccessor(new global::TUnit.Core.TestBuilderContext()),");
             writer.AppendLine("MembersToGenerate = new global::TUnit.Core.MemberMetadata[0],");
-            writer.AppendLine("TestInformation = null,");
+            writer.AppendLine("TestInformation = testInformation,");
             writer.AppendLine("TestSessionId = testSessionId,");
             writer.AppendLine("TestClassInstance = null,");
             writer.AppendLine("ClassInstanceArguments = null");
