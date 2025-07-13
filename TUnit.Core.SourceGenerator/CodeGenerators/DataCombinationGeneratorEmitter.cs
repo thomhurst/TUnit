@@ -809,14 +809,38 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("// as that would create a single instance that gets shared");
         writer.AppendLine();
 
-        if (!isClassLevel)
+        writer.AppendLine("// Get the data and use ToObjectArray to handle both tuples and arrays");
+        writer.AppendLine("var initialData = await dataSourceFunc();");
+        writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
+        writer.AppendLine();
+        
+        if (isClassLevel)
         {
-            writer.AppendLine("// For method data, we need to know the array length");
-            writer.AppendLine("// Call once to get length, then create factories");
-            writer.AppendLine("var initialData = await dataSourceFunc();");
-            writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
+            writer.AppendLine("// For class data, use ToObjectArray to handle both tuples and arrays");
+            writer.AppendLine("var processedData = dataLength == 0 ? new object?[] { null } : ");
+            writer.AppendLine("    dataLength == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(initialData![0]) : initialData!;");
+            writer.AppendLine();
+            writer.AppendLine("var classFactories = processedData.Select((_, index) => new Func<Task<object?>>(async () =>");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("var data = await dataSourceFunc();");
+            writer.AppendLine("var processed = data?.Length == 0 ? new object?[] { null } :");
+            writer.AppendLine("    data?.Length == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(data[0]) : data;");
+            writer.AppendLine("if (processed == null || index >= processed.Length) return null;");
+            writer.AppendLine("var instance = processed[index];");
+            writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
+            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
+            writer.AppendLine("return instance;");
+            writer.Unindent();
+            writer.AppendLine("})).ToArray();");
             writer.AppendLine();
         }
+
+        // Handle method data processing before creating TestDataCombination
+        writer.AppendLine("// For method data, process the data using ToObjectArray if needed");
+        writer.AppendLine("var processedMethodData = dataLength == 0 ? new object?[] { null } : ");
+        writer.AppendLine("    dataLength == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(initialData![0]) : initialData!;");
+        writer.AppendLine();
 
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
@@ -824,28 +848,18 @@ public static class DataCombinationGeneratorEmitter
 
         if (isClassLevel)
         {
-            writer.AppendLine("// Create a single factory that calls dataSourceFunc each time");
-            writer.AppendLine("// This ensures SharedType.None creates new instances");
-            writer.AppendLine("ClassDataFactories = new[] { new Func<Task<object?>>(async () =>");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("var data = await dataSourceFunc();");
-            writer.AppendLine("if (data == null || data.Length == 0) return null;");
-            writer.AppendLine("var instance = data[0];");
-            writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
-            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
-            writer.AppendLine("return instance;");
-            writer.Unindent();
-            writer.AppendLine("}) },");
+            writer.AppendLine("ClassDataFactories = classFactories,");
         }
         else
         {
-            writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () =>");
+            writer.AppendLine("MethodDataFactories = processedMethodData.Select((_, index) => new Func<Task<object?>>(async () =>");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("var data = await dataSourceFunc();");
-            writer.AppendLine("if (data == null || index >= data.Length) return null;");
-            writer.AppendLine("return data[index];");
+            writer.AppendLine("var processed = data?.Length == 0 ? new object?[] { null } :");
+            writer.AppendLine("    data?.Length == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(data[0]) : data;");
+            writer.AppendLine("if (processed == null || index >= processed.Length) return null;");
+            writer.AppendLine("return processed[index];");
             writer.Unindent();
             writer.AppendLine("})).ToArray(),");
         }
@@ -974,41 +988,57 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("// as that would create a single instance that gets shared");
         writer.AppendLine();
 
-        writer.AppendLine("// First, get the data to determine array length");
+        writer.AppendLine("// Get the data and use ToObjectArray to handle both tuples and arrays");
         writer.AppendLine("var initialData = await dataSourceFunc();");
         writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
         writer.AppendLine();
         
+        if (isClassLevel)
+        {
+            writer.AppendLine("// For class data, use ToObjectArray to handle both tuples and arrays");
+            writer.AppendLine("var processedData = dataLength == 0 ? new object?[] { null } : ");
+            writer.AppendLine("    dataLength == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(initialData![0]) : initialData!;");
+            writer.AppendLine();
+            writer.AppendLine("var classFactories = processedData.Select((_, index) => new Func<Task<object?>>(async () =>");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("var data = await dataSourceFunc();");
+            writer.AppendLine("var processed = data?.Length == 0 ? new object?[] { null } :");
+            writer.AppendLine("    data?.Length == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(data[0]) : data;");
+            writer.AppendLine("if (processed == null || index >= processed.Length) return null;");
+            writer.AppendLine("var instance = processed[index];");
+            writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
+            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
+            writer.AppendLine("return instance;");
+            writer.Unindent();
+            writer.AppendLine("})).ToArray();");
+            writer.AppendLine();
+        }
+        
+        // Handle method data processing before creating TestDataCombination
+        writer.AppendLine("// For method data, process the data using ToObjectArray if needed");
+        writer.AppendLine("var processedMethodData = dataLength == 0 ? new object?[] { null } : ");
+        writer.AppendLine("    dataLength == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(initialData![0]) : initialData!;");
+        writer.AppendLine();
+
         writer.AppendLine($"{listName}.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
 
         if (isClassLevel)
         {
-            writer.AppendLine("// Create a single factory that calls dataSourceFunc each time");
-            writer.AppendLine("// This ensures SharedType.None creates new instances");
-            writer.AppendLine("ClassDataFactories = new[] { new Func<Task<object?>>(async () =>");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("var data = await dataSourceFunc();");
-            writer.AppendLine("if (data == null || data.Length == 0) return null;");
-            writer.AppendLine("var instance = data[0];");
-            writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
-            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
-            writer.AppendLine("return instance;");
-            writer.Unindent();
-            writer.AppendLine("}) },");
+            writer.AppendLine("ClassDataFactories = classFactories,");
         }
         else
         {
-            writer.AppendLine("// For method data, create one factory per parameter");
-            writer.AppendLine("// Each factory returns the corresponding element from the data array");
-            writer.AppendLine("MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () =>");
+            writer.AppendLine("MethodDataFactories = processedMethodData.Select((_, index) => new Func<Task<object?>>(async () =>");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("var data = await dataSourceFunc();");
-            writer.AppendLine("if (data == null || index >= data.Length) return null;");
-            writer.AppendLine("var instance = data[index];");
+            writer.AppendLine("var processed = data?.Length == 0 ? new object?[] { null } :");
+            writer.AppendLine("    data?.Length == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(data[0]) : data;");
+            writer.AppendLine("if (processed == null || index >= processed.Length) return null;");
+            writer.AppendLine("var instance = processed[index];");
             writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
             writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
             writer.AppendLine("return instance;");
