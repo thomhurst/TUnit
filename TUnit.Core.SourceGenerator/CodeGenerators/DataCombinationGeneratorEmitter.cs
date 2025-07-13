@@ -238,11 +238,11 @@ public static class DataCombinationGeneratorEmitter
             }
             else if (fullyQualifiedName == "global::TUnit.Core.MethodDataSourceAttribute")
             {
-                EmitMethodDataSource(writer, attr, listName, isClassLevel, typeSymbol);
+                EmitMethodDataSource(writer, attr, listName, isClassLevel, typeSymbol, methodSymbol);
             }
             else if (fullyQualifiedName == "global::TUnit.Core.InstanceMethodDataSourceAttribute")
             {
-                EmitMethodDataSource(writer, attr, listName, isClassLevel, typeSymbol);
+                EmitMethodDataSource(writer, attr, listName, isClassLevel, typeSymbol, methodSymbol);
             }
             else if (IsAsyncDataSourceGeneratorAttribute(attr.AttributeClass))
             {
@@ -339,7 +339,7 @@ public static class DataCombinationGeneratorEmitter
         }
     }
 
-    private static void EmitMethodDataSource(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol)
+    private static void EmitMethodDataSource(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol)
     {
         writer.AppendLine("// MethodDataSourceAttribute");
 
@@ -390,11 +390,11 @@ public static class DataCombinationGeneratorEmitter
 
         if (isStatic)
         {
-            EmitStaticMethodDataSource(writer, methodName!, listName, isClassLevel, methodClass, dataSourceMethod, attr);
+            EmitStaticMethodDataSource(writer, methodName!, listName, isClassLevel, methodClass, dataSourceMethod, attr, methodSymbol);
         }
         else
         {
-            EmitInstanceMethodDataSource(writer, methodName!, listName, isClassLevel, methodClass, dataSourceMethod, attr);
+            EmitInstanceMethodDataSource(writer, methodName!, listName, isClassLevel, methodClass, dataSourceMethod, attr, methodSymbol);
         }
     }
 
@@ -413,7 +413,7 @@ public static class DataCombinationGeneratorEmitter
         return typeContainingAttribute;
     }
 
-    private static void EmitStaticMethodDataSource(CodeWriter writer, string methodName, string listName, bool isClassLevel, ITypeSymbol typeSymbol, IMethodSymbol dataSourceMethod, AttributeData attr)
+    private static void EmitStaticMethodDataSource(CodeWriter writer, string methodName, string listName, bool isClassLevel, ITypeSymbol typeSymbol, IMethodSymbol dataSourceMethod, AttributeData attr, IMethodSymbol methodSymbol)
     {
         var fullyQualifiedTypeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
@@ -462,11 +462,15 @@ public static class DataCombinationGeneratorEmitter
 
             if (isClassLevel)
             {
-                writer.AppendLine("ClassDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(data),");
+                // For class-level data sources, pass constructor parameter count
+                var ctorParamCount = methodSymbol.ContainingType.Constructors
+                    .FirstOrDefault(c => !c.IsStatic)?.Parameters.Length ?? 0;
+                writer.AppendLine($"ClassDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(data, {ctorParamCount}),");
             }
             else
             {
-                writer.AppendLine("MethodDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(data),");
+                // For method-level data sources, pass method parameter count
+                writer.AppendLine($"MethodDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(data, {methodSymbol.Parameters.Length}),");
             }
 
             // Always write both indices
@@ -502,11 +506,15 @@ public static class DataCombinationGeneratorEmitter
 
             if (isClassLevel)
             {
-                writer.AppendLine("ClassDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(dataValue),");
+                // For class-level data sources, pass constructor parameter count
+                var ctorParamCount = methodSymbol.ContainingType.Constructors
+                    .FirstOrDefault(c => !c.IsStatic)?.Parameters.Length ?? 0;
+                writer.AppendLine($"ClassDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(dataValue, {ctorParamCount}),");
             }
             else
             {
-                writer.AppendLine("MethodDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(dataValue),");
+                // For method-level data sources, pass method parameter count
+                writer.AppendLine($"MethodDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(dataValue, {methodSymbol.Parameters.Length}),");
             }
 
             // Always write both indices
@@ -523,7 +531,7 @@ public static class DataCombinationGeneratorEmitter
         }
     }
 
-    private static void EmitInstanceMethodDataSource(CodeWriter writer, string methodName, string listName, bool isClassLevel, ITypeSymbol typeSymbol, IMethodSymbol dataSourceMethod, AttributeData attr)
+    private static void EmitInstanceMethodDataSource(CodeWriter writer, string methodName, string listName, bool isClassLevel, ITypeSymbol typeSymbol, IMethodSymbol dataSourceMethod, AttributeData attr, IMethodSymbol methodSymbol)
     {
         writer.AppendLine($"// Instance method: {methodName}");
         writer.AppendLine("// Instance methods are not supported in the unified compile-time data generation approach");

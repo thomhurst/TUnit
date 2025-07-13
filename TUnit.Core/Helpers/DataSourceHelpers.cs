@@ -261,7 +261,7 @@ public static class DataSourceHelpers
     /// AOT-compatible method that processes data and returns factories for test data combination
     /// Replaces the complex HandleTupleValue + InvokeIfFunc pattern
     /// </summary>
-    public static Func<Task<object?>>[] ProcessTestDataSource<T>(T data)
+    public static Func<Task<object?>>[] ProcessTestDataSource<T>(T data, int expectedParameterCount = -1)
     {
         if (data == null)
         {
@@ -271,11 +271,27 @@ public static class DataSourceHelpers
         // If it's a Func<TResult>, invoke it first
         var actualData = InvokeIfFunc(data);
 
-        // Use ToObjectArray to handle tuples, arrays, and other types consistently
-        var unwrapped = ToObjectArray(actualData);
+        // Always unwrap tuples - they explicitly represent multiple values
+        if (IsTuple(actualData))
+        {
+            var unwrapped = UnwrapTupleAot(actualData);
+            return unwrapped.Select(v => new Func<Task<object?>>(() => Task.FromResult(v))).ToArray();
+        }
         
-        // Create a factory for each unwrapped element
-        return unwrapped.Select(v => new Func<Task<object?>>(() => Task.FromResult(v))).ToArray();
+        // For arrays, decide based on expected parameter count
+        if (actualData is object?[] array && expectedParameterCount > 0)
+        {
+            // If expecting multiple parameters and array length matches, unwrap it
+            if (expectedParameterCount > 1 && array.Length == expectedParameterCount)
+            {
+                return array.Select(v => new Func<Task<object?>>(() => Task.FromResult(v))).ToArray();
+            }
+            // If expecting 1 parameter, keep array as single value
+            // Or if array length doesn't match expected count, treat as single value
+        }
+        
+        // Default: return as single value
+        return new[] { () => Task.FromResult<object?>(actualData) };
     }
 
     /// <summary>
