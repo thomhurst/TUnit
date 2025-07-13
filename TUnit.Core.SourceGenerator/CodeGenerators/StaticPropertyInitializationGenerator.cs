@@ -7,6 +7,7 @@ using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
@@ -46,7 +47,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             return;
         }
 
-        var allStaticPropertiesList = new List<DataCombinationGeneratorEmitter.PropertyWithDataSource>();
+        var allStaticPropertiesList = new List<PropertyWithDataSource>();
         foreach (var testClass in testClasses)
         {
             allStaticPropertiesList.AddRange(GetStaticPropertyDataSources(testClass));
@@ -62,7 +63,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         context.AddSource("StaticPropertyInitializer.g.cs", SourceText.From(code, Encoding.UTF8));
     }
 
-    private static string GenerateInitializationCode(ImmutableArray<DataCombinationGeneratorEmitter.PropertyWithDataSource> staticProperties)
+    private static string GenerateInitializationCode(ImmutableArray<PropertyWithDataSource> staticProperties)
     {
         using var writer = new CodeWriter();
         
@@ -141,7 +142,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         return writer.ToString();
     }
 
-    private static void GeneratePropertyInitialization(CodeWriter writer, DataCombinationGeneratorEmitter.PropertyWithDataSource propertyData, string typeName)
+    private static void GeneratePropertyInitialization(CodeWriter writer, PropertyWithDataSource propertyData, string typeName)
     {
         var propertyName = propertyData.Property.Name;
         var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyName}";
@@ -172,7 +173,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("}");
     }
 
-    private static void GenerateIndividualPropertyInitializer(CodeWriter writer, DataCombinationGeneratorEmitter.PropertyWithDataSource propertyData)
+    private static void GenerateIndividualPropertyInitializer(CodeWriter writer, PropertyWithDataSource propertyData)
     {
         var propertyName = propertyData.Property.Name;
         var typeName = propertyData.Property.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -330,9 +331,9 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("return null;");
     }
 
-    private static ImmutableArray<DataCombinationGeneratorEmitter.PropertyWithDataSource> GetStaticPropertyDataSources(INamedTypeSymbol typeSymbol)
+    private static ImmutableArray<PropertyWithDataSource> GetStaticPropertyDataSources(INamedTypeSymbol typeSymbol)
     {
-        var properties = new List<DataCombinationGeneratorEmitter.PropertyWithDataSource>();
+        var properties = new List<PropertyWithDataSource>();
 
         // Walk inheritance hierarchy to include base class static properties
         var currentType = typeSymbol;
@@ -353,7 +354,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
                         // Check if we already have this property (in case of overrides)
                         if (!properties.Any(p => p.Property.Name == property.Name))
                         {
-                            properties.Add(new DataCombinationGeneratorEmitter.PropertyWithDataSource
+                            properties.Add(new PropertyWithDataSource
                             {
                                 Property = property,
                                 DataSourceAttribute = dataSourceAttr

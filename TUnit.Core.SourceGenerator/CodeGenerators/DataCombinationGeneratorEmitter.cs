@@ -4,6 +4,7 @@ using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
@@ -68,6 +69,8 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("var classCombinations = new List<TestDataCombination>();");
         writer.AppendLine("var propertyCombinations = new List<TestDataCombination>();");
         writer.AppendLine();
+        
+        // Runtime helpers now handle instance data source property initialization
 
         EmitMethodDataCombinations(writer, methodDataSources, methodSymbol, typeSymbol);
         EmitClassDataCombinations(writer, classDataSources, methodSymbol, typeSymbol);
@@ -185,6 +188,14 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine();
         writer.AppendLine("// Property data sources");
         writer.AppendLine("var propertyValues = new Dictionary<string, Func<Task<object?>>>();");
+        writer.AppendLine();
+        
+        // Generate testInformation for property data sources  
+        writer.AppendLine("// Create TestInformation for property data sources");
+        writer.Append("var propertyTestInformation = ");
+        TestInformationGenerator.GenerateTestInformation(writer, methodSymbol, typeSymbol);
+        writer.AppendLine(";");
+        writer.AppendLine();
 
         foreach (var propData in propertyDataSources)
         {
@@ -602,18 +613,16 @@ public static class DataCombinationGeneratorEmitter
         if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
-            var fullyQualifiedType = dataSourceType.GloballyQualifiedNonGeneric();
-            writer.AppendLine($"var instance = new {fullyQualifiedType}();");
-            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
-            writer.AppendLine("return instance;");
+            var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
+            writer.AppendLine($"return await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(propertyTestInformation, testSessionId);");
         }
         // For non-generic data source attributes, the type is in the constructor arguments
         else if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol dataSourceType)
         {
-            var fullyQualifiedType = dataSourceType.GloballyQualifiedNonGeneric();
-            writer.AppendLine($"var instance = new {fullyQualifiedType}();");
-            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
-            writer.AppendLine("return instance;");
+            var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
+            writer.AppendLine($"return await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(propertyTestInformation, testSessionId);");
         }
         else
         {
@@ -691,34 +700,8 @@ public static class DataCombinationGeneratorEmitter
     private static void EmitClassDataSourceInstantiation(CodeWriter writer, ITypeSymbol dataSourceType)
     {
         var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        
-        // Check if the type has required properties
-        var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(dataSourceType).ToList();
-        
-        if (requiredProperties.Any())
-        {
-            // Use object initializer syntax for required properties
-            writer.AppendLine($"var instance = new {fullyQualifiedType}()");
-            writer.AppendLine("{");
-            writer.Indent();
-            
-            foreach (var property in requiredProperties)
-            {
-                var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
-                writer.AppendLine($"{property.Name} = {defaultValue},");
-            }
-            
-            writer.Unindent();
-            writer.AppendLine("};");
-        }
-        else
-        {
-            // Simple constructor call for types without required properties
-            writer.AppendLine($"var instance = new {fullyQualifiedType}();");
-        }
-        
-        writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
-        writer.AppendLine("return instance;");
+        var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
+        writer.AppendLine($"return await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
     }
 
     private static void EmitPropertyDataSourceGenerator(CodeWriter writer, string propertyName, AttributeData attr, IPropertySymbol property)
@@ -727,15 +710,9 @@ public static class DataCombinationGeneratorEmitter
         // This is a simplified implementation that can be enhanced later
         if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol targetType)
         {
-            var fullyQualifiedType = targetType.GloballyQualifiedNonGeneric();
-            writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => ");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine($"var instance = new {fullyQualifiedType}();");
-            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
-            writer.AppendLine("return instance;");
-            writer.Unindent();
-            writer.AppendLine("};");
+            var fullyQualifiedType = targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
+            writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
         }
         else
         {
@@ -854,6 +831,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("var data = await dataSourceFunc();");
             writer.AppendLine("if (data == null || data.Length == 0) return null;");
             writer.AppendLine("var instance = data[0];");
+            writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
             writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
             writer.AppendLine("return instance;");
             writer.Unindent();
@@ -1014,6 +992,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("var data = await dataSourceFunc();");
             writer.AppendLine("if (data == null || data.Length == 0) return null;");
             writer.AppendLine("var instance = data[0];");
+            writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
             writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
             writer.AppendLine("return instance;");
             writer.Unindent();
@@ -1029,6 +1008,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("var data = await dataSourceFunc();");
             writer.AppendLine("if (data == null || index >= data.Length) return null;");
             writer.AppendLine("var instance = data[index];");
+            writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
             writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
             writer.AppendLine("return instance;");
             writer.Unindent();
@@ -1396,11 +1376,6 @@ public static class DataCombinationGeneratorEmitter
         return 0; // Default: no repeat
     }
 
-    public struct PropertyWithDataSource
-    {
-        public IPropertySymbol Property { get; init; }
-        public AttributeData DataSourceAttribute { get; init; }
-    }
 
     private static bool IsAsyncEnumerable(ITypeSymbol typeSymbol)
     {
@@ -1470,6 +1445,24 @@ public static class DataCombinationGeneratorEmitter
     {
         EmitNestedDataSourceInitializationRecursive(writer, typeSymbol, instanceName, 0, methodSymbol, containingTypeSymbol);
     }
+    
+    private static void EmitInstanceDataSourcePropertyInitialization(CodeWriter writer, string instanceVarName, string typeVarName, IMethodSymbol methodSymbol, INamedTypeSymbol containingTypeSymbol)
+    {
+        writer.AppendLine("// Initialize data source properties on the instance");
+        writer.AppendLine($"var instanceType_{instanceVarName} = {instanceVarName}?.GetType();");
+        writer.AppendLine($"if (instanceType_{instanceVarName} != null)");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        writer.AppendLine($"await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync({instanceVarName}, testInformation, testSessionId);");
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+    }
+    
+    // Instance data source property initialization is now handled by generated type-specific helpers
+    // registered at runtime and called via DataSourceHelpers.InitializeDataSourcePropertiesAsync
     
     private static void EmitNestedDataSourceInitializationRecursive(CodeWriter writer, INamedTypeSymbol typeSymbol, string instanceName, int depth, IMethodSymbol methodSymbol, INamedTypeSymbol containingTypeSymbol)
     {

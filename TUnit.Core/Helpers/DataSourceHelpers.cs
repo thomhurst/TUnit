@@ -267,4 +267,35 @@ public static class DataSourceHelpers
         // Single value or not a tuple
         return new[] { () => Task.FromResult<object?>(actualData) };
     }
+
+    /// <summary>
+    /// AOT-compatible runtime dispatcher for data source property initialization.
+    /// This will be populated by the generated DataSourceHelpers class.
+    /// </summary>
+    private static readonly Dictionary<Type, Func<object, MethodMetadata, string, Task>> PropertyInitializers = new();
+
+    /// <summary>
+    /// Register a type-specific property initializer (called by generated code)
+    /// </summary>
+    public static void RegisterPropertyInitializer<T>(Func<T, MethodMetadata, string, Task> initializer)
+    {
+        PropertyInitializers[typeof(T)] = (instance, testInfo, sessionId) => 
+            initializer((T)instance, testInfo, sessionId);
+    }
+
+    /// <summary>
+    /// Initialize data source properties on an instance using registered type-specific helpers
+    /// </summary>
+    public static async Task InitializeDataSourcePropertiesAsync(object? instance, MethodMetadata testInformation, string testSessionId)
+    {
+        if (instance == null) return;
+
+        var instanceType = instance.GetType();
+        if (PropertyInitializers.TryGetValue(instanceType, out var initializer))
+        {
+            await initializer(instance, testInformation, testSessionId);
+        }
+        // If no initializer is registered, the type has no data source properties
+    }
+
 }
