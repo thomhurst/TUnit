@@ -112,7 +112,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
 
     private async Task InitializeEventReceivers(List<ExecutableTest> testList, CancellationToken cancellationToken)
     {
-        var eventReceiverOrchestrator = _serviceProvider?.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
+        var eventReceiverOrchestrator = _serviceProvider?.GetService(typeof(OptimizedEventReceiverOrchestrator)) as OptimizedEventReceiverOrchestrator;
         if (eventReceiverOrchestrator == null)
         {
             return;

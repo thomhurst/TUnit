@@ -34,7 +34,6 @@ internal sealed class EventReceiverRegistry
     /// <summary>
     /// Register event receivers from a collection of objects
     /// </summary>
-    [RequiresUnreferencedCode("Reflects on receiver type to find event interfaces")]
     public void RegisterReceivers(IEnumerable<object> objects)
     {
         _lock.EnterWriteLock();
@@ -54,7 +53,6 @@ internal sealed class EventReceiverRegistry
     /// <summary>
     /// Register a single event receiver
     /// </summary>
-    [RequiresUnreferencedCode("Reflects on receiver type to find event interfaces")]
     public void RegisterReceiver(object receiver)
     {
         _lock.EnterWriteLock();
@@ -68,16 +66,29 @@ internal sealed class EventReceiverRegistry
         }
     }
     
-    [RequiresUnreferencedCode("Reflects on receiver type to find event interfaces")]
     private void RegisterReceiverInternal(object receiver)
     {
         UpdateEventFlags(receiver);
         
         // Register for each interface type the object implements
-        var interfaces = GetEventReceiverInterfaces(receiver.GetType());
-            
-        foreach (var interfaceType in interfaces)
+        // We use a simpler approach that doesn't require reflection
+        RegisterIfImplements<ITestStartEventReceiver>(receiver);
+        RegisterIfImplements<ITestEndEventReceiver>(receiver);
+        RegisterIfImplements<ITestSkippedEventReceiver>(receiver);
+        RegisterIfImplements<ITestRegisteredEventReceiver>(receiver);
+        RegisterIfImplements<IFirstTestInTestSessionEventReceiver>(receiver);
+        RegisterIfImplements<ILastTestInTestSessionEventReceiver>(receiver);
+        RegisterIfImplements<IFirstTestInAssemblyEventReceiver>(receiver);
+        RegisterIfImplements<ILastTestInAssemblyEventReceiver>(receiver);
+        RegisterIfImplements<IFirstTestInClassEventReceiver>(receiver);
+        RegisterIfImplements<ILastTestInClassEventReceiver>(receiver);
+    }
+    
+    private void RegisterIfImplements<T>(object receiver) where T : class
+    {
+        if (receiver is T)
         {
+            var interfaceType = typeof(T);
             if (_receiversByType.TryGetValue(interfaceType, out var existing))
             {
                 var newArray = new object[existing.Length + 1];
@@ -179,12 +190,6 @@ internal sealed class EventReceiverRegistry
             _registeredEvents |= EventTypes.LastTestInClass;
     }
     
-    [RequiresUnreferencedCode("Reflects on receiver type to find event interfaces")]
-    private static IEnumerable<Type> GetEventReceiverInterfaces(Type receiverType)
-    {
-        return receiverType.GetInterfaces()
-            .Where(i => typeof(IEventReceiver).IsAssignableFrom(i) && i != typeof(IEventReceiver));
-    }
     
     public void Dispose()
     {

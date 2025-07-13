@@ -33,7 +33,6 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
         _logger = logger;
     }
 
-    [RequiresUnreferencedCode("Event receiver registration requires reflection")]
     public async ValueTask InitializeAllEligibleObjectsAsync(TestContext context, CancellationToken cancellationToken)
     {
         var eligibleObjects = context.GetEligibleEventObjects();
@@ -194,6 +193,26 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
+            }
+        }
+    }
+
+    public async ValueTask InvokeTestDiscoveryEventReceiversAsync(TestContext context, DiscoveredTestContext discoveredContext, CancellationToken cancellationToken)
+    {
+        var eventReceivers = context.GetEligibleEventObjects()
+            .OfType<ITestDiscoveryEventReceiver>()
+            .OrderBy(r => r.Order)
+            .ToList();
+
+        foreach (var receiver in eventReceivers)
+        {
+            try
+            {
+                await receiver.OnTestDiscovered(discoveredContext);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in test discovery event receiver: {ex.Message}");
             }
         }
     }

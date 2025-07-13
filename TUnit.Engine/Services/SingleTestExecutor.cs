@@ -16,10 +16,10 @@ internal class SingleTestExecutor : ISingleTestExecutor
 {
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestResultFactory _resultFactory;
-    private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
+    private readonly OptimizedEventReceiverOrchestrator _eventReceiverOrchestrator;
     private SessionUid? _sessionUid;
 
-    public SingleTestExecutor(TUnitFrameworkLogger logger, EventReceiverOrchestrator eventReceiverOrchestrator)
+    public SingleTestExecutor(TUnitFrameworkLogger logger, OptimizedEventReceiverOrchestrator eventReceiverOrchestrator)
     {
         _logger = logger;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;

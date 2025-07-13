@@ -13,8 +13,8 @@ public class OverrideResultsTests
         throw new InvalidOperationException();
     }
 
-    [After(Class)]
-    public static async Task AfterClass(ClassHookContext classHookContext)
+    [After(Test)]
+    public static async Task After(ClassHookContext classHookContext)
     {
         await Assert.That(classHookContext.Tests)
             .HasSingleItem()

@@ -31,7 +31,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TestFilterService TestFilterService { get; }
     public IHookCollectionService HookCollectionService { get; }
     public HookOrchestrator HookOrchestrator { get; }
-    public EventReceiverOrchestrator EventReceiverOrchestrator { get; }
+    public OptimizedEventReceiverOrchestrator EventReceiverOrchestrator { get; }
     public ITestFinder TestFinder { get; }
 
     public TUnitServiceProvider(
@@ -72,7 +72,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         Register<ITestInvoker>(new TestInvoker());
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
         HookOrchestrator = Register(new HookOrchestrator(HookCollectionService, Logger));
-        EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
+        EventReceiverOrchestrator = Register(new OptimizedEventReceiverOrchestrator(Logger));
 
         // Detect execution mode from command line or environment
         var executionMode = GetExecutionMode(CommandLineOptions);
