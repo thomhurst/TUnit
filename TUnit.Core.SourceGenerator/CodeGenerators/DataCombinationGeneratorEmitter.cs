@@ -754,6 +754,12 @@ public static class DataCombinationGeneratorEmitter
         // Create an instance of the generator with all properties from the attribute
         var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
         writer.AppendLine($"var generator = {generatorCode};");
+        
+        // Initialize nested data source properties if any
+        if (attr.AttributeClass != null)
+        {
+            EmitNestedDataSourceInitialization(writer, attr.AttributeClass, "generator");
+        }
 
         writer.AppendLine("// Create TestInformation for the data generator");
         writer.Append("var testInformation = ");
@@ -912,6 +918,12 @@ public static class DataCombinationGeneratorEmitter
         // Create an instance of the generator with all properties from the attribute
         var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
         writer.AppendLine($"var generator = {generatorCode};");
+        
+        // Initialize nested data source properties if any
+        if (attr.AttributeClass != null)
+        {
+            EmitNestedDataSourceInitialization(writer, attr.AttributeClass, "generator");
+        }
 
         writer.AppendLine("// Create TestInformation for the data generator");
         writer.Append("var testInformation = ");
@@ -1452,5 +1464,135 @@ public static class DataCombinationGeneratorEmitter
             .FirstOrDefault(i => i.ToDisplayString() == "System.Collections.IEnumerable");
 
         return nonGenericEnumerable != null;
+    }
+    
+    private static void EmitNestedDataSourceInitialization(CodeWriter writer, INamedTypeSymbol typeSymbol, string instanceName)
+    {
+        EmitNestedDataSourceInitializationRecursive(writer, typeSymbol, instanceName, 0);
+    }
+    
+    private static void EmitNestedDataSourceInitializationRecursive(CodeWriter writer, INamedTypeSymbol typeSymbol, string instanceName, int depth)
+    {
+        var dataSourceProperties = typeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(p => p.DeclaredAccessibility == Accessibility.Public && p.SetMethod != null
+                && p.GetAttributes().Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)))
+            .ToList();
+            
+        if (!dataSourceProperties.Any())
+        {
+            return;
+        }
+        
+        writer.AppendLine();
+        writer.AppendLine("// Initialize nested data source properties");
+        
+        var propertyIndex = 0;
+        foreach (var property in dataSourceProperties)
+        {
+            var dataSourceAttr = property.GetAttributes()
+                .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
+                
+            if (dataSourceAttr?.AttributeClass == null)
+            {
+                continue;
+            }
+            
+            var propertyName = property.Name;
+            var varName = $"nested_{depth}_{propertyIndex}_{propertyName}";
+            propertyIndex++;
+            
+            // Check if it inherits from AsyncDataSourceGeneratorAttribute or AsyncUntypedDataSourceGeneratorAttribute
+            if (dataSourceAttr.AttributeClass.AllInterfaces.Any(i => 
+                i.GloballyQualified() == "global::TUnit.Core.IAsyncDataSourceGeneratorAttribute" ||
+                i.GloballyQualified() == "global::TUnit.Core.IAsyncUntypedDataSourceGeneratorAttribute"))
+            {
+                // Create nested generator
+                var nestedGeneratorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(dataSourceAttr);
+                writer.AppendLine($"var {varName} = {nestedGeneratorCode};");
+                
+                // Recursively initialize its properties
+                EmitNestedDataSourceInitializationRecursive(writer, dataSourceAttr.AttributeClass, varName, depth + 1);
+                
+                // Initialize if it implements IAsyncInitializer
+                writer.AppendLine($"await global::TUnit.Core.ObjectInitializer.InitializeAsync({varName});");
+                
+                // Set the property (using reflection for init-only properties)
+                writer.AppendLine($"typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).GetProperty(\"{propertyName}\")!.SetValue({instanceName}, {varName});");
+            }
+            else
+            {
+                // For other data source types, generate and retrieve the first value
+                writer.AppendLine($"// Initialize property {propertyName} from data source");
+                writer.AppendLine("{");
+                writer.Indent();
+                
+                var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(dataSourceAttr);
+                writer.AppendLine($"var dataSourceGenerator = {generatorCode};");
+                
+                // Create metadata for the generator
+                writer.AppendLine("var metadata = new global::TUnit.Core.DataGeneratorMetadata");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("Type = global::TUnit.Core.DataGeneratorType.Properties,");
+                writer.AppendLine("TestBuilderContext = new global::TUnit.Core.TestBuilderContextAccessor(new global::TUnit.Core.TestBuilderContext()),");
+                writer.AppendLine("MembersToGenerate = new global::TUnit.Core.MemberMetadata[0],");
+                writer.AppendLine("TestInformation = null,");
+                writer.AppendLine("TestSessionId = testSessionId,");
+                writer.AppendLine("TestClassInstance = null,");
+                writer.AppendLine("ClassInstanceArguments = null");
+                writer.Unindent();
+                writer.AppendLine("};");
+                
+                // Check if it's IAsyncDataSourceGeneratorAttribute or IAsyncUntypedDataSourceGeneratorAttribute
+                writer.AppendLine("if (dataSourceGenerator is global::TUnit.Core.IAsyncDataSourceGeneratorAttribute asyncGenerator)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("await foreach (var dataSourceFunc in asyncGenerator.GenerateAsync(metadata))");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("var data = await dataSourceFunc();");
+                writer.AppendLine("if (data?.Length > 0)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("var instance = data[0];");
+                writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
+                writer.AppendLine($"typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).GetProperty(\"{propertyName}\")!.SetValue({instanceName}, ({property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})instance);");
+                writer.AppendLine("break;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else if (dataSourceGenerator is global::TUnit.Core.IAsyncUntypedDataSourceGeneratorAttribute untypedGenerator)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("await foreach (var dataSourceFunc in untypedGenerator.GenerateAsync(metadata))");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("var data = await dataSourceFunc();");
+                writer.AppendLine("if (data?.Length > 0)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("var instance = data[0];");
+                writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
+                writer.AppendLine($"typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).GetProperty(\"{propertyName}\")!.SetValue({instanceName}, ({property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})instance);");
+                writer.AppendLine("break;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.Unindent();
+                writer.AppendLine("}");
+                
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
+        }
+        
+        // Finally, initialize the instance itself if it implements IAsyncInitializer
+        writer.AppendLine($"await global::TUnit.Core.ObjectInitializer.InitializeAsync({instanceName});");
+        writer.AppendLine();
     }
 }
