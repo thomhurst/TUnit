@@ -1,6 +1,7 @@
 using TUnit.Core;
+using TUnit.Engine.Interfaces;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// AOT-safe implementation of hook invoker - no longer needed with direct context passing

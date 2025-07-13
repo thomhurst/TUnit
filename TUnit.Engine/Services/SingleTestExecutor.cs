@@ -4,10 +4,10 @@ using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Engine.Extensions;
+using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
-using TUnit.Engine.Services;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// Test executor that properly handles ExecutionContext restoration for AsyncLocal support

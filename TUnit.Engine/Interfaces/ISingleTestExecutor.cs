@@ -3,7 +3,7 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Interfaces;
 
 /// <summary>
 /// Interface for executing a single test

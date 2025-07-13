@@ -1,4 +1,6 @@
-namespace TUnit.Engine;
+using TUnit.Engine.Interfaces;
+
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// AOT-safe implementation of test invoker using strongly-typed delegates

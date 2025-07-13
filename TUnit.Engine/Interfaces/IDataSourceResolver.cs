@@ -1,6 +1,6 @@
 using TUnit.Core;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Interfaces;
 
 /// <summary>
 /// Interface for resolving data sources

@@ -1,6 +1,6 @@
 using TUnit.Core;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Interfaces;
 
 /// <summary>
 /// Interface for invoking hook methods without reflection - deprecated

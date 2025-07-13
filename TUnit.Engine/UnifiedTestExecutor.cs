@@ -14,6 +14,7 @@ using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
+using ITestExecutor = TUnit.Engine.Interfaces.ITestExecutor;
 
 namespace TUnit.Engine;
 

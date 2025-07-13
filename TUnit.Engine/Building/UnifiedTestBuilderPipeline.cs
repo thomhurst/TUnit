@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Interfaces;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building;

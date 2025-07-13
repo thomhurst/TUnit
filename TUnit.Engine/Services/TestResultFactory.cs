@@ -1,6 +1,6 @@
 ﻿using TUnit.Core;
 
-namespace TUnit.Engine;
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// Default test result factory implementation

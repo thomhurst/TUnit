@@ -1,4 +1,4 @@
-namespace TUnit.Engine;
+namespace TUnit.Engine.Interfaces;
 
 /// <summary>
 /// Interface for invoking test methods without reflection
