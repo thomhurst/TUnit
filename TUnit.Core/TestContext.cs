@@ -166,7 +166,7 @@ public class TestContext : Context
     /// <summary>
     /// Gets the service provider for dependency injection
     /// </summary>
-    public IServiceProvider ServiceProvider
+    internal IServiceProvider ServiceProvider
     {
         get;
     }
@@ -375,7 +375,7 @@ public class TestContext : Context
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
     {
         var testFinder = ServiceProvider.GetService<ITestFinder>()!;
-        
+
         // Get all tests from the current class and filter using the predicate
         var classType = TestDetails?.ClassType;
         if (classType == null)
@@ -399,17 +399,17 @@ public class TestContext : Context
         {
             return new List<TestContext>();
         }
-        
+
         // Call GetTestsByNameAndParameters with empty parameter lists to get all tests with this name
         return testFinder.GetTestsByNameAndParameters(
-            testName, 
+            testName,
             Enumerable.Empty<Type>(),
-            classType, 
-            Enumerable.Empty<Type>(), 
+            classType,
+            Enumerable.Empty<Type>(),
             Enumerable.Empty<object?>()
         ).ToList();
     }
-    
+
     /// <summary>
     /// Gets tests by name from a specific test class
     /// </summary>
@@ -419,10 +419,10 @@ public class TestContext : Context
 
         // Call GetTestsByNameAndParameters with empty parameter lists to get all tests with this name
         return testFinder.GetTestsByNameAndParameters(
-            testName, 
+            testName,
             Enumerable.Empty<Type>(),
-            classType, 
-            Enumerable.Empty<Type>(), 
+            classType,
+            Enumerable.Empty<Type>(),
             Enumerable.Empty<object?>()
         ).ToList();
     }
