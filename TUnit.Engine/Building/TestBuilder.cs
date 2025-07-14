@@ -81,6 +81,10 @@ public sealed class TestBuilder : ITestBuilder
 
         var context = await CreateTestContextAsync(testId, displayName, metadata);
         
+        // Set the arguments on TestDetails before invoking discovery event receivers
+        context.TestDetails.TestMethodArguments = methodArguments;
+        context.TestDetails.TestClassArguments = classArguments;
+        
         // Transfer property values to TestDetails
         foreach (var kvp in propertyValues)
         {
@@ -166,7 +170,7 @@ public sealed class TestBuilder : ITestBuilder
             TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task),
             ClassMetadata = MetadataBuilder.CreateClassMetadata(metadata),
-            MethodMetadata = MetadataBuilder.CreateMethodMetadata(metadata),
+            MethodMetadata = metadata.MethodMetadata,
             Attributes =  metadata.AttributeFactory.Invoke()
         };
 
@@ -277,7 +281,7 @@ public sealed class TestBuilder : ITestBuilder
             TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task),
             ClassMetadata = MetadataBuilder.CreateClassMetadata(metadata),
-            MethodMetadata = MetadataBuilder.CreateMethodMetadata(metadata),
+            MethodMetadata = metadata.MethodMetadata,
             Attributes = [],
         };
     }
