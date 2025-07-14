@@ -70,21 +70,17 @@ public sealed class TestBuilder : ITestBuilder
         {
             propertyValues[kvp.Key] = await kvp.Value();
         }
-        
+
         // Track all objects from data sources
         TrackDataSourceObjects(classArguments, methodArguments, propertyValues);
-        
+
         // Generate unique test ID
         var testId = TestIdentifierService.GenerateTestId(metadata, combination);
 
         var displayName = GenerateDisplayName(metadata, await GetArgumentsDisplayTextAsync(combination));
 
-        var context = await CreateTestContextAsync(testId, displayName, metadata);
-        
-        // Set the arguments on TestDetails before invoking discovery event receivers
-        context.TestDetails.TestMethodArguments = methodArguments;
-        context.TestDetails.TestClassArguments = classArguments;
-        
+        var context = await CreateTestContextAsync(testId, displayName, metadata, methodArguments, classArguments);
+
         // Transfer property values to TestDetails
         foreach (var kvp in propertyValues)
         {
@@ -153,7 +149,7 @@ public sealed class TestBuilder : ITestBuilder
         return displayName;
     }
 
-    private async Task<TestContext> CreateTestContextAsync(string testId, string displayName, TestMetadata metadata)
+    private async Task<TestContext> CreateTestContextAsync(string testId, string displayName, TestMetadata metadata, object?[]? methodArguments = null, object?[]? classArguments = null)
     {
         var testDetails = new TestDetails
         {
@@ -162,9 +158,8 @@ public sealed class TestBuilder : ITestBuilder
             ClassType = metadata.TestClassType,
             MethodName = metadata.TestMethodName,
             ClassInstance = null,
-            TestMethodArguments = [],
-            TestClassArguments = [],
-            DisplayName = displayName,
+            TestMethodArguments = methodArguments ?? [],
+            TestClassArguments = classArguments ?? [],
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
             TestMethodParameterTypes = metadata.ParameterTypes,
@@ -181,7 +176,6 @@ public sealed class TestBuilder : ITestBuilder
 
         var context = new TestContext(
             metadata.TestName,
-            displayName,
             CancellationToken.None,
             _serviceProvider ?? new TUnit.Core.Services.TestServiceProvider())
         {
@@ -196,8 +190,7 @@ public sealed class TestBuilder : ITestBuilder
     {
         var discoveredContext = new DiscoveredTestContext(
             context.TestDetails.TestName,
-            context.TestDetails.DisplayName ?? context.TestDetails.TestName,
-            context.TestDetails);
+            context);
 
         // Try to get EventReceiverOrchestrator from service provider
         var eventReceiverOrchestrator = _serviceProvider?.GetService(typeof(OptimizedEventReceiverOrchestrator)) as OptimizedEventReceiverOrchestrator;
@@ -226,11 +219,6 @@ public sealed class TestBuilder : ITestBuilder
         }
 
         discoveredContext.TransferTo(context);
-
-        if (context.TestDetails.DisplayName != discoveredContext.DisplayName)
-        {
-            context.TestDetails.DisplayName = discoveredContext.DisplayName;
-        }
     }
 
     private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
@@ -242,7 +230,7 @@ public sealed class TestBuilder : ITestBuilder
     {
         return CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination(), customDisplayName);
     }
-    
+
     private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination, string? customDisplayName)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
@@ -275,7 +263,6 @@ public sealed class TestBuilder : ITestBuilder
             ClassInstance = null,
             TestMethodArguments = [],
             TestClassArguments = [],
-            DisplayName = displayName,
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
             TestMethodParameterTypes = metadata.ParameterTypes,
@@ -290,14 +277,13 @@ public sealed class TestBuilder : ITestBuilder
     {
         return new TestContext(
             metadata.TestName,
-            displayName,
             CancellationToken.None,
             new TUnit.Core.Services.TestServiceProvider())
         {
             TestDetails = testDetails
         };
     }
-    
+
     private static void TrackDataSourceObjects(object?[] classArguments, object?[] methodArguments, Dictionary<string, object?> propertyValues)
     {
         ActiveObjectTracker.IncrementUsage(classArguments);
@@ -315,20 +301,20 @@ public sealed class TestBuilder : ITestBuilder
 
         var arguments = new object?[factories.Count];
         var tasks = new Task<object?>[factories.Count];
-        
+
         // Start all tasks
         for (int i = 0; i < factories.Count; i++)
         {
             tasks[i] = factories[i]();
         }
-        
+
         // Wait for all and collect results - safe to use Result after WhenAll
         var results = await Task.WhenAll(tasks);
         for (int i = 0; i < results.Length; i++)
         {
             arguments[i] = results[i];
         }
-        
+
         return arguments;
     }
 }

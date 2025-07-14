@@ -59,7 +59,7 @@ public sealed class UnifiedTestBuilderPipeline
 
         return executableTests;
     }
-    
+
     /// <summary>
     /// Builds executable tests as a stream through the pipeline
     /// </summary>
@@ -72,7 +72,7 @@ public sealed class UnifiedTestBuilderPipeline
         {
             // Resolve generic types for this metadata
             var resolvedMetadataList = await _genericResolver.ResolveGenericsAsync(new[] { metadata });
-            
+
             foreach (var resolvedMetadata in resolvedMetadataList)
             {
                 // Build executable tests
@@ -85,7 +85,7 @@ public sealed class UnifiedTestBuilderPipeline
                 {
                     testsFromMetadata = new[] { CreateFailedTestForDataGenerationError(resolvedMetadata, ex) };
                 }
-                
+
                 foreach (var test in testsFromMetadata)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -94,7 +94,7 @@ public sealed class UnifiedTestBuilderPipeline
             }
         }
     }
-    
+
     private async IAsyncEnumerable<TestMetadata> CollectTestsStreamAsync(
         string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken)
@@ -134,7 +134,6 @@ public sealed class UnifiedTestBuilderPipeline
             ClassInstance = null,
             TestMethodArguments = [],
             TestClassArguments = [],
-            DisplayName = displayName,
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
             TestMethodParameterTypes = metadata.ParameterTypes,
@@ -146,7 +145,6 @@ public sealed class UnifiedTestBuilderPipeline
 
         var context = new TestContext(
             metadata.TestName,
-            displayName,
             CancellationToken.None,
             new TUnit.Core.Services.TestServiceProvider())
         {
