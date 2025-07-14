@@ -168,6 +168,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             try
             {
                 await hook(context, cancellationToken);
+                context.RestoreExecutionContext();
             }
             catch (Exception ex)
             {
@@ -184,6 +185,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             try
             {
                 await hook(context, cancellationToken);
+                context.RestoreExecutionContext();
             }
             catch (Exception ex)
             {
