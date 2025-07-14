@@ -100,7 +100,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             GenerateFileHeader(writer);
             GenerateSimplifiedTestMetadata(writer, compilation, testMethod);
 
-            var fileName = $"Simplified_{testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_{Guid.NewGuid():N}.g.cs";
+            var fileName = $"{testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_{Guid.NewGuid():N}.g.cs";
             context.AddSource(fileName, SourceText.From(writer.ToString(), Encoding.UTF8));
         }
         catch (Exception ex)
@@ -998,7 +998,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         foreach (var property in initOnlyPropertiesWithDataSources)
         {
             var backingFieldName = $"<{property.Name}>k__BackingField";
-            
+
             writer.AppendLine($"/// <summary>");
             writer.AppendLine($"/// Cached FieldInfo for init-only property {property.Name} backing field");
             writer.AppendLine($"/// </summary>");

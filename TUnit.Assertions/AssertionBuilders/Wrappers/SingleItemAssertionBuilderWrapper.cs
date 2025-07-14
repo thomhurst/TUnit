@@ -8,16 +8,16 @@ public class SingleItemAssertionBuilderWrapper<TActual, TInner> : InvokableValue
     {
     }
 
-    public new TaskAwaiter<TInner?> GetAwaiter()
+    public new TaskAwaiter<TInner> GetAwaiter()
     {
         var task = ProcessAssertionsAsync(d =>
         {
             if (d.Result is IEnumerable<TInner> enumerable)
             {
-                return Task.FromResult(enumerable.SingleOrDefault());
+                return Task.FromResult(enumerable.SingleOrDefault()!);
             }
 
-            return Task.FromResult<TInner?>(default(TInner?));
+            return Task.FromResult<TInner>(default(TInner)!);
         });
 
         return task.GetAwaiter();
