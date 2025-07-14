@@ -16,9 +16,39 @@ public static class DataSourceHelpers
     /// </summary>
     public static object? InvokeIfFunc(object? value)
     {
-        // This method is now mostly deprecated as Func invocation
-        // is handled by the source generator at compile time
-        return value;
+        if (value == null) return null;
+
+        // For AOT compatibility, we manually check for common Func<T> patterns
+        // This is not ideal but necessary until we find a better solution
+        
+        switch (value)
+        {
+            // Common primitive types
+            case Func<string> f: return f();
+            case Func<int> f: return f();
+            case Func<long> f: return f();
+            case Func<double> f: return f();
+            case Func<float> f: return f();
+            case Func<bool> f: return f();
+            case Func<decimal> f: return f();
+            case Func<DateTime> f: return f();
+            case Func<Guid> f: return f();
+            case Func<object> f: return f();
+            
+            // Common tuple types
+            case Func<(int, string, bool)> f: return f();
+            case Func<(object?, object?)> f: return f();
+            case Func<(object?, object?, object?)> f: return f();
+            
+            // Arrays
+            case Func<string[]> f: return f();
+            case Func<int[]> f: return f();
+            case Func<object[]> f: return f();
+            
+            default:
+                // For non-Func types, return as-is
+                return value;
+        }
     }
 
     /// <summary>
@@ -225,18 +255,18 @@ public static class DataSourceHelpers
             return new[] { () => Task.FromResult<object?>(null) };
         }
 
-        // Note: Func invocation is now handled by the source generator at compile time
-        // for better AOT compatibility
+        // If it's a Func<TResult>, invoke it first
+        var actualData = InvokeIfFunc(data);
 
         // Always unwrap tuples - they explicitly represent multiple values
-        if (IsTuple(data))
+        if (IsTuple(actualData))
         {
-            var unwrapped = UnwrapTupleAot(data);
+            var unwrapped = UnwrapTupleAot(actualData);
             return unwrapped.Select(v => new Func<Task<object?>>(() => Task.FromResult(v))).ToArray();
         }
         
         // For arrays, decide based on expected parameter count
-        if (data is object?[] array && expectedParameterCount > 0)
+        if (actualData is object?[] array && expectedParameterCount > 0)
         {
             // If expecting multiple parameters and array length matches, unwrap it
             if (expectedParameterCount > 1 && array.Length == expectedParameterCount)
@@ -248,7 +278,7 @@ public static class DataSourceHelpers
         }
         
         // Default: return as single value
-        return new[] { () => Task.FromResult<object?>(data) };
+        return new[] { () => Task.FromResult<object?>(actualData) };
     }
 
     /// <summary>

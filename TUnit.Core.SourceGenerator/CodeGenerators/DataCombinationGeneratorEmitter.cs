@@ -456,15 +456,8 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("{");
             writer.Indent();
             
-            // Check if each enumerated item is a Func and needs invocation
+            // Don't invoke Func here - let ProcessTestDataSource handle it
             writer.AppendLine("var processedData = data;");
-            if (dataSourceMethod.ReturnType is INamedTypeSymbol enumerableType && 
-                enumerableType.TypeArguments.Length > 0 && 
-                IsFuncType(enumerableType.TypeArguments[0]))
-            {
-                writer.AppendLine("// Enumerable contains Func<T> items, invoke to get actual value");
-                writer.AppendLine("processedData = data();");
-            }
 
             writer.AppendLine($"{listName}.Add(new TestDataCombination");
             writer.AppendLine("{");
@@ -511,13 +504,7 @@ public static class DataCombinationGeneratorEmitter
             // Method returns single value
             writer.AppendLine($"var dataValue = {methodCall};");
             
-            // Check if the return type is Func<T> and generate invocation code
-            if (IsFuncType(dataSourceMethod.ReturnType))
-            {
-                writer.AppendLine("// Data source returns a Func<T>, invoke it to get the actual value");
-                writer.AppendLine("var actualValue = dataValue();");
-                writer.AppendLine("dataValue = actualValue;");
-            }
+            // Don't invoke Func here - let ProcessTestDataSource handle it
             
             writer.AppendLine($"{listName}.Add(new TestDataCombination");
             writer.AppendLine("{");
