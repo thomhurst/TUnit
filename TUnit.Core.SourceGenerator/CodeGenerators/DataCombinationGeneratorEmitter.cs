@@ -515,7 +515,8 @@ public static class DataCombinationGeneratorEmitter
             if (IsFuncType(dataSourceMethod.ReturnType))
             {
                 writer.AppendLine("// Data source returns a Func<T>, invoke it to get the actual value");
-                writer.AppendLine("dataValue = dataValue();");
+                writer.AppendLine("var actualValue = dataValue();");
+                writer.AppendLine("dataValue = actualValue;");
             }
             
             writer.AppendLine($"{listName}.Add(new TestDataCombination");

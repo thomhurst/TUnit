@@ -16,16 +16,8 @@ public static class DataSourceHelpers
     /// </summary>
     public static object? InvokeIfFunc(object? value)
     {
-        if (value == null) return null;
-
-        // Only handle the most basic case - Func<object>
-        // All other Func types should be invoked by the source generator
-        if (value is Func<object> func)
-        {
-            return func();
-        }
-
-        // For non-Func types, return as-is
+        // This method is now mostly deprecated as Func invocation
+        // is handled by the source generator at compile time
         return value;
     }
 
