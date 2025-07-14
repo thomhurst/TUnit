@@ -12,10 +12,10 @@ namespace TUnit.Core;
 /// </summary>
 public class TestContext : Context
 {
-    public TestContext(string testName, string displayName, CancellationToken cancellationToken, IServiceProvider serviceProvider) : base(null)
+    public TestContext(string testName, string customDisplayName, CancellationToken cancellationToken, IServiceProvider serviceProvider) : base(null)
     {
         TestName = testName;
-        DisplayName = displayName;
+        CustomDisplayName = customDisplayName;
         CancellationToken = cancellationToken;
         ServiceProvider = serviceProvider;
     }
@@ -83,7 +83,7 @@ public class TestContext : Context
     /// <summary>
     /// Display name including parameters
     /// </summary>
-    public string DisplayName { get; }
+    internal string? CustomDisplayName { get; set; }
 
 
     /// <summary>
@@ -171,7 +171,7 @@ public class TestContext : Context
         get;
     }
 
-    public TestContext(string testName, string displayName) : this(testName, displayName, CancellationToken.None, new TestServiceProvider())
+    public TestContext(string testName, string customDisplayName) : this(testName, customDisplayName, CancellationToken.None, new TestServiceProvider())
     {
     }
 
@@ -250,9 +250,17 @@ public class TestContext : Context
     /// <summary>
     /// Gets the test display name
     /// </summary>
-    public string GetTestDisplayName()
+    public string GetDisplayName()
     {
-        return DisplayName;
+        if(!string.IsNullOrEmpty(CustomDisplayName))
+        {
+            return CustomDisplayName!;
+        }
+
+        var arguments = string.Join(", ", TestDetails.TestMethodArguments
+            .Select(arg => ArgumentDisplayFormatters.FirstOrDefault(arg) ?? arg?.ToString() ?? "null"));
+
+        return $"{TestName}({arguments})";
     }
 
     /// <summary>
@@ -398,20 +406,25 @@ public class TestContext : Context
         var testFinder = ServiceProvider.GetService<ITestFinder>()!;
 
         // Use the current test's class type by default
-        var classType = TestDetails?.ClassType;
-        if (classType == null)
-        {
-            return new List<TestContext>();
-        }
+        var classType = TestDetails.ClassType;
 
         // Call GetTestsByNameAndParameters with empty parameter lists to get all tests with this name
-        return testFinder.GetTestsByNameAndParameters(
+        var tests = testFinder.GetTestsByNameAndParameters(
             testName,
             Enumerable.Empty<Type>(),
             classType,
             Enumerable.Empty<Type>(),
             Enumerable.Empty<object?>()
         ).ToList();
+
+        if (tests.Any(x => x.Result == null))
+        {
+            throw new InvalidOperationException(
+                "Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?"
+            );
+        }
+
+        return tests;
     }
 
     /// <summary>

@@ -94,7 +94,7 @@ public class DiscoveredTestContext
     {
         RunOnTestDiscovery = runOnDiscovery;
     }
-    
+
     public void SetPriority(Priority priority)
     {
         _priority = priority;
@@ -116,6 +116,7 @@ public class DiscoveredTestContext
         testContext.ParallelConstraint = _parallelConstraint;
         testContext.ExecutionPriority = _priority;
         testContext.RunOnTestDiscovery = RunOnTestDiscovery;
+        testContext.CustomDisplayName = DisplayName;
 
         foreach (var formatter in _argumentDisplayFormatters)
         {
