@@ -30,23 +30,36 @@ internal sealed class TestRequestHandler : IRequestHandler
         TUnitServiceProvider serviceProvider,
         ExecuteRequestContext context)
     {
-        try
+        var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, GetFilter(context), context.CancellationToken);
+
+#if NET
+        if (discoveryResult.ExecutionContext != null)
         {
-            await serviceProvider.HookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(context.CancellationToken);
-
-            var allTests = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value);
-
-            foreach (var test in allTests)
-            {
-                context.CancellationToken.ThrowIfCancellationRequested();
-
-                await serviceProvider.MessageBus.Discovered(test.Context);
-            }
+            ExecutionContext.Restore(discoveryResult.ExecutionContext);
         }
-        finally
+#endif
+
+        foreach (var test in discoveryResult.Tests)
         {
-            await serviceProvider.HookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(context.CancellationToken);
+            context.CancellationToken.ThrowIfCancellationRequested();
+
+            await serviceProvider.MessageBus.Discovered(test.Context);
         }
+    }
+
+    private ITestExecutionFilter? GetFilter(ExecuteRequestContext context)
+    {
+        if (context.Request is RunTestExecutionRequest runRequest)
+        {
+            return runRequest.Filter;
+        }
+
+        if (context.Request is DiscoverTestExecutionRequest discoverTestExecutionRequest)
+        {
+            return discoverTestExecutionRequest.Filter;
+        }
+
+        return null;
     }
 
     private async Task HandleRunRequestAsync(
@@ -54,12 +67,19 @@ internal sealed class TestRequestHandler : IRequestHandler
         RunTestExecutionRequest request,
         ExecuteRequestContext context)
     {
-        var allTests = (await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value)).ToArray();
+        var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, GetFilter(context), context.CancellationToken);
 
-        var filteredTests = serviceProvider.TestFilterService.FilterTests(request, allTests);
+#if NET
+        if (discoveryResult.ExecutionContext != null)
+        {
+            ExecutionContext.Restore(discoveryResult.ExecutionContext);
+        }
+#endif
+
+        var allTests = discoveryResult.Tests.ToArray();
 
         // Report only the tests that will actually run
-        foreach (var test in filteredTests)
+        foreach (var test in allTests)
         {
             context.CancellationToken.ThrowIfCancellationRequested();
             await serviceProvider.MessageBus.Discovered(test.Context);

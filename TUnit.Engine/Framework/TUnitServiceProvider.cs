@@ -48,17 +48,17 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create core services
         VerbosityService = Register(new VerbosityService(CommandLineOptions));
-        
+
         // Initialize DiscoveryDiagnostics with VerbosityService
         DiscoveryDiagnostics.Initialize(VerbosityService);
-        
+
         Logger = Register(new TUnitFrameworkLogger(
             extension,
             outputDevice,
             loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
             VerbosityService));
 
-        TestFilterService = Register(new TestFilterService(loggerFactory));
+        TestFilterService = Register(new TestFilterService(Logger));
 
         MessageBus = Register(new TUnitMessageBus(
             extension,
@@ -82,8 +82,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             UnifiedTestBuilderPipelineFactory.CreatePipeline(
                 executionMode, this, assembliesToScan: null));
 
-        DiscoveryService = Register(new TestDiscoveryService(TestBuilderPipeline));
-        
+        DiscoveryService = Register(new TestDiscoveryService(HookOrchestrator, TestBuilderPipeline, TestFilterService));
+
         // Create test finder service after discovery service so it can use its cache
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
 
@@ -103,19 +103,19 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var sessionUid = context.Request.Session.SessionUid;
         singleTestExecutor.SetSessionId(sessionUid);
         TestExecutor.SetSessionId(sessionUid);
-        
+
         // Initialize console interceptors
         InitializeConsoleInterceptors();
     }
-    
+
     private void InitializeConsoleInterceptors()
     {
         var outInterceptor = new StandardOutConsoleInterceptor(VerbosityService);
         var errorInterceptor = new StandardErrorConsoleInterceptor(VerbosityService);
-        
+
         outInterceptor.Initialize();
         errorInterceptor.Initialize();
-        
+
         Register(outInterceptor);
         Register(errorInterceptor);
     }

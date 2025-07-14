@@ -1,28 +1,26 @@
 ﻿#pragma warning disable TPEXP
 
 using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
+using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Services;
 
-internal class TestFilterService(ILoggerFactory loggerFactory)
+internal class TestFilterService(TUnitFrameworkLogger logger)
 {
-    private readonly ILogger<TestFilterService> _logger = loggerFactory.CreateLogger<TestFilterService>();
-
-    public IReadOnlyCollection<ExecutableTest> FilterTests(TestExecutionRequest? testExecutionRequest, IReadOnlyCollection<ExecutableTest> testNodes)
+    public IReadOnlyCollection<ExecutableTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IReadOnlyCollection<ExecutableTest> testNodes)
     {
-        var testExecutionFilter = testExecutionRequest?.Filter;
-
         if (testExecutionFilter is null or NopFilter)
         {
-            _logger.LogTrace("No test filter found.");
+            logger.LogTrace("No test filter found.");
 
             return testNodes;
         }
 
-        _logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
+        logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
 
         // Create pre-sized list if we can estimate the size
         var filteredTests = new List<ExecutableTest>();
@@ -35,6 +33,88 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
         }
 
         return filteredTests;
+    }
+
+    private async Task<List<ExecutableTest>> ApplyFilterAsync(List<ExecutableTest> tests, ITestExecutionFilter filter)
+    {
+        // Debug: Applying filter to {tests.Count} tests of type {filter.GetType().Name}
+
+        var filteredTests = new List<ExecutableTest>();
+        foreach (var test in tests)
+        {
+            if (MatchesTest(filter, test))
+            {
+                filteredTests.Add(test);
+            }
+        }
+
+        // Debug: Filter matched {filteredTests.Count} tests
+
+        var testsToInclude = new HashSet<ExecutableTest>(filteredTests);
+        var processedTests = new HashSet<string>();
+        var queue = new Queue<ExecutableTest>(filteredTests);
+
+        while (queue.Count > 0)
+        {
+            var currentTest = queue.Dequeue();
+            if (!processedTests.Add(currentTest.TestId))
+            {
+                continue;
+            }
+
+            foreach (var dependency in currentTest.Dependencies)
+            {
+                if (testsToInclude.Add(dependency))
+                {
+                    queue.Enqueue(dependency);
+                }
+            }
+        }
+
+        await logger.LogAsync(Core.Logging.LogLevel.Debug,
+            $"After including dependencies: {testsToInclude.Count} tests will be executed",
+            null,
+            (state, _) => state);
+
+        var resultList = testsToInclude.ToList();
+        foreach (var test in resultList)
+        {
+            await InvokeTestRegisteredEventReceiversAsync(test);
+        }
+
+        return resultList;
+    }
+
+    private async Task InvokeTestRegisteredEventReceiversAsync(ExecutableTest test)
+    {
+        var discoveredTest = new DiscoveredTest<object>
+        {
+            TestContext = test.Context
+        };
+
+        var registeredContext = new TestRegisteredContext(test.Context)
+        {
+            DiscoveredTest = discoveredTest
+        };
+
+        test.Context.InternalDiscoveredTest = discoveredTest;
+
+        var attributes = test.Context.TestDetails.Attributes;
+
+        foreach (var attribute in attributes)
+        {
+            if (attribute is ITestRegisteredEventReceiver receiver)
+            {
+                try
+                {
+                    await receiver.OnTestRegistered(registeredContext);
+                }
+                catch (Exception ex)
+                {
+                    await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
+                }
+            }
+        }
     }
 
     public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, ExecutableTest executableTest)
@@ -76,10 +156,10 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
             }
             var path = BuildPath(executableTest);
             var propertyBag = BuildPropertyBag(executableTest);
-            _logger.LogDebug($"Checking TreeNodeFilter for path: {path}");
+            logger.LogDebug($"Checking TreeNodeFilter for path: {path}");
 
             var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
-            _logger.LogDebug($"Filter match result: {matches}");
+            logger.LogDebug($"Filter match result: {matches}");
 
             return matches;
         }
@@ -92,7 +172,7 @@ internal class TestFilterService(ILoggerFactory loggerFactory)
 
     private bool UnhandledFilter(ITestExecutionFilter testExecutionFilter)
     {
-        _logger.LogWarning($"Filter is Unhandled Type: {testExecutionFilter.GetType().FullName}");
+        logger.LogWarning($"Filter is Unhandled Type: {testExecutionFilter.GetType().FullName}");
         return true;
     }
 

@@ -2,8 +2,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
-using TUnit.Core.Enums;
 using TUnit.Engine.Building;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Services;
@@ -11,12 +11,29 @@ using TUnit.Engine.Services;
 namespace TUnit.Engine;
 
 /// <summary>
+/// Result of test discovery including tests and execution context
+/// </summary>
+internal sealed class TestDiscoveryResult
+{
+    public IEnumerable<ExecutableTest> Tests { get; }
+    public ExecutionContext? ExecutionContext { get; }
+
+    public TestDiscoveryResult(IEnumerable<ExecutableTest> tests, ExecutionContext? executionContext)
+    {
+        Tests = tests;
+        ExecutionContext = executionContext;
+    }
+}
+
+/// <summary>
 /// Unified test discovery service that uses the new pipeline architecture
 /// </summary>
-public sealed class TestDiscoveryService : IDataProducer, IStreamingTestDiscovery
+internal sealed class TestDiscoveryService : IDataProducer
 {
     private const int DiscoveryTimeoutSeconds = 60;
+    private readonly HookOrchestrator _hookOrchestrator;
     private readonly UnifiedTestBuilderPipeline _testBuilderPipeline;
+    private readonly TestFilterService _testFilterService;
     private readonly ConcurrentBag<ExecutableTest> _cachedTests = new();
     private readonly TestDependencyResolver _dependencyResolver = new();
 
@@ -28,29 +45,52 @@ public sealed class TestDiscoveryService : IDataProducer, IStreamingTestDiscover
 
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
-    public TestDiscoveryService(UnifiedTestBuilderPipeline testBuilderPipeline)
+    public TestDiscoveryService(HookOrchestrator hookOrchestrator, UnifiedTestBuilderPipeline testBuilderPipeline, TestFilterService testFilterService)
     {
+        _hookOrchestrator = hookOrchestrator;
         _testBuilderPipeline = testBuilderPipeline ?? throw new ArgumentNullException(nameof(testBuilderPipeline));
+        _testFilterService = testFilterService;
     }
 
     /// <summary>
     /// Discovers all tests using the unified pipeline
     /// </summary>
-    public async Task<IEnumerable<ExecutableTest>> DiscoverTests(string testSessionId)
+    public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
-        // Use streaming internally but collect results for backward compatibility
+        var beforeDiscoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken);
+#if NET
+        if (beforeDiscoveryContext != null)
+        {
+            ExecutionContext.Restore(beforeDiscoveryContext);
+        }
+#endif
+
         var tests = new List<ExecutableTest>();
-        await foreach (var test in DiscoverTestsStreamAsync(testSessionId))
+
+        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, cancellationToken))
         {
             tests.Add(test);
         }
-        return tests;
+
+        var afterDiscoveryContext = await _hookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken);
+#if NET
+        if (afterDiscoveryContext != null)
+        {
+            ExecutionContext.Restore(afterDiscoveryContext);
+        }
+#endif
+
+        var filteredTests = _testFilterService.FilterTests(filter, tests);
+
+        // Capture the final execution context after discovery
+        var finalContext = ExecutionContext.Capture();
+        return new TestDiscoveryResult(filteredTests, finalContext);
     }
 
     /// <summary>
     /// Discovers tests as a stream, enabling parallel discovery and execution
     /// </summary>
-    public async IAsyncEnumerable<ExecutableTest> DiscoverTestsStreamAsync(
+    private async IAsyncEnumerable<ExecutableTest> DiscoverTestsStreamAsync(
         string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {

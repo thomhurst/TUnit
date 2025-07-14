@@ -105,7 +105,7 @@ internal sealed class HookOrchestrator
         return Task.CompletedTask;
     }
 
-    public async Task ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
+    public async Task<ExecutionContext?> ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeTestSessionHooksAsync();
         EnsureContextHierarchy();
@@ -124,9 +124,15 @@ internal sealed class HookOrchestrator
                 throw; // Before hooks should prevent execution on failure
             }
         }
+
+#if NET
+        return ExecutionContext.Capture();
+#else
+        return null;
+#endif
     }
 
-    public async Task ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
+    public async Task<ExecutionContext?> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterTestSessionHooksAsync();
         EnsureContextHierarchy();
@@ -145,9 +151,15 @@ internal sealed class HookOrchestrator
                 // After hooks failures are logged but don't stop execution
             }
         }
+
+#if NET
+        return ExecutionContext.Capture();
+#else
+        return null;
+#endif
     }
 
-    public async Task ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    public async Task<ExecutionContext?> ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeTestDiscoveryHooksAsync();
         var context = new BeforeTestDiscoveryContext()
@@ -168,9 +180,15 @@ internal sealed class HookOrchestrator
                 throw;
             }
         }
+
+#if NET
+        return ExecutionContext.Capture();
+#else
+        return null;
+#endif
     }
 
-    public async Task ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    public async Task<ExecutionContext?> ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterTestDiscoveryHooksAsync();
         // Need a parent context - we'll need to pass this in
@@ -192,6 +210,12 @@ internal sealed class HookOrchestrator
                 await _logger.LogErrorAsync($"AfterTestDiscovery hook failed: {ex.Message}");
             }
         }
+
+#if NET
+        return ExecutionContext.Capture();
+#else
+        return null;
+#endif
     }
 
     public async Task OnTestStartingAsync(ExecutableTest test, CancellationToken cancellationToken)
@@ -203,16 +227,30 @@ internal sealed class HookOrchestrator
         _assemblyTestCounts.AddOrUpdate(assemblyName, 1, (_, count) => count + 1);
         _classTestCounts.AddOrUpdate(testClassType, 1, (_, count) => count + 1);
 
+        ExecutionContext? capturedContext = null;
+
         // Execute BeforeAssembly hooks if first test in assembly
         if (_initializedAssemblies.TryAdd(assemblyName, true))
         {
-            await ExecuteBeforeAssemblyHooksAsync(assemblyName, cancellationToken);
+            capturedContext = await ExecuteBeforeAssemblyHooksAsync(assemblyName, cancellationToken);
+#if NET
+            if (capturedContext != null)
+            {
+                ExecutionContext.Restore(capturedContext);
+            }
+#endif
         }
 
         // Execute BeforeClass hooks if first test in class
         if (_initializedClasses.TryAdd(testClassType, true))
         {
-            await ExecuteBeforeClassHooksAsync(testClassType, cancellationToken);
+            capturedContext = await ExecuteBeforeClassHooksAsync(testClassType, cancellationToken);
+#if NET
+            if (capturedContext != null)
+            {
+                ExecutionContext.Restore(capturedContext);
+            }
+#endif
         }
 
         // Add test to class context if it exists and hasn't been added already
@@ -226,7 +264,13 @@ internal sealed class HookOrchestrator
         }
 
         // Execute BeforeEveryTest hooks
-        await ExecuteBeforeEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
+        capturedContext = await ExecuteBeforeEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
+#if NET
+        if (capturedContext != null)
+        {
+            ExecutionContext.Restore(capturedContext);
+        }
+#endif
     }
 
     public async Task OnTestCompletedAsync(ExecutableTest test, CancellationToken cancellationToken)
@@ -234,8 +278,16 @@ internal sealed class HookOrchestrator
         var testClassType = test.Metadata.TestClassType;
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";
 
+        ExecutionContext? capturedContext = null;
+
         // Execute AfterEveryTest hooks
-        await ExecuteAfterEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
+        capturedContext = await ExecuteAfterEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
+#if NET
+        if (capturedContext != null)
+        {
+            ExecutionContext.Restore(capturedContext);
+        }
+#endif
 
         // Decrement test counts
         var classTestsRemaining = _classTestCounts.AddOrUpdate(testClassType, 0, (_, count) => count - 1);
@@ -244,19 +296,31 @@ internal sealed class HookOrchestrator
         // Execute AfterClass hooks if last test in class
         if (classTestsRemaining == 0)
         {
-            await ExecuteAfterClassHooksAsync(testClassType, cancellationToken);
+            capturedContext = await ExecuteAfterClassHooksAsync(testClassType, cancellationToken);
+#if NET
+            if (capturedContext != null)
+            {
+                ExecutionContext.Restore(capturedContext);
+            }
+#endif
             _classTestCounts.TryRemove(testClassType, out _);
         }
 
         // Execute AfterAssembly hooks if last test in assembly
         if (assemblyTestsRemaining == 0)
         {
-            await ExecuteAfterAssemblyHooksAsync(assemblyName, cancellationToken);
+            capturedContext = await ExecuteAfterAssemblyHooksAsync(assemblyName, cancellationToken);
+#if NET
+            if (capturedContext != null)
+            {
+                ExecutionContext.Restore(capturedContext);
+            }
+#endif
             _assemblyTestCounts.TryRemove(assemblyName, out _);
         }
     }
 
-    private async Task ExecuteBeforeAssemblyHooksAsync(string assemblyName, CancellationToken cancellationToken)
+    private async Task<ExecutionContext?> ExecuteBeforeAssemblyHooksAsync(string assemblyName, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeAssemblyHooksAsync(assemblyName);
 
@@ -291,9 +355,15 @@ internal sealed class HookOrchestrator
                 throw;
             }
         }
+
+#if NET
+        return ExecutionContext.Capture();
+#else
+        return null;
+#endif
     }
 
-    private async Task ExecuteAfterAssemblyHooksAsync(string assemblyName, CancellationToken cancellationToken)
+    private async Task<ExecutionContext?> ExecuteAfterAssemblyHooksAsync(string assemblyName, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterAssemblyHooksAsync(assemblyName);
 
@@ -330,9 +400,15 @@ internal sealed class HookOrchestrator
                 await _logger.LogErrorAsync($"AfterAssembly hook failed for {assemblyName}: {ex.Message}");
             }
         }
+
+#if NET
+        return ExecutionContext.Capture();
+#else
+        return null;
+#endif
     }
 
-    private async Task ExecuteBeforeClassHooksAsync(Type testClassType, CancellationToken cancellationToken)
+    private async Task<ExecutionContext?> ExecuteBeforeClassHooksAsync(Type testClassType, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeClassHooksAsync(testClassType);
 
@@ -390,9 +466,15 @@ internal sealed class HookOrchestrator
                 throw;
             }
         }
+
+#if NET
+        return ExecutionContext.Capture();
+#else
+        return null;
+#endif
     }
 
-    private async Task ExecuteAfterClassHooksAsync(Type testClassType, CancellationToken cancellationToken)
+    private async Task<ExecutionContext?> ExecuteAfterClassHooksAsync(Type testClassType, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClassType);
 
@@ -452,9 +534,15 @@ internal sealed class HookOrchestrator
                 await _logger.LogErrorAsync($"AfterClass hook failed for {testClassType.Name}: {ex.Message}");
             }
         }
+
+#if NET
+        return ExecutionContext.Capture();
+#else
+        return null;
+#endif
     }
 
-    private async Task ExecuteBeforeEveryTestHooksAsync(Type testClassType, TestContext testContext, CancellationToken cancellationToken)
+    private async Task<ExecutionContext?> ExecuteBeforeEveryTestHooksAsync(Type testClassType, TestContext testContext, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeEveryTestHooksAsync(testClassType);
 
@@ -471,9 +559,15 @@ internal sealed class HookOrchestrator
                 throw;
             }
         }
+
+#if NET
+        return ExecutionContext.Capture();
+#else
+        return null;
+#endif
     }
 
-    private async Task ExecuteAfterEveryTestHooksAsync(Type testClassType, TestContext testContext, CancellationToken cancellationToken)
+    private async Task<ExecutionContext?> ExecuteAfterEveryTestHooksAsync(Type testClassType, TestContext testContext, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterEveryTestHooksAsync(testClassType);
 
@@ -489,5 +583,11 @@ internal sealed class HookOrchestrator
                 await _logger.LogErrorAsync($"AfterEveryTest hook failed: {ex.Message}");
             }
         }
+
+#if NET
+        return ExecutionContext.Capture();
+#else
+        return null;
+#endif
     }
 }

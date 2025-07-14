@@ -6,7 +6,6 @@ using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
-using TUnit.Engine.Building;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Interfaces;
@@ -77,13 +76,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
     {
         var testList = tests.ToList();
 
-        // Apply filter if provided
-        if (filter != null)
-        {
-            testList = await ApplyFilterAsync(testList, filter);
-        }
-
-        var hookOrchestrator = CreateHookOrchestrator();
+        var hookOrchestrator = _serviceProvider.HookOrchestrator;
         await InitializeEventReceivers(testList, cancellationToken);
 
         try
@@ -94,13 +87,14 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
         }
         finally
         {
-            await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cancellationToken);
+            var afterSessionContext = await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cancellationToken);
+#if NET
+            if (afterSessionContext != null)
+            {
+                ExecutionContext.Restore(afterSessionContext);
+            }
+#endif
         }
-    }
-
-    private HookOrchestrator CreateHookOrchestrator()
-    {
-        return new HookOrchestrator(_serviceProvider.HookCollectionService, _logger);
     }
 
     private async Task InitializeEventReceivers(List<ExecutableTest> testList, CancellationToken cancellationToken)
@@ -128,7 +122,13 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
         await InitializeStaticPropertiesAsync(cancellationToken);
 
         await hookOrchestrator.InitializeContextsWithTestsAsync(testList, cancellationToken);
-        await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
+        var beforeSessionContext = await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
+#if NET
+        if (beforeSessionContext != null)
+        {
+            ExecutionContext.Restore(beforeSessionContext);
+        }
+#endif
     }
 
     private async Task InitializeStaticPropertiesAsync(CancellationToken cancellationToken)
@@ -199,119 +199,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
         return TestSchedulerFactory.Create(config, _logger, _serviceProvider.CancellationToken);
     }
 
-    private async Task<List<ExecutableTest>> ApplyFilterAsync(List<ExecutableTest> tests, ITestExecutionFilter filter)
-    {
-        // Debug: Applying filter to {tests.Count} tests of type {filter.GetType().Name}
-
-        var filterService = new TestFilterService(_loggerFactory);
-
-        var filteredTests = new List<ExecutableTest>();
-        foreach (var test in tests)
-        {
-            if (filterService.MatchesTest(filter, test))
-            {
-                filteredTests.Add(test);
-            }
-        }
-
-        // Debug: Filter matched {filteredTests.Count} tests
-
-        var testsToInclude = new HashSet<ExecutableTest>(filteredTests);
-        var processedTests = new HashSet<string>();
-        var queue = new Queue<ExecutableTest>(filteredTests);
-
-        while (queue.Count > 0)
-        {
-            var currentTest = queue.Dequeue();
-            if (!processedTests.Add(currentTest.TestId))
-            {
-                continue;
-            }
-
-            foreach (var dependency in currentTest.Dependencies)
-            {
-                if (testsToInclude.Add(dependency))
-                {
-                    queue.Enqueue(dependency);
-                }
-            }
-        }
-
-        await _logger.LogAsync(Core.Logging.LogLevel.Debug,
-            $"After including dependencies: {testsToInclude.Count} tests will be executed",
-            null,
-            (state, _) => state);
-
-        var resultList = testsToInclude.ToList();
-        foreach (var test in resultList)
-        {
-            await InvokeTestRegisteredEventReceiversAsync(test);
-        }
-
-        return resultList;
-    }
-
-    private async Task InvokeTestRegisteredEventReceiversAsync(ExecutableTest test)
-    {
-        var discoveredTest = new DiscoveredTest<object>
-        {
-            TestContext = test.Context
-        };
-
-        var registeredContext = new TestRegisteredContext(test.Context)
-        {
-            DiscoveredTest = discoveredTest
-        };
-
-        test.Context.InternalDiscoveredTest = discoveredTest;
-
-        var attributes = test.Context.TestDetails.Attributes;
-
-        foreach (var attribute in attributes)
-        {
-            if (attribute is ITestRegisteredEventReceiver receiver)
-            {
-                try
-                {
-                    await receiver.OnTestRegistered(registeredContext);
-                }
-                catch (Exception ex)
-                {
-                    await _logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
-                }
-            }
-        }
-    }
-
-
-
-    /// <summary>
-    /// Implementation of ITestExecutor for Microsoft.Testing.Platform
-    /// </summary>
-    public async Task ExecuteAsync(
-        RunTestExecutionRequest request,
-        IMessageBus messageBus,
-        CancellationToken cancellationToken)
-    {
-        await ExecuteAsyncAotSafe(request, messageBus, cancellationToken);
-    }
-
-    /// <summary>
-    /// AOT-safe test execution (source generation path)
-    /// </summary>
-    private async Task ExecuteAsyncAotSafe(
-        RunTestExecutionRequest request,
-        IMessageBus messageBus,
-        CancellationToken cancellationToken)
-    {
-        var pipeline = UnifiedTestBuilderPipelineFactory.CreateAotPipeline(
-            new TestInvoker());
-
-        var discoveryService = new TestDiscoveryService(pipeline);
-        var tests = await discoveryService.DiscoverTests(request.Session.SessionUid.Value);
-
-        await ExecuteTests(tests, request.Filter, messageBus, cancellationToken);
-    }
 
     private bool _disposed;
 

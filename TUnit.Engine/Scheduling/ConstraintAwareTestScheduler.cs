@@ -172,11 +172,22 @@ internal sealed class ConstraintAwareTestScheduler : ITestScheduler
         var workerCount = _parallelismStrategy.CurrentParallelism;
         var workers = new Task[workerCount];
 
+#if NET
+        var capturedContext = ExecutionContext.Capture();
+#endif
+
         for (var i = 0; i < workerCount; i++)
         {
             var workerId = i;
             workers[i] = Task.Run(async () =>
             {
+#if NET
+                if (capturedContext != null)
+                {
+                    // Restore the execution context at the beginning of the worker
+                    ExecutionContext.Restore(capturedContext);
+                }
+#endif
                 await WorkerLoopAsync(
                     workerId,
                     readyQueue,

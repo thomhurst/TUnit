@@ -28,11 +28,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _capabilities = capabilities;
         _requestHandler = new TestRequestHandler();
 
-        // Configure Debug/Trace listeners to prevent UI dialogs from blocking test execution
         ConfigureDebugListeners();
-
-        // Set up global exception handlers to prevent hangs
-        ConfigureGlobalExceptionHandlers();
     }
 
     private static void ConfigureDebugListeners()
@@ -48,23 +44,29 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         System.Diagnostics.Trace.AutoFlush = true;
     }
 
-    private static void ConfigureGlobalExceptionHandlers()
+    private static void ConfigureGlobalExceptionHandlers(ExecuteRequestContext context)
     {
         // Handle unhandled exceptions on any thread
-        AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
             var exception = args.ExceptionObject as Exception;
+
             Console.Error.WriteLine($"Unhandled exception in AppDomain: {exception}");
 
             // Force exit to prevent hanging
             if (args.IsTerminating)
             {
-                Environment.Exit(1);
+                context.Complete();
             }
         };
 
+        Console.CancelKeyPress += (_, _) =>
+        {
+            context.Complete();
+        };
+
         // Handle unobserved task exceptions
-        TaskScheduler.UnobservedTaskException += (sender, args) =>
+        TaskScheduler.UnobservedTaskException += (_, args) =>
         {
             Console.Error.WriteLine($"Unobserved task exception: {args.Exception}");
 
@@ -88,6 +90,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
+        ConfigureGlobalExceptionHandlers(context);
+
         var serviceProvider = GetOrCreateServiceProvider(context);
 
         try
