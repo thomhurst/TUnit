@@ -11,57 +11,22 @@ public static class DataSourceHelpers
 {
     /// <summary>
     /// Invokes a Func&lt;T&gt; if the value is one, otherwise returns the value as-is.
-    /// This is AOT-compatible by using generic type parameters instead of reflection.
+    /// Note: Most Func invocation should be handled by the source generator at compile time for AOT compatibility.
+    /// This method is kept for backward compatibility and edge cases.
     /// </summary>
     public static object? InvokeIfFunc(object? value)
     {
         if (value == null) return null;
 
-        // Try common Func<T> types without reflection
-        // Note: More specific types must come before Func<object> to avoid unreachable code
-        switch (value)
+        // Only handle the most basic case - Func<object>
+        // All other Func types should be invoked by the source generator
+        if (value is Func<object> func)
         {
-            case Func<string> funcString:
-                return funcString();
-            case Func<int> funcInt:
-                return funcInt();
-            case Func<long> funcLong:
-                return funcLong();
-            case Func<double> funcDouble:
-                return funcDouble();
-            case Func<float> funcFloat:
-                return funcFloat();
-            case Func<bool> funcBool:
-                return funcBool();
-            case Func<decimal> funcDecimal:
-                return funcDecimal();
-            case Func<DateTime> funcDateTime:
-                return funcDateTime();
-            case Func<Guid> funcGuid:
-                return funcGuid();
-
-            // Handle common tuple function types
-            case Func<(object?, object?)> funcTuple2:
-                return funcTuple2();
-            case Func<(object?, object?, object?)> funcTuple3:
-                return funcTuple3();
-            case Func<(object?, object?, object?, object?)> funcTuple4:
-                return funcTuple4();
-            case Func<(object?, object?, object?, object?, object?)> funcTuple5:
-                return funcTuple5();
-            case Func<(object?, object?, object?, object?, object?, object?)> funcTuple6:
-                return funcTuple6();
-            case Func<(object?, object?, object?, object?, object?, object?, object?)> funcTuple7:
-                return funcTuple7();
-
-            case Func<object> func:
-                return func();
-            default:
-                // For non-Func types, return as-is
-                // Note: We avoid reflection here for AOT compatibility
-                // If additional Func<T> types are needed, they should be added explicitly above
-                return value;
+            return func();
         }
+
+        // For non-Func types, return as-is
+        return value;
     }
 
     /// <summary>
@@ -268,18 +233,18 @@ public static class DataSourceHelpers
             return new[] { () => Task.FromResult<object?>(null) };
         }
 
-        // If it's a Func<TResult>, invoke it first
-        var actualData = InvokeIfFunc(data);
+        // Note: Func invocation is now handled by the source generator at compile time
+        // for better AOT compatibility
 
         // Always unwrap tuples - they explicitly represent multiple values
-        if (IsTuple(actualData))
+        if (IsTuple(data))
         {
-            var unwrapped = UnwrapTupleAot(actualData);
+            var unwrapped = UnwrapTupleAot(data);
             return unwrapped.Select(v => new Func<Task<object?>>(() => Task.FromResult(v))).ToArray();
         }
         
         // For arrays, decide based on expected parameter count
-        if (actualData is object?[] array && expectedParameterCount > 0)
+        if (data is object?[] array && expectedParameterCount > 0)
         {
             // If expecting multiple parameters and array length matches, unwrap it
             if (expectedParameterCount > 1 && array.Length == expectedParameterCount)
@@ -291,7 +256,7 @@ public static class DataSourceHelpers
         }
         
         // Default: return as single value
-        return new[] { () => Task.FromResult<object?>(actualData) };
+        return new[] { () => Task.FromResult<object?>(data) };
     }
 
     /// <summary>
