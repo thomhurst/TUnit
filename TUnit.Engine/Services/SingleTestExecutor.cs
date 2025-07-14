@@ -141,7 +141,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
         try
         {
-            await ExecuteBeforeTestHooksAsync(test.BeforeTestHooks, test.Context!, cancellationToken);
+            await ExecuteBeforeTestHooksAsync(test.BeforeTestHooks, test.Context, cancellationToken);
 
             await InvokeTestWithTimeout(test, instance, cancellationToken);
 
@@ -155,7 +155,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         finally
         {
-            await ExecuteAfterTestHooksAsync(test.AfterTestHooks, test.Context!, cancellationToken);
+            await ExecuteAfterTestHooksAsync(test.AfterTestHooks, test.Context, cancellationToken);
             await DecrementAndDisposeTrackedObjectsAsync(test);
         }
     }

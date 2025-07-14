@@ -22,7 +22,7 @@ public class AssertMultipleTests
 
         var aggregateException = (AggregateException) assertionException!.InnerException!;
 
-        var exception1 = (TUnitAssertionException) aggregateException!.InnerExceptions[0];
+        var exception1 = (TUnitAssertionException) aggregateException.InnerExceptions[0];
         var exception2 = (TUnitAssertionException) aggregateException.InnerExceptions[1];
         var exception3 = (TUnitAssertionException) aggregateException.InnerExceptions[2];
         var exception4 = (TUnitAssertionException) aggregateException.InnerExceptions[3];
@@ -86,7 +86,7 @@ public class AssertMultipleTests
 
         var aggregateException = (AggregateException) assertionException!.InnerException!;
 
-        var exception1 = (TUnitAssertionException) aggregateException!.InnerExceptions[0];
+        var exception1 = (TUnitAssertionException) aggregateException.InnerExceptions[0];
         var exception2 = (TUnitAssertionException) aggregateException.InnerExceptions[1];
         var exception3 = (TUnitAssertionException) aggregateException.InnerExceptions[2];
         var exception4 = (TUnitAssertionException) aggregateException.InnerExceptions[3];
@@ -165,7 +165,7 @@ public class AssertMultipleTests
 
         var aggregateException = (AggregateException) assertionException!.InnerException!;
 
-        await TUnitAssert.That(aggregateException!.InnerExceptions[0]).IsTypeOf<TUnitAssertionException>();
+        await TUnitAssert.That(aggregateException.InnerExceptions[0]).IsTypeOf<TUnitAssertionException>();
         await TUnitAssert.That(aggregateException.InnerExceptions[1]).IsTypeOf<TUnitAssertionException>();
         await TUnitAssert.That(aggregateException.InnerExceptions[2]).IsTypeOf<TUnitAssertionException>();
         await TUnitAssert.That(aggregateException.InnerExceptions[3]).IsTypeOf<TUnitAssertionException>();

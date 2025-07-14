@@ -17,9 +17,9 @@ public class SingleItemAssertionBuilderWrapper<TActual, TInner> : InvokableValue
                 return Task.FromResult(enumerable.SingleOrDefault());
             }
 
-            return Task.FromResult<TInner?>(default)!;
+            return Task.FromResult<TInner?>(default);
         });
 
-        return task.GetAwaiter()!;
+        return task.GetAwaiter();
     }
 }

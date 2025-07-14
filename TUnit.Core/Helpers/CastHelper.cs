@@ -50,7 +50,7 @@ public static class CastHelper
             return (T?) value;
         }
 
-        return (T?) conversionMethod!.Invoke(null, [value]);
+        return (T?) conversionMethod.Invoke(null, [value]);
     }
 
     [UnconditionalSuppressMessage("", "IL2072")]
@@ -97,7 +97,7 @@ public static class CastHelper
             return value;
         }
 
-        return conversionMethod!.Invoke(null, [value]);
+        return conversionMethod.Invoke(null, [value]);
     }
 
     public static MethodInfo? GetConversionMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type baseType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type targetType)

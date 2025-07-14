@@ -46,22 +46,22 @@ internal class ClassDataSources
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return (T) TestDataContainer.GetGlobalInstance(typeof(T), () => Create(typeof(T), dataGeneratorMetadata))!;
+            return (T) TestDataContainer.GetGlobalInstance(typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
         }
 
         if (sharedType == SharedType.PerClass)
         {
-            return (T) TestDataContainer.GetInstanceForClass(testClassType, typeof(T), () => Create(typeof(T), dataGeneratorMetadata))!;
+            return (T) TestDataContainer.GetInstanceForClass(testClassType, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
         }
 
         if (sharedType == SharedType.Keyed)
         {
-            return (T) TestDataContainer.GetInstanceForKey(key, typeof(T), () => Create(typeof(T), dataGeneratorMetadata))!;
+            return (T) TestDataContainer.GetInstanceForKey(key, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
         }
 
         if (sharedType == SharedType.PerAssembly)
         {
-            return (T) TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () => Create(typeof(T), dataGeneratorMetadata))!;
+            return (T) TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
         }
 #pragma warning restore CS8603 // Possible null reference return.
 

@@ -23,7 +23,7 @@ public abstract class TUnitFailedException : TUnitException
             return string.Empty;
         }
 
-        var lines = stackTrace!.Split([Environment.NewLine], StringSplitOptions.None);
+        var lines = stackTrace.Split([Environment.NewLine], StringSplitOptions.None);
 
         return string.Join(Environment.NewLine,
             lines.TakeWhile(x => !x.Trim().StartsWith("at TUnit")));

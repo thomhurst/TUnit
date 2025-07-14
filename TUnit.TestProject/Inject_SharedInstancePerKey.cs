@@ -29,7 +29,7 @@ public class InjectSharedPerKey1(DummyReferenceTypeClass dummyReferenceTypeClass
             {
                 throw new InvalidOperationException("TestContext.Current is null. This can happen if the test is not run in a TUnit test environment.");
             }
-            return TestContext.Current!.TestDetails.ClassMetadata.Namespace + "." + TestContext.Current.TestDetails.ClassMetadata.Name + "_" + TestContext.Current.TestDetails.TestName;
+            return TestContext.Current.TestDetails.ClassMetadata.Namespace + "." + TestContext.Current.TestDetails.ClassMetadata.Name + "_" + TestContext.Current.TestDetails.TestName;
         }
     }
 
