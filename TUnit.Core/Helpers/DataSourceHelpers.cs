@@ -33,7 +33,6 @@ public static class DataSourceHelpers
             case Func<decimal> f: return f();
             case Func<DateTime> f: return f();
             case Func<Guid> f: return f();
-            case Func<object> f: return f();
             
             // Common tuple types
             case Func<(int, string, bool)> f: return f();
@@ -43,7 +42,10 @@ public static class DataSourceHelpers
             // Arrays
             case Func<string[]> f: return f();
             case Func<int[]> f: return f();
-            case Func<object[]> f: return f();
+            case Func<object?[]> f: return f();
+            
+            // Generic object - must be last as it catches everything
+            case Func<object> f: return f();
             
             default:
                 // For non-Func types, return as-is
