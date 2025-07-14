@@ -16,10 +16,10 @@ internal class SingleTestExecutor : ISingleTestExecutor
 {
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestResultFactory _resultFactory;
-    private readonly OptimizedEventReceiverOrchestrator _eventReceiverOrchestrator;
+    private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private SessionUid? _sessionUid;
 
-    public SingleTestExecutor(TUnitFrameworkLogger logger, OptimizedEventReceiverOrchestrator eventReceiverOrchestrator)
+    public SingleTestExecutor(TUnitFrameworkLogger logger, EventReceiverOrchestrator eventReceiverOrchestrator)
     {
         _logger = logger;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
@@ -132,12 +132,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         var instance = await test.CreateInstanceAsync();
 
-        test.Context!.TestDetails.ClassInstance = instance;
+        test.Context.TestDetails.ClassInstance = instance;
 
         // Inject properties if any are defined
         await InjectPropertiesAsync(test, instance);
 
-        test.Context!.RestoreExecutionContext();
+        test.Context.RestoreExecutionContext();
 
         try
         {

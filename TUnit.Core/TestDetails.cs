@@ -14,7 +14,6 @@ public class TestDetails
     public required object?[] TestClassArguments { get; set; }
     public TimeSpan? Timeout { get; set; }
     public int RetryLimit { get; set; }
-    public string? DisplayName { get; set; }
 
     // Added for compatibility
     public required MethodMetadata MethodMetadata { get; set; }

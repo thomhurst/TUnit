@@ -48,13 +48,6 @@ internal sealed class HookOrchestrator
         }
     }
 
-    private int _totalTestCount = 0;
-
-    public void SetTotalTestCount(int count)
-    {
-        _totalTestCount = count;
-    }
-
     public Task InitializeContextsWithTestsAsync(IEnumerable<ExecutableTest> tests, CancellationToken cancellationToken)
     {
         // Ensure context hierarchy exists
@@ -104,10 +97,7 @@ internal sealed class HookOrchestrator
                 // Add all tests to the class context
                 foreach (var test in classGroup)
                 {
-                    if (test.Context != null)
-                    {
-                        classContext.AddTest(test.Context);
-                    }
+                    classContext.AddTest(test.Context);
                 }
             }
         }
@@ -126,6 +116,7 @@ internal sealed class HookOrchestrator
             try
             {
                 await hook(context, cancellationToken);
+                context.RestoreExecutionContext();
             }
             catch (Exception ex)
             {
@@ -146,6 +137,7 @@ internal sealed class HookOrchestrator
             try
             {
                 await hook(context, cancellationToken);
+                context.RestoreExecutionContext();
             }
             catch (Exception ex)
             {
@@ -168,6 +160,7 @@ internal sealed class HookOrchestrator
             try
             {
                 await hook(context, cancellationToken);
+                context.RestoreExecutionContext();
             }
             catch (Exception ex)
             {
@@ -192,6 +185,7 @@ internal sealed class HookOrchestrator
             try
             {
                 await hook(context, cancellationToken);
+                context.RestoreExecutionContext();
             }
             catch (Exception ex)
             {
@@ -222,7 +216,7 @@ internal sealed class HookOrchestrator
         }
 
         // Add test to class context if it exists and hasn't been added already
-        if (_classContexts.TryGetValue(testClassType, out var classContext) && test.Context != null)
+        if (_classContexts.TryGetValue(testClassType, out var classContext))
         {
             // Check if test is already in the context (from InitializeContextsWithTestsAsync)
             if (!classContext.Tests.Contains(test.Context))
@@ -232,10 +226,7 @@ internal sealed class HookOrchestrator
         }
 
         // Execute BeforeEveryTest hooks
-        if (test.Context != null)
-        {
-            await ExecuteBeforeEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
-        }
+        await ExecuteBeforeEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
     }
 
     public async Task OnTestCompletedAsync(ExecutableTest test, CancellationToken cancellationToken)
@@ -244,10 +235,7 @@ internal sealed class HookOrchestrator
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";
 
         // Execute AfterEveryTest hooks
-        if (test.Context != null)
-        {
-            await ExecuteAfterEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
-        }
+        await ExecuteAfterEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
 
         // Decrement test counts
         var classTestsRemaining = _classTestCounts.AddOrUpdate(testClassType, 0, (_, count) => count - 1);
@@ -295,6 +283,7 @@ internal sealed class HookOrchestrator
             try
             {
                 await hook(context, cancellationToken);
+                context.RestoreExecutionContext();
             }
             catch (Exception ex)
             {
@@ -334,6 +323,7 @@ internal sealed class HookOrchestrator
             try
             {
                 await hook(context, cancellationToken);
+                context.RestoreExecutionContext();
             }
             catch (Exception ex)
             {
@@ -351,9 +341,8 @@ internal sealed class HookOrchestrator
         {
             // Ensure assembly context exists
             var assemblyName = type.Assembly.GetName().Name ?? "Unknown";
-            AssemblyHookContext? assemblyContext = null;
 
-            if (_assemblyContexts.TryGetValue(assemblyName, out assemblyContext))
+            if (_assemblyContexts.TryGetValue(assemblyName, out var assemblyContext))
             {
                 // Use existing context
             }
@@ -393,6 +382,7 @@ internal sealed class HookOrchestrator
             try
             {
                 await hook(context, cancellationToken);
+                context.RestoreExecutionContext();
             }
             catch (Exception ex)
             {
@@ -414,9 +404,8 @@ internal sealed class HookOrchestrator
             {
                 // Ensure assembly context exists
                 var assemblyName = type.Assembly.GetName().Name ?? "Unknown";
-                AssemblyHookContext? assemblyContext = null;
 
-                if (_assemblyContexts.TryGetValue(assemblyName, out assemblyContext))
+                if (_assemblyContexts.TryGetValue(assemblyName, out var assemblyContext))
                 {
                     // Use existing context
                 }
@@ -456,6 +445,7 @@ internal sealed class HookOrchestrator
             try
             {
                 await hook(context, cancellationToken);
+                context.RestoreExecutionContext();
             }
             catch (Exception ex)
             {
@@ -473,6 +463,7 @@ internal sealed class HookOrchestrator
             try
             {
                 await hook(testContext, cancellationToken);
+                testContext.RestoreExecutionContext();
             }
             catch (Exception ex)
             {
@@ -491,6 +482,7 @@ internal sealed class HookOrchestrator
             try
             {
                 await hook(testContext, cancellationToken);
+                testContext.RestoreExecutionContext();
             }
             catch (Exception ex)
             {

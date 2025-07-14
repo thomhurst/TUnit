@@ -13,22 +13,22 @@ namespace TUnit.Engine.Services;
 /// <summary>
 /// Optimized event receiver orchestrator with fast-path checks and batching support
 /// </summary>
-internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
+internal sealed class EventReceiverOrchestrator : IDisposable
 {
     private readonly EventReceiverRegistry _registry = new();
     private readonly TUnitFrameworkLogger _logger;
-    
+
     // Track which assemblies/classes/sessions have had their "first" event invoked
     private readonly ConcurrentDictionary<string, bool> _firstTestInAssemblyInvoked = new();
     private readonly ConcurrentDictionary<Type, bool> _firstTestInClassInvoked = new();
     private int _firstTestInSessionInvoked = 0;
-    
+
     // Track remaining test counts for "last" events
     private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
     private readonly ConcurrentDictionary<Type, int> _classTestCounts = new();
     private int _sessionTestCount = 0;
 
-    public OptimizedEventReceiverOrchestrator(TUnitFrameworkLogger logger)
+    public EventReceiverOrchestrator(TUnitFrameworkLogger logger)
     {
         _logger = logger;
     }
@@ -36,10 +36,10 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
     public async ValueTask InitializeAllEligibleObjectsAsync(TestContext context, CancellationToken cancellationToken)
     {
         var eligibleObjects = context.GetEligibleEventObjects();
-        
+
         // Register all event receivers for fast lookup
         _registry.RegisterReceivers(eligibleObjects);
-        
+
         foreach (var obj in eligibleObjects)
         {
             try
@@ -65,24 +65,24 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
     public async ValueTask InvokeTestStartEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
         LogEventInvocation("TestStart", context.TestDetails.TestName);
-        
+
         // Fast path - no allocation if no receivers
         if (!_registry.HasTestStartReceivers())
             return;
-            
+
         await InvokeTestStartEventReceiversCore(context, cancellationToken);
     }
-    
+
     private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
         var receivers = _registry.GetReceiversOfType<ITestStartEventReceiver>();
-        
+
         // Sort by order once
         if (receivers.Length > 1)
         {
             Array.Sort(receivers, (a, b) => a.Order.CompareTo(b.Order));
         }
-        
+
         // Batch invocation for multiple receivers
         if (receivers.Length > 3)
         {
@@ -110,19 +110,19 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
     {
         if (!_registry.HasTestEndReceivers())
             return;
-            
+
         await InvokeTestEndEventReceiversCore(context, cancellationToken);
     }
-    
+
     private async ValueTask InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
         var receivers = _registry.GetReceiversOfType<ITestEndEventReceiver>();
-        
+
         if (receivers.Length > 1)
         {
             Array.Sort(receivers, (a, b) => a.Order.CompareTo(b.Order));
         }
-        
+
         foreach (var receiver in receivers)
         {
             try
@@ -141,19 +141,19 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
     {
         if (!_registry.HasTestSkippedReceivers())
             return;
-            
+
         await InvokeTestSkippedEventReceiversCore(context, cancellationToken);
     }
-    
+
     private async ValueTask InvokeTestSkippedEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
         var receivers = _registry.GetReceiversOfType<ITestSkippedEventReceiver>();
-        
+
         if (receivers.Length > 1)
         {
             Array.Sort(receivers, (a, b) => a.Order.CompareTo(b.Order));
         }
-        
+
         foreach (var receiver in receivers)
         {
             try
@@ -172,10 +172,10 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
     {
         if (!_registry.HasTestRegisteredReceivers())
             return;
-            
+
         await InvokeTestRegisteredEventReceiversCore(context, cancellationToken);
     }
-    
+
     private async ValueTask InvokeTestRegisteredEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
         var receivers = _registry.GetReceiversOfType<ITestRegisteredEventReceiver>();
@@ -183,7 +183,7 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
         {
             DiscoveredTest = context.InternalDiscoveredTest!
         };
-        
+
         foreach (var receiver in receivers)
         {
             try
@@ -220,26 +220,26 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
     // First/Last event methods with fast-path checks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public async ValueTask InvokeFirstTestInSessionEventReceiversAsync(
-        TestContext context, 
-        TestSessionContext sessionContext, 
+        TestContext context,
+        TestSessionContext sessionContext,
         CancellationToken cancellationToken)
     {
         if (!_registry.HasFirstTestInSessionReceivers())
             return;
-            
+
         if (Interlocked.CompareExchange(ref _firstTestInSessionInvoked, 1, 0) == 0)
         {
             await InvokeFirstTestInSessionEventReceiversCore(context, sessionContext, cancellationToken);
         }
     }
-    
+
     private async ValueTask InvokeFirstTestInSessionEventReceiversCore(
-        TestContext context, 
-        TestSessionContext sessionContext, 
+        TestContext context,
+        TestSessionContext sessionContext,
         CancellationToken cancellationToken)
     {
         var receivers = _registry.GetReceiversOfType<IFirstTestInTestSessionEventReceiver>();
-        
+
         foreach (var receiver in receivers)
         {
             try
@@ -255,27 +255,27 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public async ValueTask InvokeFirstTestInAssemblyEventReceiversAsync(
-        TestContext context, 
-        AssemblyHookContext assemblyContext, 
+        TestContext context,
+        AssemblyHookContext assemblyContext,
         CancellationToken cancellationToken)
     {
         if (!_registry.HasFirstTestInAssemblyReceivers())
             return;
-            
+
         var assemblyName = assemblyContext.Assembly.FullName ?? "";
         if (_firstTestInAssemblyInvoked.TryAdd(assemblyName, true))
         {
             await InvokeFirstTestInAssemblyEventReceiversCore(context, assemblyContext, cancellationToken);
         }
     }
-    
+
     private async ValueTask InvokeFirstTestInAssemblyEventReceiversCore(
-        TestContext context, 
-        AssemblyHookContext assemblyContext, 
+        TestContext context,
+        AssemblyHookContext assemblyContext,
         CancellationToken cancellationToken)
     {
         var receivers = _registry.GetReceiversOfType<IFirstTestInAssemblyEventReceiver>();
-        
+
         foreach (var receiver in receivers)
         {
             try
@@ -291,27 +291,27 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public async ValueTask InvokeFirstTestInClassEventReceiversAsync(
-        TestContext context, 
-        ClassHookContext classContext, 
+        TestContext context,
+        ClassHookContext classContext,
         CancellationToken cancellationToken)
     {
         if (!_registry.HasFirstTestInClassReceivers())
             return;
-            
+
         var classType = classContext.ClassType;
         if (_firstTestInClassInvoked.TryAdd(classType, true))
         {
             await InvokeFirstTestInClassEventReceiversCore(context, classContext, cancellationToken);
         }
     }
-    
+
     private async ValueTask InvokeFirstTestInClassEventReceiversCore(
-        TestContext context, 
-        ClassHookContext classContext, 
+        TestContext context,
+        ClassHookContext classContext,
         CancellationToken cancellationToken)
     {
         var receivers = _registry.GetReceiversOfType<IFirstTestInClassEventReceiver>();
-        
+
         foreach (var receiver in receivers)
         {
             try
@@ -328,26 +328,26 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
     // Last event methods
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public async ValueTask InvokeLastTestInSessionEventReceiversAsync(
-        TestContext context, 
-        TestSessionContext sessionContext, 
+        TestContext context,
+        TestSessionContext sessionContext,
         CancellationToken cancellationToken)
     {
         if (!_registry.HasLastTestInSessionReceivers())
             return;
-            
+
         if (Interlocked.Decrement(ref _sessionTestCount) == 0)
         {
             await InvokeLastTestInSessionEventReceiversCore(context, sessionContext, cancellationToken);
         }
     }
-    
+
     private async ValueTask InvokeLastTestInSessionEventReceiversCore(
-        TestContext context, 
-        TestSessionContext sessionContext, 
+        TestContext context,
+        TestSessionContext sessionContext,
         CancellationToken cancellationToken)
     {
         var receivers = _registry.GetReceiversOfType<ILastTestInTestSessionEventReceiver>();
-        
+
         foreach (var receiver in receivers)
         {
             try
@@ -363,27 +363,27 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public async ValueTask InvokeLastTestInAssemblyEventReceiversAsync(
-        TestContext context, 
-        AssemblyHookContext assemblyContext, 
+        TestContext context,
+        AssemblyHookContext assemblyContext,
         CancellationToken cancellationToken)
     {
         if (!_registry.HasLastTestInAssemblyReceivers())
             return;
-            
+
         var assemblyName = assemblyContext.Assembly.FullName ?? "";
         if (_assemblyTestCounts.AddOrUpdate(assemblyName, 0, (_, count) => count - 1) == 0)
         {
             await InvokeLastTestInAssemblyEventReceiversCore(context, assemblyContext, cancellationToken);
         }
     }
-    
+
     private async ValueTask InvokeLastTestInAssemblyEventReceiversCore(
-        TestContext context, 
-        AssemblyHookContext assemblyContext, 
+        TestContext context,
+        AssemblyHookContext assemblyContext,
         CancellationToken cancellationToken)
     {
         var receivers = _registry.GetReceiversOfType<ILastTestInAssemblyEventReceiver>();
-        
+
         foreach (var receiver in receivers)
         {
             try
@@ -399,27 +399,27 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public async ValueTask InvokeLastTestInClassEventReceiversAsync(
-        TestContext context, 
-        ClassHookContext classContext, 
+        TestContext context,
+        ClassHookContext classContext,
         CancellationToken cancellationToken)
     {
         if (!_registry.HasLastTestInClassReceivers())
             return;
-            
+
         var classType = classContext.ClassType;
         if (_classTestCounts.AddOrUpdate(classType, 0, (_, count) => count - 1) == 0)
         {
             await InvokeLastTestInClassEventReceiversCore(context, classContext, cancellationToken);
         }
     }
-    
+
     private async ValueTask InvokeLastTestInClassEventReceiversCore(
-        TestContext context, 
-        ClassHookContext classContext, 
+        TestContext context,
+        ClassHookContext classContext,
         CancellationToken cancellationToken)
     {
         var receivers = _registry.GetReceiversOfType<ILastTestInClassEventReceiver>();
-        
+
         foreach (var receiver in receivers)
         {
             try
@@ -440,7 +440,7 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
     {
         var contexts = allTestContexts.ToList();
         _sessionTestCount = contexts.Count;
-        
+
         foreach (var group in contexts.GroupBy(c => c.ClassContext?.AssemblyContext?.Assembly.FullName))
         {
             if (group.Key != null)
@@ -448,7 +448,7 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
                 _assemblyTestCounts[group.Key] = group.Count();
             }
         }
-        
+
         foreach (var group in contexts.GroupBy(c => c.ClassContext?.ClassType))
         {
             if (group.Key != null)
@@ -473,10 +473,10 @@ internal sealed class OptimizedEventReceiverOrchestrator : IDisposable
             var receiver = receivers[i];
             tasks[i] = InvokeReceiverAsync(receiver, invoker, cancellationToken);
         }
-        
+
         await Task.WhenAll(tasks);
     }
-    
+
     private async Task InvokeReceiverAsync<T>(
         T receiver,
         Func<T, ValueTask> invoker,

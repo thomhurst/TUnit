@@ -113,7 +113,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
 
     private async Task InitializeEventReceivers(List<ExecutableTest> testList, CancellationToken cancellationToken)
     {
-        var eventReceiverOrchestrator = _serviceProvider?.GetService(typeof(OptimizedEventReceiverOrchestrator)) as OptimizedEventReceiverOrchestrator;
+        var eventReceiverOrchestrator = _serviceProvider?.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
         if (eventReceiverOrchestrator == null)
         {
             return;
@@ -137,7 +137,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
     {
         // Initialize static properties with data source attributes before any other session setup
         await InitializeStaticPropertiesAsync(cancellationToken);
-        
+
         if (hookOrchestrator != null)
         {
             hookOrchestrator.SetTotalTestCount(testList.Count);
@@ -330,7 +330,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
         var pipeline = UnifiedTestBuilderPipelineFactory.CreateAotPipeline(
             new TestInvoker());
 
-        var discoveryService = new TestDiscoveryServiceV2(pipeline);
+        var discoveryService = new TestDiscoveryService(pipeline);
         var tests = await discoveryService.DiscoverTests(request.Session.SessionUid.Value);
 
         await ExecuteTests(tests, request.Filter, messageBus, cancellationToken);

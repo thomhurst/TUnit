@@ -12,10 +12,9 @@ namespace TUnit.Core;
 /// </summary>
 public class TestContext : Context
 {
-    public TestContext(string testName, string customDisplayName, CancellationToken cancellationToken, IServiceProvider serviceProvider) : base(null)
+    public TestContext(string testName, CancellationToken cancellationToken, IServiceProvider serviceProvider) : base(null)
     {
         TestName = testName;
-        CustomDisplayName = customDisplayName;
         CancellationToken = cancellationToken;
         ServiceProvider = serviceProvider;
     }
@@ -171,7 +170,7 @@ public class TestContext : Context
         get;
     }
 
-    public TestContext(string testName, string customDisplayName) : this(testName, customDisplayName, CancellationToken.None, new TestServiceProvider())
+    public TestContext(string testName, string customDisplayName) : this(testName, CancellationToken.None, new TestServiceProvider())
     {
     }
 
@@ -259,6 +258,11 @@ public class TestContext : Context
 
         var arguments = string.Join(", ", TestDetails.TestMethodArguments
             .Select(arg => ArgumentDisplayFormatters.FirstOrDefault(arg) ?? arg?.ToString() ?? "null"));
+
+        if (string.IsNullOrEmpty(arguments))
+        {
+            return TestName;
+        }
 
         return $"{TestName}({arguments})";
     }

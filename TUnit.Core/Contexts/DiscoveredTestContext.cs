@@ -22,15 +22,18 @@ public class DiscoveredTestContext
     private Priority _priority = Priority.Normal;
 
     public string TestName { get; }
-    public string DisplayName { get; private set; }
-    public TestDetails TestDetails { get; }
+    public TestContext TestContext
+    {
+        get;
+    }
+
+    public TestDetails TestDetails => TestContext.TestDetails;
     public bool RunOnTestDiscovery { get; private set; }
 
-    public DiscoveredTestContext(string testName, string displayName, TestDetails testDetails)
+    public DiscoveredTestContext(string testName, TestContext testContext)
     {
         TestName = testName;
-        DisplayName = displayName;
-        TestDetails = testDetails;
+        TestContext = testContext;
     }
 
     public void AddCategory(string category)
@@ -65,8 +68,7 @@ public class DiscoveredTestContext
 
     public void SetDisplayName(string displayName)
     {
-        DisplayName = displayName;
-        TestDetails.DisplayName = displayName;
+        TestContext.CustomDisplayName = displayName;
     }
 
     public void SetRetryLimit(int retryLimit)
@@ -116,7 +118,6 @@ public class DiscoveredTestContext
         testContext.ParallelConstraint = _parallelConstraint;
         testContext.ExecutionPriority = _priority;
         testContext.RunOnTestDiscovery = RunOnTestDiscovery;
-        testContext.CustomDisplayName = DisplayName;
 
         foreach (var formatter in _argumentDisplayFormatters)
         {
@@ -129,6 +130,6 @@ public class DiscoveredTestContext
     /// </summary>
     public string GetTestDisplayName()
     {
-        return DisplayName;
+        return TestContext.GetDisplayName();
     }
 }

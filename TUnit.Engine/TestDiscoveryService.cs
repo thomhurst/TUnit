@@ -13,7 +13,7 @@ namespace TUnit.Engine;
 /// <summary>
 /// Unified test discovery service that uses the new pipeline architecture
 /// </summary>
-public sealed class TestDiscoveryServiceV2 : IDataProducer, IStreamingTestDiscovery
+public sealed class TestDiscoveryService : IDataProducer, IStreamingTestDiscovery
 {
     private const int DiscoveryTimeoutSeconds = 60;
     private readonly UnifiedTestBuilderPipeline _testBuilderPipeline;
@@ -28,7 +28,7 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer, IStreamingTestDiscov
 
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
-    public TestDiscoveryServiceV2(UnifiedTestBuilderPipeline testBuilderPipeline)
+    public TestDiscoveryService(UnifiedTestBuilderPipeline testBuilderPipeline)
     {
         _testBuilderPipeline = testBuilderPipeline ?? throw new ArgumentNullException(nameof(testBuilderPipeline));
     }
@@ -46,7 +46,7 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer, IStreamingTestDiscov
         }
         return tests;
     }
-    
+
     /// <summary>
     /// Discovers tests as a stream, enabling parallel discovery and execution
     /// </summary>
@@ -55,26 +55,26 @@ public sealed class TestDiscoveryServiceV2 : IDataProducer, IStreamingTestDiscov
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        
+
         if (!Debugger.IsAttached)
         {
             cts.CancelAfter(TimeSpan.FromSeconds(DiscoveryTimeoutSeconds));
         }
-        
+
         await foreach (var test in BuildTestsAsync(testSessionId, cts.Token))
         {
             _dependencyResolver.RegisterTest(test);
-            
+
             // Try to resolve dependencies immediately
             if (!_dependencyResolver.TryResolveDependencies(test) && test.Metadata.Dependencies.Length > 0)
             {
                 // Mark as waiting if dependencies not ready
                 test.State = TestState.WaitingForDependencies;
             }
-            
+
             // Cache for backward compatibility
             _cachedTests.Add(test);
-            
+
             yield return test;
         }
     }

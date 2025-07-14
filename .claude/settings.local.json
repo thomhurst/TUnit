@@ -110,7 +110,8 @@
       "Bash(dir:*)",
       "Bash(git rm:*)",
       "Bash(del /F /Q TUnit.TestProjectbinDebugnet8.0TestResults*.log)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(powershell:*)"
     ],
     "deny": []
   },

@@ -193,7 +193,7 @@ public sealed class TestBuilder : ITestBuilder
             context);
 
         // Try to get EventReceiverOrchestrator from service provider
-        var eventReceiverOrchestrator = _serviceProvider?.GetService(typeof(OptimizedEventReceiverOrchestrator)) as OptimizedEventReceiverOrchestrator;
+        var eventReceiverOrchestrator = _serviceProvider?.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
         if (eventReceiverOrchestrator != null)
         {
             // Use the orchestrator for consistency with other event receivers

@@ -23,7 +23,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitFrameworkLogger Logger { get; }
     public ICommandLineOptions CommandLineOptions { get; }
     public VerbosityService VerbosityService { get; }
-    public TestDiscoveryServiceV2 DiscoveryService { get; }
+    public TestDiscoveryService DiscoveryService { get; }
     public UnifiedTestBuilderPipeline TestBuilderPipeline { get; }
     public UnifiedTestExecutor TestExecutor { get; }
     public TUnitMessageBus MessageBus { get; }
@@ -31,7 +31,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TestFilterService TestFilterService { get; }
     public IHookCollectionService HookCollectionService { get; }
     public HookOrchestrator HookOrchestrator { get; }
-    public OptimizedEventReceiverOrchestrator EventReceiverOrchestrator { get; }
+    public EventReceiverOrchestrator EventReceiverOrchestrator { get; }
     public ITestFinder TestFinder { get; }
 
     public TUnitServiceProvider(
@@ -72,7 +72,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         Register<ITestInvoker>(new TestInvoker());
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
         HookOrchestrator = Register(new HookOrchestrator(HookCollectionService, Logger));
-        EventReceiverOrchestrator = Register(new OptimizedEventReceiverOrchestrator(Logger));
+        EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
 
         // Detect execution mode from command line or environment
         var executionMode = GetExecutionMode(CommandLineOptions);
@@ -82,7 +82,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             UnifiedTestBuilderPipelineFactory.CreatePipeline(
                 executionMode, this, assembliesToScan: null));
 
-        DiscoveryService = Register(new TestDiscoveryServiceV2(TestBuilderPipeline));
+        DiscoveryService = Register(new TestDiscoveryService(TestBuilderPipeline));
         
         // Create test finder service after discovery service so it can use its cache
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));

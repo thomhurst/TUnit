@@ -15,7 +15,6 @@ public static class TestContextFactory
     {
         var testContext = new TestContext(
             discoveryContext.TestName,
-            discoveryContext.DisplayName,
             cancellationToken,
             serviceProvider)
         {

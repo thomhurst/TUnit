@@ -8,9 +8,9 @@ namespace TUnit.Engine.Services;
 /// </summary>
 public class TestFinder : ITestFinder
 {
-    private readonly TestDiscoveryServiceV2 _discoveryService;
+    private readonly TestDiscoveryService _discoveryService;
 
-    public TestFinder(TestDiscoveryServiceV2 discoveryService)
+    public TestFinder(TestDiscoveryService discoveryService)
     {
         _discoveryService = discoveryService ?? throw new ArgumentNullException(nameof(discoveryService));
     }

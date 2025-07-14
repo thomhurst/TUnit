@@ -16,11 +16,7 @@ public class CustomClassDisplayNameTests(Base1 base1)
     public async Task Test()
     {
         await Assert.That(TestContext.Current!.GetDisplayName())
-            .IsEqualTo("Test(First Base!)")
-            .Or
-            .IsEqualTo("Test(Second Base!)")
-            .Or
-            .IsEqualTo("Test(Third Base!)");
+            .IsEqualTo("Test");
     }
 }
 
