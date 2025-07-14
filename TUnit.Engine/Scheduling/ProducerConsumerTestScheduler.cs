@@ -141,36 +141,15 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         _channelRouter.SignalCompletion();
         await LoggingExtensions.LogDebugAsync(_logger, "Channel completion signaled");
         
-        // Create completion tracker for dependency handling
-        var completionTracker = new ChannelBasedTestCompletionTracker(executionStates);
-        
-        // Start dependency handler in background
-        var dependencyTask = Task.Run(async () => 
-        {
-            await LoggingExtensions.LogDebugAsync(_logger, "Starting dependency handler");
-            await foreach (var readyTest in completionTracker.ReadyTests.ReadAllAsync(cancellationToken))
-            {
-                if (readyTest.State == TestState.NotStarted && readyTest.RemainingDependencies == 0)
-                {
-                    await LoggingExtensions.LogDebugAsync(_logger, $"Routing dependency-driven test: {readyTest.Test.Context.TestName}");
-                    await RouteTestAsync(readyTest, cancellationToken);
-                }
-            }
-            await LoggingExtensions.LogDebugAsync(_logger, "Dependency handler completed");
-        }, cancellationToken);
-        
         // Start consumers - they will consume until channels are empty and completed
         await LoggingExtensions.LogDebugAsync(_logger, "Starting consumers");
         await _consumerManager.StartConsumersAsync(
             executor,
             _runningConstraintKeys,
-            async (test, token) => await ExecuteTestWithContextAsync(test, executor, completionTracker, token),
+            async (test, token) => await ExecuteTestWithContextAsync(test, executor, executionStates, token),
             _channelRouter.GetMultiplexer(),
             cancellationToken);
         await LoggingExtensions.LogDebugAsync(_logger, "Consumers completed");
-        
-        // Wait for dependency handler to complete
-        await dependencyTask;
         
         await _logger.LogInformationAsync("Test execution completed");
     }
@@ -195,7 +174,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
     private async Task ExecuteTestWithContextAsync(
         TestExecutionData testData,
         ITestExecutor executor,
-        ChannelBasedTestCompletionTracker completionTracker,
+        Dictionary<string, TestExecutionState> executionStates,
         CancellationToken cancellationToken)
     {
         var state = testData.State;
@@ -236,8 +215,8 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                 _runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
             }
             
-            // Notify completion (this will trigger dependency processing)
-            await completionTracker.OnTestCompletedAsync(state, cancellationToken);
+            // Process dependents and route newly ready tests
+            await ProcessTestCompletionAsync(state, executionStates, cancellationToken);
         }
     }
 
@@ -327,6 +306,33 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         var readyTests = executionStates.Values.Where(s => s.RemainingDependencies == 0).ToList();
         
         await LoggingExtensions.LogInformationAsync(_logger, $"Dependency setup: {testsWithDependencies.Count} tests with dependencies, {readyTests.Count} ready tests");
+    }
+    
+    private async Task ProcessTestCompletionAsync(TestExecutionState completedTest, Dictionary<string, TestExecutionState> executionStates, CancellationToken cancellationToken)
+    {
+        // Process dependents of the completed test
+        var newlyReadyTests = new List<TestExecutionState>();
+        
+        foreach (var dependentId in completedTest.Dependents)
+        {
+            if (executionStates.TryGetValue(dependentId, out var dependentState))
+            {
+                var remaining = dependentState.DecrementRemainingDependencies();
+                await LoggingExtensions.LogDebugAsync(_logger, $"Test {dependentId} now has {remaining} remaining dependencies");
+                
+                if (remaining == 0 && dependentState.State == TestState.NotStarted)
+                {
+                    await LoggingExtensions.LogDebugAsync(_logger, $"Test {dependentId} is now ready - routing to channels");
+                    newlyReadyTests.Add(dependentState);
+                }
+            }
+        }
+        
+        // Route all newly ready tests
+        foreach (var readyTest in newlyReadyTests)
+        {
+            await RouteTestAsync(readyTest, cancellationToken);
+        }
     }
     
 }
