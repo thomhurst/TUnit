@@ -53,18 +53,6 @@ public static class DataSourceHelpers
                 return funcTuple6();
             case Func<(object?, object?, object?, object?, object?, object?, object?)> funcTuple7:
                 return funcTuple7();
-                
-            // Handle specific typed tuple functions (common test scenarios)
-            case Func<(int, string, bool)> funcIntStringBool:
-                return funcIntStringBool();
-            case Func<(string, int)> funcStringInt:
-                return funcStringInt();
-            case Func<(int, int)> funcIntInt:
-                return funcIntInt();
-            case Func<(string, string)> funcStringString:
-                return funcStringString();
-            case Func<(int, string)> funcIntString:
-                return funcIntString();
 
             case Func<object> func:
                 return func();
