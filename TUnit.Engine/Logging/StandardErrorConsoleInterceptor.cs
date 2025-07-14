@@ -11,7 +11,7 @@ internal class StandardErrorConsoleInterceptor : OptimizedConsoleInterceptor
 
     public static TextWriter DefaultError { get; }
 
-    protected override TextWriter? RedirectedOut => Context.Current.ErrorOutputWriter;
+    protected override TextWriter RedirectedOut => Context.Current.ErrorOutputWriter;
 
     static StandardErrorConsoleInterceptor()
     {

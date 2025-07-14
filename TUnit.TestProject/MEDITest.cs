@@ -75,6 +75,6 @@ public class MEDIClass : IAsyncInitializer, IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         IsDisposed = true;
-        return default;
+        return default(ValueTask);
     }
 }

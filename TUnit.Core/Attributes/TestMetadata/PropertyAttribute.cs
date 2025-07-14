@@ -45,6 +45,6 @@ public class PropertyAttribute(string name, string value) : TUnitAttribute, ITes
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
         context.AddProperty(Name, Value);
-        return default;
+        return default(ValueTask);
     }
 }

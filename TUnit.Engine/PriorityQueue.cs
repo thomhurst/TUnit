@@ -42,8 +42,8 @@ namespace TUnit.Engine
         {
             if (_elements.Count == 0)
             {
-                value = default;
-                priority = default;
+                value = default(TElement);
+                priority = default(TPriority);
                 return false;
             }
 

@@ -10,6 +10,6 @@ public class SetDisplayNameWithClassAttribute : Attribute, ITestDiscoveryEventRe
     {
         context.SetDisplayName(
             $"{context.TestDetails.ClassMetadata.Name}.{context.GetTestDisplayName()}");
-        return default;
+        return default(ValueTask);
     }
 }

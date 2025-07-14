@@ -25,7 +25,7 @@ public static class TimeOnlyIsExtensions
     public static InvokableValueAssertionBuilder<TimeOnly> IsAfter(this IValueSource<TimeOnly> valueSource,
         TimeOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default(TimeOnly),
                 (value, _, _) => { return value > expected; },
                 (value, _, _) =>
                     $"{Formatter.Format(value)} was not greater than {Formatter.Format(expected)}",
@@ -36,7 +36,7 @@ public static class TimeOnlyIsExtensions
     public static InvokableValueAssertionBuilder<TimeOnly> IsAfterOrEqualTo(this IValueSource<TimeOnly> valueSource,
         TimeOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default(TimeOnly),
                 (value, _, _) => { return value >= expected; },
                 (value, _, _) =>
                     $"{Formatter.Format(value)} was not greater than or equal to {Formatter.Format(expected)}",
@@ -47,7 +47,7 @@ public static class TimeOnlyIsExtensions
     public static InvokableValueAssertionBuilder<TimeOnly> IsBefore(this IValueSource<TimeOnly> valueSource,
         TimeOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default(TimeOnly),
                 (value, _, _) => { return value < expected; },
                 (value, _, _) =>
                     $"{Formatter.Format(value)} was not less than {Formatter.Format(expected)}",
@@ -58,7 +58,7 @@ public static class TimeOnlyIsExtensions
     public static InvokableValueAssertionBuilder<TimeOnly> IsBeforeOrEqualTo(this IValueSource<TimeOnly> valueSource,
         TimeOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default(TimeOnly),
                 (value, _, _) => { return value <= expected; },
                 (value, _, _) =>
                     $"{Formatter.Format(value)} was not less than or equal to {Formatter.Format(expected)}",

@@ -33,7 +33,7 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
             testContext.AddLinkedCancellationToken(_cancellationTokenSource.Token);
         }
 
-        return default;
+        return default(ValueTask);
     }
 
     [Experimental("WIP")]

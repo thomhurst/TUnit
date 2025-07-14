@@ -24,7 +24,7 @@ public abstract class DisplayNameFormatterAttribute : TUnitAttribute, ITestDisco
     {
         var displayName = FormatDisplayName(context);
         context.SetDisplayName(displayName);
-        return default;
+        return default(ValueTask);
     }
 
     /// <summary>

@@ -34,7 +34,7 @@ public class SatisfiesAssertCondition<TActual, TExpected> : BaseAssertCondition<
 
         var innerItemTask = _mapper(actualValue);
 
-        var innerItem = innerItemTask == null ? default : await innerItemTask;
+        var innerItem = innerItemTask == null ? default(TExpected?) : await innerItemTask;
 
         var innerAssertionBuilder = new ValueAssertionBuilder<TExpected?>(innerItem, "");
 

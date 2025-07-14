@@ -14,7 +14,7 @@ public class CastableResultAssertionBuilder<TActual, TExpected> : MappableResult
         }
         catch
         {
-            return default;
+            return default(TExpected?);
         }
     }
 }
@@ -33,7 +33,7 @@ public class CastedAssertionBuilder<TActual, TExpected> : InvokableValueAssertio
         }
         catch
         {
-            return default;
+            return default(TExpected?);
         }
     }
 }

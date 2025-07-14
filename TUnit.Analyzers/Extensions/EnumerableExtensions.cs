@@ -18,12 +18,12 @@ public static class EnumerableExtensions
             }
             else
             {
-                yield return operation(iter1.Current, default);
+                yield return operation(iter1.Current, default(T2?));
             }
         }
         while (iter2.MoveNext())
         {
-            yield return operation(default, iter2.Current);
+            yield return operation(default(T1?), iter2.Current);
         }
     }
 

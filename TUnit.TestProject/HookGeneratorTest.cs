@@ -28,7 +28,7 @@ public class HookGeneratorTest
     public static ValueTask AfterClass(ClassHookContext context)
     {
         Console.WriteLine($"After class hook executed for: {context.ClassType.Name}");
-        return default;
+        return default(ValueTask);
     }
 
     [Test]

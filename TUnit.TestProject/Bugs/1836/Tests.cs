@@ -33,13 +33,13 @@ public class TestDbContext : IAsyncInitializer, IAsyncDisposable, ITestEndEventR
         }
 
         // Delete all rows in the things table.
-        return default;
+        return default(ValueTask);
     }
 
     public ValueTask DisposeAsync()
     {
         _isConnectionOpen = false;
-        return default;
+        return default(ValueTask);
     }
 
     public int Order { get; }

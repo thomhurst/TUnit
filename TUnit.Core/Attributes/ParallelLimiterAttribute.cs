@@ -60,6 +60,6 @@ public sealed class ParallelLimiterAttribute<TParallelLimit> : TUnitAttribute, I
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetParallelLimiter(new TParallelLimit());
-        return default;
+        return default(ValueTask);
     }
 }

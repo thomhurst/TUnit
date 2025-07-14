@@ -11,7 +11,7 @@ public sealed class TestExecutorAttribute<T> : TUnitAttribute, ITestRegisteredEv
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetTestExecutor(new T());
-        return default;
+        return default(ValueTask);
     }
 }
 
@@ -23,6 +23,6 @@ public sealed class TestExecutorAttribute([DynamicallyAccessedMembers(Dynamicall
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetTestExecutor((ITestExecutor) Activator.CreateInstance(type)!);
-        return default;
+        return default(ValueTask);
     }
 }

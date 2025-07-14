@@ -22,7 +22,7 @@ public static class DateTimeIsExtensions
 
     public static InvokableValueAssertionBuilder<DateTime> IsAfter(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default, (value, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default(DateTime), (value, _, _) =>
             {
                 return value > expected;
             },
@@ -33,7 +33,7 @@ public static class DateTimeIsExtensions
 
     public static InvokableValueAssertionBuilder<DateTime> IsAfterOrEqualTo(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default, (value, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default(DateTime), (value, _, _) =>
             {
                 return value >= expected;
             },
@@ -44,7 +44,7 @@ public static class DateTimeIsExtensions
 
     public static InvokableValueAssertionBuilder<DateTime> IsBefore(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default, (value, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default(DateTime), (value, _, _) =>
             {
                 return value < expected;
             },
@@ -56,7 +56,7 @@ public static class DateTimeIsExtensions
     public static InvokableValueAssertionBuilder<DateTime> IsBeforeOrEqualTo(this IValueSource<DateTime> valueSource,
         DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default(DateTime),
                 (value, _, _) => { return value <= expected; },
                 (value, _, _) => $"{Formatter.Format(value)} was not less than or equal to {Formatter.Format(expected)}",
                     $"to be before or equal to {expected}")

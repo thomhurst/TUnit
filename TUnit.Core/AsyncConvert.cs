@@ -19,7 +19,7 @@ public static class AsyncConvert
     public static ValueTask Convert(Action action)
     {
         action();
-        return default;
+        return default(ValueTask);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining
@@ -43,7 +43,7 @@ public static class AsyncConvert
 
         if (task is { IsCompleted: true, IsFaulted: false })
         {
-            return default;
+            return default(ValueTask);
         }
 
         return new ValueTask(task);
@@ -58,13 +58,13 @@ public static class AsyncConvert
     {
         if (invoke is null)
         {
-            return default;
+            return default(ValueTask);
         }
 
         if (invoke is Func<object> syncFunc)
         {
             syncFunc();
-            return default;
+            return default(ValueTask);
         }
 
         if (invoke is Func<Task> asyncFunc)
@@ -82,7 +82,7 @@ public static class AsyncConvert
         {
             if (task is { IsCompleted: true, IsFaulted: false })
             {
-                return default;
+                return default(ValueTask);
             }
 
             if (task.IsFaulted || !task.IsCompleted)
@@ -101,7 +101,7 @@ public static class AsyncConvert
         {
             if (awaitable is { IsCompleted: true, IsFaulted: false })
             {
-                return default;
+                return default(ValueTask);
             }
 
             return new ValueTask(awaitable);
@@ -115,7 +115,7 @@ public static class AsyncConvert
         }
 
         // We can assume it's not awaitable, and so the invocation should have completed synchronously.
-        return default;
+        return default(ValueTask);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The source field does not have matching annotations.")]

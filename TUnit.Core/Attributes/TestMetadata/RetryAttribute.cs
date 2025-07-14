@@ -95,6 +95,6 @@ public class RetryAttribute : TUnitAttribute, ITestDiscoveryEventReceiver
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
         context.SetRetryCount(Times, ShouldRetry);
-        return default;
+        return default(ValueTask);
     }
 }

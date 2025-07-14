@@ -9,6 +9,6 @@ public class SomeAsyncDisposableClass : IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         IsDisposed = true;
-        return default;
+        return default(ValueTask);
     }
 }

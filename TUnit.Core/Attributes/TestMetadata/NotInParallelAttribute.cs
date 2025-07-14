@@ -37,6 +37,6 @@ public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventR
         {
             Order = Order
         });
-        return default;
+        return default(ValueTask);
     }
 }

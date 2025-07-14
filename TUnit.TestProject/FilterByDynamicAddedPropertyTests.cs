@@ -15,7 +15,7 @@ public class FilterByDynamicAddedPropertyTests
         public ValueTask OnTestDiscovered(DiscoveredTestContext context)
         {
             context.AddProperty("MyKey", "MyDynamicallyAddedValue");
-            return default;
+            return default(ValueTask);
         }
 
         public int Order => 0;

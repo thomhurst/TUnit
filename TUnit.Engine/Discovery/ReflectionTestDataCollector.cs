@@ -672,7 +672,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     }
 
     [UnconditionalSuppressMessage("AOT", "IL3050:Using member 'System.Linq.Expressions.Expression.Call(Type, String, Type[], params Expression[])' which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling", Justification = "Reflection mode cannot support AOT")]
-    private static Func<object, object?[], Task>? CreateTestInvoker(Type testClass, MethodInfo testMethod)
+    private static Func<object, object?[], Task> CreateTestInvoker(Type testClass, MethodInfo testMethod)
     {
         return _expressionCache.GetOrCreateTestInvoker(testClass, testMethod, 
             key => CompileTestInvoker(key.Item1, key.Item2));

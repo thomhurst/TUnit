@@ -13,7 +13,7 @@ public class MatrixRangeAttribute<T>(T min, T max, T step)
     {
     }
 
-    private static T?[]? CreateRange(T min, T max, T step)
+    private static T?[] CreateRange(T min, T max, T step)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(min, max);
 

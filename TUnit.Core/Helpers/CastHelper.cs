@@ -11,7 +11,7 @@ public static class CastHelper
     {
         if (value is null)
         {
-            return default;
+            return default(T?);
         }
 
         if (value is T successfulCast)

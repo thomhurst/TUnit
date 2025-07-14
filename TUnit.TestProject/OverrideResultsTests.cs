@@ -27,7 +27,7 @@ public class OverrideResultsTests
         public ValueTask OnTestEnd(TestContext afterTestContext)
         {
             afterTestContext.OverrideResult(TestState.Passed, "Because I said so");
-            return default;
+            return default(ValueTask);
         }
 
         public int Order => 0;

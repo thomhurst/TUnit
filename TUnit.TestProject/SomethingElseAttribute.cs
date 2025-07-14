@@ -6,7 +6,7 @@ public class SomethingElseAttribute : Attribute, ITestStartEventReceiver
 {
     public ValueTask OnTestStart(TestContext testContext)
     {
-        return default;
+        return default(ValueTask);
     }
 
     public int Order => 0;

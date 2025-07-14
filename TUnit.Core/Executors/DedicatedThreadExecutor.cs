@@ -298,6 +298,6 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetParallelLimiter(new ProcessorCountParallelLimit());
-        return default;
+        return default(ValueTask);
     }
 }

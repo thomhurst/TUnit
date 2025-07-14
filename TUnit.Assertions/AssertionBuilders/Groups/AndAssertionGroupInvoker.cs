@@ -36,6 +36,6 @@ public class AndAssertionGroupInvoker<TActual, TAssertionBuilder>
             }
         }
 
-        return default;
+        return default(TActual?);
     }
 }

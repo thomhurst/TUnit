@@ -9,6 +9,6 @@ public class RunOnDiscoveryAttribute : TUnitAttribute, ITestDiscoveryEventReceiv
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
         context.SetRunOnDiscovery(true);
-        return default;
+        return default(ValueTask);
     }
 }

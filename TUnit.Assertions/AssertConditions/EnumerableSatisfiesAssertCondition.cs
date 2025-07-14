@@ -62,7 +62,7 @@ public class EnumerableSatisfiesAssertCondition<TActual, TInner, TExpected> : Ba
     {
         var innerItemTask = _mapper(itemValue);
 
-        var innerItem = innerItemTask == null ? default : await innerItemTask;
+        var innerItem = innerItemTask == null ? default(TExpected?) : await innerItemTask;
 
         var innerAssertionBuilder = new ValueAssertionBuilder<TExpected?>(innerItem, "");
 

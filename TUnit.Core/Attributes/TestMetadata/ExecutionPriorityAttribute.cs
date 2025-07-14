@@ -17,6 +17,6 @@ public class ExecutionPriorityAttribute : SingleTUnitAttribute, ITestDiscoveryEv
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
         context.SetPriority(Priority);
-        return default;
+        return default(ValueTask);
     }
 }

@@ -24,27 +24,27 @@ public class DataClass :
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         IsRegistered = true;
-        return default;
+        return default(ValueTask);
     }
 
 
     public ValueTask OnTestStart(TestContext beforeTestContext)
     {
         IsStarted = true;
-        return default;
+        return default(ValueTask);
     }
 
 
     public ValueTask OnTestEnd(TestContext testContext)
     {
         IsEnded = true;
-        return default;
+        return default(ValueTask);
     }
 
     public ValueTask DisposeAsync()
     {
         IsDisposed = true;
-        return default;
+        return default(ValueTask);
     }
 
     public int Order => 0;

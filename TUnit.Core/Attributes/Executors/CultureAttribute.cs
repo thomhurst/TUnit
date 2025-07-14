@@ -15,6 +15,6 @@ public class CultureAttribute(CultureInfo cultureInfo) : TUnitAttribute, ITestRe
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetTestExecutor(new CultureExecutor(cultureInfo));
-        return default;
+        return default(ValueTask);
     }
 }

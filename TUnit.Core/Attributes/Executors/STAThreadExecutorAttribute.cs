@@ -13,6 +13,6 @@ public class STAThreadExecutorAttribute : TUnitAttribute, ITestRegisteredEventRe
     {
         var executor = new STAThreadExecutor();
         context.SetTestExecutor(executor);
-        return default;
+        return default(ValueTask);
     }
 }

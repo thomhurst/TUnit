@@ -99,7 +99,7 @@ public class PropertySetterTests
         {
             Console.WriteLine(@"Disposing Property");
 
-            return default;
+            return default(ValueTask);
         }
     }
 
@@ -119,7 +119,7 @@ public class PropertySetterTests
         public ValueTask DisposeAsync()
         {
             Console.WriteLine(@"Disposing Static Property");
-            return default;
+            return default(ValueTask);
         }
     }
 

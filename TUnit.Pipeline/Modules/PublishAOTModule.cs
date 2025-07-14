@@ -30,7 +30,7 @@ public class PublishAOTModule : Module<CommandResult>
         }, cancellationToken);
     }
 
-    private string? GetRuntimeIdentifier()
+    private string GetRuntimeIdentifier()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {

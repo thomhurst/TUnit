@@ -38,7 +38,7 @@ public class NotNullStructAssertionBuilderWrapper<TActual> : InvokableValueAsser
     {
         var data = await ProcessAssertionsAsync();
 
-        var tActual = data.Result is TActual actual ? actual : default;
+        var tActual = data.Result is TActual actual ? actual : default(TActual);
 
         return tActual;
     }

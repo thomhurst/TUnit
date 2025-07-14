@@ -80,7 +80,7 @@ public class CustomDisplayNameTests
         public ValueTask OnTestDiscovered(DiscoveredTestContext context)
         {
             context.SetDisplayName($"{context.TestDetails.TestName}(REDACTED)");
-            return default;
+            return default(ValueTask);
         }
 
         public int Order => 0;

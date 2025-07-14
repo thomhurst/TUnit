@@ -14,19 +14,19 @@ public class EventReceiverAttribute : Attribute, ITestStartEventReceiver, ITestE
     public ValueTask OnTestStart(TestContext context)
     {
         Events.Add($"TestStart: {context.GetDisplayName()}");
-        return default;
+        return default(ValueTask);
     }
     
     public ValueTask OnTestEnd(TestContext context)
     {
         Events.Add($"TestEnd: {context.GetDisplayName()}");
-        return default;
+        return default(ValueTask);
     }
     
     public ValueTask OnTestSkipped(TestContext context)
     {
         Events.Add($"TestSkipped: {context.GetDisplayName()}");
-        return default;
+        return default(ValueTask);
     }
 }
 

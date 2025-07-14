@@ -32,7 +32,7 @@ public class PublishSingleFileModule : Module<CommandResult>
         }, cancellationToken);
     }
 
-    private string? GetRuntimeIdentifier()
+    private string GetRuntimeIdentifier()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {

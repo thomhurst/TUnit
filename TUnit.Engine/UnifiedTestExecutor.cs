@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Logging;
@@ -95,25 +94,18 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
         }
         finally
         {
-            if (hookOrchestrator != null)
-            {
-                await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cancellationToken);
-            }
+            await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cancellationToken);
         }
     }
 
-    private HookOrchestrator? CreateHookOrchestrator()
+    private HookOrchestrator CreateHookOrchestrator()
     {
-        if (_serviceProvider?.GetService(typeof(IHookCollectionService)) is IHookCollectionService hookCollectionService)
-        {
-            return new HookOrchestrator(hookCollectionService, _logger);
-        }
-        return null;
+        return new HookOrchestrator(_serviceProvider.HookCollectionService, _logger);
     }
 
     private async Task InitializeEventReceivers(List<ExecutableTest> testList, CancellationToken cancellationToken)
     {
-        var eventReceiverOrchestrator = _serviceProvider?.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
+        var eventReceiverOrchestrator = _serviceProvider.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
         if (eventReceiverOrchestrator == null)
         {
             return;
@@ -256,7 +248,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
             }
         }
 
-        await _logger.LogAsync(TUnit.Core.Logging.LogLevel.Debug,
+        await _logger.LogAsync(Core.Logging.LogLevel.Debug,
             $"After including dependencies: {testsToInclude.Count} tests will be executed",
             null,
             (state, _) => state);
@@ -332,21 +324,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
         await ExecuteTests(tests, request.Filter, messageBus, cancellationToken);
     }
 
-    /// <summary>
-    /// Reflection-based test execution (OBSOLETE - throws NotSupportedException)
-    /// </summary>
-    [Obsolete("Reflection mode has been removed for AOT compatibility. Use ExecuteAsyncWithSourceGeneration instead.")]
-    [RequiresDynamicCode("Generic type resolution requires runtime type generation.")]
-    [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming.")]
-    private Task ExecuteAsyncWithReflection(
-        RunTestExecutionRequest request,
-        IMessageBus messageBus,
-        CancellationToken cancellationToken)
-    {
-        throw new NotSupportedException(
-            "Reflection mode has been removed for AOT compatibility. Use source generation mode only.");
-    }
-
     private bool _disposed;
 
     public void Dispose()
@@ -356,7 +333,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
             return;
         }
 
-        _failFastCancellationSource?.Dispose();
+        _failFastCancellationSource.Dispose();
         _disposed = true;
     }
 
@@ -364,11 +341,12 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
     {
         if (_disposed)
         {
-            return default;
+            return default(ValueTask);
         }
 
-        _failFastCancellationSource?.Dispose();
+        _failFastCancellationSource.Dispose();
         _disposed = true;
-        return default;
+
+        return default(ValueTask);
     }
 }

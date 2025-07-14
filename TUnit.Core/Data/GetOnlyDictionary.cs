@@ -55,7 +55,7 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
                 return value;
             }
 
-            return default;
+            return default(TValue?);
         }
     }
 

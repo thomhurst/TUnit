@@ -34,7 +34,7 @@ public class GenericTestClass<T>
 
     public GenericTestClass()
     {
-        _value = default!;
+        _value = default(T?)!;
     }
 
     [Test]

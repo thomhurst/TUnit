@@ -11,7 +11,7 @@ public abstract class ArgumentDisplayFormatterAttribute : TUnitAttribute, ITestD
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
         context.AddArgumentDisplayFormatter(Formatter);
-        return default;
+        return default(ValueTask);
     }
 }
 

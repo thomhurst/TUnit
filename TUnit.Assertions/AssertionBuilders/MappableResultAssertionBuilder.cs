@@ -21,7 +21,7 @@ public class MappableResultAssertionBuilder<TActual, TExpected> : InvokableValue
     {
         var data = await ProcessAssertionsAsync();
 
-        var tActual = data.Result is TActual actual ? actual : default;
+        var tActual = data.Result is TActual actual ? actual : default(TActual?);
 
         return _mapper(tActual);
     }
@@ -48,7 +48,7 @@ public class MappableResultAssertionBuilder<TActual, TAssertCondition, TExpected
     {
         var data = await ProcessAssertionsAsync();
 
-        var tActual = data.Result is TActual actual ? actual : default;
+        var tActual = data.Result is TActual actual ? actual : default(TActual?);
 
         return _mapper(tActual, _assertCondition);
     }

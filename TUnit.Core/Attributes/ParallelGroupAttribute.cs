@@ -81,6 +81,6 @@ public class ParallelGroupAttribute(string group) : TUnitAttribute, ITestDiscove
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
         context.SetParallelConstraint(new ParallelGroupConstraint(Group, Order));
-        return default;
+        return default(ValueTask);
     }
 }

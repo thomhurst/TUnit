@@ -61,6 +61,6 @@ public class CategoryAttribute(string category) : TUnitAttribute, ITestDiscovery
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
         context.AddCategory(Category);
-        return default;
+        return default(ValueTask);
     }
 }

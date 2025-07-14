@@ -8,7 +8,7 @@ public record InitialisableClass : IAsyncInitializer, IAsyncDisposable
     public virtual ValueTask DisposeAsync()
     {
         DisposedCount += 1;
-        return default;
+        return default(ValueTask);
     }
 
     public int DisposedCount
