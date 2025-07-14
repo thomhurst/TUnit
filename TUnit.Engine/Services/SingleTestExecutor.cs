@@ -51,9 +51,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
         await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
 
         // Invoke first test event receivers if this is the first test
-        var classContext = test.Context.ClassContext;
-        if (classContext != null)
+        if (test.Context.ClassContext != null)
         {
+            var classContext = test.Context.ClassContext;
             var assemblyContext = classContext.AssemblyContext;
             var sessionContext = assemblyContext.TestSessionContext;
 

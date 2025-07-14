@@ -11,6 +11,7 @@ using TUnit.Engine.Building;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;

@@ -22,18 +22,11 @@ internal static class TestSchedulerFactory
     /// </summary>
     public static ITestScheduler Create(SchedulerConfiguration configuration, TUnitFrameworkLogger logger, EngineCancellationToken engineCancellationToken)
     {
-        var parallelismStrategy = configuration.Strategy == ParallelismStrategy.Adaptive
-            ? (IParallelismStrategy) new AdaptiveParallelismStrategy(
-                configuration.MinParallelism,
-                configuration.MaxParallelism)
-            : new FixedParallelismStrategy(configuration.MaxParallelism);
-
         var groupingService = new TestGroupingService();
         
-        return new OrderedConstraintTestScheduler(
-            groupingService,
-            parallelismStrategy,
+        return new ProducerConsumerTestScheduler(
             logger,
-            configuration.TestTimeout);
+            groupingService,
+            configuration);
     }
 }

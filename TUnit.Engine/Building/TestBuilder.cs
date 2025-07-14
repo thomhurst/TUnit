@@ -275,13 +275,15 @@ public sealed class TestBuilder : ITestBuilder
 
     private static TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails, string displayName)
     {
-        return new TestContext(
+        var context = new TestContext(
             metadata.TestName,
             CancellationToken.None,
             new TUnit.Core.Services.TestServiceProvider())
         {
             TestDetails = testDetails
         };
+        
+        return context;
     }
 
     private static void TrackDataSourceObjects(object?[] classArguments, object?[] methodArguments, Dictionary<string, object?> propertyValues)

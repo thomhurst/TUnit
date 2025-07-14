@@ -28,16 +28,6 @@ public sealed class SchedulerConfiguration
     public TimeSpan StallTimeout { get; set; } = TimeSpan.FromMinutes(10);
 
     /// <summary>
-    /// Whether to enable work stealing between threads
-    /// </summary>
-    public bool EnableWorkStealing { get; set; } = true;
-
-    /// <summary>
-    /// Whether to enable adaptive parallelism
-    /// </summary>
-    public bool EnableAdaptiveParallelism { get; set; } = true;
-
-    /// <summary>
     /// Parallelism strategy to use
     /// </summary>
     public ParallelismStrategy Strategy { get; set; } = ParallelismStrategy.Adaptive;

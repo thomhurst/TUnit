@@ -17,7 +17,7 @@ internal class DataSourceGeneratorTests : TestsBase
     public Task Untyped() => RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
             "AutoDataTests.cs"),
-        new RunTestOptions()
+        new RunTestOptions
         {
             AdditionalFiles = [
                 Path.Combine(Git.RootDirectory.FullName,

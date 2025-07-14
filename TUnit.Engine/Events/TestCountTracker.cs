@@ -49,7 +49,7 @@ internal sealed class TestCountTracker
         InitializeCounts("session", contextList.Count);
         
         // Assembly level
-        foreach (var assemblyGroup in contextList.GroupBy(c => c.ClassContext?.AssemblyContext?.Assembly.FullName))
+        foreach (var assemblyGroup in contextList.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.AssemblyContext.Assembly.FullName))
         {
             if (assemblyGroup.Key != null)
             {
@@ -58,7 +58,7 @@ internal sealed class TestCountTracker
         }
         
         // Class level
-        foreach (var classGroup in contextList.GroupBy(c => c.ClassContext?.ClassType))
+        foreach (var classGroup in contextList.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.ClassType))
         {
             if (classGroup.Key != null)
             {

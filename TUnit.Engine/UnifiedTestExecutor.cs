@@ -171,7 +171,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
             cancellationToken,
             _failFastCancellationSource.Token);
 
-        // Schedule and execute tests
+        // Schedule and execute tests (batch approach to preserve ExecutionContext)
         await _testScheduler.ScheduleAndExecuteAsync(testList, executorAdapter, linkedCts.Token);
     }
 

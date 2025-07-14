@@ -441,7 +441,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         var contexts = allTestContexts.ToList();
         _sessionTestCount = contexts.Count;
 
-        foreach (var group in contexts.GroupBy(c => c.ClassContext?.AssemblyContext?.Assembly.FullName))
+        foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.AssemblyContext.Assembly.FullName))
         {
             if (group.Key != null)
             {
@@ -449,7 +449,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             }
         }
 
-        foreach (var group in contexts.GroupBy(c => c.ClassContext?.ClassType))
+        foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.ClassType))
         {
             if (group.Key != null)
             {

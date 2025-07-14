@@ -60,11 +60,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             }
         };
 
-        Console.CancelKeyPress += (_, _) =>
-        {
-            context.Complete();
-        };
-
         // Handle unobserved task exceptions
         TaskScheduler.UnobservedTaskException += (_, args) =>
         {
@@ -90,13 +85,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
-        ConfigureGlobalExceptionHandlers(context);
-
-        var serviceProvider = GetOrCreateServiceProvider(context);
-
         try
         {
+            ConfigureGlobalExceptionHandlers(context);
+
+            var serviceProvider = GetOrCreateServiceProvider(context);
+
             serviceProvider.CancellationToken.Initialise(context.CancellationToken);
+
             await _requestHandler.HandleRequestAsync((TestExecutionRequest) context.Request, serviceProvider, context);
         }
         catch (Exception e) when (IsCancellationException(e))
@@ -104,19 +100,19 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             // Check if this is a normal cancellation or fail-fast cancellation
             if (context.CancellationToken.IsCancellationRequested)
             {
-                await serviceProvider.Logger.LogErrorAsync("The test run was cancelled.");
+                await GetOrCreateServiceProvider(context).Logger.LogErrorAsync("The test run was cancelled.");
             }
             else
             {
                 // This is likely a fail-fast cancellation
-                await serviceProvider.Logger.LogErrorAsync("Test execution stopped due to fail-fast.");
+                await GetOrCreateServiceProvider(context).Logger.LogErrorAsync("Test execution stopped due to fail-fast.");
             }
 
             throw;
         }
         catch (Exception e)
         {
-            await serviceProvider.Logger.LogErrorAsync(e);
+            await GetOrCreateServiceProvider(context).Logger.LogErrorAsync(e);
             await ReportUnhandledException(context, e);
             throw;
         }

@@ -150,6 +150,7 @@ public sealed class UnifiedTestBuilderPipeline
         {
             TestDetails = testDetails
         };
+        
 
         return new FailedExecutableTest(exception)
         {

@@ -162,7 +162,7 @@ internal sealed class HookOrchestrator
     public async Task<ExecutionContext?> ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeTestDiscoveryHooksAsync();
-        var context = new BeforeTestDiscoveryContext()
+        var context = new BeforeTestDiscoveryContext
         {
             TestFilter = null // Will be set by the discovery process
         };

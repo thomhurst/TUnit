@@ -31,7 +31,7 @@ public class TestDiscoveryContext : Context
     public IEnumerable<AssemblyHookContext> Assemblies => field ??= TestClasses.Select(x => x.AssemblyContext).Distinct().ToArray();
 
     [field: AllowNull, MaybeNull]
-    public IEnumerable<ClassHookContext> TestClasses => field ??= AllTests.Select(x => x.ClassContext).Where(x => x != null).Distinct().ToArray()!;
+    public IEnumerable<ClassHookContext> TestClasses => field ??= AllTests.Where(x => x.ClassContext != null).Select(x => x.ClassContext!).Distinct().ToArray();
 
     public IReadOnlyList<TestContext> AllTests { get; private set; } = [];
 

@@ -136,9 +136,14 @@ public class TestContext : Context
     public Priority ExecutionPriority { get; set; } = Priority.Normal;
 
     /// <summary>
-    /// Class context
+    /// Class context - will be null until initialized by HookOrchestrator
     /// </summary>
     public ClassHookContext? ClassContext { get; set; }
+    
+    /// <summary>
+    /// Internal property to safely check if ClassContext has been initialized
+    /// </summary>
+    internal bool HasClassContext => ClassContext != null;
 
     /// <summary>
     /// Linked cancellation tokens

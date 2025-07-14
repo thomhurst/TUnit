@@ -11,16 +11,17 @@ namespace TUnit.Engine.Services;
 
 internal class TestFilterService(TUnitFrameworkLogger logger)
 {
+    private readonly TUnitFrameworkLogger _logger = logger;
     public IReadOnlyCollection<ExecutableTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IReadOnlyCollection<ExecutableTest> testNodes)
     {
         if (testExecutionFilter is null or NopFilter)
         {
-            logger.LogTrace("No test filter found.");
+            _logger.LogTrace("No test filter found.");
 
             return testNodes;
         }
 
-        logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
+        _logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
 
         // Create pre-sized list if we can estimate the size
         var filteredTests = new List<ExecutableTest>();
@@ -71,7 +72,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
             }
         }
 
-        await logger.LogAsync(Core.Logging.LogLevel.Debug,
+        await _logger.LogAsync(Core.Logging.LogLevel.Debug,
             $"After including dependencies: {testsToInclude.Count} tests will be executed",
             null,
             (state, _) => state);
@@ -79,13 +80,13 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
         var resultList = testsToInclude.ToList();
         foreach (var test in resultList)
         {
-            await InvokeTestRegisteredEventReceiversAsync(test);
+            await RegisterTest(test);
         }
 
         return resultList;
     }
 
-    private async Task InvokeTestRegisteredEventReceiversAsync(ExecutableTest test)
+    private async Task RegisterTest(ExecutableTest test)
     {
         var discoveredTest = new DiscoveredTest<object>
         {
@@ -111,10 +112,12 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
                 }
                 catch (Exception ex)
                 {
-                    await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
+                    await _logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
                 }
             }
         }
+        
+        // Register test for execution (keeping original functionality)
     }
 
     public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, ExecutableTest executableTest)
@@ -156,10 +159,10 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
             }
             var path = BuildPath(executableTest);
             var propertyBag = BuildPropertyBag(executableTest);
-            logger.LogDebug($"Checking TreeNodeFilter for path: {path}");
+            _logger.LogDebug($"Checking TreeNodeFilter for path: {path}");
 
             var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
-            logger.LogDebug($"Filter match result: {matches}");
+            _logger.LogDebug($"Filter match result: {matches}");
 
             return matches;
         }
@@ -172,7 +175,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
 
     private bool UnhandledFilter(ITestExecutionFilter testExecutionFilter)
     {
-        logger.LogWarning($"Filter is Unhandled Type: {testExecutionFilter.GetType().FullName}");
+        _logger.LogWarning($"Filter is Unhandled Type: {testExecutionFilter.GetType().FullName}");
         return true;
     }
 
