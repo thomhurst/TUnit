@@ -5,7 +5,6 @@ using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 using TUnit.Engine.Execution;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 using LoggingExtensions = TUnit.Core.Logging.LoggingExtensions;
@@ -114,42 +113,32 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         }
         
         // Set up dependency graph
-        await LoggingExtensions.LogDebugAsync(_logger, "Setting up dependency graph");
         await SetupDependencyGraphAsync(executionStates, cancellationToken);
-        await LoggingExtensions.LogDebugAsync(_logger, "Dependency graph setup complete");
 
         // Pre-create channels for all constraint keys to avoid dynamic creation during execution
         await PreCreateChannelsForConstraintsAsync(executionStates.Values, cancellationToken);
         
-        // Route all ready tests (ignoring dependencies for now to simplify)
+        // Route all ready tests
         var readyTests = executionStates.Values.Where(s => s.RemainingDependencies == 0).ToList();
-        await LoggingExtensions.LogDebugAsync(_logger, $"Found {readyTests.Count} ready tests to route");
         
         // Route all tests to channels in batches
         const int batchSize = 100;
         for (int i = 0; i < readyTests.Count; i += batchSize)
         {
             var batch = readyTests.Skip(i).Take(batchSize);
-            await LoggingExtensions.LogDebugAsync(_logger, $"Routing batch {i / batchSize + 1} with {batch.Count()} tests");
             await Task.WhenAll(batch.Select(state => RouteTestAsync(state, cancellationToken)));
         }
         
-        await LoggingExtensions.LogDebugAsync(_logger, "Completed routing all tests");
-        
         // Signal completion - no more tests will be added
-        await LoggingExtensions.LogDebugAsync(_logger, "Signaling channel completion");
         _channelRouter.SignalCompletion();
-        await LoggingExtensions.LogDebugAsync(_logger, "Channel completion signaled");
         
         // Start consumers - they will consume until channels are empty and completed
-        await LoggingExtensions.LogDebugAsync(_logger, "Starting consumers");
         await _consumerManager.StartConsumersAsync(
             executor,
             _runningConstraintKeys,
             async (test, token) => await ExecuteTestWithContextAsync(test, executor, executionStates, token),
             _channelRouter.GetMultiplexer(),
             cancellationToken);
-        await LoggingExtensions.LogDebugAsync(_logger, "Consumers completed");
         
         await _logger.LogInformationAsync("Test execution completed");
     }
@@ -166,8 +155,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             State = state
         };
 
-        // Don't await to avoid blocking - let the router handle backpressure
-        await LoggingExtensions.LogDebugAsync(_logger, $"Routing test: {testData.Test.Context.TestName} with {testData.Constraints.Count} constraints");
+        // Route test to appropriate channel
         await _channelRouter.RouteTestAsync(testData, cancellationToken);
     }
 
@@ -244,7 +232,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         return keys;
     }
     
-    private async Task PreCreateChannelsForConstraintsAsync(IEnumerable<TestExecutionState> states, CancellationToken cancellationToken)
+    private Task PreCreateChannelsForConstraintsAsync(IEnumerable<TestExecutionState> states, CancellationToken cancellationToken)
     {
         var allConstraintKeys = new HashSet<string>();
         
@@ -270,7 +258,8 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             }
         }
         
-        await LoggingExtensions.LogDebugAsync(_logger, $"Pre-created channels for {allConstraintKeys.Count} constraint keys");
+        // Pre-created channels for constraint keys
+        return Task.CompletedTask;
     }
     
     private async Task SetupDependencyGraphAsync(Dictionary<string, TestExecutionState> executionStates, CancellationToken cancellationToken)
@@ -292,7 +281,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                 {
                     // Add this test as a dependent of the dependency
                     dependencyState.Dependents.Add(testId);
-                    await LoggingExtensions.LogDebugAsync(_logger, $"Test {testId} depends on {dependency.TestId}");
+                    // Dependency relationship established
                 }
                 else
                 {
@@ -318,11 +307,11 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             if (executionStates.TryGetValue(dependentId, out var dependentState))
             {
                 var remaining = dependentState.DecrementRemainingDependencies();
-                await LoggingExtensions.LogDebugAsync(_logger, $"Test {dependentId} now has {remaining} remaining dependencies");
+                // Dependency count decremented
                 
                 if (remaining == 0 && dependentState.State == TestState.NotStarted)
                 {
-                    await LoggingExtensions.LogDebugAsync(_logger, $"Test {dependentId} is now ready - routing to channels");
+                    // Test is now ready for execution
                     newlyReadyTests.Add(dependentState);
                 }
             }

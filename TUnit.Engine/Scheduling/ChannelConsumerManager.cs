@@ -59,7 +59,7 @@ internal class ChannelConsumerManager
         Func<TestExecutionData, CancellationToken, Task> executeTestFunc,
         CancellationToken cancellationToken)
     {
-        await LoggingExtensions.LogDebugAsync(_logger, $"Universal work-stealing consumer {consumerName} started");
+        // Consumer started
 
         try
         {
@@ -72,17 +72,17 @@ internal class ChannelConsumerManager
                 if (multiplexer.HighPriorityChannel.Reader.TryRead(out testData))
                 {
                     foundWork = true;
-                    await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} found work in HighPriorityChannel: {testData.Test.Context.TestName}");
+                    // Work found in HighPriorityChannel
                 }
                 else if (multiplexer.UnconstrainedChannel.Reader.TryRead(out testData))
                 {
                     foundWork = true;
-                    await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} found work in UnconstrainedChannel: {testData.Test.Context.TestName}");
+                    // Work found in UnconstrainedChannel
                 }
                 else if (multiplexer.GlobalNotInParallelChannel.Reader.TryRead(out testData))
                 {
                     foundWork = true;
-                    await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} found work in GlobalNotInParallelChannel: {testData.Test.Context.TestName}");
+                    // Work found in GlobalNotInParallelChannel
                 }
                 else
                 {
@@ -95,7 +95,7 @@ internal class ChannelConsumerManager
                             channel.Reader.TryRead(out testData))
                         {
                             foundWork = true;
-                            await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} found work in dynamic channel: {testData.Test.Context.TestName}");
+                            // Work found in dynamic channel
                             break;
                         }
                     }
@@ -126,12 +126,12 @@ internal class ChannelConsumerManager
                     var allChannels = multiplexer.GetAllChannels().Select(c => c.Reader).ToList();
                     var activeChannels = allChannels.Where(c => !c.Completion.IsCompleted).ToList();
                     
-                    await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} - no work found. Total channels: {allChannels.Count}, Active channels: {activeChannels.Count}");
+                    // No work found, checking channel completion
                     
                     if (activeChannels.Count == 0)
                     {
                         // All channels completed, exit
-                        await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} exiting - all channels completed");
+                        // All channels completed, consumer exiting
                         break;
                     }
                     
@@ -144,7 +144,7 @@ internal class ChannelConsumerManager
                     {
                         try
                         {
-                            await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} waiting for {waitTasks.Length} channels");
+                            // Waiting for channels
                             await Task.WhenAny(waitTasks);
                         }
                         catch (ChannelClosedException)
@@ -167,11 +167,11 @@ internal class ChannelConsumerManager
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            await LoggingExtensions.LogDebugAsync(_logger, $"Universal work-stealing consumer {consumerName} cancelled");
+            // Consumer cancelled
         }
         finally
         {
-            await LoggingExtensions.LogDebugAsync(_logger, $"Universal work-stealing consumer {consumerName} stopped");
+            // Consumer stopped
         }
     }
 

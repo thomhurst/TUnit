@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Threading.Channels;
 using TUnit.Core.Enums;
 using TUnit.Engine.Logging;
-using LoggingExtensions = TUnit.Core.Logging.LoggingExtensions;
 
 namespace TUnit.Engine.Scheduling;
 
@@ -19,12 +18,9 @@ internal class TestChannelRouter
 
     public async Task RouteTestAsync(TestExecutionData testData, CancellationToken cancellationToken)
     {
-        await LoggingExtensions.LogDebugAsync(_logger, $"RouteTestAsync: {testData.Test.Context.TestName} with priority {testData.Priority}, constraints: [{string.Join(", ", testData.Constraints)}]");
-        
         // Route based on priority first
         if (testData.Priority == Priority.High)
         {
-            await LoggingExtensions.LogDebugAsync(_logger, $"Routing to HighPriorityChannel: {testData.Test.Context.TestName}");
             await _multiplexer.HighPriorityChannel.Writer.WriteAsync(testData, cancellationToken);
             return;
         }
@@ -35,13 +31,11 @@ internal class TestChannelRouter
         if (constraints.Count == 0)
         {
             // Unconstrained test
-            await LoggingExtensions.LogDebugAsync(_logger, $"Routing to UnconstrainedChannel: {testData.Test.Context.TestName}");
             await _multiplexer.UnconstrainedChannel.Writer.WriteAsync(testData, cancellationToken);
         }
         else if (constraints.Contains("__global_not_in_parallel__"))
         {
             // Global NotInParallel
-            await LoggingExtensions.LogDebugAsync(_logger, $"Routing to GlobalNotInParallelChannel: {testData.Test.Context.TestName}");
             await _multiplexer.GlobalNotInParallelChannel.Writer.WriteAsync(testData, cancellationToken);
         }
         else if (constraints.Any(c => c.StartsWith("__parallel_group_")))
@@ -49,7 +43,6 @@ internal class TestChannelRouter
             // ParallelGroup constraint
             var groupKey = constraints.First(c => c.StartsWith("__parallel_group_"));
             var channel = _multiplexer.GetOrCreateParallelGroupChannel(groupKey);
-            await LoggingExtensions.LogDebugAsync(_logger, $"Routing to ParallelGroupChannel ({groupKey}): {testData.Test.Context.TestName}");
             await channel.Writer.WriteAsync(testData, cancellationToken);
         }
         else
@@ -57,7 +50,6 @@ internal class TestChannelRouter
             // Keyed NotInParallel
             var key = constraints.First(); // Use first constraint as channel key
             var channel = _multiplexer.GetOrCreateKeyedNotInParallelChannel(key);
-            await LoggingExtensions.LogDebugAsync(_logger, $"Routing to KeyedNotInParallelChannel ({key}): {testData.Test.Context.TestName}");
             await channel.Writer.WriteAsync(testData, cancellationToken);
         }
     }
@@ -123,7 +115,7 @@ internal class ChannelMultiplexer
     {
         return _keyedNotInParallelChannels.GetOrAdd(key, k =>
         {
-            _ = LoggingExtensions.LogDebugAsync(_logger, $"Creating keyed NotInParallel channel for key: {k}");
+            // Creating keyed NotInParallel channel
             var options = new BoundedChannelOptions(1000)
             {
                 FullMode = BoundedChannelFullMode.Wait,
@@ -141,7 +133,7 @@ internal class ChannelMultiplexer
     {
         return _parallelGroupChannels.GetOrAdd(groupKey, k =>
         {
-            _ = LoggingExtensions.LogDebugAsync(_logger, $"Creating ParallelGroup channel for group: {k}");
+            // Creating ParallelGroup channel
             var options = new BoundedChannelOptions(1000)
             {
                 FullMode = BoundedChannelFullMode.Wait,
@@ -176,29 +168,18 @@ internal class ChannelMultiplexer
 
     public void SignalCompletion()
     {
-        _ = LoggingExtensions.LogDebugAsync(_logger, "Signaling completion to all channels");
-        
-        var completedChannels = 0;
-        
-        if (HighPriorityChannel.Writer.TryComplete())
-            completedChannels++;
-        if (UnconstrainedChannel.Writer.TryComplete())
-            completedChannels++;
-        if (GlobalNotInParallelChannel.Writer.TryComplete())
-            completedChannels++;
+        HighPriorityChannel.Writer.TryComplete();
+        UnconstrainedChannel.Writer.TryComplete();
+        GlobalNotInParallelChannel.Writer.TryComplete();
         
         foreach (var channel in _keyedNotInParallelChannels.Values)
         {
-            if (channel.Writer.TryComplete())
-                completedChannels++;
+            channel.Writer.TryComplete();
         }
         
         foreach (var channel in _parallelGroupChannels.Values)
         {
-            if (channel.Writer.TryComplete())
-                completedChannels++;
+            channel.Writer.TryComplete();
         }
-        
-        _ = LoggingExtensions.LogDebugAsync(_logger, $"Completed {completedChannels} channels");
     }
 }

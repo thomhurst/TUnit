@@ -63,7 +63,7 @@ internal class ExecutionContextManager
         // This is just a placeholder to show where hierarchy restoration would occur
         // In practice, the HookOrchestrator handles this during test execution
         
-        _ = LoggingExtensions.LogDebugAsync(_logger, $"Context hierarchy prepared for test {testContext.TestName}");
+        // Context hierarchy prepared
     }
 
     public ExecutionContext? CaptureCurrentContext()
@@ -72,9 +72,9 @@ internal class ExecutionContextManager
         {
             return ExecutionContext.Capture();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _ = LoggingExtensions.LogWarningAsync(_logger, $"Failed to capture ExecutionContext: {ex.Message}");
+            // Failed to capture ExecutionContext - using current context
             return null;
         }
     }
