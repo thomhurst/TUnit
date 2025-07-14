@@ -23,6 +23,7 @@ public class ClassHookContext : Context
     public void AddTest(TestContext testContext)
     {
         _tests.Add(testContext);
+        testContext.ClassContext = this;
     }
 
     public IReadOnlyList<TestContext> Tests => _tests;

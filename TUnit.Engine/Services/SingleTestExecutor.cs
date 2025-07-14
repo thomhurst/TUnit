@@ -3,6 +3,7 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Data;
+using TUnit.Core.Models;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -137,6 +138,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
         // Inject properties if any are defined
         await InjectPropertiesAsync(test, instance);
 
+        // Restore hook contexts before test execution
+        RestoreHookContexts(test.Context);
         test.Context.RestoreExecutionContext();
 
         try
@@ -167,6 +170,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             try
             {
+                // Restore hook contexts before executing the hook
+                RestoreHookContexts(context);
+                
                 await hook(context, cancellationToken);
                 context.RestoreExecutionContext();
             }
@@ -184,6 +190,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             try
             {
+                // Restore hook contexts before executing the hook
+                RestoreHookContexts(context);
+                
                 await hook(context, cancellationToken);
                 context.RestoreExecutionContext();
             }
@@ -390,6 +399,19 @@ internal class SingleTestExecutor : ISingleTestExecutor
                     }
                 }
             }
+        }
+    }
+
+    private static void RestoreHookContexts(TestContext context)
+    {
+        if (context.ClassContext != null)
+        {
+            // Restore assembly context first
+            var assemblyContext = context.ClassContext.AssemblyContext;
+            AssemblyHookContext.Current = assemblyContext;
+            
+            // Then restore class context
+            ClassHookContext.Current = context.ClassContext;
         }
     }
 }

@@ -122,16 +122,13 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
         }
     }
 
-    private async Task PrepareHookOrchestrator(HookOrchestrator? hookOrchestrator, List<ExecutableTest> testList, CancellationToken cancellationToken)
+    private async Task PrepareHookOrchestrator(HookOrchestrator hookOrchestrator, List<ExecutableTest> testList, CancellationToken cancellationToken)
     {
         // Initialize static properties with data source attributes before any other session setup
         await InitializeStaticPropertiesAsync(cancellationToken);
 
-        if (hookOrchestrator != null)
-        {
-            await hookOrchestrator.InitializeContextsWithTestsAsync(testList, cancellationToken);
-            await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
-        }
+        await hookOrchestrator.InitializeContextsWithTestsAsync(testList, cancellationToken);
+        await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
     }
 
     private async Task InitializeStaticPropertiesAsync(CancellationToken cancellationToken)
@@ -152,27 +149,19 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
         }
     }
 
-    private Scheduling.ITestExecutor CreateExecutorAdapter(HookOrchestrator? hookOrchestrator, IMessageBus messageBus)
+    private Scheduling.ITestExecutor CreateExecutorAdapter(HookOrchestrator hookOrchestrator, IMessageBus messageBus)
     {
         var isFailFastEnabled = IsFailFastEnabled();
         var sessionUid = _sessionUid ?? new SessionUid(Guid.NewGuid().ToString());
 
-        return hookOrchestrator != null
-            ? new HookOrchestratingTestExecutorAdapter(
-                _singleTestExecutor,
-                messageBus,
-                sessionUid,
-                isFailFastEnabled,
-                _failFastCancellationSource,
-                _logger,
-                hookOrchestrator)
-            : new FailFastTestExecutorAdapter(
-                _singleTestExecutor,
-                messageBus,
-                sessionUid,
-                isFailFastEnabled,
-                _failFastCancellationSource,
-                _logger);
+        return new HookOrchestratingTestExecutorAdapter(
+            _singleTestExecutor,
+            messageBus,
+            sessionUid,
+            isFailFastEnabled,
+            _failFastCancellationSource,
+            _logger,
+            hookOrchestrator);
     }
 
     private async Task ExecuteTestsCore(List<ExecutableTest> testList, Scheduling.ITestExecutor executorAdapter, CancellationToken cancellationToken)
