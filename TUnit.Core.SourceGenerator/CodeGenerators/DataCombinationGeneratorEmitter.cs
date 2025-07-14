@@ -457,13 +457,13 @@ public static class DataCombinationGeneratorEmitter
             writer.Indent();
             
             // Check if each enumerated item is a Func and needs invocation
+            writer.AppendLine("var processedData = data;");
             if (dataSourceMethod.ReturnType is INamedTypeSymbol enumerableType && 
                 enumerableType.TypeArguments.Length > 0 && 
                 IsFuncType(enumerableType.TypeArguments[0]))
             {
                 writer.AppendLine("// Enumerable contains Func<T> items, invoke to get actual value");
-                writer.AppendLine("var actualData = data();");
-                writer.AppendLine("data = actualData;");
+                writer.AppendLine("processedData = data();");
             }
 
             writer.AppendLine($"{listName}.Add(new TestDataCombination");
@@ -475,12 +475,12 @@ public static class DataCombinationGeneratorEmitter
                 // For class-level data sources, pass constructor parameter count
                 var ctorParamCount = methodSymbol.ContainingType.Constructors
                     .FirstOrDefault(c => !c.IsStatic)?.Parameters.Length ?? 0;
-                writer.AppendLine($"ClassDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(data, {ctorParamCount}),");
+                writer.AppendLine($"ClassDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(processedData, {ctorParamCount}),");
             }
             else
             {
                 // For method-level data sources, pass method parameter count
-                writer.AppendLine($"MethodDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(data, {methodSymbol.Parameters.Length}),");
+                writer.AppendLine($"MethodDataFactories = global::TUnit.Core.Helpers.DataSourceHelpers.ProcessTestDataSource(processedData, {methodSymbol.Parameters.Length}),");
             }
 
             // Always write both indices
