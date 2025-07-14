@@ -52,7 +52,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         try
         {
             var previousContext = SynchronizationContext.Current;
-            var taskScheduler = new DedicatedThreadTaskScheduler();
+            var taskScheduler = new DedicatedThreadTaskScheduler(Thread.CurrentThread);
             var dedicatedContext = new DedicatedThreadSynchronizationContext(taskScheduler);
 
             SynchronizationContext.SetSynchronizationContext(dedicatedContext);
@@ -123,11 +123,16 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
     internal sealed class DedicatedThreadTaskScheduler : TaskScheduler
     {
-        private readonly Thread _dedicatedThread = Thread.CurrentThread;
+        private readonly Thread _dedicatedThread;
         private readonly List<Task> _taskQueue =
         [
         ];
         private readonly Lock _queueLock = new();
+
+        public DedicatedThreadTaskScheduler(Thread dedicatedThread)
+        {
+            _dedicatedThread = dedicatedThread;
+        }
 
         protected override void QueueTask(Task task)
         {

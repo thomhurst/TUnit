@@ -120,6 +120,14 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
         // Register test for execution (keeping original functionality)
     }
 
+    public async Task RegisterTestsAsync(IEnumerable<ExecutableTest> tests)
+    {
+        foreach (var test in tests)
+        {
+            await RegisterTest(test);
+        }
+    }
+
     public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, ExecutableTest executableTest)
     {
 #pragma warning disable TPEXP

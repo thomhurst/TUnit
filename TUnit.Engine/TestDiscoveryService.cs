@@ -82,6 +82,9 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         var filteredTests = _testFilterService.FilterTests(filter, tests);
 
+        // Register the filtered tests to invoke ITestRegisteredEventReceiver
+        await _testFilterService.RegisterTestsAsync(filteredTests);
+
         // Capture the final execution context after discovery
         var finalContext = ExecutionContext.Capture();
         return new TestDiscoveryResult(filteredTests, finalContext);

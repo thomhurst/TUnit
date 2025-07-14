@@ -77,7 +77,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
         var testList = tests.ToList();
 
         var hookOrchestrator = _serviceProvider.HookOrchestrator;
-        await InitializeEventReceivers(testList, cancellationToken);
+        InitializeEventReceivers(testList, cancellationToken);
 
         try
         {
@@ -97,7 +97,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
         }
     }
 
-    private async Task InitializeEventReceivers(List<ExecutableTest> testList, CancellationToken cancellationToken)
+    private void InitializeEventReceivers(List<ExecutableTest> testList, CancellationToken cancellationToken)
     {
         var eventReceiverOrchestrator = _serviceProvider.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
         if (eventReceiverOrchestrator == null)
@@ -109,11 +109,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
         var testContexts = testList.Select(t => t.Context);
         eventReceiverOrchestrator.InitializeTestCounts(testContexts);
 
-        // Invoke test registered event receivers for all tests that passed filtering
-        foreach (var test in testList)
-        {
-            await eventReceiverOrchestrator.InvokeTestRegisteredEventReceiversAsync(test.Context, cancellationToken);
-        }
+        // Test registered event receivers are now invoked during discovery phase
     }
 
     private async Task PrepareHookOrchestrator(HookOrchestrator hookOrchestrator, List<ExecutableTest> testList, CancellationToken cancellationToken)
