@@ -8,7 +8,7 @@ namespace TUnit.Core;
 public class TestRegisteredContext
 {
     public string TestName { get; }
-    public string DisplayName { get; }
+    public string? CustomDisplayName { get; }
     public TestContext TestContext { get; }
     public DiscoveredTest DiscoveredTest { get; set; } = null!;
 
@@ -16,7 +16,7 @@ public class TestRegisteredContext
     {
         TestContext = testContext;
         TestName = testContext.TestName;
-        DisplayName = testContext.DisplayName;
+        CustomDisplayName = testContext.CustomDisplayName;
     }
 
     /// <summary>

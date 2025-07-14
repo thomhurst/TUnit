@@ -11,7 +11,7 @@ public class HumanizerDisplayNameTests
     public void This_test_name_is_formatted_nicely()
     {
         // Dummy method
-        Console.WriteLine(TestContext.Current!.GetTestDisplayName());
+        Console.WriteLine(TestContext.Current!.GetDisplayName());
     }
 
     public class HumanizerDisplayNameAttribute : DisplayNameFormatterAttribute

@@ -6,8 +6,15 @@ public static class MethodExtensions
 {
     public static AttributeData? GetTestAttribute(this IMethodSymbol methodSymbol)
     {
-        return methodSymbol.GetAttributes()
-            .SafeFirstOrDefault(x => x.AttributeClass?.BaseType?.GloballyQualified()
+        var attributes = methodSymbol.GetAttributes();
+
+        if (attributes.IsDefaultOrEmpty)
+        {
+            return null;
+        }
+
+        return attributes
+            .FirstOrDefault(x => x.AttributeClass?.BaseType?.GloballyQualified()
                                  == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix);
     }
 

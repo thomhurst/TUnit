@@ -107,7 +107,10 @@
       "mcp__desktop-commander__read_output",
       "Bash(git revert:*)",
       "Bash(Get-Date -Format \"yyyy-MM-dd-HHmm\")",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(git rm:*)",
+      "Bash(del /F /Q TUnit.TestProjectbinDebugnet8.0TestResults*.log)",
+      "Bash(taskkill:*)"
     ],
     "deny": []
   },

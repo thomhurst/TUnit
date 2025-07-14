@@ -14,7 +14,7 @@ internal static class TestExtensions
         var testNode = new TestNode
         {
             Uid = new TestNodeUid(testDetails.TestId),
-            DisplayName = testContext.GetTestDisplayName(),
+            DisplayName = testContext.GetDisplayName(),
             Properties = new PropertyBag(
             [
                 new TestFileLocationProperty(testDetails.TestFilePath, new LinePositionSpan(

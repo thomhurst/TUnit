@@ -25,14 +25,6 @@ public static class TestContextExtensions
     }
 
     /// <summary>
-    /// Gets the test display name
-    /// </summary>
-    public static string GetDisplayName(this TestContext context)
-    {
-        return context.DisplayName;
-    }
-
-    /// <summary>
     /// Adds a dynamic test to the test context
     /// </summary>
     [RequiresDynamicCode("Uses MakeGenericMethod for dynamic test registration")]
