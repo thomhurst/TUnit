@@ -174,10 +174,11 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         return base.VisitInvocationExpression(node);
     }
 
+#if ROSLYN4_7_OR_GREATER
     public override SyntaxNode? VisitCollectionExpression(CollectionExpressionSyntax node)
     {
         // For collection expressions, visit each element and ensure proper type conversion
-        var rewrittenElements = node.Elements.Select(element => 
+        var rewrittenElements = node.Elements.Select(element =>
         {
             if (element is ExpressionElementSyntax expressionElement)
             {
@@ -188,7 +189,8 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         }).ToList();
 
         return SyntaxFactory.CollectionExpression(
-            SyntaxFactory.SeparatedList<CollectionElementSyntax>(rewrittenElements)
+            SyntaxFactory.SeparatedList(rewrittenElements)
         );
     }
+#endif
 }
