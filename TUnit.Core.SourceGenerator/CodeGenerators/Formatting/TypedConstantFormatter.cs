@@ -25,7 +25,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 return $"typeof({type.ToDisplayString(FullyQualifiedFormat)})";
                 
             case TypedConstantKind.Array:
-                return FormatArrayForCode(constant);
+                return FormatArrayForCode(constant, targetType);
                 
             case TypedConstantKind.Error:
                 return "default";
@@ -183,11 +183,22 @@ public class TypedConstantFormatter : ITypedConstantFormatter
             : $"({enumType.ToDisplayString(FullyQualifiedFormat)}){formattedValue}";
     }
 
-    private string FormatArrayForCode(TypedConstant constant)
+    private string FormatArrayForCode(TypedConstant constant, ITypeSymbol? targetType = null)
     {
-        var elements = constant.Values.Select(v => FormatForCode(v));
-        var elementType = (constant.Type as IArrayTypeSymbol)?.ElementType.ToDisplayString(FullyQualifiedFormat) ?? "object";
-        return $"new {elementType}[] {{ {string.Join(", ", elements)} }}";
+        // For arrays, determine the element type from the target type if available
+        ITypeSymbol? elementType = null;
+        if (targetType is IArrayTypeSymbol arrayTargetType)
+        {
+            elementType = arrayTargetType.ElementType;
+        }
+        else
+        {
+            elementType = (constant.Type as IArrayTypeSymbol)?.ElementType;
+        }
+        
+        var elements = constant.Values.Select(v => FormatForCode(v, elementType));
+        var elementTypeString = elementType?.ToDisplayString(FullyQualifiedFormat) ?? "object";
+        return $"new {elementTypeString}[] {{ {string.Join(", ", elements)} }}";
     }
 
     private static string FormatPrimitive(object? value)

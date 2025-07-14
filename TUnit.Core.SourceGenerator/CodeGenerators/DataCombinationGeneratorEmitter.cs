@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
@@ -292,19 +294,11 @@ public static class DataCombinationGeneratorEmitter
                 ])
             {
                 var values = attr.ConstructorArguments[0].Values;
-                for (var i = 0; i < values.Length; i++)
-                {
-                    var targetType = i < parameters.Length ? parameters[i].Type : null;
-                    formattedArgs.Add(FormatConstantValueWithType(values[i], targetType));
-                }
+                formattedArgs.AddRange(ProcessArgumentsForParams(values, parameters));
             }
             else
             {
-                for (var i = 0; i < attr.ConstructorArguments.Length; i++)
-                {
-                    var targetType = i < parameters.Length ? parameters[i].Type : null;
-                    formattedArgs.Add(FormatConstantValueWithType(attr.ConstructorArguments[i], targetType));
-                }
+                formattedArgs.AddRange(ProcessArgumentsForParams(attr.ConstructorArguments, parameters));
             }
 
             writer.AppendLine($"{listName}.Add(new TestDataCombination");
@@ -1621,5 +1615,84 @@ public static class DataCombinationGeneratorEmitter
         // Finally, initialize the instance itself if it implements IAsyncInitializer
         writer.AppendLine($"await global::TUnit.Core.ObjectInitializer.InitializeAsync({instanceName});");
         writer.AppendLine();
+    }
+
+    /// <summary>
+    /// Gets the target type for a given argument index, handling params parameters correctly.
+    /// For params parameters, returns the element type of the array instead of the array type itself.
+    /// </summary>
+    private static ITypeSymbol? GetTargetTypeForArgument(ImmutableArray<IParameterSymbol> parameters, int argumentIndex)
+    {
+        if (argumentIndex >= parameters.Length)
+        {
+            return null;
+        }
+
+        var parameter = parameters[argumentIndex];
+        
+        // If this is the last parameter and it's a params parameter
+        if (argumentIndex == parameters.Length - 1 && parameter.IsParams)
+        {
+            // For params parameters, we need to use the element type of the array
+            if (parameter.Type is IArrayTypeSymbol arrayType)
+            {
+                return arrayType.ElementType;
+            }
+        }
+        
+        // For regular parameters, return the parameter type
+        return parameter.Type;
+    }
+
+    private static List<string> ProcessArgumentsForParams(ImmutableArray<TypedConstant> arguments, ImmutableArray<IParameterSymbol> parameters)
+    {
+        var formattedArgs = new List<string>();
+        
+        if (parameters.IsEmpty)
+        {
+            // No parameters, just format arguments as-is
+            for (var i = 0; i < arguments.Length; i++)
+            {
+                formattedArgs.Add(FormatConstantValueWithType(arguments[i], null));
+            }
+            return formattedArgs;
+        }
+
+        // Process regular parameters
+        var regularParameterCount = parameters.Length;
+        var lastParameter = parameters.LastOrDefault();
+        
+        if (lastParameter?.IsParams == true)
+        {
+            regularParameterCount--; // Last parameter is params, so reduce regular count
+        }
+
+        // Process regular parameters
+        for (var i = 0; i < regularParameterCount && i < arguments.Length; i++)
+        {
+            var targetType = parameters[i].Type;
+            formattedArgs.Add(FormatConstantValueWithType(arguments[i], targetType));
+        }
+
+        // Process params parameter if it exists
+        if (lastParameter?.IsParams == true && regularParameterCount < arguments.Length)
+        {
+            var paramsElementType = (lastParameter.Type as IArrayTypeSymbol)?.ElementType;
+            var remainingArgs = arguments.Skip(regularParameterCount).ToArray();
+            
+            // Create an array literal for the params parameter
+            var paramsElements = remainingArgs.Select(arg => FormatConstantValueWithType(arg, paramsElementType));
+            var paramsArrayLiteral = $"new {paramsElementType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object"}[] {{ {string.Join(", ", paramsElements)} }}";
+            formattedArgs.Add(paramsArrayLiteral);
+        }
+        else if (lastParameter?.IsParams == true)
+        {
+            // No arguments for params parameter, create empty array
+            var paramsElementType = (lastParameter.Type as IArrayTypeSymbol)?.ElementType;
+            var paramsArrayLiteral = $"new {paramsElementType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object"}[0]";
+            formattedArgs.Add(paramsArrayLiteral);
+        }
+
+        return formattedArgs;
     }
 }

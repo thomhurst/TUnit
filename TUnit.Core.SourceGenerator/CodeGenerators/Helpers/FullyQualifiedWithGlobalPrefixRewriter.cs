@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -171,5 +172,23 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         }
 
         return base.VisitInvocationExpression(node);
+    }
+
+    public override SyntaxNode? VisitCollectionExpression(CollectionExpressionSyntax node)
+    {
+        // For collection expressions, visit each element and ensure proper type conversion
+        var rewrittenElements = node.Elements.Select(element => 
+        {
+            if (element is ExpressionElementSyntax expressionElement)
+            {
+                var rewrittenExpression = Visit(expressionElement.Expression);
+                return SyntaxFactory.ExpressionElement((ExpressionSyntax)rewrittenExpression);
+            }
+            return element;
+        }).ToList();
+
+        return SyntaxFactory.CollectionExpression(
+            SyntaxFactory.SeparatedList<CollectionElementSyntax>(rewrittenElements)
+        );
     }
 }

@@ -215,7 +215,18 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             var argument = arguments.ElementAtOrDefault(i);
 
-            if (typeSymbol.IsCollectionType(context.Compilation, out var innerType)
+            // Handle params parameters specifically
+            if (parameter?.IsParams == true && typeSymbol.IsCollectionType(context.Compilation, out var innerType))
+            {
+                // For params parameters, validate remaining arguments against the element type
+                var remainingArguments = arguments.Skip(i);
+                if (remainingArguments.All(x => x.IsNull || CanConvert(context, x, innerType)))
+                {
+                    break;
+                }
+            }
+            // Handle regular collection types (non-params)
+            else if (typeSymbol.IsCollectionType(context.Compilation, out innerType)
                 && arguments.Skip(i).Select(x => x.Type).All(x => CanConvert(context, x, innerType)))
             {
                 break;
