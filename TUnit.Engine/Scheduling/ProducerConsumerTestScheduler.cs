@@ -112,55 +112,70 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                 }
             }
         }
+        
+        // Set up dependency graph
+        await LoggingExtensions.LogDebugAsync(_logger, "Setting up dependency graph");
+        await SetupDependencyGraphAsync(executionStates, cancellationToken);
+        await LoggingExtensions.LogDebugAsync(_logger, "Dependency graph setup complete");
 
-        // Create and initialize completion tracker
+        // Pre-create channels for all constraint keys to avoid dynamic creation during execution
+        await PreCreateChannelsForConstraintsAsync(executionStates.Values, cancellationToken);
+        
+        // Route all ready tests (ignoring dependencies for now to simplify)
+        var readyTests = executionStates.Values.Where(s => s.RemainingDependencies == 0).ToList();
+        await LoggingExtensions.LogDebugAsync(_logger, $"Found {readyTests.Count} ready tests to route");
+        
+        // Route all tests to channels in batches
+        const int batchSize = 100;
+        for (int i = 0; i < readyTests.Count; i += batchSize)
+        {
+            var batch = readyTests.Skip(i).Take(batchSize);
+            await LoggingExtensions.LogDebugAsync(_logger, $"Routing batch {i / batchSize + 1} with {batch.Count()} tests");
+            await Task.WhenAll(batch.Select(state => RouteTestAsync(state, cancellationToken)));
+        }
+        
+        await LoggingExtensions.LogDebugAsync(_logger, "Completed routing all tests");
+        
+        // Signal completion - no more tests will be added
+        await LoggingExtensions.LogDebugAsync(_logger, "Signaling channel completion");
+        _channelRouter.SignalCompletion();
+        await LoggingExtensions.LogDebugAsync(_logger, "Channel completion signaled");
+        
+        // Create completion tracker for dependency handling
         var completionTracker = new ChannelBasedTestCompletionTracker(executionStates);
         
-        // Route all initial tests in parallel for better performance
-        var initialTests = executionStates.Values.Where(s => s.RemainingDependencies == 0).ToList();
-        
-        // Start routing task to handle test completions
-        var routingTask = Task.Run(async () =>
+        // Start dependency handler in background
+        var dependencyTask = Task.Run(async () => 
         {
-            // Route initial tests in parallel batches
-            const int batchSize = 100;
-            for (int i = 0; i < initialTests.Count; i += batchSize)
+            await LoggingExtensions.LogDebugAsync(_logger, "Starting dependency handler");
+            await foreach (var readyTest in completionTracker.ReadyTests.ReadAllAsync(cancellationToken))
             {
-                var batch = initialTests.Skip(i).Take(batchSize);
-                await Task.WhenAll(batch.Select(state => RouteTestAsync(state, cancellationToken)));
-            }
-            
-            // Process test completions and route newly ready tests
-            await foreach (var completed in completionTracker.ReadyTests.ReadAllAsync(cancellationToken))
-            {
-                // Check if this is a newly ready test (not yet started)
-                if (completed.State == TestState.NotStarted && completed.RemainingDependencies == 0)
+                if (readyTest.State == TestState.NotStarted && readyTest.RemainingDependencies == 0)
                 {
-                    // Don't await here to avoid blocking other completions
-                    _ = RouteTestAsync(completed, cancellationToken);
+                    await LoggingExtensions.LogDebugAsync(_logger, $"Routing dependency-driven test: {readyTest.Test.Context.TestName}");
+                    await RouteTestAsync(readyTest, cancellationToken);
                 }
             }
+            await LoggingExtensions.LogDebugAsync(_logger, "Dependency handler completed");
         }, cancellationToken);
         
-        // Start consumers immediately for better parallelism
-        var consumerTask = _consumerManager.StartConsumersAsync(
+        // Start consumers - they will consume until channels are empty and completed
+        await LoggingExtensions.LogDebugAsync(_logger, "Starting consumers");
+        await _consumerManager.StartConsumersAsync(
             executor,
             _runningConstraintKeys,
             async (test, token) => await ExecuteTestWithContextAsync(test, executor, completionTracker, token),
             _channelRouter.GetMultiplexer(),
-            _channelRouter,
             cancellationToken);
-
-        // Wait for both tasks
-        await Task.WhenAll(routingTask, consumerTask);
+        await LoggingExtensions.LogDebugAsync(_logger, "Consumers completed");
         
-        // Signal completion to consumers
-        _channelRouter.SignalCompletion();
+        // Wait for dependency handler to complete
+        await dependencyTask;
         
         await _logger.LogInformationAsync("Test execution completed");
     }
 
-    private Task RouteTestAsync(TestExecutionState state, CancellationToken cancellationToken)
+    private async Task RouteTestAsync(TestExecutionState state, CancellationToken cancellationToken)
     {
         // Capture execution context at routing time
         var testData = new TestExecutionData
@@ -173,7 +188,8 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         };
 
         // Don't await to avoid blocking - let the router handle backpressure
-        return _channelRouter.RouteTestAsync(testData, cancellationToken);
+        await LoggingExtensions.LogDebugAsync(_logger, $"Routing test: {testData.Test.Context.TestName} with {testData.Constraints.Count} constraints");
+        await _channelRouter.RouteTestAsync(testData, cancellationToken);
     }
 
     private async Task ExecuteTestWithContextAsync(
@@ -220,7 +236,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                 _runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
             }
             
-            // Notify completion
+            // Notify completion (this will trigger dependency processing)
             await completionTracker.OnTestCompletedAsync(state, cancellationToken);
         }
     }
@@ -248,6 +264,71 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         
         return keys;
     }
+    
+    private async Task PreCreateChannelsForConstraintsAsync(IEnumerable<TestExecutionState> states, CancellationToken cancellationToken)
+    {
+        var allConstraintKeys = new HashSet<string>();
+        
+        foreach (var state in states)
+        {
+            var keys = GetConstraintKeys(state);
+            foreach (var key in keys)
+            {
+                allConstraintKeys.Add(key);
+            }
+        }
+        
+        // Pre-create channels for all constraint keys
+        foreach (var key in allConstraintKeys)
+        {
+            if (key.StartsWith("__parallel_group_"))
+            {
+                _channelRouter.GetMultiplexer().GetOrCreateParallelGroupChannel(key);
+            }
+            else if (key != "__global_not_in_parallel__") // Global channel is already created
+            {
+                _channelRouter.GetMultiplexer().GetOrCreateKeyedNotInParallelChannel(key);
+            }
+        }
+        
+        await LoggingExtensions.LogDebugAsync(_logger, $"Pre-created channels for {allConstraintKeys.Count} constraint keys");
+    }
+    
+    private async Task SetupDependencyGraphAsync(Dictionary<string, TestExecutionState> executionStates, CancellationToken cancellationToken)
+    {
+        // Create a lookup for fast test resolution
+        var testLookup = executionStates.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        
+        // Set up dependency relationships
+        foreach (var kvp in executionStates)
+        {
+            var testId = kvp.Key;
+            var state = kvp.Value;
+            var test = state.Test;
+            
+            // Process dependencies for this test
+            foreach (var dependency in test.Dependencies)
+            {
+                if (testLookup.TryGetValue(dependency.TestId, out var dependencyState))
+                {
+                    // Add this test as a dependent of the dependency
+                    dependencyState.Dependents.Add(testId);
+                    await LoggingExtensions.LogDebugAsync(_logger, $"Test {testId} depends on {dependency.TestId}");
+                }
+                else
+                {
+                    await LoggingExtensions.LogErrorAsync(_logger, $"Dependency not found: {testId} depends on {dependency.TestId}");
+                }
+            }
+        }
+        
+        // Log dependency status
+        var testsWithDependencies = executionStates.Values.Where(s => s.RemainingDependencies > 0).ToList();
+        var readyTests = executionStates.Values.Where(s => s.RemainingDependencies == 0).ToList();
+        
+        await LoggingExtensions.LogInformationAsync(_logger, $"Dependency setup: {testsWithDependencies.Count} tests with dependencies, {readyTests.Count} ready tests");
+    }
+    
 }
 
 internal class TestExecutionData

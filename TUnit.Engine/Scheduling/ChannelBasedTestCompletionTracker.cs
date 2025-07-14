@@ -66,6 +66,7 @@ internal sealed class ChannelBasedTestCompletionTracker : IDisposable
         _completedCounter.Increment();
         
         // Process dependents
+        var newlyReadyTests = new List<TestExecutionState>();
         foreach (var dependentId in completedTest.Dependents)
         {
             if (_graph.TryGetValue(dependentId, out var dependentState))
@@ -74,14 +75,18 @@ internal sealed class ChannelBasedTestCompletionTracker : IDisposable
                 
                 if (remaining == 0 && dependentState.State == TestState.NotStarted)
                 {
-                    // Test is ready to run - write directly to channel
-                    // This provides automatic notification to waiting workers
-                    await _readyChannel.Writer.WriteAsync(dependentState, cancellationToken);
+                    newlyReadyTests.Add(dependentState);
                 }
             }
         }
         
-        // Complete the channel when all tests are done
+        // Enqueue all newly ready tests
+        foreach (var readyTest in newlyReadyTests)
+        {
+            await _readyChannel.Writer.WriteAsync(readyTest, cancellationToken);
+        }
+        
+        // Complete the channel when all tests are done AND no more dependents are being processed
         if (AllTestsCompleted)
         {
             _readyChannel.Writer.TryComplete();

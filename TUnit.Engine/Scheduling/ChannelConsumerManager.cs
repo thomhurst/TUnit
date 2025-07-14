@@ -12,7 +12,6 @@ internal class ChannelConsumerManager
     private readonly SchedulerConfiguration _configuration;
     private readonly List<Task> _consumerTasks = new();
     private readonly CancellationTokenSource _shutdownCts = new();
-    private TestChannelRouter? _channelRouter;
 
     public ChannelConsumerManager(TUnitFrameworkLogger logger, SchedulerConfiguration configuration)
     {
@@ -25,10 +24,8 @@ internal class ChannelConsumerManager
         ConcurrentDictionary<string, int> runningConstraintKeys,
         Func<TestExecutionData, CancellationToken, Task> executeTestFunc,
         ChannelMultiplexer multiplexer,
-        TestChannelRouter channelRouter,
         CancellationToken cancellationToken)
     {
-        _channelRouter = channelRouter;
         var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _shutdownCts.Token);
 
         // Start consumers based on parallelism strategy
@@ -50,65 +47,9 @@ internal class ChannelConsumerManager
                     executeTestFunc,
                     linkedCts.Token), linkedCts.Token));
         }
-        
-        // Add one dedicated consumer for GlobalNotInParallel to ensure it's always processed
-        _consumerTasks.Add(Task.Run(async () =>
-            await ConsumeChannelAsync(
-                "GlobalNotInParallel",
-                multiplexer.GlobalNotInParallelChannel.Reader,
-                runningConstraintKeys,
-                executeTestFunc,
-                linkedCts.Token), linkedCts.Token));
 
         // Wait for all consumers to complete
         await Task.WhenAll(_consumerTasks);
-    }
-
-    private async Task ConsumeChannelAsync(
-        string consumerName,
-        ChannelReader<TestExecutionData> reader,
-        ConcurrentDictionary<string, int> runningConstraintKeys,
-        Func<TestExecutionData, CancellationToken, Task> executeTestFunc,
-        CancellationToken cancellationToken)
-    {
-        await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} started");
-
-        try
-        {
-            await foreach (var testData in reader.ReadAllAsync(cancellationToken))
-            {
-                if (await TryAcquireConstraintsAsync(testData, runningConstraintKeys, cancellationToken))
-                {
-                    try
-                    {
-                        await executeTestFunc(testData, cancellationToken);
-                    }
-                    catch (Exception ex) when (ex is not OperationCanceledException)
-                    {
-                        await LoggingExtensions.LogErrorAsync(_logger, $"Error executing test {testData.Test.Context.TestName}: {ex.Message}");
-                    }
-                }
-                else
-                {
-                    // Yield to let other work proceed, then retry
-                    await Task.Yield();
-                    // Put it back on the channel
-                    // Can't write to reader - need to route back through the router
-                    if (_channelRouter != null)
-                    {
-                        await _channelRouter.RouteTestAsync(testData, cancellationToken);
-                    }
-                }
-            }
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} cancelled");
-        }
-        finally
-        {
-            await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} stopped");
-        }
     }
 
     private async Task ConsumeUniversalWorkStealingAsync(
@@ -128,20 +69,33 @@ internal class ChannelConsumerManager
                 TestExecutionData? testData = null;
 
                 // Priority order: High Priority -> Unconstrained -> Global NotInParallel -> Others
-                if (multiplexer.HighPriorityChannel.Reader.TryRead(out testData) ||
-                    multiplexer.UnconstrainedChannel.Reader.TryRead(out testData) ||
-                    multiplexer.GlobalNotInParallelChannel.Reader.TryRead(out testData))
+                if (multiplexer.HighPriorityChannel.Reader.TryRead(out testData))
                 {
                     foundWork = true;
+                    await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} found work in HighPriorityChannel: {testData.Test.Context.TestName}");
+                }
+                else if (multiplexer.UnconstrainedChannel.Reader.TryRead(out testData))
+                {
+                    foundWork = true;
+                    await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} found work in UnconstrainedChannel: {testData.Test.Context.TestName}");
+                }
+                else if (multiplexer.GlobalNotInParallelChannel.Reader.TryRead(out testData))
+                {
+                    foundWork = true;
+                    await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} found work in GlobalNotInParallelChannel: {testData.Test.Context.TestName}");
                 }
                 else
                 {
-                    // Try all dynamic channels
+                    // Try all dynamic channels (get fresh list each time to catch new channels)
                     foreach (var channel in multiplexer.GetAllChannels())
                     {
-                        if (channel.Reader.TryRead(out testData))
+                        if (channel != multiplexer.HighPriorityChannel && 
+                            channel != multiplexer.UnconstrainedChannel && 
+                            channel != multiplexer.GlobalNotInParallelChannel &&
+                            channel.Reader.TryRead(out testData))
                         {
                             foundWork = true;
+                            await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} found work in dynamic channel: {testData.Test.Context.TestName}");
                             break;
                         }
                     }
@@ -162,45 +116,51 @@ internal class ChannelConsumerManager
                     }
                     else
                     {
-                        // Put the test back for another consumer to try
-                        // This is a simple spin-wait approach
+                        // Just yield and try again later - constraint will be released soon
                         await Task.Yield();
-                        // Try to route it again
-                        if (_channelRouter != null)
-                        {
-                            await _channelRouter.RouteTestAsync(testData, cancellationToken);
-                        }
                     }
                 }
                 else
                 {
-                    // No work available, use async wait to avoid busy waiting
-                    var allChannels = new List<ChannelReader<TestExecutionData>>
-                    {
-                        multiplexer.HighPriorityChannel.Reader,
-                        multiplexer.UnconstrainedChannel.Reader,
-                        multiplexer.GlobalNotInParallelChannel.Reader
-                    };
-                    allChannels.AddRange(multiplexer.GetAllChannels().Select(c => c.Reader));
+                    // No work available, check if all channels are completed
+                    var allChannels = multiplexer.GetAllChannels().Select(c => c.Reader).ToList();
+                    var activeChannels = allChannels.Where(c => !c.Completion.IsCompleted).ToList();
                     
-                    var waitTasks = allChannels
-                        .Where(c => !c.Completion.IsCompleted)
-                        .Select(c => c.WaitToReadAsync(cancellationToken).AsTask())
-                        .ToArray();
+                    await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} - no work found. Total channels: {allChannels.Count}, Active channels: {activeChannels.Count}");
                     
-                    if (waitTasks.Length == 0)
+                    if (activeChannels.Count == 0)
                     {
-                        // All channels completed
+                        // All channels completed, exit
+                        await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} exiting - all channels completed");
                         break;
                     }
                     
-                    try
+                    // Wait for any active channel to have data or complete
+                    var waitTasks = activeChannels
+                        .Select(c => c.WaitToReadAsync(cancellationToken).AsTask())
+                        .ToArray();
+                    
+                    if (waitTasks.Length > 0)
                     {
-                        await Task.WhenAny(waitTasks);
+                        try
+                        {
+                            await LoggingExtensions.LogDebugAsync(_logger, $"Consumer {consumerName} waiting for {waitTasks.Length} channels");
+                            await Task.WhenAny(waitTasks);
+                        }
+                        catch (ChannelClosedException)
+                        {
+                            // Channel closed, continue to check other channels
+                        }
+                        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                        {
+                            // Cancellation requested, exit
+                            break;
+                        }
                     }
-                    catch (ChannelClosedException)
+                    else
                     {
-                        // Continue to check other channels
+                        // No active channels, all must be completed
+                        break;
                     }
                 }
             }
