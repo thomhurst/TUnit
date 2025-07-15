@@ -63,7 +63,11 @@ internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDat
         try
         {
             // Execute class/assembly hooks on first test
-            await _hookOrchestrator.OnTestStartingAsync(test, cancellationToken);
+            var executionContext = await _hookOrchestrator.OnTestStartingAsync(test, cancellationToken);
+
+#if NET
+            ExecutionContext.Restore(executionContext);
+#endif
 
             // Execute the test and get the result message
             var updateMessage = await _innerExecutor.ExecuteTestAsync(test, _messageBus, cancellationToken);
@@ -115,7 +119,7 @@ internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDat
         finally
         {
             test.EndTime = DateTimeOffset.UtcNow;
-            
+
             // Execute cleanup hooks
             try
             {

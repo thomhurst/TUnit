@@ -206,14 +206,6 @@ public class TestContext : Context
     }
 
     /// <summary>
-    /// Adds async local values (delegates to base class)
-    /// </summary>
-    public new void AddAsyncLocalValues()
-    {
-        base.AddAsyncLocalValues();
-    }
-
-    /// <summary>
     /// Restores the async local context for TestContext
     /// </summary>
     internal override void RestoreContextAsyncLocal()

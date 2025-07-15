@@ -17,8 +17,8 @@ internal sealed class HookOrchestrator
     private readonly IContextProvider _contextProvider;
 
     // Cache initialization tasks for assemblies/classes
-    private readonly ConcurrentDictionary<string, Task<ExecutionContext?>> _beforeAssemblyTasks = new();
-    private readonly ConcurrentDictionary<Type, Task<ExecutionContext?>> _beforeClassTasks = new();
+    private readonly ConcurrentDictionary<string, Task<ExecutionContext>> _beforeAssemblyTasks = new();
+    private readonly ConcurrentDictionary<Type, Task<ExecutionContext>> _beforeClassTasks = new();
 
     // Track active test counts for cleanup
     private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
@@ -36,9 +36,9 @@ internal sealed class HookOrchestrator
     /// Gets or creates a cached task for BeforeAssembly hooks.
     /// This ensures the hooks only run once and all tests await the same result.
     /// </summary>
-    private Task<ExecutionContext?> GetOrCreateBeforeAssemblyTask(string assemblyName, Assembly assembly, CancellationToken cancellationToken)
+    private Task<ExecutionContext> GetOrCreateBeforeAssemblyTask(string assemblyName, Assembly assembly, CancellationToken cancellationToken)
     {
-        return _beforeAssemblyTasks.GetOrAdd(assemblyName, _ => 
+        return _beforeAssemblyTasks.GetOrAdd(assemblyName, _ =>
             ExecuteBeforeAssemblyHooksAsync(assembly, cancellationToken));
     }
 
@@ -46,9 +46,9 @@ internal sealed class HookOrchestrator
     /// Gets or creates a cached task for BeforeClass hooks.
     /// This ensures the hooks only run once and all tests await the same result.
     /// </summary>
-    private Task<ExecutionContext?> GetOrCreateBeforeClassTask(Type testClassType, CancellationToken cancellationToken)
+    private Task<ExecutionContext> GetOrCreateBeforeClassTask(Type testClassType, CancellationToken cancellationToken)
     {
-        return _beforeClassTasks.GetOrAdd(testClassType, _ => 
+        return _beforeClassTasks.GetOrAdd(testClassType, _ =>
             ExecuteBeforeClassHooksAsync(testClassType, cancellationToken));
     }
 
@@ -151,7 +151,7 @@ internal sealed class HookOrchestrator
 #endif
     }
 
-    public async Task OnTestStartingAsync(ExecutableTest test, CancellationToken cancellationToken)
+    public async Task<ExecutionContext> OnTestStartingAsync(ExecutableTest test, CancellationToken cancellationToken)
     {
         var testClassType = test.Metadata.TestClassType;
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";
@@ -161,29 +161,17 @@ internal sealed class HookOrchestrator
         _classTestCounts.AddOrUpdate(testClassType, 1, (_, count) => count + 1);
 
         // Get or create the BeforeAssembly task - this ensures it only runs once
-        var beforeAssemblyTask = GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken);
-        
-        // Await the task - if it's already completed, this returns immediately
-        // If it failed, this will throw the same exception for all tests
-        var capturedContext = await beforeAssemblyTask;
+        var beforeAssemblyExecutionContext = await GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken);
+
 #if NET
-        if (capturedContext != null)
-        {
-            ExecutionContext.Restore(capturedContext);
-        }
+        ExecutionContext.Restore(beforeAssemblyExecutionContext);
 #endif
 
         // Get or create the BeforeClass task - this ensures it only runs once
-        var beforeClassTask = GetOrCreateBeforeClassTask(testClassType, cancellationToken);
-        
-        // Await the task - if it's already completed, this returns immediately
-        // If it failed, this will throw the same exception for all tests
-        capturedContext = await beforeClassTask;
+        var beforeClassExecutionContext = await GetOrCreateBeforeClassTask(testClassType, cancellationToken);
+
 #if NET
-        if (capturedContext != null)
-        {
-            ExecutionContext.Restore(capturedContext);
-        }
+        ExecutionContext.Restore(beforeClassExecutionContext);
 #endif
 
         // Add test to class context if it exists and hasn't been added already
@@ -196,13 +184,9 @@ internal sealed class HookOrchestrator
         }
 
         // Execute BeforeEveryTest hooks
-        capturedContext = await ExecuteBeforeEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
-#if NET
-        if (capturedContext != null)
-        {
-            ExecutionContext.Restore(capturedContext);
-        }
-#endif
+        await ExecuteBeforeEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
+
+        return ExecutionContext.Capture()!;
     }
 
     public async Task OnTestCompletedAsync(ExecutableTest test, CancellationToken cancellationToken)
@@ -210,16 +194,8 @@ internal sealed class HookOrchestrator
         var testClassType = test.Metadata.TestClassType;
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";
 
-        ExecutionContext? capturedContext = null;
-
         // Execute AfterEveryTest hooks
-        capturedContext = await ExecuteAfterEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
-#if NET
-        if (capturedContext != null)
-        {
-            ExecutionContext.Restore(capturedContext);
-        }
-#endif
+        await ExecuteAfterEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
 
         // Decrement test counts
         var classTestsRemaining = _classTestCounts.AddOrUpdate(testClassType, 0, (_, count) => count - 1);
@@ -228,31 +204,19 @@ internal sealed class HookOrchestrator
         // Execute AfterClass hooks if last test in class
         if (classTestsRemaining == 0)
         {
-            capturedContext = await ExecuteAfterClassHooksAsync(testClassType, cancellationToken);
-#if NET
-            if (capturedContext != null)
-            {
-                ExecutionContext.Restore(capturedContext);
-            }
-#endif
+            await ExecuteAfterClassHooksAsync(testClassType, cancellationToken);
             _classTestCounts.TryRemove(testClassType, out _);
         }
 
         // Execute AfterAssembly hooks if last test in assembly
         if (assemblyTestsRemaining == 0)
         {
-            capturedContext = await ExecuteAfterAssemblyHooksAsync(test.Context.ClassContext.AssemblyContext.Assembly, cancellationToken);
-#if NET
-            if (capturedContext != null)
-            {
-                ExecutionContext.Restore(capturedContext);
-            }
-#endif
+            await ExecuteAfterAssemblyHooksAsync(test.Context.ClassContext.AssemblyContext.Assembly, cancellationToken);
             _assemblyTestCounts.TryRemove(assemblyName, out _);
         }
     }
 
-    private async Task<ExecutionContext?> ExecuteBeforeAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
+    private async Task<ExecutionContext> ExecuteBeforeAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeAssemblyHooksAsync(assembly);
 
@@ -272,14 +236,10 @@ internal sealed class HookOrchestrator
             }
         }
 
-#if NET
-        return ExecutionContext.Capture();
-#else
-        return null;
-#endif
+        return ExecutionContext.Capture()!;
     }
 
-    private async Task<ExecutionContext?> ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
+    private async Task<ExecutionContext> ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterAssemblyHooksAsync(assembly);
 
@@ -298,14 +258,10 @@ internal sealed class HookOrchestrator
             }
         }
 
-#if NET
-        return ExecutionContext.Capture();
-#else
-        return null;
-#endif
+        return ExecutionContext.Capture()!;
     }
 
-    private async Task<ExecutionContext?> ExecuteBeforeClassHooksAsync(Type testClassType, CancellationToken cancellationToken)
+    private async Task<ExecutionContext> ExecuteBeforeClassHooksAsync(Type testClassType, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeClassHooksAsync(testClassType);
 
@@ -325,14 +281,10 @@ internal sealed class HookOrchestrator
             }
         }
 
-#if NET
-        return ExecutionContext.Capture();
-#else
-        return null;
-#endif
+        return ExecutionContext.Capture()!;
     }
 
-    private async Task<ExecutionContext?> ExecuteAfterClassHooksAsync(Type testClassType, CancellationToken cancellationToken)
+    private async Task<ExecutionContext> ExecuteAfterClassHooksAsync(Type testClassType, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClassType);
 
@@ -351,14 +303,10 @@ internal sealed class HookOrchestrator
             }
         }
 
-#if NET
-        return ExecutionContext.Capture();
-#else
-        return null;
-#endif
+        return ExecutionContext.Capture()!;
     }
 
-    private async Task<ExecutionContext?> ExecuteBeforeEveryTestHooksAsync(Type testClassType, TestContext testContext, CancellationToken cancellationToken)
+    private async Task ExecuteBeforeEveryTestHooksAsync(Type testClassType, TestContext testContext, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeEveryTestHooksAsync(testClassType);
 
@@ -375,15 +323,9 @@ internal sealed class HookOrchestrator
                 throw;
             }
         }
-
-#if NET
-        return ExecutionContext.Capture();
-#else
-        return null;
-#endif
     }
 
-    private async Task<ExecutionContext?> ExecuteAfterEveryTestHooksAsync(Type testClassType, TestContext testContext, CancellationToken cancellationToken)
+    private async Task ExecuteAfterEveryTestHooksAsync(Type testClassType, TestContext testContext, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterEveryTestHooksAsync(testClassType);
 
@@ -399,11 +341,5 @@ internal sealed class HookOrchestrator
                 await _logger.LogErrorAsync($"AfterEveryTest hook failed: {ex.Message}");
             }
         }
-
-#if NET
-        return ExecutionContext.Capture();
-#else
-        return null;
-#endif
     }
 }

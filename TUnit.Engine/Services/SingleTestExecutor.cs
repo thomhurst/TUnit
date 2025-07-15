@@ -51,21 +51,18 @@ internal class SingleTestExecutor : ISingleTestExecutor
         await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
 
         // Invoke first test event receivers if this is the first test
-        if (test.Context.ClassContext != null)
-        {
-            var classContext = test.Context.ClassContext;
-            var assemblyContext = classContext.AssemblyContext;
-            var sessionContext = assemblyContext.TestSessionContext;
+        var classContext = test.Context.ClassContext;
+        var assemblyContext = classContext.AssemblyContext;
+        var sessionContext = assemblyContext.TestSessionContext;
 
-            // First test in session
-            await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
+        // First test in session
+        await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
 
-            // First test in assembly
-            await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
+        // First test in assembly
+        await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
 
-            // First test in class
-            await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
-        }
+        // First test in class
+        await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
 
         // Invoke test start event receivers
         await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken);
@@ -172,7 +169,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 // Restore hook contexts before executing the hook
                 RestoreHookContexts(context);
-                
+
                 await hook(context, cancellationToken);
                 context.RestoreExecutionContext();
             }
@@ -192,7 +189,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 // Restore hook contexts before executing the hook
                 RestoreHookContexts(context);
-                
+
                 await hook(context, cancellationToken);
                 context.RestoreExecutionContext();
             }
@@ -409,7 +406,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             // Restore assembly context first
             var assemblyContext = context.ClassContext.AssemblyContext;
             AssemblyHookContext.Current = assemblyContext;
-            
+
             // Then restore class context
             ClassHookContext.Current = context.ClassContext;
         }
