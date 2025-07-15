@@ -137,11 +137,13 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
         // Restore hook contexts before test execution
         RestoreHookContexts(test.Context);
-        test.Context.RestoreExecutionContext();
 
         try
         {
             await ExecuteBeforeTestHooksAsync(test.BeforeTestHooks, test.Context, cancellationToken);
+
+            // Restore the test context execution context to make AsyncLocal values available
+            test.Context.RestoreExecutionContext();
 
             await InvokeTestWithTimeout(test, instance, cancellationToken);
 
@@ -163,14 +165,18 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
     private async Task ExecuteBeforeTestHooksAsync(Func<TestContext, CancellationToken, Task>[] hooks, TestContext context, CancellationToken cancellationToken)
     {
+        // Restore initial context before running hooks
+        RestoreHookContexts(context);
+        context.RestoreExecutionContext();
+        
         foreach (var hook in hooks)
         {
             try
             {
-                // Restore hook contexts before executing the hook
-                RestoreHookContexts(context);
-
                 await hook(context, cancellationToken);
+                
+                // After each hook, restore the context to ensure any AsyncLocal values
+                // set by the hook (via AddAsyncLocalValues) are available to subsequent hooks
                 context.RestoreExecutionContext();
             }
             catch (Exception ex)
@@ -191,7 +197,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 RestoreHookContexts(context);
 
                 await hook(context, cancellationToken);
-                context.RestoreExecutionContext();
             }
             catch (Exception ex)
             {

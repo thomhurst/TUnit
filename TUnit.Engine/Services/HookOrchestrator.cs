@@ -46,10 +46,19 @@ internal sealed class HookOrchestrator
     /// Gets or creates a cached task for BeforeClass hooks.
     /// This ensures the hooks only run once and all tests await the same result.
     /// </summary>
-    private Task<ExecutionContext> GetOrCreateBeforeClassTask(Type testClassType, CancellationToken cancellationToken)
+    private Task<ExecutionContext> GetOrCreateBeforeClassTask(Type testClassType, Assembly assembly, CancellationToken cancellationToken)
     {
-        return _beforeClassTasks.GetOrAdd(testClassType, _ =>
-            ExecuteBeforeClassHooksAsync(testClassType, cancellationToken));
+        return _beforeClassTasks.GetOrAdd(testClassType, async _ =>
+        {
+            // First ensure assembly hooks have run and restore their context
+            var assemblyName = assembly.GetName().Name ?? "Unknown";
+            var assemblyContext = await GetOrCreateBeforeAssemblyTask(assemblyName, assembly, cancellationToken);
+#if NET
+            ExecutionContext.Restore(assemblyContext);
+#endif
+            // Now run class hooks in the assembly context
+            return await ExecuteBeforeClassHooksAsync(testClassType, cancellationToken);
+        });
     }
 
     public async Task<ExecutionContext?> ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
@@ -161,29 +170,26 @@ internal sealed class HookOrchestrator
         _classTestCounts.AddOrUpdate(testClassType, 1, (_, count) => count + 1);
 
         // Get or create the BeforeAssembly task - this ensures it only runs once
-        var beforeAssemblyExecutionContext = await GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken);
+        await GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken);
 
+        // Get or create the BeforeClass task - this ensures it only runs once (and includes assembly context)
+        var classContext = await GetOrCreateBeforeClassTask(testClassType, testClassType.Assembly, cancellationToken);
+        
 #if NET
-        ExecutionContext.Restore(beforeAssemblyExecutionContext);
-#endif
-
-        // Get or create the BeforeClass task - this ensures it only runs once
-        var beforeClassExecutionContext = await GetOrCreateBeforeClassTask(testClassType, cancellationToken);
-
-#if NET
-        ExecutionContext.Restore(beforeClassExecutionContext);
+        // Restore the class context (which includes assembly context) before running test hooks
+        ExecutionContext.Restore(classContext);
 #endif
 
         // Add test to class context if it exists and hasn't been added already
-        var classContext = _contextProvider.GetOrCreateClassContext(testClassType);
+        var classContextObject = _contextProvider.GetOrCreateClassContext(testClassType);
 
         // Check if test is already in the context (from InitializeContextsWithTestsAsync)
-        if (!classContext.Tests.Contains(test.Context))
+        if (!classContextObject.Tests.Contains(test.Context))
         {
-            classContext.AddTest(test.Context);
+            classContextObject.AddTest(test.Context);
         }
 
-        // Execute BeforeEveryTest hooks
+        // Execute BeforeEveryTest hooks in the accumulated context
         await ExecuteBeforeEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
 
         return ExecutionContext.Capture()!;

@@ -111,7 +111,16 @@
       "Bash(git rm:*)",
       "Bash(del /F /Q TUnit.TestProjectbinDebugnet8.0TestResults*.log)",
       "Bash(taskkill:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(./TUnit.TestProject.exe --list-tests)",
+      "Bash(./TUnit.TestProject.exe --treenode-filter \"/*/*/AsyncLocalTest/*\" --output Detailed)",
+      "Bash(./TUnit.TestProject.exe --treenode-filter \"/*/*/AsyncLocalTest/*\" --output Normal)",
+      "Bash(./TUnit.TestProject.exe --treenode-filter \"/*/*/AsyncHookTests/TestAsyncLocal(1)\" --output Detailed)",
+      "Bash(./TUnit.TestProject.exe --treenode-filter \"/*/*/ExecutionContextRestorationTests/*\" --output Normal)",
+      "Bash(./TUnit.TestProject.exe --treenode-filter \"/*/*/AsyncHookTests/*\" --output Normal)",
+      "Bash(./TUnit.TestProject.exe --treenode-filter \"/*/*/SimpleAsyncLocalDebugTest/*\" --output Normal)",
+      "Bash(./TUnit.TestProject.exe --treenode-filter \"/**/SimpleAsyncLocalDebugTest/*\" --output Normal)",
+      "Bash(./TUnit.TestProject.exe --treenode-filter \"/*/*/TUnit.TestProject.Bugs._1914.SimpleAsyncLocalDebugTest/*\" --output Normal)"
     ],
     "deny": []
   },

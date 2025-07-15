@@ -59,7 +59,6 @@ internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDat
             new TestNodeUpdateMessage(
                 _sessionUid,
                 test.Context.ToTestNode().WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
-
         try
         {
             // Execute class/assembly hooks on first test
