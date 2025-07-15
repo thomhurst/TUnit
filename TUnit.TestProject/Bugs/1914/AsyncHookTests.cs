@@ -49,7 +49,7 @@ public class AsyncHookTests
     {
         await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession");
-        await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery")
+        await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession");
 
         await Task.CompletedTask;
@@ -64,7 +64,7 @@ public class AsyncHookTests
     {
         await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession");
-        await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery")
+        await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession");
 
         await Task.CompletedTask;
