@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using TUnit.Core;
+using TUnit.Core.Services;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 
@@ -9,6 +10,7 @@ internal sealed class HookOrchestrator
 {
     private readonly IHookCollectionService _hookCollectionService;
     private readonly TUnitFrameworkLogger _logger;
+    private readonly IContextBuilder _contextBuilder;
 
     // Track which assemblies/classes have been initialized
     private readonly ConcurrentDictionary<string, bool> _initializedAssemblies = new();
@@ -17,15 +19,16 @@ internal sealed class HookOrchestrator
     // Track active test counts for cleanup
     private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
     private readonly ConcurrentDictionary<Type, int> _classTestCounts = new();
-
-    // Track contexts
+    
+    // Keep local references for quick lookups
     private readonly ConcurrentDictionary<string, AssemblyHookContext> _assemblyContexts = new();
     private readonly ConcurrentDictionary<Type, ClassHookContext> _classContexts = new();
 
-    public HookOrchestrator(IHookCollectionService hookCollectionService, TUnitFrameworkLogger logger)
+    public HookOrchestrator(IHookCollectionService hookCollectionService, TUnitFrameworkLogger logger, IContextBuilder? contextBuilder = null)
     {
         _hookCollectionService = hookCollectionService;
         _logger = logger;
+        _contextBuilder = contextBuilder ?? ContextBuilderSingleton.Instance;
     }
 
     private void EnsureContextHierarchy()
@@ -61,19 +64,14 @@ internal sealed class HookOrchestrator
             var assemblyName = assemblyGroup.Key;
 
             // Get or create assembly context
-            var assemblyContext = _assemblyContexts.GetOrAdd(assemblyName, name =>
-            {
-                var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == name)
-                    ?? throw new InvalidOperationException($"Assembly '{name}' not found");
-
-                var context = new AssemblyHookContext(TestSessionContext.Current!)
-                {
-                    Assembly = assembly
-                };
-
-                AssemblyHookContext.Current = context;
-                return context;
-            });
+            // Use centralized context builder to get or create assembly context
+            var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == assemblyName)
+                ?? throw new InvalidOperationException($"Assembly '{assemblyName}' not found");
+            var assemblyContext = _contextBuilder.GetOrCreateAssemblyContext(assembly, TestSessionContext.Current);
+            AssemblyHookContext.Current = assemblyContext;
+            
+            // Cache for quick lookups
+            _assemblyContexts[assemblyName] = assemblyContext;
 
             // Group by class within assembly
             var testsByClass = assemblyGroup.GroupBy(t => t.Metadata.TestClassType);
@@ -82,17 +80,12 @@ internal sealed class HookOrchestrator
             {
                 var testClassType = classGroup.Key;
 
-                // Get or create class context
-                var classContext = _classContexts.GetOrAdd(testClassType, type =>
-                {
-                    var context = new ClassHookContext(assemblyContext)
-                    {
-                        ClassType = type
-                    };
-
-                    ClassHookContext.Current = context;
-                    return context;
-                });
+                // Use centralized context builder to get or create class context
+                var classContext = _contextBuilder.GetOrCreateClassContext(testClassType, assemblyContext);
+                ClassHookContext.Current = classContext;
+                
+                // Cache for quick lookups
+                _classContexts[testClassType] = classContext;
 
                 // Add all tests to the class context
                 foreach (var test in classGroup)
@@ -332,10 +325,7 @@ internal sealed class HookOrchestrator
             var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == name)
                 ?? throw new InvalidOperationException($"Assembly '{name}' not found");
 
-            var assemblyContext = new AssemblyHookContext(TestSessionContext.Current!)
-            {
-                Assembly = assembly
-            };
+            var assemblyContext = _contextBuilder.GetOrCreateAssemblyContext(assembly, TestSessionContext.Current);
 
             // Set as current for nested operations
             AssemblyHookContext.Current = assemblyContext;
@@ -378,10 +368,7 @@ internal sealed class HookOrchestrator
                 var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == name)
                     ?? throw new InvalidOperationException($"Assembly '{name}' not found");
 
-                var assemblyContext = new AssemblyHookContext(TestSessionContext.Current!)
-                {
-                    Assembly = assembly
-                };
+                var assemblyContext = _contextBuilder.GetOrCreateAssemblyContext(assembly, TestSessionContext.Current);
 
                 AssemblyHookContext.Current = assemblyContext;
                 return assemblyContext;
@@ -434,19 +421,13 @@ internal sealed class HookOrchestrator
                 var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == assemblyName)
                     ?? throw new InvalidOperationException($"Assembly '{assemblyName}' not found");
 
-                assemblyContext = new AssemblyHookContext(TestSessionContext.Current!)
-                {
-                    Assembly = assembly
-                };
+                assemblyContext = _contextBuilder.GetOrCreateAssemblyContext(assembly, TestSessionContext.Current);
 
                 AssemblyHookContext.Current = assemblyContext;
                 _assemblyContexts[assemblyName] = assemblyContext;
             }
 
-            var classContext = new ClassHookContext(assemblyContext)
-            {
-                ClassType = type
-            };
+            var classContext = _contextBuilder.GetOrCreateClassContext(type, assemblyContext);
 
             // Set as current for nested operations
             ClassHookContext.Current = classContext;
@@ -503,21 +484,16 @@ internal sealed class HookOrchestrator
                     var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == assemblyName)
                         ?? throw new InvalidOperationException($"Assembly '{assemblyName}' not found");
 
-                    assemblyContext = new AssemblyHookContext(TestSessionContext.Current!)
-                    {
-                        Assembly = assembly
-                    };
+                    assemblyContext = _contextBuilder.GetOrCreateAssemblyContext(assembly, TestSessionContext.Current);
 
                     AssemblyHookContext.Current = assemblyContext;
                     _assemblyContexts[assemblyName] = assemblyContext;
                 }
 
-                var classContext = new ClassHookContext(assemblyContext)
-                {
-                    ClassType = type
-                };
+                var classContext = _contextBuilder.GetOrCreateClassContext(type, assemblyContext);
 
                 ClassHookContext.Current = classContext;
+                _classContexts[type] = classContext;
                 return classContext;
             });
         }

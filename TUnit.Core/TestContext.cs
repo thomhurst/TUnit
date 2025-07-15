@@ -12,11 +12,12 @@ namespace TUnit.Core;
 /// </summary>
 public class TestContext : Context
 {
-    public TestContext(string testName, CancellationToken cancellationToken, IServiceProvider serviceProvider) : base(null)
+    public TestContext(string testName, CancellationToken cancellationToken, IServiceProvider serviceProvider, ClassHookContext classContext) : base(classContext)
     {
         TestName = testName;
         CancellationToken = cancellationToken;
         ServiceProvider = serviceProvider;
+        ClassContext = classContext;
     }
 
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
@@ -138,12 +139,7 @@ public class TestContext : Context
     /// <summary>
     /// Class context - will be null until initialized by HookOrchestrator
     /// </summary>
-    public ClassHookContext? ClassContext { get; set; }
-    
-    /// <summary>
-    /// Internal property to safely check if ClassContext has been initialized
-    /// </summary>
-    internal bool HasClassContext => ClassContext != null;
+    public ClassHookContext ClassContext { get; }
 
     /// <summary>
     /// Linked cancellation tokens
@@ -173,10 +169,6 @@ public class TestContext : Context
     internal IServiceProvider ServiceProvider
     {
         get;
-    }
-
-    public TestContext(string testName, string customDisplayName) : this(testName, CancellationToken.None, new TestServiceProvider())
-    {
     }
 
     /// <summary>

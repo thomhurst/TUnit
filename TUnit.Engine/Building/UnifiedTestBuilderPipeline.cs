@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Enums;
+using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Services;
@@ -16,15 +17,18 @@ public sealed class UnifiedTestBuilderPipeline
     private readonly ITestDataCollector _dataCollector;
     private readonly IGenericTypeResolver _genericResolver;
     private readonly ITestBuilder _testBuilder;
+    private readonly IContextBuilder _contextBuilder;
 
     public UnifiedTestBuilderPipeline(
         ITestDataCollector dataCollector,
         IGenericTypeResolver genericResolver,
-        ITestBuilder testBuilder)
+        ITestBuilder testBuilder,
+        IContextBuilder? contextBuilder = null)
     {
         _dataCollector = dataCollector ?? throw new ArgumentNullException(nameof(dataCollector));
         _genericResolver = genericResolver ?? throw new ArgumentNullException(nameof(genericResolver));
         _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
+        _contextBuilder = contextBuilder ?? ContextBuilderSingleton.Instance;
     }
 
     /// <summary>
@@ -143,10 +147,14 @@ public sealed class UnifiedTestBuilderPipeline
             Attributes = [],
         };
 
+        // Create the class context upfront using singleton
+        var classContext = ContextBuilderSingleton.Instance.GetOrCreateClassContext(metadata.TestClassType);
+        
         var context = new TestContext(
             metadata.TestName,
             CancellationToken.None,
-            new TUnit.Core.Services.TestServiceProvider())
+            new TUnit.Core.Services.TestServiceProvider(),
+            classContext)
         {
             TestDetails = testDetails
         };

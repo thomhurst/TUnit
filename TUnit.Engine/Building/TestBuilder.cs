@@ -3,6 +3,7 @@ using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Services;
@@ -15,10 +16,12 @@ namespace TUnit.Engine.Building;
 public sealed class TestBuilder : ITestBuilder
 {
     private readonly IServiceProvider? _serviceProvider;
+    private readonly IContextBuilder _contextBuilder;
 
     public TestBuilder(IServiceProvider? serviceProvider = null)
     {
         _serviceProvider = serviceProvider;
+        _contextBuilder = ContextBuilderSingleton.Instance;
     }
 
 
@@ -174,10 +177,14 @@ public sealed class TestBuilder : ITestBuilder
             testDetails.Categories.Add(category);
         }
 
+        // Create the class context upfront
+        var classContext = _contextBuilder.GetOrCreateClassContext(metadata.TestClassType);
+        
         var context = new TestContext(
             metadata.TestName,
             CancellationToken.None,
-            _serviceProvider ?? new TUnit.Core.Services.TestServiceProvider())
+            _serviceProvider ?? new TUnit.Core.Services.TestServiceProvider(),
+            classContext)
         {
             TestDetails = testDetails
         };
@@ -221,17 +228,17 @@ public sealed class TestBuilder : ITestBuilder
         discoveredContext.TransferTo(context);
     }
 
-    private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
+    private ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
         return CreateFailedTestForDataGenerationError(metadata, exception, null);
     }
 
-    private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, string? customDisplayName)
+    private ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, string? customDisplayName)
     {
         return CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination(), customDisplayName);
     }
 
-    private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination, string? customDisplayName)
+    private ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination, string? customDisplayName)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
         var displayName = customDisplayName ?? $"{metadata.TestName} [DATA GENERATION ERROR]";
@@ -273,12 +280,16 @@ public sealed class TestBuilder : ITestBuilder
         };
     }
 
-    private static TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails, string displayName)
+    private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails, string displayName)
     {
+        // Create the class context upfront
+        var classContext = _contextBuilder.GetOrCreateClassContext(metadata.TestClassType);
+        
         var context = new TestContext(
             metadata.TestName,
             CancellationToken.None,
-            new TUnit.Core.Services.TestServiceProvider())
+            new TUnit.Core.Services.TestServiceProvider(),
+            classContext)
         {
             TestDetails = testDetails
         };
