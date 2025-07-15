@@ -18,23 +18,18 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     private static readonly HashSet<Assembly> _scannedAssemblies = new();
     private static readonly List<TestMetadata> _discoveredTests = new();
     private static readonly object _lock = new();
-    private static bool _assemblyLoadHandlerRegistered;
     private static readonly ExpressionCacheService _expressionCache = new();
 
     public Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
-        lock (_lock)
-        {
-            if (!_assemblyLoadHandlerRegistered)
-            {
-                AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoaded;
-                _assemblyLoadHandlerRegistered = true;
-            }
-        }
-
+        // Disable assembly loading event handler to prevent recursive issues
+        // This was causing problems when assemblies were loaded during scanning
+        
         var assemblies = AppDomain.CurrentDomain.GetAssemblies()
             .Where(ShouldScanAssembly)
             .ToList();
+
+        Console.WriteLine($"Scanning {assemblies.Count} assemblies for tests...");
 
         var newTests = new List<TestMetadata>();
 
@@ -50,6 +45,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
             try
             {
+                Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
                 var testsInAssembly = DiscoverTestsInAssembly(assembly);
                 newTests.AddRange(testsInAssembly);
             }
@@ -72,6 +68,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     $"Instance Factories: {stats.InstanceFactories}, Test Invokers: {stats.TestInvokers}");
             }
             
+            Console.WriteLine($"Discovered {newTests.Count} tests in reflection mode");
             return Task.FromResult<IEnumerable<TestMetadata>>(_discoveredTests.ToList());
         }
     }
@@ -123,11 +120,43 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
-        // Skip system and framework assemblies
+        // Skip system and framework assemblies more aggressively
         if (name.StartsWith("System.") ||
             name.StartsWith("Microsoft.") ||
             name.StartsWith("netstandard") ||
-            name.StartsWith("mscorlib"))
+            name.StartsWith("mscorlib") ||
+            name.StartsWith("Windows.") ||
+            name.StartsWith("PresentationFramework") ||
+            name.StartsWith("PresentationCore") ||
+            name.StartsWith("WindowsBase") ||
+            name.StartsWith("Accessibility") ||
+            name.StartsWith("DirectWriteForwarder") ||
+            name.StartsWith("SMDiagnostics") ||
+            name.StartsWith("System") ||
+            name.StartsWith("Microsoft") ||
+            name.StartsWith("NuGet.") ||
+            name.StartsWith("Newtonsoft.") ||
+            name.StartsWith("Castle.") ||
+            name.StartsWith("Moq") ||
+            name.StartsWith("xunit") ||
+            name.StartsWith("nunit") ||
+            name.StartsWith("FluentAssertions") ||
+            name.StartsWith("AutoFixture") ||
+            name.StartsWith("FakeItEasy") ||
+            name.StartsWith("Shouldly") ||
+            name.StartsWith("NSubstitute") ||
+            name.StartsWith("Rhino.Mocks") ||
+            name.StartsWith("testhost") ||
+            name.StartsWith("MSTest") ||
+            name.StartsWith("vstest") ||
+            name.StartsWith("Microsoft.TestPlatform") ||
+            name.StartsWith("Microsoft.Testing.Platform") ||
+            name.StartsWith("anonymously") ||
+            name.Contains("resources") ||
+            name.Contains("resources.dll") ||
+            name.Contains("XmlSerializers") ||
+            name.EndsWith(".resources") ||
+            name.EndsWith(".XmlSerializers"))
         {
             return false;
         }
@@ -141,6 +170,34 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
+        // Skip assemblies that are likely to cause issues
+        if (assembly.IsDynamic)
+        {
+            return false;
+        }
+
+        // Skip assemblies in certain locations (single-file apps will have empty locations)
+        try
+        {
+#pragma warning disable IL3000 // Avoid accessing Assembly file path when publishing as a single file
+            var location = assembly.Location;
+#pragma warning restore IL3000 // Avoid accessing Assembly file path when publishing as a single file
+            if (!string.IsNullOrEmpty(location) && 
+                (location.Contains("ref") ||
+                 location.Contains("runtimes") ||
+                 location.Contains("Microsoft.NETCore.App") ||
+                 location.Contains("Microsoft.AspNetCore.App") ||
+                 location.Contains("Microsoft.WindowsDesktop.App")))
+            {
+                return false;
+            }
+        }
+        catch
+        {
+            // If we can't get the location, skip this assembly to be safe
+            return false;
+        }
+
         return true;
     }
 
@@ -148,13 +205,33 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     [UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     private static IEnumerable<TestMetadata> DiscoverTestsInAssembly(Assembly assembly)
     {
-        var types = assembly.GetTypes()
-            .Where(t => t is { IsAbstract: false, IsClass: true });
-
-        foreach (var type in types)
+        Type[] types;
+        try
         {
-            var testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-                .Where(m => m.GetCustomAttribute<TestAttribute>() != null);
+            types = assembly.GetTypes();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to get types from assembly {assembly.FullName}: {ex.Message}");
+            yield break;
+        }
+
+        var filteredTypes = types.Where(t => t is { IsAbstract: false, IsClass: true });
+
+        foreach (var type in filteredTypes)
+        {
+            MethodInfo[] testMethods;
+            try
+            {
+                testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
+                    .Where(m => m.GetCustomAttribute<TestAttribute>() != null)
+                    .ToArray();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to get methods from type {type.FullName}: {ex.Message}");
+                continue;
+            }
 
             foreach (var method in testMethods)
             {
@@ -652,23 +729,43 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
     private static Func<object?[], object> CompileInstanceFactory(ConstructorInfo ctor)
     {
-        var parameters = ctor.GetParameters();
-        var paramExpr = Expression.Parameter(typeof(object[]), "args");
-
-        var argExpressions = new Expression[parameters.Length];
-        for (var i = 0; i < parameters.Length; i++)
+        try
         {
-            var indexExpr = Expression.ArrayIndex(paramExpr, Expression.Constant(i));
-            var convertExpr = Expression.Convert(indexExpr, parameters[i].ParameterType);
-            argExpressions[i] = convertExpr;
+            var parameters = ctor.GetParameters();
+            var paramExpr = Expression.Parameter(typeof(object[]), "args");
+
+            var argExpressions = new Expression[parameters.Length];
+            for (var i = 0; i < parameters.Length; i++)
+            {
+                var indexExpr = Expression.ArrayIndex(paramExpr, Expression.Constant(i));
+                var convertExpr = Expression.Convert(indexExpr, parameters[i].ParameterType);
+                argExpressions[i] = convertExpr;
+            }
+
+            var newExpr = Expression.New(ctor, argExpressions);
+            var lambdaExpr = Expression.Lambda<Func<object?[], object>>(
+                Expression.Convert(newExpr, typeof(object)),
+                paramExpr);
+
+            return lambdaExpr.Compile();
         }
-
-        var newExpr = Expression.New(ctor, argExpressions);
-        var lambdaExpr = Expression.Lambda<Func<object?[], object>>(
-            Expression.Convert(newExpr, typeof(object)),
-            paramExpr);
-
-        return lambdaExpr.Compile();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to compile instance factory for {ctor.DeclaringType?.Name}: {ex.Message}");
+            // Return a fallback factory that uses reflection
+            return (args) =>
+            {
+                try
+                {
+                    return Activator.CreateInstance(ctor.DeclaringType!, args) 
+                           ?? throw new InvalidOperationException("Failed to create instance");
+                }
+                catch (Exception invokeEx)
+                {
+                    throw new InvalidOperationException($"Failed to create instance of {ctor.DeclaringType?.Name}", invokeEx);
+                }
+            };
+        }
     }
 
     [UnconditionalSuppressMessage("AOT", "IL3050:Using member 'System.Linq.Expressions.Expression.Call(Type, String, Type[], params Expression[])' which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling", Justification = "Reflection mode cannot support AOT")]
@@ -680,71 +777,95 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
     private static Func<object, object?[], Task> CompileTestInvoker(Type testClass, MethodInfo testMethod)
     {
-        var instanceParam = Expression.Parameter(typeof(object), "instance");
-        var argsParam = Expression.Parameter(typeof(object[]), "args");
-
-        var instanceExpr = testMethod.IsStatic
-            ? null
-            : Expression.Convert(instanceParam, testClass);
-
-        var parameters = testMethod.GetParameters();
-        var argExpressions = new Expression[parameters.Length];
-
-        for (var i = 0; i < parameters.Length; i++)
+        try
         {
-            var indexExpr = Expression.ArrayIndex(argsParam, Expression.Constant(i));
-            var convertExpr = Expression.Convert(indexExpr, parameters[i].ParameterType);
-            argExpressions[i] = convertExpr;
-        }
+            var instanceParam = Expression.Parameter(typeof(object), "instance");
+            var argsParam = Expression.Parameter(typeof(object[]), "args");
 
-        var callExpr = testMethod.IsStatic
-            ? Expression.Call(testMethod, argExpressions)
-            : Expression.Call(instanceExpr!, testMethod, argExpressions);
+            var instanceExpr = testMethod.IsStatic
+                ? null
+                : Expression.Convert(instanceParam, testClass);
 
-        Expression body;
-        if (testMethod.ReturnType == typeof(Task))
-        {
-            body = callExpr;
-        }
-        else if (testMethod.ReturnType == typeof(void))
-        {
-            var blockExpr = Expression.Block(
-                callExpr,
-                Expression.Constant(Task.CompletedTask)
-            );
-            body = blockExpr;
-        }
-        else if (testMethod.ReturnType.IsGenericType &&
-                 testMethod.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
-        {
-            body = Expression.Call(
-                typeof(ReflectionTestDataCollector),
-                nameof(ConvertToNonGenericTask),
-                null,
-                callExpr);
-        }
-        else if (testMethod.ReturnType == typeof(ValueTask))
-        {
-            body = Expression.Call(
-                callExpr,
-                typeof(ValueTask).GetMethod("AsTask")!);
-        }
-        else
-        {
-            // Sync method returning a value
-            var blockExpr = Expression.Block(
-                callExpr,
-                Expression.Constant(Task.CompletedTask)
-            );
-            body = blockExpr;
-        }
+            var parameters = testMethod.GetParameters();
+            var argExpressions = new Expression[parameters.Length];
 
-        var lambda = Expression.Lambda<Func<object, object?[], Task>>(
-            body,
-            instanceParam,
-            argsParam);
+            for (var i = 0; i < parameters.Length; i++)
+            {
+                var indexExpr = Expression.ArrayIndex(argsParam, Expression.Constant(i));
+                var convertExpr = Expression.Convert(indexExpr, parameters[i].ParameterType);
+                argExpressions[i] = convertExpr;
+            }
 
-        return lambda.Compile();
+            var callExpr = testMethod.IsStatic
+                ? Expression.Call(testMethod, argExpressions)
+                : Expression.Call(instanceExpr!, testMethod, argExpressions);
+
+            Expression body;
+            if (testMethod.ReturnType == typeof(Task))
+            {
+                body = callExpr;
+            }
+            else if (testMethod.ReturnType == typeof(void))
+            {
+                var blockExpr = Expression.Block(
+                    callExpr,
+                    Expression.Constant(Task.CompletedTask)
+                );
+                body = blockExpr;
+            }
+            else if (testMethod.ReturnType.IsGenericType &&
+                     testMethod.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
+            {
+                body = Expression.Call(
+                    typeof(ReflectionTestDataCollector),
+                    nameof(ConvertToNonGenericTask),
+                    null,
+                    callExpr);
+            }
+            else if (testMethod.ReturnType == typeof(ValueTask))
+            {
+                body = Expression.Call(
+                    callExpr,
+                    typeof(ValueTask).GetMethod("AsTask")!);
+            }
+            else
+            {
+                // Sync method returning a value
+                var blockExpr = Expression.Block(
+                    callExpr,
+                    Expression.Constant(Task.CompletedTask)
+                );
+                body = blockExpr;
+            }
+
+            var lambda = Expression.Lambda<Func<object, object?[], Task>>(
+                body,
+                instanceParam,
+                argsParam);
+
+            return lambda.Compile();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to compile test invoker for {testClass.Name}.{testMethod.Name}: {ex.Message}");
+            // Return a fallback invoker that uses reflection
+            return (instance, args) =>
+            {
+                try
+                {
+                    var result = testMethod.Invoke(instance, args);
+                    if (result is Task task)
+                    {
+                        return task;
+                    }
+                    return Task.CompletedTask;
+                }
+                catch (Exception invokeEx)
+                {
+                    return Task.FromException(invokeEx);
+                }
+            };
+        }
     }
 
     private static Task ConvertToNonGenericTask<T>(Task<T> task)
@@ -756,64 +877,15 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     private static TestHooks DiscoverHooks([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type testClass)
     {
-        var beforeClassHooks = new List<HookMetadata>();
-        var afterClassHooks = new List<HookMetadata>();
-        var beforeTestHooks = new List<HookMetadata>();
-        var afterTestHooks = new List<HookMetadata>();
-
-        // Discover assembly-level hooks
-        var assemblyMethods = testClass.Assembly.GetTypes()
-            .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance))
-            .ToList();
-
-        // Discover class and test level hooks
-        var classMethods = GetMethodsFromClassHierarchy(testClass);
-
-        foreach (var method in classMethods.Concat(assemblyMethods).Distinct())
-        {
-            var beforeAttr = method.GetCustomAttribute<BeforeAttribute>();
-            if (beforeAttr != null)
-            {
-                var hookMetadata = CreateHookMetadata(method, beforeAttr, isBeforeHook: true);
-                if (hookMetadata != null)
-                {
-                    switch (beforeAttr.HookType)
-                    {
-                        case HookType.Class:
-                            beforeClassHooks.Add(hookMetadata);
-                            break;
-                        case HookType.Test:
-                            beforeTestHooks.Add(hookMetadata);
-                            break;
-                    }
-                }
-            }
-
-            var afterAttr = method.GetCustomAttribute<AfterAttribute>();
-            if (afterAttr != null)
-            {
-                var hookMetadata = CreateHookMetadata(method, afterAttr, isBeforeHook: false);
-                if (hookMetadata != null)
-                {
-                    switch (afterAttr.HookType)
-                    {
-                        case HookType.Class:
-                            afterClassHooks.Add(hookMetadata);
-                            break;
-                        case HookType.Test:
-                            afterTestHooks.Add(hookMetadata);
-                            break;
-                    }
-                }
-            }
-        }
-
+        // Hook discovery is disabled in reflection mode to prevent hanging
+        // This method previously scanned all types in all assemblies which was very expensive
+        // and likely to cause hanging due to problematic assemblies
         return new TestHooks
         {
-            BeforeClass = beforeClassHooks.OrderBy(h => h.Order).ToArray(),
-            AfterClass = afterClassHooks.OrderBy(h => h.Order).ToArray(),
-            BeforeTest = beforeTestHooks.OrderBy(h => h.Order).ToArray(),
-            AfterTest = afterTestHooks.OrderBy(h => h.Order).ToArray()
+            BeforeClass = Array.Empty<HookMetadata>(),
+            AfterClass = Array.Empty<HookMetadata>(),
+            BeforeTest = Array.Empty<HookMetadata>(),
+            AfterTest = Array.Empty<HookMetadata>()
         };
     }
 
