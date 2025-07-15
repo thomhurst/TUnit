@@ -15,13 +15,13 @@ namespace TUnit.Engine.Building;
 /// </summary>
 public sealed class TestBuilder : ITestBuilder
 {
-    private readonly IServiceProvider? _serviceProvider;
-    private readonly IContextBuilder _contextBuilder;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IContextProvider _contextProvider;
 
-    public TestBuilder(IServiceProvider? serviceProvider = null)
+    public TestBuilder(IServiceProvider serviceProvider, IContextProvider contextProvider)
     {
         _serviceProvider = serviceProvider;
-        _contextBuilder = ContextBuilderSingleton.Instance;
+        _contextProvider = contextProvider;
     }
 
 
@@ -178,8 +178,8 @@ public sealed class TestBuilder : ITestBuilder
         }
 
         // Create the class context upfront
-        var classContext = _contextBuilder.GetOrCreateClassContext(metadata.TestClassType);
-        
+        var classContext = _contextProvider.GetOrCreateClassContext(metadata.TestClassType);
+
         var context = new TestContext(
             metadata.TestName,
             CancellationToken.None,
@@ -283,8 +283,8 @@ public sealed class TestBuilder : ITestBuilder
     private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails, string displayName)
     {
         // Create the class context upfront
-        var classContext = _contextBuilder.GetOrCreateClassContext(metadata.TestClassType);
-        
+        var classContext = _contextProvider.GetOrCreateClassContext(metadata.TestClassType);
+
         var context = new TestContext(
             metadata.TestName,
             CancellationToken.None,
@@ -293,7 +293,7 @@ public sealed class TestBuilder : ITestBuilder
         {
             TestDetails = testDetails
         };
-        
+
         return context;
     }
 

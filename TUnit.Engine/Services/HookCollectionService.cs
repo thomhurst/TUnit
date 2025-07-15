@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Engine.Interfaces;
@@ -19,7 +20,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         var hooks = _beforeTestHooksCache.GetOrAdd(testClassType, type =>
         {
             var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
-            
+
             foreach (var source in Sources.TestHookSources)
             {
                 var sourceHooks = source.CollectBeforeTestHooks(string.Empty);
@@ -47,7 +48,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         var hooks = _afterTestHooksCache.GetOrAdd(testClassType, type =>
         {
             var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
-            
+
             foreach (var source in Sources.TestHookSources)
             {
                 var sourceHooks = source.CollectAfterTestHooks(string.Empty);
@@ -75,7 +76,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         var hooks = _beforeEveryTestHooksCache.GetOrAdd(testClassType, type =>
         {
             var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
-            
+
             foreach (var source in Sources.TestHookSources)
             {
                 var sourceHooks = source.CollectBeforeEveryTestHooks(string.Empty);
@@ -100,7 +101,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         var hooks = _afterEveryTestHooksCache.GetOrAdd(testClassType, type =>
         {
             var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
-            
+
             foreach (var source in Sources.TestHookSources)
             {
                 var sourceHooks = source.CollectAfterEveryTestHooks(string.Empty);
@@ -125,7 +126,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         var hooks = _beforeClassHooksCache.GetOrAdd(testClassType, type =>
         {
             var allHooks = new List<(int order, Func<ClassHookContext, CancellationToken, Task> hook)>();
-            
+
             foreach (var source in Sources.ClassHookSources)
             {
                 var sourceHooks = source.CollectBeforeClassHooks(string.Empty);
@@ -153,7 +154,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         var hooks = _afterClassHooksCache.GetOrAdd(testClassType, type =>
         {
             var allHooks = new List<(int order, Func<ClassHookContext, CancellationToken, Task> hook)>();
-            
+
             foreach (var source in Sources.ClassHookSources)
             {
                 var sourceHooks = source.CollectAfterClassHooks(string.Empty);
@@ -176,10 +177,10 @@ internal sealed class HookCollectionService : IHookCollectionService
         return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
     }
 
-    public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectBeforeAssemblyHooksAsync(string assemblyName)
+    public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectBeforeAssemblyHooksAsync(Assembly assembly)
     {
         var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>();
-        
+
         foreach (var source in Sources.AssemblyHookSources)
         {
             var sourceHooks = source.CollectBeforeAssemblyHooks(string.Empty);
@@ -187,7 +188,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             {
                 try
                 {
-                    if (hook.Assembly != null && hook.Assembly.GetName().Name == assemblyName)
+                    if (hook.Assembly != null && hook.Assembly == assembly)
                     {
                         var hookFunc = CreateAssemblyHookDelegate(hook);
                         allHooks.Add((hook.Order, hookFunc));
@@ -208,10 +209,10 @@ internal sealed class HookCollectionService : IHookCollectionService
         return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
     }
 
-    public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectAfterAssemblyHooksAsync(string assemblyName)
+    public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectAfterAssemblyHooksAsync(Assembly assembly)
     {
         var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>();
-        
+
         foreach (var source in Sources.AssemblyHookSources)
         {
             var sourceHooks = source.CollectAfterAssemblyHooks(string.Empty);
@@ -219,7 +220,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             {
                 try
                 {
-                    if (hook.Assembly != null && hook.Assembly.GetName().Name == assemblyName)
+                    if (hook.Assembly != null && hook.Assembly == assembly)
                     {
                         var hookFunc = CreateAssemblyHookDelegate(hook);
                         allHooks.Add((hook.Order, hookFunc));
@@ -243,7 +244,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     public ValueTask<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>> CollectBeforeTestSessionHooksAsync()
     {
         var allHooks = new List<(int order, Func<TestSessionContext, CancellationToken, Task> hook)>();
-        
+
         foreach (var source in Sources.TestSessionHookSources)
         {
             var sourceHooks = source.CollectBeforeTestSessionHooks(string.Empty);
@@ -265,7 +266,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     public ValueTask<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>> CollectAfterTestSessionHooksAsync()
     {
         var allHooks = new List<(int order, Func<TestSessionContext, CancellationToken, Task> hook)>();
-        
+
         foreach (var source in Sources.TestSessionHookSources)
         {
             var sourceHooks = source.CollectAfterTestSessionHooks(string.Empty);
@@ -287,7 +288,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     public ValueTask<IReadOnlyList<Func<BeforeTestDiscoveryContext, CancellationToken, Task>>> CollectBeforeTestDiscoveryHooksAsync()
     {
         var allHooks = new List<(int order, Func<BeforeTestDiscoveryContext, CancellationToken, Task> hook)>();
-        
+
         foreach (var source in Sources.TestDiscoveryHookSources)
         {
             var sourceHooks = source.CollectBeforeTestDiscoveryHooks(string.Empty);
@@ -309,7 +310,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     public ValueTask<IReadOnlyList<Func<TestDiscoveryContext, CancellationToken, Task>>> CollectAfterTestDiscoveryHooksAsync()
     {
         var allHooks = new List<(int order, Func<TestDiscoveryContext, CancellationToken, Task> hook)>();
-        
+
         foreach (var source in Sources.TestDiscoveryHookSources)
         {
             var sourceHooks = source.CollectAfterTestDiscoveryHooks(string.Empty);

@@ -1,6 +1,9 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Services;
+using TUnit.Engine.Framework;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 
@@ -10,7 +13,8 @@ internal sealed class HookOrchestrator
 {
     private readonly IHookCollectionService _hookCollectionService;
     private readonly TUnitFrameworkLogger _logger;
-    private readonly IContextBuilder _contextBuilder;
+    private readonly TUnitServiceProvider _serviceProvider;
+    private readonly IContextProvider _contextProvider;
 
     // Track which assemblies/classes have been initialized
     private readonly ConcurrentDictionary<string, bool> _initializedAssemblies = new();
@@ -19,97 +23,25 @@ internal sealed class HookOrchestrator
     // Track active test counts for cleanup
     private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
     private readonly ConcurrentDictionary<Type, int> _classTestCounts = new();
-    
-    // Keep local references for quick lookups
-    private readonly ConcurrentDictionary<string, AssemblyHookContext> _assemblyContexts = new();
-    private readonly ConcurrentDictionary<Type, ClassHookContext> _classContexts = new();
 
-    public HookOrchestrator(IHookCollectionService hookCollectionService, TUnitFrameworkLogger logger, IContextBuilder? contextBuilder = null)
+    public HookOrchestrator(IHookCollectionService hookCollectionService, TUnitFrameworkLogger logger, IContextProvider contextProvider, TUnitServiceProvider serviceProvider)
     {
         _hookCollectionService = hookCollectionService;
         _logger = logger;
-        _contextBuilder = contextBuilder ?? ContextBuilderSingleton.Instance;
-    }
-
-    private void EnsureContextHierarchy()
-    {
-        if (BeforeTestDiscoveryContext.Current == null)
-        {
-            var discoveryContext = new BeforeTestDiscoveryContext { TestFilter = null };
-            BeforeTestDiscoveryContext.Current = discoveryContext;
-        }
-
-        if (TestSessionContext.Current == null)
-        {
-            var testDiscoveryContext = new TestDiscoveryContext(BeforeTestDiscoveryContext.Current) { TestFilter = null };
-            var sessionContext = new TestSessionContext(testDiscoveryContext)
-            {
-                Id = Guid.NewGuid().ToString(),
-                TestFilter = null
-            };
-            TestSessionContext.Current = sessionContext;
-        }
-    }
-
-    public Task InitializeContextsWithTestsAsync(IEnumerable<ExecutableTest> tests, CancellationToken cancellationToken)
-    {
-        // Ensure context hierarchy exists
-        EnsureContextHierarchy();
-
-        // Group tests by assembly and class
-        var testsByAssembly = tests.GroupBy(t => t.Metadata.TestClassType.Assembly.GetName().Name ?? "Unknown");
-
-        foreach (var assemblyGroup in testsByAssembly)
-        {
-            var assemblyName = assemblyGroup.Key;
-
-            // Get or create assembly context
-            // Use centralized context builder to get or create assembly context
-            var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == assemblyName)
-                ?? throw new InvalidOperationException($"Assembly '{assemblyName}' not found");
-            var assemblyContext = _contextBuilder.GetOrCreateAssemblyContext(assembly, TestSessionContext.Current);
-            AssemblyHookContext.Current = assemblyContext;
-            
-            // Cache for quick lookups
-            _assemblyContexts[assemblyName] = assemblyContext;
-
-            // Group by class within assembly
-            var testsByClass = assemblyGroup.GroupBy(t => t.Metadata.TestClassType);
-
-            foreach (var classGroup in testsByClass)
-            {
-                var testClassType = classGroup.Key;
-
-                // Use centralized context builder to get or create class context
-                var classContext = _contextBuilder.GetOrCreateClassContext(testClassType, assemblyContext);
-                ClassHookContext.Current = classContext;
-                
-                // Cache for quick lookups
-                _classContexts[testClassType] = classContext;
-
-                // Add all tests to the class context
-                foreach (var test in classGroup)
-                {
-                    classContext.AddTest(test.Context);
-                }
-            }
-        }
-
-        return Task.CompletedTask;
+        _serviceProvider = serviceProvider;
+        _contextProvider = contextProvider;
     }
 
     public async Task<ExecutionContext?> ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeTestSessionHooksAsync();
-        EnsureContextHierarchy();
-        var context = TestSessionContext.Current!;
 
         foreach (var hook in hooks)
         {
             try
             {
-                await hook(context, cancellationToken);
-                context.RestoreExecutionContext();
+                _contextProvider.TestSessionContext.RestoreExecutionContext();
+                await hook(_contextProvider.TestSessionContext, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -128,15 +60,13 @@ internal sealed class HookOrchestrator
     public async Task<ExecutionContext?> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterTestSessionHooksAsync();
-        EnsureContextHierarchy();
-        var context = TestSessionContext.Current!;
 
         foreach (var hook in hooks)
         {
             try
             {
-                await hook(context, cancellationToken);
-                context.RestoreExecutionContext();
+                _contextProvider.TestSessionContext.RestoreExecutionContext();
+                await hook(_contextProvider.TestSessionContext, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -155,17 +85,13 @@ internal sealed class HookOrchestrator
     public async Task<ExecutionContext?> ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeTestDiscoveryHooksAsync();
-        var context = new BeforeTestDiscoveryContext
-        {
-            TestFilter = null // Will be set by the discovery process
-        };
 
         foreach (var hook in hooks)
         {
             try
             {
-                await hook(context, cancellationToken);
-                context.RestoreExecutionContext();
+                _contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
+                await hook(_contextProvider.BeforeTestDiscoveryContext, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -184,19 +110,13 @@ internal sealed class HookOrchestrator
     public async Task<ExecutionContext?> ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterTestDiscoveryHooksAsync();
-        // Need a parent context - we'll need to pass this in
-        var beforeContext = BeforeTestDiscoveryContext.Current ?? new BeforeTestDiscoveryContext { TestFilter = null };
-        var context = new TestDiscoveryContext(beforeContext)
-        {
-            TestFilter = null
-        };
 
         foreach (var hook in hooks)
         {
             try
             {
-                await hook(context, cancellationToken);
-                context.RestoreExecutionContext();
+                _contextProvider.TestDiscoveryContext.RestoreExecutionContext();
+                await hook(_contextProvider.TestDiscoveryContext, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -225,7 +145,7 @@ internal sealed class HookOrchestrator
         // Execute BeforeAssembly hooks if first test in assembly
         if (_initializedAssemblies.TryAdd(assemblyName, true))
         {
-            capturedContext = await ExecuteBeforeAssemblyHooksAsync(assemblyName, cancellationToken);
+            capturedContext = await ExecuteBeforeAssemblyHooksAsync(testClassType.Assembly, cancellationToken);
 #if NET
             if (capturedContext != null)
             {
@@ -247,13 +167,12 @@ internal sealed class HookOrchestrator
         }
 
         // Add test to class context if it exists and hasn't been added already
-        if (_classContexts.TryGetValue(testClassType, out var classContext))
+        var classContext = _contextProvider.GetOrCreateClassContext(testClassType);
+
+        // Check if test is already in the context (from InitializeContextsWithTestsAsync)
+        if (!classContext.Tests.Contains(test.Context))
         {
-            // Check if test is already in the context (from InitializeContextsWithTestsAsync)
-            if (!classContext.Tests.Contains(test.Context))
-            {
-                classContext.AddTest(test.Context);
-            }
+            classContext.AddTest(test.Context);
         }
 
         // Execute BeforeEveryTest hooks
@@ -302,7 +221,7 @@ internal sealed class HookOrchestrator
         // Execute AfterAssembly hooks if last test in assembly
         if (assemblyTestsRemaining == 0)
         {
-            capturedContext = await ExecuteAfterAssemblyHooksAsync(assemblyName, cancellationToken);
+            capturedContext = await ExecuteAfterAssemblyHooksAsync(test.Context.ClassContext.AssemblyContext.Assembly, cancellationToken);
 #if NET
             if (capturedContext != null)
             {
@@ -313,35 +232,22 @@ internal sealed class HookOrchestrator
         }
     }
 
-    private async Task<ExecutionContext?> ExecuteBeforeAssemblyHooksAsync(string assemblyName, CancellationToken cancellationToken)
+    private async Task<ExecutionContext?> ExecuteBeforeAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
-        var hooks = await _hookCollectionService.CollectBeforeAssemblyHooksAsync(assemblyName);
+        var hooks = await _hookCollectionService.CollectBeforeAssemblyHooksAsync(assembly);
 
-        // Get or create assembly context
-        var context = _assemblyContexts.GetOrAdd(assemblyName, name =>
-        {
-            EnsureContextHierarchy();
-
-            var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == name)
-                ?? throw new InvalidOperationException($"Assembly '{name}' not found");
-
-            var assemblyContext = _contextBuilder.GetOrCreateAssemblyContext(assembly, TestSessionContext.Current);
-
-            // Set as current for nested operations
-            AssemblyHookContext.Current = assemblyContext;
-            return assemblyContext;
-        });
+        var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
 
         foreach (var hook in hooks)
         {
             try
             {
-                await hook(context, cancellationToken);
-                context.RestoreExecutionContext();
+                assemblyContext.RestoreExecutionContext();
+                await hook(assemblyContext, cancellationToken);
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync($"BeforeAssembly hook failed for {assemblyName}: {ex.Message}");
+                await _logger.LogErrorAsync($"BeforeAssembly hook failed for {assembly}: {ex.Message}");
                 throw;
             }
         }
@@ -353,38 +259,22 @@ internal sealed class HookOrchestrator
 #endif
     }
 
-    private async Task<ExecutionContext?> ExecuteAfterAssemblyHooksAsync(string assemblyName, CancellationToken cancellationToken)
+    private async Task<ExecutionContext?> ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
-        var hooks = await _hookCollectionService.CollectAfterAssemblyHooksAsync(assemblyName);
+        var hooks = await _hookCollectionService.CollectAfterAssemblyHooksAsync(assembly);
 
-        // Use existing assembly context
-        if (!_assemblyContexts.TryGetValue(assemblyName, out var context))
-        {
-            // This shouldn't happen, but create one if needed
-            context = _assemblyContexts.GetOrAdd(assemblyName, name =>
-            {
-                EnsureContextHierarchy();
-
-                var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == name)
-                    ?? throw new InvalidOperationException($"Assembly '{name}' not found");
-
-                var assemblyContext = _contextBuilder.GetOrCreateAssemblyContext(assembly, TestSessionContext.Current);
-
-                AssemblyHookContext.Current = assemblyContext;
-                return assemblyContext;
-            });
-        }
+        var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
 
         foreach (var hook in hooks)
         {
             try
             {
-                await hook(context, cancellationToken);
-                context.RestoreExecutionContext();
+                assemblyContext.RestoreExecutionContext();
+                await hook(assemblyContext, cancellationToken);
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync($"AfterAssembly hook failed for {assemblyName}: {ex.Message}");
+                await _logger.LogErrorAsync($"AfterAssembly hook failed for {assembly.GetName().Name}: {ex.Message}");
             }
         }
 
@@ -399,47 +289,14 @@ internal sealed class HookOrchestrator
     {
         var hooks = await _hookCollectionService.CollectBeforeClassHooksAsync(testClassType);
 
-        // Get or create class context
-        var context = _classContexts.GetOrAdd(testClassType, type =>
-        {
-            // Ensure assembly context exists
-            var assemblyName = type.Assembly.GetName().Name ?? "Unknown";
-
-            if (_assemblyContexts.TryGetValue(assemblyName, out var assemblyContext))
-            {
-                // Use existing context
-            }
-            else if (AssemblyHookContext.Current != null && AssemblyHookContext.Current.Assembly.GetName().Name == assemblyName)
-            {
-                // Use current context
-                assemblyContext = AssemblyHookContext.Current;
-            }
-            else
-            {
-                // Create new assembly context
-                EnsureContextHierarchy();
-                var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == assemblyName)
-                    ?? throw new InvalidOperationException($"Assembly '{assemblyName}' not found");
-
-                assemblyContext = _contextBuilder.GetOrCreateAssemblyContext(assembly, TestSessionContext.Current);
-
-                AssemblyHookContext.Current = assemblyContext;
-                _assemblyContexts[assemblyName] = assemblyContext;
-            }
-
-            var classContext = _contextBuilder.GetOrCreateClassContext(type, assemblyContext);
-
-            // Set as current for nested operations
-            ClassHookContext.Current = classContext;
-            return classContext;
-        });
+        var classContext = _contextProvider.GetOrCreateClassContext(testClassType);
 
         foreach (var hook in hooks)
         {
             try
             {
-                await hook(context, cancellationToken);
-                context.RestoreExecutionContext();
+                classContext.RestoreExecutionContext();
+                await hook(classContext, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -459,51 +316,14 @@ internal sealed class HookOrchestrator
     {
         var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClassType);
 
-        // Use existing class context
-        if (!_classContexts.TryGetValue(testClassType, out var context))
-        {
-            // This shouldn't happen, but create one if needed
-            context = _classContexts.GetOrAdd(testClassType, type =>
-            {
-                // Ensure assembly context exists
-                var assemblyName = type.Assembly.GetName().Name ?? "Unknown";
-
-                if (_assemblyContexts.TryGetValue(assemblyName, out var assemblyContext))
-                {
-                    // Use existing context
-                }
-                else if (AssemblyHookContext.Current != null && AssemblyHookContext.Current.Assembly.GetName().Name == assemblyName)
-                {
-                    // Use current context
-                    assemblyContext = AssemblyHookContext.Current;
-                }
-                else
-                {
-                    // Create new assembly context
-                    EnsureContextHierarchy();
-                    var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == assemblyName)
-                        ?? throw new InvalidOperationException($"Assembly '{assemblyName}' not found");
-
-                    assemblyContext = _contextBuilder.GetOrCreateAssemblyContext(assembly, TestSessionContext.Current);
-
-                    AssemblyHookContext.Current = assemblyContext;
-                    _assemblyContexts[assemblyName] = assemblyContext;
-                }
-
-                var classContext = _contextBuilder.GetOrCreateClassContext(type, assemblyContext);
-
-                ClassHookContext.Current = classContext;
-                _classContexts[type] = classContext;
-                return classContext;
-            });
-        }
+        var classContext = _contextProvider.GetOrCreateClassContext(testClassType);
 
         foreach (var hook in hooks)
         {
             try
             {
-                await hook(context, cancellationToken);
-                context.RestoreExecutionContext();
+                classContext.RestoreExecutionContext();
+                await hook(classContext, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -526,8 +346,8 @@ internal sealed class HookOrchestrator
         {
             try
             {
-                await hook(testContext, cancellationToken);
                 testContext.RestoreExecutionContext();
+                await hook(testContext, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -551,8 +371,8 @@ internal sealed class HookOrchestrator
         {
             try
             {
-                await hook(testContext, cancellationToken);
                 testContext.RestoreExecutionContext();
+                await hook(testContext, cancellationToken);
             }
             catch (Exception ex)
             {

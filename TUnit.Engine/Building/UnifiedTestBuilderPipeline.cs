@@ -4,7 +4,6 @@ using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
-using TUnit.Engine.Interfaces;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building;
@@ -17,18 +16,18 @@ public sealed class UnifiedTestBuilderPipeline
     private readonly ITestDataCollector _dataCollector;
     private readonly IGenericTypeResolver _genericResolver;
     private readonly ITestBuilder _testBuilder;
-    private readonly IContextBuilder _contextBuilder;
+    private readonly IContextProvider _contextProvider;
 
     public UnifiedTestBuilderPipeline(
         ITestDataCollector dataCollector,
         IGenericTypeResolver genericResolver,
         ITestBuilder testBuilder,
-        IContextBuilder? contextBuilder = null)
+        IContextProvider contextBuilder)
     {
         _dataCollector = dataCollector ?? throw new ArgumentNullException(nameof(dataCollector));
         _genericResolver = genericResolver ?? throw new ArgumentNullException(nameof(genericResolver));
         _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
-        _contextBuilder = contextBuilder ?? ContextBuilderSingleton.Instance;
+        _contextProvider = contextBuilder;
     }
 
     /// <summary>
@@ -123,7 +122,7 @@ public sealed class UnifiedTestBuilderPipeline
         }
     }
 
-    private static ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
+    private ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata);
         var displayName = $"{metadata.TestName} [DATA GENERATION ERROR]";
@@ -148,8 +147,8 @@ public sealed class UnifiedTestBuilderPipeline
         };
 
         // Create the class context upfront using singleton
-        var classContext = ContextBuilderSingleton.Instance.GetOrCreateClassContext(metadata.TestClassType);
-        
+        var classContext = _contextProvider.GetOrCreateClassContext(metadata.TestClassType);
+
         var context = new TestContext(
             metadata.TestName,
             CancellationToken.None,
@@ -158,7 +157,7 @@ public sealed class UnifiedTestBuilderPipeline
         {
             TestDetails = testDetails
         };
-        
+
 
         return new FailedExecutableTest(exception)
         {
@@ -184,67 +183,4 @@ public sealed class UnifiedTestBuilderPipeline
         };
     }
 
-}
-
-/// <summary>
-/// Factory for creating the appropriate pipeline based on the execution mode
-/// </summary>
-public static class UnifiedTestBuilderPipelineFactory
-{
-    /// <summary>
-    /// Creates a pipeline configured for the specified execution mode
-    /// </summary>
-    public static UnifiedTestBuilderPipeline CreatePipeline(
-        TestExecutionMode executionMode,
-        IServiceProvider? serviceProvider = null,
-        Assembly[]? assembliesToScan = null)
-    {
-        var dataCollector = TestDataCollectorFactory.Create(executionMode, assembliesToScan);
-        var genericResolver = new Resolvers.AotGenericTypeResolver();
-        var testBuilder = new TestBuilder(serviceProvider);
-
-        return new UnifiedTestBuilderPipeline(
-            dataCollector,
-            genericResolver,
-            testBuilder);
-    }
-
-    /// <summary>
-    /// Creates a pipeline configured for AOT mode (source generation)
-    /// </summary>
-    public static UnifiedTestBuilderPipeline CreateAotPipeline(
-        ITestInvoker testInvoker,
-        IServiceProvider? serviceProvider = null)
-    {
-        return CreatePipeline(TestExecutionMode.SourceGeneration, serviceProvider);
-    }
-
-    /// <summary>
-    /// Creates a pipeline configured for reflection mode
-    /// </summary>
-    public static UnifiedTestBuilderPipeline CreateReflectionPipeline(
-        Assembly[] assemblies,
-        ITestInvoker testInvoker,
-        IServiceProvider? serviceProvider = null)
-    {
-        return CreatePipeline(TestExecutionMode.Reflection, serviceProvider, assemblies);
-    }
-
-    /// <summary>
-    /// Creates a pipeline with automatic mode detection
-    /// </summary>
-    public static async Task<UnifiedTestBuilderPipeline> CreateAutoDetectPipelineAsync(
-        string testSessionId,
-        IServiceProvider? serviceProvider = null,
-        Assembly[]? assembliesToScan = null)
-    {
-        var dataCollector = await TestDataCollectorFactory.CreateAutoDetectAsync(testSessionId, assembliesToScan);
-        var genericResolver = new Resolvers.AotGenericTypeResolver();
-        var testBuilder = new TestBuilder(serviceProvider);
-
-        return new UnifiedTestBuilderPipeline(
-            dataCollector,
-            genericResolver,
-            testBuilder);
-    }
 }

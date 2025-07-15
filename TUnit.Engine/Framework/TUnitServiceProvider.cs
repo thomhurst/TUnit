@@ -7,7 +7,9 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Services;
 using TUnit.Engine.Building;
+using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -71,17 +73,32 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create test services using unified architecture
         Register<ITestInvoker>(new TestInvoker());
+
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
-        HookOrchestrator = Register(new HookOrchestrator(HookCollectionService, Logger));
+
+        var contextProvider = Register(new ContextProvider());
+
+        HookOrchestrator = Register(new HookOrchestrator(HookCollectionService, Logger, contextProvider, this));
         EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
 
         // Detect execution mode from command line or environment
         var executionMode = GetExecutionMode(CommandLineOptions);
 
-        // Create pipeline based on execution mode
+        // Create pipeline dependencies
+        var dataCollector = Register<ITestDataCollector>(
+            TestDataCollectorFactory.Create(executionMode, assembliesToScan: null));
+        var genericResolver = Register<TUnit.Engine.Building.Interfaces.IGenericTypeResolver>(
+            new TUnit.Engine.Building.Resolvers.AotGenericTypeResolver());
+        var testBuilder = Register<ITestBuilder>(
+            new TestBuilder(this, contextProvider));
+
+        // Create pipeline with all dependencies
         TestBuilderPipeline = Register(
-            UnifiedTestBuilderPipelineFactory.CreatePipeline(
-                executionMode, this, assembliesToScan: null));
+            new UnifiedTestBuilderPipeline(
+                dataCollector,
+                genericResolver,
+                testBuilder,
+                contextProvider));
 
         DiscoveryService = Register(new TestDiscoveryService(HookOrchestrator, TestBuilderPipeline, TestFilterService));
 

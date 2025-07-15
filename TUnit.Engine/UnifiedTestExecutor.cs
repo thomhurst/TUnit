@@ -117,7 +117,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
         // Initialize static properties with data source attributes before any other session setup
         await InitializeStaticPropertiesAsync(cancellationToken);
 
-        await hookOrchestrator.InitializeContextsWithTestsAsync(testList, cancellationToken);
         var beforeSessionContext = await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
 #if NET
         if (beforeSessionContext != null)
