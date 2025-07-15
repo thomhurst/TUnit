@@ -67,6 +67,7 @@ public static class DataSourceHelpers
 
     /// <summary>
     /// Handles tuple values for method and class arguments in an AOT-compatible way
+    /// Each returned factory invokes the original data source function to ensure fresh instances
     /// </summary>
     public static Func<Task<object?>>[] HandleTupleValue(object? value, bool shouldUnwrap)
     {
@@ -79,8 +80,12 @@ public static class DataSourceHelpers
         var unwrapped = UnwrapTupleAot(value);
         if (unwrapped.Length > 1)
         {
-            // Multiple values from tuple - create a factory for each
-            return unwrapped.Select(v => new Func<Task<object?>>(() => Task.FromResult<object?>(v))).ToArray();
+            // Multiple values from tuple - create a factory for each that returns the specific element
+            return unwrapped.Select((_, index) => new Func<Task<object?>>(() => 
+            {
+                var freshUnwrapped = UnwrapTupleAot(value);
+                return Task.FromResult<object?>(index < freshUnwrapped.Length ? freshUnwrapped[index] : null);
+            })).ToArray();
         }
 
         // Single value or not a tuple
@@ -249,6 +254,7 @@ public static class DataSourceHelpers
     /// <summary>
     /// AOT-compatible method that processes data and returns factories for test data combination
     /// Replaces the complex HandleTupleValue + InvokeIfFunc pattern
+    /// Each returned factory invokes the original data source function to ensure fresh instances
     /// </summary>
     public static Func<Task<object?>>[] ProcessTestDataSource<T>(T data, int expectedParameterCount = -1)
     {
@@ -257,31 +263,52 @@ public static class DataSourceHelpers
             return new[] { () => Task.FromResult<object?>(null) };
         }
 
-        // If it's a Func<TResult>, invoke it first
-        var actualData = InvokeIfFunc(data);
-
+        // Determine how many factories we need to return based on the data structure
+        // We need to evaluate the data once to understand its structure
+        var sampleData = InvokeIfFunc(data);
+        
         // Always unwrap tuples - they explicitly represent multiple values
-        if (IsTuple(actualData))
+        if (IsTuple(sampleData))
         {
-            var unwrapped = UnwrapTupleAot(actualData);
-            return unwrapped.Select(v => new Func<Task<object?>>(() => Task.FromResult(v))).ToArray();
+            var unwrapped = UnwrapTupleAot(sampleData);
+            // For tuples, return individual factories for each parameter
+            if (expectedParameterCount > 0 && unwrapped.Length == expectedParameterCount)
+            {
+                return unwrapped.Select((_, index) => new Func<Task<object?>>(() => 
+                {
+                    var freshData = InvokeIfFunc(data);
+                    var freshUnwrapped = UnwrapTupleAot(freshData);
+                    return Task.FromResult<object?>(index < freshUnwrapped.Length ? freshUnwrapped[index] : null);
+                })).ToArray();
+            }
+            // If parameter count doesn't match, return as single tuple value
+            return new[] { () => Task.FromResult<object?>(InvokeIfFunc(data)) };
         }
         
         // For arrays, decide based on expected parameter count
-        if (actualData is object?[] array && expectedParameterCount > 0)
+        if (sampleData is object?[] array && expectedParameterCount > 0)
         {
             // If expecting multiple parameters and array length matches, unwrap it
             if (expectedParameterCount > 1 && array.Length == expectedParameterCount)
             {
-                return array.Select(v => new Func<Task<object?>>(() => Task.FromResult(v))).ToArray();
+                return array.Select((_, index) => new Func<Task<object?>>(() => 
+                {
+                    var freshData = InvokeIfFunc(data);
+                    if (freshData is object?[] freshArray && index < freshArray.Length)
+                    {
+                        return Task.FromResult<object?>(freshArray[index]);
+                    }
+                    return Task.FromResult<object?>(null);
+                })).ToArray();
             }
             // If expecting 1 parameter, keep array as single value
             // Or if array length doesn't match expected count, treat as single value
         }
         
-        // Default: return as single value
-        return new[] { () => Task.FromResult<object?>(actualData) };
+        // Default: return as single value, invoking the original function each time
+        return new[] { () => Task.FromResult<object?>(InvokeIfFunc(data)) };
     }
+
 
     /// <summary>
     /// AOT-compatible runtime dispatcher for data source property initialization.

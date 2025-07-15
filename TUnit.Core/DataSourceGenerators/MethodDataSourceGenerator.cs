@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 
 namespace TUnit.Core.DataSourceGenerators;
@@ -23,22 +24,19 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
                 $"Method '{attribute.MethodNameProvidingDataSource}' not found on type '{sourceType.Name}'");
         }
 
-        object? instance = null;
-        if (!method.IsStatic)
-        {
-            instance = Activator.CreateInstance(sourceType);
-        }
-
-        var result = method.Invoke(instance, attribute.Arguments);
+        // Invoke method once to determine structure and count
+        var result = InvokeDataSourceMethod(method, sourceType, attribute.Arguments);
         
         if (result is IEnumerable<object?[]> objectArrays)
         {
             var loopIndex = 0;
             foreach (var objectArray in objectArrays)
             {
+                var currentLoopIndex = loopIndex; // Capture for closure
                 yield return new TestDataCombination
                 {
-                    MethodDataFactories = objectArray.Select<object?, Func<Task<object?>>>(item => () => Task.FromResult(item)).ToArray(),
+                    MethodDataFactories = objectArray.Select<object?, Func<Task<object?>>>((_, paramIndex) => 
+                        () => Task.FromResult(GetMethodDataAtIndex(method, sourceType, attribute.Arguments, currentLoopIndex, paramIndex))).ToArray(),
                     ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
                     MethodDataSourceIndex = context.DataSourceIndex,
                     MethodLoopIndex = loopIndex,
@@ -54,6 +52,7 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
             var loopIndex = 0;
             foreach (var item in enumerable)
             {
+                var currentLoopIndex = loopIndex; // Capture for closure
                 object?[] methodData;
                 if (item is object?[] array)
                 {
@@ -66,7 +65,8 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
 
                 yield return new TestDataCombination
                 {
-                    MethodDataFactories = methodData.Select<object?, Func<Task<object?>>>(item => () => Task.FromResult(item)).ToArray(),
+                    MethodDataFactories = methodData.Select<object?, Func<Task<object?>>>((_, paramIndex) => 
+                        () => Task.FromResult(GetMethodDataAtIndex(method, sourceType, attribute.Arguments, currentLoopIndex, paramIndex))).ToArray(),
                     ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
                     MethodDataSourceIndex = context.DataSourceIndex,
                     MethodLoopIndex = loopIndex,
@@ -83,5 +83,57 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
                 $"Method '{attribute.MethodNameProvidingDataSource}' on type '{sourceType.Name}' " +
                 "must return an IEnumerable of data values");
         }
+    }
+
+    private static object? InvokeDataSourceMethod(MethodInfo method, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type sourceType, object?[]? arguments)
+    {
+        object? instance = null;
+        if (!method.IsStatic)
+        {
+            instance = Activator.CreateInstance(sourceType);
+        }
+
+        return method.Invoke(instance, arguments);
+    }
+
+    private static object? GetMethodDataAtIndex(MethodInfo method, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type sourceType, object?[]? arguments, int loopIndex, int paramIndex)
+    {
+        var result = InvokeDataSourceMethod(method, sourceType, arguments);
+        
+        if (result is IEnumerable<object?[]> objectArrays)
+        {
+            var currentLoop = 0;
+            foreach (var objectArray in objectArrays)
+            {
+                if (currentLoop == loopIndex)
+                {
+                    return paramIndex < objectArray.Length ? objectArray[paramIndex] : null;
+                }
+                currentLoop++;
+            }
+        }
+        else if (result is System.Collections.IEnumerable enumerable)
+        {
+            var currentLoop = 0;
+            foreach (var item in enumerable)
+            {
+                if (currentLoop == loopIndex)
+                {
+                    object?[] methodData;
+                    if (item is object?[] array)
+                    {
+                        methodData = array;
+                    }
+                    else
+                    {
+                        methodData = new[] { item };
+                    }
+                    return paramIndex < methodData.Length ? methodData[paramIndex] : null;
+                }
+                currentLoop++;
+            }
+        }
+        
+        return null;
     }
 }
