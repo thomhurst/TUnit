@@ -19,7 +19,8 @@ public abstract class Context : IContext, IDisposable
     /// Gets the current context.
     /// </summary>
     public static Context Current =>
-        ClassHookContext.Current as Context
+        TestContext.Current as Context
+        ?? ClassHookContext.Current as Context
         ?? AssemblyHookContext.Current as Context
         ?? TestSessionContext.Current as Context
         ?? BeforeTestDiscoveryContext.Current as Context
