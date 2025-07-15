@@ -16,9 +16,9 @@ internal sealed class HookOrchestrator
     private readonly TUnitServiceProvider _serviceProvider;
     private readonly IContextProvider _contextProvider;
 
-    // Track which assemblies/classes have been initialized
-    private readonly ConcurrentDictionary<string, bool> _initializedAssemblies = new();
-    private readonly ConcurrentDictionary<Type, bool> _initializedClasses = new();
+    // Cache initialization tasks for assemblies/classes
+    private readonly ConcurrentDictionary<string, Task<ExecutionContext?>> _beforeAssemblyTasks = new();
+    private readonly ConcurrentDictionary<Type, Task<ExecutionContext?>> _beforeClassTasks = new();
 
     // Track active test counts for cleanup
     private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
@@ -30,6 +30,26 @@ internal sealed class HookOrchestrator
         _logger = logger;
         _serviceProvider = serviceProvider;
         _contextProvider = contextProvider;
+    }
+
+    /// <summary>
+    /// Gets or creates a cached task for BeforeAssembly hooks.
+    /// This ensures the hooks only run once and all tests await the same result.
+    /// </summary>
+    private Task<ExecutionContext?> GetOrCreateBeforeAssemblyTask(string assemblyName, Assembly assembly, CancellationToken cancellationToken)
+    {
+        return _beforeAssemblyTasks.GetOrAdd(assemblyName, _ => 
+            ExecuteBeforeAssemblyHooksAsync(assembly, cancellationToken));
+    }
+
+    /// <summary>
+    /// Gets or creates a cached task for BeforeClass hooks.
+    /// This ensures the hooks only run once and all tests await the same result.
+    /// </summary>
+    private Task<ExecutionContext?> GetOrCreateBeforeClassTask(Type testClassType, CancellationToken cancellationToken)
+    {
+        return _beforeClassTasks.GetOrAdd(testClassType, _ => 
+            ExecuteBeforeClassHooksAsync(testClassType, cancellationToken));
     }
 
     public async Task<ExecutionContext?> ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
@@ -140,31 +160,31 @@ internal sealed class HookOrchestrator
         _assemblyTestCounts.AddOrUpdate(assemblyName, 1, (_, count) => count + 1);
         _classTestCounts.AddOrUpdate(testClassType, 1, (_, count) => count + 1);
 
-        ExecutionContext? capturedContext = null;
-
-        // Execute BeforeAssembly hooks if first test in assembly
-        if (_initializedAssemblies.TryAdd(assemblyName, true))
-        {
-            capturedContext = await ExecuteBeforeAssemblyHooksAsync(testClassType.Assembly, cancellationToken);
+        // Get or create the BeforeAssembly task - this ensures it only runs once
+        var beforeAssemblyTask = GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken);
+        
+        // Await the task - if it's already completed, this returns immediately
+        // If it failed, this will throw the same exception for all tests
+        var capturedContext = await beforeAssemblyTask;
 #if NET
-            if (capturedContext != null)
-            {
-                ExecutionContext.Restore(capturedContext);
-            }
-#endif
-        }
-
-        // Execute BeforeClass hooks if first test in class
-        if (_initializedClasses.TryAdd(testClassType, true))
+        if (capturedContext != null)
         {
-            capturedContext = await ExecuteBeforeClassHooksAsync(testClassType, cancellationToken);
-#if NET
-            if (capturedContext != null)
-            {
-                ExecutionContext.Restore(capturedContext);
-            }
-#endif
+            ExecutionContext.Restore(capturedContext);
         }
+#endif
+
+        // Get or create the BeforeClass task - this ensures it only runs once
+        var beforeClassTask = GetOrCreateBeforeClassTask(testClassType, cancellationToken);
+        
+        // Await the task - if it's already completed, this returns immediately
+        // If it failed, this will throw the same exception for all tests
+        capturedContext = await beforeClassTask;
+#if NET
+        if (capturedContext != null)
+        {
+            ExecutionContext.Restore(capturedContext);
+        }
+#endif
 
         // Add test to class context if it exists and hasn't been added already
         var classContext = _contextProvider.GetOrCreateClassContext(testClassType);
