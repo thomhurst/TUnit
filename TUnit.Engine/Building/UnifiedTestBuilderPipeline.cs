@@ -146,17 +146,13 @@ public sealed class UnifiedTestBuilderPipeline
             Attributes = [],
         };
 
-        // Create the class context upfront using singleton
-        var classContext = _contextProvider.GetOrCreateClassContext(metadata.TestClassType);
-
-        var context = new TestContext(
+        var context = _contextProvider.CreateTestContext(
             metadata.TestName,
+            metadata.TestClassType,
             CancellationToken.None,
-            new TUnit.Core.Services.TestServiceProvider(),
-            classContext)
-        {
-            TestDetails = testDetails
-        };
+            new TUnit.Core.Services.TestServiceProvider());
+        
+        context.TestDetails = testDetails;
 
 
         return new FailedExecutableTest(exception)

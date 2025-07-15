@@ -177,17 +177,13 @@ public sealed class TestBuilder : ITestBuilder
             testDetails.Categories.Add(category);
         }
 
-        // Create the class context upfront
-        var classContext = _contextProvider.GetOrCreateClassContext(metadata.TestClassType);
-
-        var context = new TestContext(
+        var context = _contextProvider.CreateTestContext(
             metadata.TestName,
+            metadata.TestClassType,
             CancellationToken.None,
-            _serviceProvider ?? new TUnit.Core.Services.TestServiceProvider(),
-            classContext)
-        {
-            TestDetails = testDetails
-        };
+            _serviceProvider ?? new TUnit.Core.Services.TestServiceProvider());
+        
+        context.TestDetails = testDetails;
 
         return await Task.FromResult(context);
     }
@@ -282,17 +278,13 @@ public sealed class TestBuilder : ITestBuilder
 
     private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails, string displayName)
     {
-        // Create the class context upfront
-        var classContext = _contextProvider.GetOrCreateClassContext(metadata.TestClassType);
-
-        var context = new TestContext(
+        var context = _contextProvider.CreateTestContext(
             metadata.TestName,
+            metadata.TestClassType,
             CancellationToken.None,
-            new TUnit.Core.Services.TestServiceProvider(),
-            classContext)
-        {
-            TestDetails = testDetails
-        };
+            new TUnit.Core.Services.TestServiceProvider());
+        
+        context.TestDetails = testDetails;
 
         return context;
     }
