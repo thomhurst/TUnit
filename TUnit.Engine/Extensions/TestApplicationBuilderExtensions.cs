@@ -30,7 +30,6 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new MaximumParallelTestsCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ParametersCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new FailFastCommandProvider(extension));
-        testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionScannerCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionModeCommandProvider(extension));
         
         // Unified verbosity control (replaces HideTestOutput, DisableLogo, DetailedStacktrace)

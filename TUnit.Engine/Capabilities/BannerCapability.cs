@@ -60,7 +60,7 @@ internal class BannerCapability(IPlatformInformation platformInformation, IComma
 
     private EngineMode GetMode()
     {
-        if (commandLineOptions.IsOptionSet(ReflectionScannerCommandProvider.ReflectionScanner)
+        if (commandLineOptions.IsOptionSet(ReflectionModeCommandProvider.ReflectionMode)
             || Assembly.GetEntryAssembly()?.GetCustomAttributes<AssemblyMetadataAttribute>()
                 .Any(x => x is { Key: "TUnitReflectionScanner", Value: "true" }) is true)
         {

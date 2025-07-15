@@ -25,7 +25,7 @@ internal class ReflectionModeCommandProvider(IExtension extension) : ICommandLin
     {
         return
         [
-            new CommandLineOption(ReflectionMode, "Enable reflection mode (defaults to AOT-optimized mode)", ArgumentArity.Zero, false)
+            new CommandLineOption(ReflectionMode, "Enable reflection mode for test discovery and execution (defaults to AOT-optimized mode)", ArgumentArity.Zero, false)
         ];
     }
 
