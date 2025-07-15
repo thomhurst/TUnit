@@ -151,7 +151,13 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     private Core.Enums.TestExecutionMode GetExecutionMode(ICommandLineOptions commandLineOptions)
     {
-        // Check for command line option first
+        // Check for --reflection flag first
+        if (commandLineOptions.IsOptionSet(CommandLineProviders.ReflectionModeCommandProvider.ReflectionMode))
+        {
+            return Core.Enums.TestExecutionMode.Reflection;
+        }
+
+        // Check for command line option
         if (commandLineOptions.TryGetOptionArgumentList("tunit-execution-mode", out var modes) && modes.Length > 0)
         {
             if (Enum.TryParse<Core.Enums.TestExecutionMode>(modes[0], ignoreCase: true, out var mode))
