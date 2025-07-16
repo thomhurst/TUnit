@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using TUnit.Core;
@@ -1109,21 +1110,31 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             var parameters = testMethod.GetParameters();
             var argExpressions = new Expression[parameters.Length];
 
+            // Count required parameters (non-optional)
+            var requiredParamCount = parameters.Count(p => !p.IsOptional);
+
             // First, add a runtime check for parameter count mismatch
             var paramCountMismatchCheck = Expression.IfThen(
-                Expression.NotEqual(
-                    Expression.ArrayLength(argsParam),
-                    Expression.Constant(parameters.Length)
+                Expression.OrElse(
+                    Expression.LessThan(
+                        Expression.ArrayLength(argsParam),
+                        Expression.Constant(requiredParamCount)
+                    ),
+                    Expression.GreaterThan(
+                        Expression.ArrayLength(argsParam),
+                        Expression.Constant(parameters.Length)
+                    )
                 ),
                 Expression.Throw(
                     Expression.New(
                         typeof(ArgumentException).GetConstructor(new[] { typeof(string) })!,
                         Expression.Call(
                             typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object[]) })!,
-                            Expression.Constant($"Test method '{testClass.Name}.{testMethod.Name}' expects {{0}} parameter(s) but received {{1}}. " +
-                                              $"Expected parameters: {string.Join(", ", parameters.Select(p => $"{p.ParameterType.Name} {p.Name}"))}"),
+                            Expression.Constant($"Test method '{testClass.Name}.{testMethod.Name}' expects {{0}}-{{1}} parameter(s) but received {{2}}. " +
+                                              $"Expected parameters: {string.Join(", ", parameters.Select(p => $"{p.ParameterType.Name} {p.Name}{(p.IsOptional ? " (optional)" : "")}"))}"                          ),
                             Expression.NewArrayInit(
                                 typeof(object),
+                                Expression.Convert(Expression.Constant(requiredParamCount), typeof(object)),
                                 Expression.Convert(Expression.Constant(parameters.Length), typeof(object)),
                                 Expression.Convert(Expression.ArrayLength(argsParam), typeof(object))
                             )
@@ -1134,23 +1145,64 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
             for (var i = 0; i < parameters.Length; i++)
             {
-                var indexExpr = Expression.ArrayIndex(argsParam, Expression.Constant(i));
+                var parameter = parameters[i];
+                var argIndex = i;
                 
-                // Use CastHelper.Cast to handle implicit/explicit conversion operators
-                var castMethod = typeof(CastHelper).GetMethod(nameof(CastHelper.Cast), 
-                    BindingFlags.Public | BindingFlags.Static,
-                    null,
-                    new[] { typeof(Type), typeof(object) },
-                    null);
-                
-                var castExpr = Expression.Call(
-                    castMethod!,
-                    Expression.Constant(parameters[i].ParameterType),
-                    indexExpr
+                // Check if this parameter has a value in the args array
+                var hasValue = Expression.LessThan(
+                    Expression.Constant(argIndex),
+                    Expression.ArrayLength(argsParam)
                 );
                 
-                // Convert the result to the expected parameter type
-                argExpressions[i] = Expression.Convert(castExpr, parameters[i].ParameterType);
+                if (parameter.IsOptional)
+                {
+                    // For optional parameters, use default value if not provided
+                    var indexExpr = Expression.ArrayIndex(argsParam, Expression.Constant(i));
+                    
+                    // Use CastHelper.Cast to handle implicit/explicit conversion operators
+                    var castMethod = typeof(CastHelper).GetMethod(nameof(CastHelper.Cast), 
+                        BindingFlags.Public | BindingFlags.Static,
+                        null,
+                        new[] { typeof(Type), typeof(object) },
+                        null);
+                    
+                    var castExpr = Expression.Call(
+                        castMethod!,
+                        Expression.Constant(parameter.ParameterType),
+                        indexExpr
+                    );
+                    
+                    // Convert the result to the expected parameter type
+                    var convertedExpr = Expression.Convert(castExpr, parameter.ParameterType);
+                    
+                    // Use conditional to check if we have the argument or use default
+                    argExpressions[i] = Expression.Condition(
+                        hasValue,
+                        convertedExpr,
+                        Expression.Constant(parameter.DefaultValue, parameter.ParameterType)
+                    );
+                }
+                else
+                {
+                    // For required parameters, always use the provided value
+                    var indexExpr = Expression.ArrayIndex(argsParam, Expression.Constant(i));
+                    
+                    // Use CastHelper.Cast to handle implicit/explicit conversion operators
+                    var castMethod = typeof(CastHelper).GetMethod(nameof(CastHelper.Cast), 
+                        BindingFlags.Public | BindingFlags.Static,
+                        null,
+                        new[] { typeof(Type), typeof(object) },
+                        null);
+                    
+                    var castExpr = Expression.Call(
+                        castMethod!,
+                        Expression.Constant(parameter.ParameterType),
+                        indexExpr
+                    );
+                    
+                    // Convert the result to the expected parameter type
+                    argExpressions[i] = Expression.Convert(castExpr, parameter.ParameterType);
+                }
             }
 
             var callExpr = testMethod.IsStatic
