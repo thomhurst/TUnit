@@ -1,9 +1,11 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
+using TUnit.Engine.Diagnostics;
 
 namespace TUnit.Engine.Framework;
 
@@ -34,14 +36,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private static void ConfigureDebugListeners()
     {
         // Remove default listeners that can show UI dialogs
-        System.Diagnostics.Trace.Listeners.Clear();
+        Trace.Listeners.Clear();
 
         // Add our custom listener that converts assertions to exceptions
-        var assertionListener = new Diagnostics.TUnitAssertionListener();
-        System.Diagnostics.Trace.Listeners.Add(assertionListener);
+        var assertionListener = new TUnitAssertionListener();
+        Trace.Listeners.Add(assertionListener);
 
         // Configure to not show assert UI dialogs
-        System.Diagnostics.Trace.AutoFlush = true;
+        Trace.AutoFlush = true;
     }
 
     private static void ConfigureGlobalExceptionHandlers(ExecuteRequestContext context)

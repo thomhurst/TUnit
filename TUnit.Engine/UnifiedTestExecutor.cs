@@ -5,7 +5,6 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
-using TUnit.Core.Interfaces;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Interfaces;

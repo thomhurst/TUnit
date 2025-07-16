@@ -89,7 +89,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var dataCollector = Register<ITestDataCollector>(
             TestDataCollectorFactory.Create(executionMode, assembliesToScan: null));
         var genericResolver = Register<IGenericTypeResolver>(
-            new AotGenericTypeResolver());
+            CreateGenericTypeResolver(executionMode));
         var testBuilder = Register<ITestBuilder>(
             new TestBuilder(this, contextProvider));
 
@@ -178,6 +178,18 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         return TestExecutionMode.SourceGeneration;
     }
 
+    private static IGenericTypeResolver CreateGenericTypeResolver(TestExecutionMode executionMode)
+    {
+        var resolver = executionMode switch
+        {
+            TestExecutionMode.Reflection => new GenericTypeResolver(isAotMode: false),
+            TestExecutionMode.SourceGeneration => new AotGenericTypeResolver(),
+            _ => new AotGenericTypeResolver()
+        };
+        
+        Console.WriteLine($"Creating generic resolver for mode {executionMode}: {resolver.GetType().Name}");
+        return resolver;
+    }
 
     public async ValueTask DisposeAsync()
     {

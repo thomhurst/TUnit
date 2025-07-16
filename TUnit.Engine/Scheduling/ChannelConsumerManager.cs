@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Threading.Channels;
-using TUnit.Engine.Execution;
 using TUnit.Engine.Logging;
 using LoggingExtensions = TUnit.Core.Logging.LoggingExtensions;
 
@@ -168,10 +167,6 @@ internal class ChannelConsumerManager
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             // Consumer cancelled
-        }
-        finally
-        {
-            // Consumer stopped
         }
     }
 

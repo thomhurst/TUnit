@@ -1,5 +1,4 @@
 using TUnit.Core;
-using TUnit.Core.Interfaces;
 using TUnit.Engine.Models;
 
 namespace TUnit.Engine.Services;

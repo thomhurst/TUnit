@@ -1,10 +1,7 @@
 using System.Collections.Concurrent;
-using System.Threading.Channels;
 using TUnit.Core;
 using TUnit.Core.Enums;
-using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
-using TUnit.Engine.Execution;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 using LoggingExtensions = TUnit.Core.Logging.LoggingExtensions;
@@ -294,7 +291,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         var testsWithDependencies = executionStates.Values.Where(s => s.RemainingDependencies > 0).ToList();
         var readyTests = executionStates.Values.Where(s => s.RemainingDependencies == 0).ToList();
         
-        await LoggingExtensions.LogInformationAsync(_logger, $"Dependency setup: {testsWithDependencies.Count} tests with dependencies, {readyTests.Count} ready tests");
+        await _logger.LogInformationAsync($"Dependency setup: {testsWithDependencies.Count} tests with dependencies, {readyTests.Count} ready tests");
     }
     
     private async Task ProcessTestCompletionAsync(TestExecutionState completedTest, Dictionary<string, TestExecutionState> executionStates, CancellationToken cancellationToken)

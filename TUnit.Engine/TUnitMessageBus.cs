@@ -5,11 +5,11 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Services;
 using Microsoft.Testing.Platform.TestHost;
-using Polyfills;
 using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
+
 #pragma warning disable TPEXP
 
 namespace TUnit.Engine;

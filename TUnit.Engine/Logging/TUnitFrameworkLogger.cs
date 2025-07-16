@@ -8,7 +8,7 @@ using LogLevel = TUnit.Core.Logging.LogLevel;
 namespace TUnit.Engine.Logging;
 
 public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger, VerbosityService verbosityService)
-    : IOutputDeviceDataProducer, global::TUnit.Core.Logging.ILogger
+    : IOutputDeviceDataProducer, Core.Logging.ILogger
 {
     private readonly bool _hideTestOutput = verbosityService.HideTestOutput;
 

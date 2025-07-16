@@ -1,6 +1,5 @@
 ﻿using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
-using TUnit.Engine.Interfaces;
 
 namespace TUnit.Engine.Framework;
 

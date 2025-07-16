@@ -72,7 +72,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
             }
         }
 
-        await _logger.LogAsync(Core.Logging.LogLevel.Debug,
+        await _logger.LogAsync(LogLevel.Debug,
             $"After including dependencies: {testsToInclude.Count} tests will be executed",
             null,
             (state, _) => state);
@@ -200,7 +200,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
 
         foreach (var propertyEntry in test.Context.TestDetails.CustomProperties)
         {
-            properties.AddRange(propertyEntry.Value.Select(value => new KeyValuePairStringProperty(propertyEntry.Key, value)).Cast<IProperty>());
+            properties.AddRange(propertyEntry.Value.Select(value => new KeyValuePairStringProperty(propertyEntry.Key, value)));
         }
 
         return new PropertyBag(properties);

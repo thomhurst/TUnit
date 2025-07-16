@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace TUnit.Engine.Services;
@@ -60,11 +61,11 @@ public static class ParallelismDetector
             {
                 return GetWindowsAvailableMemoryGB();
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 return GetLinuxAvailableMemoryGB();
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 return GetMacOSAvailableMemoryGB();
             }
@@ -80,9 +81,9 @@ public static class ParallelismDetector
 
     private static double GetWindowsAvailableMemoryGB()
     {
-        using var process = new System.Diagnostics.Process
+        using var process = new Process
         {
-            StartInfo = new System.Diagnostics.ProcessStartInfo
+            StartInfo = new ProcessStartInfo
             {
                 FileName = "wmic",
                 Arguments = "OS get TotalVisibleMemorySize /value",
@@ -159,9 +160,9 @@ public static class ParallelismDetector
     {
         try
         {
-            using var process = new System.Diagnostics.Process
+            using var process = new Process
             {
-                StartInfo = new System.Diagnostics.ProcessStartInfo
+                StartInfo = new ProcessStartInfo
                 {
                     FileName = "sysctl",
                     Arguments = "-n hw.memsize",

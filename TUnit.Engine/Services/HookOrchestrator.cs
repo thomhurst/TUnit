@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Services;
@@ -174,7 +173,7 @@ internal sealed class HookOrchestrator
 
         // Get or create the BeforeClass task - this ensures it only runs once (and includes assembly context)
         var classContext = await GetOrCreateBeforeClassTask(testClassType, testClassType.Assembly, cancellationToken);
-        
+
 #if NET
         // Restore the class context (which includes assembly context) before running test hooks
         ExecutionContext.Restore(classContext);

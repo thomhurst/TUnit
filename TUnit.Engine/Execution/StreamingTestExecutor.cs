@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Collections.Concurrent;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
-using TUnit.Engine.Interfaces;
 using TUnit.Engine.Services;
-
 #if !NETSTANDARD2_0
 using System.Threading.Channels;
 #endif
@@ -24,8 +19,8 @@ internal sealed class StreamingTestExecutor
 #if !NETSTANDARD2_0
     private readonly Channel<ExecutableTest> _readyTests;
 #else
-    private readonly System.Collections.Concurrent.ConcurrentQueue<ExecutableTest> _readyTests;
-    private readonly System.Threading.SemaphoreSlim _readyTestsSemaphore;
+    private readonly ConcurrentQueue<ExecutableTest> _readyTests;
+    private readonly SemaphoreSlim _readyTestsSemaphore;
 #endif
     
     public StreamingTestExecutor(
@@ -37,8 +32,8 @@ internal sealed class StreamingTestExecutor
 #if !NETSTANDARD2_0
         _readyTests = Channel.CreateUnbounded<ExecutableTest>();
 #else
-        _readyTests = new System.Collections.Concurrent.ConcurrentQueue<ExecutableTest>();
-        _readyTestsSemaphore = new System.Threading.SemaphoreSlim(0);
+        _readyTests = new ConcurrentQueue<ExecutableTest>();
+        _readyTestsSemaphore = new SemaphoreSlim(0);
 #endif
     }
     

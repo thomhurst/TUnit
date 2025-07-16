@@ -1,7 +1,5 @@
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
-using TUnit.Core.Enums;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Services;
@@ -150,7 +148,7 @@ public sealed class UnifiedTestBuilderPipeline
             metadata.TestName,
             metadata.TestClassType,
             CancellationToken.None,
-            new TUnit.Core.Services.TestServiceProvider());
+            new TestServiceProvider());
         
         context.TestDetails = testDetails;
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
@@ -71,7 +72,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
         }
 
         var targetFramework = Assembly.GetExecutingAssembly()
-                .GetCustomAttributes<System.Runtime.Versioning.TargetFrameworkAttribute>()
+                .GetCustomAttributes<TargetFrameworkAttribute>()
                 .SingleOrDefault()
                 ?.FrameworkDisplayName
             ?? RuntimeInformation.FrameworkDescription;

@@ -1,7 +1,8 @@
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
-using TUnit.Core.Interfaces;
+using TUnit.Core.Enums;
 
 namespace TUnit.Engine.Discovery;
 
@@ -417,18 +418,15 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 {
                     return enumerable;
                 }
-                else if (result is IEnumerable<object> objects)
+                if (result is IEnumerable<object> objects)
                 {
-                    return objects.Select(obj => new object?[] { obj });
+                    return objects.Select(obj => new[] { obj });
                 }
-                else if (result is object[] array)
+                if (result is object[] array)
                 {
                     return new[] { array };
                 }
-                else
-                {
-                    return new[] { new object?[] { result } };
-                }
+                return new[] { new[] { result } };
             }
             catch (Exception ex)
             {
@@ -447,7 +445,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             var typesField = typeof(ClassDataSourceAttribute).GetField("_types", BindingFlags.NonPublic | BindingFlags.Instance);
             if (typesField?.GetValue(attr) is not Type[] types || types.Length == 0)
             {
-                Console.WriteLine($"Warning: ClassDataSourceAttribute has no types configured");
+                Console.WriteLine("Warning: ClassDataSourceAttribute has no types configured");
                 return null;
             }
 
@@ -493,7 +491,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             foreach (var factory in factories)
             {
                 var data = factory();
-                var dataFactories = data.Select(value => new Func<Task<object?>>(() => 
+                var dataFactories = data.Select(value => new Func<Task<object?>>(() =>
                 {
                     var resolvedValue = ResolveTestDataValue(value);
                     return Task.FromResult(resolvedValue);
@@ -515,7 +513,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         return combinations;
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", 
+    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern",
         Justification = "Reflection mode cannot support AOT")]
     private static object? ResolveTestDataValue(object? value)
     {
@@ -525,7 +523,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
 
         var type = value.GetType();
-        
+
         // Check if it's a Func<T> (has Invoke method with no parameters and returns something)
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))
         {
@@ -559,7 +557,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             foreach (var factory in factories)
             {
                 var data = factory();
-                var dataFactories = data.Select(value => new Func<Task<object?>>(() => 
+                var dataFactories = data.Select(value => new Func<Task<object?>>(() =>
                 {
                     var resolvedValue = ResolveTestDataValue(value);
                     return Task.FromResult(resolvedValue);
@@ -853,9 +851,9 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     {
         if (result is IEnumerable<Func<object>> funcs)
         {
-            return funcs.Select(func => new object?[] { func() });
+            return funcs.Select(func => new[] { func() });
         }
-        else if (result is System.Collections.IEnumerable enumerable)
+        if (result is IEnumerable enumerable)
         {
             // Convert to object arrays
             var results = new List<object?[]>();
@@ -863,11 +861,11 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             {
                 if (item is Func<object> func)
                 {
-                    results.Add(new object?[] { func() });
+                    results.Add(new[] { func() });
                 }
                 else
                 {
-                    results.Add(new object?[] { item });
+                    results.Add(new[] { item });
                 }
             }
             return results;
@@ -925,7 +923,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             Console.WriteLine($"DEBUG: Processing {funcs.Count()} function results");
             return funcs.Select(func => func() ?? Array.Empty<object?>()).Where(arr => arr != null);
         }
-        else if (result is System.Collections.IEnumerable enumerable)
+        if (result is IEnumerable enumerable)
         {
             // Convert to object arrays
             var results = new List<object?[]>();
@@ -990,7 +988,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                     Type = p.PropertyType,
                     ReflectionInfo = p,
                     IsStatic = p.GetMethod?.IsStatic ?? false,
-                    Getter = (obj) => p.GetValue(obj)
+                    Getter = obj => p.GetValue(obj)
                 })
                 .ToArray();
 
@@ -1004,7 +1002,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 Assembly = assemblyMetadata,
                 Parameters = Array.Empty<ParameterMetadata>(), // No constructor parameters for reflection mode
                 Properties = properties,
-                Parent = _testClass.BaseType != null && _testClass.BaseType != typeof(object) 
+                Parent = _testClass.BaseType != null && _testClass.BaseType != typeof(object)
                     ? new ClassMetadata
                     {
                         Name = _testClass.BaseType.Name,
@@ -1036,7 +1034,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             {
                 TestInformation = methodMetadata,
                 MembersToGenerate = memberMetadata.ToArray(),
-                Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+                Type = DataGeneratorType.TestParameters,
                 TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()), // Empty context for reflection mode
                 TestSessionId = string.Empty, // No session ID in reflection mode
                 TestClassInstance = null, // Will be set during test execution
@@ -1057,14 +1055,14 @@ internal class MethodDataCombination
 {
     public Func<Task<object?>>[] DataFactories { get; set; } = Array.Empty<Func<Task<object?>>>();
     public int DataSourceIndex { get; set; } = -1;
-    public int LoopIndex { get; set; } = 0;
+    public int LoopIndex { get; set; }
 }
 
 internal class ClassDataCombination
 {
     public Func<Task<object?>>[] DataFactories { get; set; } = Array.Empty<Func<Task<object?>>>();
     public int DataSourceIndex { get; set; } = -1;
-    public int LoopIndex { get; set; } = 0;
+    public int LoopIndex { get; set; }
 }
 
 internal class PropertyDataCombination

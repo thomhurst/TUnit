@@ -21,6 +21,8 @@ public sealed class GenericTypeResolver : IGenericTypeResolver
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when trimming application code", Justification = "Generic expansion in reflection mode requires dynamic type access which is expected in this mode")]
     public async Task<IEnumerable<TestMetadata>> ResolveGenericsAsync(IEnumerable<TestMetadata> metadata)
     {
+        Console.WriteLine($"GenericTypeResolver.ResolveGenericsAsync called with {metadata.Count()} tests, isAotMode={_isAotMode}");
+        
         var resolvedTests = new List<TestMetadata>();
 
         foreach (var test in metadata)
@@ -83,12 +85,15 @@ public sealed class AotGenericTypeResolver : IGenericTypeResolver
 {
     public Task<IEnumerable<TestMetadata>> ResolveGenericsAsync(IEnumerable<TestMetadata> metadata)
     {
+        Console.WriteLine($"AotGenericTypeResolver.ResolveGenericsAsync called with {metadata.Count()} tests");
+        
         // In AOT mode, all generics should already be resolved by source generators
         // Just validate and pass through
         foreach (var test in metadata)
         {
             if (test.GenericTypeInfo != null || test.GenericMethodInfo != null)
             {
+                Console.WriteLine($"Found generic test in AOT resolver: {test.TestName}");
                 throw new InvalidOperationException(
                     $"Generic test '{test.TestName}' found in AOT mode. " +
                     "All generic tests should be expanded by source generators.");

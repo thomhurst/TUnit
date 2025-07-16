@@ -120,7 +120,20 @@
       "Bash(./TUnit.TestProject.exe --treenode-filter \"/*/*/AsyncHookTests/*\" --output Normal)",
       "Bash(./TUnit.TestProject.exe --treenode-filter \"/*/*/SimpleAsyncLocalDebugTest/*\" --output Normal)",
       "Bash(./TUnit.TestProject.exe --treenode-filter \"/**/SimpleAsyncLocalDebugTest/*\" --output Normal)",
-      "Bash(./TUnit.TestProject.exe --treenode-filter \"/*/*/TUnit.TestProject.Bugs._1914.SimpleAsyncLocalDebugTest/*\" --output Normal)"
+      "Bash(./TUnit.TestProject.exe --treenode-filter \"/*/*/TUnit.TestProject.Bugs._1914.SimpleAsyncLocalDebugTest/*\" --output Normal)",
+      "Bash(TUnit.TestProject.exe:*)",
+      "Bash(./TUnit.TestProject.exe --reflection --filter \"FullyQualifiedName~TestHookContextSupport.Test_With_Hook_Context_Support\")",
+      "Bash(./TUnit.TestProject.exe --reflection --treenode-filter \"FullyQualifiedName~TestHookContextSupport.Test_With_Hook_Context_Support\")",
+      "Bash(Remove-Item -Path TUnit.TestProjectbin -Recurse -Force -ErrorAction SilentlyContinue)",
+      "Bash(.TUnit.TestProject.exe --reflection --treenode-filter \"TUnit.TestProject.TestHookContextSupport.*\" --timeout 30s --output Detailed)",
+      "Bash(./TUnit.TestProject.exe --reflection --treenode-filter \"TUnit.TestProject.TestHookContextSupport.*\" --timeout 30s --output Detailed)",
+      "Bash(./TUnit.TestProject.exe --reflection --treenode-filter \"TUnit.TestProject.BeforeTests.AssemblySetupTests.*\" --timeout 10s --output Detailed)",
+      "Bash(./TUnit.TestProject.exe --reflection --treenode-filter \"TUnit.TestProject.BeforeTests.AssemblySetupTests.*\" --timeout 5s --output Detailed)",
+      "Bash(./TUnit.TestProject.exe --reflection --treenode-filter \"TUnit.TestProject.TestHookContextSupport.*\" --timeout 10s --output Detailed)",
+      "Bash(./TUnit.TestProject.exe --reflection --treenode-filter \"TUnit.TestProject.BeforeTests.AfterTestAttributeTests.*\" --timeout 5s --output Detailed)",
+      "Bash(./TUnit.TestProject.exe --reflection --treenode-filter \"TUnit.TestProject.TestHookContextSupport.*\" --timeout 5s)",
+      "Bash(./TUnit.TestProject.exe --reflection --output Detailed)",
+      "Bash(cmd.exe:*)"
     ],
     "deny": []
   },

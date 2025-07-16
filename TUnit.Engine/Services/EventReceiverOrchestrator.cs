@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
@@ -21,12 +20,12 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     // Track which assemblies/classes/sessions have had their "first" event invoked
     private readonly ConcurrentDictionary<string, bool> _firstTestInAssemblyInvoked = new();
     private readonly ConcurrentDictionary<Type, bool> _firstTestInClassInvoked = new();
-    private int _firstTestInSessionInvoked = 0;
+    private int _firstTestInSessionInvoked;
 
     // Track remaining test counts for "last" events
     private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
     private readonly ConcurrentDictionary<Type, int> _classTestCounts = new();
-    private int _sessionTestCount = 0;
+    private int _sessionTestCount;
 
     public EventReceiverOrchestrator(TUnitFrameworkLogger logger)
     {

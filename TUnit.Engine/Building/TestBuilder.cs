@@ -1,7 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.Data;
-using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
@@ -181,7 +179,7 @@ public sealed class TestBuilder : ITestBuilder
             metadata.TestName,
             metadata.TestClassType,
             CancellationToken.None,
-            _serviceProvider ?? new TUnit.Core.Services.TestServiceProvider());
+            _serviceProvider ?? new TestServiceProvider());
         
         context.TestDetails = testDetails;
 
@@ -282,7 +280,7 @@ public sealed class TestBuilder : ITestBuilder
             metadata.TestName,
             metadata.TestClassType,
             CancellationToken.None,
-            new TUnit.Core.Services.TestServiceProvider());
+            new TestServiceProvider());
         
         context.TestDetails = testDetails;
 

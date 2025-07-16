@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Helpers;
@@ -108,7 +109,7 @@ internal static class DiscoveryDiagnostics
                 .Where(e => e.EventName == "TestExpansion")
                 .Where(e =>
                 {
-                    var match = System.Text.RegularExpressions.Regex.Match(e.Details, @"Combinations: (\d+)");
+                    var match = Regex.Match(e.Details, @"Combinations: (\d+)");
                     return match.Success && int.Parse(match.Groups[1].Value) > 1000;
                 })
                 .ToList();

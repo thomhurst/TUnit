@@ -3,7 +3,6 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Data;
-using TUnit.Core.Models;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -168,13 +167,13 @@ internal class SingleTestExecutor : ISingleTestExecutor
         // Restore initial context before running hooks
         RestoreHookContexts(context);
         context.RestoreExecutionContext();
-        
+
         foreach (var hook in hooks)
         {
             try
             {
                 await hook(context, cancellationToken);
-                
+
                 // After each hook, restore the context to ensure any AsyncLocal values
                 // set by the hook (via AddAsyncLocalValues) are available to subsequent hooks
                 context.RestoreExecutionContext();
