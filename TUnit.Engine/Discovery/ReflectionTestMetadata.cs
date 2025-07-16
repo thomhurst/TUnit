@@ -493,7 +493,11 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             foreach (var factory in factories)
             {
                 var data = factory();
-                var dataFactories = data.Select(value => new Func<Task<object?>>(() => Task.FromResult(value))).ToArray();
+                var dataFactories = data.Select(value => new Func<Task<object?>>(() => 
+                {
+                    var resolvedValue = ResolveTestDataValue(value);
+                    return Task.FromResult(resolvedValue);
+                })).ToArray();
 
                 combinations.Add(new MethodDataCombination
                 {
@@ -511,6 +515,38 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         return combinations;
     }
 
+    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", 
+        Justification = "Reflection mode cannot support AOT")]
+    private static object? ResolveTestDataValue(object? value)
+    {
+        if (value == null)
+        {
+            return null;
+        }
+
+        var type = value.GetType();
+        
+        // Check if it's a Func<T> (has Invoke method with no parameters and returns something)
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))
+        {
+            // Invoke the Func<T> to get the actual value
+            return type.GetMethod("Invoke")!.Invoke(value, null);
+        }
+
+        // Check for other delegate types that might need invocation
+        if (typeof(Delegate).IsAssignableFrom(type))
+        {
+            var invokeMethod = type.GetMethod("Invoke");
+            if (invokeMethod != null && invokeMethod.GetParameters().Length == 0)
+            {
+                // It's a parameterless delegate, invoke it
+                return invokeMethod.Invoke(value, null);
+            }
+        }
+
+        return value;
+    }
+
     private List<ClassDataCombination> ProcessClassDataSource(TestDataSource dataSource)
     {
         var combinations = new List<ClassDataCombination>();
@@ -523,7 +559,11 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             foreach (var factory in factories)
             {
                 var data = factory();
-                var dataFactories = data.Select(value => new Func<Task<object?>>(() => Task.FromResult(value))).ToArray();
+                var dataFactories = data.Select(value => new Func<Task<object?>>(() => 
+                {
+                    var resolvedValue = ResolveTestDataValue(value);
+                    return Task.FromResult(resolvedValue);
+                })).ToArray();
 
                 combinations.Add(new ClassDataCombination
                 {
