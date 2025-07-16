@@ -185,6 +185,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         var sources = new List<TestDataSource>();
 
         var attributes = _testMethod.GetCustomAttributes().ToList();
+        Console.WriteLine($"ExtractMethodDataSources: Found {attributes.Count} attributes on {_testMethod.Name}");
 
         // Process Arguments attributes
         foreach (var attr in attributes.OfType<ArgumentsAttribute>())
@@ -193,14 +194,18 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
 
         // Process MethodDataSource attributes
-        foreach (var attr in attributes.OfType<MethodDataSourceAttribute>())
+        var methodDataAttrs = attributes.OfType<MethodDataSourceAttribute>().ToList();
+        Console.WriteLine($"ExtractMethodDataSources: Found {methodDataAttrs.Count} MethodDataSource attributes");
+        foreach (var attr in methodDataAttrs)
         {
             try
             {
+                Console.WriteLine($"ExtractMethodDataSources: Processing MethodDataSource for method {attr.MethodNameProvidingDataSource}");
                 var dataSource = CreateMethodDataSource(attr);
                 if (dataSource != null)
                 {
                     sources.Add(dataSource);
+                    Console.WriteLine($"ExtractMethodDataSources: Successfully created {dataSource.GetType().Name}");
                 }
             }
             catch (Exception ex)
@@ -412,20 +417,27 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 }
 
                 var result = method.Invoke(instance, attr.Arguments);
+                Console.WriteLine($"CreateMethodDataSource: Method {method.Name} returned {result?.GetType()?.Name ?? "null"} with value {result}");
 
                 // Handle different return types
                 if (result is IEnumerable<object?[]> enumerable)
                 {
-                    return enumerable;
+                    var items = enumerable.ToList();
+                    Console.WriteLine($"CreateMethodDataSource: Returning IEnumerable<object?[]> with {items.Count} items");
+                    return items;
                 }
-                if (result is IEnumerable<object> objects)
+                if (result is IEnumerable<object> objects && !(result is string))
                 {
-                    return objects.Select(obj => new[] { obj });
+                    var items = objects.Select(obj => new[] { obj }).ToList();
+                    Console.WriteLine($"CreateMethodDataSource: Returning IEnumerable<object> converted to {items.Count} items");
+                    return items;
                 }
                 if (result is object[] array)
                 {
+                    Console.WriteLine($"CreateMethodDataSource: Returning object[] wrapped as single item");
                     return new[] { array };
                 }
+                Console.WriteLine($"CreateMethodDataSource: Returning single value wrapped as [[{result}]]");
                 return new[] { new[] { result } };
             }
             catch (Exception ex)
@@ -497,6 +509,8 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                     return Task.FromResult(resolvedValue);
                 })).ToArray();
 
+                Console.WriteLine($"ProcessMethodDataSource: Created {dataFactories.Length} data factories from {dataSource.GetType().Name}");
+                
                 combinations.Add(new MethodDataCombination
                 {
                     DataFactories = dataFactories,
