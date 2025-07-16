@@ -232,12 +232,10 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             {
                 try
                 {
-                    Console.WriteLine($"DEBUG: Processing {attr.GetType().Name} data source generator");
                     var dataSource = CreateAsyncUntypedDataSourceGenerator(asyncUntypedAttr);
                     if (dataSource != null)
                     {
                         sources.Add(dataSource);
-                        Console.WriteLine($"DEBUG: Successfully created data source for {attr.GetType().Name}");
                     }
                 }
                 catch (Exception ex)

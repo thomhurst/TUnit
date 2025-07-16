@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
@@ -20,7 +21,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     private static readonly object _lock = new();
     private static readonly ExpressionCacheService _expressionCache = new();
 
-    public Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
+    public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
         // Disable assembly loading event handler to prevent recursive issues
         // This was causing problems when assemblies were loaded during scanning
@@ -46,7 +47,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             try
             {
                 Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
-                var testsInAssembly = DiscoverTestsInAssembly(assembly);
+                var testsInAssembly = await DiscoverTestsInAssembly(assembly);
                 newTests.AddRange(testsInAssembly);
             }
             catch (Exception ex)
@@ -69,10 +70,24 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             }
             
             Console.WriteLine($"Discovered {newTests.Count} tests in reflection mode");
-            return Task.FromResult<IEnumerable<TestMetadata>>(_discoveredTests.ToList());
+            return _discoveredTests.ToList();
         }
     }
 
+    private static IEnumerable<MethodInfo> GetAllTestMethods(Type type)
+    {
+        var methods = new List<MethodInfo>();
+        var currentType = type;
+        
+        while (currentType != null && currentType != typeof(object))
+        {
+            methods.AddRange(currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly));
+            currentType = currentType.BaseType;
+        }
+        
+        return methods;
+    }
+    
     private static void OnAssemblyLoaded(object? sender, AssemblyLoadEventArgs args)
     {
         if (!ShouldScanAssembly(args.LoadedAssembly))
@@ -92,7 +107,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
         try
         {
-            var tests = DiscoverTestsInAssembly(args.LoadedAssembly);
+            var tests = Task.Run(async () => await DiscoverTestsInAssembly(args.LoadedAssembly)).Result;
+            
             lock (_lock)
             {
                 _discoveredTests.AddRange(tests);
@@ -203,8 +219,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Reflection mode cannot support trimming")]
     [UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
-    private static IEnumerable<TestMetadata> DiscoverTestsInAssembly(Assembly assembly)
+    private static async Task<List<TestMetadata>> DiscoverTestsInAssembly(Assembly assembly)
     {
+        var discoveredTests = new List<TestMetadata>();
+        
         Type[] types;
         try
         {
@@ -213,19 +231,51 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         catch (Exception ex)
         {
             Console.WriteLine($"Warning: Failed to get types from assembly {assembly.FullName}: {ex.Message}");
-            yield break;
+            return discoveredTests;
         }
 
-        var filteredTypes = types.Where(t => t is { IsAbstract: false, IsClass: true });
+        // Include both concrete classes and abstract classes (for inherited tests)
+        // Exclude compiler-generated types
+        var filteredTypes = types.Where(t => t.IsClass && !IsCompilerGenerated(t));
 
+        Console.WriteLine($"Checking {filteredTypes.Count()} types...");
+        
         foreach (var type in filteredTypes)
         {
+            // Skip abstract types - they can't be instantiated
+            if (type.IsAbstract)
+            {
+                continue;
+            }
+            
+            // Handle generic type definitions specially
+            if (type.IsGenericTypeDefinition)
+            {
+                var genericTests = await DiscoverGenericTests(type);
+                discoveredTests.AddRange(genericTests);
+                continue;
+            }
+            
             MethodInfo[] testMethods;
             try
             {
-                testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-                    .Where(m => m.GetCustomAttribute<TestAttribute>() != null)
-                    .ToArray();
+                // Check if this class inherits tests from base classes
+                var inheritsTests = type.GetCustomAttribute<InheritsTestsAttribute>() != null;
+                
+                if (inheritsTests)
+                {
+                    // Get all methods including inherited ones
+                    testMethods = GetAllTestMethods(type)
+                        .Where(m => m.GetCustomAttribute<TestAttribute>() != null && !m.IsAbstract)
+                        .ToArray();
+                }
+                else
+                {
+                    // Only get declared methods
+                    testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                        .Where(m => m.GetCustomAttribute<TestAttribute>() != null && !m.IsAbstract)
+                        .ToArray();
+                }
             }
             catch (Exception ex)
             {
@@ -235,27 +285,235 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
             foreach (var method in testMethods)
             {
-                TestMetadata? metadata = null;
                 try
                 {
-                    metadata = BuildTestMetadata(type, method);
+                    var expandedTests = await BuildExpandedTestMetadata(type, method);
+                    discoveredTests.AddRange(expandedTests);
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Warning: Failed to build metadata for test {type.FullName}.{method.Name}: {ex.Message}");
                 }
+            }
+        }
 
-                if (metadata != null)
+        return discoveredTests;
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2055:Call to 'System.Type.MakeGenericType' can not be statically analyzed", Justification = "Reflection mode requires dynamic access")]
+    [UnconditionalSuppressMessage("Trimming", "IL2067:'type' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicParameterlessConstructor' in call to 'System.Activator.CreateInstance(Type)'", Justification = "Reflection mode requires dynamic access")]
+    private static async Task<List<TestMetadata>> DiscoverGenericTests(Type genericTypeDefinition)
+    {
+        var discoveredTests = new List<TestMetadata>();
+        
+        // Extract class-level data sources that will determine the generic type arguments
+        var classDataSources = ExtractClassDataSources(genericTypeDefinition);
+        
+        if (classDataSources.Length == 0)
+        {
+            Console.WriteLine($"Warning: Generic test class {genericTypeDefinition.Name} has no data sources to determine type arguments");
+            return discoveredTests;
+        }
+        
+        // Get test methods from the generic type definition
+        var testMethods = genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+            .Where(m => m.GetCustomAttribute<TestAttribute>() != null && !m.IsAbstract)
+            .ToArray();
+        
+        if (testMethods.Length == 0)
+        {
+            return discoveredTests;
+        }
+        
+        // For each data source combination, create a concrete generic type
+        foreach (var dataSource in classDataSources)
+        {
+            var dataItems = await GetDataFromSourceAsync(dataSource);
+            
+            foreach (var dataRow in dataItems)
+            {
+                if (dataRow == null || dataRow.Length == 0)
                 {
-                    yield return metadata;
+                    continue;
+                }
+                
+                // Determine generic type arguments from the data
+                var typeArguments = DetermineGenericTypeArguments(genericTypeDefinition, dataRow);
+                if (typeArguments == null || typeArguments.Length == 0)
+                {
+                    continue;
+                }
+                
+                try
+                {
+                    // Create concrete type
+                    var concreteType = genericTypeDefinition.MakeGenericType(typeArguments);
+                    
+                    // Build tests for each method in the concrete type
+                    foreach (var genericMethod in testMethods)
+                    {
+                        var concreteMethod = concreteType.GetMethod(genericMethod.Name, 
+                            BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                        
+                        if (concreteMethod != null)
+                        {
+                            var expandedTests = await BuildExpandedTestMetadata(concreteType, concreteMethod);
+                            discoveredTests.AddRange(expandedTests);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to create concrete type for {genericTypeDefinition.Name}: {ex.Message}");
                 }
             }
         }
+        
+        return discoveredTests;
+    }
+    
+    private static Type[] DetermineGenericTypeArguments(Type genericTypeDefinition, object?[] dataRow)
+    {
+        var genericParameters = genericTypeDefinition.GetGenericArguments();
+        var typeArguments = new Type[genericParameters.Length];
+        
+        // For each generic parameter, determine the concrete type from the data
+        for (int i = 0; i < genericParameters.Length && i < dataRow.Length; i++)
+        {
+            if (dataRow[i] != null)
+            {
+                typeArguments[i] = dataRow[i]!.GetType();
+            }
+            else
+            {
+                // If data is null, we can't determine the type
+                // Use object as a fallback
+                typeArguments[i] = typeof(object);
+            }
+        }
+        
+        return typeArguments;
+    }
+    
+    private static async Task<List<object?[]>> GetDataFromSourceAsync(TestDataSource dataSource)
+    {
+        var data = new List<object?[]>();
+        
+        try
+        {
+            // Get data factories from the source
+            var factories = dataSource.GetDataFactories();
+            
+            foreach (var factory in factories)
+            {
+                var dataArray = factory();
+                if (dataArray != null)
+                {
+                    data.Add(dataArray);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to get data from source: {ex.Message}");
+        }
+        
+        return await Task.FromResult(data);
     }
 
-    private static TestMetadata BuildTestMetadata(Type testClass, MethodInfo testMethod)
+    private static Task<List<TestMetadata>> BuildExpandedTestMetadata(Type testClass, MethodInfo testMethod)
     {
+        // Create a ReflectionTestMetadata instance which handles data source expansion properly
         var testName = GenerateTestName(testClass, testMethod);
+        var metadata = new ReflectionTestMetadata(testClass, testMethod)
+        {
+            TestName = testName,
+            TestClassType = testClass,
+            TestMethodName = testMethod.Name,
+            Categories = ExtractCategories(testClass, testMethod),
+            IsSkipped = IsTestSkipped(testClass, testMethod, out var skipReason),
+            SkipReason = skipReason,
+            TimeoutMs = ExtractTimeout(testClass, testMethod),
+            RetryCount = ExtractRetryCount(testClass, testMethod),
+            CanRunInParallel = CanRunInParallel(testClass, testMethod),
+            Dependencies = ExtractDependencies(testClass, testMethod),
+            DataSources = ExtractMethodDataSources(testMethod),
+            ClassDataSources = ExtractClassDataSources(testClass),
+            PropertyDataSources = ExtractPropertyDataSources(testClass),
+            InstanceFactory = CreateInstanceFactory(testClass),
+            TestInvoker = CreateTestInvoker(testClass, testMethod),
+            ParameterCount = testMethod.GetParameters().Length,
+            ParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType).ToArray(),
+            TestMethodParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
+            Hooks = DiscoverHooks(testClass),
+            FilePath = ExtractFilePath(testMethod),
+            LineNumber = ExtractLineNumber(testMethod),
+            MethodMetadata = BuildMethodMetadata(testClass, testMethod),
+            GenericTypeInfo = ExtractGenericTypeInfo(testClass),
+            GenericMethodInfo = ExtractGenericMethodInfo(testMethod),
+            GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
+            AttributeFactory = () => testMethod.GetCustomAttributes().Concat(testClass.GetCustomAttributes()).ToArray(),
+            PropertyInjections = Array.Empty<PropertyInjectionData>()
+        };
+        
+        return Task.FromResult(new List<TestMetadata> { metadata });
+    }
+    
+    private static int CountDataSourceItems(TestDataSource dataSource)
+    {
+        try
+        {
+            var factories = dataSource.GetDataFactories();
+            return factories.Count();
+        }
+        catch
+        {
+            return 1;
+        }
+    }
+    
+    private static int ExtractRepeatCount(Type testClass, MethodInfo testMethod)
+    {
+        // Check method level first
+        var methodRepeat = testMethod.GetCustomAttribute<RepeatAttribute>();
+        if (methodRepeat != null)
+        {
+            return methodRepeat.Times;
+        }
+        
+        // Check class level  
+        var classRepeat = testClass.GetCustomAttribute<RepeatAttribute>();
+        if (classRepeat != null)
+        {
+            return classRepeat.Times;
+        }
+        
+        // Check assembly level
+        var assemblyRepeat = testClass.Assembly.GetCustomAttribute<RepeatAttribute>();
+        if (assemblyRepeat != null)
+        {
+            return assemblyRepeat.Times;
+        }
+        
+        return 1;
+    }
+    
+    private static string GenerateDataDrivenTestName(Type testClass, MethodInfo testMethod, int methodIndex, int classIndex, int repeatIndex, int testIndex)
+    {
+        return $"{testClass.Name}.{testMethod.Name}[{testIndex}]";
+    }
+    
+    private static TestMetadata BuildSingleTestMetadata(Type testClass, MethodInfo testMethod, string testName, int repeatIndex)
+    {
+        return BuildTestMetadata(testClass, testMethod, testName);
+    }
+    
+    private static TestMetadata BuildTestMetadata(Type testClass, MethodInfo testMethod, string? testName = null)
+    {
+        if (testName == null)
+        {
+            testName = GenerateTestName(testClass, testMethod);
+        }
 
         var metadata = new ReflectionTestMetadata(testClass, testMethod)
         {
@@ -580,13 +838,75 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     private static TestDataSource? CreateMethodDataSource(MethodDataSourceAttribute attr, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type defaultClass)
     {
         var targetClass = attr.ClassProvidingDataSource ?? defaultClass;
-        var method = targetClass.GetMethod(attr.MethodNameProvidingDataSource,
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+        
+        // Get all methods with the specified name
+        var methods = targetClass.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
+            .Where(m => m.Name == attr.MethodNameProvidingDataSource)
+            .ToArray();
 
-        if (method == null)
+        if (methods.Length == 0)
         {
             Console.WriteLine($"Warning: Method {attr.MethodNameProvidingDataSource} not found on type {targetClass.FullName}");
             return null;
+        }
+
+        MethodInfo? method;
+        if (methods.Length == 1)
+        {
+            // Only one method with this name, use it
+            method = methods[0];
+        }
+        else
+        {
+            // Multiple overloads - try to match based on Arguments count
+            var argCount = attr.Arguments?.Length ?? 0;
+            var matchingMethods = methods.Where(m => m.GetParameters().Length == argCount).ToArray();
+            
+            if (matchingMethods.Length == 0)
+            {
+                Console.WriteLine($"Warning: No overload of {attr.MethodNameProvidingDataSource} found with {argCount} parameters on type {targetClass.FullName}");
+                return null;
+            }
+            else if (matchingMethods.Length == 1)
+            {
+                method = matchingMethods[0];
+            }
+            else
+            {
+                // Still ambiguous - try to match parameter types if Arguments are provided
+                if (attr.Arguments != null && attr.Arguments.Length > 0)
+                {
+                    var matchedMethod = matchingMethods.FirstOrDefault(m =>
+                    {
+                        var parameters = m.GetParameters();
+                        for (int i = 0; i < parameters.Length; i++)
+                        {
+                            if (attr.Arguments[i] != null && !parameters[i].ParameterType.IsAssignableFrom(attr.Arguments[i]!.GetType()))
+                            {
+                                return false;
+                            }
+                        }
+                        return true;
+                    });
+
+                    if (matchedMethod != null)
+                    {
+                        method = matchedMethod;
+                    }
+                    else
+                    {
+                        // Use the first matching method as a fallback
+                        method = matchingMethods[0];
+                        Console.WriteLine($"Warning: Multiple overloads of {attr.MethodNameProvidingDataSource} found with {argCount} parameters. Using first match: {method}");
+                    }
+                }
+                else
+                {
+                    // No arguments to help disambiguate - use first match
+                    method = matchingMethods[0];
+                    Console.WriteLine($"Warning: Multiple overloads of {attr.MethodNameProvidingDataSource} found with {argCount} parameters. Using first match: {method}");
+                }
+            }
         }
 
         // Check if method is static or if we need an instance
@@ -609,23 +929,23 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
         if (returnType == typeof(Task<IEnumerable<object?[]>>))
         {
-            var factory = CreateTaskDataSourceFactory(method, instance, attr.Arguments);
+            var factory = CreateTaskDataSourceFactory(method, instance, attr.Arguments ?? Array.Empty<object?>());
             return new TaskDelegateDataSource(factory);
         }
         else if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>))
         {
-            var factory = CreateAsyncDataSourceFactory(method, instance, attr.Arguments);
+            var factory = CreateAsyncDataSourceFactory(method, instance, attr.Arguments ?? Array.Empty<object?>());
             return new AsyncDelegateDataSource(factory);
         }
         else if (typeof(IEnumerable<object?[]>).IsAssignableFrom(returnType))
         {
-            var factory = CreateSyncDataSourceFactory(method, instance, attr.Arguments);
+            var factory = CreateSyncDataSourceFactory(method, instance, attr.Arguments ?? Array.Empty<object?>());
             return new DelegateDataSource(factory);
         }
         else
         {
             // Handle methods that return tuples or single values
-            var factory = CreateWrappedDataSourceFactory(method, instance, attr.Arguments);
+            var factory = CreateWrappedDataSourceFactory(method, instance, attr.Arguments ?? Array.Empty<object?>());
             return new DelegateDataSource(factory);
         }
     }
@@ -789,11 +1109,48 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             var parameters = testMethod.GetParameters();
             var argExpressions = new Expression[parameters.Length];
 
+            // First, add a runtime check for parameter count mismatch
+            var paramCountMismatchCheck = Expression.IfThen(
+                Expression.NotEqual(
+                    Expression.ArrayLength(argsParam),
+                    Expression.Constant(parameters.Length)
+                ),
+                Expression.Throw(
+                    Expression.New(
+                        typeof(ArgumentException).GetConstructor(new[] { typeof(string) })!,
+                        Expression.Call(
+                            typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object[]) })!,
+                            Expression.Constant($"Test method '{testClass.Name}.{testMethod.Name}' expects {{0}} parameter(s) but received {{1}}. " +
+                                              $"Expected parameters: {string.Join(", ", parameters.Select(p => $"{p.ParameterType.Name} {p.Name}"))}"),
+                            Expression.NewArrayInit(
+                                typeof(object),
+                                Expression.Convert(Expression.Constant(parameters.Length), typeof(object)),
+                                Expression.Convert(Expression.ArrayLength(argsParam), typeof(object))
+                            )
+                        )
+                    )
+                )
+            );
+
             for (var i = 0; i < parameters.Length; i++)
             {
                 var indexExpr = Expression.ArrayIndex(argsParam, Expression.Constant(i));
-                var convertExpr = Expression.Convert(indexExpr, parameters[i].ParameterType);
-                argExpressions[i] = convertExpr;
+                
+                // Use CastHelper.Cast to handle implicit/explicit conversion operators
+                var castMethod = typeof(CastHelper).GetMethod(nameof(CastHelper.Cast), 
+                    BindingFlags.Public | BindingFlags.Static,
+                    null,
+                    new[] { typeof(Type), typeof(object) },
+                    null);
+                
+                var castExpr = Expression.Call(
+                    castMethod!,
+                    Expression.Constant(parameters[i].ParameterType),
+                    indexExpr
+                );
+                
+                // Convert the result to the expected parameter type
+                argExpressions[i] = Expression.Convert(castExpr, parameters[i].ParameterType);
             }
 
             var callExpr = testMethod.IsStatic
@@ -803,39 +1160,50 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             Expression body;
             if (testMethod.ReturnType == typeof(Task))
             {
-                body = callExpr;
+                body = Expression.Block(
+                    paramCountMismatchCheck,
+                    callExpr
+                );
             }
             else if (testMethod.ReturnType == typeof(void))
             {
-                var blockExpr = Expression.Block(
+                body = Expression.Block(
+                    paramCountMismatchCheck,
                     callExpr,
                     Expression.Constant(Task.CompletedTask)
                 );
-                body = blockExpr;
             }
             else if (testMethod.ReturnType.IsGenericType &&
                      testMethod.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
             {
+                var callWithCheck = Expression.Block(
+                    paramCountMismatchCheck,
+                    callExpr
+                );
                 body = Expression.Call(
                     typeof(ReflectionTestDataCollector),
                     nameof(ConvertToNonGenericTask),
                     null,
-                    callExpr);
+                    callWithCheck);
             }
             else if (testMethod.ReturnType == typeof(ValueTask))
             {
+                var callWithCheck = Expression.Block(
+                    paramCountMismatchCheck,
+                    callExpr
+                );
                 body = Expression.Call(
-                    callExpr,
+                    callWithCheck,
                     typeof(ValueTask).GetMethod("AsTask")!);
             }
             else
             {
                 // Sync method returning a value
-                var blockExpr = Expression.Block(
+                body = Expression.Block(
+                    paramCountMismatchCheck,
                     callExpr,
                     Expression.Constant(Task.CompletedTask)
                 );
-                body = blockExpr;
             }
 
             var lambda = Expression.Lambda<Func<object, object?[], Task>>(
@@ -877,16 +1245,139 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     private static TestHooks DiscoverHooks([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type testClass)
     {
-        // Hook discovery is disabled in reflection mode to prevent hanging
-        // This method previously scanned all types in all assemblies which was very expensive
-        // and likely to cause hanging due to problematic assemblies
+        var beforeClass = new List<HookMetadata>();
+        var afterClass = new List<HookMetadata>();
+        var beforeTest = new List<HookMetadata>();
+        var afterTest = new List<HookMetadata>();
+        
+        // Only scan the test class hierarchy, not all assemblies
+        var currentType = testClass;
+        while (currentType != null && currentType != typeof(object))
+        {
+            try
+            {
+                var methods = currentType.GetMethods(
+                    BindingFlags.Public | BindingFlags.NonPublic | 
+                    BindingFlags.Instance | BindingFlags.Static | 
+                    BindingFlags.DeclaredOnly);
+                
+                foreach (var method in methods)
+                {
+                    // Check for Before attributes
+                    var beforeAttrs = method.GetCustomAttributes<BeforeAttribute>();
+                    foreach (var attr in beforeAttrs)
+                    {
+                        var hookMetadata = CreateHookMetadata(method, attr, true);
+                        if (hookMetadata != null)
+                        {
+                            if (attr.HookType.HasFlag(HookType.Class))
+                                beforeClass.Add(hookMetadata);
+                            if (attr.HookType.HasFlag(HookType.Test))
+                                beforeTest.Add(hookMetadata);
+                        }
+                    }
+                    
+                    // Check for After attributes
+                    var afterAttrs = method.GetCustomAttributes<AfterAttribute>();
+                    foreach (var attr in afterAttrs)
+                    {
+                        var hookMetadata = CreateHookMetadata(method, attr, false);
+                        if (hookMetadata != null)
+                        {
+                            if (attr.HookType.HasFlag(HookType.Class))
+                                afterClass.Add(hookMetadata);
+                            if (attr.HookType.HasFlag(HookType.Test))
+                                afterTest.Add(hookMetadata);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to scan hooks in type {currentType.FullName}: {ex.Message}");
+            }
+            
+            currentType = currentType.BaseType;
+        }
+        
+        // Also check for assembly-level hooks in the test class's assembly only
+        try
+        {
+            var assembly = testClass.Assembly;
+            var assemblyTypes = assembly.GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract && ShouldScanTypeForHooks(t))
+                .ToList();
+            
+            foreach (var type in assemblyTypes)
+            {
+                try
+                {
+                    var methods = type.GetMethods(
+                        BindingFlags.Public | BindingFlags.NonPublic | 
+                        BindingFlags.Instance | BindingFlags.Static);
+                    
+                    foreach (var method in methods)
+                    {
+                        // Check for assembly-level Before hooks
+                        var beforeAttrs = method.GetCustomAttributes<BeforeAttribute>()
+                            .Where(a => a.HookType.HasFlag(HookType.Assembly));
+                        foreach (var attr in beforeAttrs)
+                        {
+                            var hookMetadata = CreateHookMetadata(method, attr, true);
+                            if (hookMetadata != null)
+                            {
+                                beforeClass.Add(hookMetadata);
+                            }
+                        }
+                        
+                        // Check for assembly-level After hooks
+                        var afterAttrs = method.GetCustomAttributes<AfterAttribute>()
+                            .Where(a => a.HookType.HasFlag(HookType.Assembly));
+                        foreach (var attr in afterAttrs)
+                        {
+                            var hookMetadata = CreateHookMetadata(method, attr, false);
+                            if (hookMetadata != null)
+                            {
+                                afterClass.Add(hookMetadata);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to scan assembly hooks in type {type.FullName}: {ex.Message}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to scan assembly for hooks: {ex.Message}");
+        }
+        
         return new TestHooks
         {
-            BeforeClass = Array.Empty<HookMetadata>(),
-            AfterClass = Array.Empty<HookMetadata>(),
-            BeforeTest = Array.Empty<HookMetadata>(),
-            AfterTest = Array.Empty<HookMetadata>()
+            BeforeClass = beforeClass.ToArray(),
+            AfterClass = afterClass.ToArray(),
+            BeforeTest = beforeTest.ToArray(),
+            AfterTest = afterTest.ToArray()
         };
+    }
+    
+    private static bool ShouldScanTypeForHooks(Type type)
+    {
+        // Skip types that are likely to cause issues
+        var name = type.FullName ?? type.Name;
+        
+        if (name.Contains("PrivateImplementationDetails") ||
+            name.Contains("__") ||
+            name.Contains("<>") ||
+            name.Contains("Resources") ||
+            name.Contains("AssemblyInfo"))
+        {
+            return false;
+        }
+        
+        return true;
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods', 'DynamicallyAccessedMemberTypes.NonPublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
@@ -910,89 +1401,196 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
     private static HookMetadata? CreateHookMetadata(MethodInfo method, HookAttribute hookAttr, bool isBeforeHook)
     {
-        // Hook invokers are no longer supported in reflection mode
-        // Hooks require source-generated context-specific delegates
-        return null;
+        var hookInvoker = CreateHookInvoker(method);
+        if (hookInvoker == null)
+        {
+            return null;
+        }
+        
+        var level = HookLevel.Test;
+        if (hookAttr.HookType.HasFlag(HookType.Assembly))
+        {
+            level = HookLevel.Assembly;
+        }
+        else if (hookAttr.HookType.HasFlag(HookType.Class))
+        {
+            level = HookLevel.Class;
+        }
+        
+        return new HookMetadata
+        {
+            Name = method.Name,
+            Level = level,
+            Order = hookAttr.Order,
+            DeclaringType = method.DeclaringType,
+            IsStatic = method.IsStatic,
+            IsAsync = IsAsyncMethod(method),
+            ReturnsValueTask = method.ReturnType == typeof(ValueTask),
+            HookInvoker = hookInvoker
+        };
     }
 
-    // CreateHookInvoker removed - hooks are no longer supported in reflection mode
-    // Hooks require source-generated context-specific delegates
-    /*
     [UnconditionalSuppressMessage("Trimming", "IL2026:Using member 'System.Linq.Expressions.Expression.Property(Expression, String)' which has 'RequiresUnreferencedCodeAttribute' can break functionality when trimming application code", Justification = "Reflection mode cannot support trimming")]
-    private static Func<object?, HookContext, Task>? CreateHookInvoker(MethodInfo method)
+    [UnconditionalSuppressMessage("AOT", "IL3050:Using member 'System.Linq.Expressions.Expression.Lambda' which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling", Justification = "Reflection mode cannot support AOT")]
+    private static Func<object, TestContext, Task>? CreateHookInvoker(MethodInfo method)
     {
         var instanceParam = Expression.Parameter(typeof(object), "instance");
-        var contextParam = Expression.Parameter(typeof(HookContext), "context");
+        var contextParam = Expression.Parameter(typeof(TestContext), "context");
 
         // Check parameters
         var parameters = method.GetParameters();
-        if (parameters.Length > 1)
-        {
-            Console.WriteLine($"Warning: Hook method {method.Name} has too many parameters");
-            return null;
-        }
+        if (parameters.Length > 2)
+            {
+                Console.WriteLine($"Warning: Hook method {method.Name} has too many parameters (max 2)");
+                return null;
+            }
 
-        Expression? callExpr;
-        if (parameters.Length == 0)
-        {
-            // No parameters
-            callExpr = method.IsStatic
-                ? Expression.Call(method)
-                : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method);
-        }
-        else if (parameters[0].ParameterType == typeof(HookContext) ||
-                 parameters[0].ParameterType.IsAssignableFrom(typeof(HookContext)))
-        {
-            // HookContext parameter
-            callExpr = method.IsStatic
-                ? Expression.Call(method, contextParam)
-                : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, contextParam);
-        }
-        else if (parameters[0].ParameterType == typeof(TestContext))
-        {
-            // TestContext parameter - need to extract from HookContext
-            var testContextProp = Expression.Property(contextParam, nameof(HookContext.TestContext));
-            callExpr = method.IsStatic
-                ? Expression.Call(method, testContextProp)
-                : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, testContextProp);
-        }
-        else
-        {
-            Console.WriteLine($"Warning: Hook method {method.Name} has unsupported parameter type {parameters[0].ParameterType}");
-            return null;
-        }
+            Expression? callExpr;
+            if (parameters.Length == 0)
+            {
+                // No parameters
+                callExpr = method.IsStatic
+                    ? Expression.Call(method)
+                    : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method);
+            }
+            else if (parameters.Length == 1)
+            {
+                // Single parameter
+                var paramType = parameters[0].ParameterType;
+                
+                if (paramType == typeof(TestContext))
+                {
+                    callExpr = method.IsStatic
+                        ? Expression.Call(method, contextParam)
+                        : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, contextParam);
+                }
+                else if (paramType == typeof(ClassHookContext))
+                {
+                    var classContextExpr = Expression.Property(contextParam, nameof(TestContext.ClassContext));
+                    callExpr = method.IsStatic
+                        ? Expression.Call(method, classContextExpr)
+                        : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, classContextExpr);
+                }
+                else if (paramType == typeof(AssemblyHookContext))
+                {
+                    var classContextExpr = Expression.Property(contextParam, nameof(TestContext.ClassContext));
+                    var assemblyContextExpr = Expression.Property(classContextExpr, nameof(ClassHookContext.AssemblyContext));
+                    callExpr = method.IsStatic
+                        ? Expression.Call(method, assemblyContextExpr)
+                        : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, assemblyContextExpr);
+                }
+                else if (paramType == typeof(TestSessionContext))
+                {
+                    var classContextExpr = Expression.Property(contextParam, nameof(TestContext.ClassContext));
+                    var assemblyContextExpr = Expression.Property(classContextExpr, nameof(ClassHookContext.AssemblyContext));
+                    var sessionContextExpr = Expression.Property(assemblyContextExpr, nameof(AssemblyHookContext.TestSessionContext));
+                    callExpr = method.IsStatic
+                        ? Expression.Call(method, sessionContextExpr)
+                        : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, sessionContextExpr);
+                }
+                else if (paramType == typeof(CancellationToken))
+                {
+                    var cancellationTokenExpr = Expression.Property(contextParam, nameof(TestContext.CancellationToken));
+                    callExpr = method.IsStatic
+                        ? Expression.Call(method, cancellationTokenExpr)
+                        : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, cancellationTokenExpr);
+                }
+                else
+                {
+                    Console.WriteLine($"Warning: Hook method {method.Name} has unsupported parameter type {paramType}");
+                    return null;
+                }
+            }
+            else if (parameters.Length == 2)
+            {
+                // Two parameters - typically context + CancellationToken
+                var argsList = new List<Expression>();
+                
+                for (int i = 0; i < 2; i++)
+                {
+                    var paramType = parameters[i].ParameterType;
+                    
+                    if (paramType == typeof(TestContext))
+                    {
+                        argsList.Add(contextParam);
+                    }
+                    else if (paramType == typeof(ClassHookContext))
+                    {
+                        var classContextExpr = Expression.Property(contextParam, nameof(TestContext.ClassContext));
+                        argsList.Add(classContextExpr);
+                    }
+                    else if (paramType == typeof(AssemblyHookContext))
+                    {
+                        var classContextExpr = Expression.Property(contextParam, nameof(TestContext.ClassContext));
+                        var assemblyContextExpr = Expression.Property(classContextExpr, nameof(ClassHookContext.AssemblyContext));
+                        argsList.Add(assemblyContextExpr);
+                    }
+                    else if (paramType == typeof(TestSessionContext))
+                    {
+                        var classContextExpr = Expression.Property(contextParam, nameof(TestContext.ClassContext));
+                        var assemblyContextExpr = Expression.Property(classContextExpr, nameof(ClassHookContext.AssemblyContext));
+                        var sessionContextExpr = Expression.Property(assemblyContextExpr, nameof(AssemblyHookContext.TestSessionContext));
+                        argsList.Add(sessionContextExpr);
+                    }
+                    else if (paramType == typeof(CancellationToken))
+                    {
+                        argsList.Add(Expression.Property(contextParam, nameof(TestContext.CancellationToken)));
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Warning: Hook method {method.Name} has unsupported parameter type {paramType} at position {i}");
+                        return null;
+                    }
+                }
+                
+                // Use correct overload for static vs instance methods
+                if (method.IsStatic)
+                {
+                    // For static methods, use overload without instance
+                    callExpr = Expression.Call(method, argsList);
+                }
+                else
+                {
+                    // For instance methods, include the instance
+                    callExpr = Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, argsList);
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Warning: Hook method {method.Name} has unexpected parameter count {parameters.Length}");
+                return null;
+            }
 
-        // Convert return type to Task
-        Expression body;
-        if (method.ReturnType == typeof(Task))
-        {
-            body = callExpr;
-        }
-        else if (method.ReturnType == typeof(ValueTask))
-        {
-            body = Expression.Call(callExpr, typeof(ValueTask).GetMethod("AsTask")!);
-        }
-        else if (method.ReturnType == typeof(void))
-        {
-            body = Expression.Block(
-                callExpr,
-                Expression.Constant(Task.CompletedTask)
-            );
-        }
-        else
-        {
-            Console.WriteLine($"Warning: Hook method {method.Name} has unsupported return type {method.ReturnType}");
-            return null;
-        }
+            // Convert return type to Task
+            Expression body;
+            if (method.ReturnType == typeof(Task))
+            {
+                body = callExpr;
+            }
+            else if (method.ReturnType == typeof(ValueTask))
+            {
+                body = Expression.Call(callExpr, typeof(ValueTask).GetMethod("AsTask")!);
+            }
+            else if (method.ReturnType == typeof(void))
+            {
+                body = Expression.Block(
+                    callExpr,
+                    Expression.Constant(Task.CompletedTask)
+                );
+            }
+            else
+            {
+                Console.WriteLine($"Warning: Hook method {method.Name} has unsupported return type {method.ReturnType}");
+                return null;
+            }
 
-        var lambda = Expression.Lambda<Func<object?, HookContext, Task>>(
+        var lambda = Expression.Lambda<Func<object, TestContext, Task>>(
             body,
             instanceParam,
             contextParam);
 
         return lambda.Compile();
     }
-    */
 
     private static bool IsAsyncMethod(MethodInfo method)
     {
@@ -1000,6 +1598,44 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                method.ReturnType == typeof(ValueTask) ||
                (method.ReturnType.IsGenericType &&
                 method.ReturnType.GetGenericTypeDefinition() == typeof(Task<>));
+    }
+
+    private static bool IsCompilerGenerated(Type type)
+    {
+        // Check if type has CompilerGeneratedAttribute
+        if (type.GetCustomAttribute<System.Runtime.CompilerServices.CompilerGeneratedAttribute>() != null)
+        {
+            return true;
+        }
+
+        // Check for compiler-generated naming patterns
+        var typeName = type.Name;
+        
+        // Compiler-generated types often start with <> or contain special characters
+        if (typeName.StartsWith("<>") || typeName.StartsWith("<"))
+        {
+            return true;
+        }
+        
+        // Check for async state machine pattern (e.g., <MethodName>d__1)
+        if (typeName.Contains(">d__"))
+        {
+            return true;
+        }
+        
+        // Check for display class pattern (e.g., <>c__DisplayClass)
+        if (typeName.Contains("__DisplayClass"))
+        {
+            return true;
+        }
+        
+        // Check for anonymous type pattern
+        if (typeName.Contains("AnonymousType"))
+        {
+            return true;
+        }
+        
+        return false;
     }
 
     private static string? ExtractFilePath(MethodInfo method)
