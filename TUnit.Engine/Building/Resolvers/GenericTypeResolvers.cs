@@ -9,13 +9,13 @@ namespace TUnit.Engine.Building.Resolvers;
 /// Resolves generic types in test metadata for reflection mode.
 /// This class handles runtime expansion of generic tests based on test data.
 /// </summary>
-public sealed class GenericTypeResolver : IGenericTypeResolver
+public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
 {
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling", Justification = "This resolver is only used in reflection mode")]
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when trimming application code", Justification = "Generic expansion in reflection mode requires dynamic type access which is expected in this mode")]
     public async Task<IEnumerable<TestMetadata>> ResolveGenericsAsync(IEnumerable<TestMetadata> metadata)
     {
-        Console.WriteLine($"GenericTypeResolver.ResolveGenericsAsync called with {metadata.Count()} tests");
+        Console.WriteLine($"ReflectionGenericTypeResolver.ResolveGenericsAsync called with {metadata.Count()} tests");
         
         var resolvedTests = new List<TestMetadata>();
 
@@ -64,14 +64,14 @@ public sealed class GenericTypeResolver : IGenericTypeResolver
 }
 
 /// <summary>
-/// Generic type resolver for AOT/source generation mode.
+/// Generic type resolver for source generation mode.
 /// Validates that all generic tests have been pre-resolved by source generators.
 /// </summary>
-public sealed class AotGenericTypeResolver : IGenericTypeResolver
+public sealed class SourceGeneratedGenericTypeResolver : IGenericTypeResolver
 {
     public Task<IEnumerable<TestMetadata>> ResolveGenericsAsync(IEnumerable<TestMetadata> metadata)
     {
-        Console.WriteLine($"AotGenericTypeResolver.ResolveGenericsAsync called with {metadata.Count()} tests");
+        Console.WriteLine($"SourceGeneratedGenericTypeResolver.ResolveGenericsAsync called with {metadata.Count()} tests");
         
         // In AOT mode, all generics should already be resolved by source generators
         // Just validate and pass through

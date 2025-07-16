@@ -182,9 +182,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     {
         IGenericTypeResolver resolver = executionMode switch
         {
-            TestExecutionMode.Reflection => new GenericTypeResolver(),
-            TestExecutionMode.SourceGeneration => new AotGenericTypeResolver(),
-            _ => new AotGenericTypeResolver()
+            TestExecutionMode.Reflection => new ReflectionGenericTypeResolver(),
+            TestExecutionMode.SourceGeneration => new SourceGeneratedGenericTypeResolver(),
+            _ => new SourceGeneratedGenericTypeResolver()
         };
         
         Console.WriteLine($"Creating generic resolver for mode {executionMode}: {resolver.GetType().Name}");
