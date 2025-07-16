@@ -6,22 +6,16 @@ using TUnit.Engine.Building.Interfaces;
 namespace TUnit.Engine.Building.Resolvers;
 
 /// <summary>
-/// Resolves generic types in test metadata before test expansion
+/// Resolves generic types in test metadata for reflection mode.
+/// This class handles runtime expansion of generic tests based on test data.
 /// </summary>
 public sealed class GenericTypeResolver : IGenericTypeResolver
 {
-    private readonly bool _isAotMode;
-
-    public GenericTypeResolver(bool isAotMode = true)
-    {
-        _isAotMode = isAotMode;
-    }
-
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling", Justification = "Calls to ExpandGenericTestAsync are guarded by _isAotMode check and only occur in reflection mode")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling", Justification = "This resolver is only used in reflection mode")]
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when trimming application code", Justification = "Generic expansion in reflection mode requires dynamic type access which is expected in this mode")]
     public async Task<IEnumerable<TestMetadata>> ResolveGenericsAsync(IEnumerable<TestMetadata> metadata)
     {
-        Console.WriteLine($"GenericTypeResolver.ResolveGenericsAsync called with {metadata.Count()} tests, isAotMode={_isAotMode}");
+        Console.WriteLine($"GenericTypeResolver.ResolveGenericsAsync called with {metadata.Count()} tests");
         
         var resolvedTests = new List<TestMetadata>();
 
@@ -32,15 +26,6 @@ public sealed class GenericTypeResolver : IGenericTypeResolver
                 // No generics to resolve
                 resolvedTests.Add(test);
                 continue;
-            }
-
-            if (_isAotMode)
-            {
-                // In AOT mode, generic tests should have been expanded at compile time
-                // If we get here, it's an error
-                throw new InvalidOperationException(
-                    $"Generic test '{test.TestName}' reached runtime in AOT mode. " +
-                    "Ensure source generators have expanded all generic tests.");
             }
 
             // In reflection mode, we need to expand generic tests
@@ -79,7 +64,8 @@ public sealed class GenericTypeResolver : IGenericTypeResolver
 }
 
 /// <summary>
-/// No-op generic type resolver for AOT mode where generics are pre-resolved
+/// Generic type resolver for AOT/source generation mode.
+/// Validates that all generic tests have been pre-resolved by source generators.
 /// </summary>
 public sealed class AotGenericTypeResolver : IGenericTypeResolver
 {

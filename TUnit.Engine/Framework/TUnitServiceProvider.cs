@@ -180,9 +180,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     private static IGenericTypeResolver CreateGenericTypeResolver(TestExecutionMode executionMode)
     {
-        var resolver = executionMode switch
+        IGenericTypeResolver resolver = executionMode switch
         {
-            TestExecutionMode.Reflection => new GenericTypeResolver(isAotMode: false),
+            TestExecutionMode.Reflection => new GenericTypeResolver(),
             TestExecutionMode.SourceGeneration => new AotGenericTypeResolver(),
             _ => new AotGenericTypeResolver()
         };
