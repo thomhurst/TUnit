@@ -17,7 +17,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     private Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest>? _createExecutableTestFactory;
 
     public ReflectionTestMetadata(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass, 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass,
         MethodInfo testMethod)
     {
         _testClass = testClass;
@@ -50,41 +50,82 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
     #pragma warning disable CS1998 // Async method lacks 'await' operators
     private async IAsyncEnumerable<TestDataCombination> GenerateDataCombinations()
+    #pragma warning restore CS1998
     {
-        #pragma warning restore CS1998
         // Extract data sources from attributes using reflection
         var methodDataSources = ExtractMethodDataSources();
         var classDataSources = ExtractClassDataSources();
         var propertyDataSources = ExtractPropertyDataSources();
 
-        // If no data sources, yield a single empty combination
+        // Get repeat count from method, class, or assembly level
+        var repeatCount = GetRepeatCount();
+
+        // If no data sources and no repeat, yield a single empty combination
         if (!methodDataSources.Any() && !classDataSources.Any() && !propertyDataSources.Any())
         {
-            yield return new TestDataCombination
+            for (int repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
             {
-                MethodDataFactories = Array.Empty<Func<Task<object?>>>(),
-                ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
-                PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),
-                MethodDataSourceIndex = -1,
-                MethodLoopIndex = 0,
-                ClassDataSourceIndex = -1,
-                ClassLoopIndex = 0
-            };
+                yield return new TestDataCombination
+                {
+                    MethodDataFactories = Array.Empty<Func<Task<object?>>>(),
+                    ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
+                    PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),
+                    MethodDataSourceIndex = -1,
+                    MethodLoopIndex = 0,
+                    ClassDataSourceIndex = -1,
+                    ClassLoopIndex = 0,
+                    RepeatIndex = repeatIndex
+                };
+            }
             yield break;
         }
 
-        // TODO: Implement full data source expansion logic
-        // For now, just yield empty combination
-        yield return new TestDataCombination
+        // Generate all combinations without awaiting inside the async enumerable
+        var methodDataCombinations = new List<MethodDataCombination>();
+        var classDataCombinations = new List<ClassDataCombination>();
+
+        // Process method data sources synchronously
+        foreach (var source in methodDataSources)
         {
-            MethodDataFactories = Array.Empty<Func<Task<object?>>>(),
-            ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
-            PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),
-            MethodDataSourceIndex = -1,
-            MethodLoopIndex = 0,
-            ClassDataSourceIndex = -1,
-            ClassLoopIndex = 0
-        };
+            methodDataCombinations.AddRange(ProcessMethodDataSource(source));
+        }
+
+        // Process class data sources synchronously
+        foreach (var source in classDataSources)
+        {
+            classDataCombinations.AddRange(ProcessClassDataSource(source));
+        }
+
+        var propertyDataCombinations = GeneratePropertyDataCombinations(propertyDataSources);
+
+        // Generate cartesian product of all combinations
+        var methodCombinations = methodDataCombinations.Any() ? methodDataCombinations.ToArray() : new[] { new MethodDataCombination() };
+        var classCombinations = classDataCombinations.Any() ? classDataCombinations.ToArray() : new[] { new ClassDataCombination() };
+        var propertyCombinations = propertyDataCombinations.Any() ? propertyDataCombinations.ToArray() : new[] { new PropertyDataCombination() };
+
+        foreach (var methodCombination in methodCombinations)
+        {
+            foreach (var classCombination in classCombinations)
+            {
+                foreach (var propertyCombination in propertyCombinations)
+                {
+                    for (int repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
+                    {
+                        yield return new TestDataCombination
+                        {
+                            MethodDataFactories = methodCombination.DataFactories,
+                            ClassDataFactories = classCombination.DataFactories,
+                            PropertyValueFactories = propertyCombination.PropertyValueFactories,
+                            MethodDataSourceIndex = methodCombination.DataSourceIndex,
+                            MethodLoopIndex = methodCombination.LoopIndex,
+                            ClassDataSourceIndex = classCombination.DataSourceIndex,
+                            ClassLoopIndex = classCombination.LoopIndex,
+                            RepeatIndex = repeatIndex
+                        };
+                    }
+                }
+            }
+        }
     }
 
     private ExecutableTest CreateExecutableTest(ExecutableTestCreationContext context, TestMetadata metadata)
@@ -98,16 +139,16 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             {
                 throw new InvalidOperationException($"No instance factory for {_testClass.Name}");
             }
-            
+
             var instance = InstanceFactory(context.ClassArguments);
-            
+
             // Apply property values
             foreach (var kvp in context.PropertyValues)
             {
                 var property = _testClass.GetProperty(kvp.Key);
                 property?.SetValue(instance, kvp.Value);
             }
-            
+
             return instance;
         };
 
@@ -120,7 +161,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             {
                 throw new InvalidOperationException($"No test invoker for {_testMethod.Name}");
             }
-            
+
             await TestInvoker(instance, args);
         };
 
@@ -141,48 +182,662 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     private List<TestDataSource> ExtractMethodDataSources()
     {
         var sources = new List<TestDataSource>();
-        
-        var attributes = _testMethod.GetCustomAttributes()
-            .Where(a => a is IDataAttribute || IsDataSourceAttribute(a.GetType()))
-            .ToList();
 
-        // TODO: Convert attributes to TestDataSource instances
-        
+        var attributes = _testMethod.GetCustomAttributes().ToList();
+
+        // Process Arguments attributes
+        foreach (var attr in attributes.OfType<ArgumentsAttribute>())
+        {
+            sources.Add(new StaticTestDataSource(attr.Values));
+        }
+
+        // Process MethodDataSource attributes
+        foreach (var attr in attributes.OfType<MethodDataSourceAttribute>())
+        {
+            try
+            {
+                var dataSource = CreateMethodDataSource(attr);
+                if (dataSource != null)
+                {
+                    sources.Add(dataSource);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to create method data source for {attr.MethodNameProvidingDataSource}: {ex.Message}");
+            }
+        }
+
+        // Process DataSourceGenerator attributes (basic support for synchronous generators)
+        foreach (var attr in attributes)
+        {
+            // Check if it's a DataSourceGeneratorAttribute<T> (synchronous version)
+            if (attr.GetType().BaseType?.IsGenericType == true &&
+                attr.GetType().BaseType?.GetGenericTypeDefinition().Name.Contains("DataSourceGeneratorAttribute") == true)
+            {
+                try
+                {
+                    var dataSource = CreateDataSourceGenerator(attr);
+                    if (dataSource != null)
+                    {
+                        sources.Add(dataSource);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to create data source generator: {ex.Message}");
+                }
+            }
+            else if (attr is IAsyncDataSourceGeneratorAttribute asyncAttr)
+            {
+                Console.WriteLine($"Warning: AsyncDataSourceGenerator attributes are not fully supported in reflection mode: {attr.GetType().Name}");
+                // Skip async generators for now - they require complex metadata creation
+            }
+        }
+
         return sources;
     }
 
     private List<TestDataSource> ExtractClassDataSources()
     {
         var sources = new List<TestDataSource>();
-        
-        // Check constructor parameters for data attributes
-        var constructors = _testClass.GetConstructors();
-        foreach (var ctor in constructors)
+
+        var attributes = _testClass.GetCustomAttributes().ToList();
+
+        // Process Arguments attributes on the class
+        foreach (var attr in attributes.OfType<ArgumentsAttribute>())
         {
-            var parameters = ctor.GetParameters();
-            // TODO: Extract data sources from constructor parameters
+            sources.Add(new StaticTestDataSource(attr.Values));
         }
-        
+
+        // Process MethodDataSource attributes on the class
+        foreach (var attr in attributes.OfType<MethodDataSourceAttribute>())
+        {
+            try
+            {
+                var dataSource = CreateMethodDataSource(attr);
+                if (dataSource != null)
+                {
+                    sources.Add(dataSource);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to create class method data source for {attr.MethodNameProvidingDataSource}: {ex.Message}");
+            }
+        }
+
+        // Process ClassDataSource attributes
+        foreach (var attr in attributes.OfType<ClassDataSourceAttribute>())
+        {
+            try
+            {
+                var dataSource = CreateClassDataSource(attr);
+                if (dataSource != null)
+                {
+                    sources.Add(dataSource);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to create class data source: {ex.Message}");
+            }
+        }
+
         return sources;
     }
 
     private List<PropertyDataSource> ExtractPropertyDataSources()
     {
         var sources = new List<PropertyDataSource>();
-        
+
         var properties = _testClass.GetProperties()
-            .Where(p => p.GetCustomAttributes().Any(a => a is IDataAttribute || IsDataSourceAttribute(a.GetType())))
+            .Where(p => p.GetCustomAttributes().Any(a => a is ArgumentsAttribute || a is MethodDataSourceAttribute || a is ClassDataSourceAttribute))
             .ToList();
 
-        // TODO: Convert properties to PropertyDataSource instances
-        
+        foreach (var property in properties)
+        {
+            var attributes = property.GetCustomAttributes().ToList();
+
+            // Process Arguments attributes on properties
+            foreach (var attr in attributes.OfType<ArgumentsAttribute>())
+            {
+                sources.Add(new PropertyDataSource
+                {
+                    PropertyName = property.Name,
+                    PropertyType = property.PropertyType,
+                    DataSource = new StaticTestDataSource(attr.Values)
+                });
+            }
+
+            // Process MethodDataSource attributes on properties
+            foreach (var attr in attributes.OfType<MethodDataSourceAttribute>())
+            {
+                try
+                {
+                    var dataSource = CreateMethodDataSource(attr);
+                    if (dataSource != null)
+                    {
+                        sources.Add(new PropertyDataSource
+                        {
+                            PropertyName = property.Name,
+                            PropertyType = property.PropertyType,
+                            DataSource = dataSource
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to create property method data source for {property.Name}: {ex.Message}");
+                }
+            }
+        }
+
         return sources;
     }
 
     private static bool IsDataSourceAttribute(Type attributeType)
     {
-        return attributeType.Name.EndsWith("DataAttribute") || 
+        return attributeType.Name.EndsWith("DataAttribute") ||
                attributeType.Name.EndsWith("DataSourceAttribute") ||
                attributeType.Name == "ArgumentsAttribute";
     }
+
+    private int GetRepeatCount()
+    {
+        // Check method level first
+        var methodRepeat = _testMethod.GetCustomAttribute<RepeatAttribute>();
+        if (methodRepeat != null)
+        {
+            return methodRepeat.Times;
+        }
+
+        // Check class level
+        var classRepeat = _testClass.GetCustomAttribute<RepeatAttribute>();
+        if (classRepeat != null)
+        {
+            return classRepeat.Times;
+        }
+
+        // Check assembly level
+        var assemblyRepeat = _testClass.Assembly.GetCustomAttribute<RepeatAttribute>();
+        if (assemblyRepeat != null)
+        {
+            return assemblyRepeat.Times;
+        }
+
+        return 1; // Default to 1 if no repeat attribute found
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
+    [UnconditionalSuppressMessage("Trimming", "IL2080:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
+    private TestDataSource? CreateMethodDataSource(MethodDataSourceAttribute attr)
+    {
+        var targetType = attr.ClassProvidingDataSource ?? _testClass;
+        var method = targetType.GetMethod(attr.MethodNameProvidingDataSource,
+            BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+        if (method == null)
+        {
+            Console.WriteLine($"Warning: Method {attr.MethodNameProvidingDataSource} not found on type {targetType.Name}");
+            return null;
+        }
+
+        // Create a delegate data source that invokes the method
+        return new DelegateDataSource(() =>
+        {
+            try
+            {
+                object? instance = null;
+                if (!method.IsStatic)
+                {
+                    instance = Activator.CreateInstance(targetType);
+                }
+
+                var result = method.Invoke(instance, attr.Arguments);
+
+                // Handle different return types
+                if (result is IEnumerable<object?[]> enumerable)
+                {
+                    return enumerable;
+                }
+                else if (result is IEnumerable<object> objects)
+                {
+                    return objects.Select(obj => new object?[] { obj });
+                }
+                else if (result is object[] array)
+                {
+                    return new[] { array };
+                }
+                else
+                {
+                    return new[] { new object?[] { result } };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to invoke method {attr.MethodNameProvidingDataSource}: {ex.Message}");
+                return Enumerable.Empty<object?[]>();
+            }
+        });
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2062:The parameter of method has a DynamicallyAccessedMembersAttribute, but the value passed to it can not be statically analyzed.", Justification = "This is reflection mode where dynamic type access is expected")]
+    private TestDataSource? CreateClassDataSource(ClassDataSourceAttribute attr)
+    {
+        try
+        {
+            // Use reflection to get the _types field from the attribute
+            var typesField = typeof(ClassDataSourceAttribute).GetField("_types", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (typesField?.GetValue(attr) is not Type[] types || types.Length == 0)
+            {
+                Console.WriteLine($"Warning: ClassDataSourceAttribute has no types configured");
+                return null;
+            }
+
+            // Create a delegate data source that creates instances of each type
+            return new DelegateDataSource(() =>
+            {
+                try
+                {
+                    var items = new object?[types.Length];
+
+                    for (var i = 0; i < types.Length; i++)
+                    {
+                        // Create instance of the type
+                        var instance = Activator.CreateInstance(types[i]);
+                        items[i] = instance;
+                    }
+
+                    return new[] { items };
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to create class data source instances: {ex.Message}");
+                    return Enumerable.Empty<object?[]>();
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to create class data source: {ex.Message}");
+            return null;
+        }
+    }
+
+    private List<MethodDataCombination> ProcessMethodDataSource(TestDataSource dataSource)
+    {
+        var combinations = new List<MethodDataCombination>();
+
+        try
+        {
+            var factories = dataSource.GetDataFactories();
+            int loopIndex = 0;
+
+            foreach (var factory in factories)
+            {
+                var data = factory();
+                var dataFactories = data.Select(value => new Func<Task<object?>>(() => Task.FromResult(value))).ToArray();
+
+                combinations.Add(new MethodDataCombination
+                {
+                    DataFactories = dataFactories,
+                    DataSourceIndex = 0,
+                    LoopIndex = loopIndex++
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to process method data source: {ex.Message}");
+        }
+
+        return combinations;
+    }
+
+    private List<ClassDataCombination> ProcessClassDataSource(TestDataSource dataSource)
+    {
+        var combinations = new List<ClassDataCombination>();
+
+        try
+        {
+            var factories = dataSource.GetDataFactories();
+            int loopIndex = 0;
+
+            foreach (var factory in factories)
+            {
+                var data = factory();
+                var dataFactories = data.Select(value => new Func<Task<object?>>(() => Task.FromResult(value))).ToArray();
+
+                combinations.Add(new ClassDataCombination
+                {
+                    DataFactories = dataFactories,
+                    DataSourceIndex = 0,
+                    LoopIndex = loopIndex++
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to process class data source: {ex.Message}");
+        }
+
+        return combinations;
+    }
+
+    private List<PropertyDataCombination> GeneratePropertyDataCombinations(List<PropertyDataSource> propertyDataSources)
+    {
+        var combinations = new List<PropertyDataCombination>();
+
+        if (!propertyDataSources.Any())
+        {
+            return combinations;
+        }
+
+        var propertyValueFactories = new Dictionary<string, Func<Task<object?>>>();
+
+        foreach (var propertyDataSource in propertyDataSources)
+        {
+            try
+            {
+                // Get data synchronously for property data sources
+                var factories = propertyDataSource.DataSource.GetDataFactories();
+                var firstFactory = factories.FirstOrDefault();
+                if (firstFactory != null)
+                {
+                    var data = firstFactory();
+                    if (data != null && data.Length > 0)
+                    {
+                        var value = data[0];
+                        propertyValueFactories[propertyDataSource.PropertyName] = () => Task.FromResult(value);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to generate property data for {propertyDataSource.PropertyName}: {ex.Message}");
+            }
+        }
+
+        combinations.Add(new PropertyDataCombination
+        {
+            PropertyValueFactories = propertyValueFactories
+        });
+
+        return combinations;
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
+    private TestDataSource? CreateDataSourceGenerator(Attribute attr)
+    {
+        // Create a delegate data source that invokes the synchronous generator
+        return new DelegateDataSource(() =>
+        {
+            try
+            {
+                // Initialize the generator attribute by setting its required properties
+                // Note: We have to use GetAwaiter().GetResult() here because DelegateDataSource
+                // expects a synchronous factory function. This is a limitation of the current
+                // architecture where data sources are expected to be synchronous.
+                var initializedGenerator = InitializeDataSourceGeneratorAsync(attr).GetAwaiter().GetResult();
+                if (initializedGenerator == null)
+                {
+                    Console.WriteLine($"Warning: Failed to initialize data source generator {attr.GetType().Name}");
+                    return Enumerable.Empty<object?[]>();
+                }
+
+                // Use reflection to call the GenerateDataSources method
+                var generateMethod = initializedGenerator.GetType().GetMethod("GenerateDataSources",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+
+                if (generateMethod == null)
+                {
+                    Console.WriteLine($"Warning: Could not find GenerateDataSources method on {initializedGenerator.GetType().Name}");
+                    return Enumerable.Empty<object?[]>();
+                }
+
+                // Try to call the method with null metadata first (many generators don't use it)
+                try
+                {
+                    var result = generateMethod.Invoke(initializedGenerator, new object[] { null! });
+                    return ProcessGeneratorResult(result);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to call GenerateDataSources with null metadata: {ex.Message}");
+                    return Enumerable.Empty<object?[]>();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to generate data from data source generator: {ex.Message}");
+                return Enumerable.Empty<object?[]>();
+            }
+        });
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic constructor access is expected")]
+    private async Task<object?> InitializeDataSourceGeneratorAsync(Attribute attr)
+    {
+        try
+        {
+            // Create a new instance of the generator attribute type
+            var generatorType = attr.GetType();
+            var newGenerator = Activator.CreateInstance(generatorType);
+
+            if (newGenerator == null)
+            {
+                Console.WriteLine($"Warning: Failed to create instance of {generatorType.Name}");
+                return null;
+            }
+
+            // Copy properties from the original attribute to the new instance
+            var properties = generatorType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var property in properties)
+            {
+                if (!property.CanWrite) continue;
+
+                // Check if this property has a data source attribute
+                var dataSourceAttrs = property.GetCustomAttributes().Where(a =>
+                    a.GetType().Name.Contains("DataSource") ||
+                    a.GetType().Name.Contains("ClassDataSource")).ToList();
+
+                if (dataSourceAttrs.Any())
+                {
+                    // Initialize this property with an instance based on its data source attribute
+                    var instance = await CreateInstanceForDataSourcePropertyAsync(property, dataSourceAttrs.First());
+                    if (instance != null)
+                    {
+                        property.SetValue(newGenerator, instance);
+                    }
+                }
+                else
+                {
+                    // Copy the value from the original attribute
+                    var value = property.GetValue(attr);
+                    if (value != null)
+                    {
+                        property.SetValue(newGenerator, value);
+                    }
+                }
+            }
+
+            return newGenerator;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to initialize data source generator: {ex.Message}");
+            return null;
+        }
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic constructor access is expected")]
+    private async Task<object?> CreateInstanceForDataSourcePropertyAsync(PropertyInfo property, Attribute dataSourceAttr)
+    {
+        try
+        {
+            // Get the target type from the property
+            var targetType = property.PropertyType;
+
+            // Create an instance of the target type
+            var instance = Activator.CreateInstance(targetType);
+
+            if (instance == null)
+            {
+                Console.WriteLine($"Warning: Failed to create instance of {targetType.Name}");
+                return null;
+            }
+
+            // If the created instance has properties that need initialization, initialize them recursively
+            await InitializeNestedPropertiesAsync(instance, targetType);
+
+            // Initialize the entire object graph in the correct order (deepest first)
+            await InitializeObjectGraphAsync(instance);
+
+            // Note: InitializeAsync() is called by InitializeObjectGraphAsync in the correct order
+
+            return instance;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to create instance for property {property.Name}: {ex.Message}");
+            return null;
+        }
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic property access is expected")]
+    private async Task InitializeNestedPropertiesAsync(object instance, Type instanceType)
+    {
+        try
+        {
+            var properties = instanceType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var property in properties)
+            {
+                if (!property.CanWrite) continue;
+
+                // Check if this property has a data source attribute
+                var dataSourceAttrs = property.GetCustomAttributes().Where(a =>
+                    a.GetType().Name.Contains("DataSource") ||
+                    a.GetType().Name.Contains("ClassDataSource")).ToList();
+
+                if (dataSourceAttrs.Any())
+                {
+                    // Initialize this property with an instance based on its data source attribute
+                    var nestedInstance = await CreateInstanceForDataSourcePropertyAsync(property, dataSourceAttrs.First());
+                    if (nestedInstance != null)
+                    {
+                        property.SetValue(instance, nestedInstance);
+                        // Note: IAsyncInitializer.InitializeAsync() is already called in CreateInstanceForDataSourcePropertyAsync
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to initialize nested properties for {instanceType.Name}: {ex.Message}");
+        }
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
+    private async Task InitializeObjectGraphAsync(object instance)
+    {
+        try
+        {
+            // Initialize children first (depth-first initialization)
+            await InitializeChildrenAsync(instance);
+
+            await ObjectInitializer.InitializeAsync(instance);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to initialize object graph for {instance.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
+    private async Task InitializeChildrenAsync(object instance)
+    {
+        try
+        {
+            var instanceType = instance.GetType();
+            var properties = instanceType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var property in properties)
+            {
+                if (!property.CanRead) continue;
+
+                var value = property.GetValue(instance);
+                if (value != null)
+                {
+                    // Check if this property has a data source attribute (indicating it's a nested instance we created)
+                    var dataSourceAttrs = property.GetCustomAttributes().Where(a =>
+                        a.GetType().Name.Contains("DataSource") ||
+                        a.GetType().Name.Contains("ClassDataSource")).ToList();
+
+                    if (dataSourceAttrs.Any())
+                    {
+                        // Recursively initialize this nested object
+                        await InitializeObjectGraphAsync(value);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to initialize children for {instance.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    private IEnumerable<object?[]> ProcessGeneratorResult(object? result)
+    {
+        if (result is IEnumerable<Func<object>> funcs)
+        {
+            return funcs.Select(func => new object?[] { func() });
+        }
+        else if (result is System.Collections.IEnumerable enumerable)
+        {
+            // Convert to object arrays
+            var results = new List<object?[]>();
+            foreach (var item in enumerable)
+            {
+                if (item is Func<object> func)
+                {
+                    results.Add(new object?[] { func() });
+                }
+                else
+                {
+                    results.Add(new object?[] { item });
+                }
+            }
+            return results;
+        }
+
+        return Enumerable.Empty<object?[]>();
+    }
+
+}
+
+// Helper classes for data combinations
+internal class MethodDataCombination
+{
+    public Func<Task<object?>>[] DataFactories { get; set; } = Array.Empty<Func<Task<object?>>>();
+    public int DataSourceIndex { get; set; } = -1;
+    public int LoopIndex { get; set; } = 0;
+}
+
+internal class ClassDataCombination
+{
+    public Func<Task<object?>>[] DataFactories { get; set; } = Array.Empty<Func<Task<object?>>>();
+    public int DataSourceIndex { get; set; } = -1;
+    public int LoopIndex { get; set; } = 0;
+}
+
+internal class PropertyDataCombination
+{
+    public Dictionary<string, Func<Task<object?>>> PropertyValueFactories { get; set; } = new();
 }
