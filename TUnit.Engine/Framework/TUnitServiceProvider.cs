@@ -6,15 +6,16 @@ using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
+using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
-using TUnit.Core.Services;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Building.Resolvers;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
-using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
+using IGenericTypeResolver = TUnit.Engine.Building.Interfaces.IGenericTypeResolver;
 
 namespace TUnit.Engine.Framework;
 
@@ -87,8 +88,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create pipeline dependencies
         var dataCollector = Register<ITestDataCollector>(
             TestDataCollectorFactory.Create(executionMode, assembliesToScan: null));
-        var genericResolver = Register<TUnit.Engine.Building.Interfaces.IGenericTypeResolver>(
-            new TUnit.Engine.Building.Resolvers.AotGenericTypeResolver());
+        var genericResolver = Register<IGenericTypeResolver>(
+            new AotGenericTypeResolver());
         var testBuilder = Register<ITestBuilder>(
             new TestBuilder(this, contextProvider));
 
@@ -149,18 +150,17 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         return service;
     }
 
-    private Core.Enums.TestExecutionMode GetExecutionMode(ICommandLineOptions commandLineOptions)
+    private static TestExecutionMode GetExecutionMode(ICommandLineOptions commandLineOptions)
     {
-        // Check for --reflection flag first
-        if (commandLineOptions.IsOptionSet(CommandLineProviders.ReflectionModeCommandProvider.ReflectionMode))
+        if (commandLineOptions.TryGetOptionArgumentList(CommandLineProviders.ReflectionModeCommandProvider.ReflectionMode, out _))
         {
-            return Core.Enums.TestExecutionMode.Reflection;
+            return TestExecutionMode.Reflection;
         }
 
         // Check for command line option
         if (commandLineOptions.TryGetOptionArgumentList("tunit-execution-mode", out var modes) && modes.Length > 0)
         {
-            if (Enum.TryParse<Core.Enums.TestExecutionMode>(modes[0], ignoreCase: true, out var mode))
+            if (Enum.TryParse<TestExecutionMode>(modes[0], ignoreCase: true, out var mode))
             {
                 return mode;
             }
@@ -169,13 +169,13 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Check environment variable
         var envMode = Environment.GetEnvironmentVariable("TUNIT_EXECUTION_MODE");
         if (!string.IsNullOrEmpty(envMode) &&
-            Enum.TryParse<Core.Enums.TestExecutionMode>(envMode, ignoreCase: true, out var envModeEnum))
+            Enum.TryParse<TestExecutionMode>(envMode, ignoreCase: true, out var envModeEnum))
         {
             return envModeEnum;
         }
 
         // Default to auto-detect based on available tests
-        return Core.Enums.TestExecutionMode.SourceGeneration;
+        return TestExecutionMode.SourceGeneration;
     }
 
 

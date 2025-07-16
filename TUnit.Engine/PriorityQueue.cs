@@ -1,6 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#if !NET
 
-#if !NET
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Engine
 {
