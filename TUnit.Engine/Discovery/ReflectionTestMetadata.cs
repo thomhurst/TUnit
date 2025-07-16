@@ -228,6 +228,24 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                     Console.WriteLine($"Warning: Failed to create data source generator: {ex.Message}");
                 }
             }
+            else if (attr is AsyncUntypedDataSourceGeneratorAttribute asyncUntypedAttr)
+            {
+                try
+                {
+                    Console.WriteLine($"DEBUG: Processing {attr.GetType().Name} data source generator");
+                    var dataSource = CreateAsyncUntypedDataSourceGenerator(asyncUntypedAttr);
+                    if (dataSource != null)
+                    {
+                        sources.Add(dataSource);
+                        Console.WriteLine($"DEBUG: Successfully created data source for {attr.GetType().Name}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to create async untyped data source generator: {ex.Message}");
+                    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                }
+            }
             else if (attr is IAsyncDataSourceGeneratorAttribute asyncAttr)
             {
                 Console.WriteLine($"Warning: AsyncDataSourceGenerator attributes are not fully supported in reflection mode: {attr.GetType().Name}");
@@ -818,6 +836,180 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
 
         return Enumerable.Empty<object?[]>();
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
+    private TestDataSource? CreateAsyncUntypedDataSourceGenerator(AsyncUntypedDataSourceGeneratorAttribute attr)
+    {
+        // For AsyncUntypedDataSourceGeneratorAttribute (including UntypedDataSourceGeneratorAttribute like MatrixDataSource)
+        return new DelegateDataSource(() =>
+        {
+            try
+            {
+                // Create DataGeneratorMetadata for the generator
+                var metadata = CreateDataGeneratorMetadata();
+                if (metadata == null)
+                {
+                    Console.WriteLine($"Warning: Failed to create metadata for {attr.GetType().Name}");
+                    return Enumerable.Empty<object?[]>();
+                }
+
+                // Use reflection to call the GenerateDataSources method
+                var generateMethod = attr.GetType().GetMethod("GenerateDataSources",
+                    BindingFlags.NonPublic | BindingFlags.Instance,
+                    null,
+                    new[] { typeof(DataGeneratorMetadata) },
+                    null);
+
+                if (generateMethod == null)
+                {
+                    Console.WriteLine($"Warning: Could not find GenerateDataSources method on {attr.GetType().Name}");
+                    return Enumerable.Empty<object?[]>();
+                }
+
+                var result = generateMethod.Invoke(attr, new object[] { metadata });
+                Console.WriteLine($"DEBUG: Generator returned result of type: {result?.GetType()?.FullName ?? "null"}");
+                return ProcessUntypedGeneratorResult(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to generate data from async untyped data source generator: {ex.Message}");
+                return Enumerable.Empty<object?[]>();
+            }
+        });
+    }
+
+    private IEnumerable<object?[]> ProcessUntypedGeneratorResult(object? result)
+    {
+        // Handle sync enumerable of funcs (which MatrixDataSource returns)
+        if (result is IEnumerable<Func<object?[]?>> funcs)
+        {
+            Console.WriteLine($"DEBUG: Processing {funcs.Count()} function results");
+            return funcs.Select(func => func() ?? Array.Empty<object?>()).Where(arr => arr != null);
+        }
+        else if (result is System.Collections.IEnumerable enumerable)
+        {
+            // Convert to object arrays
+            var results = new List<object?[]>();
+            foreach (var item in enumerable)
+            {
+                if (item is Func<object?[]?> func)
+                {
+                    var arr = func();
+                    if (arr != null)
+                    {
+                        results.Add(arr);
+                    }
+                }
+                else if (item is object?[] arr)
+                {
+                    results.Add(arr);
+                }
+                else
+                {
+                    Console.WriteLine($"DEBUG: Unexpected item type in enumerable: {item?.GetType()?.FullName ?? "null"}");
+                }
+            }
+            Console.WriteLine($"DEBUG: Processed {results.Count} results from enumerable");
+            return results;
+        }
+
+        Console.WriteLine($"DEBUG: Result type not handled: {result?.GetType()?.FullName ?? "null"}");
+        return Enumerable.Empty<object?[]>();
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic type access is expected")]
+    [UnconditionalSuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic type access is expected")]
+    private DataGeneratorMetadata? CreateDataGeneratorMetadata()
+    {
+        try
+        {
+            // Create parameter metadata for the test method
+            var parameters = _testMethod.GetParameters();
+            var memberMetadata = new List<MemberMetadata>();
+
+            foreach (var param in parameters)
+            {
+                memberMetadata.Add(new ParameterMetadata(param.ParameterType)
+                {
+                    Name = param.Name ?? string.Empty,
+                    TypeReference = TypeReference.CreateConcrete(param.ParameterType.AssemblyQualifiedName ?? param.ParameterType.FullName ?? param.ParameterType.Name),
+                    ReflectionInfo = param
+                });
+            }
+
+            // Create assembly metadata
+            var assemblyMetadata = new AssemblyMetadata
+            {
+                Name = _testClass.Assembly.GetName().Name ?? "Unknown"
+            };
+
+            // Get class properties
+            var properties = _testClass.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
+                .Select(p => new PropertyMetadata
+                {
+                    Name = p.Name,
+                    Type = p.PropertyType,
+                    ReflectionInfo = p,
+                    IsStatic = p.GetMethod?.IsStatic ?? false,
+                    Getter = (obj) => p.GetValue(obj)
+                })
+                .ToArray();
+
+            // Create class metadata
+            var classMetadata = new ClassMetadata
+            {
+                Name = _testClass.Name,
+                Type = _testClass,
+                TypeReference = TypeReference.CreateConcrete(_testClass.AssemblyQualifiedName ?? _testClass.FullName ?? _testClass.Name),
+                Namespace = _testClass.Namespace ?? string.Empty,
+                Assembly = assemblyMetadata,
+                Parameters = Array.Empty<ParameterMetadata>(), // No constructor parameters for reflection mode
+                Properties = properties,
+                Parent = _testClass.BaseType != null && _testClass.BaseType != typeof(object) 
+                    ? new ClassMetadata
+                    {
+                        Name = _testClass.BaseType.Name,
+                        Type = _testClass.BaseType,
+                        TypeReference = TypeReference.CreateConcrete(_testClass.BaseType.AssemblyQualifiedName ?? _testClass.BaseType.FullName ?? _testClass.BaseType.Name),
+                        Namespace = _testClass.BaseType.Namespace ?? string.Empty,
+                        Assembly = new AssemblyMetadata { Name = _testClass.BaseType.Assembly.GetName().Name ?? "Unknown" },
+                        Parameters = Array.Empty<ParameterMetadata>(),
+                        Properties = Array.Empty<PropertyMetadata>(),
+                        Parent = null
+                    }
+                    : null
+            };
+
+            // Create method metadata
+            var methodMetadata = new MethodMetadata
+            {
+                Name = _testMethod.Name,
+                Type = _testMethod.DeclaringType ?? _testClass,
+                Class = classMetadata,
+                Parameters = memberMetadata.OfType<ParameterMetadata>().ToArray(),
+                GenericTypeCount = _testMethod.IsGenericMethodDefinition ? _testMethod.GetGenericArguments().Length : 0,
+                ReturnTypeReference = TypeReference.CreateConcrete(_testMethod.ReturnType.AssemblyQualifiedName ?? _testMethod.ReturnType.FullName ?? _testMethod.ReturnType.Name),
+                ReturnType = _testMethod.ReturnType,
+                TypeReference = TypeReference.CreateConcrete((_testMethod.DeclaringType ?? _testClass).AssemblyQualifiedName ?? (_testMethod.DeclaringType ?? _testClass).FullName ?? (_testMethod.DeclaringType ?? _testClass).Name)
+            };
+
+            return new DataGeneratorMetadata
+            {
+                TestInformation = methodMetadata,
+                MembersToGenerate = memberMetadata.ToArray(),
+                Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+                TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()), // Empty context for reflection mode
+                TestSessionId = string.Empty, // No session ID in reflection mode
+                TestClassInstance = null, // Will be set during test execution
+                ClassInstanceArguments = null // Will be set during test execution
+            };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to create DataGeneratorMetadata: {ex.Message}");
+            return null;
+        }
     }
 
 }
