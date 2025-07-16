@@ -503,7 +503,19 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             foreach (var factory in factories)
             {
                 var data = factory();
-                var dataFactories = data.Select(value => new Func<Task<object?>>(() =>
+                
+                // Handle the case where data is object?[] instead of object[]
+                IEnumerable<object?> dataEnumerable;
+                if (data is object?[] nullableArray)
+                {
+                    dataEnumerable = nullableArray;
+                }
+                else
+                {
+                    dataEnumerable = data;
+                }
+                
+                var dataFactories = dataEnumerable.Select(value => new Func<Task<object?>>(() =>
                 {
                     var resolvedValue = ResolveTestDataValue(value);
                     return Task.FromResult(resolvedValue);
