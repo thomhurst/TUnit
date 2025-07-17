@@ -454,7 +454,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             GenericMethodInfo = ExtractGenericMethodInfo(testMethod),
             GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
             AttributeFactory = () => testMethod.GetCustomAttributes().Concat(testClass.GetCustomAttributes()).ToArray(),
-            PropertyInjections = Array.Empty<PropertyInjectionData>()
+            PropertyInjections = PropertyInjector.DiscoverInjectableProperties(testClass)
         };
 
         return Task.FromResult(new List<TestMetadata> { metadata });

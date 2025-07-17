@@ -150,8 +150,8 @@ public abstract class TestMetadata
 
     /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.
-    /// Used by TestBuilder to create strongly-typed executable tests without reflection.
-    /// Must never be null.
+    /// Both AOT and reflection modes must provide delegates with identical signatures.
+    /// The delegates encapsulate all mode-specific behavior.
     /// </summary>
     public abstract Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory { get; }
 }

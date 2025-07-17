@@ -317,8 +317,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         // Generate appropriate setter based on whether property is init-only
                         if (property.SetMethod.IsInitOnly)
                         {
-                            // For init-only properties, use reflection to set backing field
-                            writer.AppendLine($"Setter = (instance, value) => {property.Name}BackingField.SetValue(instance, value),");
+                            // For init-only properties, use UnsafeAccessor (requires .NET 8+)
+                            writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
                         }
                         else
                         {
@@ -469,8 +469,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Property injections for properties with data source attributes
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, className);
 
-        // Typed invokers
-        writer.AppendLine("CreateTypedInstance = null,");
+        // Unified delegates for AOT mode (to be used by CreateExecutableTestFactory)
+        writer.AppendLine("CreateInstance = null,");
+        writer.AppendLine("InvokeTest = null,");
+        
+        // Generate InvokeTypedTest which is used by the CreateExecutableTestFactory
         writer.AppendLine($"InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
@@ -573,50 +576,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.Unindent();
         writer.AppendLine("},");
-
-        // CreateExecutableTest factory to create strongly-typed ExecutableTest<T>
-        writer.AppendLine($"CreateExecutableTest = (context, metadata) =>");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"var typedMetadata = (TestMetadata<{className}>)metadata;");
-        writer.AppendLine($"return new global::TUnit.Core.ExecutableTest<{className}>");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Set all required properties from context
-        writer.AppendLine("TestId = context.TestId,");
-        writer.AppendLine("DisplayName = context.DisplayName,");
-        writer.AppendLine("Arguments = context.Arguments,");
-        writer.AppendLine("ClassArguments = context.ClassArguments,");
-        writer.AppendLine("PropertyValues = context.PropertyValues,");
-        writer.AppendLine("BeforeTestHooks = context.BeforeTestHooks,");
-        writer.AppendLine("AfterTestHooks = context.AfterTestHooks,");
-        writer.AppendLine("Context = context.Context,");
-
-        // Set the metadata property (not TypedMetadata which is read-only)
-        writer.AppendLine("Metadata = typedMetadata,");
-
-        // Set typed properties
-        writer.AppendLine($"CreateTypedInstance = async () =>");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("if (typedMetadata.InstanceFactory == null)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("throw new InvalidOperationException(\"No instance factory\");");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine($"var instance = ({className})typedMetadata.InstanceFactory(context.ClassArguments);");
-        writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
-        writer.AppendLine("return instance;");
-        writer.Unindent();
-        writer.AppendLine("},");
-        writer.AppendLine("InvokeTypedTest = typedMetadata.InvokeTypedTest ?? throw new InvalidOperationException(\"No typed test invoker\")");
-
-        writer.Unindent();
-        writer.AppendLine("};");
-        writer.Unindent();
-        writer.AppendLine("}");
     }
 
 
@@ -964,7 +923,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Generates reflection-based field accessors for init-only properties with data source attributes
+    /// Generates field accessors for init-only properties with data source attributes
     /// </summary>
     private static void GenerateReflectionFieldAccessors(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)
     {
@@ -994,20 +953,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             currentType = currentType.BaseType;
         }
 
-        // Generate cached FieldInfo static fields for each init-only property with data source
+        // Generate UnsafeAccessor methods for init-only properties
+        // This will only compile on .NET 8+ where UnsafeAccessor is available
         foreach (var property in initOnlyPropertiesWithDataSources)
         {
             var backingFieldName = $"<{property.Name}>k__BackingField";
-
+            var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            
             writer.AppendLine($"/// <summary>");
-            writer.AppendLine($"/// Cached FieldInfo for init-only property {property.Name} backing field");
+            writer.AppendLine($"/// UnsafeAccessor for init-only property {property.Name} backing field");
             writer.AppendLine($"/// </summary>");
-            writer.AppendLine($"[global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields)]");
-            writer.AppendLine($"private static readonly global::System.Reflection.FieldInfo {property.Name}BackingField = ");
-            writer.Indent();
-            writer.AppendLine($"typeof({className}).GetField(\"{backingFieldName}\", ");
-            writer.AppendLine($"global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic)!;");
-            writer.Unindent();
+            writer.AppendLine($"[global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
+            writer.AppendLine($"private static extern ref {propertyType} Get{property.Name}BackingField({className} instance);");
             writer.AppendLine();
         }
     }

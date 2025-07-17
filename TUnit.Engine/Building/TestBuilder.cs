@@ -97,7 +97,7 @@ public sealed class TestBuilder : ITestBuilder
         var creationContext = new ExecutableTestCreationContext
         {
             TestId = testId,
-            DisplayName = displayName,
+            DisplayName = context.GetDisplayName(), // Use the display name from context which may have been updated by discovery events
             Arguments = methodArguments,
             ClassArguments = classArguments,
             PropertyValues = propertyValues,

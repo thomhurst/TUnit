@@ -49,8 +49,17 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
     }
 
-    #pragma warning disable CS1998 // Async method lacks 'await' operators
     private async IAsyncEnumerable<TestDataCombination> GenerateDataCombinations()
+    {
+        // Wrap the entire data generation in error handling
+        await foreach (var combination in DataCombinationBuilder.BuildCombinationsWithErrorHandlingAsync(GenerateDataCombinationsCore))
+        {
+            yield return combination;
+        }
+    }
+
+    #pragma warning disable CS1998 // Async method lacks 'await' operators
+    private async IAsyncEnumerable<TestDataCombination> GenerateDataCombinationsCore()
     #pragma warning restore CS1998
     {
         // Extract data sources from attributes using reflection
@@ -82,51 +91,41 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
 
         // Generate all combinations without awaiting inside the async enumerable
-        var methodDataCombinations = new List<MethodDataCombination>();
-        var classDataCombinations = new List<ClassDataCombination>();
-
-        // Process method data sources synchronously
-        foreach (var source in methodDataSources)
-        {
-            methodDataCombinations.AddRange(ProcessMethodDataSource(source));
-        }
-
-        // Process class data sources synchronously
-        foreach (var source in classDataSources)
-        {
-            classDataCombinations.AddRange(ProcessClassDataSource(source));
-        }
-
+        var methodDataCombinations = ProcessDataSourcesWithErrorHandling(methodDataSources, ProcessMethodDataSource);
+        var classDataCombinations = ProcessDataSourcesWithErrorHandling(classDataSources, ProcessClassDataSource);
         var propertyDataCombinations = GeneratePropertyDataCombinations(propertyDataSources);
 
-        // Generate cartesian product of all combinations
-        var methodCombinations = methodDataCombinations.Any() ? methodDataCombinations.ToArray() : new[] { new MethodDataCombination() };
-        var classCombinations = classDataCombinations.Any() ? classDataCombinations.ToArray() : new[] { new ClassDataCombination() };
-        var propertyCombinations = propertyDataCombinations.Any() ? propertyDataCombinations.ToArray() : new[] { new PropertyDataCombination() };
-
-        foreach (var methodCombination in methodCombinations)
+        // Use the unified DataCombinationBuilder
+        await foreach (var combination in DataCombinationBuilder.BuildCombinationsAsync(
+            methodDataCombinations,
+            classDataCombinations,
+            propertyDataCombinations,
+            repeatCount))
         {
-            foreach (var classCombination in classCombinations)
+            yield return combination;
+        }
+    }
+
+    private List<T> ProcessDataSourcesWithErrorHandling<T>(List<TestDataSource> sources, Func<TestDataSource, IEnumerable<T>> processor)
+        where T : new()
+    {
+        var results = new List<T>();
+        
+        foreach (var source in sources)
+        {
+            try
             {
-                foreach (var propertyCombination in propertyCombinations)
-                {
-                    for (int repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
-                    {
-                        yield return new TestDataCombination
-                        {
-                            MethodDataFactories = methodCombination.DataFactories,
-                            ClassDataFactories = classCombination.DataFactories,
-                            PropertyValueFactories = propertyCombination.PropertyValueFactories,
-                            MethodDataSourceIndex = methodCombination.DataSourceIndex,
-                            MethodLoopIndex = methodCombination.LoopIndex,
-                            ClassDataSourceIndex = classCombination.DataSourceIndex,
-                            ClassLoopIndex = classCombination.LoopIndex,
-                            RepeatIndex = repeatIndex
-                        };
-                    }
-                }
+                results.AddRange(processor(source));
+            }
+            catch (Exception ex)
+            {
+                // Instead of logging and continuing, create an error combination
+                // This will be caught by the outer error handler and converted to TestDataCombination with DataGenerationException
+                throw new Exception($"Failed to process data source: {ex.Message}", ex);
             }
         }
+        
+        return results;
     }
 
     private ExecutableTest CreateExecutableTest(ExecutableTestCreationContext context, TestMetadata metadata)
@@ -143,30 +142,56 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
             var instance = InstanceFactory(context.ClassArguments);
 
-            // Apply property values
-            foreach (var kvp in context.PropertyValues)
-            {
-                var property = _testClass.GetProperty(kvp.Key);
-                property?.SetValue(instance, kvp.Value);
-            }
+            // Apply property values using unified PropertyInjector
+            await PropertyInjector.InjectPropertiesAsync(
+                instance, 
+                context.PropertyValues, 
+                metadata.PropertyInjections);
 
             return instance;
         };
 
-        // Create test invoker that uses reflection
-        #pragma warning disable CS1998 // Async method lacks 'await' operators
-        Func<object, object?[], Task> invokeTest = async (instance, args) =>
+        // Create test invoker with CancellationToken support
+        // Determine if the test method has a CancellationToken parameter
+        var hasCancellationToken = ParameterTypes.Any(t => t == typeof(CancellationToken));
+        var cancellationTokenIndex = hasCancellationToken 
+            ? Array.IndexOf(ParameterTypes, typeof(CancellationToken))
+            : -1;
+
+        Func<object, object?[], CancellationToken, Task> invokeTest = async (instance, args, cancellationToken) =>
         {
-            #pragma warning restore CS1998
             if (TestInvoker == null)
             {
                 throw new InvalidOperationException($"No test invoker for {_testMethod.Name}");
             }
 
-            await TestInvoker(instance, args);
+            if (hasCancellationToken)
+            {
+                // Insert CancellationToken at the correct position
+                var argsWithToken = new object?[args.Length + 1];
+                var argIndex = 0;
+                
+                for (int i = 0; i < argsWithToken.Length; i++)
+                {
+                    if (i == cancellationTokenIndex)
+                    {
+                        argsWithToken[i] = cancellationToken;
+                    }
+                    else if (argIndex < args.Length)
+                    {
+                        argsWithToken[i] = args[argIndex++];
+                    }
+                }
+                
+                await TestInvoker(instance, argsWithToken);
+            }
+            else
+            {
+                await TestInvoker(instance, args);
+            }
         };
 
-        return new DynamicExecutableTest(createInstance, invokeTest)
+        return new UnifiedExecutableTest(createInstance, invokeTest)
         {
             TestId = context.TestId,
             DisplayName = context.DisplayName,
@@ -210,7 +235,8 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Warning: Failed to create method data source for {attr.MethodNameProvidingDataSource}: {ex.Message}");
+                // Method data source failures are configuration errors that should fail the test
+                throw new InvalidOperationException($"Failed to create method data source for {attr.MethodNameProvidingDataSource}: {ex.Message}", ex);
             }
         }
 
@@ -231,7 +257,8 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Warning: Failed to create data source generator: {ex.Message}");
+                    // Data source generator failures are configuration errors that should fail the test
+                    throw new InvalidOperationException($"Failed to create data source generator: {ex.Message}", ex);
                 }
             }
             else if (attr is AsyncUntypedDataSourceGeneratorAttribute asyncUntypedAttr)
@@ -246,14 +273,14 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Warning: Failed to create async untyped data source generator: {ex.Message}");
-                    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                    // Async untyped data source generator failures are configuration errors that should fail the test
+                    throw new InvalidOperationException($"Failed to create async untyped data source generator: {ex.Message}", ex);
                 }
             }
             else if (attr is IAsyncDataSourceGeneratorAttribute asyncAttr)
             {
-                Console.WriteLine($"Warning: AsyncDataSourceGenerator attributes are not fully supported in reflection mode: {attr.GetType().Name}");
-                // Skip async generators for now - they require complex metadata creation
+                // AsyncDataSourceGenerator attributes require complex metadata and are not supported in reflection mode
+                throw new NotSupportedException($"AsyncDataSourceGenerator attributes are not supported in reflection mode: {attr.GetType().Name}. Use source generation mode or a supported data source type.");
             }
         }
 
@@ -285,7 +312,8 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Warning: Failed to create class method data source for {attr.MethodNameProvidingDataSource}: {ex.Message}");
+                // Class method data source failures are configuration errors that should fail the test
+                throw new InvalidOperationException($"Failed to create class method data source for {attr.MethodNameProvidingDataSource}: {ex.Message}", ex);
             }
         }
 
@@ -302,7 +330,8 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Warning: Failed to create class data source: {ex.Message}");
+                // Class data source failure will be wrapped in TestDataCombination by error handling
+                throw new Exception($"Failed to create class data source: {ex.Message}", ex);
             }
         }
 
@@ -350,7 +379,8 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Warning: Failed to create property method data source for {property.Name}: {ex.Message}");
+                    // Property data source failure will be wrapped in TestDataCombination by error handling
+                    throw new Exception($"Failed to create property method data source for {property.Name}: {ex.Message}", ex);
                 }
             }
         }
@@ -401,8 +431,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
         if (method == null)
         {
-            Console.WriteLine($"Warning: Method {attr.MethodNameProvidingDataSource} not found on type {targetType.Name}");
-            return null;
+            throw new InvalidOperationException($"Method {attr.MethodNameProvidingDataSource} not found on type {targetType.Name}");
         }
 
         // Create a delegate data source that invokes the method
@@ -442,8 +471,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Warning: Failed to invoke method {attr.MethodNameProvidingDataSource}: {ex.Message}");
-                return Enumerable.Empty<object?[]>();
+                throw new InvalidOperationException($"Failed to invoke method {attr.MethodNameProvidingDataSource}: {ex.Message}", ex);
             }
         });
     }
@@ -457,8 +485,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             var typesField = typeof(ClassDataSourceAttribute).GetField("_types", BindingFlags.NonPublic | BindingFlags.Instance);
             if (typesField?.GetValue(attr) is not Type[] types || types.Length == 0)
             {
-                Console.WriteLine("Warning: ClassDataSourceAttribute has no types configured");
-                return null;
+                throw new InvalidOperationException("ClassDataSourceAttribute has no types configured");
             }
 
             // Create a delegate data source that creates instances of each type
@@ -479,61 +506,51 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Warning: Failed to create class data source instances: {ex.Message}");
-                    return Enumerable.Empty<object?[]>();
+                    throw new InvalidOperationException($"Failed to create class data source instances: {ex.Message}", ex);
                 }
             });
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to create class data source: {ex.Message}");
-            return null;
+            throw new InvalidOperationException($"Failed to create class data source: {ex.Message}", ex);
         }
     }
 
     private List<MethodDataCombination> ProcessMethodDataSource(TestDataSource dataSource)
     {
         var combinations = new List<MethodDataCombination>();
+        var factories = dataSource.GetDataFactories();
+        int loopIndex = 0;
 
-        try
+        foreach (var factory in factories)
         {
-            var factories = dataSource.GetDataFactories();
-            int loopIndex = 0;
-
-            foreach (var factory in factories)
+            var data = factory();
+            
+            // Handle the case where data is object?[] instead of object[]
+            IEnumerable<object?> dataEnumerable;
+            if (data is object?[] nullableArray)
             {
-                var data = factory();
-                
-                // Handle the case where data is object?[] instead of object[]
-                IEnumerable<object?> dataEnumerable;
-                if (data is object?[] nullableArray)
-                {
-                    dataEnumerable = nullableArray;
-                }
-                else
-                {
-                    dataEnumerable = data;
-                }
-                
-                var dataFactories = dataEnumerable.Select(value => new Func<Task<object?>>(() =>
-                {
-                    var resolvedValue = ResolveTestDataValue(value);
-                    return Task.FromResult(resolvedValue);
-                })).ToArray();
-
-                Console.WriteLine($"ProcessMethodDataSource: Created {dataFactories.Length} data factories from {dataSource.GetType().Name}");
-                
-                combinations.Add(new MethodDataCombination
-                {
-                    DataFactories = dataFactories,
-                    DataSourceIndex = 0,
-                    LoopIndex = loopIndex++
-                });
+                dataEnumerable = nullableArray;
             }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Warning: Failed to process method data source: {ex.Message}");
+            else
+            {
+                dataEnumerable = data;
+            }
+            
+            var dataFactories = dataEnumerable.Select(value => new Func<Task<object?>>(() =>
+            {
+                var resolvedValue = ResolveTestDataValue(value);
+                return Task.FromResult(resolvedValue);
+            })).ToArray();
+
+            Console.WriteLine($"ProcessMethodDataSource: Created {dataFactories.Length} data factories from {dataSource.GetType().Name}");
+            
+            combinations.Add(new MethodDataCombination
+            {
+                DataFactories = dataFactories,
+                DataSourceIndex = 0,
+                LoopIndex = loopIndex++
+            });
         }
 
         return combinations;
@@ -574,32 +591,24 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     private List<ClassDataCombination> ProcessClassDataSource(TestDataSource dataSource)
     {
         var combinations = new List<ClassDataCombination>();
+        var factories = dataSource.GetDataFactories();
+        int loopIndex = 0;
 
-        try
+        foreach (var factory in factories)
         {
-            var factories = dataSource.GetDataFactories();
-            int loopIndex = 0;
-
-            foreach (var factory in factories)
+            var data = factory();
+            var dataFactories = data.Select(value => new Func<Task<object?>>(() =>
             {
-                var data = factory();
-                var dataFactories = data.Select(value => new Func<Task<object?>>(() =>
-                {
-                    var resolvedValue = ResolveTestDataValue(value);
-                    return Task.FromResult(resolvedValue);
-                })).ToArray();
+                var resolvedValue = ResolveTestDataValue(value);
+                return Task.FromResult(resolvedValue);
+            })).ToArray();
 
-                combinations.Add(new ClassDataCombination
-                {
-                    DataFactories = dataFactories,
-                    DataSourceIndex = 0,
-                    LoopIndex = loopIndex++
-                });
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Warning: Failed to process class data source: {ex.Message}");
+            combinations.Add(new ClassDataCombination
+            {
+                DataFactories = dataFactories,
+                DataSourceIndex = 0,
+                LoopIndex = loopIndex++
+            });
         }
 
         return combinations;
@@ -635,7 +644,8 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Warning: Failed to generate property data for {propertyDataSource.PropertyName}: {ex.Message}");
+                // Property data generation failure is a configuration error that should fail the test
+                throw new InvalidOperationException($"Failed to generate property data for {propertyDataSource.PropertyName}: {ex.Message}", ex);
             }
         }
 
@@ -662,8 +672,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 var initializedGenerator = InitializeDataSourceGeneratorAsync(attr).GetAwaiter().GetResult();
                 if (initializedGenerator == null)
                 {
-                    Console.WriteLine($"Warning: Failed to initialize data source generator {attr.GetType().Name}");
-                    return Enumerable.Empty<object?[]>();
+                    throw new InvalidOperationException($"Failed to initialize data source generator {attr.GetType().Name}");
                 }
 
                 // Use reflection to call the GenerateDataSources method
@@ -672,8 +681,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
                 if (generateMethod == null)
                 {
-                    Console.WriteLine($"Warning: Could not find GenerateDataSources method on {initializedGenerator.GetType().Name}");
-                    return Enumerable.Empty<object?[]>();
+                    throw new InvalidOperationException($"Could not find GenerateDataSources method on {initializedGenerator.GetType().Name}");
                 }
 
                 // Try to call the method with null metadata first (many generators don't use it)
@@ -684,14 +692,12 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Warning: Failed to call GenerateDataSources with null metadata: {ex.Message}");
-                    return Enumerable.Empty<object?[]>();
+                    throw new InvalidOperationException($"Failed to call GenerateDataSources with null metadata: {ex.Message}", ex);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Warning: Failed to generate data from data source generator: {ex.Message}");
-                return Enumerable.Empty<object?[]>();
+                throw new InvalidOperationException($"Failed to generate data from data source generator: {ex.Message}", ex);
             }
         });
     }
@@ -708,8 +714,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
             if (newGenerator == null)
             {
-                Console.WriteLine($"Warning: Failed to create instance of {generatorType.Name}");
-                return null;
+                throw new InvalidOperationException($"Failed to create instance of {generatorType.Name}");
             }
 
             // Copy properties from the original attribute to the new instance
@@ -748,8 +753,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to initialize data source generator: {ex.Message}");
-            return null;
+            throw new InvalidOperationException($"Failed to initialize data source generator: {ex.Message}", ex);
         }
     }
 
@@ -767,8 +771,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
             if (instance == null)
             {
-                Console.WriteLine($"Warning: Failed to create instance of {targetType.Name}");
-                return null;
+                throw new InvalidOperationException($"Failed to create instance of {targetType.Name}");
             }
 
             // If the created instance has properties that need initialization, initialize them recursively
@@ -783,8 +786,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to create instance for property {property.Name}: {ex.Message}");
-            return null;
+            throw new InvalidOperationException($"Failed to create instance for property {property.Name}: {ex.Message}", ex);
         }
     }
 
@@ -819,7 +821,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to initialize nested properties for {instanceType.Name}: {ex.Message}");
+            throw new InvalidOperationException($"Failed to initialize nested properties for {instanceType.Name}: {ex.Message}", ex);
         }
     }
 
@@ -835,7 +837,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to initialize object graph for {instance.GetType().Name}: {ex.Message}");
+            throw new InvalidOperationException($"Failed to initialize object graph for {instance.GetType().Name}: {ex.Message}", ex);
         }
     }
 
@@ -869,7 +871,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to initialize children for {instance.GetType().Name}: {ex.Message}");
+            throw new InvalidOperationException($"Failed to initialize children for {instance.GetType().Name}: {ex.Message}", ex);
         }
     }
 
@@ -912,8 +914,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 var metadata = CreateDataGeneratorMetadata();
                 if (metadata == null)
                 {
-                    Console.WriteLine($"Warning: Failed to create metadata for {attr.GetType().Name}");
-                    return Enumerable.Empty<object?[]>();
+                    throw new InvalidOperationException($"Failed to create metadata for {attr.GetType().Name}");
                 }
 
                 // Use reflection to call the GenerateDataSources method
@@ -925,8 +926,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
                 if (generateMethod == null)
                 {
-                    Console.WriteLine($"Warning: Could not find GenerateDataSources method on {attr.GetType().Name}");
-                    return Enumerable.Empty<object?[]>();
+                    throw new InvalidOperationException($"Could not find GenerateDataSources method on {attr.GetType().Name}");
                 }
 
                 var result = generateMethod.Invoke(attr, new object[] { metadata });
@@ -935,8 +935,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Warning: Failed to generate data from async untyped data source generator: {ex.Message}");
-                return Enumerable.Empty<object?[]>();
+                throw new InvalidOperationException($"Failed to generate data from async untyped data source generator: {ex.Message}", ex);
             }
         });
     }
@@ -1069,29 +1068,8 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to create DataGeneratorMetadata: {ex.Message}");
-            return null;
+            throw new InvalidOperationException($"Failed to create DataGeneratorMetadata: {ex.Message}", ex);
         }
     }
 
-}
-
-// Helper classes for data combinations
-internal class MethodDataCombination
-{
-    public Func<Task<object?>>[] DataFactories { get; set; } = Array.Empty<Func<Task<object?>>>();
-    public int DataSourceIndex { get; set; } = -1;
-    public int LoopIndex { get; set; }
-}
-
-internal class ClassDataCombination
-{
-    public Func<Task<object?>>[] DataFactories { get; set; } = Array.Empty<Func<Task<object?>>>();
-    public int DataSourceIndex { get; set; } = -1;
-    public int LoopIndex { get; set; }
-}
-
-internal class PropertyDataCombination
-{
-    public Dictionary<string, Func<Task<object?>>> PropertyValueFactories { get; set; } = new();
 }

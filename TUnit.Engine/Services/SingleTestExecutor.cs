@@ -131,8 +131,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
         test.Context.TestDetails.ClassInstance = instance;
 
-        // Inject properties if any are defined
-        await InjectPropertiesAsync(test, instance);
+        // Property injection is now handled inside CreateInstanceAsync for both AOT and reflection modes
+        // to ensure consistent behavior across both execution modes
 
         // Restore hook contexts before test execution
         RestoreHookContexts(test.Context);
@@ -330,40 +330,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
     }
 
-    private async Task InjectPropertiesAsync(ExecutableTest test, object instance)
-    {
-        var propertyValues = test.Context?.TestDetails.TestClassInjectedPropertyArguments;
-        if (propertyValues == null || propertyValues.Count == 0)
-        {
-            return;
-        }
-
-        // Get property injections from the test metadata
-        var metadata = test.Metadata;
-        if (metadata.PropertyInjections.Length == 0)
-        {
-            return;
-        }
-
-        // Apply property values
-        foreach (var injection in metadata.PropertyInjections)
-        {
-            if (propertyValues.TryGetValue(injection.PropertyName, out var value))
-            {
-                // Initialize nested properties first
-                if (value != null)
-                {
-                    await ObjectInitializer.InitializeAsync(value);
-                }
-
-                // Set the property value
-                injection.Setter(instance, value);
-            }
-        }
-
-        // Initialize the test instance after all properties are set
-        await ObjectInitializer.InitializeAsync(instance);
-    }
 
     private async Task DecrementAndDisposeTrackedObjectsAsync(ExecutableTest test)
     {
