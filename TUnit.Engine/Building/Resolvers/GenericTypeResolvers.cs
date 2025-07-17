@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
@@ -63,14 +64,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
     [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming")]
     private async Task<IEnumerable<TestMetadata>> ExpandGenericTestAsync(TestMetadata genericTest)
     {
-        // For generic tests, we need test data to infer types
-        // This is a simplified version - full implementation would need to:
-        // 1. Get initial data from data sources
-        // 2. Infer generic types from the data
-        // 3. Create specialized metadata for each type combination
-
-        // Check if we have data sources by looking at the DataSources property
-        // or by checking if it's a ReflectionTestMetadata which handles data sources dynamically
+        // Check if we have data sources
         var hasDataSources = genericTest.DataSources.Length > 0 || 
                             genericTest.ClassDataSources.Length > 0 || 
                             genericTest.PropertyDataSources.Length > 0;
@@ -84,24 +78,190 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
 
         if (!hasDataSources && genericTest.GenericMethodInfo != null)
         {
-            Console.WriteLine($"DEBUG: Generic test '{genericTest.TestName}' has no data sources. " +
-                              $"DataSources.Length: {genericTest.DataSources.Length}, " +
-                              $"ClassDataSources.Length: {genericTest.ClassDataSources.Length}, " +
-                              $"PropertyDataSources.Length: {genericTest.PropertyDataSources.Length}, " +
-                              $"IsReflectionTestMetadata: {genericTest is ReflectionTestMetadata}");
-            
             throw new GenericTypeResolutionException(
                 $"Generic test method '{genericTest.TestName}' requires test data to infer generic type parameters. " +
                 "Add [Arguments] attributes or other data sources.");
         }
 
-        // For reflection mode, generic tests are not fully supported yet
-        // Return the original test with a marker that it couldn't be expanded
-        Console.WriteLine($"WARNING: Generic test '{genericTest.TestName}' cannot be expanded in reflection mode. " +
-                          "Use source generation mode for full generic test support.");
+        // Get the test class and method from ReflectionTestMetadata
+        if (genericTest is not ReflectionTestMetadata reflectionMetadata)
+        {
+            // Can't expand non-reflection metadata
+            return new[] { genericTest };
+        }
+
+        var testClassField = typeof(ReflectionTestMetadata).GetField("_testClass", BindingFlags.NonPublic | BindingFlags.Instance);
+        var testMethodField = typeof(ReflectionTestMetadata).GetField("_testMethod", BindingFlags.NonPublic | BindingFlags.Instance);
         
-        // Return empty to skip the test
-        return await Task.FromResult(Enumerable.Empty<TestMetadata>());
+        if (testClassField?.GetValue(reflectionMetadata) is not Type testClass ||
+            testMethodField?.GetValue(reflectionMetadata) is not MethodInfo testMethod)
+        {
+            return new[] { genericTest };
+        }
+
+        // For now, we'll create a single concrete instance with common types
+        // A full implementation would analyze the data to determine the actual types
+        var expandedTests = new List<TestMetadata>();
+
+        try
+        {
+            Console.WriteLine($"DEBUG: Attempting to expand generic test '{genericTest.TestName}'");
+            
+            // Check if the test has typed data sources that require generic type resolution
+            var hasTypedDataSource = false;
+            foreach (var attr in testMethod.GetCustomAttributes())
+            {
+                var baseType = attr.GetType().BaseType;
+                while (baseType != null)
+                {
+                    if (baseType.IsGenericType &&
+                        (baseType.GetGenericTypeDefinition().Name.Contains("DataSourceGeneratorAttribute") ||
+                         baseType.GetGenericTypeDefinition().Name.Contains("AsyncDataSourceGeneratorAttribute")))
+                    {
+                        hasTypedDataSource = true;
+                        break;
+                    }
+                    baseType = baseType.BaseType;
+                }
+                if (hasTypedDataSource) break;
+            }
+
+            if (hasTypedDataSource)
+            {
+                Console.WriteLine($"WARNING: Generic test '{genericTest.TestName}' uses typed data sources which cannot be expanded in reflection mode.");
+                Console.WriteLine("Typed data sources (DataSourceGeneratorAttribute<T> and AsyncDataSourceGeneratorAttribute<T>) require compile-time type information.");
+                Console.WriteLine("Use [Arguments] attributes or non-generic data sources for reflection mode, or use source generation mode.");
+                return Enumerable.Empty<TestMetadata>();
+            }
+            
+            // Get the first data combination to infer types
+            var dataCombinations = genericTest.DataCombinationGenerator();
+            TestDataCombination? firstCombination = null;
+            await foreach (var combination in dataCombinations)
+            {
+                Console.WriteLine($"DEBUG: Got data combination with {combination.MethodDataFactories?.Length ?? 0} method data factories");
+                firstCombination = combination;
+                break;
+            }
+            
+            if (firstCombination == null)
+            {
+                Console.WriteLine($"DEBUG: No data combinations available for '{genericTest.TestName}'");
+                // No data available, can't expand
+                return new[] { genericTest };
+            }
+
+            // Infer generic type arguments from the data
+            var typeArguments = InferTypeArgumentsFromData(testMethod, firstCombination);
+            
+            if (typeArguments.Length == 0)
+            {
+                // Couldn't infer types, return original
+                return new[] { genericTest };
+            }
+
+            // Create a concrete version of the method
+            var concreteMethod = testMethod.MakeGenericMethod(typeArguments);
+            
+            // Create new metadata for the concrete test
+            var concreteMetadata = new ReflectionTestMetadata(testClass, concreteMethod)
+            {
+                TestName = genericTest.TestName,
+                TestClassType = genericTest.TestClassType,
+                TestMethodName = genericTest.TestMethodName,
+                Categories = genericTest.Categories,
+                IsSkipped = genericTest.IsSkipped,
+                SkipReason = genericTest.SkipReason,
+                TimeoutMs = genericTest.TimeoutMs,
+                RetryCount = genericTest.RetryCount,
+                CanRunInParallel = genericTest.CanRunInParallel,
+                Dependencies = genericTest.Dependencies,
+                DataSources = genericTest.DataSources,
+                ClassDataSources = genericTest.ClassDataSources,
+                PropertyDataSources = genericTest.PropertyDataSources,
+                InstanceFactory = genericTest.InstanceFactory,
+                TestInvoker = genericTest.TestInvoker,
+                ParameterCount = genericTest.ParameterCount,
+                ParameterTypes = concreteMethod.GetParameters().Select(p => p.ParameterType).ToArray(),
+                TestMethodParameterTypes = genericTest.TestMethodParameterTypes,
+                Hooks = genericTest.Hooks,
+                FilePath = genericTest.FilePath,
+                LineNumber = genericTest.LineNumber,
+                MethodMetadata = genericTest.MethodMetadata,
+                GenericTypeInfo = null, // No longer generic
+                GenericMethodInfo = null, // No longer generic
+                GenericMethodTypeArguments = typeArguments,
+                AttributeFactory = genericTest.AttributeFactory,
+                PropertyInjections = genericTest.PropertyInjections
+            };
+            
+            expandedTests.Add(concreteMetadata);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"WARNING: Failed to expand generic test '{genericTest.TestName}': {ex.Message}");
+            // Return empty to skip the test
+            return Enumerable.Empty<TestMetadata>();
+        }
+
+        return expandedTests;
+    }
+    
+    [RequiresDynamicCode("Type inference requires dynamic code generation")]
+    private Type[] InferTypeArgumentsFromData(MethodInfo genericMethod, TestDataCombination dataCombination)
+    {
+        var genericParams = genericMethod.GetGenericArguments();
+        var methodParams = genericMethod.GetParameters();
+        var typeArguments = new Type[genericParams.Length];
+        
+        Console.WriteLine($"DEBUG: InferTypeArgumentsFromData - Method has {genericParams.Length} generic params and {methodParams.Length} method params");
+        
+        // Simple type inference based on parameter positions
+        // This assumes generic parameters are used directly as method parameters
+        for (int i = 0; i < genericParams.Length; i++)
+        {
+            var genericParam = genericParams[i];
+            Console.WriteLine($"DEBUG: Processing generic param {i}: {genericParam.Name}");
+            
+            // Find which method parameter uses this generic parameter
+            for (int j = 0; j < methodParams.Length; j++)
+            {
+                var paramType = methodParams[j].ParameterType;
+                Console.WriteLine($"DEBUG: Checking method param {j}: {paramType.Name}");
+                
+                if (paramType == genericParam)
+                {
+                    Console.WriteLine($"DEBUG: Method param {j} uses generic param {i}");
+                    // This parameter directly uses the generic type
+                    // Get the actual type from the data
+                    if (dataCombination.MethodDataFactories != null && j < dataCombination.MethodDataFactories.Length)
+                    {
+                        var dataTask = dataCombination.MethodDataFactories[j]();
+                        var data = dataTask.GetAwaiter().GetResult();
+                        
+                        if (data != null)
+                        {
+                            typeArguments[i] = data.GetType();
+                            Console.WriteLine($"DEBUG: Inferred type {typeArguments[i].Name} for generic param {i} from data");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Fill in any missing type arguments with common defaults
+        for (int i = 0; i < typeArguments.Length; i++)
+        {
+            if (typeArguments[i] == null)
+            {
+                Console.WriteLine($"DEBUG: No type inferred for generic param {i}, using object as fallback");
+                // Use object as a fallback
+                typeArguments[i] = typeof(object);
+            }
+        }
+        
+        return typeArguments;
     }
 
     /// <summary>
@@ -134,7 +294,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
             Console.WriteLine($"DEBUG: Method has {methodAttributes.Count} attributes");
             foreach (var attr in methodAttributes)
             {
-                Console.WriteLine($"DEBUG: Method attribute: {attr.GetType().Name}");
+                Console.WriteLine($"DEBUG: Method attribute: {attr.GetType().FullName}");
                 if (IsDataSourceAttribute(attr))
                 {
                     Console.WriteLine($"DEBUG: Found data source attribute on method: {attr.GetType().Name}");
@@ -205,11 +365,21 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
             return true;
         }
 
-        // Check for DataSourceGeneratorAttribute<T>
-        if (attributeType.BaseType?.IsGenericType == true &&
-            attributeType.BaseType?.GetGenericTypeDefinition().Name.Contains("DataSourceGeneratorAttribute") == true)
+        // Check for DataSourceGeneratorAttribute<T> and AsyncDataSourceGeneratorAttribute<T>
+        var baseType = attributeType.BaseType;
+        while (baseType != null)
         {
-            return true;
+            if (baseType.IsGenericType)
+            {
+                var genericDef = baseType.GetGenericTypeDefinition();
+                if (genericDef.Name.Contains("DataSourceGeneratorAttribute") || 
+                    genericDef.Name.Contains("AsyncDataSourceGeneratorAttribute"))
+                {
+                    Console.WriteLine($"DEBUG: Found typed data source attribute: {attributeType.Name} inherits from {baseType.Name}");
+                    return true;
+                }
+            }
+            baseType = baseType.BaseType;
         }
 
         // Check for AsyncUntypedDataSourceGeneratorAttribute (including MatrixDataSourceAttribute)

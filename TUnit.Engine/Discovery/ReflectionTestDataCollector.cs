@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Engine.Building.Interfaces;
@@ -312,7 +313,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
         if (classDataSources.Length == 0)
         {
-            Console.WriteLine($"Warning: Generic test class {genericTypeDefinition.Name} has no data sources to determine type arguments");
+            // This is expected for generic test classes in reflection mode
+            // They need data sources to determine concrete types
             return discoveredTests;
         }
 
@@ -1100,6 +1102,29 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     {
         try
         {
+            // Skip compilation for generic methods - they can't be compiled and will use reflection
+            if (testMethod.IsGenericMethodDefinition || testMethod.ContainsGenericParameters)
+            {
+                // Return the reflection-based fallback directly without warning
+                return (instance, args) =>
+                {
+                    try
+                    {
+                        var result = testMethod.Invoke(instance, args);
+                        if (result is Task task)
+                        {
+                            return task;
+                        }
+                        return Task.CompletedTask;
+                    }
+                    catch (TargetInvocationException tie)
+                    {
+                        ExceptionDispatchInfo.Capture(tie.InnerException ?? tie).Throw();
+                        throw;
+                    }
+                };
+            }
+
             var instanceParam = Expression.Parameter(typeof(object), "instance");
             var argsParam = Expression.Parameter(typeof(object[]), "args");
 

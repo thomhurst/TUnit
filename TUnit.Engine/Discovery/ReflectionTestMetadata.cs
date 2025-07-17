@@ -210,7 +210,6 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         var sources = new List<TestDataSource>();
 
         var attributes = _testMethod.GetCustomAttributes().ToList();
-        Console.WriteLine($"ExtractMethodDataSources: Found {attributes.Count} attributes on {_testMethod.Name}");
 
         // Process Arguments attributes
         foreach (var attr in attributes.OfType<ArgumentsAttribute>())
@@ -220,17 +219,14 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
         // Process MethodDataSource attributes
         var methodDataAttrs = attributes.OfType<MethodDataSourceAttribute>().ToList();
-        Console.WriteLine($"ExtractMethodDataSources: Found {methodDataAttrs.Count} MethodDataSource attributes");
         foreach (var attr in methodDataAttrs)
         {
             try
             {
-                Console.WriteLine($"ExtractMethodDataSources: Processing MethodDataSource for method {attr.MethodNameProvidingDataSource}");
                 var dataSource = CreateMethodDataSource(attr);
                 if (dataSource != null)
                 {
                     sources.Add(dataSource);
-                    Console.WriteLine($"ExtractMethodDataSources: Successfully created {dataSource.GetType().Name}");
                 }
             }
             catch (Exception ex)
@@ -243,44 +239,60 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         // Process DataSourceGenerator attributes (basic support for synchronous generators)
         foreach (var attr in attributes)
         {
-            // Check if it's a DataSourceGeneratorAttribute<T> (synchronous version)
-            if (attr.GetType().BaseType?.IsGenericType == true &&
-                attr.GetType().BaseType?.GetGenericTypeDefinition().Name.Contains("DataSourceGeneratorAttribute") == true)
+            // Check if it's a typed data source generator (DataSourceGeneratorAttribute<T> or AsyncDataSourceGeneratorAttribute<T>)
+            var baseType = attr.GetType().BaseType;
+            while (baseType != null)
             {
-                try
+                if (baseType.IsGenericType)
                 {
-                    var dataSource = CreateDataSourceGenerator(attr);
-                    if (dataSource != null)
+                    var genericDef = baseType.GetGenericTypeDefinition();
+                    if (genericDef.Name.Contains("DataSourceGeneratorAttribute") || 
+                        genericDef.Name.Contains("AsyncDataSourceGeneratorAttribute"))
                     {
-                        sources.Add(dataSource);
+                        try
+                        {
+                            var dataSource = CreateDataSourceGenerator(attr);
+                            if (dataSource != null)
+                            {
+                                sources.Add(dataSource);
+                            }
+                            break; // Found a match, stop searching base types
+                        }
+                        catch (Exception ex)
+                        {
+                            // Data source generator failures are configuration errors that should fail the test
+                            throw new InvalidOperationException($"Failed to create data source generator: {ex.Message}", ex);
+                        }
                     }
                 }
-                catch (Exception ex)
-                {
-                    // Data source generator failures are configuration errors that should fail the test
-                    throw new InvalidOperationException($"Failed to create data source generator: {ex.Message}", ex);
-                }
+                baseType = baseType.BaseType;
             }
-            else if (attr is AsyncUntypedDataSourceGeneratorAttribute asyncUntypedAttr)
+            
+            // If not handled above, check for other types
+            if (baseType == null)
             {
-                try
+                if (attr is AsyncUntypedDataSourceGeneratorAttribute asyncUntypedAttr)
                 {
-                    var dataSource = CreateAsyncUntypedDataSourceGenerator(asyncUntypedAttr);
-                    if (dataSource != null)
+                    try
                     {
-                        sources.Add(dataSource);
+                        var dataSource = CreateAsyncUntypedDataSourceGenerator(asyncUntypedAttr);
+                        if (dataSource != null)
+                        {
+                            sources.Add(dataSource);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Async untyped data source generator failures are configuration errors that should fail the test
+                        throw new InvalidOperationException($"Failed to create async untyped data source generator: {ex.Message}", ex);
                     }
                 }
-                catch (Exception ex)
+                else if (attr is IAsyncDataSourceGeneratorAttribute asyncAttr && 
+                         !attr.GetType().Name.Contains("DataSourceGeneratorAttribute"))
                 {
-                    // Async untyped data source generator failures are configuration errors that should fail the test
-                    throw new InvalidOperationException($"Failed to create async untyped data source generator: {ex.Message}", ex);
+                    // AsyncDataSourceGenerator attributes that aren't typed data sources are not supported in reflection mode
+                    throw new NotSupportedException($"AsyncDataSourceGenerator attributes are not supported in reflection mode: {attr.GetType().Name}. Use source generation mode or a supported data source type.");
                 }
-            }
-            else if (attr is IAsyncDataSourceGeneratorAttribute asyncAttr)
-            {
-                // AsyncDataSourceGenerator attributes require complex metadata and are not supported in reflection mode
-                throw new NotSupportedException($"AsyncDataSourceGenerator attributes are not supported in reflection mode: {attr.GetType().Name}. Use source generation mode or a supported data source type.");
             }
         }
 
@@ -675,19 +687,28 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                     throw new InvalidOperationException($"Failed to initialize data source generator {attr.GetType().Name}");
                 }
 
-                // Use reflection to call the GenerateDataSources method
+                // Use reflection to call the GenerateDataSources or GenerateDataSourcesAsync method
                 var generateMethod = initializedGenerator.GetType().GetMethod("GenerateDataSources",
                     BindingFlags.NonPublic | BindingFlags.Instance);
+                var generateAsyncMethod = initializedGenerator.GetType().GetMethod("GenerateDataSourcesAsync",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
 
-                if (generateMethod == null)
+                if (generateMethod == null && generateAsyncMethod == null)
                 {
-                    throw new InvalidOperationException($"Could not find GenerateDataSources method on {initializedGenerator.GetType().Name}");
+                    throw new InvalidOperationException($"Could not find GenerateDataSources or GenerateDataSourcesAsync method on {initializedGenerator.GetType().Name}");
                 }
 
                 // Try to call the method with null metadata first (many generators don't use it)
                 try
                 {
-                    var result = generateMethod.Invoke(initializedGenerator, new object[] { null! });
+                    // For async generators in reflection mode, we can't properly handle them
+                    // because they require metadata that includes generic type information
+                    if (generateAsyncMethod != null && generateMethod == null)
+                    {
+                        throw new NotSupportedException($"Async typed data source generators are not supported in reflection mode for generic tests. Use [Arguments] or other synchronous data sources.");
+                    }
+                    
+                    var result = generateMethod!.Invoke(initializedGenerator, new object[] { null! });
                     return ProcessGeneratorResult(result);
                 }
                 catch (Exception ex)
@@ -901,6 +922,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
         return Enumerable.Empty<object?[]>();
     }
+
 
     [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
     private TestDataSource? CreateAsyncUntypedDataSourceGenerator(AsyncUntypedDataSourceGeneratorAttribute attr)
