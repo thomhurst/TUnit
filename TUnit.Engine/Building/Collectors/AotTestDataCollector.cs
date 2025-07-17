@@ -33,7 +33,11 @@ public sealed class AotTestDataCollector : ITestDataCollector
             return Enumerable.Empty<TestMetadata>();
         }
 
-        // Filter out any tests that should be handled by specialized generators
+        // Filter out tests that the source generator cannot handle yet
+        // TODO: Source generation mode currently cannot handle:
+        // 1. Generic type definitions - requires runtime type resolution
+        // 2. Async data source generators - requires runtime async execution
+        // This creates a feature parity gap with reflection mode (~1000 tests difference)
         var filteredMetadata = allTests.Where(m =>
             !HasAsyncDataSourceGenerator(m) &&
             !IsGenericTypeDefinition(m));

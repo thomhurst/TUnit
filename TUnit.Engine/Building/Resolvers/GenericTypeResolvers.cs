@@ -65,7 +65,8 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
 
 /// <summary>
 /// Generic type resolver for source generation mode.
-/// Validates that all generic tests have been pre-resolved by source generators.
+/// In the new approach, generics are resolved during data combination generation,
+/// so this resolver allows generic tests to pass through.
 /// </summary>
 public sealed class SourceGeneratedGenericTypeResolver : IGenericTypeResolver
 {
@@ -73,16 +74,14 @@ public sealed class SourceGeneratedGenericTypeResolver : IGenericTypeResolver
     {
         Console.WriteLine($"SourceGeneratedGenericTypeResolver.ResolveGenericsAsync called with {metadata.Count()} tests");
         
-        // In AOT mode, all generics should already be resolved by source generators
-        // Just validate and pass through
+        // In the new approach, generic tests are resolved during data combination generation
+        // So we just pass through all tests, including those with generic metadata
         foreach (var test in metadata)
         {
             if (test.GenericTypeInfo != null || test.GenericMethodInfo != null)
             {
-                Console.WriteLine($"Found generic test in AOT resolver: {test.TestName}");
-                throw new InvalidOperationException(
-                    $"Generic test '{test.TestName}' found in AOT mode. " +
-                    "All generic tests should be expanded by source generators.");
+                Console.WriteLine($"Found generic test in source generation mode: {test.TestName}. " +
+                    $"This will be resolved during data combination generation.");
             }
         }
 

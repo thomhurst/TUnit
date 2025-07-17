@@ -14,11 +14,11 @@ public static class TestInformationGenerator
         writer.AppendLine("{");
         writer.Indent();
         
-        writer.AppendLine($"Type = typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
+        writer.AppendLine($"Type = typeof({GetSafeTypeDisplayString(typeSymbol)}),");
         writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(typeSymbol)},");
         writer.AppendLine($"Name = \"{methodSymbol.Name}\",");
         writer.AppendLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
-        writer.AppendLine($"ReturnType = typeof({methodSymbol.ReturnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
+        writer.AppendLine($"ReturnType = typeof({GetSafeTypeDisplayString(methodSymbol.ReturnType)}),");
         writer.AppendLine($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ReturnType)},");
         
         writer.AppendLine("Parameters = ");
@@ -46,7 +46,7 @@ public static class TestInformationGenerator
         
         foreach (var parameter in parameters)
         {
-            var type = parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var type = GetSafeTypeDisplayString(parameter.Type);
             
             writer.AppendLine($"new global::TUnit.Core.ParameterMetadata(typeof({type}))");
             writer.AppendLine("{");
@@ -65,12 +65,13 @@ public static class TestInformationGenerator
     private static void GenerateClassMetadata(CodeWriter writer, INamedTypeSymbol typeSymbol)
     {
         var qualifiedName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var safeTypeName = GetSafeTypeDisplayString(typeSymbol);
         
         writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", () => new global::TUnit.Core.ClassMetadata");
         writer.AppendLine("{");
         writer.Indent();
         
-        writer.AppendLine($"Type = typeof({qualifiedName}),");
+        writer.AppendLine($"Type = typeof({safeTypeName}),");
         writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(typeSymbol)},");
         writer.AppendLine($"Name = \"{typeSymbol.Name}\",");
         writer.AppendLine($"Namespace = \"{typeSymbol.ContainingNamespace?.ToDisplayString() ?? ""}\",");
@@ -94,5 +95,18 @@ public static class TestInformationGenerator
         writer.AppendLine($"Name = \"{assembly.Name}\"");
         writer.Unindent();
         writer.AppendLine("}),");
+    }
+    
+    /// <summary>
+    /// Gets a safe type display string for typeof() expressions, replacing generic type parameters with object placeholders.
+    /// </summary>
+    private static string GetSafeTypeDisplayString(ITypeSymbol type)
+    {
+        if (CodeGenerationHelpers.ContainsTypeParameter(type))
+        {
+            return "object";
+        }
+        
+        return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
     }
 }

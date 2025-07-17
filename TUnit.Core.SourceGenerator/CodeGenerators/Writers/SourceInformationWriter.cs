@@ -24,7 +24,8 @@ public static class SourceInformationWriter
             sourceCodeWriter.Append("Parent = null,");
         }
 
-        sourceCodeWriter.Append($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
+        var safeTypeName = CodeGenerationHelpers.ContainsTypeParameter(namedTypeSymbol) ? "object" : namedTypeSymbol.GloballyQualified();
+        sourceCodeWriter.Append($"Type = typeof({safeTypeName}),");
         sourceCodeWriter.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(namedTypeSymbol)},");
 
         sourceCodeWriter.Append("Assembly = ");
@@ -93,11 +94,13 @@ public static class SourceInformationWriter
     {
         sourceCodeWriter.Append("new global::TUnit.Core.MethodMetadata");
         sourceCodeWriter.Append("{");
-        sourceCodeWriter.Append($"Type = typeof({namedTypeSymbol.GloballyQualified()}),");
+        var safeTypeName = CodeGenerationHelpers.ContainsTypeParameter(namedTypeSymbol) ? "object" : namedTypeSymbol.GloballyQualified();
+        sourceCodeWriter.Append($"Type = typeof({safeTypeName}),");
         sourceCodeWriter.Append($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(namedTypeSymbol)},");
         sourceCodeWriter.Append($"Name = \"{methodSymbol.Name}\",");
         sourceCodeWriter.Append($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
-        sourceCodeWriter.Append($"ReturnType = typeof({methodSymbol.ReturnType.GloballyQualified()}),");
+        var safeReturnTypeName = CodeGenerationHelpers.ContainsTypeParameter(methodSymbol.ReturnType) ? "object" : methodSymbol.ReturnType.GloballyQualified();
+        sourceCodeWriter.Append($"ReturnType = typeof({safeReturnTypeName}),");
         sourceCodeWriter.Append($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ReturnType)},");
 
         sourceCodeWriter.Append("Parameters = ");
@@ -156,8 +159,10 @@ public static class SourceInformationWriter
     {
         sourceCodeWriter.Append("new global::TUnit.Core.PropertyMetadata");
         sourceCodeWriter.Append("{");
-        sourceCodeWriter.Append($"ReflectionInfo = typeof({namedTypeSymbol.GloballyQualified()}).GetProperty(\"{property.Name}\"),");
-        sourceCodeWriter.Append($"Type = typeof({property.Type.GloballyQualified()}),");
+        var safeTypeNameForReflection = CodeGenerationHelpers.ContainsTypeParameter(namedTypeSymbol) ? "object" : namedTypeSymbol.GloballyQualified();
+        sourceCodeWriter.Append($"ReflectionInfo = typeof({safeTypeNameForReflection}).GetProperty(\"{property.Name}\"),");
+        var safePropertyTypeName = CodeGenerationHelpers.ContainsTypeParameter(property.Type) ? "object" : property.Type.GloballyQualified();
+        sourceCodeWriter.Append($"Type = typeof({safePropertyTypeName}),");
         sourceCodeWriter.Append($"Name = \"{property.Name}\",");
         sourceCodeWriter.Append($"IsStatic = {property.IsStatic.ToString().ToLower()},");
         sourceCodeWriter.Append($"Getter = {GetPropertyAccessor(namedTypeSymbol, property)},");
@@ -173,9 +178,10 @@ public static class SourceInformationWriter
 
     private static string GetPropertyAccessor(INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
     {
+        var safeTypeName = CodeGenerationHelpers.ContainsTypeParameter(namedTypeSymbol) ? "object" : namedTypeSymbol.GloballyQualified();
         return property.IsStatic
-            ? $"_ => {namedTypeSymbol.GloballyQualified()}.{property.Name}"
-            : $"o => (({namedTypeSymbol.GloballyQualified()})o).{property.Name}";
+            ? $"_ => {safeTypeName}.{property.Name}"
+            : $"o => (({safeTypeName})o).{property.Name}";
     }
 
     public static void GenerateParameterInformation(ICodeWriter sourceCodeWriter,
@@ -185,7 +191,7 @@ public static class SourceInformationWriter
     {
         var type = parameter.Type.GloballyQualified();
 
-        if (parameter.Type.IsGenericDefinition())
+        if (parameter.Type.IsGenericDefinition() || CodeGenerationHelpers.ContainsTypeParameter(parameter.Type))
         {
             type = GetTypeOrSubstitution(parameter.Type);
         }

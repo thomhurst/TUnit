@@ -50,13 +50,13 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
     /// Instance creator delegate for unified execution model.
     /// Created at compile-time for AOT mode, at runtime for reflection mode.
     /// </summary>
-    public Func<Task<object>>? CreateInstance { get; init; }
+    public Func<TestContext, Task<object>>? CreateInstance { get; init; }
 
     /// <summary>
     /// Test invoker delegate with CancellationToken support for unified execution model.
     /// Handles all parameter injection including CancellationToken.
     /// </summary>
-    public Func<object, object?[], CancellationToken, Task>? InvokeTest { get; init; }
+    public Func<object, object?[], TestContext, CancellationToken, Task>? InvokeTest { get; init; }
     
     /// <summary>
     /// Strongly typed test invoker with CancellationToken support.
@@ -104,7 +104,9 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
             // Use pre-set delegates if available
             if (CreateInstance != null && InvokeTest != null)
             {
-                return (context, metadata) => new UnifiedExecutableTest(CreateInstance, InvokeTest)
+                return (context, metadata) => new UnifiedExecutableTest(
+                    (testContext) => CreateInstance(testContext),
+                    (instance, args, testContext, cancellationToken) => InvokeTest(instance, args, testContext, cancellationToken))
                 {
                     TestId = context.TestId,
                     DisplayName = context.DisplayName,
@@ -126,7 +128,7 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
                     var typedMetadata = (TestMetadata<T>)metadata;
                     
                     // Create instance delegate that uses context
-                    Func<Task<object>> createInstance = async () =>
+                    Func<TestContext, Task<object>> createInstance = async (testContext) =>
                     {
                         var instance = typedMetadata.InstanceFactory!(context.ClassArguments);
                         
@@ -140,7 +142,7 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
                     };
                     
                     // Convert InvokeTypedTest to the expected signature
-                    Func<object, object?[], CancellationToken, Task> invokeTest = async (instance, args, cancellationToken) =>
+                    Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
                     {
                         await typedMetadata.InvokeTypedTest!((T)instance, args, cancellationToken);
                     };

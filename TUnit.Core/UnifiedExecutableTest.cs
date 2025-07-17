@@ -11,8 +11,8 @@ namespace TUnit.Core;
 /// </summary>
 public sealed class UnifiedExecutableTest : ExecutableTest
 {
-    private readonly Func<Task<object>> _createInstance;
-    private readonly Func<object, object?[], CancellationToken, Task> _invokeTest;
+    private readonly Func<TestContext, Task<object>> _createInstance;
+    private readonly Func<object, object?[], TestContext, CancellationToken, Task> _invokeTest;
 
     /// <summary>
     /// Creates a UnifiedExecutableTest where all mode-specific behavior is encapsulated in the delegates.
@@ -21,8 +21,8 @@ public sealed class UnifiedExecutableTest : ExecutableTest
     /// <param name="createInstance">Delegate that creates the test instance with all necessary initialization</param>
     /// <param name="invokeTest">Delegate that invokes the test method with proper parameter handling</param>
     public UnifiedExecutableTest(
-        Func<Task<object>> createInstance,
-        Func<object, object?[], CancellationToken, Task> invokeTest)
+        Func<TestContext, Task<object>> createInstance,
+        Func<object, object?[], TestContext, CancellationToken, Task> invokeTest)
     {
         _createInstance = createInstance ?? throw new ArgumentNullException(nameof(createInstance));
         _invokeTest = invokeTest ?? throw new ArgumentNullException(nameof(invokeTest));
@@ -30,12 +30,12 @@ public sealed class UnifiedExecutableTest : ExecutableTest
 
     public override async Task<object> CreateInstanceAsync()
     {
-        return await _createInstance();
+        return await _createInstance(Context);
     }
 
     public override async Task InvokeTestAsync(object instance, CancellationToken cancellationToken)
     {
         // Simply invoke the delegate - all complexity is handled during delegate creation
-        await _invokeTest(instance, Arguments, cancellationToken);
+        await _invokeTest(instance, Arguments, Context, cancellationToken);
     }
 }

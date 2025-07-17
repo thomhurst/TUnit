@@ -132,7 +132,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     {
         // Create instance factory that uses reflection
         #pragma warning disable CS1998 // Async method lacks 'await' operators
-        Func<Task<object>> createInstance = async () =>
+        Func<TestContext, Task<object>> createInstance = async (testContext) =>
         {
             #pragma warning restore CS1998
             if (InstanceFactory == null)
@@ -158,7 +158,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             ? Array.IndexOf(ParameterTypes, typeof(CancellationToken))
             : -1;
 
-        Func<object, object?[], CancellationToken, Task> invokeTest = async (instance, args, cancellationToken) =>
+        Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
         {
             if (TestInvoker == null)
             {

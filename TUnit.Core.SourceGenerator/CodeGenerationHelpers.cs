@@ -135,7 +135,7 @@ internal static class CodeGenerationHelpers
                fullName.StartsWith("System.Diagnostics.CodeAnalysis.");
     }
 
-    private static bool ContainsTypeParameter(ITypeSymbol type)
+    public static bool ContainsTypeParameter(ITypeSymbol type)
     {
         if (type is ITypeParameterSymbol)
         {

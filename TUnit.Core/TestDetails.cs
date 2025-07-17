@@ -31,6 +31,12 @@ public class TestDetails
 
     public required IReadOnlyList<Attribute> Attributes { get; init; }
     public object?[] ClassMetadataArguments => TestClassArguments;
+    
+    /// <summary>
+    /// The data combination that generated this test instance.
+    /// Contains resolved generic types for generic tests.
+    /// </summary>
+    public TestDataCombination? DataCombination { get; set; }
 }
 
 /// <summary>

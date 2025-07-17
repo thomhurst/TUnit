@@ -178,7 +178,10 @@ public class AsyncDataSourceProviderGenerator : IDataProviderGenerator
         using var writer = new CodeWriter("", includeHeader: false);
 
         // Use the existing writer to generate the metadata
-        SourceInformationWriter.GenerateMethodInformation(writer, testInfo.Context.SemanticModel.Compilation, testInfo.TypeSymbol, testInfo.MethodSymbol, null, ',');
+        if (testInfo.Context is { SemanticModel: not null } context)
+        {
+            SourceInformationWriter.GenerateMethodInformation(writer, context.SemanticModel.Compilation, testInfo.TypeSymbol, testInfo.MethodSymbol, null, ',');
+        }
 
         // Remove the trailing comma and newline
         var result = writer.ToString().TrimEnd('\r', '\n', ',');

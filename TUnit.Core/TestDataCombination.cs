@@ -64,4 +64,10 @@ public class TestDataCombination
     /// 0 for the first run, 1 for the second, etc.
     /// </summary>
     public int RepeatIndex { get; init; } = 0;
+
+    /// <summary>
+    /// Resolved generic type arguments for generic tests.
+    /// Key: generic parameter name (e.g., "T"), Value: resolved concrete type.
+    /// </summary>
+    public Dictionary<string, Type>? ResolvedGenericTypes { get; init; }
 }

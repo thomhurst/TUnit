@@ -87,6 +87,9 @@ public sealed class TestBuilder : ITestBuilder
         {
             context.TestDetails.TestClassInjectedPropertyArguments[kvp.Key] = kvp.Value;
         }
+        
+        // Set the data combination for generic type resolution
+        context.TestDetails.DataCombination = combination;
 
         await InvokeDiscoveryEventReceiversAsync(metadata, context);
 

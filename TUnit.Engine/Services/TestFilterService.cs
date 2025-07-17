@@ -147,10 +147,29 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
     private string BuildPath(ExecutableTest test)
     {
         var metadata = test.Metadata;
-        var assembly = metadata.TestClassType.Assembly.GetName();
-        var classTypeName = metadata.TestClassType.Name;
+        
+        // For generic types, use the ClassMetadata which has the correct name
+        string assemblyName;
+        string namespaceName;
+        string classTypeName;
+        
+        if (test.Context?.TestDetails?.ClassMetadata != null)
+        {
+            var classMetadata = test.Context.TestDetails.ClassMetadata;
+            assemblyName = classMetadata.Assembly?.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
+            namespaceName = classMetadata.Namespace ?? "*";
+            classTypeName = classMetadata.Name;
+        }
+        else
+        {
+            // Fallback to the type-based approach for non-generic tests
+            var assembly = metadata.TestClassType.Assembly.GetName();
+            assemblyName = assembly.Name ?? "*";
+            namespaceName = metadata.TestClassType.Namespace ?? "*";
+            classTypeName = metadata.TestClassType.Name;
+        }
 
-        return $"/{assembly.Name ?? "*"}/{metadata.TestClassType.Namespace ?? "*"}/{classTypeName}/{metadata.TestMethodName}";
+        return $"/{assemblyName}/{namespaceName}/{classTypeName}/{metadata.TestMethodName}";
     }
 
     private bool CheckTreeNodeFilter(
@@ -168,6 +187,13 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
             var path = BuildPath(executableTest);
             var propertyBag = BuildPropertyBag(executableTest);
             _logger.LogDebug($"Checking TreeNodeFilter for path: {path}");
+            
+            // Additional debug for generic tests
+            if (executableTest.Context?.TestDetails?.ClassMetadata?.Name == "SimpleGenericClassTests")
+            {
+                Console.WriteLine($"DEBUG: Built path for generic test: {path}");
+                Console.WriteLine($"DEBUG: Test display name: {executableTest.DisplayName}");
+            }
 
             var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
             _logger.LogDebug($"Filter match result: {matches}");
