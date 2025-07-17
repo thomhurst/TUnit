@@ -2420,8 +2420,17 @@ public static class DataCombinationGeneratorEmitter
                 writer.AppendLine("MethodLoopIndex = 0,");
                 writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),");
                 
-                // Note: The actual data will be generated during test execution
-                writer.AppendLine("// Data will be generated at runtime from the typed data source");
+                // Store the data source type for runtime generation
+                var attributeFullName = attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                writer.AppendLine($"// Store typed data source info for runtime generation: {attributeFullName}");
+                writer.AppendLine("MethodDataFactories = new Func<Task<object?>>[]");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("// This will be replaced by runtime data source generation");
+                writer.AppendLine("async () => await global::TUnit.Core.TestDataSourceGenerator.GenerateTypedDataSourceValueAsync(");
+                writer.AppendLine($"    typeof({attributeFullName}), testSessionId, typedDataSourceTypes)");
+                writer.Unindent();
+                writer.AppendLine("},");
                 
                 writer.Unindent();
                 writer.AppendLine("});");
@@ -2673,7 +2682,17 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("ClassLoopIndex = 0,");
         writer.AppendLine("MethodLoopIndex = 0,");
         writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),");
-        writer.AppendLine("// Data will be generated at runtime from the untyped data source");
+        
+        // Generate method data factories for Matrix-based generic tests
+        writer.AppendLine("// For Matrix-based tests, delegate to MatrixDataSource at runtime");
+        writer.AppendLine("MethodDataFactories = new Func<Task<object?>>[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("// This will be replaced by runtime Matrix data source generation");
+        writer.AppendLine("async () => await global::TUnit.Core.TestDataSourceGenerator.GenerateMatrixDataSourceValueAsync(");
+        writer.AppendLine("    testSessionId, parameterBasedTypes)");
+        writer.Unindent();
+        writer.AppendLine("},");
         
         writer.Unindent();
         writer.AppendLine("});");
@@ -2692,6 +2711,36 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("DisplayName = \"[GENERIC TYPE INFERENCE FAILED: No typed parameter attributes]\"");
         writer.Unindent();
         writer.AppendLine("});");
+        writer.Unindent();
+        writer.AppendLine("}");
+        
+        // Apply repeat count and yield the combinations
+        writer.AppendLine();
+        writer.AppendLine("// Apply repeat count to parameter-based generic combinations");
+        writer.AppendLine("for (var repeatIndex = 0; repeatIndex <= 0; repeatIndex++)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("foreach (var combination in genericCombinations)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("yield return new TestDataCombination");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("ClassDataFactories = combination.ClassDataFactories,");
+        writer.AppendLine("MethodDataFactories = combination.MethodDataFactories,");
+        writer.AppendLine("ClassDataSourceIndex = combination.ClassDataSourceIndex,");
+        writer.AppendLine("MethodDataSourceIndex = combination.MethodDataSourceIndex,");
+        writer.AppendLine("ClassLoopIndex = combination.ClassLoopIndex,");
+        writer.AppendLine("MethodLoopIndex = combination.MethodLoopIndex,");
+        writer.AppendLine("PropertyValueFactories = combination.PropertyValueFactories,");
+        writer.AppendLine("DataGenerationException = combination.DataGenerationException,");
+        writer.AppendLine("DisplayName = combination.DisplayName,");
+        writer.AppendLine("RepeatIndex = repeatIndex,");
+        writer.AppendLine("ResolvedGenericTypes = combination.ResolvedGenericTypes");
+        writer.Unindent();
+        writer.AppendLine("};");
+        writer.Unindent();
+        writer.AppendLine("}");
         writer.Unindent();
         writer.AppendLine("}");
     }
