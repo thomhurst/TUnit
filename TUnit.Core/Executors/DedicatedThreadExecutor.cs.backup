@@ -1,0 +1,208 @@
+﻿namespace TUnit.Core;
+
+public class DedicatedThreadExecutor : GenericAbstractExecutor
+{    protected sealed override async ValueTask ExecuteAsync(Func<ValueTask> action)
+    {
+        var tcs = new TaskCompletionSource<object?>();
+        
+        var thread = new Thread(() =>
+        {
+            Exception? capturedException = null;
+            
+            try
+            {
+                Initialize();
+
+                var previousContext = SynchronizationContext.Current;
+                var dedicatedContext = new DedicatedThreadSynchronizationContext();
+
+                SynchronizationContext.SetSynchronizationContext(dedicatedContext);
+                TestContext.Current!.SynchronizationContext = dedicatedContext;
+                
+                try
+                {
+                    // Execute the action using our custom async runner
+                    ExecuteAsyncAction(action, dedicatedContext, tcs);
+                }
+                catch (Exception e)
+                {
+                    capturedException = e;
+                }
+                finally
+                {
+                    SynchronizationContext.SetSynchronizationContext(previousContext);
+                }
+            }
+            catch (Exception e)
+            {
+                capturedException = e;
+            }
+            finally
+            {
+                CleanUp();
+                
+                // Set result if not already set
+                if (capturedException != null && !tcs.Task.IsCompleted)
+                {
+                    tcs.SetException(capturedException);
+                }
+            }
+        });
+
+        ConfigureThread(thread);
+        thread.Start();
+
+        await tcs.Task;
+    }    private static void ExecuteAsyncAction(Func<ValueTask> action, DedicatedThreadSynchronizationContext context, TaskCompletionSource<object?> tcs)
+    {
+        try
+        {
+            // Force synchronous execution on the STA thread
+            // This is the key: we run the async method synchronously using GetAwaiter().GetResult()
+            // which ensures everything happens on the current (STA) thread
+            var valueTask = action();
+            
+            if (valueTask.IsCompletedSuccessfully)
+            {
+                // Already completed synchronously
+                tcs.SetResult(null);
+            }
+            else
+            {
+                // Force synchronous completion
+                // This will block the STA thread until completion, but maintains apartment state
+                valueTask.GetAwaiter().GetResult();
+                tcs.SetResult(null);
+            }
+        }
+        catch (Exception ex)
+        {
+            tcs.SetException(ex);
+        }
+    }
+
+    protected virtual void ConfigureThread(Thread thread)
+    {
+    }    protected virtual void Initialize()
+    {
+    }
+
+    protected virtual void CleanUp()
+    {
+    }    internal sealed class DedicatedThreadSynchronizationContext : SynchronizationContext
+    {
+        private readonly Thread _dedicatedThread;
+
+        public DedicatedThreadSynchronizationContext()
+        {
+            _dedicatedThread = Thread.CurrentThread;
+        }
+
+        public override void Post(SendOrPostCallback d, object? state)
+        {
+            // Since we're forcing synchronous execution, Post operations should execute immediately
+            // if we're on the dedicated thread, otherwise we shouldn't get here in our scenario
+            if (Thread.CurrentThread == _dedicatedThread)
+            {
+                d(state);
+            }
+            else
+            {
+                // This shouldn't happen with our synchronous approach, but handle it gracefully
+                ThreadPool.QueueUserWorkItem(_ => d(state));
+            }
+        }
+
+        public override void Send(SendOrPostCallback d, object? state)
+        {
+            // Send always executes synchronously
+            d(state);
+        }
+
+        public override SynchronizationContext CreateCopy()
+        {
+            return this; // Return the same instance to ensure continuity
+        }
+    }internal sealed class StaTaskAwaiter
+    {
+        private readonly Task _task;
+        private readonly DedicatedThreadSynchronizationContext _context;
+        private Action? _continuation;
+
+        public StaTaskAwaiter(Task task, DedicatedThreadSynchronizationContext context)
+        {
+            _task = task;
+            _context = context;
+        }
+
+        public bool IsCompleted => _task.IsCompleted;
+
+        public void GetResult()
+        {
+            _task.GetAwaiter().GetResult(); // This will throw if the task faulted or was canceled
+        }
+
+        public void OnCompleted(Action continuation)
+        {
+            _continuation = continuation;
+            
+            if (_task.IsCompleted)
+            {
+                // Task is already completed, schedule continuation immediately
+                _context.Post(_ => continuation(), null);
+            }
+            else
+            {
+                // Task is not completed, attach continuation that will run on STA thread
+                _task.ContinueWith(_ =>
+                {
+                    // Always marshal back to the STA thread
+                    _context.Post(__ => continuation(), null);
+                }, TaskScheduler.Default);
+            }
+        }
+    }
+
+    internal sealed class StaTaskScheduler : TaskScheduler
+    {
+        private readonly Thread _staThread;
+        private readonly DedicatedThreadSynchronizationContext? _synchronizationContext;
+
+        public StaTaskScheduler()
+        {
+            _staThread = Thread.CurrentThread;
+            _synchronizationContext = SynchronizationContext.Current as DedicatedThreadSynchronizationContext;
+        }
+
+        protected override IEnumerable<Task> GetScheduledTasks()
+        {
+            return Enumerable.Empty<Task>();
+        }
+
+        protected override void QueueTask(Task task)
+        {
+            if (Thread.CurrentThread == _staThread)
+            {
+                // We're already on the STA thread, execute immediately
+                TryExecuteTask(task);
+            }
+            else if (_synchronizationContext != null)
+            {
+                // Marshal to the STA thread
+                _synchronizationContext.Post(_ => TryExecuteTask(task), null);
+            }
+            else
+            {
+                // Fallback - this shouldn't happen in our scenario
+                ThreadPool.QueueUserWorkItem(_ => TryExecuteTask(task));
+            }
+        }
+
+        protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
+        {
+            // Only allow inline execution if we're on the STA thread
+            return Thread.CurrentThread == _staThread && TryExecuteTask(task);
+        }
+
+        public override int MaximumConcurrencyLevel => 1; // STA threads are single-threaded
+    }}

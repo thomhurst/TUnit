@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
+using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
@@ -17,7 +18,7 @@ public abstract record DynamicTest
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
                                 | DynamicallyAccessedMemberTypes.PublicMethods
-                                | DynamicallyAccessedMemberTypes.NonPublicMethods
+                                | DynamicallyAccessedMemberTypes.PublicProperties
                                 | DynamicallyAccessedMemberTypes.PublicProperties)]
     public abstract Type TestClassType { get; }
 
@@ -40,19 +41,19 @@ public abstract record DynamicTest
         return
         [
             ..Attributes,
-            ..TestBody.GetCustomAttributes(),
-            ..TestClassType.GetCustomAttributes(),
-            ..TestClassType.Assembly.GetCustomAttributes()
+            ..TestBody.GetCustomAttributesSafe(),
+            ..TestClassType.GetCustomAttributesSafe(),
+            ..TestClassType.Assembly.GetCustomAttributesSafe()
         ];
     }
 
     public static T Argument<T>() => default!;
 
-    protected SourceGeneratedMethodInformation BuildTestMethod(MethodInfo methodInfo)
+    protected TestMethod BuildTestMethod(MethodInfo methodInfo)
     {
-        return new SourceGeneratedMethodInformation
+        return new TestMethod
         {
-            Attributes = methodInfo.GetCustomAttributes().ToArray(),
+            Attributes = methodInfo.GetCustomAttributesSafe().ToArray(),
             Class = GenerateClass(),
             Name = TestName ?? methodInfo.Name,
             GenericTypeCount = methodInfo.IsGenericMethod ? methodInfo.GetGenericArguments().Length : 0,
@@ -63,13 +64,13 @@ public abstract record DynamicTest
         };
     }
 
-    protected SourceGeneratedClassInformation GenerateClass()
+    protected TestClass GenerateClass()
     {
-        return new SourceGeneratedClassInformation
+        return new TestClass
         {
             Parent = ReflectionToSourceModelHelpers.GetParent(TestClassType),
             Assembly = GenerateAssembly(),
-            Attributes = TestClassType.GetCustomAttributes().ToArray(),
+            Attributes = TestClassType.GetCustomAttributesSafe().ToArray(),
             Name = TestClassType.Name,
             Namespace = TestClassType.Namespace,
             Parameters = GetParameters(TestClassType.GetConstructors().FirstOrDefault()?.GetParameters() ?? []).ToArray(),
@@ -78,35 +79,35 @@ public abstract record DynamicTest
         };
     }
 
-    protected SourceGeneratedAssemblyInformation GenerateAssembly()
+    protected TestAssembly GenerateAssembly()
     {
-        return new SourceGeneratedAssemblyInformation
+        return new TestAssembly
         {
-            Attributes = TestClassType.Assembly.GetCustomAttributes().ToArray(),
+            Attributes = TestClassType.Assembly.GetCustomAttributesSafe().ToArray(),
             Name = TestClassType.Assembly.GetName().Name ??
                    TestClassType.Assembly.GetName().FullName,
         };
     }
 
-    protected static SourceGeneratedPropertyInformation GenerateProperty(KeyValuePair<string, object?> property)
+    protected static TestProperty GenerateProperty(KeyValuePair<string, object?> property)
     {
-        return new SourceGeneratedPropertyInformation
+        return new TestProperty
         {
             Attributes = [], // TODO?
+            ReflectionInfo = null!, // TODO?
             Name = property.Key,
-#pragma warning disable IL2072
             Type = property.Value?.GetType() ?? typeof(object),
-#pragma warning restore IL2072
+            Getter = _ => property.Value,
             IsStatic = false, // TODO?
         };
     }
 
-    protected SourceGeneratedParameterInformation[] GetParameters(ParameterInfo[] parameters)
+    protected TestParameter[] GetParameters(ParameterInfo[] parameters)
     {
         return parameters.Select(GenerateParameter).ToArray();
     }
 
-    protected SourceGeneratedParameterInformation GenerateParameter(ParameterInfo parameter)
+    protected TestParameter GenerateParameter(ParameterInfo parameter)
     {
         return ReflectionToSourceModelHelpers.GenerateParameter(parameter);
     }
@@ -136,7 +137,7 @@ public record DynamicTest<
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
                                 | DynamicallyAccessedMemberTypes.PublicMethods
-                                | DynamicallyAccessedMemberTypes.NonPublicMethods
+                                | DynamicallyAccessedMemberTypes.PublicProperties
                                 | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override Type TestClassType { get; } = typeof(TClass);
 
@@ -152,7 +153,7 @@ public record DynamicTest<
         {
             var testBuilderContext = new TestBuilderContext();
 
-            var sourceGeneratedMethodInformation = BuildTestMethod(TestBody);
+            var testMethodInformation = BuildTestMethod(TestBody);
 
             yield return new TestMetadata<TClass>
             {
@@ -161,9 +162,9 @@ public record DynamicTest<
                 TestMethodArguments = TestMethodArguments,
                 CurrentRepeatAttempt = i,
                 RepeatLimit = repeatLimit,
-                TestMethod = sourceGeneratedMethodInformation,
+                TestMethod = testMethodInformation,
                 ResettableClassFactory = new ResettableLazy<TClass>(() => (TClass)InstanceHelper.CreateInstance(
-                        sourceGeneratedMethodInformation.Class,
+                        testMethodInformation,
                         TestClassArguments, Properties, testBuilderContext),
                     TestSessionContext.Current?.Id ?? "Unknown",
                     testBuilderContext),
@@ -183,6 +184,7 @@ public record DynamicTest<
                 TestFilePath = TestFilePath,
                 TestLineNumber = TestLineNumber,
                 DynamicAttributes = Attributes,
+                DiscoveryException = Exception
             };
         }
     }

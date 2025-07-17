@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace TUnit.Core;
 
 public class TestSessionContext : Context

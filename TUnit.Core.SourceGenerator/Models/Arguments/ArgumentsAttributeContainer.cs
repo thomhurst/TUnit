@@ -13,7 +13,7 @@ public record ArgumentsAttributeContainer(ArgumentsType ArgumentsType, Argument[
     {
         foreach (var argument in Arguments)
         {
-            sourceCodeWriter.WriteLine(GenerateVariable(argument.Type, argument.Invocation, ref variableIndex).ToString());
+            sourceCodeWriter.Write(GenerateVariable(argument.Type, argument.Invocation, ref variableIndex).ToString());
         }
 
         sourceCodeWriter.WriteLine();

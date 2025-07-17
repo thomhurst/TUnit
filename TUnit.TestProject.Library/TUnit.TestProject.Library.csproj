@@ -10,21 +10,20 @@
         <TargetFrameworks>net6.0;net8.0;net9.0;net472;netstandard2.0</TargetFrameworks>
     </PropertyGroup>
 
-    <!--    <Target Name="CleanGenerated" BeforeTargets="PreBuildEvent">-->
-    <!--        <Message Text="Removing SourceGeneratedViewer directory..." Importance="high" />-->
-    <!--        <RemoveDir Directories="$(ProjectDir)SourceGeneratedViewer" />-->
-    <!--    </Target>-->
+<!--        <Target Name="CleanGenerated" BeforeTargets="PreBuildEvent">-->
+<!--            <Message Text="Removing SourceGeneratedViewer directory..." Importance="high" />-->
+<!--            <RemoveDir Directories="$(ProjectDir)SourceGeneratedViewer" />-->
+<!--        </Target>-->
 
-    <!--    <PropertyGroup>-->
-    <!--        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
-    <!--
-    <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>-->
-    <!--    </PropertyGroup>-->
+<!--        <PropertyGroup>-->
+<!--            <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
+<!--            <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>-->
+<!--        </PropertyGroup>-->
 
-    <!--    <ItemGroup>-->
-    <!--        <Compile Remove="SourceGeneratedViewer\**" />-->
-    <!--        <None Include="SourceGeneratedViewer\**" />-->
-    <!--    </ItemGroup>-->
+<!--        <ItemGroup>-->
+<!--            <Compile Remove="SourceGeneratedViewer\**" />-->
+<!--            <None Include="SourceGeneratedViewer\**" />-->
+<!--        </ItemGroup>-->
 
     <Import Project="..\TestLibrary.targets" />
 
