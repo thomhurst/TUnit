@@ -458,27 +458,22 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 }
 
                 var result = method.Invoke(instance, attr.Arguments);
-                Console.WriteLine($"CreateMethodDataSource: Method {method.Name} returned {result?.GetType()?.Name ?? "null"} with value {result}");
 
                 // Handle different return types
                 if (result is IEnumerable<object?[]> enumerable)
                 {
                     var items = enumerable.ToList();
-                    Console.WriteLine($"CreateMethodDataSource: Returning IEnumerable<object?[]> with {items.Count} items");
                     return items;
                 }
                 if (result is IEnumerable<object> objects && !(result is string))
                 {
                     var items = objects.Select(obj => new[] { obj }).ToList();
-                    Console.WriteLine($"CreateMethodDataSource: Returning IEnumerable<object> converted to {items.Count} items");
                     return items;
                 }
                 if (result is object[] array)
                 {
-                    Console.WriteLine($"CreateMethodDataSource: Returning object[] wrapped as single item");
                     return new[] { array };
                 }
-                Console.WriteLine($"CreateMethodDataSource: Returning single value wrapped as [[{result}]]");
                 return new[] { new[] { result } };
             }
             catch (Exception ex)
@@ -554,8 +549,6 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 var resolvedValue = ResolveTestDataValue(value);
                 return Task.FromResult(resolvedValue);
             })).ToArray();
-
-            Console.WriteLine($"ProcessMethodDataSource: Created {dataFactories.Length} data factories from {dataSource.GetType().Name}");
             
             combinations.Add(new MethodDataCombination
             {
@@ -920,7 +913,9 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             return results;
         }
 
-        return Enumerable.Empty<object?[]>();
+        throw new InvalidOperationException(
+            $"Data source generator returned unexpected result type: {result?.GetType().FullName ?? "null"}. " +
+            "Expected IEnumerable<Func<object>> or IEnumerable.");
     }
 
 
@@ -952,7 +947,6 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 }
 
                 var result = generateMethod.Invoke(attr, new object[] { metadata });
-                Console.WriteLine($"DEBUG: Generator returned result of type: {result?.GetType()?.FullName ?? "null"}");
                 return ProcessUntypedGeneratorResult(result);
             }
             catch (Exception ex)
@@ -967,7 +961,6 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         // Handle sync enumerable of funcs (which MatrixDataSource returns)
         if (result is IEnumerable<Func<object?[]?>> funcs)
         {
-            Console.WriteLine($"DEBUG: Processing {funcs.Count()} function results");
             return funcs.Select(func => func() ?? Array.Empty<object?>()).Where(arr => arr != null);
         }
         if (result is IEnumerable enumerable)
@@ -990,15 +983,15 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 }
                 else
                 {
-                    Console.WriteLine($"DEBUG: Unexpected item type in enumerable: {item?.GetType()?.FullName ?? "null"}");
+                    // Skip items that are not in expected format
                 }
             }
-            Console.WriteLine($"DEBUG: Processed {results.Count} results from enumerable");
             return results;
         }
 
-        Console.WriteLine($"DEBUG: Result type not handled: {result?.GetType()?.FullName ?? "null"}");
-        return Enumerable.Empty<object?[]>();
+        throw new InvalidOperationException(
+            $"Async untyped data source generator returned unexpected result type: {result?.GetType().FullName ?? "null"}. " +
+            "Expected IEnumerable<Func<object?[]?>> or IEnumerable.");
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic type access is expected")]

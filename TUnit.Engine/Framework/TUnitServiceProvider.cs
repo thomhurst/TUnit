@@ -187,7 +187,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             _ => new SourceGeneratedGenericTypeResolver()
         };
         
-        Console.WriteLine($"Creating generic resolver for mode {executionMode}: {resolver.GetType().Name}");
         return resolver;
     }
 

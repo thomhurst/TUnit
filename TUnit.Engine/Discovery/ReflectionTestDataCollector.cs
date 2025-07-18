@@ -294,7 +294,16 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Warning: Failed to build metadata for test {type.FullName}.{method.Name}: {ex.Message}");
+                    // Add this failed test to the results with the exception
+                    var failedTest = new ReflectionTestMetadata(type, method)
+                    {
+                        TestName = $"{type.FullName}.{method.Name}",
+                        TestClassType = type,
+                        TestMethodName = method.Name,
+                        DataGenerationException = new InvalidOperationException(
+                            $"Failed to build metadata for test {type.FullName}.{method.Name}: {ex.Message}", ex)
+                    };
+                    discoveredTests.Add(failedTest);
                 }
             }
         }
@@ -367,7 +376,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Warning: Failed to create concrete type for {genericTypeDefinition.Name}: {ex.Message}");
+                    throw new InvalidOperationException(
+                        $"Failed to create concrete type for {genericTypeDefinition.Name}: {ex.Message}", ex);
                 }
             }
         }
@@ -418,7 +428,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to get data from source: {ex.Message}");
+            throw new InvalidOperationException(
+                $"Failed to get data from source: {ex.Message}", ex);
         }
 
         return await Task.FromResult(data);
@@ -849,8 +860,10 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
         if (methods.Length == 0)
         {
-            Console.WriteLine($"Warning: Method {attr.MethodNameProvidingDataSource} not found on type {targetClass.FullName}");
-            return null;
+            throw new InvalidOperationException(
+                $"Method '{attr.MethodNameProvidingDataSource}' specified in MethodDataSource attribute " +
+                $"was not found on type '{targetClass.FullName}'. " +
+                "Ensure the method name is correct and the method exists.");
         }
 
         MethodInfo? method;
@@ -867,8 +880,9 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
             if (matchingMethods.Length == 0)
             {
-                Console.WriteLine($"Warning: No overload of {attr.MethodNameProvidingDataSource} found with {argCount} parameters on type {targetClass.FullName}");
-                return null;
+                throw new InvalidOperationException(
+                    $"No overload of method '{attr.MethodNameProvidingDataSource}' found with {argCount} parameters " +
+                    $"on type '{targetClass.FullName}'. Check that the method exists with the correct parameter count.");
             }
             if (matchingMethods.Length == 1)
             {
@@ -922,8 +936,9 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Warning: Cannot create instance of {targetClass.FullName} for data source: {ex.Message}");
-                return null;
+                throw new InvalidOperationException(
+                    $"Cannot create instance of '{targetClass.FullName}' to invoke instance method data source. " +
+                    $"Ensure the class has a parameterless constructor. Error: {ex.Message}", ex);
             }
         }
 
@@ -970,8 +985,9 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Cannot create instance of {dataType.FullName} for class data source: {ex.Message}");
-            return null;
+            throw new InvalidOperationException(
+                $"Cannot create instance of '{dataType.FullName}' for class data source. " +
+                $"Ensure the type has a parameterless constructor. Error: {ex.Message}", ex);
         }
     }
 
@@ -1518,8 +1534,8 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         var parameters = method.GetParameters();
         if (parameters.Length > 2)
             {
-                Console.WriteLine($"Warning: Hook method {method.Name} has too many parameters (max 2)");
-                return null;
+                throw new InvalidOperationException(
+                    $"Hook method {method.Name} has too many parameters. Maximum allowed is 2, but found {parameters.Length}.");
             }
 
             Expression? callExpr;
@@ -1574,8 +1590,9 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 }
                 else
                 {
-                    Console.WriteLine($"Warning: Hook method {method.Name} has unsupported parameter type {paramType}");
-                    return null;
+                    throw new InvalidOperationException(
+                        $"Hook method {method.Name} has unsupported parameter type {paramType}. " +
+                        "Supported types are: TestContext, ClassHookContext, AssemblyHookContext, TestSessionContext, CancellationToken.");
                 }
             }
             else if (parameters.Length == 2)
@@ -1615,8 +1632,9 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     }
                     else
                     {
-                        Console.WriteLine($"Warning: Hook method {method.Name} has unsupported parameter type {paramType} at position {i}");
-                        return null;
+                        throw new InvalidOperationException(
+                            $"Hook method {method.Name} has unsupported parameter type {paramType} at position {i}. " +
+                            "Supported types are: TestContext, ClassHookContext, AssemblyHookContext, TestSessionContext, CancellationToken.");
                     }
                 }
 
@@ -1634,8 +1652,9 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             }
             else
             {
-                Console.WriteLine($"Warning: Hook method {method.Name} has unexpected parameter count {parameters.Length}");
-                return null;
+                throw new InvalidOperationException(
+                    $"Hook method {method.Name} has unexpected parameter count {parameters.Length}. " +
+                    "Hook methods must have 0, 1, or 2 parameters.");
             }
 
             // Convert return type to Task
@@ -1657,8 +1676,9 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             }
             else
             {
-                Console.WriteLine($"Warning: Hook method {method.Name} has unsupported return type {method.ReturnType}");
-                return null;
+                throw new InvalidOperationException(
+                    $"Hook method {method.Name} has unsupported return type {method.ReturnType}. " +
+                    "Hook methods must return void, Task, or ValueTask.");
             }
 
         var lambda = Expression.Lambda<Func<object, TestContext, Task>>(

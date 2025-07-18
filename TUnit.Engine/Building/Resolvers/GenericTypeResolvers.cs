@@ -18,7 +18,6 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when trimming application code", Justification = "Generic expansion in reflection mode requires dynamic type access which is expected in this mode")]
     public async Task<IEnumerable<TestMetadata>> ResolveGenericsAsync(IEnumerable<TestMetadata> metadata)
     {
-        Console.WriteLine($"ReflectionGenericTypeResolver.ResolveGenericsAsync called with {metadata.Count()} tests");
         
         var resolvedTests = new List<TestMetadata>();
 
@@ -37,18 +36,14 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                 var expandedTests = await ExpandGenericTestAsync(test);
                 resolvedTests.AddRange(expandedTests);
             }
-            catch (GenericTypeResolutionException ex)
-            {
-                // Log the error but don't crash the entire test run
-                Console.WriteLine($"ERROR: {ex.Message}");
-                Console.WriteLine($"Skipping generic test '{test.TestName}' in reflection mode.");
-                // Don't add the test to resolved tests - it will be skipped
-            }
             catch (Exception ex)
             {
-                // Log unexpected errors but continue
-                Console.WriteLine($"ERROR: Unexpected error resolving generic test '{test.TestName}': {ex.Message}");
-                // Don't add the test to resolved tests - it will be skipped
+                // For generic test resolution failures, we want the test to fail with a clear error
+                // Rather than silently skipping it. The test framework will convert this
+                // exception into a failed test result.
+                throw new GenericTypeResolutionException(
+                    $"Failed to resolve generic test '{test.TestName}': {ex.Message}", 
+                    ex is GenericTypeResolutionException ? ex.InnerException : ex);
             }
         }
 
@@ -86,8 +81,9 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
         // Get the test class and method from ReflectionTestMetadata
         if (genericTest is not ReflectionTestMetadata reflectionMetadata)
         {
-            // Can't expand non-reflection metadata
-            return new[] { genericTest };
+            throw new GenericTypeResolutionException(
+                $"Generic test '{genericTest.TestName}' cannot be expanded in reflection mode: " +
+                "Test metadata is not of type ReflectionTestMetadata.");
         }
 
         var testClassField = typeof(ReflectionTestMetadata).GetField("_testClass", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -96,7 +92,9 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
         if (testClassField?.GetValue(reflectionMetadata) is not Type testClass ||
             testMethodField?.GetValue(reflectionMetadata) is not MethodInfo testMethod)
         {
-            return new[] { genericTest };
+            throw new GenericTypeResolutionException(
+                $"Generic test '{genericTest.TestName}' cannot be expanded: " +
+                "Unable to access test class or method information from metadata.");
         }
 
         // For now, we'll create a single concrete instance with common types
@@ -105,7 +103,6 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
 
         try
         {
-            Console.WriteLine($"DEBUG: Attempting to expand generic test '{genericTest.TestName}'");
             
             // Check if the test has typed data sources that require generic type resolution
             var hasTypedDataSource = false;
@@ -128,10 +125,10 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
 
             if (hasTypedDataSource)
             {
-                Console.WriteLine($"WARNING: Generic test '{genericTest.TestName}' uses typed data sources which cannot be expanded in reflection mode.");
-                Console.WriteLine("Typed data sources (DataSourceGeneratorAttribute<T> and AsyncDataSourceGeneratorAttribute<T>) require compile-time type information.");
-                Console.WriteLine("Use [Arguments] attributes or non-generic data sources for reflection mode, or use source generation mode.");
-                return Enumerable.Empty<TestMetadata>();
+                throw new GenericTypeResolutionException(
+                    $"Generic test '{genericTest.TestName}' uses typed data sources which cannot be expanded in reflection mode. " +
+                    "Typed data sources (DataSourceGeneratorAttribute<T> and AsyncDataSourceGeneratorAttribute<T>) require compile-time type information. " +
+                    "Use [Arguments] attributes or non-generic data sources for reflection mode, or use source generation mode.");
             }
             
             // Get the first data combination to infer types
@@ -139,16 +136,16 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
             TestDataCombination? firstCombination = null;
             await foreach (var combination in dataCombinations)
             {
-                Console.WriteLine($"DEBUG: Got data combination with {combination.MethodDataFactories?.Length ?? 0} method data factories");
                 firstCombination = combination;
                 break;
             }
             
             if (firstCombination == null)
             {
-                Console.WriteLine($"DEBUG: No data combinations available for '{genericTest.TestName}'");
-                // No data available, can't expand
-                return new[] { genericTest };
+                throw new GenericTypeResolutionException(
+                    $"Generic test '{genericTest.TestName}' has no data combinations available. " +
+                    "Generic tests require at least one data combination to infer type parameters. " +
+                    "Ensure your data sources are generating data correctly.");
             }
 
             // Infer generic type arguments from the data
@@ -197,11 +194,16 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
             
             expandedTests.Add(concreteMetadata);
         }
+        catch (GenericTypeResolutionException)
+        {
+            // Re-throw GenericTypeResolutionException as-is
+            throw;
+        }
         catch (Exception ex)
         {
-            Console.WriteLine($"WARNING: Failed to expand generic test '{genericTest.TestName}': {ex.Message}");
-            // Return empty to skip the test
-            return Enumerable.Empty<TestMetadata>();
+            // Wrap other exceptions in GenericTypeResolutionException
+            throw new GenericTypeResolutionException(
+                $"Failed to expand generic test '{genericTest.TestName}': {ex.Message}", ex);
         }
 
         return expandedTests;
@@ -214,24 +216,19 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
         var methodParams = genericMethod.GetParameters();
         var typeArguments = new Type[genericParams.Length];
         
-        Console.WriteLine($"DEBUG: InferTypeArgumentsFromData - Method has {genericParams.Length} generic params and {methodParams.Length} method params");
-        
         // Simple type inference based on parameter positions
         // This assumes generic parameters are used directly as method parameters
         for (int i = 0; i < genericParams.Length; i++)
         {
             var genericParam = genericParams[i];
-            Console.WriteLine($"DEBUG: Processing generic param {i}: {genericParam.Name}");
             
             // Find which method parameter uses this generic parameter
             for (int j = 0; j < methodParams.Length; j++)
             {
                 var paramType = methodParams[j].ParameterType;
-                Console.WriteLine($"DEBUG: Checking method param {j}: {paramType.Name}");
                 
                 if (paramType == genericParam)
                 {
-                    Console.WriteLine($"DEBUG: Method param {j} uses generic param {i}");
                     // This parameter directly uses the generic type
                     // Get the actual type from the data
                     if (dataCombination.MethodDataFactories != null && j < dataCombination.MethodDataFactories.Length)
@@ -242,7 +239,6 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                         if (data != null)
                         {
                             typeArguments[i] = data.GetType();
-                            Console.WriteLine($"DEBUG: Inferred type {typeArguments[i].Name} for generic param {i} from data");
                             break;
                         }
                     }
@@ -255,7 +251,6 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
         {
             if (typeArguments[i] == null)
             {
-                Console.WriteLine($"DEBUG: No type inferred for generic param {i}, using object as fallback");
                 // Use object as a fallback
                 typeArguments[i] = typeof(object);
             }
@@ -277,39 +272,28 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
             var testClassField = typeof(ReflectionTestMetadata).GetField("_testClass", BindingFlags.NonPublic | BindingFlags.Instance);
             var testMethodField = typeof(ReflectionTestMetadata).GetField("_testMethod", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            Console.WriteLine($"DEBUG: Checking HasDataSourceAttributes for {reflectionTest.TestName}");
-            Console.WriteLine($"DEBUG: testClassField = {testClassField}, testMethodField = {testMethodField}");
-
             if (testClassField?.GetValue(reflectionTest) is not Type testClass ||
                 testMethodField?.GetValue(reflectionTest) is not MethodInfo testMethod)
             {
-                Console.WriteLine("DEBUG: Failed to get testClass or testMethod");
                 return false;
             }
 
-            Console.WriteLine($"DEBUG: Got testClass = {testClass.Name}, testMethod = {testMethod.Name}");
-
             // Check for method-level data source attributes
             var methodAttributes = testMethod.GetCustomAttributes().ToList();
-            Console.WriteLine($"DEBUG: Method has {methodAttributes.Count} attributes");
             foreach (var attr in methodAttributes)
             {
-                Console.WriteLine($"DEBUG: Method attribute: {attr.GetType().FullName}");
                 if (IsDataSourceAttribute(attr))
                 {
-                    Console.WriteLine($"DEBUG: Found data source attribute on method: {attr.GetType().Name}");
                     return true;
                 }
             }
 
             // Check for class-level data source attributes
             var classAttributes = testClass.GetCustomAttributes().ToList();
-            Console.WriteLine($"DEBUG: Class has {classAttributes.Count} attributes");
             foreach (var attr in classAttributes)
             {
                 if (IsDataSourceAttribute(attr))
                 {
-                    Console.WriteLine($"DEBUG: Found data source attribute on class: {attr.GetType().Name}");
                     return true;
                 }
             }
@@ -323,18 +307,15 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                 {
                     if (IsDataSourceAttribute(attr))
                     {
-                        Console.WriteLine($"DEBUG: Found data source attribute on property {property.Name}: {attr.GetType().Name}");
                         return true;
                     }
                 }
             }
 
-            Console.WriteLine("DEBUG: No data source attributes found");
             return false;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"DEBUG: Exception in HasDataSourceAttributes: {ex.Message}");
             // If we can't determine, assume no data sources
             return false;
         }
@@ -375,7 +356,6 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                 if (genericDef.Name.Contains("DataSourceGeneratorAttribute") || 
                     genericDef.Name.Contains("AsyncDataSourceGeneratorAttribute"))
                 {
-                    Console.WriteLine($"DEBUG: Found typed data source attribute: {attributeType.Name} inherits from {baseType.Name}");
                     return true;
                 }
             }
@@ -407,7 +387,6 @@ public sealed class SourceGeneratedGenericTypeResolver : IGenericTypeResolver
 {
     public Task<IEnumerable<TestMetadata>> ResolveGenericsAsync(IEnumerable<TestMetadata> metadata)
     {
-        Console.WriteLine($"SourceGeneratedGenericTypeResolver.ResolveGenericsAsync called with {metadata.Count()} tests");
         
         // In the new approach, generic tests are resolved during data combination generation
         // So we just pass through all tests, including those with generic metadata
@@ -415,8 +394,6 @@ public sealed class SourceGeneratedGenericTypeResolver : IGenericTypeResolver
         {
             if (test.GenericTypeInfo != null || test.GenericMethodInfo != null)
             {
-                Console.WriteLine($"Found generic test in source generation mode: {test.TestName}. " +
-                    $"This will be resolved during data combination generation.");
             }
         }
 
