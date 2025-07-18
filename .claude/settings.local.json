@@ -133,7 +133,21 @@
       "Bash(./TUnit.TestProject.exe --reflection --treenode-filter \"TUnit.TestProject.BeforeTests.AfterTestAttributeTests.*\" --timeout 5s --output Detailed)",
       "Bash(./TUnit.TestProject.exe --reflection --treenode-filter \"TUnit.TestProject.TestHookContextSupport.*\" --timeout 5s)",
       "Bash(./TUnit.TestProject.exe --reflection --output Detailed)",
-      "Bash(cmd.exe:*)"
+      "Bash(cmd.exe:*)",
+      "Bash(cmd /c:*)",
+      "Bash(\"D:\\git\\TUnit\\TUnit.TestProject\\bin\\Debug\\net8.0\\TUnit.TestProject.exe\" --filter \"FullyQualifiedName~SimpleGenericClassTests\")",
+      "Bash(\"D:\\git\\TUnit\\TUnit.TestProject\\bin\\Debug\\net8.0\\TUnit.TestProject.exe\" --help)",
+      "Bash(\"D:\\git\\TUnit\\TUnit.TestProject\\bin\\Debug\\net8.0\\TUnit.TestProject.exe\" --treenode-filter \"SimpleGenericClassTests\")",
+      "Bash(\"D:\\git\\TUnit\\TUnit.TestProject\\bin\\Debug\\net8.0\\TUnit.TestProject.exe\" --list-tests)",
+      "Bash(\"D:\\git\\TUnit\\TUnit.TestProject\\bin\\Debug\\net8.0\\TUnit.TestProject.exe\" --verbosity debug)",
+      "Bash(\"D:\\git\\TUnit\\TUnit.TestProject\\bin\\Debug\\net8.0\\TUnit.TestProject.exe\" --treenode-filter \"*SimpleGeneric*\" --verbosity verbose)",
+      "Bash(\"D:\\git\\TUnit\\TUnit.TestProject\\bin\\Debug\\net8.0\\TUnit.TestProject.exe\" --treenode-filter \"TestWithValue\")",
+      "Bash(verify_generic_test.exe)",
+      "Bash(\"D:\\git\\TUnit\\TUnit.TestProject\\bin\\Debug\\net8.0\\TUnit.TestProject.exe\" --treenode-filter \"*TestWithValue*\")",
+      "Bash(\"D:\\git\\TUnit\\TUnit.TestProject\\bin\\Debug\\net8.0\\TUnit.TestProject.exe\" --treenode-filter \"/*/*/*/TestWithValue\")",
+      "Bash(del TestTypedDataSources.cs)",
+      "Bash(tasklist)",
+      "Bash(tail:*)"
     ],
     "deny": []
   },

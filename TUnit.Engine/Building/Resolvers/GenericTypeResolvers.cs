@@ -304,6 +304,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
     /// Builds method metadata for a concrete method based on the original generic method metadata
     /// </summary>
     [RequiresDynamicCode("Method metadata creation requires dynamic code generation")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy DynamicallyAccessedMembersAttribute requirements", Justification = "Reflection mode requires dynamic type access for parameter types")]
     private static MethodMetadata BuildConcreteMethodMetadata(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.NonPublicConstructors
@@ -318,11 +319,17 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
             Name = concreteMethod.Name,
             Type = testClass,
             Class = originalMetadata.Class,
-            Parameters = concreteMethod.GetParameters().Select(p => new ParameterMetadata(p.ParameterType)
+            Parameters = concreteMethod.GetParameters().Select(p => 
             {
-                Name = p.Name ?? "unnamed",
-                TypeReference = TypeReference.CreateConcrete(p.ParameterType.AssemblyQualifiedName!),
-                ReflectionInfo = p
+                #pragma warning disable IL2072 // Type argument doesn't satisfy DynamicallyAccessedMembers  
+                var paramMetadata = new ParameterMetadata(p.ParameterType)
+                {
+                    Name = p.Name ?? "unnamed",
+                    TypeReference = TypeReference.CreateConcrete(p.ParameterType.AssemblyQualifiedName!),
+                    ReflectionInfo = p
+                };
+                #pragma warning restore IL2072
+                return paramMetadata;
             }).ToArray(),
             GenericTypeCount = 0, // Concrete method has no generic parameters
             ReturnTypeReference = TypeReference.CreateConcrete(concreteMethod.ReturnType.AssemblyQualifiedName!),
