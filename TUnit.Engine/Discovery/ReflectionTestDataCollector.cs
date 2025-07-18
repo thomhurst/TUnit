@@ -562,7 +562,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
 private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     {
-        return testMethod.Name;
+        return $"{testClass.Name}.{testMethod.Name}";
     }
 
     private static string[] ExtractCategories(Type testClass, MethodInfo testMethod)
@@ -741,6 +741,49 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             if (dataSource != null)
             {
                 dataSources.Add(dataSource);
+            }
+        }
+
+        // Process custom data source generator attributes
+        foreach (var attr in testMethod.GetCustomAttributes())
+        {
+            // Skip attributes we've already handled
+            if (attr is ArgumentsAttribute || attr is MethodDataSourceAttribute || attr is ClassDataSourceAttribute)
+            {
+                continue;
+            }
+            
+            // Check if it's a data source generator attribute
+            var baseType = attr.GetType().BaseType;
+            while (baseType != null)
+            {
+                if (baseType.IsGenericType)
+                {
+                    var genericDef = baseType.GetGenericTypeDefinition();
+                    // Check for both sync and async data source generator attributes
+                    if (genericDef == typeof(DataSourceGeneratorAttribute<>) || 
+                        genericDef == typeof(DataSourceGeneratorAttribute<,>) ||
+                        genericDef == typeof(AsyncDataSourceGeneratorAttribute<>) ||
+                        genericDef == typeof(AsyncDataSourceGeneratorAttribute<,>))
+                    {
+                        var dataSource = CreateDataSourceFromGenerator(attr, testMethod.DeclaringType!);
+                        if (dataSource != null)
+                        {
+                            dataSources.Add(dataSource);
+                        }
+                        break;
+                    }
+                }
+                else if (baseType == typeof(AsyncUntypedDataSourceGeneratorAttribute))
+                {
+                    var dataSource = CreateDataSourceFromGenerator(attr, testMethod.DeclaringType!);
+                    if (dataSource != null)
+                    {
+                        dataSources.Add(dataSource);
+                    }
+                    break;
+                }
+                baseType = baseType.BaseType;
             }
         }
 
@@ -1010,6 +1053,258 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             }
             return Task.FromResult(Enumerable.Empty<object?[]>());
         };
+    }
+
+
+    [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
+    private static TestDataSource? CreateDataSourceFromGenerator(Attribute attr, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass)
+    {
+        try
+        {
+            var attrType = attr.GetType();
+            var baseType = attrType.BaseType;
+            
+            // Check if it's an async generator
+            bool isAsyncGenerator = false;
+            while (baseType != null)
+            {
+                if (baseType.IsGenericType)
+                {
+                    var genericDef = baseType.GetGenericTypeDefinition();
+                    if (genericDef == typeof(AsyncDataSourceGeneratorAttribute<>) ||
+                        genericDef == typeof(AsyncDataSourceGeneratorAttribute<,>))
+                    {
+                        isAsyncGenerator = true;
+                        break;
+                    }
+                }
+                else if (baseType == typeof(AsyncUntypedDataSourceGeneratorAttribute))
+                {
+                    isAsyncGenerator = true;
+                    break;
+                }
+                baseType = baseType.BaseType;
+            }
+            
+            if (isAsyncGenerator)
+            {
+                // For async generators, create an AsyncDelegateDataSource
+                return new AsyncDelegateDataSource(cancellationToken => 
+                    CreateAsyncGeneratorEnumerable(attr, attrType, testClass, cancellationToken));
+            }
+            else
+            {
+                // For sync generators, create a DelegateDataSource
+                return new DelegateDataSource(() =>
+                {
+                    var metadata = CreateDataGeneratorMetadata(testClass);
+                    
+                    // Get the GenerateDataSources method
+                    var generateMethod = attrType.GetMethod("GenerateDataSources", 
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+                    
+                    if (generateMethod == null)
+                    {
+                        throw new InvalidOperationException($"Could not find GenerateDataSources method on {attrType.Name}");
+                    }
+                    
+                    // Invoke the generator
+                    var result = generateMethod.Invoke(attr, new object[] { metadata });
+                    
+                    return ProcessGeneratorResult(result);
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to create data source from generator: {ex.Message}", ex);
+        }
+    }
+
+
+    private static async IAsyncEnumerable<object?[]> CreateAsyncGeneratorEnumerable(
+        Attribute attr, 
+        Type attrType, 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var metadata = CreateDataGeneratorMetadata(testClass);
+        
+        // Get the GenerateDataSourcesAsync method
+        var generateMethod = attrType.GetMethod("GenerateDataSourcesAsync", 
+            BindingFlags.NonPublic | BindingFlags.Instance);
+        
+        if (generateMethod == null)
+        {
+            throw new InvalidOperationException($"Could not find GenerateDataSourcesAsync method on {attrType.Name}");
+        }
+        
+        // Invoke the async generator
+        var result = generateMethod.Invoke(attr, new object[] { metadata });
+        
+        // Handle the async enumerable result
+        if (result is IAsyncEnumerable<object> asyncEnumerable)
+        {
+            await foreach (var item in asyncEnumerable.WithCancellation(cancellationToken))
+            {
+                var dataRows = ProcessGeneratorItem(item);
+                foreach (var dataRow in dataRows)
+                {
+                    yield return dataRow;
+                }
+            }
+        }
+    }
+    
+    private static DataGeneratorMetadata CreateDataGeneratorMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass)
+    {
+        // Create TypeReference for the class
+        var classTypeRef = new TypeReference
+        {
+            AssemblyQualifiedName = testClass.AssemblyQualifiedName
+        };
+        
+        // Create AssemblyMetadata
+        var assemblyMetadata = AssemblyMetadata.GetOrAdd(testClass.Assembly.FullName ?? testClass.Assembly.GetName().Name ?? "Unknown", 
+            () => new AssemblyMetadata { Name = testClass.Assembly.FullName ?? testClass.Assembly.GetName().Name ?? "Unknown" });
+        
+        // Create ClassMetadata
+        var classMetadata = ClassMetadata.GetOrAdd(testClass.FullName ?? testClass.Name, () => new ClassMetadata
+        {
+            Name = testClass.Name,
+            TypeReference = classTypeRef,
+            Type = testClass,
+            Namespace = testClass.Namespace,
+            Assembly = assemblyMetadata,
+            Parameters = Array.Empty<ParameterMetadata>(), // Constructor parameters, empty for now
+            Properties = Array.Empty<PropertyMetadata>(), // Properties, empty for now
+            Parent = null // Parent class, null for now
+        });
+        
+        // Create MethodMetadata (minimal for data generation)
+        var methodMetadata = new MethodMetadata
+        {
+            Name = "TestMethod", // Placeholder name
+            TypeReference = classTypeRef,
+            Type = testClass,
+            Parameters = Array.Empty<ParameterMetadata>(),
+            GenericTypeCount = 0,
+            Class = classMetadata,
+            ReturnTypeReference = new TypeReference { AssemblyQualifiedName = typeof(void).AssemblyQualifiedName },
+            ReturnType = typeof(void)
+        };
+        
+        return new DataGeneratorMetadata
+        {
+            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
+            MembersToGenerate = Array.Empty<MemberMetadata>(),
+            TestInformation = methodMetadata,
+            Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
+            TestSessionId = Guid.NewGuid().ToString(),
+            TestClassInstance = null,
+            ClassInstanceArguments = null
+        };
+    }
+    
+    private static List<object?[]> ProcessGeneratorResult(object? result)
+    {
+        var items = new List<object?[]>();
+        
+        if (result is IEnumerable<object> enumerable)
+        {
+            foreach (var item in enumerable)
+            {
+                items.AddRange(ProcessGeneratorItem(item));
+            }
+        }
+        
+        return items;
+    }
+    
+    private static List<object?[]> ProcessGeneratorItem(object? item)
+    {
+        var items = new List<object?[]>();
+        
+        if (item is Func<Task<object?[]?>> taskFunc)
+        {
+            var data = taskFunc().GetAwaiter().GetResult();
+            if (data != null)
+            {
+                items.Add(data);
+            }
+        }
+        else if (item is Func<Task<object?>> singleTaskFunc)
+        {
+            var data = singleTaskFunc().GetAwaiter().GetResult();
+            items.Add(new[] { data });
+        }
+        else if (item is Task<object?[]?> task)
+        {
+            var data = task.GetAwaiter().GetResult();
+            if (data != null)
+            {
+                items.Add(data);
+            }
+        }
+        else if (item is Func<object?[]?> func)
+        {
+            var data = func();
+            if (data != null)
+            {
+                items.Add(data);
+            }
+        }
+        else if (item is Func<object?> singleFunc)
+        {
+            var data = singleFunc();
+            items.Add(new[] { data });
+        }
+        else if (item is object?[] array)
+        {
+            items.Add(array);
+        }
+        else if (global::TUnit.Engine.Helpers.TupleHelper.TryParseTupleToObjectArray(item, out object?[]? tupleValues))
+        {
+            items.Add(tupleValues!);
+        }
+        else if (item != null)
+        {
+            // Check if it's a Func<Task<T>> where T is a specific type
+            var itemType = item.GetType();
+            if (itemType.IsGenericType && itemType.GetGenericTypeDefinition() == typeof(Func<>))
+            {
+                var returnType = itemType.GetGenericArguments()[0];
+                if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>))
+                {
+                    // It's a Func<Task<T>>, invoke it and await the result
+                    var funcDelegate = (Delegate)item;
+                    var taskResult = funcDelegate.DynamicInvoke();
+                    if (taskResult is Task taskObj)
+                    {
+                        taskObj.Wait();
+                        var resultProperty = taskObj.GetType().GetProperty("Result");
+                        if (resultProperty != null)
+                        {
+                            var result = resultProperty.GetValue(taskObj);
+                            items.Add(new[] { result });
+                        }
+                    }
+                }
+                else
+                {
+                    // It's a regular Func<T>, invoke it
+                    var regularFunc = (Delegate)item;
+                    var result = regularFunc.DynamicInvoke();
+                    items.Add(new[] { result });
+                }
+            }
+            else
+            {
+                items.Add(new[] { item });
+            }
+        }
+        
+        return items;
     }
 
     private static Func<CancellationToken, IAsyncEnumerable<object?[]>> CreateAsyncDataSourceFactory(MethodInfo method, object? instance, object?[] args)
