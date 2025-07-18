@@ -437,6 +437,12 @@ public static class DataCombinationGeneratorEmitter
 
     private static ITypeSymbol GetMethodClass(AttributeData methodDataAttribute, INamedTypeSymbol typeContainingAttribute)
     {
+        // For InstanceMethodDataSource (including generic variants), always use the test class
+        if (methodDataAttribute.AttributeClass?.IsOrInherits("global::TUnit.Core.InstanceMethodDataSourceAttribute") == true)
+        {
+            return typeContainingAttribute;
+        }
+
         if (methodDataAttribute.AttributeClass?.IsGenericType is true)
         {
             return methodDataAttribute.AttributeClass.TypeArguments[0];
