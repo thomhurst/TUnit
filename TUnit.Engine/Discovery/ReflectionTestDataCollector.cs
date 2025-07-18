@@ -562,7 +562,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
 private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     {
-        return $"{testClass.Name}.{testMethod.Name}";
+        return testMethod.Name;
     }
 
     private static string[] ExtractCategories(Type testClass, MethodInfo testMethod)

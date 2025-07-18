@@ -91,8 +91,8 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
 
         // Generate all combinations without awaiting inside the async enumerable
-        var methodDataCombinations = ProcessDataSourcesWithErrorHandling(methodDataSources, ProcessMethodDataSource);
-        var classDataCombinations = ProcessDataSourcesWithErrorHandling(classDataSources, ProcessClassDataSource);
+        var methodDataCombinations = await ProcessDataSourcesAsync(methodDataSources, ProcessMethodDataSourceAsync);
+        var classDataCombinations = await ProcessDataSourcesAsync(classDataSources, ProcessClassDataSourceAsync);
         var propertyDataCombinations = GeneratePropertyDataCombinations(propertyDataSources);
 
         // Use the unified DataCombinationBuilder
@@ -116,6 +116,29 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             try
             {
                 results.AddRange(processor(source));
+            }
+            catch (Exception ex)
+            {
+                // Instead of logging and continuing, create an error combination
+                // This will be caught by the outer error handler and converted to TestDataCombination with DataGenerationException
+                throw new Exception($"Failed to process data source: {ex.Message}", ex);
+            }
+        }
+        
+        return results;
+    }
+
+    private async Task<List<T>> ProcessDataSourcesAsync<T>(List<TestDataSource> sources, Func<TestDataSource, Task<IEnumerable<T>>> processor)
+        where T : new()
+    {
+        var results = new List<T>();
+        
+        foreach (var source in sources)
+        {
+            try
+            {
+                var items = await processor(source);
+                results.AddRange(items);
             }
             catch (Exception ex)
             {
@@ -593,6 +616,53 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         return value;
     }
 
+    private async Task<IEnumerable<MethodDataCombination>> ProcessMethodDataSourceAsync(TestDataSource dataSource)
+    {
+        var combinations = new List<MethodDataCombination>();
+        int loopIndex = 0;
+
+        // Check if it's an async data source
+        if (dataSource is AsyncTestDataSource asyncDataSource)
+        {
+            await foreach (var factory in asyncDataSource.GetDataFactoriesAsync())
+            {
+                var data = factory();
+                
+                // Handle the case where data is object?[] instead of object[]
+                IEnumerable<object?> dataEnumerable;
+                if (data is object?[] nullableArray)
+                {
+                    dataEnumerable = nullableArray;
+                }
+                else
+                {
+                    dataEnumerable = data;
+                }
+                
+                var dataFactories = dataEnumerable.Select(value => new Func<Task<object?>>(() =>
+                {
+                    var resolvedValue = ResolveTestDataValue(value);
+                    return Task.FromResult(resolvedValue);
+                })).ToArray();
+                
+                combinations.Add(new MethodDataCombination
+                {
+                    DataFactories = dataFactories,
+                    DataSourceIndex = 0,
+                    LoopIndex = loopIndex++
+                });
+            }
+        }
+        else
+        {
+            // Fall back to synchronous processing for non-async data sources
+            var syncCombinations = ProcessMethodDataSource(dataSource);
+            combinations.AddRange(syncCombinations);
+        }
+
+        return combinations;
+    }
+
     private List<ClassDataCombination> ProcessClassDataSource(TestDataSource dataSource)
     {
         var combinations = new List<ClassDataCombination>();
@@ -614,6 +684,41 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 DataSourceIndex = 0,
                 LoopIndex = loopIndex++
             });
+        }
+
+        return combinations;
+    }
+
+    private async Task<IEnumerable<ClassDataCombination>> ProcessClassDataSourceAsync(TestDataSource dataSource)
+    {
+        var combinations = new List<ClassDataCombination>();
+        int loopIndex = 0;
+
+        // Check if it's an async data source
+        if (dataSource is AsyncTestDataSource asyncDataSource)
+        {
+            await foreach (var factory in asyncDataSource.GetDataFactoriesAsync())
+            {
+                var data = factory();
+                var dataFactories = data.Select(value => new Func<Task<object?>>(() =>
+                {
+                    var resolvedValue = ResolveTestDataValue(value);
+                    return Task.FromResult(resolvedValue);
+                })).ToArray();
+
+                combinations.Add(new ClassDataCombination
+                {
+                    DataFactories = dataFactories,
+                    DataSourceIndex = 0,
+                    LoopIndex = loopIndex++
+                });
+            }
+        }
+        else
+        {
+            // Fall back to synchronous processing for non-async data sources
+            var syncCombinations = ProcessClassDataSource(dataSource);
+            combinations.AddRange(syncCombinations);
         }
 
         return combinations;

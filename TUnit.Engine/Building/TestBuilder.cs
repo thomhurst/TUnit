@@ -124,7 +124,7 @@ public sealed class TestBuilder : ITestBuilder
             return string.Empty;
         }
 
-        return ArgumentDisplayFormatter.FormatArguments(allArgs);
+        return ArgumentFormatter.FormatArguments(allArgs);
     }
 
     private async Task<Func<TestContext, CancellationToken, Task>[]> CreateTestHooksAsync(Type testClassType, bool isBeforeHook)
