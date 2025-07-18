@@ -54,9 +54,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             }
             catch (Exception ex)
             {
-                // Continue with other assemblies if one fails to scan
-                // The error will be visible in test output
-                continue;
+                // Create a failed test metadata for the assembly that couldn't be scanned
+                var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
+                newTests.Add(failedTest);
             }
         }
 
@@ -295,9 +295,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
                 catch (Exception ex)
                 {
-                    // Skip this test and continue with others
-                    // The error will be reported when the test tries to run
-                    continue;
+                    // Create a failed test metadata for this specific test
+                    var failedTest = CreateFailedTestMetadata(type, method, ex);
+                    discoveredTests.Add(failedTest);
                 }
             }
         }
@@ -1432,14 +1432,14 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // Skip hooks from this type and continue
                     continue;
                 }
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Return empty hooks if assembly scan fails
             // This allows tests to run without hooks rather than failing entirely
@@ -1898,5 +1898,140 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             Parameters = parameters,
             Class = classMetadata
         };
+    }
+
+    private static TestMetadata CreateFailedTestMetadataForAssembly(Assembly assembly, Exception ex)
+    {
+        var testName = $"[ASSEMBLY SCAN FAILED] {assembly.GetName().Name}";
+        var testClass = typeof(ReflectionTestDataCollector);
+        var displayName = $"{testName} - {ex.Message}";
+        
+        // Create a special metadata that will yield a failed data combination
+        return new FailedTestMetadata(ex, displayName)
+        {
+            TestName = testName,
+            TestClassType = testClass,
+            TestMethodName = "AssemblyScanFailed",
+            MethodMetadata = CreateDummyMethodMetadata(testClass, "AssemblyScanFailed"),
+            AttributeFactory = () => Array.Empty<Attribute>()
+        };
+    }
+
+    private static TestMetadata CreateFailedTestMetadata(Type type, MethodInfo method, Exception ex)
+    {
+        var testName = $"[DISCOVERY FAILED] {type.FullName}.{method.Name}";
+        var displayName = $"{testName} - {ex.Message}";
+
+        // Create a special metadata that will yield a failed data combination
+        return new FailedTestMetadata(ex, displayName)
+        {
+            TestName = testName,
+            TestClassType = type,
+            TestMethodName = method.Name,
+            MethodMetadata = CreateMethodMetadata(type, method),
+            AttributeFactory = () => method.GetCustomAttributes().ToArray()
+        };
+    }
+
+    // Dummy method to use as a placeholder for failed tests
+    private static void DummyFailedTestMethod() { }
+
+    private static MethodMetadata CreateMethodMetadata(Type type, MethodInfo method)
+    {
+        return new MethodMetadata
+        {
+            Name = method.Name,
+            Type = type,
+            Class = new ClassMetadata
+            {
+                Name = type.Name,
+                Type = type,
+                TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!),
+                Namespace = type.Namespace ?? string.Empty,
+                Assembly = new AssemblyMetadata { Name = type.Assembly.GetName().Name ?? "Unknown" },
+                Parameters = Array.Empty<ParameterMetadata>(),
+                Properties = Array.Empty<PropertyMetadata>(),
+                Parent = null
+            },
+            Parameters = method.GetParameters().Select(p => new ParameterMetadata(p.ParameterType)
+            {
+                Name = p.Name ?? "unnamed",
+                TypeReference = TypeReference.CreateConcrete(p.ParameterType.AssemblyQualifiedName!),
+                ReflectionInfo = p
+            }).ToArray(),
+            GenericTypeCount = method.IsGenericMethodDefinition ? method.GetGenericArguments().Length : 0,
+            ReturnTypeReference = TypeReference.CreateConcrete(method.ReturnType.AssemblyQualifiedName!),
+            ReturnType = method.ReturnType,
+            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!)
+        };
+    }
+
+    private static MethodMetadata CreateDummyMethodMetadata(Type type, string methodName)
+    {
+        return new MethodMetadata
+        {
+            Name = methodName,
+            Type = type,
+            Class = new ClassMetadata
+            {
+                Name = type.Name,
+                Type = type,
+                TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!),
+                Namespace = type.Namespace ?? string.Empty,
+                Assembly = new AssemblyMetadata { Name = type.Assembly.GetName().Name ?? "Unknown" },
+                Parameters = Array.Empty<ParameterMetadata>(),
+                Properties = Array.Empty<PropertyMetadata>(),
+                Parent = null
+            },
+            Parameters = Array.Empty<ParameterMetadata>(),
+            GenericTypeCount = 0,
+            ReturnTypeReference = TypeReference.CreateConcrete(typeof(void).AssemblyQualifiedName!),
+            ReturnType = typeof(void),
+            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!)
+        };
+    }
+
+    // Special test metadata class for tests that failed during discovery
+    private sealed class FailedTestMetadata : TestMetadata
+    {
+        private readonly Exception _exception;
+        private readonly string _displayName;
+
+        public FailedTestMetadata(Exception exception, string displayName)
+        {
+            _exception = exception;
+            _displayName = displayName;
+        }
+
+        public override Func<IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator
+        {
+            get => () => GenerateFailedCombination();
+        }
+
+        public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
+        {
+            get => (context, metadata) => new FailedExecutableTest(_exception)
+            {
+                TestId = context.TestId,
+                DisplayName = context.DisplayName,
+                Metadata = metadata,
+                Arguments = context.Arguments,
+                ClassArguments = context.ClassArguments,
+                PropertyValues = context.PropertyValues,
+                BeforeTestHooks = context.BeforeTestHooks,
+                AfterTestHooks = context.AfterTestHooks,
+                Context = context.Context
+            };
+        }
+
+        private async IAsyncEnumerable<TestDataCombination> GenerateFailedCombination()
+        {
+            yield return new TestDataCombination
+            {
+                DataGenerationException = _exception,
+                DisplayName = _displayName
+            };
+            await Task.CompletedTask;
+        }
     }
 }

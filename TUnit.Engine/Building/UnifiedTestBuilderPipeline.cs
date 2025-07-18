@@ -36,12 +36,27 @@ public sealed class UnifiedTestBuilderPipeline
         // Stage 1: Collect test metadata
         var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId);
 
-        // Stage 2: Resolve generic types
-        var resolvedMetadata = await _genericResolver.ResolveGenericsAsync(collectedMetadata);
-
-        // Stage 3: Generate data combinations and build tests using the simplified approach
         var executableTests = new List<ExecutableTest>();
 
+        // Stage 2: Resolve generic types
+        var resolvedMetadata = new List<TestMetadata>();
+        foreach (var metadata in collectedMetadata)
+        {
+            try
+            {
+                var resolved = await _genericResolver.ResolveGenericsAsync(new[] { metadata });
+                resolvedMetadata.AddRange(resolved);
+            }
+            catch (Exception ex)
+            {
+                // Create a failed test for generic resolution failures
+                var failedTest = CreateFailedTestForGenericResolutionError(metadata, ex);
+                executableTests.Add(failedTest);
+                continue;
+            }
+        }
+
+        // Stage 3: Generate data combinations and build tests using the simplified approach
         foreach (var metadata in resolvedMetadata)
         {
             try
@@ -72,7 +87,24 @@ public sealed class UnifiedTestBuilderPipeline
         await foreach (var metadata in CollectTestsStreamAsync(testSessionId, cancellationToken))
         {
             // Resolve generic types for this metadata
-            var resolvedMetadataList = await _genericResolver.ResolveGenericsAsync(new[] { metadata });
+            IEnumerable<TestMetadata> resolvedMetadataList;
+            ExecutableTest? failedTest = null;
+            try
+            {
+                resolvedMetadataList = await _genericResolver.ResolveGenericsAsync(new[] { metadata });
+            }
+            catch (Exception ex)
+            {
+                // Create a failed test for generic resolution failures
+                failedTest = CreateFailedTestForGenericResolutionError(metadata, ex);
+                resolvedMetadataList = Array.Empty<TestMetadata>();
+            }
+            
+            if (failedTest != null)
+            {
+                yield return failedTest;
+                continue;
+            }
 
             foreach (var resolvedMetadata in resolvedMetadataList)
             {
@@ -152,6 +184,62 @@ public sealed class UnifiedTestBuilderPipeline
         
         context.TestDetails = testDetails;
 
+
+        return new FailedExecutableTest(exception)
+        {
+            TestId = testId,
+            DisplayName = displayName,
+            Metadata = metadata,
+            Arguments = [],
+            ClassArguments = [],
+            BeforeTestHooks = [],
+            AfterTestHooks = [],
+            Context = context,
+            State = TestState.Failed,
+            Result = new TestResult
+            {
+                State = TestState.Failed,
+                Start = DateTimeOffset.UtcNow,
+                End = DateTimeOffset.UtcNow,
+                Duration = TimeSpan.Zero,
+                Exception = exception,
+                ComputerName = Environment.MachineName,
+                TestContext = context
+            }
+        };
+    }
+
+    private ExecutableTest CreateFailedTestForGenericResolutionError(TestMetadata metadata, Exception exception)
+    {
+        var testId = TestIdentifierService.GenerateFailedTestId(metadata);
+        var displayName = $"{metadata.TestName} [GENERIC RESOLUTION ERROR]";
+
+        // Create a minimal test context for failed test
+        var testDetails = new TestDetails
+        {
+            TestId = testId,
+            TestName = metadata.TestName,
+            ClassType = metadata.TestClassType,
+            MethodName = metadata.TestMethodName,
+            ClassInstance = null,
+            TestMethodArguments = [],
+            TestClassArguments = [],
+            TestFilePath = metadata.FilePath ?? "Unknown",
+            TestLineNumber = metadata.LineNumber ?? 0,
+            TestMethodParameterTypes = metadata.ParameterTypes,
+            ReturnType = typeof(Task),
+            ClassMetadata = MetadataBuilder.CreateClassMetadata(metadata),
+            MethodMetadata = metadata.MethodMetadata,
+            Attributes = [],
+        };
+
+        var context = _contextProvider.CreateTestContext(
+            metadata.TestName,
+            metadata.TestClassType,
+            CancellationToken.None,
+            new TestServiceProvider());
+        
+        context.TestDetails = testDetails;
 
         return new FailedExecutableTest(exception)
         {
