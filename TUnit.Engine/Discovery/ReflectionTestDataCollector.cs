@@ -294,16 +294,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
                 catch (Exception ex)
                 {
-                    // Add this failed test to the results with the exception
-                    var failedTest = new ReflectionTestMetadata(type, method)
-                    {
-                        TestName = $"{type.FullName}.{method.Name}",
-                        TestClassType = type,
-                        TestMethodName = method.Name,
-                        DataGenerationException = new InvalidOperationException(
-                            $"Failed to build metadata for test {type.FullName}.{method.Name}: {ex.Message}", ex)
-                    };
-                    discoveredTests.Add(failedTest);
+                    // Re-throw with more context about which test failed
+                    throw new InvalidOperationException(
+                        $"Failed to build metadata for test {type.FullName}.{method.Name}: {ex.Message}", ex);
                 }
             }
         }

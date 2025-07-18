@@ -22,8 +22,8 @@ public sealed class AotTestDataCollector : ITestDataCollector
             }
             catch (Exception ex)
             {
-                // Log but continue with other sources
-                Console.WriteLine($"Warning: Failed to collect tests from source {testSource.GetType().Name}: {ex.Message}");
+                throw new InvalidOperationException(
+                    $"Failed to collect tests from source {testSource.GetType().Name}: {ex.Message}", ex);
             }
         }
 

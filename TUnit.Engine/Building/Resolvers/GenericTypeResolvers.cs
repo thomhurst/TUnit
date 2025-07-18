@@ -43,7 +43,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                 // exception into a failed test result.
                 throw new GenericTypeResolutionException(
                     $"Failed to resolve generic test '{test.TestName}': {ex.Message}", 
-                    ex is GenericTypeResolutionException ? ex.InnerException : ex);
+                    ex is GenericTypeResolutionException gtre ? (gtre.InnerException ?? ex) : ex);
             }
         }
 
@@ -314,7 +314,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
 
             return false;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // If we can't determine, assume no data sources
             return false;
