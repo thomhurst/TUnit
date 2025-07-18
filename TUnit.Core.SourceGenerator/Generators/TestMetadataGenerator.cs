@@ -194,7 +194,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine($"TestName = \"{methodName}\",");
+        writer.AppendLine($"TestName = \"{className}.{methodName}\",");
         writer.AppendLine($"TestClassType = {GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)},");
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
 

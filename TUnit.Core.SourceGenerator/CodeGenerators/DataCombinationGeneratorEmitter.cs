@@ -2219,7 +2219,7 @@ public static class DataCombinationGeneratorEmitter
         writer.Indent();
         
         writer.AppendLine("MethodDataFactories = argumentValues.Select((arg, index) => new Func<Task<object?>>(async () => arg)).ToArray(),");
-        writer.AppendLine("DisplayName = $\"TestWithValue({string.Join(\", \", argumentValues.Select(v => v?.ToString() ?? \"null\"))})\",");
+        writer.AppendLine("DisplayName = $\"TestWithValue({TUnit.Core.Helpers.ArgumentDisplayFormatter.FormatArguments(argumentValues)})\",");
         writer.AppendLine("ClassDataSourceIndex = 0,");
         writer.AppendLine("MethodDataSourceIndex = 0,");
         writer.AppendLine("ClassLoopIndex = 0,");
@@ -2269,7 +2269,7 @@ public static class DataCombinationGeneratorEmitter
         writer.Indent();
         
         writer.AppendLine("MethodDataFactories = argumentValues.Select((arg, index) => new Func<Task<object?>>(async () => arg)).ToArray(),");
-        writer.AppendLine("DisplayName = $\"TestWithValue({string.Join(\", \", argumentValues.Select(v => v?.ToString() ?? \"null\"))})\",");
+        writer.AppendLine("DisplayName = $\"TestWithValue({TUnit.Core.Helpers.ArgumentDisplayFormatter.FormatArguments(argumentValues)})\",");
         writer.AppendLine("ClassDataSourceIndex = 0,");
         writer.AppendLine("MethodDataSourceIndex = 0,");
         writer.AppendLine("ClassLoopIndex = 0,");
@@ -2317,7 +2317,7 @@ public static class DataCombinationGeneratorEmitter
         writer.Indent();
         
         writer.AppendLine("MethodDataFactories = argumentValues.Select((arg, index) => new Func<Task<object?>>(async () => arg)).ToArray(),");
-        writer.AppendLine("DisplayName = $\"GenericMethod<{string.Join(\", \", resolvedGenericTypes.Values.Select(t => t.Name))}>({string.Join(\", \", argumentValues.Select(v => v?.ToString() ?? \"null\"))})\",");
+        writer.AppendLine("DisplayName = $\"GenericMethod<{string.Join(\", \", resolvedGenericTypes.Values.Select(t => t.Name))}>({TUnit.Core.Helpers.ArgumentDisplayFormatter.FormatArguments(argumentValues)})\",");
         writer.AppendLine("ClassDataSourceIndex = 0,");
         writer.AppendLine("MethodDataSourceIndex = 0,");
         writer.AppendLine("ClassLoopIndex = 0,");
@@ -2461,7 +2461,7 @@ public static class DataCombinationGeneratorEmitter
         writer.Indent();
         
         writer.AppendLine("MethodDataFactories = argumentValues.Select((arg, index) => new Func<Task<object?>>(async () => arg)).ToArray(),");
-        writer.AppendLine("DisplayName = $\"GenericMethod<{string.Join(\", \", resolvedGenericTypes.Values.Select(t => t.Name))}>({string.Join(\", \", argumentValues.Select(v => v?.ToString() ?? \"null\"))})\",");
+        writer.AppendLine("DisplayName = $\"GenericMethod<{string.Join(\", \", resolvedGenericTypes.Values.Select(t => t.Name))}>({TUnit.Core.Helpers.ArgumentDisplayFormatter.FormatArguments(argumentValues)})\",");
         writer.AppendLine("ClassDataSourceIndex = 0,");
         writer.AppendLine("MethodDataSourceIndex = 0,");
         writer.AppendLine("ClassLoopIndex = 0,");

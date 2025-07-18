@@ -1,5 +1,6 @@
 using TUnit.Core;
 using TUnit.Core.Data;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
@@ -123,7 +124,7 @@ public sealed class TestBuilder : ITestBuilder
             return string.Empty;
         }
 
-        return string.Join(", ", allArgs.Select(arg => arg?.ToString() ?? "null"));
+        return ArgumentDisplayFormatter.FormatArguments(allArgs);
     }
 
     private async Task<Func<TestContext, CancellationToken, Task>[]> CreateTestHooksAsync(Type testClassType, bool isBeforeHook)

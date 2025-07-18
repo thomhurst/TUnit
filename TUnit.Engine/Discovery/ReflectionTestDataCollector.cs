@@ -72,7 +72,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     $"Instance Factories: {stats.InstanceFactories}, Test Invokers: {stats.TestInvokers}");
             }
 
-            Console.WriteLine($"Discovered {newTests.Count} tests in reflection mode");
             return _discoveredTests.ToList();
         }
     }
@@ -1905,7 +1904,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         var testName = $"[ASSEMBLY SCAN FAILED] {assembly.GetName().Name}";
         var testClass = typeof(ReflectionTestDataCollector);
         var displayName = $"{testName} - {ex.Message}";
-        
+
         // Create a special metadata that will yield a failed data combination
         return new FailedTestMetadata(ex, displayName)
         {
