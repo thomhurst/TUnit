@@ -57,6 +57,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
 
     [RequiresDynamicCode("Generic type resolution requires dynamic code generation")]
     [RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming")]
+    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter argument does not satisfy DynamicallyAccessedMembersAttribute requirements", Justification = "Reflection mode requires dynamic type access which may not be statically analyzable")]
     private async Task<IEnumerable<TestMetadata>> ExpandGenericTestAsync(TestMetadata genericTest)
     {
         // Check if we have data sources
@@ -177,14 +178,16 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                 ClassDataSources = genericTest.ClassDataSources,
                 PropertyDataSources = genericTest.PropertyDataSources,
                 InstanceFactory = genericTest.InstanceFactory,
-                TestInvoker = genericTest.TestInvoker,
+                TestInvoker = CreateConcreteTestInvoker(testClass, concreteMethod),
                 ParameterCount = genericTest.ParameterCount,
                 ParameterTypes = concreteMethod.GetParameters().Select(p => p.ParameterType).ToArray(),
                 TestMethodParameterTypes = genericTest.TestMethodParameterTypes,
                 Hooks = genericTest.Hooks,
                 FilePath = genericTest.FilePath,
                 LineNumber = genericTest.LineNumber,
-                MethodMetadata = genericTest.MethodMetadata,
+                #pragma warning disable IL2067 // Type argument doesn't satisfy DynamicallyAccessedMembers
+                MethodMetadata = BuildConcreteMethodMetadata(testClass, concreteMethod, genericTest.MethodMetadata),
+                #pragma warning restore IL2067
                 GenericTypeInfo = null, // No longer generic
                 GenericMethodInfo = null, // No longer generic
                 GenericMethodTypeArguments = typeArguments,
@@ -257,6 +260,75 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
         }
         
         return typeArguments;
+    }
+
+    /// <summary>
+    /// Creates a test invoker for a concrete (non-generic) method
+    /// </summary>
+    [RequiresDynamicCode("Test invoker creation requires dynamic code generation")]
+    private static Func<object, object?[], Task> CreateConcreteTestInvoker(
+        Type testClass, 
+        MethodInfo concreteMethod)
+    {
+        // For concrete methods, we can create a direct invoker
+        return async (instance, args) =>
+        {
+            try
+            {
+                var result = concreteMethod.Invoke(
+                    concreteMethod.IsStatic ? null : instance,
+                    args);
+
+                if (result is Task task)
+                {
+                    await task;
+                }
+                else if (result is ValueTask valueTask)
+                {
+                    await valueTask.AsTask();
+                }
+            }
+            catch (TargetInvocationException tie)
+            {
+                // Unwrap and rethrow the actual exception
+                if (tie.InnerException != null)
+                {
+                    throw tie.InnerException;
+                }
+                throw;
+            }
+        };
+    }
+
+    /// <summary>
+    /// Builds method metadata for a concrete method based on the original generic method metadata
+    /// </summary>
+    [RequiresDynamicCode("Method metadata creation requires dynamic code generation")]
+    private static MethodMetadata BuildConcreteMethodMetadata(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+            | DynamicallyAccessedMemberTypes.NonPublicConstructors
+            | DynamicallyAccessedMemberTypes.PublicMethods
+            | DynamicallyAccessedMemberTypes.NonPublicMethods
+            | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass, 
+        MethodInfo concreteMethod, 
+        MethodMetadata originalMetadata)
+    {
+        return new MethodMetadata
+        {
+            Name = concreteMethod.Name,
+            Type = testClass,
+            Class = originalMetadata.Class,
+            Parameters = concreteMethod.GetParameters().Select(p => new ParameterMetadata(p.ParameterType)
+            {
+                Name = p.Name ?? "unnamed",
+                TypeReference = TypeReference.CreateConcrete(p.ParameterType.AssemblyQualifiedName!),
+                ReflectionInfo = p
+            }).ToArray(),
+            GenericTypeCount = 0, // Concrete method has no generic parameters
+            ReturnTypeReference = TypeReference.CreateConcrete(concreteMethod.ReturnType.AssemblyQualifiedName!),
+            ReturnType = concreteMethod.ReturnType,
+            TypeReference = TypeReference.CreateConcrete(testClass.AssemblyQualifiedName!)
+        };
     }
 
     /// <summary>
