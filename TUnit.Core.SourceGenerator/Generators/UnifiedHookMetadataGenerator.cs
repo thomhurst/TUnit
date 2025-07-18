@@ -478,8 +478,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("catch (Exception ex)");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("Console.Error.WriteLine($\"Failed to initialize hook source: {ex}\");");
-            writer.AppendLine("throw;");
+            writer.AppendLine("throw new InvalidOperationException($\"Failed to initialize hook source: {ex.Message}\", ex);");
             writer.Unindent();
             writer.AppendLine("}");
         }

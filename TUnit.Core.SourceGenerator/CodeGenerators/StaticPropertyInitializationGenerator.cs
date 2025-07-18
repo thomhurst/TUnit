@@ -167,8 +167,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine($"catch (Exception ex)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine($"// Log error initializing static property {typeName}.{propertyName}");
-        writer.AppendLine($"Console.WriteLine($\"Warning: Failed to initialize static property {typeName}.{propertyName}: {{ex.Message}}\");");
+        writer.AppendLine($"throw new InvalidOperationException($\"Failed to initialize static property {typeName}.{propertyName}: {{ex.Message}}\", ex);");
         writer.Unindent();
         writer.AppendLine("}");
     }

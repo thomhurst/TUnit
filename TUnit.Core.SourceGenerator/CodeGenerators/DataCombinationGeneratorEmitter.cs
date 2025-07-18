@@ -813,7 +813,7 @@ public static class DataCombinationGeneratorEmitter
         }
         else
         {
-            writer.AppendLine("return null;");
+            writer.AppendLine("throw new InvalidOperationException(\"ClassDataSource attribute does not have a valid type specified. Ensure the attribute has either a generic type argument or a Type constructor argument.\");");
         }
         
         writer.Unindent();
@@ -843,7 +843,7 @@ public static class DataCombinationGeneratorEmitter
 
         if (string.IsNullOrEmpty(methodName))
         {
-            writer.AppendLine("return null;");
+            writer.AppendLine("throw new InvalidOperationException(\"MethodDataSource attribute does not have a valid method name specified.\");");
         }
         else
         {
@@ -877,7 +877,7 @@ public static class DataCombinationGeneratorEmitter
         }
         else
         {
-            writer.AppendLine("return null;");
+            writer.AppendLine("throw new InvalidOperationException(\"ClassDataSource attribute on property does not have a valid type specified.\");");
         }
         
         writer.Unindent();
@@ -1013,7 +1013,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("var data = await dataSourceFunc();");
             writer.AppendLine("var processed = data?.Length == 0 ? new object?[] { null } :");
             writer.AppendLine("    data?.Length == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(data[0]) : data;");
-            writer.AppendLine("if (processed == null || index >= processed.Length) return null;");
+            writer.AppendLine("if (processed == null || index >= processed.Length) throw new InvalidOperationException($\"Data source index {index} is out of range. Data source returned {processed?.Length ?? 0} items.\");");
             writer.AppendLine("var instance = processed[index];");
             writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
             writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
@@ -1045,7 +1045,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("var data = await dataSourceFunc();");
             writer.AppendLine("var processed = data?.Length == 0 ? new object?[] { null } :");
             writer.AppendLine("    data?.Length == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(data[0]) : data;");
-            writer.AppendLine("if (processed == null || index >= processed.Length) return null;");
+            writer.AppendLine("if (processed == null || index >= processed.Length) throw new InvalidOperationException($\"Data source index {index} is out of range. Data source returned {processed?.Length ?? 0} items.\");");
             writer.AppendLine("return processed[index];");
             writer.Unindent();
             writer.AppendLine("})).ToArray(),");
@@ -1192,7 +1192,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("var data = await dataSourceFunc();");
             writer.AppendLine("var processed = data?.Length == 0 ? new object?[] { null } :");
             writer.AppendLine("    data?.Length == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(data[0]) : data;");
-            writer.AppendLine("if (processed == null || index >= processed.Length) return null;");
+            writer.AppendLine("if (processed == null || index >= processed.Length) throw new InvalidOperationException($\"Data source index {index} is out of range. Data source returned {processed?.Length ?? 0} items.\");");
             writer.AppendLine("var instance = processed[index];");
             writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
             writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
@@ -1224,7 +1224,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("var data = await dataSourceFunc();");
             writer.AppendLine("var processed = data?.Length == 0 ? new object?[] { null } :");
             writer.AppendLine("    data?.Length == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(data[0]) : data;");
-            writer.AppendLine("if (processed == null || index >= processed.Length) return null;");
+            writer.AppendLine("if (processed == null || index >= processed.Length) throw new InvalidOperationException($\"Data source index {index} is out of range. Data source returned {processed?.Length ?? 0} items.\");");
             writer.AppendLine("var instance = processed[index];");
             writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
             writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
@@ -1958,7 +1958,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine($"// Debug: Found {argumentsAttributes.Length} Arguments attributes at compile time");
         writer.AppendLine($"// Debug: Found {typedAsyncDataSources.Length} typed data sources (async/sync) at compile time");
         writer.AppendLine($"// Debug: Found {untypedDataSources.Length} untyped data sources at compile time");
-        writer.AppendLine($"Console.WriteLine(\"Method data sources count: {methodDataSources.Length}\");");
+        // Method data sources count: {methodDataSources.Length}
         
         if (argumentsAttributes.Any() || typedAsyncDataSources.Any() || untypedDataSources.Any())
         {
@@ -2053,7 +2053,7 @@ public static class DataCombinationGeneratorEmitter
             writer.Indent();
             
             // Add debug logging
-            writer.AppendLine($"Console.WriteLine(\"Processing Arguments attribute with {attr.ConstructorArguments.Length} constructor arguments\");");
+            // Processing Arguments attribute with {attr.ConstructorArguments.Length} constructor arguments
             
             // Generate the argument values
             writer.AppendLine("var argumentValues = new object?[]");
@@ -2241,7 +2241,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("};");
         writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine("Console.WriteLine($\"Yielding generic test combination: {combination.DisplayName}\");");
+        // Yielding generic test combination
         writer.AppendLine("yield return combination;");
     }
     
@@ -2338,7 +2338,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("};");
         writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine("Console.WriteLine($\"Yielding generic test combination: {combination.DisplayName}\");");
+        // Yielding generic test combination
         writer.AppendLine("yield return combination;");
     }
     
