@@ -2,7 +2,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;
 
-// Test that properties with IDataAttribute are initialized correctly
+// Test that properties with IDataSourceAttribute are initialized correctly
 public class PropertyInitializationTests
 {
     [TestData]
@@ -12,7 +12,7 @@ public class PropertyInitializationTests
     public required PropertyWithNestedDependencies? NestedProperty { get; set; }
 
     [Test]
-    public async Task Property_With_IDataAttribute_Should_Be_Initialized()
+    public async Task Property_With_IDataSourceAttribute_Should_Be_Initialized()
     {
         // TestProperty should be set during discovery and initialized during invocation
         await Assert.That(TestProperty).IsNotNull();

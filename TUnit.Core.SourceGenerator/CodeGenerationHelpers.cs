@@ -271,7 +271,7 @@ internal static class CodeGenerationHelpers
                fullName == "TUnit.Core.ClassDataSourceAttribute" ||
                fullName == "TUnit.Core.PropertyDataSourceAttribute" ||
                (attr.AttributeClass!.AllInterfaces.Any(i =>
-                   i.GloballyQualified() == "TUnit.Core.Interfaces.IDataAttribute"));
+                   i.GloballyQualified() == "TUnit.Core.Interfaces.IDataSourceAttribute"));
     }
 
     /// <summary>
@@ -297,7 +297,7 @@ internal static class CodeGenerationHelpers
                 return GeneratePropertyDataSourceProvider(attr, containingType);
 
             default:
-                // For custom IDataAttribute implementations
+                // For custom IDataSourceAttribute implementations
                 return GenerateCustomDataProvider(attr);
         }
     }

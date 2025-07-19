@@ -113,7 +113,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var dataAttributes = attributes.Where(x =>
                 x.AttributeClass?.AllInterfaces.Contains(
-                    context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataAttribute
+                    context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute
                         .WithoutGlobalPrefix)!, SymbolEqualityComparer.Default
                 ) == true)
             .ToImmutableArray();
@@ -542,7 +542,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             var taskTypeSymbol = context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.Task`1");
             var valueTaskTypeSymbol = context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask`1");
-            
+
             if ((taskTypeSymbol != null && SymbolEqualityComparer.Default.Equals(taskType.OriginalDefinition, taskTypeSymbol)) ||
                 (valueTaskTypeSymbol != null && SymbolEqualityComparer.Default.Equals(taskType.OriginalDefinition, valueTaskTypeSymbol)))
             {
@@ -554,7 +554,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             type = enumerableInnerType;
         }
-        
+
         // Check for IAsyncEnumerable<T>
         if (SymbolEqualityComparer.Default.Equals(type, methodContainingTestData.ReturnType) && IsIAsyncEnumerable(type, context.Compilation, out var asyncEnumerableInnerType))
         {
@@ -683,35 +683,35 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         return false;
     }
-    
+
     private static bool IsIAsyncEnumerable(ITypeSymbol type, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)
     {
         innerType = null;
-        
+
         // Get IAsyncEnumerable<T> type
         var asyncEnumerableType = compilation.GetTypeByMetadataName("System.Collections.Generic.IAsyncEnumerable`1");
         if (asyncEnumerableType == null)
         {
             return false;
         }
-        
+
         // Check if the type itself is IAsyncEnumerable<T>
         if (type is INamedTypeSymbol namedType && namedType.OriginalDefinition.Equals(asyncEnumerableType, SymbolEqualityComparer.Default))
         {
             innerType = namedType.TypeArguments[0];
             return true;
         }
-        
+
         // Check interfaces
         var asyncEnumerableInterface = type.AllInterfaces
             .FirstOrDefault(i => i.OriginalDefinition.Equals(asyncEnumerableType, SymbolEqualityComparer.Default));
-            
+
         if (asyncEnumerableInterface != null)
         {
             innerType = asyncEnumerableInterface.TypeArguments[0];
             return true;
         }
-        
+
         return false;
     }
 }

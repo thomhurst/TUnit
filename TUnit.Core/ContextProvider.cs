@@ -57,13 +57,15 @@ public class ContextProvider : IContextProvider
     /// <summary>
     /// Gets or creates a class context
     /// </summary>
-    public ClassHookContext GetOrCreateClassContext(Type classType)
+    public ClassHookContext GetOrCreateClassContext(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type classType)
     {
         return _classContexts.GetOrAdd(classType, type =>
         {
             return new ClassHookContext(GetOrCreateAssemblyContext(classType.Assembly))
             {
-                ClassType = type
+                ClassType = classType
             };
         });
     }
@@ -73,6 +75,7 @@ public class ContextProvider : IContextProvider
     /// </summary>
     public TestContext CreateTestContext(
         string testName,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type classType,
         CancellationToken cancellationToken,
         IServiceProvider serviceProvider)

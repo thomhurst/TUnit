@@ -40,4 +40,16 @@ public class MethodDataSourceAttribute : TestDataAttribute
         ClassProvidingDataSource = classProvidingDataSource ?? throw new ArgumentNullException(nameof(classProvidingDataSource), "No class type was provided");
         MethodNameProvidingDataSource = methodNameProvidingDataSource;
     }
+
+    public override async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        var methodInfo = (ClassProvidingDataSource ?? TestContext.Current!.ClassContext.ClassType).GetMethod(MethodNameProvidingDataSource)
+            ?? throw new InvalidOperationException($"Method '{MethodNameProvidingDataSource}' not found in class '{ClassProvidingDataSource?.Name ?? "Unknown"}'.");
+
+        var methodResult = methodInfo.Invoke(null, Arguments);
+
+        await Task.CompletedTask;
+
+        yield return () => Task.FromResult<object?[]?>([ methodResult ]);
+    }
 }

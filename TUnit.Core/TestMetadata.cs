@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace TUnit.Core;
 
 /// <summary>
@@ -13,6 +15,7 @@ public abstract class TestMetadata
     /// <summary>
     /// The type containing the test method
     /// </summary>
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
     public required Type TestClassType { get; init; }
 
     /// <summary>

@@ -13,6 +13,8 @@ public class TupleDataSource : IAsyncDataSourceGeneratorAttribute
         yield return () => Task.FromResult<object?[]?>(new object?[] { (123, "Test") });
         await Task.CompletedTask; // To satisfy async
     }
+
+    public IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata) => GenerateAsync(dataGeneratorMetadata);
 }
 
 // Test class that expects two constructor parameters from tuple unwrapping
@@ -25,7 +27,7 @@ public class ClassDataSourceTupleTests(int number, string text)
     {
         await Assert.That(number).IsGreaterThan(0);
         await Assert.That(text).IsNotNull();
-        
+
         // Log to verify the values are correctly unpacked
         Console.WriteLine($"Test executed with: number={number}, text={text}");
     }
@@ -46,7 +48,7 @@ public class StaticMethodClassDataSourceTupleTests(int number, string text)
     {
         await Assert.That(number).IsEqualTo(555);
         await Assert.That(text).IsEqualTo("Static");
-        
+
         Console.WriteLine($"Static method test executed with: number={number}, text={text}");
     }
 }

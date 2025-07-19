@@ -53,12 +53,12 @@ public static class TestDataFormatter
         // If we have a custom display name from data combination, use it
         if (!string.IsNullOrEmpty(dataCombination?.DisplayName))
         {
-            return dataCombination.DisplayName;
+            return dataCombination!.DisplayName!;
         }
 
         // Otherwise create default display name
         var testName = metadata.TestName;
-        
+
         if (arguments.Length == 0)
         {
             return testName;
@@ -74,7 +74,7 @@ public static class TestDataFormatter
     public static string CreateGenericDisplayName(TestMetadata metadata, Type[] genericTypes, object?[] arguments)
     {
         var testName = metadata.TestName;
-        
+
         if (genericTypes.Length > 0)
         {
             var genericPart = string.Join(", ", genericTypes.Select(GetSimpleTypeName));
@@ -106,7 +106,7 @@ public static class TestDataFormatter
 
         var genericArgs = type.GetGenericArguments();
         var genericArgsText = string.Join(", ", genericArgs.Select(GetSimpleTypeName));
-        
+
         return $"{genericTypeName}<{genericArgsText}>";
     }
 

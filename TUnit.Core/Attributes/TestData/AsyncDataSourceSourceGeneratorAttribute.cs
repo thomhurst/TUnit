@@ -22,6 +22,14 @@ public abstract class AsyncDataSourceGeneratorAttribute<T> : TestDataAttribute, 
             yield return async () => [await dataSourceDelegate()];
         }
     }
+
+    public override async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        await foreach (var dataSourceDelegate in GenerateAsync(dataGeneratorMetadata))
+        {
+            yield return async () => [await dataSourceDelegate()];
+        }
+    }
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
@@ -38,6 +46,14 @@ public abstract class AsyncDataSourceGeneratorAttribute<T1, T2> : TestDataAttrib
     }
 
     async IAsyncEnumerable<Func<Task<object?[]?>>> IAsyncDataSourceGeneratorAttribute.GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        await foreach (var dataSourceDelegate in GenerateAsync(dataGeneratorMetadata))
+        {
+            yield return async () => (await dataSourceDelegate()).ToObjectArray();
+        }
+    }
+
+    public override async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         await foreach (var dataSourceDelegate in GenerateAsync(dataGeneratorMetadata))
         {
@@ -66,6 +82,14 @@ public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3> : TestDataAt
             yield return async () => (await dataSourceDelegate()).ToObjectArray();
         }
     }
+
+    public override async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        await foreach (var dataSourceDelegate in GenerateAsync(dataGeneratorMetadata))
+        {
+            yield return async () => (await dataSourceDelegate()).ToObjectArray();
+        }
+    }
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
@@ -88,6 +112,14 @@ public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4> : TestDa
             yield return async () => (await dataSourceDelegate()).ToObjectArray();
         }
     }
+
+    public override async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        await foreach (var dataSourceDelegate in GenerateAsync(dataGeneratorMetadata))
+        {
+            yield return async () => (await dataSourceDelegate()).ToObjectArray();
+        }
+    }
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
@@ -104,6 +136,14 @@ public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : Te
     }
 
     async IAsyncEnumerable<Func<Task<object?[]?>>> IAsyncDataSourceGeneratorAttribute.GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        await foreach (var dataSourceDelegate in GenerateAsync(dataGeneratorMetadata))
+        {
+            yield return async () => (await dataSourceDelegate()).ToObjectArray();
+        }
+    }
+
+    public override async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         await foreach (var dataSourceDelegate in GenerateAsync(dataGeneratorMetadata))
         {

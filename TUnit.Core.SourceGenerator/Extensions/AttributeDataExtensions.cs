@@ -12,7 +12,7 @@ public static class AttributeDataExtensions
     public static bool IsDataSourceAttribute(this AttributeData? attributeData)
     {
         return attributeData?.AttributeClass?.AllInterfaces.Any(x =>
-                   x.GloballyQualified() == WellKnownFullyQualifiedClassNames.IDataAttribute.WithGlobalPrefix)
+                   x.GloballyQualified() == WellKnownFullyQualifiedClassNames.IDataSourceAttribute.WithGlobalPrefix)
                == true;
     }
 

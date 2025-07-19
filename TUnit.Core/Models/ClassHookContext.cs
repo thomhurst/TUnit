@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace TUnit.Core;
 
 public class ClassHookContext : Context
 {
@@ -16,6 +18,7 @@ public class ClassHookContext : Context
 
     public AssemblyHookContext AssemblyContext => (AssemblyHookContext) Parent!;
 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
     public required Type ClassType { get; init; }
 
     private readonly List<TestContext> _tests = [];

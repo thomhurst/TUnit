@@ -3,6 +3,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Hooks;
 
+[UnconditionalSuppressMessage("Trimming", "IL2111:Method with parameters or return value with `DynamicallyAccessedMembersAttribute` is accessed via reflection. Trimmer can\'t guarantee availability of the requirements of the method.")]
 public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClassEventReceiver, TestContext testContext) : IExecutableHook<ClassHookContext>
 {
     public string Name => nameof(lastTestInClassEventReceiver.OnLastTestInClass);

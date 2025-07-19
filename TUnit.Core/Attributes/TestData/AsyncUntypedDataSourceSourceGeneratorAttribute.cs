@@ -16,4 +16,9 @@ public abstract class AsyncUntypedDataSourceGeneratorAttribute : TestDataAttribu
             yield return generateDataSource;
         }
     }
+
+    public override IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        return GenerateAsync(dataGeneratorMetadata);
+    }
 }

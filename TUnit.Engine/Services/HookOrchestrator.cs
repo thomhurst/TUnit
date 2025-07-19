@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Services;
@@ -45,7 +46,9 @@ internal sealed class HookOrchestrator
     /// Gets or creates a cached task for BeforeClass hooks.
     /// This ensures the hooks only run once and all tests await the same result.
     /// </summary>
-    private Task<ExecutionContext> GetOrCreateBeforeClassTask(Type testClassType, Assembly assembly, CancellationToken cancellationToken)
+    private Task<ExecutionContext> GetOrCreateBeforeClassTask(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClassType, Assembly assembly, CancellationToken cancellationToken)
     {
         return _beforeClassTasks.GetOrAdd(testClassType, async _ =>
         {
@@ -266,7 +269,9 @@ internal sealed class HookOrchestrator
         return ExecutionContext.Capture()!;
     }
 
-    private async Task<ExecutionContext> ExecuteBeforeClassHooksAsync(Type testClassType, CancellationToken cancellationToken)
+    private async Task<ExecutionContext> ExecuteBeforeClassHooksAsync(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClassType, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeClassHooksAsync(testClassType);
 
@@ -289,7 +294,9 @@ internal sealed class HookOrchestrator
         return ExecutionContext.Capture()!;
     }
 
-    private async Task<ExecutionContext> ExecuteAfterClassHooksAsync(Type testClassType, CancellationToken cancellationToken)
+    private async Task<ExecutionContext> ExecuteAfterClassHooksAsync(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClassType, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClassType);
 

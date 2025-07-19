@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace TUnit.Core.Services;
 
@@ -30,13 +31,16 @@ public interface IContextProvider
     /// <summary>
     /// Gets or creates a class context
     /// </summary>
-    ClassHookContext GetOrCreateClassContext(Type classType);
+    ClassHookContext GetOrCreateClassContext(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type classType);
 
     /// <summary>
     /// Creates a test context
     /// </summary>
     TestContext CreateTestContext(
         string testName,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type classType,
         CancellationToken cancellationToken,
         IServiceProvider serviceProvider);

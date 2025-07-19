@@ -1,7 +1,7 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Parameter)]
-public class MatrixAttribute(params object?[]? objects) : TestDataAttribute
+public class MatrixAttribute(params object?[]? objects) : TUnitAttribute
 {
     protected MatrixAttribute() : this(null)
     {

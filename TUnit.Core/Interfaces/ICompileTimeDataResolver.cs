@@ -32,7 +32,7 @@ public interface ICompileTimeDataResolver
     /// </summary>
     /// <param name="dataAttribute">The data attribute to check</param>
     /// <returns>True if resolvable at compile-time, false otherwise</returns>
-    bool CanResolveAtCompileTime(IDataAttribute dataAttribute);
+    bool CanResolveAtCompileTime(IDataSourceAttribute dataAttribute);
 }
 
 /// <summary>
@@ -62,11 +62,6 @@ public sealed class CompileTimeResolvedData
     /// Data attributes that could not be resolved at compile-time.
     /// These will need to be handled at runtime in reflection mode.
     /// </summary>
-    public IReadOnlyList<IDataAttribute> UnresolvedAttributes { get; init; } = [
+    public IReadOnlyList<IDataSourceAttribute> UnresolvedAttributes { get; init; } = [
     ];
-
-    /// <summary>
-    /// Total number of test variations this data will produce.
-    /// </summary>
-    public int TotalVariations => Math.Max(1, ClassData.Count) * Math.Max(1, MethodData.Count);
 }

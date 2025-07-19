@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using TUnit.Core.Interfaces;
 
@@ -7,7 +8,9 @@ namespace TUnit.Core;
 /// Strongly typed test metadata that provides type-safe test invocation
 /// </summary>
 /// <typeparam name="T">The type of the test class</typeparam>
-public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
+public class TestMetadata<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T> : TestMetadata, ITypedTestMetadata where T : class
 {
     private Func<object?[], T>? _instanceFactory;
     private Func<T, object?[], Task>? _testInvoker;
@@ -15,8 +18,8 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
     /// <summary>
     /// Strongly typed instance factory
     /// </summary>
-    public new Func<object?[], T>? InstanceFactory 
-    { 
+    public new Func<object?[], T>? InstanceFactory
+    {
         get => _instanceFactory;
         init
         {
@@ -32,8 +35,8 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
     /// <summary>
     /// Strongly typed test invoker
     /// </summary>
-    public new Func<T, object?[], Task>? TestInvoker 
-    { 
+    public new Func<T, object?[], Task>? TestInvoker
+    {
         get => _testInvoker;
         init
         {
@@ -57,7 +60,7 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
     /// Handles all parameter injection including CancellationToken.
     /// </summary>
     public Func<object, object?[], TestContext, CancellationToken, Task>? InvokeTest { get; init; }
-    
+
     /// <summary>
     /// Strongly typed test invoker with CancellationToken support.
     /// Used by source generation mode.
@@ -73,20 +76,20 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
     /// <summary>
     /// Generator delegate that produces all data combinations for this test.
     /// </summary>
-    public override Func<IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator 
-    { 
+    public override Func<IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator
+    {
         get
         {
             if (_dataCombinationGenerator != null)
             {
                 return _dataCombinationGenerator;
             }
-            
+
             // Return empty enumerable if no generator is set
             return () => EmptyAsyncEnumerable();
         }
     }
-    
+
     #pragma warning disable CS1998 // Async method lacks 'await' operators
     private static async IAsyncEnumerable<TestDataCombination> EmptyAsyncEnumerable()
     {
@@ -119,34 +122,34 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
                     Context = context.Context
                 };
             }
-            
+
             // For AOT mode, create delegates from the strongly-typed ones
             if (InstanceFactory != null && InvokeTypedTest != null)
             {
                 return (context, metadata) =>
                 {
                     var typedMetadata = (TestMetadata<T>)metadata;
-                    
+
                     // Create instance delegate that uses context
                     Func<TestContext, Task<object>> createInstance = async (testContext) =>
                     {
                         var instance = typedMetadata.InstanceFactory!(context.ClassArguments);
-                        
+
                         // Apply property values using unified PropertyInjector
                         await PropertyInjector.InjectPropertiesAsync(
                             instance,
                             context.PropertyValues,
                             typedMetadata.PropertyInjections);
-                            
+
                         return instance;
                     };
-                    
+
                     // Convert InvokeTypedTest to the expected signature
                     Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
                     {
                         await typedMetadata.InvokeTypedTest!((T)instance, args, cancellationToken);
                     };
-                    
+
                     return new UnifiedExecutableTest(createInstance, invokeTest)
                     {
                         TestId = context.TestId,
@@ -161,7 +164,7 @@ public class TestMetadata<T> : TestMetadata, ITypedTestMetadata where T : class
                     };
                 };
             }
-            
+
             throw new InvalidOperationException($"Either (CreateInstance and InvokeTest) or (InstanceFactory and InvokeTypedTest) must be set for {typeof(T).Name}");
         }
     }

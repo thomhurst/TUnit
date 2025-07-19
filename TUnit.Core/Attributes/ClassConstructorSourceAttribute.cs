@@ -4,7 +4,7 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 // Base abstract class
-public abstract class BaseClassConstructorAttribute : TUnitAttribute, IDataAttribute
+public abstract class BaseClassConstructorAttribute : TUnitAttribute
 {
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
     public abstract Type ClassConstructorType { get; init; }
