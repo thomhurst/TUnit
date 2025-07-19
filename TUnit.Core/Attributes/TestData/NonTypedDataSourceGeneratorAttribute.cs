@@ -15,6 +15,7 @@ public abstract class UntypedDataSourceGeneratorAttribute : AsyncUntypedDataSour
         {
             yield return () => Task.FromResult(generateDataSource());
         }
+
         await Task.CompletedTask;
     }
 

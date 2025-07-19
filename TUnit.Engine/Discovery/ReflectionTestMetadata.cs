@@ -231,6 +231,14 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
     private List<TestDataSource> ExtractMethodDataSources()
     {
+        // Use the data sources already extracted by ReflectionTestDataCollector
+        // This includes custom data source generators like MatrixDataSourceAttribute
+        if (DataSources != null && DataSources.Length > 0)
+        {
+            return DataSources.ToList();
+        }
+
+        // Fallback to extracting from attributes if not already set
         var sources = new List<TestDataSource>();
 
         var attributes = _testMethod.GetCustomAttributes().ToList();
@@ -260,13 +268,18 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             }
         }
 
-        // Note: Custom data source generator attributes are now handled by ReflectionTestDataCollector
-
         return sources;
     }
 
     private List<TestDataSource> ExtractClassDataSources()
     {
+        // Use the data sources already extracted by ReflectionTestDataCollector
+        if (ClassDataSources != null && ClassDataSources.Length > 0)
+        {
+            return ClassDataSources.ToList();
+        }
+
+        // Fallback to extracting from attributes if not already set
         var sources = new List<TestDataSource>();
 
         var attributes = _testClass.GetCustomAttributes().ToList();
@@ -318,6 +331,13 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
     private List<PropertyDataSource> ExtractPropertyDataSources()
     {
+        // Use the property data sources already extracted by ReflectionTestDataCollector
+        if (PropertyDataSources != null && PropertyDataSources.Length > 0)
+        {
+            return PropertyDataSources.ToList();
+        }
+
+        // Fallback to extracting from attributes if not already set
         var sources = new List<PropertyDataSource>();
 
         var properties = _testClass.GetProperties()
@@ -379,21 +399,24 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         var methodRepeat = _testMethod.GetCustomAttribute<RepeatAttribute>();
         if (methodRepeat != null)
         {
-            return methodRepeat.Times;
+            // Times represents additional repeats, so total executions = Times + 1
+            return methodRepeat.Times + 1;
         }
 
         // Check class level
         var classRepeat = _testClass.GetCustomAttribute<RepeatAttribute>();
         if (classRepeat != null)
         {
-            return classRepeat.Times;
+            // Times represents additional repeats, so total executions = Times + 1
+            return classRepeat.Times + 1;
         }
 
         // Check assembly level
         var assemblyRepeat = _testClass.Assembly.GetCustomAttribute<RepeatAttribute>();
         if (assemblyRepeat != null)
         {
-            return assemblyRepeat.Times;
+            // Times represents additional repeats, so total executions = Times + 1
+            return assemblyRepeat.Times + 1;
         }
 
         return 1; // Default to 1 if no repeat attribute found

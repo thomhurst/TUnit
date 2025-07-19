@@ -766,7 +766,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                         genericDef == typeof(AsyncDataSourceGeneratorAttribute<>) ||
                         genericDef == typeof(AsyncDataSourceGeneratorAttribute<,>))
                     {
-                        var dataSource = CreateDataSourceFromGenerator(attr, testMethod.DeclaringType!);
+                        var dataSource = CreateDataSourceFromGenerator(attr, testMethod.DeclaringType!, testMethod);
                         if (dataSource != null)
                         {
                             dataSources.Add(dataSource);
@@ -774,9 +774,9 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                         break;
                     }
                 }
-                else if (baseType == typeof(AsyncUntypedDataSourceGeneratorAttribute))
+                else if (baseType == typeof(UntypedDataSourceGeneratorAttribute) || baseType == typeof(AsyncUntypedDataSourceGeneratorAttribute))
                 {
-                    var dataSource = CreateDataSourceFromGenerator(attr, testMethod.DeclaringType!);
+                    var dataSource = CreateDataSourceFromGenerator(attr, testMethod.DeclaringType!, testMethod);
                     if (dataSource != null)
                     {
                         dataSources.Add(dataSource);
@@ -1057,7 +1057,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
 
     [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
-    private static TestDataSource? CreateDataSourceFromGenerator(Attribute attr, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass)
+    private static TestDataSource? CreateDataSourceFromGenerator(Attribute attr, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass, MethodInfo testMethod)
     {
         try
         {
@@ -1090,14 +1090,14 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             {
                 // For async generators, create an AsyncDelegateDataSource
                 return new AsyncDelegateDataSource(cancellationToken => 
-                    CreateAsyncGeneratorEnumerable(attr, attrType, testClass, cancellationToken));
+                    CreateAsyncGeneratorEnumerable(attr, attrType, testClass, testMethod, cancellationToken));
             }
             else
             {
                 // For sync generators, create a DelegateDataSource
                 return new DelegateDataSource(() =>
                 {
-                    var metadata = CreateDataGeneratorMetadata(testClass);
+                    var metadata = CreateDataGeneratorMetadata(testClass, testMethod);
                     
                     // Get the GenerateDataSources method
                     var generateMethod = attrType.GetMethod("GenerateDataSources", 
@@ -1126,9 +1126,10 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         Attribute attr, 
         Type attrType, 
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass,
+        MethodInfo testMethod,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var metadata = CreateDataGeneratorMetadata(testClass);
+        var metadata = CreateDataGeneratorMetadata(testClass, testMethod);
         
         // Get the GenerateDataSourcesAsync method
         var generateMethod = attrType.GetMethod("GenerateDataSourcesAsync", 
@@ -1156,7 +1157,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         }
     }
     
-    private static DataGeneratorMetadata CreateDataGeneratorMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass)
+    private static DataGeneratorMetadata CreateDataGeneratorMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass, MethodInfo testMethod)
     {
         // Create TypeReference for the class
         var classTypeRef = new TypeReference
@@ -1181,23 +1182,43 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             Parent = null // Parent class, null for now
         });
         
-        // Create MethodMetadata (minimal for data generation)
+        // Create parameter metadata for the test method
+        var parameterMetadataList = new List<ParameterMetadata>();
+        var methodParams = testMethod.GetParameters();
+        foreach (var param in methodParams)
+        {
+            var paramTypeRef = new TypeReference 
+            { 
+                AssemblyQualifiedName = param.ParameterType.AssemblyQualifiedName 
+            };
+            
+            var paramMetadata = new ParameterMetadata(param.ParameterType)
+            {
+                Name = param.Name ?? "param",
+                TypeReference = paramTypeRef,
+                ReflectionInfo = param  // This is crucial for MatrixDataSourceAttribute
+            };
+            
+            parameterMetadataList.Add(paramMetadata);
+        }
+        
+        // Create MethodMetadata with actual method info
         var methodMetadata = new MethodMetadata
         {
-            Name = "TestMethod", // Placeholder name
+            Name = testMethod.Name,
             TypeReference = classTypeRef,
             Type = testClass,
-            Parameters = Array.Empty<ParameterMetadata>(),
-            GenericTypeCount = 0,
+            Parameters = parameterMetadataList.ToArray(),
+            GenericTypeCount = testMethod.IsGenericMethodDefinition ? testMethod.GetGenericArguments().Length : 0,
             Class = classMetadata,
-            ReturnTypeReference = new TypeReference { AssemblyQualifiedName = typeof(void).AssemblyQualifiedName },
-            ReturnType = typeof(void)
+            ReturnTypeReference = new TypeReference { AssemblyQualifiedName = testMethod.ReturnType.AssemblyQualifiedName },
+            ReturnType = testMethod.ReturnType
         };
         
         return new DataGeneratorMetadata
         {
             TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
-            MembersToGenerate = Array.Empty<MemberMetadata>(),
+            MembersToGenerate = parameterMetadataList.ToArray(),  // Pass the parameters as members to generate
             TestInformation = methodMetadata,
             Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
             TestSessionId = Guid.NewGuid().ToString(),
@@ -1326,14 +1347,50 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         {
             var result = method.Invoke(instance, args);
 
-            // If result is a tuple or single value, wrap it
-            if (result != null && result.GetType().Name.StartsWith("ValueTuple"))
+            // If result is null, return empty
+            if (result == null)
+            {
+                return [];
+            }
+
+            var resultType = result.GetType();
+
+            // If result is a tuple, extract values
+            if (resultType.Name.StartsWith("ValueTuple"))
             {
                 // Extract tuple values
-                var tupleType = result.GetType();
-                var fields = tupleType.GetFields();
+                var fields = resultType.GetFields();
                 var values = fields.Select(f => f.GetValue(result)).ToArray();
                 return [[values]];
+            }
+
+            // If result is an array of tuples, extract each tuple's values
+            if (resultType.IsArray && resultType.GetElementType()?.Name.StartsWith("ValueTuple") == true)
+            {
+                var array = (Array)result;
+                var results = new List<object?[]>();
+                foreach (var item in array)
+                {
+                    if (item != null)
+                    {
+                        var tupleType = item.GetType();
+                        var fields = tupleType.GetFields();
+                        var values = fields.Select(f => f.GetValue(item)).ToArray();
+                        results.Add(values);
+                    }
+                }
+                return results;
+            }
+
+            // If result is an array or IEnumerable (but not string), treat each element as separate test data
+            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+            {
+                var results = new List<object?[]>();
+                foreach (var item in enumerable)
+                {
+                    results.Add([item]);
+                }
+                return results;
             }
 
             // Single value
@@ -1563,11 +1620,11 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     paramCountMismatchCheck,
                     callExpr
                 );
-                body = Expression.Call(
-                    typeof(ReflectionTestDataCollector),
-                    nameof(ConvertToNonGenericTask),
-                    null,
-                    callWithCheck);
+                var taskType = testMethod.ReturnType.GetGenericArguments()[0];
+                var convertMethod = typeof(ReflectionTestDataCollector)
+                    .GetMethod(nameof(ConvertToNonGenericTask), BindingFlags.NonPublic | BindingFlags.Static)!
+                    .MakeGenericMethod(taskType);
+                body = Expression.Call(convertMethod, callWithCheck);
             }
             else if (testMethod.ReturnType == typeof(ValueTask))
             {
@@ -1578,6 +1635,19 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 body = Expression.Call(
                     callWithCheck,
                     typeof(ValueTask).GetMethod("AsTask")!);
+            }
+            else if (testMethod.ReturnType.IsGenericType &&
+                     testMethod.ReturnType.GetGenericTypeDefinition() == typeof(ValueTask<>))
+            {
+                var callWithCheck = Expression.Block(
+                    paramCountMismatchCheck,
+                    callExpr
+                );
+                var taskType = testMethod.ReturnType.GetGenericArguments()[0];
+                var convertMethod = typeof(ReflectionTestDataCollector)
+                    .GetMethod(nameof(ConvertValueTaskToTask), BindingFlags.NonPublic | BindingFlags.Static)!
+                    .MakeGenericMethod(taskType);
+                body = Expression.Call(convertMethod, callWithCheck);
             }
             else
             {
@@ -1624,6 +1694,11 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         return task;
     }
 
+    private static Task ConvertValueTaskToTask<T>(ValueTask<T> valueTask)
+    {
+        return valueTask.AsTask();
+    }
+
     [UnconditionalSuppressMessage("Trimming", "IL2026:Using member 'System.Reflection.Assembly.GetTypes()' which has 'RequiresUnreferencedCodeAttribute' can break functionality when trimming application code", Justification = "Reflection mode cannot support trimming")]
     [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     private static TestHooks DiscoverHooks([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type testClass)
@@ -1650,6 +1725,10 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     var beforeAttrs = method.GetCustomAttributes<BeforeAttribute>();
                     foreach (var attr in beforeAttrs)
                     {
+                        // Skip TestDiscovery hooks - they run during discovery phase, not test execution
+                        if (attr.HookType.HasFlag(HookType.TestDiscovery))
+                            continue;
+                            
                         var hookMetadata = CreateHookMetadata(method, attr, true);
                         if (hookMetadata != null)
                         {
@@ -1664,6 +1743,10 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     var afterAttrs = method.GetCustomAttributes<AfterAttribute>();
                     foreach (var attr in afterAttrs)
                     {
+                        // Skip TestDiscovery hooks - they run during discovery phase, not test execution
+                        if (attr.HookType.HasFlag(HookType.TestDiscovery))
+                            continue;
+                            
                         var hookMetadata = CreateHookMetadata(method, attr, false);
                         if (hookMetadata != null)
                         {
@@ -1703,7 +1786,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     {
                         // Check for assembly-level Before hooks
                         var beforeAttrs = method.GetCustomAttributes<BeforeAttribute>()
-                            .Where(a => a.HookType.HasFlag(HookType.Assembly));
+                            .Where(a => a.HookType.HasFlag(HookType.Assembly) && !a.HookType.HasFlag(HookType.TestDiscovery));
                         foreach (var attr in beforeAttrs)
                         {
                             var hookMetadata = CreateHookMetadata(method, attr, true);
@@ -1715,7 +1798,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
                         // Check for assembly-level After hooks
                         var afterAttrs = method.GetCustomAttributes<AfterAttribute>()
-                            .Where(a => a.HookType.HasFlag(HookType.Assembly));
+                            .Where(a => a.HookType.HasFlag(HookType.Assembly) && !a.HookType.HasFlag(HookType.TestDiscovery));
                         foreach (var attr in afterAttrs)
                         {
                             var hookMetadata = CreateHookMetadata(method, attr, false);

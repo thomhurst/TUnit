@@ -147,7 +147,8 @@
       "Bash(\"D:\\git\\TUnit\\TUnit.TestProject\\bin\\Debug\\net8.0\\TUnit.TestProject.exe\" --treenode-filter \"/*/*/*/TestWithValue\")",
       "Bash(del TestTypedDataSources.cs)",
       "Bash(tasklist)",
-      "Bash(tail:*)"
+      "Bash(tail:*)",
+      "Bash(del GenericTestExample.cs)"
     ],
     "deny": []
   },

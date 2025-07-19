@@ -144,6 +144,7 @@ public sealed class TestBuilder : ITestBuilder
 
     private static string GenerateDisplayName(TestMetadata metadata, string argumentsDisplayText)
     {
+        // Use shared display name builder for consistency
         var displayName = metadata.TestName;
 
         if (!string.IsNullOrEmpty(argumentsDisplayText))
