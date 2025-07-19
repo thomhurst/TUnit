@@ -533,10 +533,10 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 dataEnumerable = data;
             }
             
-            var dataFactories = dataEnumerable.Select(value => new Func<Task<object?>>(() =>
+            var dataFactories = dataEnumerable.Select(value => new Func<Task<object?>>(async () =>
             {
-                var resolvedValue = ResolveTestDataValue(value);
-                return Task.FromResult(resolvedValue);
+                var resolvedValue = await ResolveTestDataValueAsync(value);
+                return resolvedValue;
             })).ToArray();
             
             combinations.Add(new MethodDataCombination
@@ -548,6 +548,77 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
 
         return combinations;
+    }
+
+    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern",
+        Justification = "Reflection mode cannot support AOT")]
+    private static async Task<object?> ResolveTestDataValueAsync(object? value)
+    {
+        if (value == null)
+        {
+            return null;
+        }
+
+        var type = value.GetType();
+
+        // Check if it's a Func<Task<T>>
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))
+        {
+            var returnType = type.GetGenericArguments()[0];
+            
+            // Invoke the Func to get the result
+            var invokeMethod = type.GetMethod("Invoke");
+            var result = invokeMethod!.Invoke(value, null);
+            
+            // If the result is a Task, await it
+            if (result is Task task)
+            {
+                await task.ConfigureAwait(false);
+                
+                // Get the Result property for Task<T>
+                if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>))
+                {
+                    var resultProperty = task.GetType().GetProperty("Result");
+                    return resultProperty?.GetValue(task);
+                }
+                
+                // For non-generic Task
+                return null;
+            }
+            
+            return result;
+        }
+
+        // Check if it's already a Task<T>
+        if (value is Task task2)
+        {
+            await task2.ConfigureAwait(false);
+            
+            var taskType = task2.GetType();
+            if (taskType.IsGenericType && taskType.GetGenericTypeDefinition() == typeof(Task<>))
+            {
+                var resultProperty = taskType.GetProperty("Result");
+                return resultProperty?.GetValue(task2);
+            }
+            
+            return null;
+        }
+
+        // Check for other delegate types that might need invocation
+        if (typeof(Delegate).IsAssignableFrom(type))
+        {
+            var invokeMethod = type.GetMethod("Invoke");
+            if (invokeMethod != null && invokeMethod.GetParameters().Length == 0)
+            {
+                // It's a parameterless delegate, invoke it
+                var result = invokeMethod.Invoke(value, null);
+                
+                // Recursively resolve in case it returns a Task
+                return await ResolveTestDataValueAsync(result).ConfigureAwait(false);
+            }
+        }
+
+        return value;
     }
 
     [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern",
@@ -605,10 +676,10 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                     dataEnumerable = data;
                 }
                 
-                var dataFactories = dataEnumerable.Select(value => new Func<Task<object?>>(() =>
+                var dataFactories = dataEnumerable.Select(value => new Func<Task<object?>>(async () =>
                 {
-                    var resolvedValue = ResolveTestDataValue(value);
-                    return Task.FromResult(resolvedValue);
+                    var resolvedValue = await ResolveTestDataValueAsync(value);
+                    return resolvedValue;
                 })).ToArray();
                 
                 combinations.Add(new MethodDataCombination
@@ -638,10 +709,10 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         foreach (var factory in factories)
         {
             var data = factory();
-            var dataFactories = data.Select(value => new Func<Task<object?>>(() =>
+            var dataFactories = data.Select(value => new Func<Task<object?>>(async () =>
             {
-                var resolvedValue = ResolveTestDataValue(value);
-                return Task.FromResult(resolvedValue);
+                var resolvedValue = await ResolveTestDataValueAsync(value);
+                return resolvedValue;
             })).ToArray();
 
             combinations.Add(new ClassDataCombination
@@ -666,10 +737,10 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             await foreach (var factory in asyncDataSource.GetDataFactoriesAsync())
             {
                 var data = factory();
-                var dataFactories = data.Select(value => new Func<Task<object?>>(() =>
+                var dataFactories = data.Select(value => new Func<Task<object?>>(async () =>
                 {
-                    var resolvedValue = ResolveTestDataValue(value);
-                    return Task.FromResult(resolvedValue);
+                    var resolvedValue = await ResolveTestDataValueAsync(value);
+                    return resolvedValue;
                 })).ToArray();
 
                 combinations.Add(new ClassDataCombination

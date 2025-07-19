@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace TUnit.Core.DataSources;
 
@@ -8,8 +9,47 @@ namespace TUnit.Core.DataSources;
 public static class DataSourceProcessor
 {
     /// <summary>
-    /// Processes a generator result item and extracts the data values
+    /// AOT-compatible method to process typed generator items
     /// </summary>
+    public static async Task<List<object?[]>> ProcessTypedGeneratorItemAsync<T>(Func<Task<T>> taskFunc)
+    {
+        var items = new List<object?[]>();
+        var data = await taskFunc().ConfigureAwait(false);
+        
+        if (data is object?[] array)
+        {
+            items.Add(array);
+        }
+        else if (data != null)
+        {
+            items.Add(new[] { (object?)data });
+        }
+        
+        return items;
+    }
+
+    /// <summary>
+    /// AOT-compatible method to process typed array generator items
+    /// </summary>
+    public static async Task<List<object?[]>> ProcessTypedArrayGeneratorItemAsync<T>(Func<Task<T[]>> taskFunc)
+    {
+        var items = new List<object?[]>();
+        var data = await taskFunc().ConfigureAwait(false);
+        
+        if (data != null)
+        {
+            items.Add(data.Cast<object?>().ToArray());
+        }
+        
+        return items;
+    }
+
+    /// <summary>
+    /// Processes a generator result item and extracts the data values
+    /// This method uses reflection and is only suitable for reflection mode
+    /// </summary>
+    [RequiresUnreferencedCode("This method uses reflection to process data sources")]
+    [RequiresDynamicCode("This method may create types at runtime")]
     public static async Task<List<object?[]>> ProcessGeneratorItemAsync(object? item)
     {
         var items = new List<object?[]>();
@@ -76,10 +116,27 @@ public static class DataSourceProcessor
     }
 
     /// <summary>
-    /// Resolves a value that might be wrapped in a Func or Task
+    /// AOT-compatible typed value resolver for known types
     /// </summary>
-    [UnconditionalSuppressMessage("AOT", "IL2075:Target method return value does not satisfy annotation requirements.",
-        Justification = "This is shared code used by reflection mode which doesn't support AOT")]
+    public static async Task<object?> ResolveTypedValueAsync<T>(Func<Task<T>> taskFunc)
+    {
+        return await taskFunc().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// AOT-compatible synchronous typed value resolver
+    /// </summary>
+    public static object? ResolveTypedValue<T>(Func<T> func)
+    {
+        return func();
+    }
+
+    /// <summary>
+    /// Resolves a value that might be wrapped in a Func or Task
+    /// This method uses reflection and is only suitable for reflection mode
+    /// </summary>
+    [RequiresUnreferencedCode("This method uses reflection to resolve values")]
+    [RequiresDynamicCode("This method may invoke methods dynamically")]
     public static async Task<object?> ResolveValueAsync(object? value)
     {
         if (value == null)
@@ -144,7 +201,9 @@ public static class DataSourceProcessor
 
     /// <summary>
     /// Processes method data source results into a consistent format
+    /// This method uses reflection for tuple processing and is not AOT-compatible
     /// </summary>
+    [RequiresUnreferencedCode("This method uses reflection for tuple processing")]
     public static IEnumerable<object?[]> ProcessMethodDataSourceResult(object? result)
     {
         if (result == null)
@@ -175,28 +234,19 @@ public static class DataSourceProcessor
         }
 
         // Handle arrays of tuples
-        if (resultType.IsArray && resultType.GetElementType()?.Name.StartsWith("ValueTuple") == true)
+        if (TryProcessTupleArray(result, resultType))
         {
-            var array = (Array)result;
-            foreach (var item in array)
+            foreach (var values in ProcessTupleArray(result, resultType))
             {
-                if (item != null)
-                {
-                    var tupleType = item.GetType();
-                    var fields = tupleType.GetFields();
-                    var values = fields.Select(f => f.GetValue(item)).ToArray();
-                    yield return values;
-                }
+                yield return values;
             }
             yield break;
         }
 
         // Handle single tuple
-        if (resultType.Name.StartsWith("ValueTuple"))
+        if (TryProcessSingleTuple(result, resultType))
         {
-            var fields = resultType.GetFields();
-            var values = fields.Select(f => f.GetValue(result)).ToArray();
-            yield return values;
+            yield return ProcessSingleTuple(result, resultType);
             yield break;
         }
 
@@ -208,7 +258,7 @@ public static class DataSourceProcessor
         }
 
         // Handle IEnumerable (generic catch-all)
-        if (result is IEnumerable enumerable)
+        if (result is System.Collections.IEnumerable enumerable)
         {
             var items = new List<object?>();
             foreach (var item in enumerable)
@@ -226,4 +276,43 @@ public static class DataSourceProcessor
         // Single value
         yield return new[] { result };
     }
+
+    #region Tuple Processing Helpers (Reflection-based, not AOT-compatible)
+
+    [RequiresUnreferencedCode("Tuple processing requires reflection")]
+    private static bool TryProcessTupleArray(object result, Type resultType)
+    {
+        return resultType.IsArray && resultType.GetElementType()?.Name.StartsWith("ValueTuple") == true;
+    }
+
+    [RequiresUnreferencedCode("Tuple processing requires reflection")]
+    private static IEnumerable<object?[]> ProcessTupleArray(object result, Type resultType)
+    {
+        var array = (Array)result;
+        foreach (var item in array)
+        {
+            if (item != null)
+            {
+                var tupleType = item.GetType();
+                var fields = tupleType.GetFields();
+                var values = fields.Select(f => f.GetValue(item)).ToArray();
+                yield return values;
+            }
+        }
+    }
+
+    [RequiresUnreferencedCode("Tuple processing requires reflection")]
+    private static bool TryProcessSingleTuple(object result, Type resultType)
+    {
+        return resultType.Name.StartsWith("ValueTuple");
+    }
+
+    [RequiresUnreferencedCode("Tuple processing requires reflection")]
+    private static object?[] ProcessSingleTuple(object result, Type resultType)
+    {
+        var fields = resultType.GetFields();
+        return fields.Select(f => f.GetValue(result)).ToArray();
+    }
+
+    #endregion
 }

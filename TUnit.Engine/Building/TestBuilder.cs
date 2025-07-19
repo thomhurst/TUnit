@@ -1,5 +1,6 @@
 using TUnit.Core;
 using TUnit.Core.Data;
+using TUnit.Core.DataSources;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
@@ -124,7 +125,8 @@ public sealed class TestBuilder : ITestBuilder
             return string.Empty;
         }
 
-        return ArgumentFormatter.FormatArguments(allArgs);
+        // Use shared formatter for consistent formatting
+        return TestDataFormatter.FormatArguments(allArgs.ToArray());
     }
 
     private async Task<Func<TestContext, CancellationToken, Task>[]> CreateTestHooksAsync(Type testClassType, bool isBeforeHook)
@@ -144,7 +146,7 @@ public sealed class TestBuilder : ITestBuilder
 
     private static string GenerateDisplayName(TestMetadata metadata, string argumentsDisplayText)
     {
-        // Use shared display name builder for consistency
+        // Build default display name - custom display names are handled by discovery event receivers
         var displayName = metadata.TestName;
 
         if (!string.IsNullOrEmpty(argumentsDisplayText))
