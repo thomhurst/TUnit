@@ -32,6 +32,8 @@ internal sealed class HookOrchestrator
         _contextProvider = contextProvider;
     }
 
+    public IContextProvider GetContextProvider() => _contextProvider;
+
     /// <summary>
     /// Gets or creates a cached task for BeforeAssembly hooks.
     /// This ensures the hooks only run once and all tests await the same result.

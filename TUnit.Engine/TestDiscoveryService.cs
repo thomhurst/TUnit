@@ -71,6 +71,10 @@ internal sealed class TestDiscoveryService : IDataProducer
             tests.Add(test);
         }
 
+        // Populate the TestDiscoveryContext with all discovered tests before running AfterTestDiscovery hooks
+        var contextProvider = _hookOrchestrator.GetContextProvider();
+        contextProvider.TestDiscoveryContext.AddTests(tests.Select(t => t.Context));
+
         var afterDiscoveryContext = await _hookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken);
 #if NET
         if (afterDiscoveryContext != null)
