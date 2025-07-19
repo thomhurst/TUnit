@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
@@ -85,7 +86,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         ContextManager = new ContextManager(context.Request.Session.SessionUid.Value, stringFilter);
 
-        TUnitMessageBus = Register(new TUnitMessageBus(extension, CommandLineOptions, context));
+        TUnitMessageBus = Register(new TUnitMessageBus(extension, CommandLineOptions, _capabilities.GetCapability<ITrxReportCapability>()!, context));
 
         var instanceTracker = Register(new InstanceTracker());
 
