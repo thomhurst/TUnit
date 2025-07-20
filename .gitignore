@@ -415,3 +415,4 @@ TUnit.TestProject/TestDiscovery*.txt
 TUnit.TestProject/TestSession*.txt
 
 .mcp.json
+requirements
