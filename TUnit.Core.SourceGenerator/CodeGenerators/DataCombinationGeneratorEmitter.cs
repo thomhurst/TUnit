@@ -117,7 +117,7 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("// Ensure we have at least one combination of each type");
         writer.AppendLine("if (methodCombinations.Count == 0) methodCombinations.Add(new TestDataCombination());");
         writer.AppendLine("if (classCombinations.Count == 0) classCombinations.Add(new TestDataCombination());");
-        writer.AppendLine("if (propertyCombinations.Count == 0) propertyCombinations.Add(new TestDataCombination());");
+        writer.AppendLine("if (propertyCombinations.Count == 0) propertyCombinations.Add(new PropertyDataCombination());");
         writer.AppendLine();
 
         EmitCartesianProduct(writer);
@@ -223,43 +223,10 @@ public static class DataCombinationGeneratorEmitter
             return;
         }
 
-        writer.AppendLine();
-        writer.AppendLine("// Property data sources");
-        writer.AppendLine("var propertyValues = new Dictionary<string, Func<Task<object?>>>();");
-        writer.AppendLine();
-        
-        // Generate DataGeneratorMetadata for property data sources  
-        writer.AppendLine("// Create DataGeneratorMetadata for property data sources");
-        writer.AppendLine("var propertyDataGeneratorMetadata = new DataGeneratorMetadata");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"TestBuilderContext = new TestBuilderContextAccessor(TestBuilderContext.Current ?? new TestBuilderContext()),");
-        writer.AppendLine($"MembersToGenerate = Array.Empty<MemberMetadata>(),");
-        writer.Append("TestInformation = ");
-        TestInformationGenerator.GenerateTestInformation(writer, methodSymbol, typeSymbol);
-        writer.AppendLine(",");
-        writer.AppendLine($"Type = DataGeneratorType.Property,");
-        writer.AppendLine($"TestSessionId = testSessionId,");
-        writer.AppendLine($"TestClassInstance = null, // Will be set when property is injected");
-        writer.AppendLine($"ClassInstanceArguments = null // Will be set when property is injected");
-        writer.Unindent();
-        writer.AppendLine("};");
-        writer.AppendLine();
+        // Properties are now resolved directly via PropertyDataSources in PropertyInjector
+        // No need to generate property value resolution code here
 
-        // Process property data sources inline
-        writer.AppendLine("// Process property data sources using DataSourceProcessor");
-
-        // Fallback for legacy code that processes propertyDataSources directly
-        if (propertyDataSources.Length > 0)
-        {
-            writer.AppendLine("// Legacy property data source processing (for backwards compatibility)");
-            foreach (var propData in propertyDataSources)
-            {
-                EmitPropertyDataSource(writer, propData, typeSymbol, methodSymbol);
-            }
-        }
-
-        writer.AppendLine("propertyCombinations.Add(new TestDataCombination { });");
+        writer.AppendLine("propertyCombinations.Add(new PropertyDataCombination { });");
     }
 
     private static void EmitDataSourceCombination(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
@@ -750,193 +717,6 @@ public static class DataCombinationGeneratorEmitter
         {
             writer.AppendLine($"// Error: InstanceMethodDataSourceAttribute is not generic");
             EmitEmptyCombination(writer, listName);
-        }
-    }
-
-    private static void EmitPropertyDataSource(CodeWriter writer, PropertyWithDataSource propData, INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol)
-    {
-        try
-        {
-            var propertyName = propData.Property.Name;
-            var attr = propData.DataSourceAttribute;
-
-            if (attr.AttributeClass == null)
-            {
-                writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>(null);");
-                return;
-            }
-
-            // Generate data source instantiation inline
-            writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () =>");
-            writer.AppendLine("{");
-            writer.Indent();
-            
-            writer.Append("var dataSource = ");
-            // Generate the data source attribute inline (similar to how TestMetadataGenerator does it)
-            GenerateInlineDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
-            writer.AppendLine(";");
-            
-            writer.AppendLine("// Process the data source to get its value");
-            writer.AppendLine("var dataRows = dataSource.GetDataRowsAsync(propertyDataGeneratorMetadata);");
-            writer.AppendLine("await foreach (var factory in dataRows)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("var args = await factory();");
-            writer.AppendLine("return args?.FirstOrDefault();");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("return null;");
-            
-            writer.Unindent();
-            writer.AppendLine("};");
-        }
-        catch (Exception ex)
-        {
-            writer.AppendLine($"// Error processing property data source for {propData.Property.Name}: {ex.Message}");
-            writer.AppendLine($"propertyValues[\"{propData.Property.Name}\"] = () => Task.FromResult<object?>(null);");
-        }
-    }
-
-    private static void EmitPropertyArgumentsDataSource(CodeWriter writer, string propertyName, AttributeData attr)
-    {
-        if (attr.ConstructorArguments.Length > 0)
-        {
-            if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
-                attr.ConstructorArguments[0].Values.Length > 0)
-            {
-                var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0]);
-                writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>({value});");
-            }
-            else if (attr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
-            {
-                var value = FormatConstantValue(attr.ConstructorArguments[0]);
-                writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>({value});");
-            }
-        }
-        else
-        {
-            writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>(null);");
-        }
-    }
-
-    private static void EmitPropertyAsyncDataSource(CodeWriter writer, string propertyName, AttributeData attr)
-    {
-        writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => ");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        // For generic data source attributes (e.g. ClassDataSource<T>), the type is in the generic type argument
-        if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
-        {
-            var dataSourceType = attr.AttributeClass.TypeArguments[0];
-            var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-            writer.AppendLine($"return await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(propertyDataGeneratorMetadata, testSessionId);");
-        }
-        // For non-generic data source attributes, the type is in the constructor arguments
-        else if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol dataSourceType)
-        {
-            var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-            writer.AppendLine($"return await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(propertyDataGeneratorMetadata, testSessionId);");
-        }
-        else
-        {
-            writer.AppendLine("throw new InvalidOperationException(\"ClassDataSource attribute does not have a valid type specified. Ensure the attribute has either a generic type argument or a Type constructor argument.\");");
-        }
-        
-        writer.Unindent();
-        writer.AppendLine("};");
-    }
-
-    private static void EmitPropertyMethodDataSource(CodeWriter writer, string propertyName, AttributeData attr, INamedTypeSymbol typeSymbol)
-    {
-        writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => ");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        string? methodName = null;
-        ITypeSymbol? targetType = null;
-        
-        // Extract method name and target type from attribute
-        if (attr.ConstructorArguments is
-            [
-                { Value: ITypeSymbol } _, _
-            ])
-        {
-            targetType = (ITypeSymbol)attr.ConstructorArguments[0].Value;
-            methodName = attr.ConstructorArguments[1].Value?.ToString();
-        }
-        else if (attr.ConstructorArguments.Length >= 1)
-        {
-            methodName = attr.ConstructorArguments[0].Value?.ToString();
-            targetType = typeSymbol;
-        }
-
-        if (string.IsNullOrEmpty(methodName))
-        {
-            writer.AppendLine("throw new InvalidOperationException(\"MethodDataSource attribute does not have a valid method name specified.\");");
-        }
-        else
-        {
-            var fullyQualifiedType = targetType?.GloballyQualifiedNonGeneric() ?? typeSymbol.GloballyQualifiedNonGeneric();
-            writer.AppendLine($"var data = {fullyQualifiedType}.{methodName}();");
-            
-            // Use AOT-compatible helper method that handles all the complexity
-            writer.AppendLine("return await global::TUnit.Core.Helpers.DataSourceHelpers.ProcessDataSourceResultGeneric(data);");
-        }
-        
-        writer.Unindent();
-        writer.AppendLine("};");
-    }
-
-    private static void EmitPropertyClassDataSource(CodeWriter writer, string propertyName, AttributeData attr)
-    {
-        writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => ");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        // For generic ClassDataSource<T>, the type is in the generic type argument
-        if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
-        {
-            var dataSourceType = attr.AttributeClass.TypeArguments[0];
-            EmitClassDataSourceInstantiation(writer, dataSourceType, usePropertyTestInformation: true);
-        }
-        // For non-generic ClassDataSource, the type is in the constructor arguments
-        else if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol dataSourceType)
-        {
-            EmitClassDataSourceInstantiation(writer, dataSourceType, usePropertyTestInformation: true);
-        }
-        else
-        {
-            writer.AppendLine("throw new InvalidOperationException(\"ClassDataSource attribute on property does not have a valid type specified.\");");
-        }
-        
-        writer.Unindent();
-        writer.AppendLine("};");
-    }
-
-    private static void EmitClassDataSourceInstantiation(CodeWriter writer, ITypeSymbol dataSourceType, bool usePropertyTestInformation = false)
-    {
-        var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-        var testInfoVar = usePropertyTestInformation ? "propertyDataGeneratorMetadata" : "testInformation";
-        writer.AppendLine($"return await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}({testInfoVar}, testSessionId);");
-    }
-
-    private static void EmitPropertyDataSourceGenerator(CodeWriter writer, string propertyName, AttributeData attr, IPropertySymbol property)
-    {
-        // For now, handle generic data source generators by creating simple instances
-        // This is a simplified implementation that can be enhanced later
-        if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol targetType)
-        {
-            var fullyQualifiedType = targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-            writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(propertyDataGeneratorMetadata, testSessionId);");
-        }
-        else
-        {
-            writer.AppendLine($"propertyValues[\"{propertyName}\"] = () => Task.FromResult<object?>(null);");
         }
     }
 
