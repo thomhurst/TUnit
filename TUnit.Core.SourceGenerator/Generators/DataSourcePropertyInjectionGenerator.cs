@@ -104,9 +104,7 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
         writer.AppendLine("#pragma warning disable");
         writer.AppendLine("#nullable enable");
         writer.AppendLine();
-        writer.AppendLine("using System;");
-        writer.AppendLine("using System.Collections.Generic;");
-        writer.AppendLine("using TUnit.Core;");
+        // No using statements - use globally qualified types
         writer.AppendLine();
         writer.AppendLine("namespace TUnit.Generated;");
         writer.AppendLine();
@@ -141,7 +139,7 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
 
     private static void GenerateRegistrationForType(CodeWriter writer, DataSourceTypeInfo dataSourceType)
     {
-        var typeName = dataSourceType.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var typeName = dataSourceType.TypeSymbol.GloballyQualified();
         var safeTypeName = GetSafeTypeName(dataSourceType.TypeSymbol);
         
         writer.AppendLine($"// Registration for {typeName}");
@@ -149,17 +147,17 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
         writer.Indent();
         
         // Generate property data sources array
-        writer.AppendLine("var propertyDataSources = new PropertyDataSource[]");
+        writer.AppendLine("var propertyDataSources = new global::TUnit.Core.PropertyDataSource[]");
         writer.AppendLine("{");
         writer.Indent();
         
         foreach (var propInfo in dataSourceType.PropertiesWithDataSources)
         {
-            writer.AppendLine("new PropertyDataSource");
+            writer.AppendLine("new global::TUnit.Core.PropertyDataSource");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine($"PropertyName = \"{propInfo.Property.Name}\",");
-            writer.AppendLine($"PropertyType = typeof({propInfo.Property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
+            writer.AppendLine($"PropertyType = typeof({propInfo.Property.Type.GloballyQualified()}),");
             
             // Generate the data source attribute instantiation
             writer.Append("DataSource = ");
@@ -174,18 +172,18 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
         writer.AppendLine();
         
         // Generate property injection data array
-        writer.AppendLine("var injectionData = new PropertyInjectionData[]");
+        writer.AppendLine("var injectionData = new global::TUnit.Core.PropertyInjectionData[]");
         writer.AppendLine("{");
         writer.Indent();
         
         foreach (var propInfo in dataSourceType.PropertiesWithDataSources)
         {
             var property = propInfo.Property;
-            writer.AppendLine("new PropertyInjectionData");
+            writer.AppendLine("new global::TUnit.Core.PropertyInjectionData");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine($"PropertyName = \"{property.Name}\",");
-            writer.AppendLine($"PropertyType = typeof({property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
+            writer.AppendLine($"PropertyType = typeof({property.Type.GloballyQualified()}),");
             
             // Generate setter
             if (property.SetMethod.IsInitOnly)
@@ -193,17 +191,17 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
                 writer.AppendLine("#if NET8_0_OR_GREATER");
                 writer.AppendLine($"Setter = (instance, value) => {safeTypeName}_Set{property.Name}(({typeName})instance, value),");
                 writer.AppendLine("#else");
-                writer.AppendLine($"Setter = (instance, value) => throw new NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
+                writer.AppendLine($"Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
                 writer.AppendLine("#endif");
             }
             else
             {
-                writer.AppendLine($"Setter = (instance, value) => (({typeName})instance).{property.Name} = ({property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})value,");
+                writer.AppendLine($"Setter = (instance, value) => (({typeName})instance).{property.Name} = ({property.Type.GloballyQualified()})value,");
             }
             
-            writer.AppendLine("ValueFactory = () => throw new InvalidOperationException(\"Should not be called\"),");
-            writer.AppendLine("NestedPropertyInjections = Array.Empty<PropertyInjectionData>(),");
-            writer.AppendLine("NestedPropertyValueFactory = obj => new Dictionary<string, object?>()");
+            writer.AppendLine("ValueFactory = () => throw new global::System.InvalidOperationException(\"Should not be called\"),");
+            writer.AppendLine("NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),");
+            writer.AppendLine("NestedPropertyValueFactory = obj => new global::System.Collections.Generic.Dictionary<string, object?>()");
             
             writer.Unindent();
             writer.AppendLine("},");
@@ -213,7 +211,7 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
         writer.AppendLine("};");
         writer.AppendLine();
         
-        writer.AppendLine($"DataSourcePropertyInjectionRegistry.Register(typeof({typeName}), injectionData, propertyDataSources);");
+        writer.AppendLine($"global::TUnit.Core.DataSourcePropertyInjectionRegistry.Register(typeof({typeName}), injectionData, propertyDataSources);");
         
         writer.Unindent();
         writer.AppendLine("}");
@@ -222,7 +220,7 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
 
     private static void GeneratePropertySettersForType(CodeWriter writer, DataSourceTypeInfo dataSourceType)
     {
-        var typeName = dataSourceType.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var typeName = dataSourceType.TypeSymbol.GloballyQualified();
         var safeTypeName = GetSafeTypeName(dataSourceType.TypeSymbol);
         
         // Generate UnsafeAccessor methods for init-only properties
@@ -233,7 +231,7 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
             var property = propInfo.Property;
             if (property.SetMethod.IsInitOnly)
             {
-                var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var propertyType = property.Type.GloballyQualified();
                 
                 writer.AppendLine($"[global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"<{property.Name}>k__BackingField\")]");
                 writer.AppendLine($"private static extern ref {propertyType} {safeTypeName}_Get{property.Name}BackingField({typeName} instance);");
@@ -294,7 +292,7 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
             return;
         }
 
-        writer.Append($"new {attributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}(");
+        writer.Append($"new {attributeClass.GloballyQualified()}(");
 
         // Add constructor arguments
         var constructorArgs = attribute.ConstructorArguments;
@@ -338,7 +336,7 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
                     writer.Append(value.Value.ToString() ?? "null");
                 break;
             case TypedConstantKind.Type:
-                writer.Append($"typeof({((ITypeSymbol)value.Value!).ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                writer.Append($"typeof({((ITypeSymbol)value.Value!).GloballyQualified()})");
                 break;
             case TypedConstantKind.Array:
                 writer.Append("new[] { ");
