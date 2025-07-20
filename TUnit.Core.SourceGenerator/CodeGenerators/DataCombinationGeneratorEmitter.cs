@@ -347,11 +347,11 @@ public static class DataCombinationGeneratorEmitter
 
             if (isClassLevel)
             {
-                writer.AppendLine($"ClassDataFactories = ImmutableArray.Create<Func<Task<object?>>>({string.Join(", ", formattedArgs.Select(arg => $"() => Task.FromResult<object?>({arg})"))}),");
+                writer.AppendLine($"ClassDataFactories = new Func<Task<object?>>[] {{ {string.Join(", ", formattedArgs.Select(arg => $"() => Task.FromResult<object?>({arg})"))} }},");
             }
             else
             {
-                writer.AppendLine($"MethodDataFactories = ImmutableArray.Create<Func<Task<object?>>>({string.Join(", ", formattedArgs.Select(arg => $"() => Task.FromResult<object?>({arg})"))}),");
+                writer.AppendLine($"MethodDataFactories = new Func<Task<object?>>[] {{ {string.Join(", ", formattedArgs.Select(arg => $"() => Task.FromResult<object?>({arg})"))} }},");
             }
 
             // Always write both indices
@@ -948,7 +948,7 @@ public static class DataCombinationGeneratorEmitter
         }
 
         writer.AppendLine("// Create MembersToGenerate array based on whether it's class or method level");
-        writer.AppendLine("var membersToGenerate = ImmutableArray.Create<MemberMetadata>");
+        writer.AppendLine("var membersToGenerate = new MemberMetadata[]");
         writer.AppendLine("{");
         writer.Indent();
         if (isClassLevel)
@@ -1127,7 +1127,7 @@ public static class DataCombinationGeneratorEmitter
         }
 
         writer.AppendLine("// Create MembersToGenerate array based on whether it's class or method level");
-        writer.AppendLine("var membersToGenerate = ImmutableArray.Create<MemberMetadata>");
+        writer.AppendLine("var membersToGenerate = new MemberMetadata[]");
         writer.AppendLine("{");
         writer.Indent();
         if (isClassLevel)

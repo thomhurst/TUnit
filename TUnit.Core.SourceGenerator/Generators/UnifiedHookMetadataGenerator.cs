@@ -725,7 +725,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<InstanceHookMethod>.Empty;");
+            writer.AppendLine("    => Array.Empty<InstanceHookMethod>();");
         }
         writer.AppendLine();
 
@@ -736,7 +736,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<InstanceHookMethod>.Empty;");
+            writer.AppendLine("    => Array.Empty<InstanceHookMethod>();");
         }
         writer.AppendLine();
 
@@ -747,7 +747,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<TestContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<TestContext>>();");
         }
         writer.AppendLine();
 
@@ -758,7 +758,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<TestContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<TestContext>>();");
         }
         writer.AppendLine();
     }
@@ -777,7 +777,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<ClassHookContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<ClassHookContext>>();");
         }
         writer.AppendLine();
 
@@ -788,7 +788,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<ClassHookContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<ClassHookContext>>();");
         }
         writer.AppendLine();
 
@@ -799,7 +799,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<ClassHookContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<ClassHookContext>>();");
         }
         writer.AppendLine();
 
@@ -810,7 +810,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<ClassHookContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<ClassHookContext>>();");
         }
         writer.AppendLine();
     }
@@ -829,7 +829,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<AssemblyHookContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<AssemblyHookContext>>();");
         }
         writer.AppendLine();
 
@@ -840,7 +840,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<AssemblyHookContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<AssemblyHookContext>>();");
         }
         writer.AppendLine();
 
@@ -851,7 +851,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<AssemblyHookContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<AssemblyHookContext>>();");
         }
         writer.AppendLine();
 
@@ -862,7 +862,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<AssemblyHookContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<AssemblyHookContext>>();");
         }
         writer.AppendLine();
     }
@@ -879,7 +879,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<TestSessionContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<TestSessionContext>>();");
         }
         writer.AppendLine();
 
@@ -890,7 +890,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<TestSessionContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<TestSessionContext>>();");
         }
         writer.AppendLine();
     }
@@ -907,7 +907,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<BeforeTestDiscoveryContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<BeforeTestDiscoveryContext>>();");
         }
         writer.AppendLine();
 
@@ -918,7 +918,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("    => ImmutableArray<StaticHookMethod<TestDiscoveryContext>>.Empty;");
+            writer.AppendLine("    => Array.Empty<StaticHookMethod<TestDiscoveryContext>>();");
         }
         writer.AppendLine();
     }

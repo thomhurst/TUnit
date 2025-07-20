@@ -128,7 +128,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
         writer.AppendLine("using System;");
         writer.AppendLine("using System.Collections.Generic;");
-        writer.AppendLine("using System.Collections.Immutable;");
         writer.AppendLine("using System.Linq;");
         writer.AppendLine("using System.Reflection;");
         writer.AppendLine("using System.Threading;");
