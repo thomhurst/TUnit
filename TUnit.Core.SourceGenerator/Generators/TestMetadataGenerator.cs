@@ -316,7 +316,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .ToList();
 
         // Generate method data sources
-        writer.AppendLine("DataSources = new global::TUnit.Core.Interfaces.IDataSourceAttribute[]");
+        writer.AppendLine("DataSources = new global::TUnit.Core.IDataSourceAttribute[]");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -329,7 +329,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
 
         // Generate class data sources
-        writer.AppendLine("ClassDataSources = new global::TUnit.Core.Interfaces.IDataSourceAttribute[]");
+        writer.AppendLine("ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]");
         writer.AppendLine("{");
         writer.Indent();
 
