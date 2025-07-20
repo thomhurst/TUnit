@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Enums;
+using TUnit.Core.Extensions;
 using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Discovery;
@@ -12,41 +14,49 @@ namespace TUnit.Engine.Discovery;
 /// </summary>
 internal sealed class ReflectionTestMetadata : TestMetadata
 {
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)]
     private readonly Type _testClass;
     private readonly MethodInfo _testMethod;
-    private Func<IAsyncEnumerable<TestDataCombination>>? _dataCombinationGenerator;
-    private Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest>? _createExecutableTestFactory;
 
     public ReflectionTestMetadata(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
+            | DynamicallyAccessedMemberTypes.NonPublicConstructors
+            | DynamicallyAccessedMemberTypes.PublicMethods
+            | DynamicallyAccessedMemberTypes.NonPublicMethods
+            | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass,
         MethodInfo testMethod)
     {
         _testClass = testClass;
         _testMethod = testMethod;
     }
 
+    [field: AllowNull, MaybeNull]
     public override Func<IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator
     {
         get
         {
-            if (_dataCombinationGenerator == null)
+            if (field == null)
             {
-                _dataCombinationGenerator = GenerateDataCombinations;
+                field = GenerateDataCombinations;
             }
-            return _dataCombinationGenerator;
+            return field;
         }
     }
 
+    [field: AllowNull, MaybeNull]
     public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
     {
         get
         {
-            if (_createExecutableTestFactory == null)
+            if (field == null)
             {
-                _createExecutableTestFactory = CreateExecutableTest;
+                field = CreateExecutableTest;
             }
-            return _createExecutableTestFactory;
+            return field;
         }
     }
 
@@ -94,7 +104,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         // Generate all combinations without awaiting inside the async enumerable
         var methodDataCombinations = await ProcessDataSourcesAsync(methodDataSources, ProcessMethodDataSourceAsync);
         var classDataCombinations = await ProcessDataSourcesAsync(classDataSources, ProcessClassDataSourceAsync);
-        var propertyDataCombinations = GeneratePropertyDataCombinations(propertyDataSources);
+        var propertyDataCombinations = await GeneratePropertyDataCombinationsAsync(propertyDataSources);
 
         // Use the unified DataCombinationBuilder
         await foreach (var combination in DataCombinationBuilder.BuildCombinationsAsync(
@@ -107,33 +117,12 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
     }
 
-    private List<T> ProcessDataSourcesWithErrorHandling<T>(List<TestDataSource> sources, Func<TestDataSource, IEnumerable<T>> processor)
-        where T : new()
-    {
-        var results = new List<T>();
-        
-        foreach (var source in sources)
-        {
-            try
-            {
-                results.AddRange(processor(source));
-            }
-            catch (Exception ex)
-            {
-                // Instead of logging and continuing, create an error combination
-                // This will be caught by the outer error handler and converted to TestDataCombination with DataGenerationException
-                throw new Exception($"Failed to process data source: {ex.Message}", ex);
-            }
-        }
-        
-        return results;
-    }
 
-    private async Task<List<T>> ProcessDataSourcesAsync<T>(List<TestDataSource> sources, Func<TestDataSource, Task<IEnumerable<T>>> processor)
+    private async Task<List<T>> ProcessDataSourcesAsync<T>(List<IDataSourceAttribute> sources, Func<IDataSourceAttribute, Task<IEnumerable<T>>> processor)
         where T : new()
     {
         var results = new List<T>();
-        
+
         foreach (var source in sources)
         {
             try
@@ -148,7 +137,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 throw new Exception($"Failed to process data source: {ex.Message}", ex);
             }
         }
-        
+
         return results;
     }
 
@@ -168,8 +157,8 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
             // Apply property values using unified PropertyInjector
             await PropertyInjector.InjectPropertiesAsync(
-                instance, 
-                context.PropertyValues, 
+                instance,
+                context.PropertyValues,
                 metadata.PropertyInjections);
 
             return instance;
@@ -178,7 +167,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         // Create test invoker with CancellationToken support
         // Determine if the test method has a CancellationToken parameter
         var hasCancellationToken = ParameterTypes.Any(t => t == typeof(CancellationToken));
-        var cancellationTokenIndex = hasCancellationToken 
+        var cancellationTokenIndex = hasCancellationToken
             ? Array.IndexOf(ParameterTypes, typeof(CancellationToken))
             : -1;
 
@@ -194,7 +183,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 // Insert CancellationToken at the correct position
                 var argsWithToken = new object?[args.Length + 1];
                 var argIndex = 0;
-                
+
                 for (int i = 0; i < argsWithToken.Length; i++)
                 {
                     if (i == cancellationTokenIndex)
@@ -206,7 +195,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                         argsWithToken[i] = args[argIndex++];
                     }
                 }
-                
+
                 await TestInvoker(instance, argsWithToken);
             }
             else
@@ -229,110 +218,44 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         };
     }
 
-    private List<TestDataSource> ExtractMethodDataSources()
+    private List<IDataSourceAttribute> ExtractMethodDataSources()
     {
         // Use the data sources already extracted by ReflectionTestDataCollector
         // This includes custom data source generators like MatrixDataSourceAttribute
-        if (DataSources != null && DataSources.Length > 0)
+        if (DataSources is { Length: > 0 })
         {
             return DataSources.ToList();
         }
 
         // Fallback to extracting from attributes if not already set
-        var sources = new List<TestDataSource>();
-
         var attributes = _testMethod.GetCustomAttributes().ToList();
+        var dataSources = attributes.OfType<IDataSourceAttribute>().ToList();
 
-        // Process Arguments attributes
-        foreach (var attr in attributes.OfType<ArgumentsAttribute>())
+        if (dataSources.Count == 0)
         {
-            sources.Add(new StaticTestDataSource(attr.Values));
+            return [new EmptyDataSourceAttribute()];
         }
 
-        // Process MethodDataSource attributes
-        var methodDataAttrs = attributes.OfType<MethodDataSourceAttribute>().ToList();
-        foreach (var attr in methodDataAttrs)
-        {
-            try
-            {
-                var dataSource = CreateMethodDataSource(attr);
-                if (dataSource != null)
-                {
-                    sources.Add(dataSource);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Method data source failures are configuration errors that should fail the test
-                throw new InvalidOperationException($"Failed to create method data source for {attr.MethodNameProvidingDataSource}: {ex.Message}", ex);
-            }
-        }
-
-        return sources;
+        return dataSources;
     }
 
-    private List<TestDataSource> ExtractClassDataSources()
+    private List<IDataSourceAttribute> ExtractClassDataSources()
     {
         // Use the data sources already extracted by ReflectionTestDataCollector
-        if (ClassDataSources != null && ClassDataSources.Length > 0)
+        if (ClassDataSources is { Length: > 0 })
         {
             return ClassDataSources.ToList();
         }
 
         // Fallback to extracting from attributes if not already set
-        var sources = new List<TestDataSource>();
-
         var attributes = _testClass.GetCustomAttributes().ToList();
-
-        // Process Arguments attributes on the class
-        foreach (var attr in attributes.OfType<ArgumentsAttribute>())
-        {
-            sources.Add(new StaticTestDataSource(attr.Values));
-        }
-
-        // Process MethodDataSource attributes on the class
-        foreach (var attr in attributes.OfType<MethodDataSourceAttribute>())
-        {
-            try
-            {
-                var dataSource = CreateMethodDataSource(attr);
-                if (dataSource != null)
-                {
-                    sources.Add(dataSource);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Class method data source failures are configuration errors that should fail the test
-                throw new InvalidOperationException($"Failed to create class method data source for {attr.MethodNameProvidingDataSource}: {ex.Message}", ex);
-            }
-        }
-
-        // Process ClassDataSource attributes
-        foreach (var attr in attributes.OfType<ClassDataSourceAttribute>())
-        {
-            try
-            {
-                var dataSource = CreateClassDataSource(attr);
-                if (dataSource != null)
-                {
-                    sources.Add(dataSource);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Class data source failure will be wrapped in TestDataCombination by error handling
-                throw new Exception($"Failed to create class data source: {ex.Message}", ex);
-            }
-        }
-
-        return sources;
+        return attributes.OfType<IDataSourceAttribute>().ToList();
     }
 
     private List<PropertyDataSource> ExtractPropertyDataSources()
     {
         // Use the property data sources already extracted by ReflectionTestDataCollector
-        if (PropertyDataSources != null && PropertyDataSources.Length > 0)
+        if (PropertyDataSources is { Length: > 0 })
         {
             return PropertyDataSources.ToList();
         }
@@ -355,7 +278,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 {
                     PropertyName = property.Name,
                     PropertyType = property.PropertyType,
-                    DataSource = new StaticTestDataSource(attr.Values)
+                    DataSource = new StaticDataSourceAttribute(attr.Values)
                 });
             }
 
@@ -424,121 +347,39 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
     [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
     [UnconditionalSuppressMessage("Trimming", "IL2080:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
-    private TestDataSource? CreateMethodDataSource(MethodDataSourceAttribute attr)
+    [UnconditionalSuppressMessage("AOT", "IL2072:Target method argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "Reflection mode cannot support AOT")]
+    private IDataSourceAttribute? CreateMethodDataSource(MethodDataSourceAttribute attr)
     {
         var targetType = attr.ClassProvidingDataSource ?? _testClass;
-        var method = targetType.GetMethod(attr.MethodNameProvidingDataSource,
-            BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-        if (method == null)
-        {
-            throw new InvalidOperationException($"Method {attr.MethodNameProvidingDataSource} not found on type {targetType.Name}");
-        }
-
-        // Create a delegate data source that invokes the method
-        return new DelegateDataSource(() =>
-        {
-            try
-            {
-                object? instance = null;
-                if (!method.IsStatic)
-                {
-                    instance = Activator.CreateInstance(targetType);
-                }
-
-                var result = method.Invoke(instance, attr.Arguments);
-
-                // Handle different return types
-                if (result is IEnumerable<object?[]> enumerable)
-                {
-                    var items = enumerable.ToList();
-                    return items;
-                }
-                if (result is IEnumerable<object> objects && !(result is string))
-                {
-                    var items = objects.Select(obj => new[] { obj }).ToList();
-                    return items;
-                }
-                if (result is object[] array)
-                {
-                    return new[] { array };
-                }
-                return new[] { new[] { result } };
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Failed to invoke method {attr.MethodNameProvidingDataSource}: {ex.Message}", ex);
-            }
-        });
+        // For now we assume static method if ClassProvidingDataSource is provided
+        var isInstance = attr.ClassProvidingDataSource == null;
+        
+        return new MethodBasedDataSourceAttribute(targetType, attr.MethodNameProvidingDataSource, attr.Arguments, isInstance);
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2062:The parameter of method has a DynamicallyAccessedMembersAttribute, but the value passed to it can not be statically analyzed.", Justification = "This is reflection mode where dynamic type access is expected")]
-    private TestDataSource? CreateClassDataSource(ClassDataSourceAttribute attr)
-    {
-        try
-        {
-            // Use reflection to get the _types field from the attribute
-            var typesField = typeof(ClassDataSourceAttribute).GetField("_types", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (typesField?.GetValue(attr) is not Type[] types || types.Length == 0)
-            {
-                throw new InvalidOperationException("ClassDataSourceAttribute has no types configured");
-            }
+    // Removed - ClassDataSourceAttribute now directly implements IDataSourceAttribute
 
-            // Create a delegate data source that creates instances of each type
-            return new DelegateDataSource(() =>
-            {
-                try
-                {
-                    var items = new object?[types.Length];
-
-                    for (var i = 0; i < types.Length; i++)
-                    {
-                        // Create instance of the type
-                        var instance = Activator.CreateInstance(types[i]);
-                        items[i] = instance;
-                    }
-
-                    return new[] { items };
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"Failed to create class data source instances: {ex.Message}", ex);
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to create class data source: {ex.Message}", ex);
-        }
-    }
-
-    private List<MethodDataCombination> ProcessMethodDataSource(TestDataSource dataSource)
+    private async Task<IEnumerable<MethodDataCombination>> ProcessMethodDataSourceAsync(IDataSourceAttribute dataSource)
     {
         var combinations = new List<MethodDataCombination>();
-        var factories = dataSource.GetDataFactories();
         int loopIndex = 0;
+        
+        var metadata = CreateDataGeneratorMetadata(global::TUnit.Core.Enums.DataGeneratorType.TestParameters);
 
-        foreach (var factory in factories)
+        await foreach (var rowFactory in dataSource.GetDataRowsAsync(metadata))
         {
-            var data = factory();
-            
-            // Handle the case where data is object?[] instead of object[]
-            IEnumerable<object?> dataEnumerable;
-            if (data is object?[] nullableArray)
+            var row = await rowFactory();
+            if (row == null)
             {
-                dataEnumerable = nullableArray;
+                continue;
             }
-            else
-            {
-                dataEnumerable = data;
-            }
-            
-            var dataFactories = dataEnumerable.Select(value => new Func<Task<object?>>(async () =>
+
+            var dataFactories = row.Select(value => new Func<Task<object?>>(async () =>
             {
                 var resolvedValue = await ResolveTestDataValueAsync(value);
                 return resolvedValue;
             })).ToArray();
-            
+
             combinations.Add(new MethodDataCombination
             {
                 DataFactories = dataFactories,
@@ -565,27 +406,27 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))
         {
             var returnType = type.GetGenericArguments()[0];
-            
+
             // Invoke the Func to get the result
             var invokeMethod = type.GetMethod("Invoke");
             var result = invokeMethod!.Invoke(value, null);
-            
+
             // If the result is a Task, await it
             if (result is Task task)
             {
                 await task.ConfigureAwait(false);
-                
+
                 // Get the Result property for Task<T>
                 if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>))
                 {
                     var resultProperty = task.GetType().GetProperty("Result");
                     return resultProperty?.GetValue(task);
                 }
-                
+
                 // For non-generic Task
                 return null;
             }
-            
+
             return result;
         }
 
@@ -593,14 +434,14 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         if (value is Task task2)
         {
             await task2.ConfigureAwait(false);
-            
+
             var taskType = task2.GetType();
             if (taskType.IsGenericType && taskType.GetGenericTypeDefinition() == typeof(Task<>))
             {
                 var resultProperty = taskType.GetProperty("Result");
                 return resultProperty?.GetValue(task2);
             }
-            
+
             return null;
         }
 
@@ -612,7 +453,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             {
                 // It's a parameterless delegate, invoke it
                 var result = invokeMethod.Invoke(value, null);
-                
+
                 // Recursively resolve in case it returns a Task
                 return await ResolveTestDataValueAsync(result).ConfigureAwait(false);
             }
@@ -653,63 +494,24 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         return value;
     }
 
-    private async Task<IEnumerable<MethodDataCombination>> ProcessMethodDataSourceAsync(TestDataSource dataSource)
-    {
-        var combinations = new List<MethodDataCombination>();
-        int loopIndex = 0;
+    // Method removed - replaced by single async implementation above
 
-        // Check if it's an async data source
-        if (dataSource is AsyncTestDataSource asyncDataSource)
-        {
-            await foreach (var factory in asyncDataSource.GetDataFactoriesAsync())
-            {
-                var data = factory();
-                
-                // Handle the case where data is object?[] instead of object[]
-                IEnumerable<object?> dataEnumerable;
-                if (data is object?[] nullableArray)
-                {
-                    dataEnumerable = nullableArray;
-                }
-                else
-                {
-                    dataEnumerable = data;
-                }
-                
-                var dataFactories = dataEnumerable.Select(value => new Func<Task<object?>>(async () =>
-                {
-                    var resolvedValue = await ResolveTestDataValueAsync(value);
-                    return resolvedValue;
-                })).ToArray();
-                
-                combinations.Add(new MethodDataCombination
-                {
-                    DataFactories = dataFactories,
-                    DataSourceIndex = 0,
-                    LoopIndex = loopIndex++
-                });
-            }
-        }
-        else
-        {
-            // Fall back to synchronous processing for non-async data sources
-            var syncCombinations = ProcessMethodDataSource(dataSource);
-            combinations.AddRange(syncCombinations);
-        }
-
-        return combinations;
-    }
-
-    private List<ClassDataCombination> ProcessClassDataSource(TestDataSource dataSource)
+    private async Task<IEnumerable<ClassDataCombination>> ProcessClassDataSourceAsync(IDataSourceAttribute dataSource)
     {
         var combinations = new List<ClassDataCombination>();
-        var factories = dataSource.GetDataFactories();
         int loopIndex = 0;
+        
+        var metadata = CreateDataGeneratorMetadata(global::TUnit.Core.Enums.DataGeneratorType.ClassParameters);
 
-        foreach (var factory in factories)
+        await foreach (var rowFactory in dataSource.GetDataRowsAsync(metadata))
         {
-            var data = factory();
-            var dataFactories = data.Select(value => new Func<Task<object?>>(async () =>
+            var row = await rowFactory();
+            if (row == null)
+            {
+                continue;
+            }
+            
+            var dataFactories = row.Select(value => new Func<Task<object?>>(async () =>
             {
                 var resolvedValue = await ResolveTestDataValueAsync(value);
                 return resolvedValue;
@@ -726,42 +528,9 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         return combinations;
     }
 
-    private async Task<IEnumerable<ClassDataCombination>> ProcessClassDataSourceAsync(TestDataSource dataSource)
-    {
-        var combinations = new List<ClassDataCombination>();
-        int loopIndex = 0;
+    // Method removed - replaced by single async implementation above
 
-        // Check if it's an async data source
-        if (dataSource is AsyncTestDataSource asyncDataSource)
-        {
-            await foreach (var factory in asyncDataSource.GetDataFactoriesAsync())
-            {
-                var data = factory();
-                var dataFactories = data.Select(value => new Func<Task<object?>>(async () =>
-                {
-                    var resolvedValue = await ResolveTestDataValueAsync(value);
-                    return resolvedValue;
-                })).ToArray();
-
-                combinations.Add(new ClassDataCombination
-                {
-                    DataFactories = dataFactories,
-                    DataSourceIndex = 0,
-                    LoopIndex = loopIndex++
-                });
-            }
-        }
-        else
-        {
-            // Fall back to synchronous processing for non-async data sources
-            var syncCombinations = ProcessClassDataSource(dataSource);
-            combinations.AddRange(syncCombinations);
-        }
-
-        return combinations;
-    }
-
-    private List<PropertyDataCombination> GeneratePropertyDataCombinations(List<PropertyDataSource> propertyDataSources)
+    private async Task<List<PropertyDataCombination>> GeneratePropertyDataCombinationsAsync(List<PropertyDataSource> propertyDataSources)
     {
         var combinations = new List<PropertyDataCombination>();
 
@@ -776,13 +545,14 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         {
             try
             {
-                // Get data synchronously for property data sources
-                var factories = propertyDataSource.DataSource.GetDataFactories();
-                var firstFactory = factories.FirstOrDefault();
-                if (firstFactory != null)
+                var metadata = CreateDataGeneratorMetadata(global::TUnit.Core.Enums.DataGeneratorType.Property);
+                
+                // Get first data row for property
+                var firstRow = await GetFirstDataRowAsync(propertyDataSource.DataSource, metadata);
+                if (firstRow != null)
                 {
-                    var data = firstFactory();
-                    if (data != null && data.Length > 0)
+                    var data = await firstRow();
+                    if (data is { Length: > 0 })
                     {
                         var value = data[0];
                         propertyValueFactories[propertyDataSource.PropertyName] = () => Task.FromResult(value);
@@ -802,5 +572,65 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         });
 
         return combinations;
+    }
+    
+    [UnconditionalSuppressMessage("AOT", "IL2072:Target method argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "Reflection mode cannot support AOT")]
+    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", Justification = "Reflection mode cannot support AOT")]
+    private DataGeneratorMetadata CreateDataGeneratorMetadata(global::TUnit.Core.Enums.DataGeneratorType type)
+    {
+        // Create minimal metadata structures for reflection mode
+        var classMetadata = ClassMetadata.GetOrAdd(_testClass.FullName ?? _testClass.Name, () => new ClassMetadata
+        {
+            Type = _testClass,
+            Name = _testClass.Name,
+            Namespace = _testClass.Namespace ?? string.Empty,
+            TypeReference = new TypeReference { AssemblyQualifiedName = _testClass.AssemblyQualifiedName },
+            Assembly = AssemblyMetadata.GetOrAdd(_testClass.Assembly.GetName().Name ?? "Unknown", () => new AssemblyMetadata
+            {
+                Name = _testClass.Assembly.GetName().Name ?? "Unknown"
+            }),
+            Parameters = Array.Empty<ParameterMetadata>(),
+            Properties = Array.Empty<PropertyMetadata>(),
+            Parent = null
+        });
+        
+        var methodMetadata = new MethodMetadata
+        {
+            Name = _testMethod.Name,
+            Type = _testMethod.DeclaringType ?? _testClass,
+            Class = classMetadata,
+            Parameters = _testMethod.GetParameters().Select((p, i) => new ParameterMetadata(p.ParameterType)
+            {
+                Name = p.Name ?? $"param{i}",
+                TypeReference = new TypeReference { AssemblyQualifiedName = p.ParameterType.AssemblyQualifiedName },
+                ReflectionInfo = p
+            }).ToArray(),
+            GenericTypeCount = _testMethod.IsGenericMethodDefinition ? _testMethod.GetGenericArguments().Length : 0,
+            ReturnTypeReference = new TypeReference { AssemblyQualifiedName = _testMethod.ReturnType.AssemblyQualifiedName },
+            ReturnType = _testMethod.ReturnType,
+            TypeReference = new TypeReference { AssemblyQualifiedName = (_testMethod.DeclaringType ?? _testClass).AssemblyQualifiedName }
+        };
+        
+        return new DataGeneratorMetadata
+        {
+            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
+            MembersToGenerate = type == global::TUnit.Core.Enums.DataGeneratorType.TestParameters 
+                ? methodMetadata.Parameters 
+                : Array.Empty<MemberMetadata>(),
+            TestInformation = methodMetadata,
+            Type = type,
+            TestSessionId = "reflection-discovery",
+            TestClassInstance = null,
+            ClassInstanceArguments = null
+        };
+    }
+    
+    private async Task<Func<Task<object?[]?>>?> GetFirstDataRowAsync(IDataSourceAttribute dataSource, DataGeneratorMetadata metadata)
+    {
+        await foreach (var row in dataSource.GetDataRowsAsync(metadata))
+        {
+            return row;
+        }
+        return null;
     }
 }

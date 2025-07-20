@@ -234,7 +234,7 @@ public static class DataSourceHelpers
         var actualData = InvokeIfFunc(data);
 
         // Handle IEnumerable types (but not string)
-        if (actualData is IEnumerable enumerable && actualData is not string)
+        if (actualData is IEnumerable enumerable and not string)
         {
             var enumerator = enumerable.GetEnumerator();
             if (enumerator.MoveNext())

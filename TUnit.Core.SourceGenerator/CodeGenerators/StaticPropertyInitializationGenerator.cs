@@ -248,7 +248,10 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         string? methodName = null;
         ITypeSymbol? targetType = null;
         
-        if (attr.ConstructorArguments.Length == 2 && attr.ConstructorArguments[0].Value is ITypeSymbol type)
+        if (attr.ConstructorArguments is
+            [
+                { Value: ITypeSymbol type } _, _
+            ])
         {
             targetType = type;
             methodName = attr.ConstructorArguments[1].Value?.ToString();
@@ -340,10 +343,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         {
             foreach (var member in currentType.GetMembers())
             {
-                if (member is IPropertySymbol property && 
-                    property.DeclaredAccessibility == Accessibility.Public &&
-                    property.SetMethod?.DeclaredAccessibility == Accessibility.Public &&
-                    property.IsStatic) // Only static properties for session initialization
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: true } property) // Only static properties for session initialization
                 {
                     var dataSourceAttr = property.GetAttributes()
                         .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));

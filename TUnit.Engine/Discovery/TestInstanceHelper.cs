@@ -20,7 +20,7 @@ internal static class TestInstanceHelper
     [UnconditionalSuppressMessage("Trimming", "IL2067:Target type's member does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
     public static object? CreateTestInstanceWithData(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass,
-        TestDataSource[]? classDataSources)
+        IDataSourceAttribute[]? classDataSources)
     {
         try
         {
@@ -40,12 +40,12 @@ internal static class TestInstanceHelper
             var constructors = testClass.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             
             // If we have class data sources, try to match them to constructor parameters
-            if (classDataSources != null && classDataSources.Length > 0)
+            if (classDataSources is { Length: > 0 })
             {
                 // Get data from class data sources
                 var classData = GetFirstDataFromSources(classDataSources);
                 
-                if (classData != null && classData.Length > 0)
+                if (classData is { Length: > 0 })
                 {
                     // Find constructor that matches the data count
                     var matchingConstructor = constructors.FirstOrDefault(c => c.GetParameters().Length == classData.Length);
@@ -79,7 +79,7 @@ internal static class TestInstanceHelper
     /// <summary>
     /// Gets the first set of data from test data sources (for discovery purposes)
     /// </summary>
-    private static object?[]? GetFirstDataFromSources(TestDataSource[] dataSources)
+    private static object?[]? GetFirstDataFromSources(IDataSourceAttribute[] dataSources)
     {
         if (dataSources == null || dataSources.Length == 0)
         {
@@ -108,7 +108,7 @@ internal static class TestInstanceHelper
         return dataList.Count > 0 ? dataList.ToArray() : null;
     }
     
-    private static object?[]? GetFirstDataFromSource(TestDataSource dataSource)
+    private static object?[]? GetFirstDataFromSource(IDataSourceAttribute dataSource)
     {
         // For discovery, we can't evaluate data sources that might have complex dependencies
         // Just return null to indicate we should use default construction

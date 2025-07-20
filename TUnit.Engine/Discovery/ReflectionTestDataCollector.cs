@@ -294,13 +294,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
                 catch (Exception ex)
                 {
-                    // Log the error for debugging
-                    Console.WriteLine($"Error discovering test {type.FullName}.{method.Name}: {ex.Message}");
-                    if (ex.InnerException != null)
-                    {
-                        Console.WriteLine($"  Inner: {ex.InnerException.Message}");
-                    }
-                    
                     // Create a failed test metadata for this specific test
                     var failedTest = CreateFailedTestMetadata(type, method, ex);
                     discoveredTests.Add(failedTest);
@@ -408,18 +401,48 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return typeArguments;
     }
 
-    private static async Task<List<object?[]>> GetDataFromSourceAsync(TestDataSource dataSource)
+    private static async Task<List<object?[]>> GetDataFromSourceAsync(IDataSourceAttribute dataSource)
     {
         var data = new List<object?[]>();
 
         try
         {
-            // Get data factories from the source
-            var factories = dataSource.GetDataFactories();
-
-            foreach (var factory in factories)
+            // Create minimal metadata for discovery
+            var metadata = new DataGeneratorMetadata
             {
-                var dataArray = factory();
+                TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
+                MembersToGenerate = Array.Empty<MemberMetadata>(),
+                TestInformation = new MethodMetadata
+                {
+                    Name = "Discovery",
+                    Type = typeof(object),
+                    Class = new ClassMetadata
+                    {
+                        Name = "Discovery",
+                        Type = typeof(object),
+                        Namespace = string.Empty,
+                        TypeReference = new TypeReference { AssemblyQualifiedName = typeof(object).AssemblyQualifiedName },
+                        Assembly = AssemblyMetadata.GetOrAdd("Discovery", () => new AssemblyMetadata { Name = "Discovery" }),
+                        Parameters = Array.Empty<ParameterMetadata>(),
+                        Properties = Array.Empty<PropertyMetadata>(),
+                        Parent = null
+                    },
+                    Parameters = Array.Empty<ParameterMetadata>(),
+                    GenericTypeCount = 0,
+                    ReturnTypeReference = new TypeReference { AssemblyQualifiedName = typeof(void).AssemblyQualifiedName },
+                    ReturnType = typeof(void),
+                    TypeReference = new TypeReference { AssemblyQualifiedName = typeof(object).AssemblyQualifiedName }
+                },
+                Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,
+                TestSessionId = "discovery",
+                TestClassInstance = null,
+                ClassInstanceArguments = null
+            };
+            
+            // Get data rows from the source
+            await foreach (var rowFactory in dataSource.GetDataRowsAsync(metadata))
+            {
+                var dataArray = await rowFactory();
                 if (dataArray != null)
                 {
                     data.Add(dataArray);
@@ -471,10 +494,11 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         };
 
         // Check if we should expand data sources during discovery
-        var hasDataSources = baseMetadata.DataSources.Length > 0 || 
-                           baseMetadata.ClassDataSources.Length > 0 || 
+        var hasDataSources = baseMetadata.DataSources.Length > 0 ||
+                           baseMetadata.ClassDataSources.Length > 0 ||
                            baseMetadata.PropertyDataSources.Length > 0;
-        
+
+
         // Only expand if there are data sources
         if (!hasDataSources)
         {
@@ -483,13 +507,13 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // Expand data sources to create individual test metadata for each combination
         var expandedMetadata = new List<TestMetadata>();
-        
+
         try
         {
             // Get all data combinations from the base metadata
             var dataCombinationGenerator = baseMetadata.DataCombinationGenerator();
             var combinationIndex = 0;
-            
+
             await foreach (var combination in dataCombinationGenerator)
             {
                 // Create a new metadata instance for each combination
@@ -523,9 +547,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     AttributeFactory = baseMetadata.AttributeFactory,
                     PropertyInjections = baseMetadata.PropertyInjections
                 };
-                
+
                 expandedMetadata.Add(expandedTest);
-                
+
                 // Limit expansion to prevent memory issues with very large data sets
                 if (combinationIndex >= 10000)
                 {
@@ -539,28 +563,17 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             Console.WriteLine($"Warning: Failed to expand data sources for {testName}: {ex.Message}. Falling back to single test.");
             return new List<TestMetadata> { baseMetadata };
         }
-        
+
         // If no combinations were generated, return the base metadata
         if (expandedMetadata.Count == 0)
         {
             return new List<TestMetadata> { baseMetadata };
         }
-        
+
         return expandedMetadata;
     }
 
-    private static int CountDataSourceItems(TestDataSource dataSource)
-    {
-        try
-        {
-            var factories = dataSource.GetDataFactories();
-            return factories.Count();
-        }
-        catch
-        {
-            return 1;
-        }
-    }
+    // Removed CountDataSourceItems - no longer needed since we work directly with IDataSourceAttribute
 
     private static int ExtractRepeatCount(Type testClass, MethodInfo testMethod)
     {
@@ -794,105 +807,40 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         return dependencies.ToArray();
     }
 
-    private static TestDataSource[] ExtractMethodDataSources(MethodInfo testMethod)
+    private static IDataSourceAttribute[] ExtractMethodDataSources(MethodInfo testMethod)
     {
-        var dataSources = new List<TestDataSource>();
+        var dataSources = new List<IDataSourceAttribute>();
 
         // Simply check for IDataSourceAttribute interface
         foreach (var attr in testMethod.GetCustomAttributes())
         {
             if (attr is IDataSourceAttribute dataSourceAttr)
             {
-                var dataSource = CreateDataSourceFromAttribute(dataSourceAttr, testMethod.DeclaringType!, testMethod);
-                if (dataSource != null)
-                {
-                    dataSources.Add(dataSource);
-                }
+                dataSources.Add(dataSourceAttr);
             }
         }
 
         return dataSources.ToArray();
     }
 
-    private static TestDataSource[] ExtractClassDataSources(Type testClass)
+    private static IDataSourceAttribute[] ExtractClassDataSources(Type testClass)
     {
-        var dataSources = new List<TestDataSource>();
+        var dataSources = new List<IDataSourceAttribute>();
+
 
         // Simply check for IDataSourceAttribute interface
         foreach (var attr in testClass.GetCustomAttributes())
         {
             if (attr is IDataSourceAttribute dataSourceAttr)
             {
-                var dataSource = CreateDataSourceFromAttribute(dataSourceAttr, testClass, null, null);
-                if (dataSource != null)
-                {
-                    dataSources.Add(dataSource);
-                }
+                dataSources.Add(dataSourceAttr);
             }
         }
 
         return dataSources.ToArray();
     }
 
-    private static TestDataSource? CreateDataSourceFromAttribute(IDataSourceAttribute attribute, Type testClass, MethodInfo? testMethod, PropertyInfo? property = null)
-    {
-        // Handle different types of data source attributes
-        if (attribute is ArgumentsAttribute argsAttr)
-        {
-            return new StaticTestDataSource(argsAttr.Values);
-        }
-        
-        if (attribute is MethodDataSourceAttribute methodAttr)
-        {
-            return CreateMethodDataSource(methodAttr, testClass);
-        }
-        
-        if (attribute is ClassDataSourceAttribute classAttr)
-        {
-            return CreateClassDataSource(classAttr);
-        }
-        
-        // Check if it's a data source generator attribute
-        var attrType = attribute.GetType();
-        if (IsDataSourceGeneratorAttribute(attrType))
-        {
-            return CreateDataSourceFromGenerator((Attribute)attribute, testClass, testMethod!);
-        }
-        
-        // For other types, try to use it directly if it implements TestDataSource
-        if (attribute is TestDataSource dataSource)
-        {
-            return dataSource;
-        }
-        
-        return null;
-    }
-    
-    private static bool IsDataSourceGeneratorAttribute(Type type)
-    {
-        // Check if this type inherits from any of the generator attribute types
-        var currentType = type;
-        while (currentType != null && currentType != typeof(object))
-        {
-            if (currentType.IsGenericType)
-            {
-                var genericDef = currentType.GetGenericTypeDefinition();
-                if (genericDef.Name.StartsWith("DataSourceGeneratorAttribute") ||
-                    genericDef.Name.StartsWith("AsyncDataSourceGeneratorAttribute"))
-                {
-                    return true;
-                }
-            }
-            else if (currentType.Name == "DataSourceGeneratorAttribute" ||
-                     currentType.Name == "AsyncDataSourceGeneratorAttribute" ||
-                     currentType.Name == "AsyncUntypedDataSourceGeneratorAttribute")
-            {
-                return true;
-            }
-            currentType = currentType.BaseType;
-        }
-        return false;
-    }
+    // Removed - no longer needed since we work directly with IDataSourceAttribute
 
     [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicProperties' in call to 'System.Type.GetProperties(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     private static PropertyDataSource[] ExtractPropertyDataSources([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass)
@@ -909,16 +857,12 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             {
                 if (attr is IDataSourceAttribute dataSourceAttr)
                 {
-                    var dataSource = CreateDataSourceFromAttribute(dataSourceAttr, testClass, null, property);
-                    if (dataSource != null)
+                    propertyDataSources.Add(new PropertyDataSource
                     {
-                        propertyDataSources.Add(new PropertyDataSource
-                        {
-                            PropertyName = property.Name,
-                            PropertyType = property.PropertyType,
-                            DataSource = dataSource
-                        });
-                    }
+                        PropertyName = property.Name,
+                        PropertyType = property.PropertyType,
+                        DataSource = dataSourceAttr
+                    });
                 }
             }
         }
@@ -929,171 +873,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     [UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.NonPublicMethods' in call to 'System.Type.GetMethod(String, BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods', 'DynamicallyAccessedMemberTypes.NonPublicMethods' in call to 'System.Type.GetMethod(String, BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     [UnconditionalSuppressMessage("Trimming", "IL2067:'type' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicParameterlessConstructor' in call to 'System.Activator.CreateInstance(Type)'", Justification = "Reflection mode requires dynamic access")]
-    private static TestDataSource? CreateMethodDataSource(MethodDataSourceAttribute attr, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type defaultClass)
-    {
-        // For InstanceMethodDataSource, always use the test class (defaultClass)
-        // even if ClassProvidingDataSource is set (which happens with generic InstanceMethodDataSource<T>)
-        var targetClass = attr is IAccessesInstanceData ? defaultClass : (attr.ClassProvidingDataSource ?? defaultClass);
-
-        // Get all methods with the specified name, including inherited methods
-        var bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance;
-        var methods = new List<MethodInfo>();
-        var currentType = targetClass;
-        
-        while (currentType != null && currentType != typeof(object))
-        {
-            methods.AddRange(currentType.GetMethods(bindingFlags | BindingFlags.DeclaredOnly)
-                .Where(m => m.Name == attr.MethodNameProvidingDataSource));
-            currentType = currentType.BaseType;
-        }
-        
-        var methodsArray = methods.ToArray();
-
-        if (methodsArray.Length == 0)
-        {
-            throw new InvalidOperationException(
-                $"Method '{attr.MethodNameProvidingDataSource}' specified in MethodDataSource attribute " +
-                $"was not found on type '{targetClass.FullName}'. " +
-                "Ensure the method name is correct and the method exists.");
-        }
-
-        MethodInfo? method;
-        if (methodsArray.Length == 1)
-        {
-            // Only one method with this name, use it
-            method = methodsArray[0];
-        }
-        else
-        {
-            // Multiple overloads - try to match based on Arguments count
-            var argCount = attr.Arguments?.Length ?? 0;
-            var matchingMethods = methods.Where(m => m.GetParameters().Length == argCount).ToArray();
-
-            if (matchingMethods.Length == 0)
-            {
-                throw new InvalidOperationException(
-                    $"No overload of method '{attr.MethodNameProvidingDataSource}' found with {argCount} parameters " +
-                    $"on type '{targetClass.FullName}'. Check that the method exists with the correct parameter count.");
-            }
-            if (matchingMethods.Length == 1)
-            {
-                method = matchingMethods[0];
-            }
-            else
-            {
-                // Still ambiguous - try to match parameter types if Arguments are provided
-                if (attr.Arguments != null && attr.Arguments.Length > 0)
-                {
-                    var matchedMethod = matchingMethods.FirstOrDefault(m =>
-                    {
-                        var parameters = m.GetParameters();
-                        for (int i = 0; i < parameters.Length; i++)
-                        {
-                            if (attr.Arguments[i] != null && !parameters[i].ParameterType.IsAssignableFrom(attr.Arguments[i]!.GetType()))
-                            {
-                                return false;
-                            }
-                        }
-                        return true;
-                    });
-
-                    if (matchedMethod != null)
-                    {
-                        method = matchedMethod;
-                    }
-                    else
-                    {
-                        // Use the first matching method as a fallback
-                        method = matchingMethods[0];
-                        Console.WriteLine($"Warning: Multiple overloads of {attr.MethodNameProvidingDataSource} found with {argCount} parameters. Using first match: {method}");
-                    }
-                }
-                else
-                {
-                    // No arguments to help disambiguate - use first match
-                    method = matchingMethods[0];
-                    Console.WriteLine($"Warning: Multiple overloads of {attr.MethodNameProvidingDataSource} found with {argCount} parameters. Using first match: {method}");
-                }
-            }
-        }
-
-        // Check if method is static or if we need an instance
-        object? instance = null;
-        if (!method.IsStatic)
-        {
-            try
-            {
-                // For instance methods, we need to create an instance with proper constructor data
-                // Check if the default class (test class) has class data sources
-                TestDataSource[]? classDataSources = null;
-                if (attr is IAccessesInstanceData && defaultClass != targetClass)
-                {
-                    // For InstanceMethodDataSource, use the test class's data sources
-                    var classDataAttrs = defaultClass.GetCustomAttributes<ClassDataSourceAttribute>().ToArray();
-                    if (classDataAttrs.Length > 0)
-                    {
-                        classDataSources = classDataAttrs.Select(a => CreateClassDataSource(a)).Where(ds => ds != null).ToArray()!;
-                    }
-                }
-                
-                instance = TestInstanceHelper.CreateTestInstanceWithData(targetClass, classDataSources);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException(
-                    $"Cannot create instance of '{targetClass.FullName}' to invoke instance method data source. " +
-                    $"Ensure the class has a parameterless constructor. Error: {ex.Message}", ex);
-            }
-        }
-
-        // Determine return type and create appropriate data source
-        var returnType = method.ReturnType;
-
-        if (returnType == typeof(Task<IEnumerable<object?[]>>))
-        {
-            var factory = CreateTaskDataSourceFactory(method, instance, attr.Arguments ?? Array.Empty<object?>());
-            return new TaskDelegateDataSource(factory);
-        }
-        if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>))
-        {
-            var factory = CreateAsyncDataSourceFactory(method, instance, attr.Arguments ?? Array.Empty<object?>());
-            return new AsyncDelegateDataSource(factory);
-        }
-        if (typeof(IEnumerable<object?[]>).IsAssignableFrom(returnType))
-        {
-            var factory = CreateSyncDataSourceFactory(method, instance, attr.Arguments ?? Array.Empty<object?>());
-            return new DelegateDataSource(factory);
-        }
-        else
-        {
-            // Handle methods that return tuples or single values
-            var factory = CreateWrappedDataSourceFactory(method, instance, attr.Arguments ?? Array.Empty<object?>());
-            return new DelegateDataSource(factory);
-        }
-    }
-
-    [UnconditionalSuppressMessage("Trimming", "IL2072:'type' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicParameterlessConstructor' in call to 'System.Activator.CreateInstance(Type)'", Justification = "Reflection mode requires dynamic access")]
-    private static TestDataSource? CreateClassDataSource(ClassDataSourceAttribute attr)
-    {
-        // ClassDataSource creates instances of the specified type
-        var dataType = attr.GetType().GetGenericArguments().FirstOrDefault();
-        if (dataType == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            var instance = Activator.CreateInstance(dataType);
-            return new StaticTestDataSource([instance]);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException(
-                $"Cannot create instance of '{dataType.FullName}' for class data source. " +
-                $"Ensure the type has a parameterless constructor. Error: {ex.Message}", ex);
-        }
-    }
+    // Removed CreateMethodDataSource and CreateClassDataSource - no longer needed since we work directly with IDataSourceAttribute
 
     private static Func<IEnumerable<object?[]>> CreateSyncDataSourceFactory(MethodInfo method, object? instance, object?[] args)
     {
@@ -1122,93 +902,29 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     }
 
 
-    [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
-    private static TestDataSource? CreateDataSourceFromGenerator(Attribute attr, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass, MethodInfo testMethod)
-    {
-        try
-        {
-            var attrType = attr.GetType();
-            var baseType = attrType.BaseType;
-            
-            // Check if it's an async generator
-            bool isAsyncGenerator = false;
-            while (baseType != null)
-            {
-                if (baseType.IsGenericType)
-                {
-                    var genericDef = baseType.GetGenericTypeDefinition();
-                    if (genericDef == typeof(AsyncDataSourceGeneratorAttribute<>) ||
-                        genericDef == typeof(AsyncDataSourceGeneratorAttribute<,>))
-                    {
-                        isAsyncGenerator = true;
-                        break;
-                    }
-                }
-                else if (baseType == typeof(AsyncUntypedDataSourceGeneratorAttribute))
-                {
-                    isAsyncGenerator = true;
-                    break;
-                }
-                baseType = baseType.BaseType;
-            }
-            
-            if (isAsyncGenerator)
-            {
-                // For async generators, create an AsyncDelegateDataSource
-                return new AsyncDelegateDataSource(cancellationToken => 
-                    CreateAsyncGeneratorEnumerable(attr, attrType, testClass, testMethod, cancellationToken));
-            }
-            else
-            {
-                // For sync generators, create a DelegateDataSource
-                return new DelegateDataSource(() =>
-                {
-                    var metadata = CreateDataGeneratorMetadata(testClass, testMethod);
-                    
-                    // Get the GenerateDataSources method
-                    var generateMethod = attrType.GetMethod("GenerateDataSources", 
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-                    
-                    if (generateMethod == null)
-                    {
-                        throw new InvalidOperationException($"Could not find GenerateDataSources method on {attrType.Name}");
-                    }
-                    
-                    // Invoke the generator
-                    var result = generateMethod.Invoke(attr, new object[] { metadata });
-                    
-                    return ProcessGeneratorResult(result);
-                });
-            }
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to create data source from generator: {ex.Message}", ex);
-        }
-    }
-
+    // Removed CreateDataSourceFromGenerator - no longer needed since we work directly with IDataSourceAttribute
 
     private static async IAsyncEnumerable<object?[]> CreateAsyncGeneratorEnumerable(
-        Attribute attr, 
-        Type attrType, 
+        Attribute attr,
+        Type attrType,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass,
         MethodInfo testMethod,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var metadata = CreateDataGeneratorMetadata(testClass, testMethod);
-        
+
         // Get the GenerateDataSourcesAsync method
-        var generateMethod = attrType.GetMethod("GenerateDataSourcesAsync", 
+        var generateMethod = attrType.GetMethod("GenerateDataSourcesAsync",
             BindingFlags.NonPublic | BindingFlags.Instance);
-        
+
         if (generateMethod == null)
         {
             throw new InvalidOperationException($"Could not find GenerateDataSourcesAsync method on {attrType.Name}");
         }
-        
+
         // Invoke the async generator
         var result = generateMethod.Invoke(attr, new object[] { metadata });
-        
+
         // Handle the async enumerable result
         if (result is IAsyncEnumerable<object> asyncEnumerable)
         {
@@ -1223,7 +939,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             }
         }
     }
-    
+
     private static DataGeneratorMetadata CreateDataGeneratorMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass, MethodInfo testMethod)
     {
         // Create TypeReference for the class
@@ -1231,11 +947,11 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         {
             AssemblyQualifiedName = testClass.AssemblyQualifiedName
         };
-        
+
         // Create AssemblyMetadata
-        var assemblyMetadata = AssemblyMetadata.GetOrAdd(testClass.Assembly.FullName ?? testClass.Assembly.GetName().Name ?? "Unknown", 
+        var assemblyMetadata = AssemblyMetadata.GetOrAdd(testClass.Assembly.FullName ?? testClass.Assembly.GetName().Name ?? "Unknown",
             () => new AssemblyMetadata { Name = testClass.Assembly.FullName ?? testClass.Assembly.GetName().Name ?? "Unknown" });
-        
+
         // Create ClassMetadata
         var classMetadata = ClassMetadata.GetOrAdd(testClass.FullName ?? testClass.Name, () => new ClassMetadata
         {
@@ -1248,27 +964,27 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             Properties = Array.Empty<PropertyMetadata>(), // Properties, empty for now
             Parent = null // Parent class, null for now
         });
-        
+
         // Create parameter metadata for the test method
         var parameterMetadataList = new List<ParameterMetadata>();
         var methodParams = testMethod.GetParameters();
         foreach (var param in methodParams)
         {
-            var paramTypeRef = new TypeReference 
-            { 
-                AssemblyQualifiedName = param.ParameterType.AssemblyQualifiedName 
+            var paramTypeRef = new TypeReference
+            {
+                AssemblyQualifiedName = param.ParameterType.AssemblyQualifiedName
             };
-            
+
             var paramMetadata = new ParameterMetadata(param.ParameterType)
             {
                 Name = param.Name ?? "param",
                 TypeReference = paramTypeRef,
                 ReflectionInfo = param  // This is crucial for MatrixDataSourceAttribute
             };
-            
+
             parameterMetadataList.Add(paramMetadata);
         }
-        
+
         // Create MethodMetadata with actual method info
         var methodMetadata = new MethodMetadata
         {
@@ -1281,7 +997,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             ReturnTypeReference = new TypeReference { AssemblyQualifiedName = testMethod.ReturnType.AssemblyQualifiedName },
             ReturnType = testMethod.ReturnType
         };
-        
+
         return new DataGeneratorMetadata
         {
             TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
@@ -1293,11 +1009,11 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             ClassInstanceArguments = null
         };
     }
-    
+
     private static List<object?[]> ProcessGeneratorResult(object? result)
     {
         var items = new List<object?[]>();
-        
+
         if (result is IEnumerable<object> enumerable)
         {
             foreach (var item in enumerable)
@@ -1306,14 +1022,14 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 items.AddRange(AsyncDataSourceHelper.ProcessAsyncGeneratorItemsForDiscovery(item));
             }
         }
-        
+
         return items;
     }
-    
+
     private static List<object?[]> ProcessGeneratorItem(object? item)
     {
         var items = new List<object?[]>();
-        
+
         if (item is Func<Task<object?[]?>> taskFunc)
         {
             var data = taskFunc().GetAwaiter().GetResult();
@@ -1392,7 +1108,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 items.Add(new[] { item });
             }
         }
-        
+
         return items;
     }
 
@@ -1796,7 +1512,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                         // Skip TestDiscovery hooks - they run during discovery phase, not test execution
                         if (attr.HookType.HasFlag(HookType.TestDiscovery))
                             continue;
-                            
+
                         var hookMetadata = CreateHookMetadata(method, attr, true);
                         if (hookMetadata != null)
                         {
@@ -1814,7 +1530,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                         // Skip TestDiscovery hooks - they run during discovery phase, not test execution
                         if (attr.HookType.HasFlag(HookType.TestDiscovery))
                             continue;
-                            
+
                         var hookMetadata = CreateHookMetadata(method, attr, false);
                         if (hookMetadata != null)
                         {
@@ -1839,7 +1555,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         {
             var assembly = testClass.Assembly;
             var assemblyTypes = assembly.GetTypes()
-                .Where(t => t.IsClass && !t.IsAbstract && ShouldScanTypeForHooks(t))
+                .Where(t => t is { IsClass: true, IsAbstract: false } && ShouldScanTypeForHooks(t))
                 .ToList();
 
             foreach (var type in assemblyTypes)
@@ -2479,7 +2195,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             await Task.CompletedTask;
         }
     }
-    
+
     // Special test metadata class for expanded tests during discovery
     private sealed class ExpandedReflectionTestMetadata : TestMetadata
     {
@@ -2549,8 +2265,8 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
                 // Apply property values using unified PropertyInjector
                 await PropertyInjector.InjectPropertiesAsync(
-                    instance, 
-                    context.PropertyValues, 
+                    instance,
+                    context.PropertyValues,
                     metadata.PropertyInjections);
 
                 return instance;
@@ -2559,7 +2275,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             // Create test invoker with CancellationToken support
             // Determine if the test method has a CancellationToken parameter
             var hasCancellationToken = ParameterTypes.Any(t => t == typeof(CancellationToken));
-            var cancellationTokenIndex = hasCancellationToken 
+            var cancellationTokenIndex = hasCancellationToken
                 ? Array.IndexOf(ParameterTypes, typeof(CancellationToken))
                 : -1;
 
@@ -2575,7 +2291,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     // Insert CancellationToken at the correct position
                     var argsWithToken = new object?[args.Length + 1];
                     var argIndex = 0;
-                    
+
                     for (int i = 0; i < argsWithToken.Length; i++)
                     {
                         if (i == cancellationTokenIndex)
@@ -2587,7 +2303,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                             argsWithToken[i] = args[argIndex++];
                         }
                     }
-                    
+
                     await TestInvoker(instance, argsWithToken);
                 }
                 else

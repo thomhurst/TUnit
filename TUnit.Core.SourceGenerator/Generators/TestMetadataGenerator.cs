@@ -258,8 +258,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("],");
 
         // Legacy data sources (empty in new approach)
-        writer.AppendLine("DataSources = Array.Empty<TestDataSource>(),");
-        writer.AppendLine("ClassDataSources = Array.Empty<TestDataSource>(),");
+        writer.AppendLine("DataSources = Array.Empty<IDataSourceAttribute>(),");
+        writer.AppendLine("ClassDataSources = Array.Empty<IDataSourceAttribute>(),");
         writer.AppendLine("PropertyDataSources = Array.Empty<PropertyDataSource>(),");
 
         // Parameter types
@@ -325,10 +325,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             foreach (var member in currentType.GetMembers())
             {
-                if (member is IPropertySymbol property &&
-                    property.DeclaredAccessibility == Accessibility.Public &&
-                    property.SetMethod?.DeclaredAccessibility == Accessibility.Public &&
-                    !property.IsStatic &&
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
                     !processedProperties.Contains(property.Name))
                 {
                     var dataSourceAttr = property.GetAttributes()
@@ -784,9 +781,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool IsNullableValueType(ITypeSymbol type)
     {
-        return type is INamedTypeSymbol namedType &&
-               namedType.IsGenericType &&
-               namedType.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T;
+        return type is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.SpecialType: SpecialType.System_Nullable_T };
     }
 
     private static void GenerateDependencies(CodeWriter writer, Compilation compilation, IMethodSymbol methodSymbol)
@@ -842,7 +837,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 if (classType != null)
                 {
                     var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                    var genericArity = classType is INamedTypeSymbol namedType && namedType.IsGenericType
+                    var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType
                         ? namedType.Arity
                         : 0;
                     writer.AppendLine($"new TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity} }}");
@@ -889,7 +884,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 if (classType != null)
                 {
                     var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                    var genericArity = classType is INamedTypeSymbol namedType && namedType.IsGenericType
+                    var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType
                         ? namedType.Arity
                         : 0;
                     writer.AppendLine($"new TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\" }}");
@@ -905,7 +900,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (classType != null)
             {
                 var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                var genericArity = classType is INamedTypeSymbol namedType && namedType.IsGenericType
+                var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType
                     ? namedType.Arity
                     : 0;
                 writer.Append($"new TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\"");
@@ -1115,11 +1110,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             foreach (var member in currentType.GetMembers())
             {
-                if (member is IPropertySymbol property &&
-                    property.DeclaredAccessibility == Accessibility.Public &&
-                    property.SetMethod?.DeclaredAccessibility == Accessibility.Public &&
-                    !property.IsStatic &&
-                    property.SetMethod.IsInitOnly)
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod: { DeclaredAccessibility: Accessibility.Public, IsInitOnly: true }, IsStatic: false } property)
                 {
                     var dataSourceAttr = property.GetAttributes()
                         .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));

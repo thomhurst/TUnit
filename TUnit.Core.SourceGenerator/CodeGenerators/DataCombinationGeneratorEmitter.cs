@@ -388,7 +388,10 @@ public static class DataCombinationGeneratorEmitter
 
         // Method name can be in different positions depending on overload
         string? methodName = null;
-        if (attr.ConstructorArguments.Length == 2 && attr.ConstructorArguments[0].Value is ITypeSymbol)
+        if (attr.ConstructorArguments is
+            [
+                { Value: ITypeSymbol } _, _
+            ])
         {
             // MethodDataSource(Type, string) overload
             methodName = attr.ConstructorArguments[1].Value?.ToString();
@@ -462,7 +465,7 @@ public static class DataCombinationGeneratorEmitter
 
         // Get the Arguments property from the attribute
         var argumentsProperty = attr.NamedArguments.FirstOrDefault(x => x.Key == "Arguments");
-        var hasArguments = argumentsProperty.Key != null && !argumentsProperty.Value.IsNull;
+        var hasArguments = argumentsProperty is { Key: not null, Value.IsNull: false };
 
         // Build the method call with arguments if any
         var methodCall = $"{fullyQualifiedTypeName}.{methodName}(";
@@ -586,7 +589,10 @@ public static class DataCombinationGeneratorEmitter
         string? methodName = null;
         ITypeSymbol? targetType = null;
         
-        if (attr.ConstructorArguments.Length == 2 && attr.ConstructorArguments[0].Value is ITypeSymbol)
+        if (attr.ConstructorArguments is
+            [
+                { Value: ITypeSymbol } _, _
+            ])
         {
             targetType = (ITypeSymbol)attr.ConstructorArguments[0].Value;
             methodName = attr.ConstructorArguments[1].Value?.ToString();
@@ -638,7 +644,10 @@ public static class DataCombinationGeneratorEmitter
         string? methodName = null;
         ITypeSymbol? targetType = null;
         
-        if (attr.ConstructorArguments.Length == 2 && attr.ConstructorArguments[0].Value is ITypeSymbol)
+        if (attr.ConstructorArguments is
+            [
+                { Value: ITypeSymbol } _, _
+            ])
         {
             targetType = (ITypeSymbol)attr.ConstructorArguments[0].Value;
             methodName = attr.ConstructorArguments[1].Value?.ToString();
@@ -679,7 +688,7 @@ public static class DataCombinationGeneratorEmitter
                         writer.AppendLine($"instanceMethodTypes[\"{typeParam.Name}\"] = typeof({typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)});");
                     }
                 }
-                else if (typeSymbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.IsGenericType)
+                else if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol)
                 {
                     for (int i = 0; i < Math.Min(typeArgs.Length, namedTypeSymbol.TypeParameters.Length); i++)
                     {
@@ -690,12 +699,12 @@ public static class DataCombinationGeneratorEmitter
                 }
                 
                 // Validate constraints if we have generic parameters
-                if (methodSymbol.IsGenericMethod && methodSymbol.TypeParameters.Length > 0)
+                if (methodSymbol is { IsGenericMethod: true, TypeParameters.Length: > 0 })
                 {
                     var typeArgStrings = typeArgs.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
                     EmitGenericConstraintValidation(writer, methodSymbol.TypeParameters, typeArgStrings, "method");
                 }
-                else if (typeSymbol is INamedTypeSymbol namedTypeForConstraints && namedTypeForConstraints.IsGenericType && namedTypeForConstraints.TypeParameters.Length > 0)
+                else if (typeSymbol is INamedTypeSymbol { IsGenericType: true, TypeParameters.Length: > 0 } namedTypeForConstraints)
                 {
                     var typeArgStrings = typeArgs.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
                     EmitGenericConstraintValidation(writer, namedTypeForConstraints.TypeParameters, typeArgStrings, "class");
@@ -803,7 +812,7 @@ public static class DataCombinationGeneratorEmitter
         writer.Indent();
         
         // For generic data source attributes (e.g. ClassDataSource<T>), the type is in the generic type argument
-        if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
+        if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
             var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -836,7 +845,10 @@ public static class DataCombinationGeneratorEmitter
         ITypeSymbol? targetType = null;
         
         // Extract method name and target type from attribute
-        if (attr.ConstructorArguments.Length == 2 && attr.ConstructorArguments[0].Value is ITypeSymbol)
+        if (attr.ConstructorArguments is
+            [
+                { Value: ITypeSymbol } _, _
+            ])
         {
             targetType = (ITypeSymbol)attr.ConstructorArguments[0].Value;
             methodName = attr.ConstructorArguments[1].Value?.ToString();
@@ -871,7 +883,7 @@ public static class DataCombinationGeneratorEmitter
         writer.Indent();
         
         // For generic ClassDataSource<T>, the type is in the generic type argument
-        if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
+        if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
             EmitClassDataSourceInstantiation(writer, dataSourceType, usePropertyTestInformation: true);
@@ -1359,10 +1371,7 @@ public static class DataCombinationGeneratorEmitter
         {
             foreach (var member in currentType.GetMembers())
             {
-                if (member is IPropertySymbol property && 
-                    property.DeclaredAccessibility == Accessibility.Public &&
-                    property.SetMethod?.DeclaredAccessibility == Accessibility.Public &&
-                    !property.IsStatic) // Only instance properties for test data combinations
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: false } property) // Only instance properties for test data combinations
                 {
                     var dataSourceAttr = property.GetAttributes()
                         .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
@@ -1397,10 +1406,7 @@ public static class DataCombinationGeneratorEmitter
         {
             foreach (var member in currentType.GetMembers())
             {
-                if (member is IPropertySymbol property && 
-                    property.DeclaredAccessibility == Accessibility.Public &&
-                    property.SetMethod?.DeclaredAccessibility == Accessibility.Public &&
-                    property.IsStatic) // Only static properties for session initialization
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: true } property) // Only static properties for session initialization
                 {
                     var dataSourceAttr = property.GetAttributes()
                         .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
@@ -1481,7 +1487,7 @@ public static class DataCombinationGeneratorEmitter
         while (currentType != null)
         {
             // Check if this is a constructed generic type that matches our base
-            if (currentType.IsGenericType && currentType.ConstructedFrom != null)
+            if (currentType is { IsGenericType: true, ConstructedFrom: not null })
             {
                 var typeName = currentType.ConstructedFrom.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 if (typeName.StartsWith("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
@@ -1643,8 +1649,7 @@ public static class DataCombinationGeneratorEmitter
         }
 
         if (repeatAttr?.ConstructorArguments.Length > 0 &&
-            repeatAttr.ConstructorArguments[0].Value is int repeatTimes &&
-            repeatTimes > 0)
+            repeatAttr.ConstructorArguments[0].Value is int repeatTimes and > 0)
         {
             return repeatTimes;
         }
@@ -1725,9 +1730,7 @@ public static class DataCombinationGeneratorEmitter
         }
         
         // Check if it's a Func<T> delegate type
-        if (namedType.IsGenericType && 
-            namedType.TypeKind == TypeKind.Delegate &&
-            namedType.Name == "Func" &&
+        if (namedType is { IsGenericType: true, TypeKind: TypeKind.Delegate, Name: "Func" } &&
             namedType.ContainingNamespace.ToDisplayString() == "System")
         {
             return true;
@@ -1868,13 +1871,10 @@ public static class DataCombinationGeneratorEmitter
         var parameter = parameters[argumentIndex];
         
         // If this is the last parameter and it's a params parameter
-        if (argumentIndex == parameters.Length - 1 && parameter.IsParams)
-        {
+        if (argumentIndex == parameters.Length - 1 && parameter is { IsParams: true, Type: IArrayTypeSymbol arrayType })
             // For params parameters, we need to use the element type of the array
-            if (parameter.Type is IArrayTypeSymbol arrayType)
-            {
-                return arrayType.ElementType;
-            }
+        {
+            return arrayType.ElementType;
         }
         
         // For regular parameters, return the parameter type
@@ -2650,7 +2650,7 @@ public static class DataCombinationGeneratorEmitter
         writer.Indent();
         
         // Validate constraints if we found types
-        if (methodSymbol.IsGenericMethod && methodSymbol.TypeParameters.Length > 0)
+        if (methodSymbol is { IsGenericMethod: true, TypeParameters.Length: > 0 })
         {
             writer.AppendLine("// Validate constraints for method type parameters");
             writer.AppendLine($"var typeArray = new Type[{methodSymbol.TypeParameters.Length}];");
@@ -2662,7 +2662,7 @@ public static class DataCombinationGeneratorEmitter
             EmitGenericConstraintValidation(writer, methodSymbol.TypeParameters, 
                 methodSymbol.TypeParameters.Select(tp => $"typeArray[{methodSymbol.TypeParameters.IndexOf(tp)}]").ToArray(), "method");
         }
-        else if (typeSymbol.IsGenericType && typeSymbol.TypeParameters.Length > 0)
+        else if (typeSymbol is { IsGenericType: true, TypeParameters.Length: > 0 })
         {
             writer.AppendLine("// Validate constraints for class type parameters");
             writer.AppendLine($"var typeArray = new Type[{typeSymbol.TypeParameters.Length}];");

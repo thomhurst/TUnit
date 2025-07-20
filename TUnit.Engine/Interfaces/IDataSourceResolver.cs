@@ -7,7 +7,7 @@ namespace TUnit.Engine.Interfaces;
 /// </summary>
 public interface IDataSourceResolver
 {
-    Task<IEnumerable<object?[]>> ResolveDataSource(TestDataSource dataSource);
-    Task<IEnumerable<object?[]>> ResolveDataAsync(TestDataSource dataSource);
+    Task<IEnumerable<object?[]>> ResolveDataSource(IDataSourceAttribute dataSource);
+    Task<IEnumerable<object?[]>> ResolveDataAsync(IDataSourceAttribute dataSource);
     Task<object?> ResolvePropertyDataAsync(PropertyDataSource propertyDataSource);
 }

@@ -61,12 +61,12 @@ public abstract class TestMetadata
     /// <summary>
     /// Test data for parameterized tests
     /// </summary>
-    public TestDataSource[] DataSources { get; init; } = [];
+    public IDataSourceAttribute[] DataSources { get; init; } = [];
 
     /// <summary>
     /// Class-level data sources for constructor arguments
     /// </summary>
-    public TestDataSource[] ClassDataSources { get; init; } = [];
+    public IDataSourceAttribute[] ClassDataSources { get; init; } = [];
 
     /// <summary>
     /// Properties that require data injection
