@@ -29,7 +29,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         var semanticModel = context.SemanticModel;
         
         if (semanticModel.GetDeclaredSymbol(classDeclaration) is not INamedTypeSymbol typeSymbol)
+        {
             return null;
+        }
 
         var propertiesWithDataSource = typeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
@@ -45,7 +47,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             .ToList();
 
         if (!propertiesWithDataSource.Any())
+        {
             return null;
+        }
 
         return new TypeWithDataSourceProperties
         {
@@ -56,7 +60,10 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
     private static void GenerateDataSourceHelpers(SourceProductionContext context, ImmutableArray<TypeWithDataSourceProperties> types)
     {
-        if (!types.Any()) return;
+        if (!types.Any())
+        {
+            return;
+        }
 
         // Collect all referenced target types
         var referencedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
@@ -151,25 +158,35 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         
         // Skip primitive types and built-in .NET types
         if (typeSymbol.SpecialType != SpecialType.None)
+        {
             return false;
-            
+        }
+
         // Skip string specifically
         if (typeSymbol.ToDisplayString() == "string")
+        {
             return false;
-            
+        }
+
         // Skip if it's a system type
         var namespaceName = typeSymbol.ContainingNamespace?.ToDisplayString();
         if (namespaceName?.StartsWith("System") == true && !namespaceName.StartsWith("System.Threading.Tasks"))
+        {
             return false;
-            
+        }
+
         // Skip test classes (classes that have TestAttribute or inherit from test base classes)
         if (IsTestClass(typeSymbol))
+        {
             return false;
-            
+        }
+
         // Skip classes with complex constructor requirements that are likely test classes
         if (HasComplexConstructorRequirements(typeSymbol))
+        {
             return false;
-            
+        }
+
         return true;
     }
 
@@ -180,13 +197,17 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             attr.AttributeClass?.Name.Contains("Test") == true);
             
         if (hasTestAttribute)
+        {
             return true;
-            
+        }
+
         // Check methods for test attributes
         foreach (var member in typeSymbol.GetMembers().OfType<IMethodSymbol>())
         {
             if (member.GetAttributes().Any(attr => attr.AttributeClass?.Name.Contains("Test") == true))
+            {
                 return true;
+            }
         }
         
         return false;
@@ -199,19 +220,25 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         var constructors = typeSymbol.Constructors.Where(c => !c.IsStatic).ToList();
         
         if (!constructors.Any())
+        {
             return true; // No constructors available
-            
+        }
+
         // Check if there's a parameterless constructor
         var hasParameterlessConstructor = constructors.Any(c => c.Parameters.Length == 0);
         
         if (hasParameterlessConstructor)
+        {
             return false; // We can use the parameterless constructor
-            
+        }
+
         // If all constructors require parameters, check if they're simple types we can handle
         foreach (var constructor in constructors)
         {
             if (constructor.Parameters.All(p => CanProvideDefaultValue(p.Type)))
+            {
                 return false; // We can provide default values for all parameters
+            }
         }
         
         return true; // Too complex to handle
@@ -413,7 +440,10 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         var attr = propInfo.DataSourceAttribute;
         var propertyName = property.Name;
 
-        if (attr.AttributeClass == null) return;
+        if (attr.AttributeClass == null)
+        {
+            return;
+        }
 
         var fullyQualifiedName = attr.AttributeClass.GloballyQualifiedNonGeneric();
 
@@ -529,7 +559,10 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         var attr = propInfo.DataSourceAttribute;
         var propertyName = property.Name;
 
-        if (attr.AttributeClass == null) return;
+        if (attr.AttributeClass == null)
+        {
+            return;
+        }
 
         var fullyQualifiedName = attr.AttributeClass.GloballyQualifiedNonGeneric();
 
@@ -583,7 +616,10 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         var attr = propInfo.DataSourceAttribute;
         var propertyName = property.Name;
 
-        if (attr.AttributeClass == null) return;
+        if (attr.AttributeClass == null)
+        {
+            return;
+        }
 
         var fullyQualifiedName = attr.AttributeClass.GloballyQualifiedNonGeneric();
 

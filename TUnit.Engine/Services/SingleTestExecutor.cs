@@ -3,6 +3,7 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Data;
+using TUnit.Core.ReferenceTracking;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -46,6 +47,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
         test.StartTime = DateTimeOffset.Now;
         test.State = TestState.Running;
 
+        await PropertyInjector.InjectPropertiesAsync(
+            test.Context,
+            test.Context.TestDetails.ClassInstance!,
+            test.Context.TestDetails.TestClassInjectedPropertyArguments as Dictionary<string, object?> ?? new Dictionary<string, object?>(test.Context.TestDetails.TestClassInjectedPropertyArguments),
+            test.Metadata.PropertyInjections);
+
         // Initialize all eligible objects before test starts
         await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
 
@@ -68,16 +75,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
         try
         {
-            if (!string.IsNullOrEmpty(test.Context?.SkipReason))
+            if (!string.IsNullOrEmpty(test.Context.SkipReason))
             {
                 return await HandleSkippedTestAsync(test, cancellationToken);
             }
 
             await ExecuteTestWithHooksAsync(test, cancellationToken);
-        }
-        catch (OperationCanceledException ex) when (test.Metadata.TimeoutMs.HasValue)
-        {
-            HandleTestFailure(test, ex);
         }
         catch (Exception ex)
         {
@@ -87,25 +90,25 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             test.EndTime = DateTimeOffset.Now;
 
+            // Release data source references
+            await ReleaseDataSourceReferences(test.Context!);
+
             // Invoke test end event receivers
             await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
 
             // Invoke last test event receivers if this is the last test
             var endClassContext = test.Context!.ClassContext;
-            if (endClassContext != null)
-            {
-                var endAssemblyContext = endClassContext.AssemblyContext;
-                var endSessionContext = endAssemblyContext.TestSessionContext;
+            var endAssemblyContext = endClassContext.AssemblyContext;
+            var endSessionContext = endAssemblyContext.TestSessionContext;
 
-                // Last test in class
-                await _eventReceiverOrchestrator.InvokeLastTestInClassEventReceiversAsync(test.Context, endClassContext, cancellationToken);
+            // Last test in class
+            await _eventReceiverOrchestrator.InvokeLastTestInClassEventReceiversAsync(test.Context, endClassContext, cancellationToken);
 
-                // Last test in assembly
-                await _eventReceiverOrchestrator.InvokeLastTestInAssemblyEventReceiversAsync(test.Context, endAssemblyContext, cancellationToken);
+            // Last test in assembly
+            await _eventReceiverOrchestrator.InvokeLastTestInAssemblyEventReceiversAsync(test.Context, endAssemblyContext, cancellationToken);
 
-                // Last test in session
-                await _eventReceiverOrchestrator.InvokeLastTestInSessionEventReceiversAsync(test.Context, endSessionContext, cancellationToken);
-            }
+            // Last test in session
+            await _eventReceiverOrchestrator.InvokeLastTestInSessionEventReceiversAsync(test.Context, endSessionContext, cancellationToken);
         }
 
         return CreateUpdateMessage(test);
@@ -219,6 +222,29 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.Result = _resultFactory.CreateFailedResult(
                 test.StartTime!.Value,
                 ex);
+        }
+    }
+
+    private async Task ReleaseDataSourceReferences(TestContext context)
+    {
+        var testDetails = context.TestDetails;
+
+        // Release test method arguments
+        foreach (var arg in testDetails.TestMethodArguments)
+        {
+            await DataSourceReferenceTrackerProvider.ReleaseDataSourceObject(arg);
+        }
+
+        // Release test class constructor arguments
+        foreach (var arg in testDetails.TestClassArguments)
+        {
+            await DataSourceReferenceTrackerProvider.ReleaseDataSourceObject(arg);
+        }
+
+        // Release injected property values
+        foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
+        {
+            await DataSourceReferenceTrackerProvider.ReleaseDataSourceObject(kvp.Value);
         }
     }
 

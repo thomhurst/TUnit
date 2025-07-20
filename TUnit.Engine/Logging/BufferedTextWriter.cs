@@ -42,8 +42,11 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
     {
         lock (_lock)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             _buffer.Append(value);
             CheckFlush();
         }
@@ -51,12 +54,18 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
 
     public override void Write(string? value)
     {
-        if (string.IsNullOrEmpty(value)) return;
+        if (string.IsNullOrEmpty(value))
+        {
+            return;
+        }
 
         lock (_lock)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             _buffer.Append(value);
             CheckFlush();
         }
@@ -64,12 +73,18 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
 
     public override void Write(char[] buffer, int index, int count)
     {
-        if (buffer == null || count <= 0) return;
+        if (buffer == null || count <= 0)
+        {
+            return;
+        }
 
         lock (_lock)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             _buffer.Append(buffer, index, count);
             CheckFlush();
         }
@@ -79,8 +94,11 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
     {
         lock (_lock)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             _buffer.AppendLine();
             FlushBuffer();
         }
@@ -90,8 +108,11 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
     {
         lock (_lock)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             _buffer.AppendLine(value);
             FlushBuffer();
         }
@@ -102,8 +123,11 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
     {
         lock (_lock)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             _buffer.AppendFormat(format, arg0);
             CheckFlush();
         }
@@ -113,8 +137,11 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
     {
         lock (_lock)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             _buffer.AppendFormat(format, arg0, arg1);
             CheckFlush();
         }
@@ -124,8 +151,11 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
     {
         lock (_lock)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             _buffer.AppendFormat(format, arg0, arg1, arg2);
             CheckFlush();
         }
@@ -135,8 +165,11 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
     {
         lock (_lock)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             _buffer.AppendFormat(format, args);
             CheckFlush();
         }
@@ -146,8 +179,11 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
     {
         lock (_lock)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             _buffer.AppendFormat(format, arg0);
             _buffer.AppendLine();
             FlushBuffer();
@@ -158,8 +194,11 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
     {
         lock (_lock)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             _buffer.AppendFormat(format, arg0, arg1);
             _buffer.AppendLine();
             FlushBuffer();
@@ -170,8 +209,11 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
     {
         lock (_lock)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             _buffer.AppendFormat(format, arg0, arg1, arg2);
             _buffer.AppendLine();
             FlushBuffer();
@@ -182,8 +224,11 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
     {
         lock (_lock)
         {
-            if (_disposed) return;
-            
+            if (_disposed)
+            {
+                return;
+            }
+
             _buffer.AppendFormat(format, args);
             _buffer.AppendLine();
             FlushBuffer();
@@ -204,8 +249,11 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
         string content;
         lock (_lock)
         {
-            if (_buffer.Length == 0) return;
-            
+            if (_buffer.Length == 0)
+            {
+                return;
+            }
+
             content = _buffer.ToString();
             _buffer.Clear();
         }
@@ -225,7 +273,10 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
 
     private void FlushBuffer()
     {
-        if (_buffer.Length == 0) return;
+        if (_buffer.Length == 0)
+        {
+            return;
+        }
 
         var content = _buffer.ToString();
         _buffer.Clear();

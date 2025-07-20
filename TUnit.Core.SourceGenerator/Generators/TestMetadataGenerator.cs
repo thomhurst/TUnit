@@ -257,6 +257,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate data sources with factory methods
         GenerateDataSources(writer, compilation, testMethod);
 
+        // Generate property injections
+        GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.Name);
+
         // Parameter types
         writer.AppendLine("ParameterTypes = new Type[]");
         writer.AppendLine("{");
@@ -347,15 +350,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("},");
         
-        // Property data sources (still empty for now)
-        writer.AppendLine("PropertyDataSources = Array.Empty<PropertyDataSource>(),");
+        // Generate property data sources
+        GeneratePropertyDataSources(writer, compilation, testMethod);
     }
     
     private static void GenerateDataSourceAttribute(CodeWriter writer, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         var attrClass = attr.AttributeClass;
-        if (attrClass == null) return;
-        
+        if (attrClass == null)
+        {
+            return;
+        }
+
         var attrName = attrClass.GloballyQualifiedNonGeneric();
         
         if (attrName == "global::TUnit.Core.MethodDataSourceAttribute")
@@ -365,6 +371,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else if (attrName == "global::TUnit.Core.ArgumentsAttribute")
         {
             GenerateArgumentsAttribute(writer, attr);
+        }
+        else if (attrName == "global::TUnit.Core.ClassDataSourceAttribute" && attrClass.IsGenericType)
+        {
+            GenerateClassDataSourceAttribute(writer, attr);
         }
         else
         {
@@ -638,8 +648,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static bool IsEnumerable(ITypeSymbol type)
     {
         if (type.SpecialType == SpecialType.System_String)
+        {
             return false;
-            
+        }
+
         return type.AllInterfaces.Any(i => 
             i.OriginalDefinition.ToDisplayString() == "System.Collections.IEnumerable" ||
             (i.IsGenericType && i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>"));
@@ -655,11 +667,26 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             WriteTypedConstant(writer, attr.ConstructorArguments[i]);
             if (i < attr.ConstructorArguments.Length - 1)
+            {
                 writer.Append(", ");
+            }
         }
         
         writer.Unindent();
         writer.AppendLine("),");
+    }
+    
+    private static void GenerateClassDataSourceAttribute(CodeWriter writer, AttributeData attr)
+    {
+        if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
+        {
+            var genericArg = attr.AttributeClass.TypeArguments[0];
+            writer.AppendLine($"new ClassDataSourceAttribute<{genericArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>(),");
+        }
+        else
+        {
+            writer.AppendLine("// Unable to generate ClassDataSourceAttribute");
+        }
     }
     
     private static void WriteTypedConstant(CodeWriter writer, TypedConstant constant)
@@ -696,9 +723,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     writer.Append($"'{escapedChar}'");
                 }
                 else if (constant.Type?.SpecialType == SpecialType.System_Boolean)
+                {
                     writer.Append(constant.Value?.ToString()?.ToLowerInvariant() ?? "false");
+                }
                 else
+                {
                     writer.Append(constant.Value?.ToString() ?? "null");
+                }
                 break;
                 
             case TypedConstantKind.Type:
@@ -715,7 +746,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     WriteTypedConstant(writer, constant.Values[i]);
                     if (i < constant.Values.Length - 1)
+                    {
                         writer.Append(", ");
+                    }
                 }
                 writer.Append(" }");
                 break;
@@ -774,7 +807,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         }
 
                         // ValueFactory will be provided by the TestDataCombination at runtime
-                        writer.AppendLine("ValueFactory = () => throw new InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\")");
+                        writer.AppendLine("ValueFactory = () => throw new InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\"),");
+
+                        // Generate nested property injections
+                        GenerateNestedPropertyInjections(writer, property.Type, processedProperties);
+
+                        // Generate nested property value factory
+                        GenerateNestedPropertyValueFactory(writer, property.Type);
 
                         writer.Unindent();
                         writer.AppendLine("},");
@@ -788,7 +827,196 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
 
+    private static void GeneratePropertyDataSources(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    {
+        writer.AppendLine("PropertyDataSources = new PropertyDataSource[]");
+        writer.AppendLine("{");
+        writer.Indent();
 
+        var typeSymbol = testMethod.TypeSymbol;
+        var currentType = typeSymbol;
+        var processedProperties = new HashSet<string>();
+
+        while (currentType != null)
+        {
+            foreach (var member in currentType.GetMembers())
+            {
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
+                    !processedProperties.Contains(property.Name))
+                {
+                    var dataSourceAttr = property.GetAttributes()
+                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
+
+                    if (dataSourceAttr != null)
+                    {
+                        processedProperties.Add(property.Name);
+                        
+                        writer.AppendLine("new PropertyDataSource");
+                        writer.AppendLine("{");
+                        writer.Indent();
+                        writer.AppendLine($"PropertyName = \"{property.Name}\",");
+                        writer.AppendLine($"PropertyType = typeof({property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
+                        writer.Append("DataSource = ");
+                        GenerateDataSourceAttribute(writer, dataSourceAttr, testMethod.MethodSymbol, typeSymbol);
+                        writer.Unindent();
+                        writer.AppendLine("},");
+                    }
+                }
+            }
+            currentType = currentType.BaseType;
+        }
+
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+
+    private static void GenerateNestedPropertyInjections(CodeWriter writer, ITypeSymbol propertyType, HashSet<string> processedProperties)
+    {
+        writer.AppendLine("NestedPropertyInjections = new PropertyInjectionData[]");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        // Only generate nested injections for reference types that aren't basic types
+        if (ShouldGenerateNestedInjections(propertyType))
+        {
+            GeneratePropertyInjectionsForType(writer, propertyType, processedProperties, isNested: true);
+        }
+
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+
+    private static void GenerateNestedPropertyValueFactory(CodeWriter writer, ITypeSymbol propertyType)
+    {
+        writer.AppendLine("NestedPropertyValueFactory = obj =>");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        if (ShouldGenerateNestedInjections(propertyType))
+        {
+            writer.AppendLine("var nestedValues = new Dictionary<string, object?>();");
+            
+            // Generate code to extract property values from the nested object
+            GeneratePropertyValueExtraction(writer, propertyType);
+            
+            writer.AppendLine("return nestedValues;");
+        }
+        else
+        {
+            writer.AppendLine("return new Dictionary<string, object?>();");
+        }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+    }
+
+    private static bool ShouldGenerateNestedInjections(ITypeSymbol type)
+    {
+        // Don't generate for basic types, primitives, or system types
+        if (type.TypeKind == TypeKind.Enum || 
+            type.SpecialType != SpecialType.None ||
+            type.ToDisplayString().StartsWith("System."))
+        {
+            return false;
+        }
+
+        // Don't generate for arrays or collections
+        if (type.TypeKind == TypeKind.Array)
+        {
+            return false;
+        }
+
+        // Check if type has any properties with data source attributes
+        return type.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Any(p => p.GetAttributes()
+                .Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)));
+    }
+
+    private static void GeneratePropertyInjectionsForType(CodeWriter writer, ITypeSymbol typeSymbol, HashSet<string> processedProperties, bool isNested)
+    {
+        var currentType = typeSymbol;
+        var nestedProcessedProperties = new HashSet<string>(processedProperties);
+
+        while (currentType != null)
+        {
+            foreach (var member in currentType.GetMembers())
+            {
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
+                    !nestedProcessedProperties.Contains(property.Name))
+                {
+                    var dataSourceAttr = property.GetAttributes()
+                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
+
+                    if (dataSourceAttr != null)
+                    {
+                        nestedProcessedProperties.Add(property.Name);
+                        var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                        var className = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+                        writer.AppendLine("new PropertyInjectionData");
+                        writer.AppendLine("{");
+                        writer.Indent();
+                        writer.AppendLine($"PropertyName = \"{property.Name}\",");
+                        writer.AppendLine($"PropertyType = typeof({propertyType}),");
+
+                        // Generate setter
+                        if (property.SetMethod.IsInitOnly)
+                        {
+                            writer.AppendLine("#if NET8_0_OR_GREATER");
+                            writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingFieldNested(({className})instance) = ({propertyType})value,");
+                            writer.AppendLine("#else");
+                            writer.AppendLine($"Setter = (instance, value) => throw new NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
+                            writer.AppendLine("#endif");
+                        }
+                        else
+                        {
+                            writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
+                        }
+
+                        writer.AppendLine("ValueFactory = () => throw new InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\")");
+
+                        writer.Unindent();
+                        writer.AppendLine("},");
+                    }
+                }
+            }
+            currentType = currentType.BaseType;
+        }
+    }
+
+    private static void GeneratePropertyValueExtraction(CodeWriter writer, ITypeSymbol typeSymbol)
+    {
+        var currentType = typeSymbol;
+        var processedProperties = new HashSet<string>();
+
+        while (currentType != null)
+        {
+            foreach (var member in currentType.GetMembers())
+            {
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, GetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
+                    !processedProperties.Contains(property.Name))
+                {
+                    var dataSourceAttr = property.GetAttributes()
+                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
+
+                    if (dataSourceAttr != null)
+                    {
+                        processedProperties.Add(property.Name);
+                        var className = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                        
+                        writer.AppendLine($"if (obj is {className} typedObj)");
+                        writer.AppendLine("{");
+                        writer.Indent();
+                        writer.AppendLine($"nestedValues[\"{property.Name}\"] = typedObj.{property.Name};");
+                        writer.Unindent();
+                        writer.AppendLine("}");
+                    }
+                }
+            }
+            currentType = currentType.BaseType;
+        }
+    }
 
     private static void GenerateTypedInvokers(CodeWriter writer, TestMethodMetadata testMethod, string className)
     {
@@ -1704,7 +1932,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static bool ContainsGenericTypeParameter(ITypeSymbol type)
     {
         if (type.TypeKind == TypeKind.TypeParameter)
+        {
             return true;
+        }
 
         if (type is INamedTypeSymbol namedType)
         {

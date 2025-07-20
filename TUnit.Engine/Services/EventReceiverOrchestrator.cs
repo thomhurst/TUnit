@@ -34,7 +34,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     public async ValueTask InitializeAllEligibleObjectsAsync(TestContext context, CancellationToken cancellationToken)
     {
-        var eligibleObjects = context.GetEligibleEventObjects();
+        var eligibleObjects = context.GetEligibleEventObjects().ToArray();
 
         // Register all event receivers for fast lookup
         _registry.RegisterReceivers(eligibleObjects);
@@ -67,7 +67,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         // Fast path - no allocation if no receivers
         if (!_registry.HasTestStartReceivers())
+        {
             return;
+        }
 
         await InvokeTestStartEventReceiversCore(context, cancellationToken);
     }
@@ -108,7 +110,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     public async ValueTask InvokeTestEndEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
         if (!_registry.HasTestEndReceivers())
+        {
             return;
+        }
 
         await InvokeTestEndEventReceiversCore(context, cancellationToken);
     }
@@ -139,7 +143,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     public async ValueTask InvokeTestSkippedEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
         if (!_registry.HasTestSkippedReceivers())
+        {
             return;
+        }
 
         await InvokeTestSkippedEventReceiversCore(context, cancellationToken);
     }
@@ -170,7 +176,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     public async ValueTask InvokeTestRegisteredEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
         if (!_registry.HasTestRegisteredReceivers())
+        {
             return;
+        }
 
         await InvokeTestRegisteredEventReceiversCore(context, cancellationToken);
     }
@@ -224,7 +232,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         CancellationToken cancellationToken)
     {
         if (!_registry.HasFirstTestInSessionReceivers())
+        {
             return;
+        }
 
         if (Interlocked.CompareExchange(ref _firstTestInSessionInvoked, 1, 0) == 0)
         {
@@ -259,7 +269,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         CancellationToken cancellationToken)
     {
         if (!_registry.HasFirstTestInAssemblyReceivers())
+        {
             return;
+        }
 
         var assemblyName = assemblyContext.Assembly.FullName ?? "";
         if (_firstTestInAssemblyInvoked.TryAdd(assemblyName, true))
@@ -295,7 +307,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         CancellationToken cancellationToken)
     {
         if (!_registry.HasFirstTestInClassReceivers())
+        {
             return;
+        }
 
         var classType = classContext.ClassType;
         if (_firstTestInClassInvoked.TryAdd(classType, true))
@@ -332,7 +346,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         CancellationToken cancellationToken)
     {
         if (!_registry.HasLastTestInSessionReceivers())
+        {
             return;
+        }
 
         if (Interlocked.Decrement(ref _sessionTestCount) == 0)
         {
@@ -367,7 +383,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         CancellationToken cancellationToken)
     {
         if (!_registry.HasLastTestInAssemblyReceivers())
+        {
             return;
+        }
 
         var assemblyName = assemblyContext.Assembly.FullName ?? "";
         if (_assemblyTestCounts.AddOrUpdate(assemblyName, 0, (_, count) => count - 1) == 0)
@@ -403,7 +421,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         CancellationToken cancellationToken)
     {
         if (!_registry.HasLastTestInClassReceivers())
+        {
             return;
+        }
 
         var classType = classContext.ClassType;
         if (_classTestCounts.AddOrUpdate(classType, 0, (_, count) => count - 1) == 0)

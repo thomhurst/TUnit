@@ -119,8 +119,11 @@ internal static class GenericTestHelper
     public static bool IsInheritedFromGenericBase(MethodInfo method)
     {
         var declaringType = method.DeclaringType;
-        if (declaringType == null) return false;
-        
+        if (declaringType == null)
+        {
+            return false;
+        }
+
         // Check if any base type is generic
         var currentType = declaringType.BaseType;
         while (currentType != null)

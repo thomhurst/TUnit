@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.ReferenceTracking;
 
 namespace TUnit.Core;
 
@@ -9,40 +10,102 @@ namespace TUnit.Core;
 /// </summary>
 public static class PropertyInjector
 {
-    private static readonly BindingFlags BackingFieldFlags = 
+    private static readonly BindingFlags BackingFieldFlags =
         BindingFlags.Instance | BindingFlags.NonPublic;
 
     /// <summary>
     /// Injects property values into a test instance using PropertyInjectionData.
     /// Works for both regular and init-only properties.
+    /// This overload is for backward compatibility when TestContext is not available.
     /// </summary>
-    public static async Task InjectPropertiesAsync(
+    public static Task InjectPropertiesAsync(
         object instance,
         Dictionary<string, object?> propertyValues,
         PropertyInjectionData[] injectionData)
     {
+        // Call the full version with a null TestContext
+        return InjectPropertiesAsync(null!, instance, propertyValues, injectionData, 5, 0);
+    }
+
+    /// <summary>
+    /// Injects property values into a test instance using PropertyInjectionData.
+    /// Works for both regular and init-only properties.
+    /// Supports recursive injection using pre-compiled nested metadata for AOT compatibility.
+    /// </summary>
+    public static async Task InjectPropertiesAsync(
+        TestContext testContext,
+        object? instance,
+        Dictionary<string, object?> propertyValues,
+        PropertyInjectionData[] injectionData,
+        int maxRecursionDepth = 5,
+        int currentDepth = 0)
+    {
         if (instance == null)
+        {
             throw new ArgumentNullException(nameof(instance));
+        }
+
+        if (currentDepth >= maxRecursionDepth)
+        {
+            return; // Prevent infinite recursion
+        }
 
         // Use PropertyInjectionData if available (preferred path)
         if (injectionData is { Length: > 0 })
         {
             foreach (var injection in injectionData)
             {
-                if (propertyValues.TryGetValue(injection.PropertyName, out var value))
+                if (!propertyValues.TryGetValue(injection.PropertyName, out var value))
                 {
-                    injection.Setter(instance, value);
+                    continue;
+                }
+
+                testContext.Events.OnTestStart += async (o, context) =>
+                {
+                    await ObjectInitializer.InitializeAsync(value);
+                };
+
+                testContext.Events.OnDispose += async (o, context) =>
+                {
+                    await DataSourceReferenceTrackerProvider.ReleaseDataSourceObject(value);
+                };
+
+                // Track the injected value
+                var trackedValue = DataSourceReferenceTrackerProvider.TrackDataSourceObject(value);
+
+                injection.Setter(instance, trackedValue);
+
+                // Recursively inject properties using pre-compiled nested metadata (AOT-compatible)
+                if (trackedValue != null &&
+                    injection.NestedPropertyInjections.Length > 0 &&
+                    injection.NestedPropertyValueFactory != null)
+                {
+                    try
+                    {
+                        // Extract nested property values using pre-compiled factory
+                        var nestedPropertyValues = injection.NestedPropertyValueFactory(trackedValue);
+
+                        await InjectPropertiesAsync(
+                            testContext,
+                            trackedValue,
+                            nestedPropertyValues,
+                            injection.NestedPropertyInjections,
+                            maxRecursionDepth,
+                            currentDepth + 1);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException(
+                            $"Failed to recursively inject properties on '{injection.PropertyName}': {ex.Message}", ex);
+                    }
                 }
             }
         }
         else
         {
             // Fallback to reflection if no injection data (for compatibility)
-            InjectPropertiesViaReflection(instance, propertyValues);
+            await InjectPropertiesViaReflectionAsync(testContext, instance, propertyValues, maxRecursionDepth, currentDepth);
         }
-
-        // Initialize any data source properties
-        await ObjectInitializer.InitializeAsync(instance);
     }
 
     /// <summary>
@@ -52,7 +115,7 @@ public static class PropertyInjector
     public static PropertyInjectionData CreatePropertyInjection(PropertyInfo property)
     {
         var setter = CreatePropertySetter(property);
-        
+
         return new PropertyInjectionData
         {
             PropertyName = property.Name,
@@ -79,7 +142,7 @@ public static class PropertyInjector
             // IsInitOnly is only available in .NET 6+
             var setMethod = property.SetMethod;
             var isInitOnly = IsInitOnlyMethod(setMethod);
-            
+
             if (!isInitOnly)
             {
                 // Regular property - use normal setter
@@ -108,49 +171,92 @@ public static class PropertyInjector
     private static FieldInfo? GetBackingField(PropertyInfo property)
     {
         if (property.DeclaringType == null)
+        {
             return null;
+        }
 
         // Try compiler-generated backing field pattern
         var backingFieldName = $"<{property.Name}>k__BackingField";
         var field = GetField(property.DeclaringType, backingFieldName, BackingFieldFlags);
-        
+
         if (field != null)
+        {
             return field;
+        }
 
         // Try underscore prefix pattern
         var underscoreName = "_" + char.ToLowerInvariant(property.Name[0]) + property.Name.Substring(1);
         field = GetField(property.DeclaringType, underscoreName, BackingFieldFlags);
-        
+
         if (field != null && field.FieldType == property.PropertyType)
+        {
             return field;
+        }
 
         // Try exact name match
         field = GetField(property.DeclaringType, property.Name, BackingFieldFlags);
-        
+
         if (field != null && field.FieldType == property.PropertyType)
+        {
             return field;
+        }
 
         return null;
     }
 
     /// <summary>
     /// Fallback method to inject properties via reflection when no PropertyInjectionData is available.
+    /// Supports recursive injection and data source tracking.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Property injection requires reflection access to object type")]
-    private static void InjectPropertiesViaReflection(object instance, Dictionary<string, object?> propertyValues)
+    private static async Task InjectPropertiesViaReflectionAsync(
+        TestContext testContext,
+        object instance,
+        Dictionary<string, object?> propertyValues,
+        int maxRecursionDepth = 5,
+        int currentDepth = 0)
     {
+        if (currentDepth >= maxRecursionDepth)
+        {
+            return; // Prevent infinite recursion
+        }
+
         var type = instance.GetType();
-        
+
         foreach (var kvp in propertyValues)
         {
             var property = GetProperty(type, kvp.Key);
             if (property == null)
+            {
                 continue;
+            }
 
             try
             {
+                // Track the injected value
+                var trackedValue = DataSourceReferenceTrackerProvider.TrackDataSourceObject(kvp.Value);
+
                 var setter = CreatePropertySetter(property);
-                setter(instance, kvp.Value);
+                setter(instance, trackedValue);
+
+                // Recursively inject properties on the injected object
+                if (trackedValue != null && ShouldRecurse(trackedValue))
+                {
+                    var nestedInjectionData = DiscoverInjectableProperties(trackedValue.GetType());
+                    if (nestedInjectionData.Length > 0)
+                    {
+                        // For recursive injection, we need to extract property values from the object itself
+                        var nestedPropertyValues = new Dictionary<string, object?>();
+
+                        await InjectPropertiesAsync(
+                            testContext,
+                            trackedValue,
+                            nestedPropertyValues,
+                            nestedInjectionData,
+                            maxRecursionDepth,
+                            currentDepth + 1);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -172,8 +278,8 @@ public static class PropertyInjector
         {
             // Check if property has any data source attributes
             var attributes = property.GetCustomAttributes(true);
-            var hasDataSource = attributes.Any(attr => 
-                attr.GetType().Name.Contains("DataSource") || 
+            var hasDataSource = attributes.Any(attr =>
+                attr.GetType().Name.Contains("DataSource") ||
                 attr.GetType().Name == "ArgumentsAttribute");
 
             if (hasDataSource)
@@ -192,6 +298,40 @@ public static class PropertyInjector
         }
 
         return injectableProperties.ToArray();
+    }
+
+    /// <summary>
+    /// Determines if an object should be recursively processed for property injection.
+    /// Excludes primitive types, strings, and other basic types to prevent infinite recursion.
+    /// </summary>
+    private static bool ShouldRecurse(object obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+
+        var type = obj.GetType();
+
+        // Don't recurse on primitive types, strings, enums, or value types
+        if (type.IsPrimitive || type == typeof(string) || type.IsEnum || type.IsValueType)
+        {
+            return false;
+        }
+
+        // Don't recurse on collections to avoid complexity
+        if (type.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(type))
+        {
+            return false;
+        }
+
+        // Don't recurse on common framework types
+        if (type.Namespace?.StartsWith("System") == true && type.Assembly == typeof(object).Assembly)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Property injection requires reflection access")]

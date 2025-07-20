@@ -120,7 +120,10 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                     }
                     baseType = baseType.BaseType;
                 }
-                if (hasTypedDataSource) break;
+                if (hasTypedDataSource)
+                {
+                    break;
+                }
             }
 
             if (hasTypedDataSource)

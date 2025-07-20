@@ -54,12 +54,21 @@ internal class TestFinder : ITestFinder
 
     private bool ParameterTypesMatch(Type[]? testParamTypes, Type[] expectedParamTypes)
     {
-        if (testParamTypes == null && expectedParamTypes.Length == 0) return true;
-        if (testParamTypes == null || testParamTypes.Length != expectedParamTypes.Length) return false;
+        if (testParamTypes == null && expectedParamTypes.Length == 0)
+        {
+            return true;
+        }
+        if (testParamTypes == null || testParamTypes.Length != expectedParamTypes.Length)
+        {
+            return false;
+        }
 
         for (int i = 0; i < testParamTypes.Length; i++)
         {
-            if (testParamTypes[i] != expectedParamTypes[i]) return false;
+            if (testParamTypes[i] != expectedParamTypes[i])
+            {
+                return false;
+            }
         }
         return true;
     }

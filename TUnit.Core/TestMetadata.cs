@@ -322,4 +322,16 @@ public sealed class PropertyInjectionData
     public required Type PropertyType { get; init; }
     public required Action<object, object?> Setter { get; init; }
     public required Func<object?> ValueFactory { get; init; }
+    
+    /// <summary>
+    /// Nested property injection data for recursive property injection.
+    /// Empty array if no nested properties need injection.
+    /// </summary>
+    public PropertyInjectionData[] NestedPropertyInjections { get; init; } = Array.Empty<PropertyInjectionData>();
+    
+    /// <summary>
+    /// Factory to extract nested property values from the parent object.
+    /// Returns a dictionary mapping property names to their values for nested injection.
+    /// </summary>
+    public Func<object?, Dictionary<string, object?>>? NestedPropertyValueFactory { get; init; }
 }

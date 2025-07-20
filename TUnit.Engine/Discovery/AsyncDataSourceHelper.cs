@@ -52,34 +52,58 @@ internal static class AsyncDataSourceHelper
     private static bool IsGenericFuncTask(object? item, out Type? resultType)
     {
         resultType = null;
-        if (item == null) return false;
-        
+        if (item == null)
+        {
+            return false;
+        }
+
         var itemType = item.GetType();
-        if (!itemType.IsGenericType) return false;
-        
+        if (!itemType.IsGenericType)
+        {
+            return false;
+        }
+
         var genericDef = itemType.GetGenericTypeDefinition();
-        if (genericDef != typeof(Func<>)) return false;
-        
+        if (genericDef != typeof(Func<>))
+        {
+            return false;
+        }
+
         var returnType = itemType.GetGenericArguments()[0];
-        if (!returnType.IsGenericType) return false;
-        
+        if (!returnType.IsGenericType)
+        {
+            return false;
+        }
+
         var returnGenericDef = returnType.GetGenericTypeDefinition();
-        if (returnGenericDef != typeof(Task<>)) return false;
-        
+        if (returnGenericDef != typeof(Task<>))
+        {
+            return false;
+        }
+
         resultType = returnType.GetGenericArguments()[0];
         return true;
     }
     
     private static Type? GetTaskResultType(Type funcType)
     {
-        if (!funcType.IsGenericType) return null;
-        
+        if (!funcType.IsGenericType)
+        {
+            return null;
+        }
+
         var genericArgs = funcType.GetGenericArguments();
-        if (genericArgs.Length == 0) return null;
-        
+        if (genericArgs.Length == 0)
+        {
+            return null;
+        }
+
         var returnType = genericArgs[0];
-        if (!returnType.IsGenericType) return returnType;
-        
+        if (!returnType.IsGenericType)
+        {
+            return returnType;
+        }
+
         if (returnType.GetGenericTypeDefinition() == typeof(Task<>))
         {
             return returnType.GetGenericArguments()[0];

@@ -50,9 +50,13 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override async Task FlushAsync()
     {
         if (_originalOutBuffer != null)
+        {
             await _originalOutBuffer.FlushAsync();
+        }
         if (RedirectedOut != null)
+        {
             await RedirectedOut.FlushAsync();
+        }
     }
 
     // Optimized Write methods - no tuple allocations
@@ -60,23 +64,32 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override void Write(bool value)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(value.ToString());
+        }
         RedirectedOut?.Write(value.ToString());
     }
 
     public override void Write(char value)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(value);
+        }
         RedirectedOut?.Write(value);
     }
 
     public override void Write(char[]? buffer)
     {
-        if (buffer == null) return;
-        
+        if (buffer == null)
+        {
+            return;
+        }
+
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(buffer);
+        }
         RedirectedOut?.Write(buffer);
     }
 
@@ -84,7 +97,9 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(str);
+        }
         RedirectedOut?.Write(str);
     }
 
@@ -92,7 +107,9 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(str);
+        }
         RedirectedOut?.Write(str);
     }
 
@@ -100,7 +117,9 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(str);
+        }
         RedirectedOut?.Write(str);
     }
 
@@ -108,7 +127,9 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(str);
+        }
         RedirectedOut?.Write(str);
     }
 
@@ -116,7 +137,9 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = value?.ToString() ?? string.Empty;
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(str);
+        }
         RedirectedOut?.Write(str);
     }
 
@@ -124,16 +147,23 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(str);
+        }
         RedirectedOut?.Write(str);
     }
 
     public override void Write(string? value)
     {
-        if (value == null) return;
-        
+        if (value == null)
+        {
+            return;
+        }
+
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(value);
+        }
         RedirectedOut?.Write(value);
     }
 
@@ -141,7 +171,9 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(str);
+        }
         RedirectedOut?.Write(str);
     }
 
@@ -149,14 +181,18 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = value.ToString();
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(str);
+        }
         RedirectedOut?.Write(str);
     }
 
     public override void Write(char[] buffer, int index, int count)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(buffer, index, count);
+        }
         RedirectedOut?.Write(buffer, index, count);
     }
 
@@ -164,28 +200,36 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override void Write(string format, object? arg0)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteFormatted(format, arg0);
+        }
         RedirectedOut?.Write(format, arg0);
     }
 
     public override void Write(string format, object? arg0, object? arg1)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteFormatted(format, arg0, arg1);
+        }
         RedirectedOut?.Write(format, arg0, arg1);
     }
 
     public override void Write(string format, object? arg0, object? arg1, object? arg2)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteFormatted(format, arg0, arg1, arg2);
+        }
         RedirectedOut?.Write(format, arg0, arg1, arg2);
     }
 
     public override void Write(string format, params object?[] arg)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteFormatted(format, arg);
+        }
         RedirectedOut?.Write(format, arg);
     }
 
@@ -193,31 +237,42 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override void WriteLine()
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine();
+        }
         RedirectedOut?.WriteLine();
     }
 
     public override void WriteLine(bool value)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(value.ToString());
+        }
         RedirectedOut?.WriteLine(value.ToString());
     }
 
     public override void WriteLine(char value)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(value.ToString());
+        }
         RedirectedOut?.WriteLine(value.ToString());
     }
 
     public override void WriteLine(char[]? buffer)
     {
-        if (buffer == null) return;
-        
+        if (buffer == null)
+        {
+            return;
+        }
+
         var str = new string(buffer);
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(str);
+        }
         RedirectedOut?.WriteLine(str);
     }
 
@@ -225,35 +280,45 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = new string(buffer, index, count);
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(str);
+        }
         RedirectedOut?.WriteLine(str);
     }
 
     public override void WriteLine(decimal value)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(value.ToString());
+        }
         RedirectedOut?.WriteLine(value.ToString());
     }
 
     public override void WriteLine(double value)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(value.ToString());
+        }
         RedirectedOut?.WriteLine(value.ToString());
     }
 
     public override void WriteLine(int value)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(value.ToString());
+        }
         RedirectedOut?.WriteLine(value.ToString());
     }
 
     public override void WriteLine(long value)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(value.ToString());
+        }
         RedirectedOut?.WriteLine(value.ToString());
     }
 
@@ -261,35 +326,45 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = value?.ToString() ?? string.Empty;
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(str);
+        }
         RedirectedOut?.WriteLine(str);
     }
 
     public override void WriteLine(float value)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(value.ToString());
+        }
         RedirectedOut?.WriteLine(value.ToString());
     }
 
     public override void WriteLine(string? value)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(value);
+        }
         RedirectedOut?.WriteLine(value);
     }
 
     public override void WriteLine(uint value)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(value.ToString());
+        }
         RedirectedOut?.WriteLine(value.ToString());
     }
 
     public override void WriteLine(ulong value)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(value.ToString());
+        }
         RedirectedOut?.WriteLine(value.ToString());
     }
 
@@ -297,28 +372,36 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override void WriteLine(string format, object? arg0)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLineFormatted(format, arg0);
+        }
         RedirectedOut?.WriteLine(format, arg0);
     }
 
     public override void WriteLine(string format, object? arg0, object? arg1)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLineFormatted(format, arg0, arg1);
+        }
         RedirectedOut?.WriteLine(format, arg0, arg1);
     }
 
     public override void WriteLine(string format, object? arg0, object? arg1, object? arg2)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLineFormatted(format, arg0, arg1, arg2);
+        }
         RedirectedOut?.WriteLine(format, arg0, arg1, arg2);
     }
 
     public override void WriteLine(string format, params object?[] arg)
     {
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLineFormatted(format, arg);
+        }
         RedirectedOut?.WriteLine(format, arg);
     }
 
@@ -326,63 +409,94 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override async Task WriteLineAsync()
     {
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
+        {
             await _originalOutBuffer.WriteAsync(Environment.NewLine);
+        }
         if (RedirectedOut != null)
+        {
             await RedirectedOut.WriteAsync(Environment.NewLine);
+        }
     }
 
     public override async Task WriteAsync(char value)
     {
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
+        {
             await _originalOutBuffer.WriteAsync(value.ToString());
+        }
         if (RedirectedOut != null)
+        {
             await RedirectedOut.WriteAsync(value.ToString());
+        }
     }
 
     public override async Task WriteAsync(char[] buffer, int index, int count)
     {
         var str = new string(buffer, index, count);
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
+        {
             await _originalOutBuffer.WriteAsync(str);
+        }
         if (RedirectedOut != null)
+        {
             await RedirectedOut.WriteAsync(str);
+        }
     }
 
     public override async Task WriteAsync(string? value)
     {
-        if (value == null) return;
-        
+        if (value == null)
+        {
+            return;
+        }
+
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
+        {
             await _originalOutBuffer.WriteAsync(value);
+        }
         if (RedirectedOut != null)
+        {
             await RedirectedOut.WriteAsync(value);
+        }
     }
 
     public override async Task WriteLineAsync(char value)
     {
         var str = value + Environment.NewLine;
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
+        {
             await _originalOutBuffer.WriteAsync(str);
+        }
         if (RedirectedOut != null)
+        {
             await RedirectedOut.WriteAsync(str);
+        }
     }
 
     public override async Task WriteLineAsync(char[] buffer, int index, int count)
     {
         var str = new string(buffer, index, count) + Environment.NewLine;
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
+        {
             await _originalOutBuffer.WriteAsync(str);
+        }
         if (RedirectedOut != null)
+        {
             await RedirectedOut.WriteAsync(str);
+        }
     }
 
     public override async Task WriteLineAsync(string? value)
     {
         var str = (value ?? string.Empty) + Environment.NewLine;
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
+        {
             await _originalOutBuffer.WriteAsync(str);
+        }
         if (RedirectedOut != null)
+        {
             await RedirectedOut.WriteAsync(str);
+        }
     }
 
 #if NET
@@ -390,7 +504,9 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = new string(buffer);
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(str);
+        }
         RedirectedOut?.Write(str);
     }
 
@@ -398,7 +514,9 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = value?.ToString() ?? string.Empty;
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.Write(str);
+        }
         RedirectedOut?.Write(str);
     }
 
@@ -406,25 +524,35 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = new string(buffer.Span);
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
+        {
             await _originalOutBuffer.WriteAsync(str);
+        }
         if (RedirectedOut != null)
+        {
             await RedirectedOut.WriteAsync(str);
+        }
     }
 
     public override async Task WriteAsync(StringBuilder? value, CancellationToken cancellationToken = new())
     {
         var str = value?.ToString() ?? string.Empty;
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
+        {
             await _originalOutBuffer.WriteAsync(str);
+        }
         if (RedirectedOut != null)
+        {
             await RedirectedOut.WriteAsync(str);
+        }
     }
 
     public override void WriteLine(ReadOnlySpan<char> buffer)
     {
         var str = new string(buffer);
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(str);
+        }
         RedirectedOut?.WriteLine(str);
     }
 
@@ -432,7 +560,9 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = value?.ToString() ?? string.Empty;
         if (!_verbosityService.HideTestOutput)
+        {
             _originalOutBuffer?.WriteLine(str);
+        }
         RedirectedOut?.WriteLine(str);
     }
 
@@ -440,18 +570,26 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     {
         var str = new string(buffer.Span) + Environment.NewLine;
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
+        {
             await _originalOutBuffer.WriteAsync(str);
+        }
         if (RedirectedOut != null)
+        {
             await RedirectedOut.WriteAsync(str);
+        }
     }
 
     public override async Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken = new())
     {
         var str = (value?.ToString() ?? string.Empty) + Environment.NewLine;
         if (!_verbosityService.HideTestOutput && _originalOutBuffer != null)
+        {
             await _originalOutBuffer.WriteAsync(str);
+        }
         if (RedirectedOut != null)
+        {
             await RedirectedOut.WriteAsync(str);
+        }
     }
 #endif
 

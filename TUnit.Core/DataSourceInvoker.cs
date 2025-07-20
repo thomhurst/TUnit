@@ -171,7 +171,9 @@ public static class DataSourceInvoker
     private static bool IsTupleType(this Type type)
     {
         if (!type.IsGenericType)
+        {
             return false;
+        }
 
         var genericTypeDefinition = type.GetGenericTypeDefinition();
         return genericTypeDefinition == typeof(ValueTuple<>) ||

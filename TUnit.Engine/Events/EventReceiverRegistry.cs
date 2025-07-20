@@ -169,25 +169,45 @@ internal sealed class EventReceiverRegistry
     {
         // Set flags based on implemented interfaces
         if (receiver is ITestStartEventReceiver)
+        {
             _registeredEvents |= EventTypes.TestStart;
+        }
         if (receiver is ITestEndEventReceiver)
+        {
             _registeredEvents |= EventTypes.TestEnd;
+        }
         if (receiver is ITestSkippedEventReceiver)
+        {
             _registeredEvents |= EventTypes.TestSkipped;
+        }
         if (receiver is ITestRegisteredEventReceiver)
+        {
             _registeredEvents |= EventTypes.TestRegistered;
+        }
         if (receiver is IFirstTestInTestSessionEventReceiver)
+        {
             _registeredEvents |= EventTypes.FirstTestInSession;
+        }
         if (receiver is ILastTestInTestSessionEventReceiver)
+        {
             _registeredEvents |= EventTypes.LastTestInSession;
+        }
         if (receiver is IFirstTestInAssemblyEventReceiver)
+        {
             _registeredEvents |= EventTypes.FirstTestInAssembly;
+        }
         if (receiver is ILastTestInAssemblyEventReceiver)
+        {
             _registeredEvents |= EventTypes.LastTestInAssembly;
+        }
         if (receiver is IFirstTestInClassEventReceiver)
+        {
             _registeredEvents |= EventTypes.FirstTestInClass;
+        }
         if (receiver is ILastTestInClassEventReceiver)
+        {
             _registeredEvents |= EventTypes.LastTestInClass;
+        }
     }
     
     

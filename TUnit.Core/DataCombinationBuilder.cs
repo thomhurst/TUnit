@@ -23,11 +23,17 @@ public static class DataCombinationBuilder
         var propertyCombs = propertyCombinations.ToList();
 
         if (!methodCombs.Any())
+        {
             methodCombs.Add(new MethodDataCombination());
+        }
         if (!classCombs.Any())
+        {
             classCombs.Add(new ClassDataCombination());
+        }
         if (!propertyCombs.Any())
+        {
             propertyCombs.Add(new PropertyDataCombination());
+        }
 
         // Generate cartesian product
         foreach (var methodCombination in methodCombs)

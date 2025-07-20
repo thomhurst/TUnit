@@ -97,8 +97,10 @@ internal sealed class TestCountTracker
     public (bool isFirst, bool isLast) CheckTestPosition(string key)
     {
         if (!_counts.TryGetValue(key, out var info))
+        {
             return (false, false);
-            
+        }
+
         var isFirst = info.IsFirst();
         var isLast = info.IsLast();
         

@@ -13,7 +13,10 @@ internal static class DataSourceAttributeHelper
     /// </summary>
     public static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)
     {
-        if (attributeClass == null) return false;
+        if (attributeClass == null)
+        {
+            return false;
+        }
 
         var name = attributeClass.Name;
         var fullyQualifiedName = attributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);

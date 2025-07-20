@@ -37,8 +37,14 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         ITestExecutor executor,
         CancellationToken cancellationToken)
     {
-        if (tests == null) throw new ArgumentNullException(nameof(tests));
-        if (executor == null) throw new ArgumentNullException(nameof(executor));
+        if (tests == null)
+        {
+            throw new ArgumentNullException(nameof(tests));
+        }
+        if (executor == null)
+        {
+            throw new ArgumentNullException(nameof(executor));
+        }
 
         var testList = tests.ToList();
         if (testList.Count == 0)

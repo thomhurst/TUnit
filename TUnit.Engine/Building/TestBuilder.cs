@@ -307,7 +307,9 @@ public sealed class TestBuilder : ITestBuilder
     private static async Task<object?[]> CreateArgumentsFromFactoriesAsync(IReadOnlyList<Func<Task<object?>>> factories)
     {
         if (factories.Count == 0)
+        {
             return [];
+        }
 
         var arguments = new object?[factories.Count];
         var tasks = new Task<object?>[factories.Count];

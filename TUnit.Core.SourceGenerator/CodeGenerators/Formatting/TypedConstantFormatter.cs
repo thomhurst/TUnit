@@ -10,7 +10,9 @@ public class TypedConstantFormatter : ITypedConstantFormatter
     public string FormatForCode(TypedConstant constant, ITypeSymbol? targetType = null)
     {
         if (constant.IsNull)
+        {
             return "null";
+        }
 
         switch (constant.Kind)
         {
@@ -38,7 +40,9 @@ public class TypedConstantFormatter : ITypedConstantFormatter
     public string FormatForTestId(TypedConstant constant)
     {
         if (constant.IsNull)
+        {
             return "null";
+        }
 
         switch (constant.Kind)
         {
@@ -67,11 +71,15 @@ public class TypedConstantFormatter : ITypedConstantFormatter
     public string FormatValue(object? value, ITypeSymbol? targetType = null)
     {
         if (value == null)
+        {
             return "null";
+        }
 
         // Handle TypedConstant values that weren't extracted
         if (value is TypedConstant tc)
+        {
             return FormatForCode(tc, targetType);
+        }
 
         return FormatPrimitiveForCode(value, targetType);
     }
@@ -79,7 +87,9 @@ public class TypedConstantFormatter : ITypedConstantFormatter
     private string FormatPrimitiveForCode(object? value, ITypeSymbol? targetType)
     {
         if (value == null)
+        {
             return "null";
+        }
 
         // Handle target type conversions
         if (targetType != null)
@@ -168,7 +178,9 @@ public class TypedConstantFormatter : ITypedConstantFormatter
     {
         var enumType = (targetType as INamedTypeSymbol) ?? (constant.Type as INamedTypeSymbol);
         if (enumType == null)
+        {
             return FormatPrimitive(constant.Value);
+        }
 
         var memberName = GetEnumMemberName(enumType, constant.Value);
         if (memberName != null)
@@ -233,7 +245,9 @@ public class TypedConstantFormatter : ITypedConstantFormatter
     private string? GetEnumMemberName(INamedTypeSymbol? enumType, object? value)
     {
         if (enumType == null || value == null)
+        {
             return null;
+        }
 
         foreach (var member in enumType.GetMembers())
         {
@@ -252,7 +266,9 @@ public class TypedConstantFormatter : ITypedConstantFormatter
     private bool AreValuesEqual(object? enumValue, object? providedValue)
     {
         if (enumValue == null || providedValue == null)
+        {
             return enumValue == providedValue;
+        }
 
         try
         {

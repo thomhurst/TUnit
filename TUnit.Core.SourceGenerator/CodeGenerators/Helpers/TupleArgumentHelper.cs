@@ -106,8 +106,10 @@ public static class TupleArgumentHelper
     private static bool IsTupleType(ITypeSymbol type)
     {
         if (type is not INamedTypeSymbol namedType)
+        {
             return false;
-            
+        }
+
         return namedType.IsTupleType || 
                (namedType.IsGenericType && namedType.ConstructedFrom.Name.StartsWith("ValueTuple"));
     }

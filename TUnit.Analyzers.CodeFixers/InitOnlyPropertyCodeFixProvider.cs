@@ -20,7 +20,9 @@ public sealed class InitOnlyPropertyCodeFixProvider : CodeFixProvider
     {
         var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
         if (root == null)
+        {
             return;
+        }
 
         var diagnostic = context.Diagnostics.First();
         var diagnosticSpan = diagnostic.Location.SourceSpan;
@@ -32,7 +34,9 @@ public sealed class InitOnlyPropertyCodeFixProvider : CodeFixProvider
             .FirstOrDefault();
 
         if (propertyDeclaration?.AccessorList == null)
+        {
             return;
+        }
 
         // Register code fix
         context.RegisterCodeFix(
@@ -50,14 +54,18 @@ public sealed class InitOnlyPropertyCodeFixProvider : CodeFixProvider
     {
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
         if (root == null)
+        {
             return document;
+        }
 
         // Find the init accessor
         var initAccessor = propertyDeclaration.AccessorList!.Accessors
             .FirstOrDefault(a => a.IsKind(SyntaxKind.InitAccessorDeclaration));
 
         if (initAccessor == null)
+        {
             return document;
+        }
 
         // Create a new set accessor
         var setAccessor = SyntaxFactory.AccessorDeclaration(

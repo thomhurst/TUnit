@@ -74,7 +74,9 @@ internal static class TestExtensions
     private static string[] CreateParameterTypeArray(IReadOnlyList<Type>? parameterTypes)
     {
         if (parameterTypes == null || parameterTypes.Count == 0)
+        {
             return [];
+        }
 
         var array = new string[parameterTypes.Count];
         for (int i = 0; i < parameterTypes.Count; i++)

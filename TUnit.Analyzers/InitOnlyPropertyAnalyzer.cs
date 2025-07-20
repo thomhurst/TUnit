@@ -39,18 +39,24 @@ public sealed class InitOnlyPropertyAnalyzer : DiagnosticAnalyzer
             .Any(a => a.IsKind(SyntaxKind.InitAccessorDeclaration)) ?? false;
         
         if (!hasInit)
+        {
             return;
+        }
 
         var propertySymbol = context.SemanticModel.GetDeclaredSymbol(propertyDeclaration);
         if (propertySymbol == null)
+        {
             return;
+        }
 
         // Check if property has any data source attribute
         var hasDataSourceAttribute = propertySymbol.GetAttributes()
             .Any(attr => IsDataSourceAttribute(attr.AttributeClass));
         
         if (!hasDataSourceAttribute)
+        {
             return;
+        }
 
         // Check if we're targeting .NET 8 or later
         var compilation = context.Compilation;
@@ -70,8 +76,10 @@ public sealed class InitOnlyPropertyAnalyzer : DiagnosticAnalyzer
     private static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)
     {
         if (attributeClass == null)
+        {
             return false;
-            
+        }
+
         var name = attributeClass.Name;
         return name.EndsWith("DataSourceAttribute") || 
                name.EndsWith("DataSourceGeneratorAttribute") ||

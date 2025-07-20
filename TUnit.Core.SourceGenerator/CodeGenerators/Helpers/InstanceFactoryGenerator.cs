@@ -94,7 +94,10 @@ public static class InstanceFactoryGenerator
             
             for (var i = 0; i < constructorArgs.Count; i++)
             {
-                if (i > 0) writer.Append(", ");
+                if (i > 0)
+                {
+                    writer.Append(", ");
+                }
                 writer.Append(constructorArgs[i]);
             }
 

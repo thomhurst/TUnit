@@ -130,18 +130,7 @@ public class TestMetadata<
                     var typedMetadata = (TestMetadata<T>)metadata;
 
                     // Create instance delegate that uses context
-                    Func<TestContext, Task<object>> createInstance = async (testContext) =>
-                    {
-                        var instance = typedMetadata.InstanceFactory!(context.ClassArguments);
-
-                        // Apply property values using unified PropertyInjector
-                        await PropertyInjector.InjectPropertiesAsync(
-                            instance,
-                            context.PropertyValues,
-                            typedMetadata.PropertyInjections);
-
-                        return instance;
-                    };
+                    Func<TestContext, Task<object>> createInstance = (testContext) => Task.FromResult<object>(typedMetadata.InstanceFactory!(context.ClassArguments));
 
                     // Convert InvokeTypedTest to the expected signature
                     Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>

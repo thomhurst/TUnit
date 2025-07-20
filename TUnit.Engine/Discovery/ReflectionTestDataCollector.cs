@@ -1552,15 +1552,21 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     {
                         // Skip TestDiscovery hooks - they run during discovery phase, not test execution
                         if (attr.HookType.HasFlag(HookType.TestDiscovery))
+                        {
                             continue;
+                        }
 
                         var hookMetadata = CreateHookMetadata(method, attr, true);
                         if (hookMetadata != null)
                         {
                             if (attr.HookType.HasFlag(HookType.Class))
+                            {
                                 beforeClass.Add(hookMetadata);
+                            }
                             if (attr.HookType.HasFlag(HookType.Test))
+                            {
                                 beforeTest.Add(hookMetadata);
+                            }
                         }
                     }
 
@@ -1570,15 +1576,21 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     {
                         // Skip TestDiscovery hooks - they run during discovery phase, not test execution
                         if (attr.HookType.HasFlag(HookType.TestDiscovery))
+                        {
                             continue;
+                        }
 
                         var hookMetadata = CreateHookMetadata(method, attr, false);
                         if (hookMetadata != null)
                         {
                             if (attr.HookType.HasFlag(HookType.Class))
+                            {
                                 afterClass.Add(hookMetadata);
+                            }
                             if (attr.HookType.HasFlag(HookType.Test))
+                            {
                                 afterTest.Add(hookMetadata);
+                            }
                         }
                     }
                 }

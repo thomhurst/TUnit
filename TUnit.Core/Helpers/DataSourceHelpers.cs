@@ -16,7 +16,10 @@ public static class DataSourceHelpers
     /// </summary>
     public static object? InvokeIfFunc(object? value)
     {
-        if (value == null) return null;
+        if (value == null)
+        {
+            return null;
+        }
 
         // For AOT compatibility, we manually check for common Func<T> patterns
         // This is not ideal but necessary until we find a better solution
@@ -99,7 +102,10 @@ public static class DataSourceHelpers
         Justification = "We handle specific known tuple types without reflection")]
     public static object?[] UnwrapTupleAot(object? value)
     {
-        if (value == null) return [null];
+        if (value == null)
+        {
+            return [null];
+        }
 
 #if NET5_0_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         // Try to use ITuple interface first for any ValueTuple type (available in .NET Core 3.0+)
@@ -192,7 +198,9 @@ public static class DataSourceHelpers
     public static async Task<object?> ProcessDataSourceResult<T>(T data)
     {
         if (data == null)
+        {
             return null;
+        }
 
         // If it's a Func<TResult>, invoke it first
         var actualData = InvokeIfFunc(data);
@@ -209,7 +217,9 @@ public static class DataSourceHelpers
     public static async Task<object?> ProcessEnumerableDataSource<T>(IEnumerable<T> enumerable)
     {
         if (enumerable == null)
+        {
             return null;
+        }
 
         var enumerator = enumerable.GetEnumerator();
         if (enumerator.MoveNext())
@@ -228,7 +238,9 @@ public static class DataSourceHelpers
     public static async Task<object?> ProcessDataSourceResultGeneric<T>(T data)
     {
         if (data == null)
+        {
             return null;
+        }
 
         // If it's a Func<TResult>, invoke it first
         var actualData = InvokeIfFunc(data);
@@ -330,7 +342,10 @@ public static class DataSourceHelpers
     /// </summary>
     public static async Task InitializeDataSourcePropertiesAsync(object? instance, MethodMetadata testInformation, string testSessionId)
     {
-        if (instance == null) return;
+        if (instance == null)
+        {
+            return;
+        }
 
         var instanceType = instance.GetType();
 

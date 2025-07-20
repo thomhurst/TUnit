@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.ReferenceTracking;
 
 namespace TUnit.Core;
 
@@ -31,14 +32,13 @@ public static class DataSourceProcessor
         {
             return ProcessTuple(unwrappedResult);
         }
-        else if (unwrappedResult is IEnumerable enumerable && !IsString(enumerable))
+
+        if (unwrappedResult is IEnumerable enumerable && !IsString(enumerable))
         {
             return ProcessEnumerable(enumerable, expectedParameterCount);
         }
-        else
-        {
-            return ProcessSingleValue(unwrappedResult, expectedParameterCount);
-        }
+
+        return ProcessSingleValue(unwrappedResult, expectedParameterCount);
     }
 
     /// <summary>
@@ -48,7 +48,9 @@ public static class DataSourceProcessor
     public static async Task<object?> ResolveDataSourceValue(object? value)
     {
         if (value == null)
+        {
             return null;
+        }
 
         // Handle Func<T>
         var unwrapped = UnwrapFuncResult(value);
@@ -61,22 +63,28 @@ public static class DataSourceProcessor
             if (taskType.IsGenericType)
             {
                 var resultProperty = GetResultProperty(taskType);
-                return resultProperty?.GetValue(task);
+                unwrapped = resultProperty?.GetValue(task);
             }
-            return null;
+            else
+            {
+                unwrapped = null;
+            }
         }
 
-        return unwrapped;
+        // Track the resolved object
+        return DataSourceReferenceTrackerProvider.TrackDataSourceObject(unwrapped);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Data source processing requires reflection on runtime types")]
     private static object? UnwrapFuncResult(object? value)
     {
         if (value == null)
+        {
             return null;
+        }
 
         var type = value.GetType();
-        
+
         // Check if it's a Func<T>
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))
         {
@@ -90,20 +98,22 @@ public static class DataSourceProcessor
     private static bool IsTuple(object? value)
     {
         if (value == null)
+        {
             return false;
-            
+        }
+
         var type = value.GetType();
-        return type is { IsGenericType: true, FullName: not null } && 
+        return type is { IsGenericType: true, FullName: not null } &&
             type.FullName.StartsWith("System.ValueTuple");
     }
-    
+
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Data source processing requires reflection on runtime types")]
     private static Func<Task<object?>>[] ProcessTuple(object tuple)
     {
         var tupleType = tuple.GetType();
         var fields = GetTupleFields(tupleType);
         var factories = new Func<Task<object?>>[fields.Length];
-        
+
         for (int i = 0; i < fields.Length; i++)
         {
             var field = fields[i];
@@ -117,11 +127,11 @@ public static class DataSourceProcessor
     private static Func<Task<object?>>[] ProcessEnumerable(IEnumerable enumerable, int expectedParameterCount)
     {
         var items = enumerable.Cast<object?>().ToList();
-        
+
         // If the enumerable has the expected number of items, treat each as a parameter
         if (items.Count == expectedParameterCount && expectedParameterCount > 0)
         {
-            return items.Select(item => 
+            return items.Select(item =>
                 new Func<Task<object?>>(async () => await ResolveDataSourceValue(item))
             ).ToArray();
         }
@@ -166,7 +176,7 @@ public static class DataSourceProcessor
             try
             {
                 var result = dataSourceMethod();
-                
+
                 // Handle async results
                 if (result is Task task)
                 {
@@ -185,14 +195,14 @@ public static class DataSourceProcessor
 
                 // Process the result into parameter factories
                 var factories = ProcessDataSource(result, expectedParameterCount);
-                
+
                 // Resolve all factories to get actual values
                 var values = new object?[factories.Length];
                 for (int i = 0; i < factories.Length; i++)
                 {
                     values[i] = await factories[i]();
                 }
-                
+
                 return values;
             }
             catch (Exception ex)

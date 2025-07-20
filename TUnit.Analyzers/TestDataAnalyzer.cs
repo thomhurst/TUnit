@@ -398,22 +398,19 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 // object[] can contain any types - skip compile-time type checking
                 return;
             }
-            else
-            {
-                var conversions = unwrappedTypes.ZipAll(testParameterTypes,
-                    (argument, parameter) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter));
+            var conversions = unwrappedTypes.ZipAll(testParameterTypes,
+                (argument, parameter) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter));
 
-                if (!conversions.All(x => x))
-                {
-                    context.ReportDiagnostic(
-                        Diagnostic.Create(
-                            Rules.WrongArgumentTypeTestData,
-                            attribute.GetLocation(),
-                            string.Join(", ", unwrappedTypes),
-                            string.Join(", ", testParameterTypes))
-                    );
-                    return;
-                }
+            if (!conversions.All(x => x))
+            {
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.WrongArgumentTypeTestData,
+                        attribute.GetLocation(),
+                        string.Join(", ", unwrappedTypes),
+                        string.Join(", ", testParameterTypes))
+                );
+                return;
             }
 
             var argumentsToParamsConversions = argumentForMethodCallTypes.ZipAll(dataSourceMethodParameterTypes,
