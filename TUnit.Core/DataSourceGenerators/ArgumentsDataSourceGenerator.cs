@@ -1,5 +1,3 @@
-using TUnit.Core;
-
 namespace TUnit.Core.DataSourceGenerators;
 
 /// <summary>
@@ -15,7 +13,8 @@ public class ArgumentsDataSourceGenerator : IDataSourceGenerator<ArgumentsAttrib
         yield return new TestDataCombination
         {
             MethodDataFactories = attribute.Values.Select<object?, Func<Task<object?>>>(value => () => Task.FromResult(value)).ToArray(),
-            ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
+            ClassDataFactories = [
+            ],
             MethodDataSourceIndex = context.DataSourceIndex,
             MethodLoopIndex = 0, // ArgumentsAttribute only returns one row
             ClassDataSourceIndex = -1,

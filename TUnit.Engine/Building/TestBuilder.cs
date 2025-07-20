@@ -1,7 +1,6 @@
 using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.DataSources;
-using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
@@ -133,7 +132,8 @@ public sealed class TestBuilder : ITestBuilder
     {
         if (_serviceProvider?.GetService(typeof(IHookCollectionService)) is not IHookCollectionService hookCollectionService)
         {
-            return Array.Empty<Func<TestContext, CancellationToken, Task>>();
+            return [
+            ];
         }
 
         var hooks = isBeforeHook

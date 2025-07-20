@@ -1,11 +1,6 @@
-using System.Collections;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using TUnit.Core;
-using TUnit.Core.Enums;
-using TUnit.Core.Extensions;
-using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Discovery;
 
@@ -88,8 +83,10 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             {
                 yield return new TestDataCombination
                 {
-                    MethodDataFactories = Array.Empty<Func<Task<object?>>>(),
-                    ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
+                    MethodDataFactories = [
+                    ],
+                    ClassDataFactories = [
+                    ],
                     PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),
                     MethodDataSourceIndex = -1,
                     MethodLoopIndex = 0,
@@ -350,11 +347,8 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     [UnconditionalSuppressMessage("AOT", "IL2072:Target method argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "Reflection mode cannot support AOT")]
     private IDataSourceAttribute? CreateMethodDataSource(MethodDataSourceAttribute attr)
     {
-        var targetType = attr.ClassProvidingDataSource ?? _testClass;
-        // For now we assume static method if ClassProvidingDataSource is provided
-        var isInstance = attr.ClassProvidingDataSource == null;
-        
-        return new MethodBasedDataSourceAttribute(targetType, attr.MethodNameProvidingDataSource, attr.Arguments, isInstance);
+        // Just return the attribute itself - it already implements IDataSourceAttribute
+        return attr;
     }
 
     // Removed - ClassDataSourceAttribute now directly implements IDataSourceAttribute
@@ -589,8 +583,10 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             {
                 Name = _testClass.Assembly.GetName().Name ?? "Unknown"
             }),
-            Parameters = Array.Empty<ParameterMetadata>(),
-            Properties = Array.Empty<PropertyMetadata>(),
+            Parameters = [
+            ],
+            Properties = [
+            ],
             Parent = null
         });
         

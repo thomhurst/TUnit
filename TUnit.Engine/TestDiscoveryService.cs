@@ -33,7 +33,9 @@ internal sealed class TestDiscoveryService : IDataProducer
     private readonly HookOrchestrator _hookOrchestrator;
     private readonly UnifiedTestBuilderPipeline _testBuilderPipeline;
     private readonly TestFilterService _testFilterService;
-    private readonly ConcurrentBag<ExecutableTest> _cachedTests = new();
+    private readonly ConcurrentBag<ExecutableTest> _cachedTests =
+    [
+    ];
     private readonly TestDependencyResolver _dependencyResolver = new();
 
     public string Uid => "TUnit";

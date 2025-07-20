@@ -67,7 +67,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 var attr = prop.DataSourceAttribute;
                 
                 // For generic data source attributes, get type from generic type argument
-                if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
+                if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
                 {
                     referencedTypes.Add(attr.AttributeClass.TypeArguments[0]);
                 }
@@ -75,7 +75,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 else if (attr.ConstructorArguments.Length > 0)
                 {
                     var firstArg = attr.ConstructorArguments[0];
-                    if (firstArg.Kind == TypedConstantKind.Type && firstArg.Value is ITypeSymbol targetType)
+                    if (firstArg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol targetType })
                     {
                         referencedTypes.Add(targetType);
                     }
@@ -92,7 +92,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 allTypes.Add(new TypeWithDataSourceProperties
                 {
                     TypeSymbol = (INamedTypeSymbol)refType,
-                    Properties = new List<PropertyWithDataSource>()
+                    Properties =
+                    [
+                    ]
                 });
             }
         }
@@ -438,7 +440,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         var attr = propInfo.DataSourceAttribute;
         
         // For generic data source attributes, get the type from generic type argument
-        if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
+        if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
             var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -453,7 +455,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         else if (attr.ConstructorArguments.Length > 0)
         {
             var firstArg = attr.ConstructorArguments[0];
-            if (firstArg.Kind == TypedConstantKind.Type && firstArg.Value is ITypeSymbol dataSourceType)
+            if (firstArg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol dataSourceType })
             {
                 var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
@@ -493,7 +495,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         var attr = propInfo.DataSourceAttribute;
         
         // For generic ClassDataSource<T>, get type from generic type argument
-        if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
+        if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
             var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -508,7 +510,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         else if (attr.ConstructorArguments.Length > 0)
         {
             var firstArg = attr.ConstructorArguments[0];
-            if (firstArg.Kind == TypedConstantKind.Type && firstArg.Value is ITypeSymbol dataSourceType)
+            if (firstArg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol dataSourceType })
             {
                 var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
@@ -608,7 +610,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         var attr = propInfo.DataSourceAttribute;
         
         // For generic data source attributes, get the type from generic type argument
-        if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
+        if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
             var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -623,7 +625,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         else if (attr.ConstructorArguments.Length > 0)
         {
             var firstArg = attr.ConstructorArguments[0];
-            if (firstArg.Kind == TypedConstantKind.Type && firstArg.Value is ITypeSymbol dataSourceType)
+            if (firstArg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol dataSourceType })
             {
                 var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
@@ -663,7 +665,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         var attr = propInfo.DataSourceAttribute;
         
         // For generic ClassDataSource<T>, get type from generic type argument
-        if (attr.AttributeClass?.IsGenericType == true && attr.AttributeClass.TypeArguments.Length > 0)
+        if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
             var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -678,7 +680,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         else if (attr.ConstructorArguments.Length > 0)
         {
             var firstArg = attr.ConstructorArguments[0];
-            if (firstArg.Kind == TypedConstantKind.Type && firstArg.Value is ITypeSymbol dataSourceType)
+            if (firstArg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol dataSourceType })
             {
                 var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");

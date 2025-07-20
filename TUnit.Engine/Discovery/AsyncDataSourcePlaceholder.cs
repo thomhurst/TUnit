@@ -1,6 +1,3 @@
-using System;
-using System.Threading.Tasks;
-
 namespace TUnit.Engine.Discovery;
 
 /// <summary>
@@ -22,16 +19,16 @@ internal sealed class AsyncDataSourcePlaceholder
         if (SingleValueFactory != null)
         {
             // Single value - show as one parameter
-            return new object?[] { $"<async:{ExpectedType?.Name ?? "data"}>" };
+            return [$"<async:{ExpectedType?.Name ?? "data"}>"];
         }
         
         if (ArrayFactory != null)
         {
             // Array of values - we don't know the count yet
-            return new object?[] { "<async:data>" };
+            return ["<async:data>"];
         }
         
-        return new object?[] { "<async>" };
+        return ["<async>"];
     }
     
     /// <summary>
@@ -42,15 +39,17 @@ internal sealed class AsyncDataSourcePlaceholder
         if (SingleValueFactory != null)
         {
             var result = await SingleValueFactory().ConfigureAwait(false);
-            return new[] { result };
+            return [result];
         }
         
         if (ArrayFactory != null)
         {
             var result = await ArrayFactory().ConfigureAwait(false);
-            return result ?? Array.Empty<object?>();
+            return result ?? [
+            ];
         }
         
-        return Array.Empty<object?>();
+        return [
+        ];
     }
 }

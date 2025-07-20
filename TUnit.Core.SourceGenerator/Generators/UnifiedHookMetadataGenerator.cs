@@ -85,7 +85,9 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
             // Discover hooks from base classes
             var allHooks = DiscoverAllHooks(directHooks, testClassesList);
-            GenerateHookRegistry(context, allHooks.ToImmutableArray());
+            GenerateHookRegistry(context, [
+                ..allHooks
+            ]);
         });
     }
 

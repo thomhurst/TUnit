@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using TUnit.Core;
 
 namespace TUnit.Engine.Discovery;
 
@@ -131,7 +125,7 @@ internal static class AsyncDataSourceHelper
         else if (item is Func<object?> singleFunc)
         {
             var data = singleFunc();
-            items.Add(new[] { data });
+            items.Add([data]);
         }
         else if (item is object?[] array)
         {
@@ -147,7 +141,7 @@ internal static class AsyncDataSourceHelper
             else
             {
                 // Single value - wrap in array
-                items.Add(new[] { item });
+                items.Add([item]);
             }
         }
         

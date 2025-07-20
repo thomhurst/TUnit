@@ -156,7 +156,8 @@ internal sealed class EventReceiverRegistry
                 }
                 return typedArray;
             }
-            return Array.Empty<T>();
+            return [
+            ];
         }
         finally
         {

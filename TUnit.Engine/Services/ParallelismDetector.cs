@@ -121,7 +121,7 @@ public static class ParallelismDetector
             {
                 if (line.StartsWith("MemAvailable:"))
                 {
-                    var parts = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                    var parts = line.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length >= 2 && long.TryParse(parts[1], out var kb))
                     {
                         return kb / (1024.0 * 1024.0); // Convert KB to GB
@@ -139,7 +139,7 @@ public static class ParallelismDetector
                 {
                     if (line.StartsWith("MemTotal:"))
                     {
-                        var parts = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                        var parts = line.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
                         if (parts.Length >= 2 && long.TryParse(parts[1], out var kb))
                         {
                             return (kb * 0.8) / (1024.0 * 1024.0); // Assume 80% available

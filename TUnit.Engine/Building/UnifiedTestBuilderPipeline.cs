@@ -44,7 +44,7 @@ public sealed class UnifiedTestBuilderPipeline
         {
             try
             {
-                var resolved = await _genericResolver.ResolveGenericsAsync(new[] { metadata });
+                var resolved = await _genericResolver.ResolveGenericsAsync([metadata]);
                 resolvedMetadata.AddRange(resolved);
             }
             catch (Exception ex)
@@ -91,13 +91,14 @@ public sealed class UnifiedTestBuilderPipeline
             ExecutableTest? failedTest = null;
             try
             {
-                resolvedMetadataList = await _genericResolver.ResolveGenericsAsync(new[] { metadata });
+                resolvedMetadataList = await _genericResolver.ResolveGenericsAsync([metadata]);
             }
             catch (Exception ex)
             {
                 // Create a failed test for generic resolution failures
                 failedTest = CreateFailedTestForGenericResolutionError(metadata, ex);
-                resolvedMetadataList = Array.Empty<TestMetadata>();
+                resolvedMetadataList = [
+                ];
             }
             
             if (failedTest != null)
@@ -116,7 +117,7 @@ public sealed class UnifiedTestBuilderPipeline
                 }
                 catch (Exception ex)
                 {
-                    testsFromMetadata = new[] { CreateFailedTestForDataGenerationError(resolvedMetadata, ex) };
+                    testsFromMetadata = [CreateFailedTestForDataGenerationError(resolvedMetadata, ex)];
                 }
 
                 foreach (var test in testsFromMetadata)

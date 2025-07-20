@@ -28,13 +28,13 @@ public static class TupleHelper
         Justification = "This method specifically handles tuple types which have known structure")]
     public static object?[] UnwrapTuple(object? value)
     {
-        if (value == null) return new object?[] { null };
+        if (value == null) return [null];
         
         var type = value.GetType();
         if (!IsTupleType(type))
         {
             // Not a tuple, return as single-element array
-            return new object?[] { value };
+            return [value];
         }
         
         // Get tuple elements

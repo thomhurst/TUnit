@@ -13,11 +13,6 @@ public interface IAsyncDataSource
     /// <param name="cancellationToken">Cancellation token for the async operation</param>
     /// <returns>Async enumerable of factory functions that produce test data sets</returns>
     IAsyncEnumerable<Func<object?[]>> GenerateDataFactoriesAsync(DataSourceContext context, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Indicates whether this data source is shared across multiple tests
-    /// </summary>
-    bool IsShared { get; }
 }
 
 /// <summary>

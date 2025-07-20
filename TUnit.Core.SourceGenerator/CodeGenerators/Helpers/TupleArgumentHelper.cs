@@ -1,6 +1,4 @@
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
@@ -119,16 +117,21 @@ public static class TupleArgumentHelper
     /// </summary>
     private static List<ITypeSymbol> GetTupleElements(ITypeSymbol tupleType)
     {
-        if (tupleType is INamedTypeSymbol namedType && namedType.IsTupleType)
+        if (tupleType is INamedTypeSymbol { IsTupleType: true } namedType)
         {
-            return namedType.TupleElements.IsDefault ? new List<ITypeSymbol>() : namedType.TupleElements.Select(e => e.Type).ToList();
+            return namedType.TupleElements.IsDefault ?
+                [
+                ]
+                : namedType.TupleElements.Select(e => e.Type).ToList();
         }
         
-        if (tupleType is INamedTypeSymbol genericType && genericType.IsGenericType && genericType.ConstructedFrom.Name.StartsWith("ValueTuple"))
+        if (tupleType is INamedTypeSymbol { IsGenericType: true } genericType && genericType.ConstructedFrom.Name.StartsWith("ValueTuple"))
         {
             return genericType.TypeArguments.ToList();
         }
         
-        return new List<ITypeSymbol>();
+        return
+        [
+        ];
     }
 }

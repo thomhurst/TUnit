@@ -268,7 +268,8 @@ internal sealed class GenericTypeResolver
     {
         if (attribute.ConstructorArguments.IsDefaultOrEmpty)
         {
-            return Array.Empty<ITypeSymbol>();
+            return [
+            ];
         }
 
         var typeParameters = testMethod.TypeParameters;
@@ -280,7 +281,10 @@ internal sealed class GenericTypeResolver
 
         // Handle params array - ArgumentsAttribute takes params object?[]
         // Roslyn always passes params as a single array argument
-        if (constructorArgs.Length == 1 && constructorArgs[0].Kind == TypedConstantKind.Array)
+        if (constructorArgs is
+            [
+                { Kind: TypedConstantKind.Array } _
+            ])
         {
             var arrayValues = constructorArgs[0].Values;
             for (var i = 0; i < arrayValues.Length && i < methodParameters.Length; i++)
@@ -383,7 +387,8 @@ internal sealed class GenericTypeResolver
         // Get method name from constructor argument
         if (attribute.ConstructorArguments.IsDefaultOrEmpty)
         {
-            return Array.Empty<ITypeSymbol>();
+            return [
+            ];
         }
 
         var firstArg = attribute.ConstructorArguments[0];
@@ -404,7 +409,8 @@ internal sealed class GenericTypeResolver
 
         if (string.IsNullOrEmpty(methodName))
         {
-            return Array.Empty<ITypeSymbol>();
+            return [
+            ];
         }
 
         var containingType = testMethod.ContainingType;
@@ -414,7 +420,8 @@ internal sealed class GenericTypeResolver
 
         if (dataSourceMethod?.ReturnType is not INamedTypeSymbol returnType)
         {
-            return Array.Empty<ITypeSymbol>();
+            return [
+            ];
         }
 
         // Extract type from IEnumerable<T> or similar
@@ -429,7 +436,8 @@ internal sealed class GenericTypeResolver
         var attributeClass = attribute.AttributeClass;
         if (attributeClass?.BaseType == null)
         {
-            return Array.Empty<ITypeSymbol>();
+            return [
+            ];
         }
 
         // The base type should be AsyncDataSourceGeneratorAttribute<T1, T2, ...>
@@ -443,7 +451,8 @@ internal sealed class GenericTypeResolver
             baseType = baseType.BaseType;
         }
 
-        return Array.Empty<ITypeSymbol>();
+        return [
+        ];
     }
 
     /// <summary>
@@ -464,10 +473,11 @@ internal sealed class GenericTypeResolver
             }
 
             // Handle single type T
-            return new[] { elementType };
+            return [elementType];
         }
 
-        return Array.Empty<ITypeSymbol>();
+        return [
+        ];
     }
 
     private void RegisterGenericTestInstantiation(INamedTypeSymbol originalType, ITypeSymbol[] typeArgs, GenericTestSource source)
@@ -492,7 +502,8 @@ internal sealed class GenericTypeResolver
     {
         if (attribute.ConstructorArguments.Length == 0)
         {
-            return Array.Empty<ITypeSymbol>();
+            return [
+            ];
         }
 
         var typeArgs = new List<ITypeSymbol>();

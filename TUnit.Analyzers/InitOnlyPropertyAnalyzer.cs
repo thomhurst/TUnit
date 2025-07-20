@@ -1,10 +1,8 @@
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using TUnit.Analyzers.Extensions;
 
 namespace TUnit.Analyzers;
 
@@ -22,8 +20,8 @@ public sealed class InitOnlyPropertyAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true,
         description: "Init-only properties with data source attributes require .NET 8 or later for AOT-compatible code generation. On older frameworks, use regular settable properties instead.");
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = 
-        ImmutableArray.Create(InitOnlyPropertyNotSupported);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
+        [InitOnlyPropertyNotSupported];
 
     public override void Initialize(AnalysisContext context)
     {

@@ -66,9 +66,9 @@ public class DynamicTestAwaitExpressionSuppressor : DiagnosticSuppressor
     }
 
     public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } =
-        ImmutableArray.Create(
-            CreateDescriptor("CA2012"), CreateDescriptor("CS4014")
-        );
+    [
+        CreateDescriptor("CA2012"), CreateDescriptor("CS4014")
+    ];
 
     private static SuppressionDescriptor CreateDescriptor(string id)
         => new(

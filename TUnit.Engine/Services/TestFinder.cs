@@ -30,8 +30,10 @@ internal class TestFinder : ITestFinder
     public TestContext[] GetTestsByNameAndParameters(string testName, IEnumerable<Type> methodParameterTypes,
         Type classType, IEnumerable<Type> classParameterTypes, IEnumerable<object?> classArguments)
     {
-        var paramTypes = methodParameterTypes?.ToArray() ?? Array.Empty<Type>();
-        var classParamTypes = classParameterTypes?.ToArray() ?? Array.Empty<Type>();
+        var paramTypes = methodParameterTypes?.ToArray() ?? [
+        ];
+        var classParamTypes = classParameterTypes?.ToArray() ?? [
+        ];
 
         var allTests = _discoveryService.GetCachedTestContexts();
 

@@ -1,8 +1,5 @@
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -38,7 +35,9 @@ public static class DataCombinationGeneratorEmitter
 
         // Use stored attributes if available (for generic types), otherwise get them directly
         var methodDataSources = testMethodMetadata?.MethodAttributes.IsDefault == false 
-            ? testMethodMetadata.MethodAttributes.Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)).ToImmutableArray()
+            ? [
+                ..testMethodMetadata.MethodAttributes.Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+            ]
             : GetDataSourceAttributes(methodSymbol);
         var classDataSources = GetDataSourceAttributes(typeSymbol);
         var propertyDataSources = GetPropertyDataSources(typeSymbol);
@@ -1393,7 +1392,9 @@ public static class DataCombinationGeneratorEmitter
             currentType = currentType.BaseType;
         }
 
-        return properties.ToImmutableArray();
+        return [
+            ..properties
+        ];
     }
 
     private static ImmutableArray<PropertyWithDataSource> GetStaticPropertyDataSources(INamedTypeSymbol typeSymbol)
@@ -1428,7 +1429,9 @@ public static class DataCombinationGeneratorEmitter
             currentType = currentType.BaseType;
         }
 
-        return properties.ToImmutableArray();
+        return [
+            ..properties
+        ];
     }
 
     private static bool IsAsyncDataSourceGeneratorAttribute(INamedTypeSymbol? attributeClass)

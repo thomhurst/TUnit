@@ -1,5 +1,3 @@
-using TUnit.Core;
-
 namespace TUnit.TestProject;
 
 // Data source class that returns tuples for constructor parameters
@@ -8,9 +6,9 @@ public class TupleDataSource : IAsyncDataSourceGeneratorAttribute
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         // Return tuples that should be unwrapped into constructor parameters
-        yield return () => Task.FromResult<object?[]?>(new object?[] { (42, "Hello") });
-        yield return () => Task.FromResult<object?[]?>(new object?[] { (99, "World") });
-        yield return () => Task.FromResult<object?[]?>(new object?[] { (123, "Test") });
+        yield return () => Task.FromResult<object?[]?>([(42, "Hello")]);
+        yield return () => Task.FromResult<object?[]?>([(99, "World")]);
+        yield return () => Task.FromResult<object?[]?>([(123, "Test")]);
         await Task.CompletedTask; // To satisfy async
     }
 

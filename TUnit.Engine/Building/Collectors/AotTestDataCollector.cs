@@ -30,7 +30,8 @@ public sealed class AotTestDataCollector : ITestDataCollector
         if (allTests.Count == 0)
         {
             // No generated tests found
-            return Enumerable.Empty<TestMetadata>();
+            return [
+            ];
         }
 
         return allTests;

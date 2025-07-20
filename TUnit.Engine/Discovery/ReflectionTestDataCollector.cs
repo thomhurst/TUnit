@@ -18,8 +18,12 @@ namespace TUnit.Engine.Discovery;
 [RequiresDynamicCode("Expression compilation requires dynamic code generation")]
 public sealed class ReflectionTestDataCollector : ITestDataCollector
 {
-    private static readonly HashSet<Assembly> _scannedAssemblies = new();
-    private static readonly List<TestMetadata> _discoveredTests = new();
+    private static readonly HashSet<Assembly> _scannedAssemblies =
+    [
+    ];
+    private static readonly List<TestMetadata> _discoveredTests =
+    [
+    ];
     private static readonly object _lock = new();
     private static readonly ExpressionCacheService _expressionCache = new();
 
@@ -411,7 +415,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             var metadata = new DataGeneratorMetadata
             {
                 TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
-                MembersToGenerate = Array.Empty<MemberMetadata>(),
+                MembersToGenerate = [
+                ],
                 TestInformation = new MethodMetadata
                 {
                     Name = "Discovery",
@@ -423,11 +428,14 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                         Namespace = string.Empty,
                         TypeReference = new TypeReference { AssemblyQualifiedName = typeof(object).AssemblyQualifiedName },
                         Assembly = AssemblyMetadata.GetOrAdd("Discovery", () => new AssemblyMetadata { Name = "Discovery" }),
-                        Parameters = Array.Empty<ParameterMetadata>(),
-                        Properties = Array.Empty<PropertyMetadata>(),
+                        Parameters = [
+                        ],
+                        Properties = [
+                        ],
                         Parent = null
                     },
-                    Parameters = Array.Empty<ParameterMetadata>(),
+                    Parameters = [
+                    ],
                     GenericTypeCount = 0,
                     ReturnTypeReference = new TypeReference { AssemblyQualifiedName = typeof(void).AssemblyQualifiedName },
                     ReturnType = typeof(void),
@@ -502,7 +510,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         // Only expand if there are data sources
         if (!hasDataSources)
         {
-            return new List<TestMetadata> { baseMetadata };
+            return
+            [
+                baseMetadata
+            ];
         }
 
         // Expand data sources to create individual test metadata for each combination
@@ -561,13 +572,19 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         catch (Exception ex)
         {
             Console.WriteLine($"Warning: Failed to expand data sources for {testName}: {ex.Message}. Falling back to single test.");
-            return new List<TestMetadata> { baseMetadata };
+            return
+            [
+                baseMetadata
+            ];
         }
 
         // If no combinations were generated, return the base metadata
         if (expandedMetadata.Count == 0)
         {
-            return new List<TestMetadata> { baseMetadata };
+            return
+            [
+                baseMetadata
+            ];
         }
 
         return expandedMetadata;
@@ -923,7 +940,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         }
 
         // Invoke the async generator
-        var result = generateMethod.Invoke(attr, new object[] { metadata });
+        var result = generateMethod.Invoke(attr, [metadata]);
 
         // Handle the async enumerable result
         if (result is IAsyncEnumerable<object> asyncEnumerable)
@@ -960,8 +977,10 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             Type = testClass,
             Namespace = testClass.Namespace,
             Assembly = assemblyMetadata,
-            Parameters = Array.Empty<ParameterMetadata>(), // Constructor parameters, empty for now
-            Properties = Array.Empty<PropertyMetadata>(), // Properties, empty for now
+            Parameters = [
+            ], // Constructor parameters, empty for now
+            Properties = [
+            ], // Properties, empty for now
             Parent = null // Parent class, null for now
         });
 
@@ -1041,7 +1060,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         else if (item is Func<Task<object?>> singleTaskFunc)
         {
             var data = singleTaskFunc().GetAwaiter().GetResult();
-            items.Add(new[] { data });
+            items.Add([data]);
         }
         else if (item is Task<object?[]?> task)
         {
@@ -1062,7 +1081,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         else if (item is Func<object?> singleFunc)
         {
             var data = singleFunc();
-            items.Add(new[] { data });
+            items.Add([data]);
         }
         else if (item is object?[] array)
         {
@@ -1091,7 +1110,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                         if (resultProperty != null)
                         {
                             var result = resultProperty.GetValue(taskObj);
-                            items.Add(new[] { result });
+                            items.Add([result]);
                         }
                     }
                 }
@@ -1100,12 +1119,12 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     // It's a regular Func<T>, invoke it
                     var regularFunc = (Delegate)item;
                     var result = regularFunc.DynamicInvoke();
-                    items.Add(new[] { result });
+                    items.Add([result]);
                 }
             }
             else
             {
-                items.Add(new[] { item });
+                items.Add([item]);
             }
         }
 
@@ -1167,7 +1186,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             }
 
             // If result is an array or IEnumerable (but not string), treat each element as separate test data
-            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+            if (result is System.Collections.IEnumerable enumerable and not string)
             {
                 var results = new List<object?[]>();
                 foreach (var item in enumerable)
@@ -1299,9 +1318,9 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 ),
                 Expression.Throw(
                     Expression.New(
-                        typeof(ArgumentException).GetConstructor(new[] { typeof(string) })!,
+                        typeof(ArgumentException).GetConstructor([typeof(string)])!,
                         Expression.Call(
-                            typeof(string).GetMethod("Format", new[] { typeof(string), typeof(object[]) })!,
+                            typeof(string).GetMethod("Format", [typeof(string), typeof(object[])])!,
                             Expression.Constant($"Test method '{testClass.Name}.{testMethod.Name}' expects {{0}}-{{1}} parameter(s) but received {{2}}. " +
                                               $"Expected parameters: {string.Join(", ", parameters.Select(p => $"{p.ParameterType.Name} {p.Name}{(p.IsOptional ? " (optional)" : "")}"))}"                          ),
                             Expression.NewArrayInit(
@@ -1335,7 +1354,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     var castMethod = typeof(CastHelper).GetMethod(nameof(CastHelper.Cast),
                         BindingFlags.Public | BindingFlags.Static,
                         null,
-                        new[] { typeof(Type), typeof(object) },
+                        [typeof(Type), typeof(object)],
                         null);
 
                     var castExpr = Expression.Call(
@@ -1363,7 +1382,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     var castMethod = typeof(CastHelper).GetMethod(nameof(CastHelper.Cast),
                         BindingFlags.Public | BindingFlags.Static,
                         null,
-                        new[] { typeof(Type), typeof(object) },
+                        [typeof(Type), typeof(object)],
                         null);
 
                     var castExpr = Expression.Call(
@@ -2030,8 +2049,10 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 Name = testClass.Assembly.GetName().Name ?? string.Empty
             },
             Parent = null,
-            Parameters = Array.Empty<ParameterMetadata>(),
-            Properties = Array.Empty<PropertyMetadata>()
+            Parameters = [
+            ],
+            Properties = [
+            ]
         };
 
         return new MethodMetadata
@@ -2074,7 +2095,8 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             TestClassType = testClass,
             TestMethodName = "AssemblyScanFailed",
             MethodMetadata = CreateDummyMethodMetadata(testClass, "AssemblyScanFailed"),
-            AttributeFactory = () => Array.Empty<Attribute>()
+            AttributeFactory = () => [
+            ]
         };
     }
 
@@ -2110,8 +2132,10 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!),
                 Namespace = type.Namespace ?? string.Empty,
                 Assembly = new AssemblyMetadata { Name = type.Assembly.GetName().Name ?? "Unknown" },
-                Parameters = Array.Empty<ParameterMetadata>(),
-                Properties = Array.Empty<PropertyMetadata>(),
+                Parameters = [
+                ],
+                Properties = [
+                ],
                 Parent = null
             },
             Parameters = method.GetParameters().Select(p => new ParameterMetadata(p.ParameterType)
@@ -2140,11 +2164,14 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!),
                 Namespace = type.Namespace ?? string.Empty,
                 Assembly = new AssemblyMetadata { Name = type.Assembly.GetName().Name ?? "Unknown" },
-                Parameters = Array.Empty<ParameterMetadata>(),
-                Properties = Array.Empty<PropertyMetadata>(),
+                Parameters = [
+                ],
+                Properties = [
+                ],
                 Parent = null
             },
-            Parameters = Array.Empty<ParameterMetadata>(),
+            Parameters = [
+            ],
             GenericTypeCount = 0,
             ReturnTypeReference = TypeReference.CreateConcrete(typeof(void).AssemblyQualifiedName!),
             ReturnType = typeof(void),

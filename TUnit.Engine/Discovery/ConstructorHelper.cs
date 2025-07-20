@@ -1,6 +1,4 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using TUnit.Core;
 
@@ -202,7 +200,7 @@ internal static class ConstructorHelper
                             property.GetCustomAttributes().Any(a => a.GetType().Name == "RequiredAttribute");
             
             // Also check if property is marked with 'required' modifier by checking if it's init-only and the type has RequiredMemberAttribute
-            if (!isRequired && property.CanWrite && property.SetMethod?.IsSpecialName == true && 
+            if (!isRequired && property is { CanWrite: true, SetMethod.IsSpecialName: true } && 
                 property.SetMethod.Name.StartsWith("set_") && 
                 type.GetCustomAttribute<System.Runtime.CompilerServices.RequiredMemberAttribute>() != null)
             {

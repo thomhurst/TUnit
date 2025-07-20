@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
@@ -18,7 +17,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when trimming application code", Justification = "Generic expansion in reflection mode requires dynamic type access which is expected in this mode")]
     public async Task<IEnumerable<TestMetadata>> ResolveGenericsAsync(IEnumerable<TestMetadata> metadata)
     {
-        
+
         var resolvedTests = new List<TestMetadata>();
 
         foreach (var test in metadata)
@@ -42,7 +41,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                 // Rather than silently skipping it. The test framework will convert this
                 // exception into a failed test result.
                 throw new GenericTypeResolutionException(
-                    $"Failed to resolve generic test '{test.TestName}': {ex.Message}", 
+                    $"Failed to resolve generic test '{test.TestName}': {ex.Message}",
                     ex is GenericTypeResolutionException gtre ? (gtre.InnerException ?? ex) : ex);
             }
         }
@@ -61,8 +60,8 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
     private async Task<IEnumerable<TestMetadata>> ExpandGenericTestAsync(TestMetadata genericTest)
     {
         // Check if we have data sources
-        var hasDataSources = genericTest.DataSources.Length > 0 || 
-                            genericTest.ClassDataSources.Length > 0 || 
+        var hasDataSources = genericTest.DataSources.Length > 0 ||
+                            genericTest.ClassDataSources.Length > 0 ||
                             genericTest.PropertyDataSources.Length > 0;
 
         // For ReflectionTestMetadata, we also need to check if there are data source attributes
@@ -89,7 +88,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
 
         var testClassField = typeof(ReflectionTestMetadata).GetField("_testClass", BindingFlags.NonPublic | BindingFlags.Instance);
         var testMethodField = typeof(ReflectionTestMetadata).GetField("_testMethod", BindingFlags.NonPublic | BindingFlags.Instance);
-        
+
         if (testClassField?.GetValue(reflectionMetadata) is not Type testClass ||
             testMethodField?.GetValue(reflectionMetadata) is not MethodInfo testMethod)
         {
@@ -104,7 +103,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
 
         try
         {
-            
+
             // Check if the test has typed data sources that require generic type resolution
             var hasTypedDataSource = false;
             foreach (var attr in testMethod.GetCustomAttributes())
@@ -131,7 +130,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                     "Typed data sources (DataSourceGeneratorAttribute<T> and AsyncDataSourceGeneratorAttribute<T>) require compile-time type information. " +
                     "Use [Arguments] attributes or non-generic data sources for reflection mode, or use source generation mode.");
             }
-            
+
             // Get the first data combination to infer types
             var dataCombinations = genericTest.DataCombinationGenerator();
             TestDataCombination? firstCombination = null;
@@ -140,7 +139,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                 firstCombination = combination;
                 break;
             }
-            
+
             if (firstCombination == null)
             {
                 throw new GenericTypeResolutionException(
@@ -151,16 +150,16 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
 
             // Infer generic type arguments from the data
             var typeArguments = InferTypeArgumentsFromData(testMethod, firstCombination);
-            
+
             if (typeArguments.Length == 0)
             {
                 // Couldn't infer types, return original
-                return new[] { genericTest };
+                return [genericTest];
             }
 
             // Create a concrete version of the method
             var concreteMethod = testMethod.MakeGenericMethod(typeArguments);
-            
+
             // Create new metadata for the concrete test
             var concreteMetadata = new ReflectionTestMetadata(testClass, concreteMethod)
             {
@@ -194,7 +193,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                 AttributeFactory = genericTest.AttributeFactory,
                 PropertyInjections = genericTest.PropertyInjections
             };
-            
+
             expandedTests.Add(concreteMetadata);
         }
         catch (GenericTypeResolutionException)
@@ -211,25 +210,25 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
 
         return expandedTests;
     }
-    
+
     [RequiresDynamicCode("Type inference requires dynamic code generation")]
     private Type[] InferTypeArgumentsFromData(MethodInfo genericMethod, TestDataCombination dataCombination)
     {
         var genericParams = genericMethod.GetGenericArguments();
         var methodParams = genericMethod.GetParameters();
         var typeArguments = new Type[genericParams.Length];
-        
+
         // Simple type inference based on parameter positions
         // This assumes generic parameters are used directly as method parameters
         for (int i = 0; i < genericParams.Length; i++)
         {
             var genericParam = genericParams[i];
-            
+
             // Find which method parameter uses this generic parameter
             for (int j = 0; j < methodParams.Length; j++)
             {
                 var paramType = methodParams[j].ParameterType;
-                
+
                 if (paramType == genericParam)
                 {
                     // This parameter directly uses the generic type
@@ -238,7 +237,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                     {
                         var dataTask = dataCombination.MethodDataFactories[j]();
                         var data = dataTask.GetAwaiter().GetResult();
-                        
+
                         if (data != null)
                         {
                             typeArguments[i] = data.GetType();
@@ -248,7 +247,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                 }
             }
         }
-        
+
         // Fill in any missing type arguments with common defaults
         for (int i = 0; i < typeArguments.Length; i++)
         {
@@ -258,7 +257,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
                 typeArguments[i] = typeof(object);
             }
         }
-        
+
         return typeArguments;
     }
 
@@ -267,7 +266,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
     /// </summary>
     [RequiresDynamicCode("Test invoker creation requires dynamic code generation")]
     private static Func<object, object?[], Task> CreateConcreteTestInvoker(
-        Type testClass, 
+        Type testClass,
         MethodInfo concreteMethod)
     {
         // For concrete methods, we can create a direct invoker
@@ -310,8 +309,8 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
             | DynamicallyAccessedMemberTypes.NonPublicConstructors
             | DynamicallyAccessedMemberTypes.PublicMethods
             | DynamicallyAccessedMemberTypes.NonPublicMethods
-            | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass, 
-        MethodInfo concreteMethod, 
+            | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass,
+        MethodInfo concreteMethod,
         MethodMetadata originalMetadata)
     {
         return new MethodMetadata
@@ -319,9 +318,9 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
             Name = concreteMethod.Name,
             Type = testClass,
             Class = originalMetadata.Class,
-            Parameters = concreteMethod.GetParameters().Select(p => 
+            Parameters = concreteMethod.GetParameters().Select(p =>
             {
-                #pragma warning disable IL2072 // Type argument doesn't satisfy DynamicallyAccessedMembers  
+                #pragma warning disable IL2072 // Type argument doesn't satisfy DynamicallyAccessedMembers
                 var paramMetadata = new ParameterMetadata(p.ParameterType)
                 {
                     Name = p.Name ?? "unnamed",
@@ -405,55 +404,7 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
     /// </summary>
     private bool IsDataSourceAttribute(Attribute attribute)
     {
-        var attributeType = attribute.GetType();
-        
-        // Check for ArgumentsAttribute
-        if (attribute is ArgumentsAttribute)
-        {
-            return true;
-        }
-
-        // Check for MethodDataSourceAttribute
-        if (attribute is MethodDataSourceAttribute)
-        {
-            return true;
-        }
-
-        // Check for ClassDataSourceAttribute
-        if (attribute is ClassDataSourceAttribute)
-        {
-            return true;
-        }
-
-        // Check for DataSourceGeneratorAttribute<T> and AsyncDataSourceGeneratorAttribute<T>
-        var baseType = attributeType.BaseType;
-        while (baseType != null)
-        {
-            if (baseType.IsGenericType)
-            {
-                var genericDef = baseType.GetGenericTypeDefinition();
-                if (genericDef.Name.Contains("DataSourceGeneratorAttribute") || 
-                    genericDef.Name.Contains("AsyncDataSourceGeneratorAttribute"))
-                {
-                    return true;
-                }
-            }
-            baseType = baseType.BaseType;
-        }
-
-        // Check for AsyncUntypedDataSourceGeneratorAttribute (including MatrixDataSourceAttribute)
-        if (attribute is AsyncUntypedDataSourceGeneratorAttribute)
-        {
-            return true;
-        }
-
-        // Check for IAsyncDataSourceGeneratorAttribute
-        if (attribute is IAsyncDataSourceGeneratorAttribute)
-        {
-            return true;
-        }
-
-        return false;
+        return attribute is IDataSourceAttribute;
     }
 }
 
@@ -466,16 +417,6 @@ public sealed class SourceGeneratedGenericTypeResolver : IGenericTypeResolver
 {
     public Task<IEnumerable<TestMetadata>> ResolveGenericsAsync(IEnumerable<TestMetadata> metadata)
     {
-        
-        // In the new approach, generic tests are resolved during data combination generation
-        // So we just pass through all tests, including those with generic metadata
-        foreach (var test in metadata)
-        {
-            if (test.GenericTypeInfo != null || test.GenericMethodInfo != null)
-            {
-            }
-        }
-
         return Task.FromResult(metadata);
     }
 }

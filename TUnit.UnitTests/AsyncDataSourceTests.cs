@@ -5,9 +5,9 @@ public class AsyncDataSourceTests
     // Sync data source for comparison
     public static IEnumerable<object[]> SyncDataSource()
     {
-        yield return new object[] { 1, "one" };
-        yield return new object[] { 2, "two" };
-        yield return new object[] { 3, "three" };
+        yield return [1, "one"];
+        yield return [2, "two"];
+        yield return [3, "three"];
     }
 
     // Async data source returning Task<IEnumerable<T>>
@@ -37,13 +37,13 @@ public class AsyncDataSourceTests
     public static async IAsyncEnumerable<object[]> AsyncEnumerableDataSource()
     {
         await Task.Delay(1);
-        yield return new object[] { 1000, "thousand" };
+        yield return [1000, "thousand"];
 
         await Task.Delay(1);
-        yield return new object[] { 2000, "two thousand" };
+        yield return [2000, "two thousand"];
 
         await Task.Delay(1);
-        yield return new object[] { 3000, "three thousand" };
+        yield return [3000, "three thousand"];
     }
 
     // Async enumerable with cancellation support
@@ -110,9 +110,9 @@ public static class ExternalAsyncDataSources
     public static async IAsyncEnumerable<string[]> StringDataSource()
     {
         await Task.Yield();
-        yield return new[] { "hello", "world" };
-        yield return new[] { "foo", "bar" };
-        yield return new[] { "async", "data" };
+        yield return ["hello", "world"];
+        yield return ["foo", "bar"];
+        yield return ["async", "data"];
     }
 }
 

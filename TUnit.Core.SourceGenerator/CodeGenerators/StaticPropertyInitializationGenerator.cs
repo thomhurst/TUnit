@@ -3,9 +3,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
-using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Models;
 
@@ -24,7 +22,9 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             .Collect();
 
         context.RegisterSourceOutput(testClasses, (sourceProductionContext, testClasses) => 
-            GenerateStaticPropertyInitialization(sourceProductionContext, testClasses.Where(t => t != null).ToImmutableArray()!));
+            GenerateStaticPropertyInitialization(sourceProductionContext, [
+                ..testClasses.Where(t => t != null)
+            ]!));
     }
 
     private static INamedTypeSymbol? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
@@ -365,7 +365,9 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             currentType = currentType.BaseType;
         }
 
-        return properties.ToImmutableArray();
+        return [
+            ..properties
+        ];
     }
 
 }

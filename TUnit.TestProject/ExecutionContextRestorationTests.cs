@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace TUnit.TestProject;
 
 public class ExecutionContextRestorationTests

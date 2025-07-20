@@ -92,7 +92,9 @@ internal sealed class TestGroupingService : ITestGroupingService
 
         if (!orderGroups.TryGetValue(constraint.Order, out var tests))
         {
-            tests = new List<ExecutableTest>();
+            tests =
+            [
+            ];
             orderGroups[constraint.Order] = tests;
         }
 

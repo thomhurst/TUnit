@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 
@@ -56,7 +55,8 @@ internal static class DisplayNameBuilder
             return string.Empty;
         }
 
-        var formattedArgs = arguments.Select(arg => ArgumentFormatter.Format(arg, new List<Func<object?, string?>>())).ToArray();
+        var formattedArgs = arguments.Select(arg => ArgumentFormatter.Format(arg, [
+        ])).ToArray();
         return string.Join(", ", formattedArgs);
     }
 

@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
 

@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using TUnit.Core.Data;
-
 namespace TUnit.Core;
 
 /// <summary>
@@ -113,7 +107,8 @@ public static class DataCombinationBuilder
 /// </summary>
 public sealed class MethodDataCombination
 {
-    public Func<Task<object?>>[] DataFactories { get; init; } = Array.Empty<Func<Task<object?>>>();
+    public Func<Task<object?>>[] DataFactories { get; init; } = [
+    ];
     public int DataSourceIndex { get; init; }
     public int LoopIndex { get; init; }
 }
@@ -123,7 +118,8 @@ public sealed class MethodDataCombination
 /// </summary>
 public sealed class ClassDataCombination
 {
-    public Func<Task<object?>>[] DataFactories { get; init; } = Array.Empty<Func<Task<object?>>>();
+    public Func<Task<object?>>[] DataFactories { get; init; } = [
+    ];
     public int DataSourceIndex { get; init; }
     public int LoopIndex { get; init; }
 }

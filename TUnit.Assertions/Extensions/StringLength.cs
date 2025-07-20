@@ -43,7 +43,7 @@ public class StringLength(IValueSource<string> valueSource)
             , []);
 
     public InvokableValueAssertionBuilder<string> Positive =>
-        valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(default(int), (@string, _, self) =>
+        valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0, (@string, _, self) =>
             {
                 if (@string is null)
                 {

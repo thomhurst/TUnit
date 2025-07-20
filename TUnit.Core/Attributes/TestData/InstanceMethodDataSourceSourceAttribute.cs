@@ -10,7 +10,7 @@ public class InstanceMethodDataSourceAttribute : MethodDataSourceAttribute, IAcc
     }
 
     public InstanceMethodDataSourceAttribute(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
         Type classProvidingDataSource, string methodNameProvidingDataSource) : base(classProvidingDataSource, methodNameProvidingDataSource)
     {
     }
@@ -18,6 +18,6 @@ public class InstanceMethodDataSourceAttribute : MethodDataSourceAttribute, IAcc
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public class InstanceMethodDataSourceAttribute<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
 T>(string methodNameProvidingDataSource)
     : MethodDataSourceAttribute<T>(methodNameProvidingDataSource), IAccessesInstanceData;

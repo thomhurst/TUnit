@@ -9,9 +9,9 @@ namespace TUnit.Analyzers;
 public class ClassAccessibilityAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(
-            Rules.MethodMustBePublic, Rules.TypeMustBePublic
-        );
+    [
+        Rules.MethodMustBePublic, Rules.TypeMustBePublic
+    ];
 
     protected override void InitializeInternal(AnalysisContext context)
     {

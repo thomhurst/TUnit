@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.UnitTests;

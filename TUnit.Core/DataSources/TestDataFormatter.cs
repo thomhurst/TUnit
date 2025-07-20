@@ -1,4 +1,3 @@
-using TUnit.Core.Data;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Core.DataSources;
@@ -41,7 +40,8 @@ public static class TestDataFormatter
             return string.Empty;
         }
 
-        var formattedArgs = arguments.Select(arg => ArgumentFormatter.Format(arg, new List<Func<object?, string?>>())).ToArray();
+        var formattedArgs = arguments.Select(arg => ArgumentFormatter.Format(arg, [
+        ])).ToArray();
         return string.Join(", ", formattedArgs);
     }
 

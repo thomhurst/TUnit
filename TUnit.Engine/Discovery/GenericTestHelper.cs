@@ -1,6 +1,4 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 
 namespace TUnit.Engine.Discovery;
@@ -90,7 +88,7 @@ internal static class GenericTestHelper
             if (method != null)
             {
                 // If found in base type and it's virtual/abstract, get the implementation
-                if (method.IsVirtual && !method.IsFinal)
+                if (method is { IsVirtual: true, IsFinal: false })
                 {
                     // Try to get the override in the implementation type
                     var overrideMethod = implementationType.GetMethod(
@@ -156,7 +154,7 @@ internal static class GenericTestHelper
             }
             
             // Check if base type matches
-            if (currentType.BaseType != null && currentType.BaseType.IsGenericType)
+            if (currentType.BaseType is { IsGenericType: true })
             {
                 var baseGenericTypeDef = currentType.BaseType.GetGenericTypeDefinition();
                 if (baseGenericTypeDef == genericBaseType)

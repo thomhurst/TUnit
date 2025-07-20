@@ -1,10 +1,6 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace TUnit.Core;
 
@@ -57,7 +53,8 @@ public static class DataSourceInvoker
     {
         try
         {
-            var result = method.Invoke(instance, parameters ?? Array.Empty<object>());
+            var result = method.Invoke(instance, parameters ?? [
+            ]);
             
             if (result is Task task)
             {
@@ -144,7 +141,7 @@ public static class DataSourceInvoker
 
         if (expectedParameterCount == 1)
         {
-            return new[] { data };
+            return [data];
         }
 
         throw new DataGenerationException(

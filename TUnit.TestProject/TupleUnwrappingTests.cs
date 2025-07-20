@@ -1,5 +1,3 @@
-using TUnit.Core;
-
 namespace TUnit.TestProject;
 
 // Test using MethodDataSource with tuples for the class constructor

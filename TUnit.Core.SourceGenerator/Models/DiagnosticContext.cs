@@ -7,7 +7,9 @@ namespace TUnit.Core.SourceGenerator.Models;
 /// </summary>
 public class DiagnosticContext
 {
-    private readonly List<Diagnostic> _diagnostics = new();
+    private readonly List<Diagnostic> _diagnostics =
+    [
+    ];
     private readonly SourceProductionContext _sourceProductionContext;
 
     public DiagnosticContext(SourceProductionContext sourceProductionContext)

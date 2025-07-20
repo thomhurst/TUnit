@@ -12,8 +12,8 @@ namespace TUnit.Analyzers;
 public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(
-            Rules.WrongArgumentTypeTestData,
+    [
+        Rules.WrongArgumentTypeTestData,
             Rules.NoTestDataProvided,
             Rules.MethodParameterBadNullability,
             Rules.MethodMustBeParameterless,
@@ -28,7 +28,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.MatrixDataSourceAttributeRequired,
             Rules.TooManyArguments,
             Rules.InstanceMethodSource
-        );
+    ];
 
     protected override void InitializeInternal(AnalysisContext context)
     {
@@ -56,7 +56,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var attributes = methodSymbol.GetAttributes();
 
-        Analyze(context, attributes, methodSymbol.Parameters.WithoutCancellationTokenParameter().ToImmutableArray(), null, methodSymbol.ContainingType);
+        Analyze(context, attributes, [
+            ..methodSymbol.Parameters.WithoutCancellationTokenParameter()
+        ], null, methodSymbol.ContainingType);
     }
 
     private void AnalyzeProperty(SymbolAnalysisContext context)
@@ -192,7 +194,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         var arguments = argumentsAttribute.ConstructorArguments.First().IsNull
-            ? ImmutableArray.Create(default(TypedConstant))
+            ? [default(TypedConstant)]
             : argumentsAttribute.ConstructorArguments.First().Values;
 
         var cancellationTokenType = context.Compilation.GetTypeByMetadataName(typeof(CancellationToken).FullName!);
@@ -515,7 +517,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (testParameterTypes.Length == 1
             && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
-            return ImmutableArray.Create(type);
+            return [type];
         }
 
         if (context.Symbol is IPropertySymbol)
@@ -529,12 +531,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 type = propertyFuncType.TypeArguments[0];
             }
 
-            return ImmutableArray.Create(type);
+            return [type];
         }
 
         if (methodContainingTestData.ReturnType is not INamedTypeSymbol and not IArrayTypeSymbol)
         {
-            return ImmutableArray.Create(methodContainingTestData.ReturnType);
+            return [methodContainingTestData.ReturnType];
         }
 
         // Check for Task<T> or ValueTask<T> wrappers first
@@ -564,7 +566,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (testParameterTypes.Length == 1
             && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
-            return ImmutableArray.Create(type);
+            return [type];
         }
 
         if (type is INamedTypeSymbol { IsGenericType: true } genericType
@@ -579,13 +581,15 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (testParameterTypes.Length == 1
             && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
-            return ImmutableArray.Create(type);
+            return [type];
         }
 
         if (type is INamedTypeSymbol { IsTupleType: true } tupleType)
         {
             isTuples = true;
-            return tupleType.TupleElements.Select(x => x.Type).ToImmutableArray();
+            return [
+                ..tupleType.TupleElements.Select(x => x.Type)
+            ];
         }
 
         // Handle array cases - when a data source returns IEnumerable<T[]> or IAsyncEnumerable<T[]>,
@@ -598,7 +602,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return ImmutableArray<ITypeSymbol>.Empty;
         }
 
-        return ImmutableArray.Create(type);
+        return [type];
     }
 
     private void CheckDataGenerator(SymbolAnalysisContext context,

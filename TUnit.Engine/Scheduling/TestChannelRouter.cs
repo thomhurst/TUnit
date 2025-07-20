@@ -147,7 +147,9 @@ internal class ChannelMultiplexer
         });
     }
 
-    private readonly List<Channel<TestExecutionData>> _allChannelsList = new();
+    private readonly List<Channel<TestExecutionData>> _allChannelsList =
+    [
+    ];
     private readonly object _channelListLock = new object();
     
     public IEnumerable<Channel<TestExecutionData>> GetAllChannels()

@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,7 +10,7 @@ namespace TUnit.Analyzers;
 public class BlockingAsyncAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.BlockingAsyncCall);
+        [Rules.BlockingAsyncCall];
 
     protected override void InitializeInternal(AnalysisContext context)
     {
@@ -26,8 +25,7 @@ public class BlockingAsyncAnalyzer : ConcurrentDiagnosticAnalyzer
         if (memberAccess.Name.Identifier.Text == "Result")
         {
             var symbolInfo = context.SemanticModel.GetSymbolInfo(memberAccess);
-            if (symbolInfo.Symbol is IPropertySymbol property &&
-                property.ContainingType != null &&
+            if (symbolInfo.Symbol is IPropertySymbol { ContainingType: not null } property &&
                 IsTaskType(property.ContainingType))
             {
                 var diagnostic = Diagnostic.Create(
@@ -43,11 +41,10 @@ public class BlockingAsyncAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         var invocation = (InvocationExpressionSyntax)context.Node;
         
-        if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-            memberAccess.Name.Identifier.Text == "GetResult" &&
-            memberAccess.Expression is InvocationExpressionSyntax getAwaiterInvocation &&
-            getAwaiterInvocation.Expression is MemberAccessExpressionSyntax getAwaiterAccess &&
-            getAwaiterAccess.Name.Identifier.Text == "GetAwaiter")
+        if (invocation.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: "GetResult", Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax
+            {
+                Name.Identifier.Text: "GetAwaiter"
+            } getAwaiterAccess } })
         {
             var symbolInfo = context.SemanticModel.GetSymbolInfo(getAwaiterAccess.Expression);
             if (symbolInfo.Symbol != null)

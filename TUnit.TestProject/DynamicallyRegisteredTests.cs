@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using TUnit.Core;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;

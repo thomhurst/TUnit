@@ -46,7 +46,7 @@ public sealed class TestExecutionState
         
         ConstraintKey = Constraint switch
         {
-            NotInParallelConstraint nip when nip.NotInParallelConstraintKeys.Count > 0 => 
+            NotInParallelConstraint { NotInParallelConstraintKeys.Count: > 0 } nip => 
                 string.Join(",", nip.NotInParallelConstraintKeys.OrderBy(k => k)),
             ParallelGroupConstraint pg => pg.Group,
             _ => null

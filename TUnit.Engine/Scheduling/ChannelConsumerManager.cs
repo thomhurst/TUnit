@@ -9,7 +9,9 @@ internal class ChannelConsumerManager
 {
     private readonly TUnitFrameworkLogger _logger;
     private readonly SchedulerConfiguration _configuration;
-    private readonly List<Task> _consumerTasks = new();
+    private readonly List<Task> _consumerTasks =
+    [
+    ];
     private readonly CancellationTokenSource _shutdownCts = new();
 
     public ChannelConsumerManager(TUnitFrameworkLogger logger, SchedulerConfiguration configuration)

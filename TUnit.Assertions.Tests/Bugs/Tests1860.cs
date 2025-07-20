@@ -11,7 +11,7 @@ public class Tests1860
     class Player
     {
         public Guid Id { get; set; }
-        public Game Game { get; set; } = default!;
+        public Game Game { get; set; } = null!;
         public Guid GameId { get; set; }
     }
 

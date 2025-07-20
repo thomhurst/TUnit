@@ -1,13 +1,13 @@
-using TUnit.Core;
 using TUnit.Core.Interfaces;
-using TUnit.Core.Extensions;
 
 namespace TUnit.TestProject;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
 public class EventReceiverAttribute : Attribute, ITestStartEventReceiver, ITestEndEventReceiver, ITestSkippedEventReceiver
 {
-    public static readonly List<string> Events = new();
+    public static readonly List<string> Events =
+    [
+    ];
     
     public int Order => 0;
     

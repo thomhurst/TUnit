@@ -2,7 +2,9 @@ namespace TUnit.TestProject;
 
 public class DependencyFilteringTests
 {
-    private static readonly List<string> ExecutedTests = new();
+    private static readonly List<string> ExecutedTests =
+    [
+    ];
 
     [Test]
     public async Task BaseTest()
@@ -69,7 +71,9 @@ public class DependencyFilteringTests
 
 public class DependencyFilteringTests2
 {
-    public static readonly List<string> ExecutedTests = new();
+    public static readonly List<string> ExecutedTests =
+    [
+    ];
 
     [Test]
     public async Task CrossClassDependency()

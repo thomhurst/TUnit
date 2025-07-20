@@ -237,7 +237,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
 
         foreach (var member in enumType.GetMembers())
         {
-            if (member is IFieldSymbol field && field.IsConst && field.HasConstantValue)
+            if (member is IFieldSymbol { IsConst: true, HasConstantValue: true } field)
             {
                 if (AreValuesEqual(field.ConstantValue, value))
                 {

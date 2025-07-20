@@ -1,10 +1,6 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace TUnit.Core;
 
@@ -97,9 +93,8 @@ public static class DataSourceProcessor
             return false;
             
         var type = value.GetType();
-        return type.IsGenericType && 
-               type.FullName != null && 
-               type.FullName.StartsWith("System.ValueTuple");
+        return type is { IsGenericType: true, FullName: not null } && 
+            type.FullName.StartsWith("System.ValueTuple");
     }
     
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Data source processing requires reflection on runtime types")]
@@ -150,7 +145,7 @@ public static class DataSourceProcessor
 
     private static Func<Task<object?>>[] CreateSingleFactory(object? value)
     {
-        return new[] { async () => await ResolveDataSourceValue(value) };
+        return [async () => await ResolveDataSourceValue(value)];
     }
 
     private static bool IsString(object obj)

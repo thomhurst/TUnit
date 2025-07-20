@@ -385,7 +385,8 @@ public class TestContext : Context
         var classType = TestDetails?.ClassType;
         if (classType == null)
         {
-            return Enumerable.Empty<TestContext>();
+            return [
+            ];
         }
 
         return testFinder.GetTests(classType).Where(predicate);
@@ -404,10 +405,13 @@ public class TestContext : Context
         // Call GetTestsByNameAndParameters with empty parameter lists to get all tests with this name
         var tests = testFinder.GetTestsByNameAndParameters(
             testName,
-            Enumerable.Empty<Type>(),
+            [
+            ],
             classType,
-            Enumerable.Empty<Type>(),
-            Enumerable.Empty<object?>()
+            [
+            ],
+            [
+            ]
         ).ToList();
 
         if (tests.Any(x => x.Result == null))
@@ -430,10 +434,13 @@ public class TestContext : Context
         // Call GetTestsByNameAndParameters with empty parameter lists to get all tests with this name
         return testFinder.GetTestsByNameAndParameters(
             testName,
-            Enumerable.Empty<Type>(),
+            [
+            ],
             classType,
-            Enumerable.Empty<Type>(),
-            Enumerable.Empty<object?>()
+            [
+            ],
+            [
+            ]
         ).ToList();
     }
 }

@@ -16,7 +16,7 @@ public static class DataConversionHelper
         switch (data)
         {
             case null:
-                yield return new object?[] { null };
+                yield return [null];
                 yield break;
 
             case IEnumerable<object?[]> objectArrays:
@@ -39,38 +39,38 @@ public static class DataConversionHelper
             case ulong:
             case short:
             case ushort:
-                yield return new[] { data };
+                yield return [data];
                 yield break;
 
             // Handle arrays of primitives
             case int[] intArray:
                 foreach (var item in intArray)
-                    yield return new object?[] { item };
+                    yield return [item];
                 yield break;
 
             case string[] stringArray:
                 foreach (var item in stringArray)
-                    yield return new object?[] { item };
+                    yield return [item];
                 yield break;
 
             case bool[] boolArray:
                 foreach (var item in boolArray)
-                    yield return new object?[] { item };
+                    yield return [item];
                 yield break;
 
             case double[] doubleArray:
                 foreach (var item in doubleArray)
-                    yield return new object?[] { item };
+                    yield return [item];
                 yield break;
 
             case float[] floatArray:
                 foreach (var item in floatArray)
-                    yield return new object?[] { item };
+                    yield return [item];
                 yield break;
 
             case long[] longArray:
                 foreach (var item in longArray)
-                    yield return new object?[] { item };
+                    yield return [item];
                 yield break;
 
             // Handle generic IEnumerable
@@ -113,14 +113,14 @@ public static class DataConversionHelper
                     else
                     {
                         // Not a tuple or array, wrap in array
-                        yield return new[] { item };
+                        yield return [item];
                     }
                 }
                 yield break;
 
             // Single non-enumerable value
             default:
-                yield return new[] { data };
+                yield return [data];
                 yield break;
         }
     }
@@ -149,7 +149,7 @@ public static class DataConversionHelper
     {
         await foreach (var item in source.WithCancellation(ct))
         {
-            yield return new object?[] { item };
+            yield return [item];
         }
     }
 
@@ -162,7 +162,7 @@ public static class DataConversionHelper
     {
         await foreach (var (item1, item2) in source.WithCancellation(ct))
         {
-            yield return new object?[] { item1, item2 };
+            yield return [item1, item2];
         }
     }
 
@@ -175,7 +175,7 @@ public static class DataConversionHelper
     {
         await foreach (var (item1, item2, item3) in source.WithCancellation(ct))
         {
-            yield return new object?[] { item1, item2, item3 };
+            yield return [item1, item2, item3];
         }
     }
 
@@ -188,7 +188,7 @@ public static class DataConversionHelper
     {
         await foreach (var (item1, item2, item3, item4) in source.WithCancellation(ct))
         {
-            yield return new object?[] { item1, item2, item3, item4 };
+            yield return [item1, item2, item3, item4];
         }
     }
 
@@ -201,7 +201,7 @@ public static class DataConversionHelper
     {
         await foreach (var (item1, item2, item3, item4, item5) in source.WithCancellation(ct))
         {
-            yield return new object?[] { item1, item2, item3, item4, item5 };
+            yield return [item1, item2, item3, item4, item5];
         }
     }
 
@@ -239,7 +239,7 @@ public static class DataConversionHelper
     /// </summary>
     public static object?[] UnwrapTuple<T1, T2>((T1, T2) tuple)
     {
-        return new object?[] { tuple.Item1, tuple.Item2 };
+        return [tuple.Item1, tuple.Item2];
     }
 
     /// <summary>
@@ -247,7 +247,7 @@ public static class DataConversionHelper
     /// </summary>
     public static object?[] UnwrapTuple<T1, T2, T3>((T1, T2, T3) tuple)
     {
-        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3 };
+        return [tuple.Item1, tuple.Item2, tuple.Item3];
     }
 
     /// <summary>
@@ -255,7 +255,7 @@ public static class DataConversionHelper
     /// </summary>
     public static object?[] UnwrapTuple<T1, T2, T3, T4>((T1, T2, T3, T4) tuple)
     {
-        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4 };
+        return [tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4];
     }
 
     /// <summary>
@@ -263,7 +263,7 @@ public static class DataConversionHelper
     /// </summary>
     public static object?[] UnwrapTuple<T1, T2, T3, T4, T5>((T1, T2, T3, T4, T5) tuple)
     {
-        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5 };
+        return [tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5];
     }
 
     /// <summary>
@@ -271,7 +271,7 @@ public static class DataConversionHelper
     /// </summary>
     public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6>((T1, T2, T3, T4, T5, T6) tuple)
     {
-        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6 };
+        return [tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6];
     }
 
     /// <summary>
@@ -279,7 +279,7 @@ public static class DataConversionHelper
     /// </summary>
     public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6, T7>((T1, T2, T3, T4, T5, T6, T7) tuple)
     {
-        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7 };
+        return [tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7];
     }
 
     /// <summary>
@@ -287,7 +287,7 @@ public static class DataConversionHelper
     /// </summary>
     public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6, T7, T8>((T1, T2, T3, T4, T5, T6, T7, T8) tuple)
     {
-        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7, tuple.Item8 };
+        return [tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7, tuple.Item8];
     }
 
     /// <summary>
@@ -295,7 +295,7 @@ public static class DataConversionHelper
     /// </summary>
     public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9>((T1, T2, T3, T4, T5, T6, T7, T8, T9) tuple)
     {
-        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7, tuple.Item8, tuple.Item9 };
+        return [tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7, tuple.Item8, tuple.Item9];
     }
 
     /// <summary>
@@ -303,6 +303,6 @@ public static class DataConversionHelper
     /// </summary>
     public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) tuple)
     {
-        return new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7, tuple.Item8, tuple.Item9, tuple.Item10 };
+        return [tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7, tuple.Item8, tuple.Item9, tuple.Item10];
     }
 }

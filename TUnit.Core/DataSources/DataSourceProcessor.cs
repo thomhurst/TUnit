@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace TUnit.Core.DataSources;
 
@@ -22,7 +21,7 @@ public static class DataSourceProcessor
         }
         else if (data != null)
         {
-            items.Add(new[] { (object?)data });
+            items.Add([(object?)data]);
         }
         
         return items;
@@ -71,7 +70,7 @@ public static class DataSourceProcessor
         else if (item is Func<Task<object?>> taskFunc)
         {
             var data = await taskFunc().ConfigureAwait(false);
-            items.Add(new[] { data });
+            items.Add([data]);
         }
         // Handle direct Task<T> patterns
         else if (item is Task<object?[]?> taskArray)
@@ -85,7 +84,7 @@ public static class DataSourceProcessor
         else if (item is Task<object?> task)
         {
             var data = await task.ConfigureAwait(false);
-            items.Add(new[] { data });
+            items.Add([data]);
         }
         // Handle synchronous Func<T> patterns
         else if (item is Func<object?[]?> func)
@@ -99,7 +98,7 @@ public static class DataSourceProcessor
         else if (item is Func<object?> singleFunc)
         {
             var data = singleFunc();
-            items.Add(new[] { data });
+            items.Add([data]);
         }
         // Handle direct arrays
         else if (item is object?[] array)
@@ -109,7 +108,7 @@ public static class DataSourceProcessor
         // Handle single values
         else
         {
-            items.Add(new[] { item });
+            items.Add([item]);
         }
         
         return items;
@@ -218,17 +217,18 @@ public static class DataSourceProcessor
         {
             foreach (var item in objectArrayEnum)
             {
-                yield return item ?? Array.Empty<object?>();
+                yield return item ?? [
+                ];
             }
             yield break;
         }
 
         // Handle IEnumerable<object> (but not string)
-        if (result is IEnumerable<object> objectEnum && !(result is string))
+        if (result is IEnumerable<object> objectEnum and not string)
         {
             foreach (var item in objectEnum)
             {
-                yield return new[] { item };
+                yield return [item];
             }
             yield break;
         }
@@ -274,7 +274,7 @@ public static class DataSourceProcessor
         }
 
         // Single value
-        yield return new[] { result };
+        yield return [result];
     }
 
     #region Tuple Processing Helpers (Reflection-based, not AOT-compatible)

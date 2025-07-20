@@ -58,8 +58,8 @@ public class TypeArrayComparerTests
 
         // Act & Assert
         await Assert.That(comparer.Equals(null, null)).IsTrue();
-        await Assert.That(comparer.Equals(null, new[] { typeof(int) })).IsFalse();
-        await Assert.That(comparer.Equals(new[] { typeof(int) }, null)).IsFalse();
+        await Assert.That(comparer.Equals(null, [typeof(int)])).IsFalse();
+        await Assert.That(comparer.Equals([typeof(int)], null)).IsFalse();
     }
 
     [Test]

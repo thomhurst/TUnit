@@ -1,5 +1,3 @@
-using System;
-
 namespace TUnit.Core;
 
 public class DataGenerationException : Exception

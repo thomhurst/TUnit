@@ -88,7 +88,7 @@ public class TestMethodAnalyzer : ITestAnalyzer
         if (skipAttribute != null)
         {
             var firstArg = skipAttribute.ConstructorArguments.FirstOrDefault();
-            var reason = firstArg.Kind == TypedConstantKind.Array && firstArg.Values.Length > 0
+            var reason = firstArg is { Kind: TypedConstantKind.Array, Values.Length: > 0 }
                 ? firstArg.Values[0].Value?.ToString()
                 : firstArg.Value?.ToString();
             return (true, string.IsNullOrEmpty(reason) ? null : $"\"{reason}\"");

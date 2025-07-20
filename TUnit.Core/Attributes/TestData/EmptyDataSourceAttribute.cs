@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
 namespace TUnit.Core;
 
 /// <summary>
@@ -12,7 +8,8 @@ internal sealed class EmptyDataSourceAttribute : Attribute, IDataSourceAttribute
 {
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        yield return () => Task.FromResult<object?[]?>(Array.Empty<object?>());
+        yield return () => Task.FromResult<object?[]?>([
+        ]);
         await Task.CompletedTask; // Suppress CS1998
     }
 }

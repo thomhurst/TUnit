@@ -26,7 +26,7 @@ internal sealed class EventBatcher<TEvent> : IAsyncDisposable, IDisposable where
         
         _processingTask = ProcessBatchesAsync(
             batchSize, 
-            maxBatchDelay == default(TimeSpan) ? TimeSpan.FromMilliseconds(10) : maxBatchDelay,
+            maxBatchDelay == TimeSpan.Zero ? TimeSpan.FromMilliseconds(10) : maxBatchDelay,
             _shutdownCts.Token);
     }
     

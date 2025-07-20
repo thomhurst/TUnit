@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
 using TUnit.Core.Enums;
 
 namespace TUnit.Core;
@@ -35,13 +31,15 @@ public static class TestDataSourceGenerator
             var metadata = new DataGeneratorMetadata
             {
                 TestBuilderContext = null!,
-                MembersToGenerate = new MemberMetadata[0],
+                MembersToGenerate = [
+                ],
                 TestInformation = new MethodMetadata
                 {
                     Name = "GenericTest",
                     Type = typeof(object),
                     GenericTypeCount = 0,
-                    Parameters = new ParameterMetadata[0],
+                    Parameters = [
+                    ],
                     ReturnType = typeof(Task),
                     ReturnTypeReference = TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Runtime"),
                     TypeReference = TypeReference.CreateConcrete("System.Object, System.Runtime"),
@@ -53,8 +51,10 @@ public static class TestDataSourceGenerator
                         Parent = null,
                         TypeReference = TypeReference.CreateConcrete("System.Object, System.Runtime"),
                         Assembly = new AssemblyMetadata { Name = "TUnit.TestProject" },
-                        Parameters = new ParameterMetadata[0],
-                        Properties = new PropertyMetadata[0]
+                        Parameters = [
+                        ],
+                        Properties = [
+                        ]
                     }
                 },
                 Type = DataGeneratorType.TestParameters,
@@ -98,13 +98,15 @@ public static class TestDataSourceGenerator
             var metadata = new DataGeneratorMetadata
             {
                 TestBuilderContext = null!,
-                MembersToGenerate = new MemberMetadata[0],
+                MembersToGenerate = [
+                ],
                 TestInformation = new MethodMetadata
                 {
                     Name = "GenericMatrixTest",
                     Type = typeof(object),
                     GenericTypeCount = 0,
-                    Parameters = new ParameterMetadata[0],
+                    Parameters = [
+                    ],
                     ReturnType = typeof(Task),
                     ReturnTypeReference = TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Runtime"),
                     TypeReference = TypeReference.CreateConcrete("System.Object, System.Runtime"),
@@ -116,8 +118,10 @@ public static class TestDataSourceGenerator
                         Parent = null,
                         TypeReference = TypeReference.CreateConcrete("System.Object, System.Runtime"),
                         Assembly = new AssemblyMetadata { Name = "TUnit.TestProject" },
-                        Parameters = new ParameterMetadata[0],
-                        Properties = new PropertyMetadata[0]
+                        Parameters = [
+                        ],
+                        Properties = [
+                        ]
                     }
                 },
                 Type = DataGeneratorType.TestParameters,

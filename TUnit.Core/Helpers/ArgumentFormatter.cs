@@ -39,7 +39,7 @@ public static class ArgumentFormatter
         }
 
         // Handle arrays and collections by showing their elements
-        if (o is IEnumerable enumerable && o is not string)
+        if (o is IEnumerable enumerable and not string)
         {
             return FormatEnumerable(enumerable);
         }

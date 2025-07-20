@@ -216,7 +216,9 @@ public class GenericTypeResolver
     {
         // This would require semantic analysis of the compilation
         // For now, return empty list
-        return new List<GenericInstantiation>();
+        return
+        [
+        ];
     }
 
     private void AddInstantiation(INamedTypeSymbol typeSymbol, GenericInstantiation instantiation)
@@ -224,7 +226,9 @@ public class GenericTypeResolver
         var key = typeSymbol.ToDisplayString();
         if (!_genericInstantiations.ContainsKey(key))
         {
-            _genericInstantiations[key] = new List<GenericInstantiation>();
+            _genericInstantiations[key] =
+            [
+            ];
         }
 
         _genericInstantiations[key].Add(instantiation);

@@ -73,7 +73,7 @@ public static class DataSourceHelpers
     {
         if (!shouldUnwrap || value == null)
         {
-            return new[] { () => Task.FromResult<object?>(value) };
+            return [() => Task.FromResult<object?>(value)];
         }
 
         // Use AOT-compatible tuple unwrapping
@@ -89,7 +89,7 @@ public static class DataSourceHelpers
         }
 
         // Single value or not a tuple
-        return new[] { () => Task.FromResult<object?>(value) };
+        return [() => Task.FromResult<object?>(value)];
     }
 
     /// <summary>
@@ -99,7 +99,7 @@ public static class DataSourceHelpers
         Justification = "We handle specific known tuple types without reflection")]
     public static object?[] UnwrapTupleAot(object? value)
     {
-        if (value == null) return new object?[] { null };
+        if (value == null) return [null];
 
 #if NET5_0_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         // Try to use ITuple interface first for any ValueTuple type (available in .NET Core 3.0+)
@@ -119,35 +119,35 @@ public static class DataSourceHelpers
         switch (value)
         {
             case ValueTuple<object?> vt1:
-                return new[] { vt1.Item1 };
+                return [vt1.Item1];
             case ValueTuple<object?, object?> vt2:
-                return new[] { vt2.Item1, vt2.Item2 };
+                return [vt2.Item1, vt2.Item2];
             case ValueTuple<object?, object?, object?> vt3:
-                return new[] { vt3.Item1, vt3.Item2, vt3.Item3 };
+                return [vt3.Item1, vt3.Item2, vt3.Item3];
             case ValueTuple<object?, object?, object?, object?> vt4:
-                return new[] { vt4.Item1, vt4.Item2, vt4.Item3, vt4.Item4 };
+                return [vt4.Item1, vt4.Item2, vt4.Item3, vt4.Item4];
             case ValueTuple<object?, object?, object?, object?, object?> vt5:
-                return new[] { vt5.Item1, vt5.Item2, vt5.Item3, vt5.Item4, vt5.Item5 };
+                return [vt5.Item1, vt5.Item2, vt5.Item3, vt5.Item4, vt5.Item5];
             case ValueTuple<object?, object?, object?, object?, object?, object?> vt6:
-                return new[] { vt6.Item1, vt6.Item2, vt6.Item3, vt6.Item4, vt6.Item5, vt6.Item6 };
+                return [vt6.Item1, vt6.Item2, vt6.Item3, vt6.Item4, vt6.Item5, vt6.Item6];
             case ValueTuple<object?, object?, object?, object?, object?, object?, object?> vt7:
-                return new[] { vt7.Item1, vt7.Item2, vt7.Item3, vt7.Item4, vt7.Item5, vt7.Item6, vt7.Item7 };
+                return [vt7.Item1, vt7.Item2, vt7.Item3, vt7.Item4, vt7.Item5, vt7.Item6, vt7.Item7];
 
             // Handle regular Tuple types
             case Tuple<object?> t1:
-                return new[] { t1.Item1 };
+                return [t1.Item1];
             case Tuple<object?, object?> t2:
-                return new[] { t2.Item1, t2.Item2 };
+                return [t2.Item1, t2.Item2];
             case Tuple<object?, object?, object?> t3:
-                return new[] { t3.Item1, t3.Item2, t3.Item3 };
+                return [t3.Item1, t3.Item2, t3.Item3];
             case Tuple<object?, object?, object?, object?> t4:
-                return new[] { t4.Item1, t4.Item2, t4.Item3, t4.Item4 };
+                return [t4.Item1, t4.Item2, t4.Item3, t4.Item4];
             case Tuple<object?, object?, object?, object?, object?> t5:
-                return new[] { t5.Item1, t5.Item2, t5.Item3, t5.Item4, t5.Item5 };
+                return [t5.Item1, t5.Item2, t5.Item3, t5.Item4, t5.Item5];
             case Tuple<object?, object?, object?, object?, object?, object?> t6:
-                return new[] { t6.Item1, t6.Item2, t6.Item3, t6.Item4, t6.Item5, t6.Item6 };
+                return [t6.Item1, t6.Item2, t6.Item3, t6.Item4, t6.Item5, t6.Item6];
             case Tuple<object?, object?, object?, object?, object?, object?, object?> t7:
-                return new[] { t7.Item1, t7.Item2, t7.Item3, t7.Item4, t7.Item5, t7.Item6, t7.Item7 };
+                return [t7.Item1, t7.Item2, t7.Item3, t7.Item4, t7.Item5, t7.Item6, t7.Item7];
 
             default:
                 // For backward compatibility, fall back to reflection-based approach if available
@@ -158,7 +158,7 @@ public static class DataSourceHelpers
                 }
 
                 // Not a tuple, return as single-element array
-                return new object?[] { value };
+                return [value];
         }
     }
 
@@ -166,25 +166,25 @@ public static class DataSourceHelpers
     /// Generic tuple unwrapping for when types are known at compile time
     /// </summary>
     public static object?[] UnwrapTuple<T1>(ValueTuple<T1> tuple)
-        => new object?[] { tuple.Item1 };
+        => [tuple.Item1];
 
     public static object?[] UnwrapTuple<T1, T2>(ValueTuple<T1, T2> tuple)
-        => new object?[] { tuple.Item1, tuple.Item2 };
+        => [tuple.Item1, tuple.Item2];
 
     public static object?[] UnwrapTuple<T1, T2, T3>(ValueTuple<T1, T2, T3> tuple)
-        => new object?[] { tuple.Item1, tuple.Item2, tuple.Item3 };
+        => [tuple.Item1, tuple.Item2, tuple.Item3];
 
     public static object?[] UnwrapTuple<T1, T2, T3, T4>(ValueTuple<T1, T2, T3, T4> tuple)
-        => new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4 };
+        => [tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4];
 
     public static object?[] UnwrapTuple<T1, T2, T3, T4, T5>(ValueTuple<T1, T2, T3, T4, T5> tuple)
-        => new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5 };
+        => [tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5];
 
     public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6>(ValueTuple<T1, T2, T3, T4, T5, T6> tuple)
-        => new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6 };
+        => [tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6];
 
     public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6, T7>(ValueTuple<T1, T2, T3, T4, T5, T6, T7> tuple)
-        => new object?[] { tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7 };
+        => [tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5, tuple.Item6, tuple.Item7];
 
     /// <summary>
     /// AOT-compatible data source processor for when the return type is known at compile time
@@ -260,7 +260,7 @@ public static class DataSourceHelpers
     {
         if (data == null)
         {
-            return new[] { () => Task.FromResult<object?>(null) };
+            return [() => Task.FromResult<object?>(null)];
         }
 
         // Determine how many factories we need to return based on the data structure
@@ -282,7 +282,7 @@ public static class DataSourceHelpers
                 })).ToArray();
             }
             // If parameter count doesn't match, return as single tuple value
-            return new[] { () => Task.FromResult<object?>(InvokeIfFunc(data)) };
+            return [() => Task.FromResult<object?>(InvokeIfFunc(data))];
         }
         
         // For arrays, decide based on expected parameter count
@@ -306,7 +306,7 @@ public static class DataSourceHelpers
         }
         
         // Default: return as single value, invoking the original function each time
-        return new[] { () => Task.FromResult<object?>(InvokeIfFunc(data)) };
+        return [() => Task.FromResult<object?>(InvokeIfFunc(data))];
     }
 
 

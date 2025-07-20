@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace TUnit.Core;
 
@@ -29,7 +25,7 @@ public static class PropertyInjector
             throw new ArgumentNullException(nameof(instance));
 
         // Use PropertyInjectionData if available (preferred path)
-        if (injectionData != null && injectionData.Length > 0)
+        if (injectionData is { Length: > 0 })
         {
             foreach (var injection in injectionData)
             {

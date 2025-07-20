@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using TUnit.Core;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;

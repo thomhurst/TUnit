@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
-using TUnit.Core;
 
 namespace TUnit.Core.DataSourceGenerators;
 
@@ -37,7 +36,8 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
                 {
                     MethodDataFactories = objectArray.Select<object?, Func<Task<object?>>>((_, paramIndex) => 
                         () => Task.FromResult(GetMethodDataAtIndex(method, sourceType, attribute.Arguments, currentLoopIndex, paramIndex))).ToArray(),
-                    ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
+                    ClassDataFactories = [
+                    ],
                     MethodDataSourceIndex = context.DataSourceIndex,
                     MethodLoopIndex = loopIndex,
                     ClassDataSourceIndex = -1,
@@ -60,14 +60,15 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
                 }
                 else
                 {
-                    methodData = new[] { item };
+                    methodData = [item];
                 }
 
                 yield return new TestDataCombination
                 {
                     MethodDataFactories = methodData.Select<object?, Func<Task<object?>>>((_, paramIndex) => 
                         () => Task.FromResult(GetMethodDataAtIndex(method, sourceType, attribute.Arguments, currentLoopIndex, paramIndex))).ToArray(),
-                    ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
+                    ClassDataFactories = [
+                    ],
                     MethodDataSourceIndex = context.DataSourceIndex,
                     MethodLoopIndex = loopIndex,
                     ClassDataSourceIndex = -1,
@@ -126,7 +127,7 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
                     }
                     else
                     {
-                        methodData = new[] { item };
+                        methodData = [item];
                     }
                     return paramIndex < methodData.Length ? methodData[paramIndex] : null;
                 }

@@ -12,11 +12,6 @@ public interface IDataSource
     /// <param name="context">Context providing information about where the data is being used</param>
     /// <returns>Enumerable of factory functions that produce test data sets</returns>
     IEnumerable<Func<object?[]>> GenerateDataFactories(DataSourceContext context);
-
-    /// <summary>
-    /// Indicates whether this data source is shared across multiple tests
-    /// </summary>
-    bool IsShared { get; }
 }
 
 /// <summary>

@@ -85,7 +85,7 @@ internal sealed class StreamingTestExecutor
         await foreach (var test in _readyTests.Reader.ReadAllAsync(cancellationToken))
         {
             // Execute using existing executor
-            await _executor.ExecuteTests(new[] { test }, filter, messageBus, cancellationToken);
+            await _executor.ExecuteTests([test], filter, messageBus, cancellationToken);
         }
 #else
         while (!cancellationToken.IsCancellationRequested)
@@ -96,7 +96,7 @@ internal sealed class StreamingTestExecutor
                 
                 if (_readyTests.TryDequeue(out var test))
                 {
-                    await _executor.ExecuteTests(new[] { test }, filter, messageBus, cancellationToken);
+                    await _executor.ExecuteTests([test], filter, messageBus, cancellationToken);
                 }
             }
             catch (OperationCanceledException)

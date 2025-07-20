@@ -1,6 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using TUnit.Core;
 
 namespace TUnit.Core.DataSourceGenerators;
 
@@ -42,7 +40,8 @@ public class AsyncUntypedDataSourceGenerator : IAsyncDataSourceGenerator
                 yield return new TestDataCombination
                 {
                     MethodDataFactories = Enumerable.Range(0, dataLength).Select(index => new Func<Task<object?>>(async () => (await factoryFunc())?[index])).ToArray(),
-                    ClassDataFactories = Array.Empty<Func<Task<object?>>>(),
+                    ClassDataFactories = [
+                    ],
                     MethodDataSourceIndex = dataSourceIndex,
                     MethodLoopIndex = loopIndex,
                     ClassDataSourceIndex = -1,

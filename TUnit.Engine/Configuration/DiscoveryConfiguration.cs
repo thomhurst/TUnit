@@ -13,7 +13,8 @@ public static class DiscoveryConfiguration
     private static readonly string? _cachedDataSourceTimeoutEnvVar = Environment.GetEnvironmentVariable("TUNIT_DATA_SOURCE_TIMEOUT_SECONDS");
     
     // Cache CI environment variables at startup
-    private static readonly string?[] _cachedCiEnvVars = {
+    private static readonly string?[] _cachedCiEnvVars =
+    [
         Environment.GetEnvironmentVariable("CI"),
         Environment.GetEnvironmentVariable("CONTINUOUS_INTEGRATION"),
         Environment.GetEnvironmentVariable("BUILD_ID"),
@@ -26,14 +27,15 @@ public static class DiscoveryConfiguration
         Environment.GetEnvironmentVariable("APPVEYOR"),
         Environment.GetEnvironmentVariable("CIRCLECI"),
         Environment.GetEnvironmentVariable("TRAVIS")
-    };
+    ];
     
     // Cache container environment variables at startup
-    private static readonly string?[] _cachedContainerEnvVars = {
+    private static readonly string?[] _cachedContainerEnvVars =
+    [
         Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"),
         Environment.GetEnvironmentVariable("CONTAINER"),
         Environment.GetEnvironmentVariable("KUBERNETES_SERVICE_HOST")
-    };
+    ];
 
     /// <summary>
     /// Maximum time allowed for overall test discovery (auto-scaled based on system)

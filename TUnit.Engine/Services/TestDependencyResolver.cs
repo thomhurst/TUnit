@@ -54,7 +54,10 @@ internal sealed class TestDependencyResolver
                 // Dependency not yet discovered, register for notification
                 var depKey = dependency.ToString();
                 _pendingDependents.AddOrUpdate(depKey,
-                    _ => new List<string> { test.TestId },
+                    _ =>
+                    [
+                        test.TestId
+                    ],
                     (_, list) => { list.Add(test.TestId); return list; });
                 allResolved = false;
             }
@@ -73,7 +76,8 @@ internal sealed class TestDependencyResolver
                 
             // Update TestContext.Dependencies
             test.Context.Dependencies.Clear();
-            foreach (var dep in GetAllDependencies(test, new HashSet<string>()))
+            foreach (var dep in GetAllDependencies(test, [
+                     ]))
             {
                 test.Context.Dependencies.Add(dep.Context.TestDetails);
             }

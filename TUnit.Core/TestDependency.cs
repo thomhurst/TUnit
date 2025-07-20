@@ -133,7 +133,8 @@ public sealed class TestDependency : IEquatable<TestDependency>
             // Check method parameters if specified
             if (MethodParameters != null)
             {
-                var testParams = test.TestMethodParameterTypes ?? Array.Empty<string>();
+                var testParams = test.TestMethodParameterTypes ?? [
+                ];
                 if (testParams.Length != MethodParameters.Length)
                 {
                     return false;
@@ -186,7 +187,8 @@ public sealed class TestDependency : IEquatable<TestDependency>
                ClassGenericArity == other.ClassGenericArity &&
                MethodName == other.MethodName &&
                MethodGenericArity == other.MethodGenericArity &&
-               (MethodParameters?.SequenceEqual(other.MethodParameters ?? Array.Empty<Type>()) ??
+               (MethodParameters?.SequenceEqual(other.MethodParameters ?? [
+                   ]) ??
                 other.MethodParameters == null);
     }
 

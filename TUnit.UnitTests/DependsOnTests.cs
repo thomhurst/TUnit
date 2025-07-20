@@ -1,5 +1,3 @@
-using TUnit.Core;
-
 namespace TUnit.UnitTests;
 
 public class DependsOnTests
@@ -8,8 +6,8 @@ public class DependsOnTests
     {
         if (parameterTypes == null && parameterCount > 0)
         {
-            parameterTypes = parameterCount == 1 ? new[] { typeof(string) } : new[] { typeof(string), typeof(int) };
-            parameterTypeNames = parameterCount == 1 ? new[] { "System.String" } : new[] { "System.String", "System.Int32" };
+            parameterTypes = parameterCount == 1 ? [typeof(string)] : [typeof(string), typeof(int)];
+            parameterTypeNames = parameterCount == 1 ? ["System.String"] : ["System.String", "System.Int32"];
         }
 
         return new TestMetadata<T>
@@ -18,8 +16,10 @@ public class DependsOnTests
             TestMethodName = methodName,
             TestName = methodName,
             ParameterCount = parameterCount,
-            ParameterTypes = parameterTypes ?? new Type[0],
-            TestMethodParameterTypes = parameterTypeNames ?? new string[0],
+            ParameterTypes = parameterTypes ?? [
+            ],
+            TestMethodParameterTypes = parameterTypeNames ?? [
+            ],
             AttributeFactory = () => [],
             MethodMetadata = new MethodMetadata
             {
@@ -29,7 +29,8 @@ public class DependsOnTests
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
                 ReturnTypeReference = TypeReference.CreateConcrete(typeof(void).AssemblyQualifiedName ?? "System.Void"),
-                Parameters = Array.Empty<ParameterMetadata>(),
+                Parameters = [
+                ],
                 Class = new ClassMetadata
                 {
                     Type = typeof(T),
@@ -41,8 +42,10 @@ public class DependsOnTests
                         Name = typeof(T).Assembly.GetName().Name ?? string.Empty
                     },
                     Parent = null,
-                    Parameters = Array.Empty<ParameterMetadata>(),
-                    Properties = Array.Empty<PropertyMetadata>()
+                    Parameters = [
+                    ],
+                    Properties = [
+                    ]
                 }
             }
         };
@@ -127,7 +130,7 @@ public class DependsOnTests
         {
             ClassType = typeof(DependsOnTests),
             MethodName = "OverloadedMethod",
-            MethodParameters = new[] { typeof(string), typeof(int) }
+            MethodParameters = [typeof(string), typeof(int)]
         };
         var testMetadata = CreateTestMetadata<DependsOnTests>("test1", "OverloadedMethod", 2);
 
@@ -146,7 +149,7 @@ public class DependsOnTests
         {
             ClassType = typeof(DependsOnTests),
             MethodName = "OverloadedMethod",
-            MethodParameters = new[] { typeof(string), typeof(int) }
+            MethodParameters = [typeof(string), typeof(int)]
         };
         var testMetadata = CreateTestMetadata<DependsOnTests>("test1", "OverloadedMethod", 1);
 

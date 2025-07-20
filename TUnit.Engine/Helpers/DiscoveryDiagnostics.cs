@@ -81,7 +81,7 @@ internal static class DiscoveryDiagnostics
         }
 
         // Only output to console if verbosity allows
-        if (_verbosityService != null && _verbosityService.HideTestOutput)
+        if (_verbosityService is { HideTestOutput: true })
         {
             return;
         }

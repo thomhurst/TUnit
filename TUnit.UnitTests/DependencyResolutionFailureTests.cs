@@ -40,7 +40,7 @@ public class DependencyResolutionFailureTests
     }
 
     [Test]
-    [DependsOn("TestMethod", new[] { typeof(string), typeof(int) })]
+    [DependsOn("TestMethod", [typeof(string), typeof(int)])]
     public async Task TestWithMissingOverloadDependency()
     {
         // This test depends on a method overload that doesn't exist

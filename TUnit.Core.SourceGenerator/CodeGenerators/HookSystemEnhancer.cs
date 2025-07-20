@@ -259,10 +259,18 @@ public class HookSystemEnhancer
 /// </summary>
 public class HookMetadataResult
 {
-    public List<HookInfo> BeforeClassHooks { get; } = new();
-    public List<HookInfo> AfterClassHooks { get; } = new();
-    public List<HookInfo> BeforeTestHooks { get; } = new();
-    public List<HookInfo> AfterTestHooks { get; } = new();
+    public List<HookInfo> BeforeClassHooks { get; } =
+    [
+    ];
+    public List<HookInfo> AfterClassHooks { get; } =
+    [
+    ];
+    public List<HookInfo> BeforeTestHooks { get; } =
+    [
+    ];
+    public List<HookInfo> AfterTestHooks { get; } =
+    [
+    ];
 
     public string HookMetadataCode { get; set; } = "";
     public string HookInvokerCode { get; set; } = "";
