@@ -228,11 +228,22 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("var propertyValues = new Dictionary<string, Func<Task<object?>>>();");
         writer.AppendLine();
         
-        // Generate testInformation for property data sources  
-        writer.AppendLine("// Create TestInformation for property data sources");
-        writer.Append("var propertyTestInformation = ");
+        // Generate DataGeneratorMetadata for property data sources  
+        writer.AppendLine("// Create DataGeneratorMetadata for property data sources");
+        writer.AppendLine("var propertyDataGeneratorMetadata = new DataGeneratorMetadata");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"TestBuilderContext = new TestBuilderContextAccessor(TestBuilderContext.Current ?? new TestBuilderContext()),");
+        writer.AppendLine($"MembersToGenerate = Array.Empty<MemberMetadata>(),");
+        writer.Append("TestInformation = ");
         TestInformationGenerator.GenerateTestInformation(writer, methodSymbol, typeSymbol);
-        writer.AppendLine(";");
+        writer.AppendLine(",");
+        writer.AppendLine($"Type = DataGeneratorType.Property,");
+        writer.AppendLine($"TestSessionId = testSessionId,");
+        writer.AppendLine($"TestClassInstance = null, // Will be set when property is injected");
+        writer.AppendLine($"ClassInstanceArguments = null // Will be set when property is injected");
+        writer.Unindent();
+        writer.AppendLine("};");
         writer.AppendLine();
 
         // Process property data sources inline
@@ -766,12 +777,11 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine(";");
             
             writer.AppendLine("// Process the data source to get its value");
-            writer.AppendLine("var factories = await dataSource.GetDataFactories(propertyTestInformation, testSessionId);");
-            writer.AppendLine("if (factories.Any())");
+            writer.AppendLine("var dataRows = dataSource.GetDataRowsAsync(propertyDataGeneratorMetadata);");
+            writer.AppendLine("await foreach (var factory in dataRows)");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("var firstFactory = factories.First();");
-            writer.AppendLine("var args = await firstFactory();");
+            writer.AppendLine("var args = await factory();");
             writer.AppendLine("return args?.FirstOrDefault();");
             writer.Unindent();
             writer.AppendLine("}");
@@ -821,14 +831,14 @@ public static class DataCombinationGeneratorEmitter
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
             var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-            writer.AppendLine($"return await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(propertyTestInformation, testSessionId);");
+            writer.AppendLine($"return await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(propertyDataGeneratorMetadata, testSessionId);");
         }
         // For non-generic data source attributes, the type is in the constructor arguments
         else if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol dataSourceType)
         {
             var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-            writer.AppendLine($"return await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(propertyTestInformation, testSessionId);");
+            writer.AppendLine($"return await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(propertyDataGeneratorMetadata, testSessionId);");
         }
         else
         {
@@ -910,7 +920,7 @@ public static class DataCombinationGeneratorEmitter
     {
         var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-        var testInfoVar = usePropertyTestInformation ? "propertyTestInformation" : "testInformation";
+        var testInfoVar = usePropertyTestInformation ? "propertyDataGeneratorMetadata" : "testInformation";
         writer.AppendLine($"return await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}({testInfoVar}, testSessionId);");
     }
 
@@ -922,7 +932,7 @@ public static class DataCombinationGeneratorEmitter
         {
             var fullyQualifiedType = targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-            writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(propertyTestInformation, testSessionId);");
+            writer.AppendLine($"propertyValues[\"{propertyName}\"] = async () => await global::TUnit.Core.Generated.DataSourceHelpers.CreateAndInitializeAsync_{safeName}(propertyDataGeneratorMetadata, testSessionId);");
         }
         else
         {
