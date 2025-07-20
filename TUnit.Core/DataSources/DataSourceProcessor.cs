@@ -224,7 +224,7 @@ public static class DataSourceProcessor
         }
 
         // Handle IEnumerable<object> (but not string)
-        if (result is IEnumerable<object> objectEnum and not string)
+        if (result is IEnumerable<object> objectEnum && !(result is string))
         {
             foreach (var item in objectEnum)
             {

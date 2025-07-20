@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.Text;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
+using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Generators;
@@ -253,10 +254,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("],");
 
-        // Legacy data sources (empty in new approach)
-        writer.AppendLine("DataSources = Array.Empty<IDataSourceAttribute>(),");
-        writer.AppendLine("ClassDataSources = Array.Empty<IDataSourceAttribute>(),");
-        writer.AppendLine("PropertyDataSources = Array.Empty<PropertyDataSource>(),");
+        // Generate data sources with factory methods
+        GenerateDataSources(writer, compilation, testMethod);
 
         // Parameter types
         writer.AppendLine("ParameterTypes = new Type[]");
@@ -306,6 +305,356 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
 
+
+    private static void GenerateDataSources(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    {
+        var methodSymbol = testMethod.MethodSymbol;
+        var typeSymbol = testMethod.TypeSymbol;
+        
+        // Extract data source attributes from method
+        var methodDataSources = methodSymbol.GetAttributes()
+            .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+            .ToList();
+        
+        // Extract data source attributes from class
+        var classDataSources = typeSymbol.GetAttributes()
+            .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+            .ToList();
+        
+        // Generate method data sources
+        writer.AppendLine("DataSources = new IDataSourceAttribute[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        foreach (var attr in methodDataSources)
+        {
+            GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+        
+        // Generate class data sources
+        writer.AppendLine("ClassDataSources = new IDataSourceAttribute[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        foreach (var attr in classDataSources)
+        {
+            GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+        
+        // Property data sources (still empty for now)
+        writer.AppendLine("PropertyDataSources = Array.Empty<PropertyDataSource>(),");
+    }
+    
+    private static void GenerateDataSourceAttribute(CodeWriter writer, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
+    {
+        var attrClass = attr.AttributeClass;
+        if (attrClass == null) return;
+        
+        var attrName = attrClass.GloballyQualifiedNonGeneric();
+        
+        if (attrName == "global::TUnit.Core.MethodDataSourceAttribute")
+        {
+            GenerateMethodDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+        }
+        else if (attrName == "global::TUnit.Core.ArgumentsAttribute")
+        {
+            GenerateArgumentsAttribute(writer, attr);
+        }
+        else
+        {
+            // For other data source attributes, generate them as-is for now
+            writer.AppendLine($"// TODO: Generate {attrName}");
+        }
+    }
+    
+    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
+    {
+        // Extract method name and target type
+        string? methodName = null;
+        ITypeSymbol? targetType = null;
+        
+        if (attr.ConstructorArguments.Length >= 2 && attr.ConstructorArguments[0].Value is ITypeSymbol)
+        {
+            // MethodDataSource(Type, string) overload
+            targetType = (ITypeSymbol)attr.ConstructorArguments[0].Value;
+            methodName = attr.ConstructorArguments[1].Value?.ToString();
+        }
+        else if (attr.ConstructorArguments.Length >= 1)
+        {
+            // MethodDataSource(string) overload
+            methodName = attr.ConstructorArguments[0].Value?.ToString();
+            targetType = typeSymbol;
+        }
+        
+        if (string.IsNullOrEmpty(methodName))
+        {
+            writer.AppendLine("// Error: No method name in MethodDataSourceAttribute");
+            return;
+        }
+        
+        // Find the data source method
+        var dataSourceMethod = targetType?.GetMembers(methodName)
+            .OfType<IMethodSymbol>()
+            .FirstOrDefault();
+        
+        if (dataSourceMethod == null)
+        {
+            writer.AppendLine($"// Error: Method '{methodName}' not found");
+            return;
+        }
+        
+        // Generate the attribute with factory
+        if (attr.ConstructorArguments.Length >= 2 && attr.ConstructorArguments[0].Value is ITypeSymbol typeArg)
+        {
+            // MethodDataSource(Type, string) constructor
+            writer.AppendLine($"new MethodDataSourceAttribute(typeof({typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}), \"{methodName}\")");
+        }
+        else
+        {
+            // MethodDataSource(string) constructor  
+            writer.AppendLine($"new MethodDataSourceAttribute(\"{methodName}\")");
+        }
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Set the Factory property with a strongly-typed function
+        writer.AppendLine("Factory = (dataGeneratorMetadata) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Generate the factory implementation
+        GenerateMethodDataSourceFactory(writer, dataSourceMethod, targetType, methodSymbol);
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+        
+        // Copy over any Arguments property if present
+        var argumentsProperty = attr.NamedArguments.FirstOrDefault(x => x.Key == "Arguments");
+        if (argumentsProperty.Key != null && !argumentsProperty.Value.IsNull)
+        {
+            writer.Append("Arguments = ");
+            WriteTypedConstant(writer, argumentsProperty.Value);
+            writer.AppendLine(",");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+    
+    private static void GenerateMethodDataSourceFactory(CodeWriter writer, IMethodSymbol dataSourceMethod, ITypeSymbol targetType, IMethodSymbol testMethod)
+    {
+        var isStatic = dataSourceMethod.IsStatic;
+        var returnType = dataSourceMethod.ReturnType;
+        var fullyQualifiedType = targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        
+        // Generate async enumerable that yields Func<Task<object?[]?>>
+        writer.AppendLine("async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Invoke the data source method
+        if (isStatic)
+        {
+            writer.AppendLine($"var result = {fullyQualifiedType}.{dataSourceMethod.Name}();");
+        }
+        else
+        {
+            // For instance methods, check if test instance is available
+            writer.AppendLine("object? instance;");
+            writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"instance = new {fullyQualifiedType}();");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine($"var result = (({fullyQualifiedType})instance).{dataSourceMethod.Name}();");
+        }
+        writer.AppendLine();
+        
+        // Handle different return types
+        var returnTypeName = returnType.ToDisplayString();
+        
+        if (IsAsyncEnumerable(returnType))
+        {
+            // IAsyncEnumerable<T>
+            writer.AppendLine("await foreach (var item in result)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => Task.FromResult(ConvertToObjectArray(item));");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else if (IsTask(returnType))
+        {
+            // Task<T>
+            writer.AppendLine("var taskResult = await result;");
+            writer.AppendLine("if (taskResult is System.Collections.IEnumerable enumerable && !(taskResult is string))");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("foreach (var item in enumerable)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => Task.FromResult(ConvertToObjectArray(item));");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => Task.FromResult(ConvertToObjectArray(taskResult));");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else if (IsEnumerable(returnType))
+        {
+            // IEnumerable<T>
+            writer.AppendLine("if (result is System.Collections.IEnumerable enumerable && !(result is string))");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("foreach (var item in enumerable)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => Task.FromResult(ConvertToObjectArray(item));");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => Task.FromResult(ConvertToObjectArray(result));");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else
+        {
+            // Single value
+            writer.AppendLine("yield return () => Task.FromResult(ConvertToObjectArray(result));");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        
+        // Generate helper method for converting to object array
+        writer.AppendLine("object?[]? ConvertToObjectArray(object? item)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("if (item == null) return new object?[] { null };");
+        writer.AppendLine("if (item is object?[] objArray) return objArray;");
+        writer.AppendLine("if (item.GetType().IsArray)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("var array = (Array)item;");
+        writer.AppendLine("var result = new object?[array.Length];");
+        writer.AppendLine("array.CopyTo(result, 0);");
+        writer.AppendLine("return result;");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("return new[] { item };");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        
+        writer.AppendLine("return Factory();");
+    }
+    
+    private static bool IsAsyncEnumerable(ITypeSymbol type)
+    {
+        return type.AllInterfaces.Any(i => 
+            i.IsGenericType && 
+            i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>");
+    }
+    
+    private static bool IsTask(ITypeSymbol type)
+    {
+        var typeName = type.ToDisplayString();
+        return typeName.StartsWith("System.Threading.Tasks.Task") || 
+               typeName.StartsWith("System.Threading.Tasks.ValueTask");
+    }
+    
+    private static bool IsEnumerable(ITypeSymbol type)
+    {
+        if (type.SpecialType == SpecialType.System_String)
+            return false;
+            
+        return type.AllInterfaces.Any(i => 
+            i.OriginalDefinition.ToDisplayString() == "System.Collections.IEnumerable" ||
+            (i.IsGenericType && i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>"));
+    }
+    
+    private static void GenerateArgumentsAttribute(CodeWriter writer, AttributeData attr)
+    {
+        writer.AppendLine("new ArgumentsAttribute(");
+        writer.Indent();
+        
+        // Write constructor arguments
+        for (int i = 0; i < attr.ConstructorArguments.Length; i++)
+        {
+            WriteTypedConstant(writer, attr.ConstructorArguments[i]);
+            if (i < attr.ConstructorArguments.Length - 1)
+                writer.Append(", ");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("),");
+    }
+    
+    private static void WriteTypedConstant(CodeWriter writer, TypedConstant constant)
+    {
+        if (constant.IsNull)
+        {
+            writer.Append("null");
+            return;
+        }
+        
+        switch (constant.Kind)
+        {
+            case TypedConstantKind.Primitive:
+                if (constant.Type?.SpecialType == SpecialType.System_String)
+                    writer.Append($"\"{constant.Value}\"");
+                else if (constant.Type?.SpecialType == SpecialType.System_Char)
+                    writer.Append($"'{constant.Value}'");
+                else if (constant.Type?.SpecialType == SpecialType.System_Boolean)
+                    writer.Append(constant.Value?.ToString()?.ToLowerInvariant() ?? "false");
+                else
+                    writer.Append(constant.Value?.ToString() ?? "null");
+                break;
+                
+            case TypedConstantKind.Type:
+                var type = constant.Value as ITypeSymbol;
+                writer.Append($"typeof({type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                break;
+                
+            case TypedConstantKind.Array:
+                writer.Append("new[] { ");
+                for (int i = 0; i < constant.Values.Length; i++)
+                {
+                    WriteTypedConstant(writer, constant.Values[i]);
+                    if (i < constant.Values.Length - 1)
+                        writer.Append(", ");
+                }
+                writer.Append(" }");
+                break;
+                
+            default:
+                writer.Append("null");
+                break;
+        }
+    }
 
     private static void GeneratePropertyInjections(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)
     {
