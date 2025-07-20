@@ -52,15 +52,9 @@ public static class PropertyInjector
         {
             try
             {
-                // First, check if the data source attribute itself has properties with data sources
-                // This enables composition where data sources can use other data sources
-                var dataSourceType = propertyDataSource.DataSource.GetType();
-                if (!IsBuiltInType(dataSourceType))
-                {
-                    // For reflection mode, discover and inject properties dynamically
-                    await InjectDataSourcePropertiesAsync(testContext, propertyDataSource.DataSource, 
-                        testInformation, testSessionId);
-                }
+                // For reflection mode, discover and inject properties dynamically
+                await InjectDataSourcePropertiesAsync(testContext, propertyDataSource.DataSource,
+                    testInformation, testSessionId);
 
                 // Initialize the data source attribute after property injection
                 await ObjectInitializer.InitializeAsync(propertyDataSource.DataSource);
@@ -82,8 +76,8 @@ public static class PropertyInjector
                         if (propertyInjection?.NestedPropertyInjections?.Length > 0 && propertyInjection.NestedPropertyValueFactory != null)
                         {
                             // Recursively inject properties into the nested object
-                            await InjectPropertiesWithValuesAsync(testContext, value, 
-                                propertyInjection.NestedPropertyValueFactory(value), 
+                            await InjectPropertiesWithValuesAsync(testContext, value,
+                                propertyInjection.NestedPropertyValueFactory(value),
                                 propertyInjection.NestedPropertyInjections, 5, 0);
                         }
 
@@ -434,24 +428,6 @@ public static class PropertyInjector
     }
 
     /// <summary>
-    /// Checks if a type is a built-in framework type that shouldn't have property injection.
-    /// </summary>
-    private static bool IsBuiltInType(Type type)
-    {
-        // Don't inject into built-in attribute types
-        if (type.Namespace?.StartsWith("TUnit.Core") == true &&
-            (type.Name == "ArgumentsAttribute" || 
-             type.Name == "MethodDataSourceAttribute" ||
-             type.Name == "ClassDataSourceAttribute" ||
-             type.Name.StartsWith("MatrixAttribute")))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>
     /// Injects properties into a data source attribute instance.
     /// For AOT mode, this uses pre-generated metadata from the registry.
     /// For reflection mode, this discovers properties dynamically.
@@ -465,11 +441,11 @@ public static class PropertyInjector
         string testSessionId)
     {
         var type = dataSourceInstance.GetType();
-        
+
         // Try to get pre-generated metadata from registry (AOT mode)
         var injectionData = DataSourcePropertyInjectionRegistry.GetInjectionData(type);
         var propertyDataSources = DataSourcePropertyInjectionRegistry.GetPropertyDataSources(type);
-        
+
         // If no pre-generated data, try reflection (non-AOT mode only)
         if ((injectionData == null || propertyDataSources == null) && !IsAotMode())
         {
@@ -480,12 +456,12 @@ public static class PropertyInjector
                 injectionData = discovered.injectionData;
             }
         }
-        
+
         // Inject properties if we have the necessary metadata
-        if (propertyDataSources != null && propertyDataSources.Length > 0 && 
-            injectionData != null && injectionData.Length > 0)
+        if (propertyDataSources is { Length: > 0 } &&
+            injectionData is { Length: > 0 })
         {
-            await InjectPropertiesAsync(testContext, dataSourceInstance, 
+            await InjectPropertiesAsync(testContext, dataSourceInstance,
                 propertyDataSources, injectionData, testInformation, testSessionId);
         }
     }
@@ -495,19 +471,19 @@ public static class PropertyInjector
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection-only fallback")]
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection-only fallback")]
-    private static (PropertyDataSource[] properties, PropertyInjectionData[] injectionData) 
+    private static (PropertyDataSource[] properties, PropertyInjectionData[] injectionData)
         DiscoverDataSourcePropertiesViaReflection([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         var properties = new List<PropertyDataSource>();
         var injectionData = new List<PropertyInjectionData>();
-        
+
         foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
             if (property.CanWrite || GetBackingField(property) != null)
             {
                 var dataSourceAttr = property.GetCustomAttributes()
                     .FirstOrDefault(attr => attr is IDataSourceAttribute) as IDataSourceAttribute;
-                
+
                 if (dataSourceAttr != null)
                 {
                     properties.Add(new PropertyDataSource
@@ -516,7 +492,7 @@ public static class PropertyInjector
                         PropertyType = property.PropertyType,
                         DataSource = dataSourceAttr
                     });
-                    
+
                     injectionData.Add(new PropertyInjectionData
                     {
                         PropertyName = property.Name,
@@ -529,7 +505,7 @@ public static class PropertyInjector
                 }
             }
         }
-        
+
         return (properties.ToArray(), injectionData.ToArray());
     }
 

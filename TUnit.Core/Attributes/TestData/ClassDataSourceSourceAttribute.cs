@@ -108,7 +108,7 @@ public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribu
             for (var i = 0; i < _types.Length; i++)
             {
                 items[i] = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                    .Get(Shared.ElementAtOrDefault(0), _types[i], dataGeneratorMetadata.TestClassType, Keys.ElementAtOrDefault(0), dataGeneratorMetadata);
+                    .Get(Shared.ElementAtOrDefault(i), _types[i], dataGeneratorMetadata.TestClassType, Keys.ElementAtOrDefault(i), dataGeneratorMetadata);
             }
 
             return items;

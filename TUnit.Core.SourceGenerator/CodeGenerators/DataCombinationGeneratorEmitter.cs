@@ -1664,7 +1664,7 @@ public static class DataCombinationGeneratorEmitter
         var enumerableInterface = type.AllInterfaces.FirstOrDefault(i => 
             i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>");
         
-        if (enumerableInterface != null && enumerableInterface.TypeArguments.Length > 0)
+        if (enumerableInterface is { TypeArguments.Length: > 0 })
         {
             elementType = enumerableInterface.TypeArguments[0];
             return true;
@@ -1672,7 +1672,7 @@ public static class DataCombinationGeneratorEmitter
         
         // Check if the type itself is IEnumerable<T>
         if (type.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>" && 
-            type is INamedTypeSymbol namedType && namedType.TypeArguments.Length > 0)
+            type is INamedTypeSymbol { TypeArguments.Length: > 0 } namedType)
         {
             elementType = namedType.TypeArguments[0];
             return true;

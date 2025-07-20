@@ -64,10 +64,7 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
         
         foreach (var member in typeSymbol.GetMembers())
         {
-            if (member is IPropertySymbol property && 
-                property.DeclaredAccessibility == Accessibility.Public &&
-                !property.IsStatic &&
-                property.SetMethod != null)
+            if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, IsStatic: false, SetMethod: not null } property)
             {
                 var dataSourceAttr = property.GetAttributes()
                     .FirstOrDefault(a => IsDataSourceAttribute(a.AttributeClass));

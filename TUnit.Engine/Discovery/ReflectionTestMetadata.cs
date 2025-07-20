@@ -262,74 +262,50 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         var sources = new List<PropertyDataSource>();
 
         var properties = _testClass.GetProperties()
-            .Where(p => p.GetCustomAttributes().Any(a => 
-                a is ArgumentsAttribute || 
-                a is MethodDataSourceAttribute || 
-                a is ClassDataSourceAttribute ||
-                (a.GetType().IsGenericType && a.GetType().GetGenericTypeDefinition().Name.StartsWith("ClassDataSourceAttribute"))))
+            .Where(p => p.GetCustomAttributes().Any(a => a is IDataSourceAttribute))
             .ToList();
 
         foreach (var property in properties)
         {
             var attributes = property.GetCustomAttributes().ToList();
 
-            // Process Arguments attributes on properties
-            foreach (var attr in attributes.OfType<ArgumentsAttribute>())
-            {
-                sources.Add(new PropertyDataSource
-                {
-                    PropertyName = property.Name,
-                    PropertyType = property.PropertyType,
-                    DataSource = new StaticDataSourceAttribute(attr.Values)
-                });
-            }
-
-            // Process MethodDataSource attributes on properties
-            foreach (var attr in attributes.OfType<MethodDataSourceAttribute>())
+            // Process all IDataSourceAttribute attributes on properties
+            foreach (var attr in attributes.OfType<IDataSourceAttribute>())
             {
                 try
                 {
-                    var dataSource = CreateMethodDataSource(attr);
-                    if (dataSource != null)
+                    // Special handling for ArgumentsAttribute which needs to be wrapped
+                    if (attr is ArgumentsAttribute argsAttr)
                     {
                         sources.Add(new PropertyDataSource
                         {
                             PropertyName = property.Name,
                             PropertyType = property.PropertyType,
-                            DataSource = dataSource
+                            DataSource = new StaticDataSourceAttribute(argsAttr.Values)
+                        });
+                    }
+                    else
+                    {
+                        // All other data source attributes can be used directly
+                        sources.Add(new PropertyDataSource
+                        {
+                            PropertyName = property.Name,
+                            PropertyType = property.PropertyType,
+                            DataSource = attr
                         });
                     }
                 }
                 catch (Exception ex)
                 {
                     // Property data source failure will be wrapped in TestDataCombination by error handling
-                    throw new Exception($"Failed to create property method data source for {property.Name}: {ex.Message}", ex);
+                    throw new Exception($"Failed to create property data source for {property.Name}: {ex.Message}", ex);
                 }
-            }
-            
-            // Process ClassDataSource attributes on properties (generic and non-generic)
-            foreach (var attr in attributes.Where(a => a is IDataSourceAttribute && 
-                (a.GetType().Name == "ClassDataSourceAttribute" || 
-                 (a.GetType().IsGenericType && a.GetType().GetGenericTypeDefinition().Name.StartsWith("ClassDataSourceAttribute")))))
-            {
-                sources.Add(new PropertyDataSource
-                {
-                    PropertyName = property.Name,
-                    PropertyType = property.PropertyType,
-                    DataSource = (IDataSourceAttribute)attr
-                });
             }
         }
 
         return sources;
     }
 
-    private static bool IsDataSourceAttribute(Type attributeType)
-    {
-        return attributeType.Name.EndsWith("DataAttribute") ||
-               attributeType.Name.EndsWith("DataSourceAttribute") ||
-               attributeType.Name == "ArgumentsAttribute";
-    }
 
     private int GetRepeatCount()
     {
@@ -360,16 +336,6 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         return 1; // Default to 1 if no repeat attribute found
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2075:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
-    [UnconditionalSuppressMessage("Trimming", "IL2080:Target parameter argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "This is reflection mode where dynamic method access is expected")]
-    [UnconditionalSuppressMessage("AOT", "IL2072:Target method argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "Reflection mode cannot support AOT")]
-    private IDataSourceAttribute? CreateMethodDataSource(MethodDataSourceAttribute attr)
-    {
-        // Just return the attribute itself - it already implements IDataSourceAttribute
-        return attr;
-    }
-
-    // Removed - ClassDataSourceAttribute now directly implements IDataSourceAttribute
 
     private async Task<IEnumerable<MethodDataCombination>> ProcessMethodDataSourceAsync(IDataSourceAttribute dataSource)
     {
