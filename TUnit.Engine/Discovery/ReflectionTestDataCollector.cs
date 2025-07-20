@@ -8,6 +8,7 @@ using TUnit.Core.Helpers;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
+using TUnit.Core.Data;
 
 namespace TUnit.Engine.Discovery;
 
@@ -675,6 +676,27 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
 private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     {
+        // Check for DisplayNameAttribute and extract the template
+        var displayNameAttr = testMethod.GetCustomAttribute<DisplayNameAttribute>();
+        if (displayNameAttr != null)
+        {
+            // Extract the display name template from the attribute
+            // We can't fully process it here because we don't have parameter values yet
+            // But we can at least show the template for tests without parameters
+            var displayNameField = typeof(DisplayNameAttribute).GetField("displayName", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (displayNameField != null)
+            {
+                var displayNameValue = displayNameField.GetValue(displayNameAttr) as string;
+                if (!string.IsNullOrEmpty(displayNameValue) && !displayNameValue!.Contains("$"))
+                {
+                    // If the display name doesn't have parameter placeholders, use it directly
+                    return displayNameValue;
+                }
+            }
+        }
+        
+        // Default format
         return $"{testClass.Name}.{testMethod.Name}";
     }
 

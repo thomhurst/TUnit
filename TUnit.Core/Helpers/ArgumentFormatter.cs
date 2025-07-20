@@ -38,6 +38,12 @@ public static class ArgumentFormatter
             return "null";
         }
 
+        // Handle tuples specially
+        if (TupleHelper.IsTupleType(o.GetType()))
+        {
+            return FormatTuple(o);
+        }
+
         // Handle arrays and collections by showing their elements
         if (o is IEnumerable enumerable and not string)
         {
@@ -62,6 +68,16 @@ public static class ArgumentFormatter
         }
 
         return toString;
+    }
+
+    /// <summary>
+    /// Formats a tuple for display.
+    /// </summary>
+    private static string FormatTuple(object tuple)
+    {
+        var elements = TupleHelper.UnwrapTuple(tuple);
+        var formattedElements = elements.Select(e => FormatDefault(e));
+        return $"({string.Join(", ", formattedElements)})";
     }
 
     /// <summary>

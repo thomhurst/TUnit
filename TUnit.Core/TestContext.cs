@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Enums;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 
@@ -246,7 +247,7 @@ public class TestContext : Context
         }
 
         var arguments = string.Join(", ", TestDetails.TestMethodArguments
-            .Select(arg => ArgumentDisplayFormatters.FirstOrDefault(arg) ?? arg?.ToString() ?? "null"));
+            .Select(arg => ArgumentFormatter.Format(arg, ArgumentDisplayFormatters)));
 
         if (string.IsNullOrEmpty(arguments))
         {

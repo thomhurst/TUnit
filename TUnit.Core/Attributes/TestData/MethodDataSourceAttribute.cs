@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -179,6 +180,12 @@ public class MethodDataSourceAttribute : TestDataAttribute
         if (item is object?[] objArray)
         {
             return objArray;
+        }
+
+        // Handle tuples by unwrapping them
+        if (TupleHelper.IsTupleType(item.GetType()))
+        {
+            return TupleHelper.UnwrapTuple(item);
         }
 
         if (item.GetType().IsArray)

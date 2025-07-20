@@ -352,6 +352,9 @@ public static class DataCombinationGeneratorEmitter
             else
             {
                 writer.AppendLine($"MethodDataFactories = new Func<Task<object?>>[] {{ {string.Join(", ", formattedArgs.Select(arg => $"() => Task.FromResult<object?>({arg})"))} }},");
+                
+                // Add display name using ArgumentFormatter to show all arguments properly formatted
+                writer.AppendLine($"DisplayName = TUnit.Core.Helpers.ArgumentFormatter.FormatArguments(new object?[] {{ {string.Join(", ", formattedArgs)} }}),");
             }
 
             // Always write both indices
@@ -1197,11 +1200,13 @@ public static class DataCombinationGeneratorEmitter
         
         if (isClassLevel)
         {
-            writer.AppendLine("// For class data, use ToObjectArray to handle both tuples and arrays");
+            writer.AppendLine("// For class data, each yield from GenerateAsync creates a new test instance");
+            writer.AppendLine("// The data represents constructor arguments for one test instance");
             writer.AppendLine("var processedData = dataLength == 0 ? new object?[] { null } : ");
             writer.AppendLine("    dataLength == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(initialData![0]) : initialData!;");
             writer.AppendLine();
-            writer.AppendLine("var classFactories = processedData.Select((_, index) => new Func<Task<object?>>(async () =>");
+            writer.AppendLine("// Create factories for the constructor arguments");
+            writer.AppendLine("var classFactories = processedData.Select((arg, index) => new Func<Task<object?>>(async () =>");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("var data = await dataSourceFunc();");
@@ -1215,24 +1220,29 @@ public static class DataCombinationGeneratorEmitter
             writer.Unindent();
             writer.AppendLine("})).ToArray();");
             writer.AppendLine();
-        }
-        
-        // Handle method data processing before creating TestDataCombination
-        writer.AppendLine("// For method data, process the data using ToObjectArray if needed");
-        writer.AppendLine("var processedMethodData = dataLength == 0 ? new object?[] { null } : ");
-        writer.AppendLine("    dataLength == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(initialData![0]) : initialData!;");
-        writer.AppendLine();
-
-        writer.AppendLine($"{listName}.Add(new TestDataCombination");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        if (isClassLevel)
-        {
+            writer.AppendLine($"{listName}.Add(new TestDataCombination");
+            writer.AppendLine("{");
+            writer.Indent();
             writer.AppendLine("ClassDataFactories = classFactories,");
+            writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
+            writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
+            writer.AppendLine("ClassLoopIndex = classLoopCounter++,");
+            writer.AppendLine("MethodLoopIndex = 0");
+            writer.Unindent();
+            writer.AppendLine("});");
         }
         else
         {
+            // Handle method data processing before creating TestDataCombination
+            writer.AppendLine("// For method data, process the data using ToObjectArray if needed");
+            writer.AppendLine("var processedMethodData = dataLength == 0 ? new object?[] { null } : ");
+            writer.AppendLine("    dataLength == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(initialData![0]) : initialData!;");
+            writer.AppendLine();
+
+            writer.AppendLine($"{listName}.Add(new TestDataCombination");
+            writer.AppendLine("{");
+            writer.Indent();
+            
             writer.AppendLine("MethodDataFactories = processedMethodData.Select((_, index) => new Func<Task<object?>>(async () =>");
             writer.AppendLine("{");
             writer.Indent();
@@ -1246,26 +1256,16 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("return instance;");
             writer.Unindent();
             writer.AppendLine("})).ToArray(),");
-        }
-
-        // Always write both indices
-        writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
-        writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
-
-        // Always write both loop indices
-        if (isClassLevel)
-        {
-            writer.AppendLine("ClassLoopIndex = classLoopCounter++,");
-            writer.AppendLine("MethodLoopIndex = methodLoopCounter = 0");
-        }
-        else
-        {
+            
+            // Always write both indices
+            writer.AppendLine("ClassDataSourceIndex = currentClassIndex,");
+            writer.AppendLine("MethodDataSourceIndex = currentMethodIndex,");
             writer.AppendLine("ClassLoopIndex = classLoopCounter,");
             writer.AppendLine("MethodLoopIndex = methodLoopCounter++");
+            writer.Unindent();
+            writer.AppendLine("});");
         }
 
-        writer.Unindent();
-        writer.AppendLine("});");
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -1878,6 +1878,31 @@ public static class DataCombinationGeneratorEmitter
         return parameter.Type;
     }
 
+    private static bool IsEnumerableType(ITypeSymbol type, out ITypeSymbol? elementType)
+    {
+        elementType = null;
+        
+        // Check if it's IEnumerable<T>
+        var enumerableInterface = type.AllInterfaces.FirstOrDefault(i => 
+            i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>");
+        
+        if (enumerableInterface != null && enumerableInterface.TypeArguments.Length > 0)
+        {
+            elementType = enumerableInterface.TypeArguments[0];
+            return true;
+        }
+        
+        // Check if the type itself is IEnumerable<T>
+        if (type.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>" && 
+            type is INamedTypeSymbol namedType && namedType.TypeArguments.Length > 0)
+        {
+            elementType = namedType.TypeArguments[0];
+            return true;
+        }
+        
+        return false;
+    }
+
     private static List<string> ProcessArgumentsForParams(ImmutableArray<TypedConstant> arguments, ImmutableArray<IParameterSymbol> parameters)
     {
         var formattedArgs = new List<string>();
@@ -1890,6 +1915,70 @@ public static class DataCombinationGeneratorEmitter
                 formattedArgs.Add(FormatConstantValueWithType(arguments[i], null));
             }
             return formattedArgs;
+        }
+
+        // Special case: If we have a single array/enumerable parameter and multiple arguments,
+        // check if all arguments should be wrapped into that array
+        if (parameters.Length == 1 && arguments.Length > 1)
+        {
+            var parameter = parameters[0];
+            var paramType = parameter.Type;
+            
+            // Check if the parameter is an array or IEnumerable<T>
+            if (paramType is IArrayTypeSymbol arrayType)
+            {
+                // All arguments should be elements of this array
+                var elementType = arrayType.ElementType;
+                var elements = arguments.Select(arg => FormatConstantValueWithType(arg, elementType));
+                var arrayLiteral = $"new {elementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}[] {{ {string.Join(", ", elements)} }}";
+                formattedArgs.Add(arrayLiteral);
+                return formattedArgs;
+            }
+            else if (IsEnumerableType(paramType, out var enumerableElementType))
+            {
+                // All arguments should be elements of this enumerable
+                var elements = arguments.Select(arg => FormatConstantValueWithType(arg, enumerableElementType));
+                var arrayLiteral = $"new {enumerableElementType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object"}[] {{ {string.Join(", ", elements)} }}";
+                formattedArgs.Add(arrayLiteral);
+                return formattedArgs;
+            }
+        }
+        
+        // Also check if the last parameter is an array/enumerable and we have extra arguments for it
+        if (parameters.Length > 0 && arguments.Length > parameters.Length)
+        {
+            var lastParam = parameters[parameters.Length - 1];
+            var lastParamType = lastParam.Type;
+            
+            // If last parameter is array/enumerable and not params, wrap remaining arguments
+            if (!lastParam.IsParams && (lastParamType is IArrayTypeSymbol || IsEnumerableType(lastParamType, out _)))
+            {
+                // Process regular parameters first
+                for (var i = 0; i < parameters.Length - 1 && i < arguments.Length; i++)
+                {
+                    var targetType = parameters[i].Type;
+                    formattedArgs.Add(FormatConstantValueWithType(arguments[i], targetType));
+                }
+                
+                // Wrap remaining arguments into array for last parameter
+                if (lastParamType is IArrayTypeSymbol arrayType)
+                {
+                    var elementType = arrayType.ElementType;
+                    var remainingArgs = arguments.Skip(parameters.Length - 1);
+                    var elements = remainingArgs.Select(arg => FormatConstantValueWithType(arg, elementType));
+                    var arrayLiteral = $"new {elementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}[] {{ {string.Join(", ", elements)} }}";
+                    formattedArgs.Add(arrayLiteral);
+                }
+                else if (IsEnumerableType(lastParamType, out var enumerableElementType))
+                {
+                    var remainingArgs = arguments.Skip(parameters.Length - 1);
+                    var elements = remainingArgs.Select(arg => FormatConstantValueWithType(arg, enumerableElementType));
+                    var arrayLiteral = $"new {enumerableElementType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object"}[] {{ {string.Join(", ", elements)} }}";
+                    formattedArgs.Add(arrayLiteral);
+                }
+                
+                return formattedArgs;
+            }
         }
 
         // Process regular parameters

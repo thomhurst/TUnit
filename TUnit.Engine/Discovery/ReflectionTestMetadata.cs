@@ -261,7 +261,11 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         var sources = new List<PropertyDataSource>();
 
         var properties = _testClass.GetProperties()
-            .Where(p => p.GetCustomAttributes().Any(a => a is ArgumentsAttribute || a is MethodDataSourceAttribute || a is ClassDataSourceAttribute))
+            .Where(p => p.GetCustomAttributes().Any(a => 
+                a is ArgumentsAttribute || 
+                a is MethodDataSourceAttribute || 
+                a is ClassDataSourceAttribute ||
+                (a.GetType().IsGenericType && a.GetType().GetGenericTypeDefinition().Name.StartsWith("ClassDataSourceAttribute"))))
             .ToList();
 
         foreach (var property in properties)
@@ -300,6 +304,19 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                     // Property data source failure will be wrapped in TestDataCombination by error handling
                     throw new Exception($"Failed to create property method data source for {property.Name}: {ex.Message}", ex);
                 }
+            }
+            
+            // Process ClassDataSource attributes on properties (generic and non-generic)
+            foreach (var attr in attributes.Where(a => a is IDataSourceAttribute && 
+                (a.GetType().Name == "ClassDataSourceAttribute" || 
+                 (a.GetType().IsGenericType && a.GetType().GetGenericTypeDefinition().Name.StartsWith("ClassDataSourceAttribute")))))
+            {
+                sources.Add(new PropertyDataSource
+                {
+                    PropertyName = property.Name,
+                    PropertyType = property.PropertyType,
+                    DataSource = (IDataSourceAttribute)attr
+                });
             }
         }
 
