@@ -15,6 +15,8 @@ public class MethodDataSourceAttribute : TestDataAttribute
     public Type? ClassProvidingDataSource { get; }
     public string MethodNameProvidingDataSource { get; }
 
+    public Func<DataGeneratorMetadata, IAsyncEnumerable<Func<Task<object?[]?>>>>? Factory { get; set; }
+
     public object?[] Arguments { get; set; } = [];
 
     public MethodDataSourceAttribute(string methodNameProvidingDataSource)
@@ -45,6 +47,16 @@ public class MethodDataSourceAttribute : TestDataAttribute
     [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", Justification = "Data source methods use dynamic patterns")]
     public override async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        if (Factory != null)
+        {
+            await foreach (var func in Factory(dataGeneratorMetadata))
+            {
+                yield return func;
+            }
+
+            yield break;
+        }
+
         var targetType = ClassProvidingDataSource ?? dataGeneratorMetadata.TestClassType;
         var bindingFlags = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance;
 
