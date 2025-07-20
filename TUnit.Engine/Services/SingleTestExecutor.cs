@@ -47,9 +47,14 @@ internal class SingleTestExecutor : ISingleTestExecutor
         test.StartTime = DateTimeOffset.Now;
         test.State = TestState.Running;
 
+        // Create the test instance early so it's available for property injection
+        var instance = await test.CreateInstanceAsync();
+        test.Context.TestDetails.ClassInstance = instance;
+
+        // Now inject properties with the instance available
         await PropertyInjector.InjectPropertiesAsync(
             test.Context,
-            test.Context.TestDetails.ClassInstance!,
+            instance,
             test.Metadata.PropertyDataSources,
             test.Metadata.PropertyInjections,
             test.Metadata.MethodMetadata,
@@ -82,7 +87,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 return await HandleSkippedTestAsync(test, cancellationToken);
             }
 
-            await ExecuteTestWithHooksAsync(test, cancellationToken);
+            await ExecuteTestWithHooksAsync(test, instance, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -130,15 +135,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
         return CreateUpdateMessage(test);
     }
 
-    private async Task ExecuteTestWithHooksAsync(ExecutableTest test, CancellationToken cancellationToken)
+    private async Task ExecuteTestWithHooksAsync(ExecutableTest test, object instance, CancellationToken cancellationToken)
     {
-        var instance = await test.CreateInstanceAsync();
-
-        test.Context.TestDetails.ClassInstance = instance;
-
-        // Property injection is now handled inside CreateInstanceAsync for both AOT and reflection modes
-        // to ensure consistent behavior across both execution modes
-
+        // Instance is already created and properties are already injected
         // Restore hook contexts before test execution
         RestoreHookContexts(test.Context);
 

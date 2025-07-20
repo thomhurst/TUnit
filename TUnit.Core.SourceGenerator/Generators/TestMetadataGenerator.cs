@@ -258,7 +258,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateDataSources(writer, compilation, testMethod);
 
         // Generate property injections
-        GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.Name);
+        GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
 
         // Parameter types
         writer.AppendLine("ParameterTypes = new Type[]");
@@ -378,8 +378,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // For other data source attributes, generate them as-is for now
-            writer.AppendLine($"// TODO: Generate {attrName}");
+            // For other data source attributes, generate using the generic attribute instantiation method
+            var generatedCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
+            writer.AppendLine($"{generatedCode},");
         }
     }
     
@@ -415,7 +416,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         
         if (dataSourceMethod == null)
         {
-            writer.AppendLine($"// Error: Method '{methodName}' not found");
+            // Still generate the attribute even if method not found - it will fail at runtime with proper error
+            if (attr.ConstructorArguments.Length >= 2 && attr.ConstructorArguments[0].Value is ITypeSymbol missingMethodTypeArg)
+            {
+                writer.AppendLine($"new MethodDataSourceAttribute(typeof({missingMethodTypeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}), \"{methodName}\"),");
+            }
+            else
+            {
+                writer.AppendLine($"new MethodDataSourceAttribute(\"{methodName}\"),");
+            }
             return;
         }
         

@@ -28,7 +28,7 @@ public static class PropertyInjector
     {
         if (instance == null)
         {
-            throw new ArgumentNullException(nameof(instance));
+            throw new ArgumentNullException(nameof(instance), "Test instance cannot be null");
         }
 
         // Create DataGeneratorMetadata for property data source resolution
@@ -53,13 +53,13 @@ public static class PropertyInjector
             {
                 // Get data rows from the data source attribute
                 var dataRows = propertyDataSource.DataSource.GetDataRowsAsync(dataGeneratorMetadata);
-                
+
                 await foreach (var factory in dataRows)
                 {
                     // Get the first value - properties only support single values
                     var args = await factory();
                     var value = args?.FirstOrDefault();
-                    
+
                     propertyValues[propertyDataSource.PropertyName] = value;
                     break; // Only take the first value for properties
                 }

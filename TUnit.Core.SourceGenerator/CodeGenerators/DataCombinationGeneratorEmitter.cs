@@ -104,20 +104,18 @@ public static class DataCombinationGeneratorEmitter
 
         writer.AppendLine("var methodCombinations = new List<TestDataCombination>();");
         writer.AppendLine("var classCombinations = new List<TestDataCombination>();");
-        writer.AppendLine("var propertyCombinations = new List<TestDataCombination>();");
         writer.AppendLine();
         
         // Runtime helpers now handle instance data source property initialization
 
         EmitMethodDataCombinations(writer, methodDataSources, methodSymbol, typeSymbol);
         EmitClassDataCombinations(writer, classDataSources, methodSymbol, typeSymbol);
-        EmitPropertyDataCombinations(writer, propertyDataSources, methodSymbol, typeSymbol);
+        // Properties are now resolved directly in PropertyInjector, no need to generate combinations
 
         writer.AppendLine();
         writer.AppendLine("// Ensure we have at least one combination of each type");
         writer.AppendLine("if (methodCombinations.Count == 0) methodCombinations.Add(new TestDataCombination());");
         writer.AppendLine("if (classCombinations.Count == 0) classCombinations.Add(new TestDataCombination());");
-        writer.AppendLine("if (propertyCombinations.Count == 0) propertyCombinations.Add(new PropertyDataCombination());");
         writer.AppendLine();
 
         EmitCartesianProduct(writer);
@@ -216,18 +214,6 @@ public static class DataCombinationGeneratorEmitter
         }
     }
 
-    private static void EmitPropertyDataCombinations(CodeWriter writer, ImmutableArray<PropertyWithDataSource> propertyDataSources, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
-    {
-        if (!propertyDataSources.Any())
-        {
-            return;
-        }
-
-        // Properties are now resolved directly via PropertyDataSources in PropertyInjector
-        // No need to generate property value resolution code here
-
-        writer.AppendLine("propertyCombinations.Add(new PropertyDataCombination { });");
-    }
 
     private static void EmitDataSourceCombination(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
@@ -1105,10 +1091,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("foreach (var methodCombination in methodCombinations)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("foreach (var propertyCombination in propertyCombinations)");
-        writer.AppendLine("{");
-        writer.Indent();
-
 
         writer.AppendLine("allCombinations.Add(new TestDataCombination");
         writer.AppendLine("{");
@@ -1119,13 +1101,11 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("ClassLoopIndex = classCombination.ClassLoopIndex,");
         writer.AppendLine("MethodDataSourceIndex = methodCombination.MethodDataSourceIndex,");
         writer.AppendLine("MethodLoopIndex = methodCombination.MethodLoopIndex,");
-        writer.AppendLine("DataGenerationException = classCombination.DataGenerationException ?? methodCombination.DataGenerationException ?? propertyCombination.DataGenerationException,");
-        writer.AppendLine("DisplayName = classCombination.DisplayName ?? methodCombination.DisplayName ?? propertyCombination.DisplayName");
+        writer.AppendLine("DataGenerationException = classCombination.DataGenerationException ?? methodCombination.DataGenerationException,");
+        writer.AppendLine("DisplayName = classCombination.DisplayName ?? methodCombination.DisplayName");
         writer.Unindent();
         writer.AppendLine("});");
 
-        writer.Unindent();
-        writer.AppendLine("}");
         writer.Unindent();
         writer.AppendLine("}");
         writer.Unindent();
