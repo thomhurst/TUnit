@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using TUnit.Core.Enums;
 using TUnit.Core.ReferenceTracking;
@@ -51,7 +52,11 @@ public static class PropertyInjector
         {
             try
             {
-                // Get data rows from the data source attribute
+                // Initialize the data source attribute before using it
+                // This allows data sources to perform any necessary setup
+                await ObjectInitializer.InitializeAsync(propertyDataSource.DataSource);
+
+                // Get data rows from the initialized data source attribute
                 var dataRows = propertyDataSource.DataSource.GetDataRowsAsync(dataGeneratorMetadata);
 
                 await foreach (var factory in dataRows)
@@ -59,6 +64,23 @@ public static class PropertyInjector
                     // Get the first value - properties only support single values
                     var args = await factory();
                     var value = args?.FirstOrDefault();
+
+                    // If the value is an object that might have properties needing injection, handle that
+                    if (value != null && value.GetType().IsClass && value.GetType() != typeof(string))
+                    {
+                        // Find the injection data for this property's type
+                        var propertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
+                        if (propertyInjection?.NestedPropertyInjections?.Length > 0 && propertyInjection.NestedPropertyValueFactory != null)
+                        {
+                            // Recursively inject properties into the nested object
+                            await InjectPropertiesWithValuesAsync(testContext, value, 
+                                propertyInjection.NestedPropertyValueFactory(value), 
+                                propertyInjection.NestedPropertyInjections, 5, 0);
+                        }
+
+                        // Initialize the data object
+                        await ObjectInitializer.InitializeAsync(value);
+                    }
 
                     propertyValues[propertyDataSource.PropertyName] = value;
                     break; // Only take the first value for properties
@@ -401,4 +423,5 @@ public static class PropertyInjector
         var isInitOnlyProperty = methodType.GetProperty("IsInitOnly");
         return isInitOnlyProperty != null && (bool)isInitOnlyProperty.GetValue(setMethod)!;
     }
+
 }
