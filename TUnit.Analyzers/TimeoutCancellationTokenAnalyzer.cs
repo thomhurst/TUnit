@@ -9,9 +9,7 @@ namespace TUnit.Analyzers;
 public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-    [
-        Rules.MissingTimeoutCancellationTokenAttributes
-    ];
+        ImmutableArray.Create(Rules.MissingTimeoutCancellationTokenAttributes);
 
     protected override void InitializeInternal(AnalysisContext context)
     {

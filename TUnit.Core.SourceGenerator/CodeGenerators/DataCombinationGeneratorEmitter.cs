@@ -35,9 +35,7 @@ public static class DataCombinationGeneratorEmitter
 
         // Use stored attributes if available (for generic types), otherwise get them directly
         var methodDataSources = testMethodMetadata?.MethodAttributes.IsDefault == false 
-            ? [
-                ..testMethodMetadata.MethodAttributes.Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
-            ]
+            ? testMethodMetadata.MethodAttributes.Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)).ToImmutableArray()
             : GetDataSourceAttributes(methodSymbol);
         var classDataSources = GetDataSourceAttributes(typeSymbol);
         var propertyDataSources = GetPropertyDataSources(typeSymbol);
@@ -349,11 +347,11 @@ public static class DataCombinationGeneratorEmitter
 
             if (isClassLevel)
             {
-                writer.AppendLine($"ClassDataFactories = new Func<Task<object?>>[] {{ {string.Join(", ", formattedArgs.Select(arg => $"() => Task.FromResult<object?>({arg})"))} }},");
+                writer.AppendLine($"ClassDataFactories = ImmutableArray.Create<Func<Task<object?>>>({string.Join(", ", formattedArgs.Select(arg => $"() => Task.FromResult<object?>({arg})"))}),");
             }
             else
             {
-                writer.AppendLine($"MethodDataFactories = new Func<Task<object?>>[] {{ {string.Join(", ", formattedArgs.Select(arg => $"() => Task.FromResult<object?>({arg})"))} }},");
+                writer.AppendLine($"MethodDataFactories = ImmutableArray.Create<Func<Task<object?>>>({string.Join(", ", formattedArgs.Select(arg => $"() => Task.FromResult<object?>({arg})"))}),");
             }
 
             // Always write both indices
@@ -950,7 +948,7 @@ public static class DataCombinationGeneratorEmitter
         }
 
         writer.AppendLine("// Create MembersToGenerate array based on whether it's class or method level");
-        writer.AppendLine("var membersToGenerate = new MemberMetadata[]");
+        writer.AppendLine("var membersToGenerate = ImmutableArray.Create<MemberMetadata>");
         writer.AppendLine("{");
         writer.Indent();
         if (isClassLevel)
@@ -1129,7 +1127,7 @@ public static class DataCombinationGeneratorEmitter
         }
 
         writer.AppendLine("// Create MembersToGenerate array based on whether it's class or method level");
-        writer.AppendLine("var membersToGenerate = new MemberMetadata[]");
+        writer.AppendLine("var membersToGenerate = ImmutableArray.Create<MemberMetadata>");
         writer.AppendLine("{");
         writer.Indent();
         if (isClassLevel)
@@ -1392,9 +1390,7 @@ public static class DataCombinationGeneratorEmitter
             currentType = currentType.BaseType;
         }
 
-        return [
-            ..properties
-        ];
+        return properties.ToImmutableArray();
     }
 
     private static ImmutableArray<PropertyWithDataSource> GetStaticPropertyDataSources(INamedTypeSymbol typeSymbol)
@@ -1429,9 +1425,7 @@ public static class DataCombinationGeneratorEmitter
             currentType = currentType.BaseType;
         }
 
-        return [
-            ..properties
-        ];
+        return properties.ToImmutableArray();
     }
 
     private static bool IsAsyncDataSourceGeneratorAttribute(INamedTypeSymbol? attributeClass)

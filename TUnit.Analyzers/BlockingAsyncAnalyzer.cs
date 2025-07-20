@@ -10,7 +10,7 @@ namespace TUnit.Analyzers;
 public class BlockingAsyncAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        [Rules.BlockingAsyncCall];
+        ImmutableArray.Create(Rules.BlockingAsyncCall);
 
     protected override void InitializeInternal(AnalysisContext context)
     {

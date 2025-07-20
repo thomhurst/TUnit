@@ -22,9 +22,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             .Collect();
 
         context.RegisterSourceOutput(testClasses, (sourceProductionContext, testClasses) => 
-            GenerateStaticPropertyInitialization(sourceProductionContext, [
-                ..testClasses.Where(t => t != null)
-            ]!));
+            GenerateStaticPropertyInitialization(sourceProductionContext, testClasses.Where(t => t != null).ToImmutableArray()!));
     }
 
     private static INamedTypeSymbol? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
@@ -220,10 +218,10 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             var value = attr.ConstructorArguments[0];
             var formattedValue = DataCombinationGeneratorEmitter.FormatConstantValue(value);
             // For static properties, we want the raw value, not wrapped in an array
-            if (formattedValue.StartsWith("new object[] { ") && formattedValue.EndsWith(" }"))
+            if (formattedValue.StartsWith("ImmutableArray.Create<object>(") && formattedValue.EndsWith(")"))
             {
                 // Extract the inner value from the array wrapper
-                var innerValue = formattedValue.Substring("new object[] { ".Length, formattedValue.Length - "new object[] { ".Length - " }".Length);
+                var innerValue = formattedValue.Substring("ImmutableArray.Create<object>(".Length, formattedValue.Length - "ImmutableArray.Create<object>(".Length - ")".Length);
                 writer.AppendLine($"return {innerValue};");
             }
             else
@@ -365,9 +363,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             currentType = currentType.BaseType;
         }
 
-        return [
-            ..properties
-        ];
+        return properties.ToImmutableArray();
     }
 
 }

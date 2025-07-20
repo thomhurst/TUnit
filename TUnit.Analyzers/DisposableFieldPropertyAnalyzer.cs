@@ -13,9 +13,7 @@ namespace TUnit.Analyzers;
 public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-    [
-        Rules.Dispose_Member_In_Cleanup
-    ];
+        ImmutableArray.Create(Rules.Dispose_Member_In_Cleanup);
 
     protected override void InitializeInternal(AnalysisContext context)
     {

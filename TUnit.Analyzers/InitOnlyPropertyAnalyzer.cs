@@ -21,7 +21,7 @@ public sealed class InitOnlyPropertyAnalyzer : DiagnosticAnalyzer
         description: "Init-only properties with data source attributes require .NET 8 or later for AOT-compatible code generation. On older frameworks, use regular settable properties instead.");
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        [InitOnlyPropertyNotSupported];
+        ImmutableArray.Create(InitOnlyPropertyNotSupported);
 
     public override void Initialize(AnalysisContext context)
     {

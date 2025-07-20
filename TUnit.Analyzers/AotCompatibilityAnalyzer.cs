@@ -13,11 +13,11 @@ namespace TUnit.Analyzers;
 public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-    [
-        Rules.GenericTestMissingExplicitInstantiation,
+        ImmutableArray.Create(
+            Rules.GenericTestMissingExplicitInstantiation,
             Rules.DynamicDataSourceNotAotCompatible,
             Rules.OpenGenericTypeNotAotCompatible
-    ];
+        );
 
     protected override void InitializeInternal(AnalysisContext context)
     {

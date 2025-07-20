@@ -8,9 +8,7 @@ namespace TUnit.Analyzers;
 
 public record Chain(IMethodSymbol OriginalMethod)
 {
-    public List<IMethodSymbol> Dependencies { get; } =
-    [
-    ];
+    public List<IMethodSymbol> Dependencies { get; } = new List<IMethodSymbol>();
 
     public bool MethodTraversed(IMethodSymbol method) => Dependencies.Contains(method, SymbolEqualityComparer.Default);
 
@@ -23,11 +21,9 @@ public record Chain(IMethodSymbol OriginalMethod)
 
     public IMethodSymbol[] GetCompleteChain()
     {
-        return
-        [
-            OriginalMethod,
-            ..Dependencies.TakeUntil(d => SymbolEqualityComparer.Default.Equals(d, OriginalMethod))
-        ];
+        return new[] { OriginalMethod }
+            .Concat(Dependencies.TakeUntil(d => SymbolEqualityComparer.Default.Equals(d, OriginalMethod)))
+            .ToArray();
     }
 }
 
@@ -35,9 +31,7 @@ public record Chain(IMethodSymbol OriginalMethod)
 public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-    [
-        Rules.DependsOnConflicts, Rules.NoMethodFound
-    ];
+        ImmutableArray.Create(Rules.DependsOnConflicts, Rules.NoMethodFound);
 
     protected override void InitializeInternal(AnalysisContext context)
     {
@@ -48,7 +42,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         var method = (IMethodSymbol) context.Symbol;
 
-        AttributeData[] dependsOnAttributes = [.. GetDependsOnAttributes(method), .. GetDependsOnAttributes(method.ReceiverType ?? method.ContainingType)];
+        AttributeData[] dependsOnAttributes = GetDependsOnAttributes(method).Concat(GetDependsOnAttributes(method.ReceiverType ?? method.ContainingType)).ToArray();
 
         var dependencies = GetDependencies(context, new Chain(method), method, dependsOnAttributes);
 
@@ -59,7 +53,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
 
         context.ReportDiagnostic(Diagnostic.Create(Rules.DependsOnConflicts,
             method.Locations.FirstOrDefault(),
-                string.Join(" > ", [.. dependencies.GetCompleteChain().Select(x => $"{(x.ReceiverType ?? x.ContainingType).Name}.{x.Name}")])));
+                string.Join(" > ", dependencies.GetCompleteChain().Select(x => $"{(x.ReceiverType ?? x.ContainingType).Name}.{x.Name}"))));
     }
 
     private AttributeData[] GetDependsOnAttributes(ISymbol methodSymbol)
@@ -134,7 +128,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
 
                 chain.Add(foundDependency);
 
-                var nestedChain = GetDependencies(context, chain, foundDependency, [.. GetDependsOnAttributes(foundDependency), .. GetDependsOnAttributes(foundDependency.ReceiverType ?? foundDependency.ContainingType)]);
+                var nestedChain = GetDependencies(context, chain, foundDependency, GetDependsOnAttributes(foundDependency).Concat(GetDependsOnAttributes(foundDependency.ReceiverType ?? foundDependency.ContainingType)).ToArray());
 
                 foreach (var nestedDependency in nestedChain.Dependencies)
                 {

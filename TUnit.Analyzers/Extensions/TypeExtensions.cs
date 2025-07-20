@@ -95,7 +95,7 @@ public static class TypeExtensions
     public static bool IsIEnumerable(this ITypeSymbol namedTypeSymbol, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)
     {
         var interfaces = namedTypeSymbol.TypeKind == TypeKind.Interface
-            ? [(INamedTypeSymbol) namedTypeSymbol, .. namedTypeSymbol.AllInterfaces]
+            ? new[] { (INamedTypeSymbol)namedTypeSymbol }.Concat(namedTypeSymbol.AllInterfaces)
             : namedTypeSymbol.AllInterfaces.AsEnumerable();
 
         foreach (var enumerable in interfaces

@@ -8,9 +8,7 @@ namespace TUnit.Analyzers;
 public class PsvmAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-    [
-        Rules.NoMainMethod
-    ];
+        ImmutableArray.Create(Rules.NoMainMethod);
 
     protected override void InitializeInternal(AnalysisContext context)
     {
