@@ -59,4 +59,20 @@ public class AsyncEvent<TEventArgs>
 
         return e;
     }
+
+    public AsyncEvent<TEventArgs> InsertAtFront(Func<object, TEventArgs, ValueTask> callback)
+    {
+        if (callback == null)
+        {
+            throw new NullReferenceException("callback is null");
+        }
+
+        lock (_locker)
+        {
+            InvocationList.Insert(0, new Invocation(callback, Order));
+            Order = int.MaxValue / 2;
+        }
+
+        return this;
+    }
 }

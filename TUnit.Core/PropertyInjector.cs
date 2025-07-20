@@ -60,10 +60,11 @@ public static class PropertyInjector
                     continue;
                 }
 
-                testContext.Events.OnTestStart += async (o, context) =>
+                var onTestStart = testContext.Events.OnTestStart ??= new AsyncEvent<TestContext>();
+                onTestStart.InsertAtFront(async (o, context) =>
                 {
                     await ObjectInitializer.InitializeAsync(value);
-                };
+                });
 
                 testContext.Events.OnDispose += async (o, context) =>
                 {
