@@ -345,7 +345,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             writer.AppendLine();
 
             // Generate the hook source implementation
-            var interfaces = new List<string>();
+            var interfaces = new global::System.Collections.Generic.List<string>();
             if (validHooks.Any(h => h.HookType == "Test"))
             {
                 interfaces.Add("ITestHookSource");
@@ -445,8 +445,8 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
     {
         // Generate type-safe hook storage using dictionaries
         writer.AppendLine("// Hook storage: Type -> HookType -> List of hook methods");
-        writer.AppendLine("private static readonly Dictionary<Type, Dictionary<HookType, List<StaticHookMethod>>> _staticHooksByType = new();");
-        writer.AppendLine("private static readonly Dictionary<Type, Dictionary<HookType, List<InstanceHookMethod>>> _instanceHooksByType = new();");
+        writer.AppendLine("private static readonly global::System.Collections.Generic.Dictionary<global::System.Type, global::System.Collections.Generic.Dictionary<global::TUnit.Core.HookType, global::System.Collections.Generic.List<global::TUnit.Core.Hooks.StaticHookMethod>>> _staticHooksByType = new();");
+        writer.AppendLine("private static readonly global::System.Collections.Generic.Dictionary<global::System.Type, global::System.Collections.Generic.Dictionary<global::TUnit.Core.HookType, global::System.Collections.Generic.List<global::TUnit.Core.Hooks.InstanceHookMethod>>> _instanceHooksByType = new();");
         writer.AppendLine();
 
         // Also keep the existing fields for backward compatibility during refactoring
@@ -545,24 +545,24 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                 if (instanceHooks.Any())
                 {
                     writer.AppendLine($"if (!_instanceHooksByType.ContainsKey(typeof({typeDisplay})))");
-                    writer.AppendLine($"    _instanceHooksByType[typeof({typeDisplay})] = new Dictionary<HookType, List<InstanceHookMethod>>();");
+                    writer.AppendLine($"    _instanceHooksByType[typeof({typeDisplay})] = new global::System.Collections.Generic.Dictionary<global::TUnit.Core.HookType, global::System.Collections.Generic.List<global::TUnit.Core.Hooks.InstanceHookMethod>>();");
 
                     var hooksByHookType = instanceHooks.GroupBy(h => h.HookType);
                     foreach (var htGroup in hooksByHookType)
                     {
-                        writer.AppendLine($"_instanceHooksByType[typeof({typeDisplay})][HookType.{htGroup.Key}] = new List<InstanceHookMethod>();");
+                        writer.AppendLine($"_instanceHooksByType[typeof({typeDisplay})][global::TUnit.Core.HookType.{htGroup.Key}] = new global::System.Collections.Generic.List<global::TUnit.Core.Hooks.InstanceHookMethod>();");
                     }
                 }
 
                 if (staticHooks.Any())
                 {
                     writer.AppendLine($"if (!_staticHooksByType.ContainsKey(typeof({typeDisplay})))");
-                    writer.AppendLine($"    _staticHooksByType[typeof({typeDisplay})] = new Dictionary<HookType, List<StaticHookMethod>>();");
+                    writer.AppendLine($"    _staticHooksByType[typeof({typeDisplay})] = new global::System.Collections.Generic.Dictionary<global::TUnit.Core.HookType, global::System.Collections.Generic.List<global::TUnit.Core.Hooks.StaticHookMethod>>();");
 
                     var hooksByHookType = staticHooks.GroupBy(h => h.HookType);
                     foreach (var htGroup in hooksByHookType)
                     {
-                        writer.AppendLine($"_staticHooksByType[typeof({typeDisplay})][HookType.{htGroup.Key}] = new List<StaticHookMethod>();");
+                        writer.AppendLine($"_staticHooksByType[typeof({typeDisplay})][global::TUnit.Core.HookType.{htGroup.Key}] = new global::System.Collections.Generic.List<global::TUnit.Core.Hooks.StaticHookMethod>();");
                     }
                 }
             }
@@ -575,7 +575,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         // Generate method to get hooks by type - this handles inheritance
         using (writer.BeginBlock("private static IEnumerable<T> GetHooksForType<T>(Type type, HookType hookType) where T : class"))
         {
-            writer.AppendLine("var results = new List<T>();");
+            writer.AppendLine("var results = new global::System.Collections.Generic.List<T>();");
             writer.AppendLine();
 
             writer.AppendLine("// Walk up the inheritance chain");

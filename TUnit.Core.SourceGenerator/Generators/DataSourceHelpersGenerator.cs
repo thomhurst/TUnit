@@ -259,9 +259,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         var safeName = fullyQualifiedTypeName.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
 
         // Separate data source properties into init-only and settable
-        var initOnlyProperties = new List<PropertyWithDataSource>();
-        var settableProperties = new List<PropertyWithDataSource>();
-        var staticProperties = new List<PropertyWithDataSource>();
+        var initOnlyProperties = new global::System.Collections.Generic.List<PropertyWithDataSource>();
+        var settableProperties = new global::System.Collections.Generic.List<PropertyWithDataSource>();
+        var staticProperties = new global::System.Collections.Generic.List<PropertyWithDataSource>();
         
         foreach (var prop in typeInfo.Properties)
         {

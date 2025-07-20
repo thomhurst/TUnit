@@ -71,7 +71,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         return new TestMethodMetadata
         {
-            MethodSymbol = methodSymbol ?? throw new InvalidOperationException("Symbol is not a method"),
+            MethodSymbol = methodSymbol ?? throw new global::System.InvalidOperationException("Symbol is not a method"),
             TypeSymbol = containingType,
             FilePath = methodSyntax.SyntaxTree.FilePath,
             LineNumber = methodSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
@@ -126,16 +126,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("#pragma warning disable");
         writer.AppendLine("#nullable enable");
         writer.AppendLine();
-        writer.AppendLine("using System;");
-        writer.AppendLine("using System.Collections.Generic;");
-        writer.AppendLine("using System.Linq;");
-        writer.AppendLine("using System.Reflection;");
-        writer.AppendLine("using System.Threading;");
-        writer.AppendLine("using System.Threading.Tasks;");
-        writer.AppendLine("using global::TUnit.Core;");
-        writer.AppendLine("using global::TUnit.Core.Enums;");
-        writer.AppendLine("using global::TUnit.Core.Interfaces;");
-        writer.AppendLine("using global::TUnit.Core.Interfaces.SourceGenerator;");
+        // No using statements - use globally qualified types
         writer.AppendLine();
         writer.AppendLine($"namespace {GeneratedNamespace};");
         writer.AppendLine();
@@ -159,7 +150,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("var tests = new List<TestMetadata>();");
+        writer.AppendLine("var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestDiscovery.TestMetadata>();");
         writer.AppendLine();
 
         // Generate the TestMetadata<T> with DataCombinationGenerator
@@ -270,11 +261,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (IsGenericTypeParameter(paramType) || ContainsGenericTypeParameter(paramType))
             {
                 // Use object as placeholder for generic type parameters
-                writer.AppendLine("typeof(object),");
+                writer.AppendLine("typeof(global::System.Object),");
             }
             else
             {
-                writer.AppendLine($"typeof({paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
+                writer.AppendLine($"typeof({paramType.GloballyQualified()}),");
             }
         }
         writer.Unindent();
@@ -816,7 +807,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         }
 
                         // ValueFactory will be provided by the TestDataCombination at runtime
-                        writer.AppendLine("ValueFactory = () => throw new InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\"),");
+                        writer.AppendLine("ValueFactory = () => throw new global::System.InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\"),");
 
                         // Generate nested property injections
                         GenerateNestedPropertyInjections(writer, property.Type, processedProperties);
@@ -903,7 +894,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (ShouldGenerateNestedInjections(propertyType))
         {
-            writer.AppendLine("var nestedValues = new Dictionary<string, object?>();");
+            writer.AppendLine("var nestedValues = new global::System.Collections.Generic.Dictionary<string, object?>();");
             
             // Generate code to extract property values from the nested object
             GeneratePropertyValueExtraction(writer, propertyType);
@@ -912,7 +903,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("return new Dictionary<string, object?>();");
+            writer.AppendLine("return new global::System.Collections.Generic.Dictionary<string, object?>();");
         }
 
         writer.Unindent();
@@ -983,7 +974,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
                         }
 
-                        writer.AppendLine("ValueFactory = () => throw new InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\")");
+                        writer.AppendLine("ValueFactory = () => throw new global::System.InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\")");
 
                         writer.Unindent();
                         writer.AppendLine("},");
@@ -1074,7 +1065,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("if (context?.TestDetails?.DataCombination?.ResolvedGenericTypes == null)");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("throw new InvalidOperationException(\"No resolved generic types available for generic test instantiation\");");
+            writer.AppendLine("throw new global::System.InvalidOperationException(\"No resolved generic types available for generic test instantiation\");");
             writer.Unindent();
             writer.AppendLine("}");
             writer.AppendLine();

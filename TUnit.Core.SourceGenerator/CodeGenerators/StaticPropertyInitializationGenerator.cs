@@ -97,7 +97,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("/// <summary>");
         writer.AppendLine("/// Initializes all static properties with data source attributes");
         writer.AppendLine("/// </summary>");
-        writer.AppendLine("public static async Task InitializeAsync()");
+        writer.AppendLine("public static async global::System.Threading.Tasks.Task InitializeAsync()");
         writer.AppendLine("{");
         writer.Indent();
         
@@ -162,10 +162,10 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         
         writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine($"catch (Exception ex)");
+        writer.AppendLine($"catch (global::System.Exception ex)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine($"throw new InvalidOperationException($\"Failed to initialize static property {typeName}.{propertyName}: {{ex.Message}}\", ex);");
+        writer.AppendLine($"throw new global::System.InvalidOperationException($\"Failed to initialize static property {typeName}.{propertyName}: {{ex.Message}}\", ex);");
         writer.Unindent();
         writer.AppendLine("}");
     }
@@ -177,7 +177,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyName}";
         
         writer.AppendLine();
-        writer.AppendLine($"private static async Task<object?> {methodName}()");
+        writer.AppendLine($"private static async global::System.Threading.Tasks.Task<object?> {methodName}()");
         writer.AppendLine("{");
         writer.Indent();
         
