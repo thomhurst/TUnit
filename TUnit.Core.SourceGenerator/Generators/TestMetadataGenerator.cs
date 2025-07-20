@@ -423,20 +423,33 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
         
+        // Check if the attribute has Arguments property set
+        var argumentsProperty = attr.NamedArguments.FirstOrDefault(x => x.Key == "Arguments");
+        var hasArguments = argumentsProperty.Key != null && !argumentsProperty.Value.IsNull;
+        
         // Set the Factory property with a strongly-typed function
         writer.AppendLine("Factory = (dataGeneratorMetadata) =>");
         writer.AppendLine("{");
         writer.Indent();
         
+        // If we have arguments, capture them in local variables
+        if (hasArguments)
+        {
+            writer.AppendLine("// Capture Arguments from the attribute");
+            writer.Append("var arguments = ");
+            WriteTypedConstant(writer, argumentsProperty.Value);
+            writer.AppendLine(";");
+            writer.AppendLine();
+        }
+        
         // Generate the factory implementation
-        GenerateMethodDataSourceFactory(writer, dataSourceMethod, targetType, methodSymbol);
+        GenerateMethodDataSourceFactory(writer, dataSourceMethod, targetType, methodSymbol, attr, hasArguments);
         
         writer.Unindent();
         writer.AppendLine("},");
         
         // Copy over any Arguments property if present
-        var argumentsProperty = attr.NamedArguments.FirstOrDefault(x => x.Key == "Arguments");
-        if (argumentsProperty.Key != null && !argumentsProperty.Value.IsNull)
+        if (hasArguments)
         {
             writer.Append("Arguments = ");
             WriteTypedConstant(writer, argumentsProperty.Value);
@@ -447,7 +460,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
     
-    private static void GenerateMethodDataSourceFactory(CodeWriter writer, IMethodSymbol dataSourceMethod, ITypeSymbol targetType, IMethodSymbol testMethod)
+    private static void GenerateMethodDataSourceFactory(CodeWriter writer, IMethodSymbol dataSourceMethod, ITypeSymbol targetType, IMethodSymbol testMethod, AttributeData attr, bool hasArguments)
     {
         var isStatic = dataSourceMethod.IsStatic;
         var returnType = dataSourceMethod.ReturnType;
@@ -458,10 +471,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
         
+        // Build the method call with arguments if needed
+        string methodCall;
+        if (hasArguments && dataSourceMethod.Parameters.Length > 0)
+        {
+            // Use the captured arguments
+            var argsList = string.Join(", ", dataSourceMethod.Parameters.Select((p, i) => 
+                $"(({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})arguments[{i}])"));
+            methodCall = $"{dataSourceMethod.Name}({argsList})";
+        }
+        else
+        {
+            methodCall = $"{dataSourceMethod.Name}()";
+        }
+        
         // Invoke the data source method
         if (isStatic)
         {
-            writer.AppendLine($"var result = {fullyQualifiedType}.{dataSourceMethod.Name}();");
+            writer.AppendLine($"var result = {fullyQualifiedType}.{methodCall};");
         }
         else
         {
@@ -479,7 +506,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"instance = new {fullyQualifiedType}();");
             writer.Unindent();
             writer.AppendLine("}");
-            writer.AppendLine($"var result = (({fullyQualifiedType})instance).{dataSourceMethod.Name}();");
+            writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
         }
         writer.AppendLine();
         
@@ -647,9 +674,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             case TypedConstantKind.Primitive:
                 if (constant.Type?.SpecialType == SpecialType.System_String)
-                    writer.Append($"\"{constant.Value}\"");
+                {
+                    var stringValue = constant.Value?.ToString() ?? "";
+                    var escapedValue = stringValue
+                        .Replace("\\", "\\\\")
+                        .Replace("\"", "\\\"")
+                        .Replace("\r", "\\r")
+                        .Replace("\n", "\\n")
+                        .Replace("\t", "\\t");
+                    writer.Append($"\"{escapedValue}\"");
+                }
                 else if (constant.Type?.SpecialType == SpecialType.System_Char)
-                    writer.Append($"'{constant.Value}'");
+                {
+                    var charValue = constant.Value?.ToString() ?? "";
+                    var escapedChar = charValue
+                        .Replace("\\", "\\\\")
+                        .Replace("'", "\\'")
+                        .Replace("\r", "\\r")
+                        .Replace("\n", "\\n")
+                        .Replace("\t", "\\t");
+                    writer.Append($"'{escapedChar}'");
+                }
                 else if (constant.Type?.SpecialType == SpecialType.System_Boolean)
                     writer.Append(constant.Value?.ToString()?.ToLowerInvariant() ?? "false");
                 else
@@ -662,7 +707,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 break;
                 
             case TypedConstantKind.Array:
-                writer.Append("new[] { ");
+                var elementType = constant.Type is IArrayTypeSymbol arrayType 
+                    ? arrayType.ElementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                    : "object";
+                writer.Append($"new {elementType}[] {{ ");
                 for (int i = 0; i < constant.Values.Length; i++)
                 {
                     WriteTypedConstant(writer, constant.Values[i]);
