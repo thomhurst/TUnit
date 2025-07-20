@@ -52,8 +52,17 @@ public static class PropertyInjector
         {
             try
             {
-                // Initialize the data source attribute before using it
-                // This allows data sources to perform any necessary setup
+                // First, check if the data source attribute itself has properties with data sources
+                // This enables composition where data sources can use other data sources
+                var dataSourceType = propertyDataSource.DataSource.GetType();
+                if (!IsBuiltInType(dataSourceType))
+                {
+                    // For reflection mode, discover and inject properties dynamically
+                    await InjectDataSourcePropertiesAsync(testContext, propertyDataSource.DataSource, 
+                        testInformation, testSessionId);
+                }
+
+                // Initialize the data source attribute after property injection
                 await ObjectInitializer.InitializeAsync(propertyDataSource.DataSource);
 
                 // Get data rows from the initialized data source attribute
@@ -424,4 +433,113 @@ public static class PropertyInjector
         return isInitOnlyProperty != null && (bool)isInitOnlyProperty.GetValue(setMethod)!;
     }
 
+    /// <summary>
+    /// Checks if a type is a built-in framework type that shouldn't have property injection.
+    /// </summary>
+    private static bool IsBuiltInType(Type type)
+    {
+        // Don't inject into built-in attribute types
+        if (type.Namespace?.StartsWith("TUnit.Core") == true &&
+            (type.Name == "ArgumentsAttribute" || 
+             type.Name == "MethodDataSourceAttribute" ||
+             type.Name == "ClassDataSourceAttribute" ||
+             type.Name.StartsWith("MatrixAttribute")))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Injects properties into a data source attribute instance.
+    /// For AOT mode, this uses pre-generated metadata from the registry.
+    /// For reflection mode, this discovers properties dynamically.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Property injection with fallback to reflection")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Property injection with fallback to reflection")]
+    private static async Task InjectDataSourcePropertiesAsync(
+        TestContext testContext,
+        object dataSourceInstance,
+        MethodMetadata testInformation,
+        string testSessionId)
+    {
+        var type = dataSourceInstance.GetType();
+        
+        // Try to get pre-generated metadata from registry (AOT mode)
+        var injectionData = DataSourcePropertyInjectionRegistry.GetInjectionData(type);
+        var propertyDataSources = DataSourcePropertyInjectionRegistry.GetPropertyDataSources(type);
+        
+        // If no pre-generated data, try reflection (non-AOT mode only)
+        if ((injectionData == null || propertyDataSources == null) && !IsAotMode())
+        {
+            var discovered = DiscoverDataSourcePropertiesViaReflection(type);
+            if (discovered.properties.Length > 0)
+            {
+                propertyDataSources = discovered.properties;
+                injectionData = discovered.injectionData;
+            }
+        }
+        
+        // Inject properties if we have the necessary metadata
+        if (propertyDataSources != null && propertyDataSources.Length > 0 && 
+            injectionData != null && injectionData.Length > 0)
+        {
+            await InjectPropertiesAsync(testContext, dataSourceInstance, 
+                propertyDataSources, injectionData, testInformation, testSessionId);
+        }
+    }
+
+    /// <summary>
+    /// Discovers data source properties via reflection (non-AOT mode only).
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection-only fallback")]
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection-only fallback")]
+    private static (PropertyDataSource[] properties, PropertyInjectionData[] injectionData) 
+        DiscoverDataSourcePropertiesViaReflection([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
+    {
+        var properties = new List<PropertyDataSource>();
+        var injectionData = new List<PropertyInjectionData>();
+        
+        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (property.CanWrite || GetBackingField(property) != null)
+            {
+                var dataSourceAttr = property.GetCustomAttributes()
+                    .FirstOrDefault(attr => attr is IDataSourceAttribute) as IDataSourceAttribute;
+                
+                if (dataSourceAttr != null)
+                {
+                    properties.Add(new PropertyDataSource
+                    {
+                        PropertyName = property.Name,
+                        PropertyType = property.PropertyType,
+                        DataSource = dataSourceAttr
+                    });
+                    
+                    injectionData.Add(new PropertyInjectionData
+                    {
+                        PropertyName = property.Name,
+                        PropertyType = property.PropertyType,
+                        Setter = CreatePropertySetter(property),
+                        ValueFactory = () => throw new InvalidOperationException("Should not be called"),
+                        NestedPropertyInjections = Array.Empty<PropertyInjectionData>(),
+                        NestedPropertyValueFactory = obj => new Dictionary<string, object?>()
+                    });
+                }
+            }
+        }
+        
+        return (properties.ToArray(), injectionData.ToArray());
+    }
+
+    /// <summary>
+    /// Checks if we're running in AOT mode where reflection is limited.
+    /// </summary>
+    private static bool IsAotMode()
+    {
+        // Check if any data source registrations exist - if they do, we're in source generation mode
+        // In reflection mode, the registry will be empty
+        return DataSourcePropertyInjectionRegistry.GetInjectionData(typeof(ArgumentsAttribute)) != null;
+    }
 }
