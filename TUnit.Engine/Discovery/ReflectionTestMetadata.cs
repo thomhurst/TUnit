@@ -87,7 +87,6 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                     ],
                     ClassDataFactories = [
                     ],
-                    PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),
                     MethodDataSourceIndex = -1,
                     MethodLoopIndex = 0,
                     ClassDataSourceIndex = -1,
@@ -581,7 +580,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
         combinations.Add(new PropertyDataCombination
         {
-            PropertyValueFactories = propertyValueFactories
+            // Properties are now resolved directly via PropertyDataSources in PropertyInjector
         });
 
         return combinations;

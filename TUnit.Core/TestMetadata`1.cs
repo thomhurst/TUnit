@@ -115,7 +115,6 @@ public class TestMetadata<
                     Metadata = metadata,
                     Arguments = context.Arguments,
                     ClassArguments = context.ClassArguments,
-                    PropertyValues = context.PropertyValues,
                     BeforeTestHooks = context.BeforeTestHooks,
                     AfterTestHooks = context.AfterTestHooks,
                     Context = context.Context
@@ -145,8 +144,7 @@ public class TestMetadata<
                         Metadata = metadata,
                         Arguments = context.Arguments,
                         ClassArguments = context.ClassArguments,
-                        PropertyValues = context.PropertyValues,
-                        BeforeTestHooks = context.BeforeTestHooks,
+                            BeforeTestHooks = context.BeforeTestHooks,
                         AfterTestHooks = context.AfterTestHooks,
                         Context = context.Context
                     };
