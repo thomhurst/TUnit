@@ -2239,7 +2239,6 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 Metadata = metadata,
                 Arguments = context.Arguments,
                 ClassArguments = context.ClassArguments,
-                PropertyValues = context.PropertyValues,
                 BeforeTestHooks = context.BeforeTestHooks,
                 AfterTestHooks = context.AfterTestHooks,
                 Context = context.Context
@@ -2383,7 +2382,6 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 Metadata = metadata,
                 Arguments = context.Arguments,
                 ClassArguments = context.ClassArguments,
-                PropertyValues = context.PropertyValues,
                 BeforeTestHooks = context.BeforeTestHooks,
                 AfterTestHooks = context.AfterTestHooks,
                 Context = context.Context

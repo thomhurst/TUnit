@@ -71,30 +71,15 @@ public static class PropertyInjector
             }
         }
 
-        // Now inject the resolved values using the existing logic
-        await InjectPropertiesAsync(testContext, instance, propertyValues, injectionData, 5, 0);
+        // Now inject the resolved values
+        await InjectPropertiesWithValuesAsync(testContext, instance, propertyValues, injectionData, 5, 0);
     }
 
     /// <summary>
-    /// Injects property values into a test instance using PropertyInjectionData.
-    /// Works for both regular and init-only properties.
-    /// This overload is for backward compatibility when TestContext is not available.
+    /// Internal method to inject already-resolved property values.
+    /// Used after data sources have been invoked.
     /// </summary>
-    public static Task InjectPropertiesAsync(
-        object instance,
-        Dictionary<string, object?> propertyValues,
-        PropertyInjectionData[] injectionData)
-    {
-        // Call the full version with a null TestContext
-        return InjectPropertiesAsync(null!, instance, propertyValues, injectionData, 5, 0);
-    }
-
-    /// <summary>
-    /// Injects property values into a test instance using PropertyInjectionData.
-    /// Works for both regular and init-only properties.
-    /// Supports recursive injection using pre-compiled nested metadata for AOT compatibility.
-    /// </summary>
-    public static async Task InjectPropertiesAsync(
+    private static async Task InjectPropertiesWithValuesAsync(
         TestContext testContext,
         object? instance,
         Dictionary<string, object?> propertyValues,
@@ -148,7 +133,7 @@ public static class PropertyInjector
                         // Extract nested property values using pre-compiled factory
                         var nestedPropertyValues = injection.NestedPropertyValueFactory(trackedValue);
 
-                        await InjectPropertiesAsync(
+                        await InjectPropertiesWithValuesAsync(
                             testContext,
                             trackedValue,
                             nestedPropertyValues,
@@ -311,7 +296,7 @@ public static class PropertyInjector
                         // For recursive injection, we need to extract property values from the object itself
                         var nestedPropertyValues = new Dictionary<string, object?>();
 
-                        await InjectPropertiesAsync(
+                        await InjectPropertiesWithValuesAsync(
                             testContext,
                             trackedValue,
                             nestedPropertyValues,

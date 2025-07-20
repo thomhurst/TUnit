@@ -45,8 +45,7 @@ public class AsyncUntypedDataSourceGenerator : IAsyncDataSourceGenerator
                     MethodDataSourceIndex = dataSourceIndex,
                     MethodLoopIndex = loopIndex,
                     ClassDataSourceIndex = -1,
-                    ClassLoopIndex = 0,
-                    PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()
+                    ClassLoopIndex = 0
                 };
                 loopIndex++;
             }

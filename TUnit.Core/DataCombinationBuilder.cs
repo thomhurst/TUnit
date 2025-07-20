@@ -48,7 +48,6 @@ public static class DataCombinationBuilder
                         {
                             MethodDataFactories = methodCombination.DataFactories,
                             ClassDataFactories = classCombination.DataFactories,
-                            PropertyValueFactories = propertyCombination.PropertyValueFactories,
                             MethodDataSourceIndex = methodCombination.DataSourceIndex,
                             MethodLoopIndex = methodCombination.LoopIndex,
                             ClassDataSourceIndex = classCombination.DataSourceIndex,
@@ -131,9 +130,9 @@ public sealed class ClassDataCombination
 }
 
 /// <summary>
-/// Represents property data combinations with their value factories.
+/// Represents property data combinations.
 /// </summary>
 public sealed class PropertyDataCombination
 {
-    public Dictionary<string, Func<Task<object?>>> PropertyValueFactories { get; init; } = new();
+    // Properties are now resolved directly via PropertyDataSources in PropertyInjector
 }

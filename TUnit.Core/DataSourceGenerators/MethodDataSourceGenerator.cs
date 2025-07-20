@@ -42,7 +42,6 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
                     MethodLoopIndex = loopIndex,
                     ClassDataSourceIndex = -1,
                     ClassLoopIndex = 0,
-                    PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()
                 };
                 loopIndex++;
             }
@@ -73,7 +72,6 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
                     MethodLoopIndex = loopIndex,
                     ClassDataSourceIndex = -1,
                     ClassLoopIndex = 0,
-                    PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()
                 };
                 loopIndex++;
             }

@@ -44,11 +44,6 @@ public class TestDataCombination
     /// </summary>
     public int ClassLoopIndex { get; init; } = 0;
 
-    /// <summary>
-    /// Factory functions for property values to be injected into the test class instance.
-    /// Key: property name, Value: factory function that creates the property value
-    /// </summary>
-    public Dictionary<string, Func<Task<object?>>> PropertyValueFactories { get; init; } = new();
 
     /// <summary>
     /// Exception that occurred during data generation, if any.

@@ -67,7 +67,6 @@ public class FailureTestBuilder
             writer.AppendLine($"TestMethodMetadata = {GenerateFailureMethodMetadata(context)},");
             writer.AppendLine($"ClassFactory = args => new {context.ClassName}(),");
             writer.AppendLine("MethodInvoker = async (instance, args, cancellationToken) => throw new InvalidOperationException(errorMessage),");
-            writer.AppendLine("PropertyValuesProvider = () => new[] { new System.Collections.Generic.Dictionary<string, object?>() },");
             writer.AppendLine("ClassDataProvider = new TUnit.Core.EmptyDataProvider(),");
             writer.AppendLine("MethodDataProvider = new TUnit.Core.EmptyDataProvider()");
         }

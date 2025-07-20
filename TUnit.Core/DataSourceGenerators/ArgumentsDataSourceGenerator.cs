@@ -18,8 +18,7 @@ public class ArgumentsDataSourceGenerator : IDataSourceGenerator<ArgumentsAttrib
             MethodDataSourceIndex = context.DataSourceIndex,
             MethodLoopIndex = 0, // ArgumentsAttribute only returns one row
             ClassDataSourceIndex = -1,
-            ClassLoopIndex = 0,
-            PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()
+            ClassLoopIndex = 0
         };
     }
 }

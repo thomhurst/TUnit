@@ -178,7 +178,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("MethodDataSourceIndex = combination.MethodDataSourceIndex,");
         writer.AppendLine("ClassLoopIndex = combination.ClassLoopIndex,");
         writer.AppendLine("MethodLoopIndex = combination.MethodLoopIndex,");
-        writer.AppendLine("PropertyValueFactories = combination.PropertyValueFactories,");
         writer.AppendLine("DataGenerationException = combination.DataGenerationException,");
         writer.AppendLine("DisplayName = combination.DisplayName,");
         writer.AppendLine("RepeatIndex = repeatIndex");
@@ -249,7 +248,7 @@ public static class DataCombinationGeneratorEmitter
             }
         }
 
-        writer.AppendLine("propertyCombinations.Add(new TestDataCombination { PropertyValueFactories = propertyValues });");
+        writer.AppendLine("propertyCombinations.Add(new TestDataCombination { });");
     }
 
     private static void EmitDataSourceCombination(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
@@ -375,7 +374,6 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("ClassLoopIndex = 0,");
             writer.AppendLine("MethodLoopIndex = 0,");
 
-            writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()");
             writer.Unindent();
             writer.AppendLine("});");
         }
@@ -548,7 +546,6 @@ public static class DataCombinationGeneratorEmitter
                 writer.AppendLine("MethodLoopIndex = methodLoopCounter++,");
             }
 
-            writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()");
             writer.Unindent();
             writer.AppendLine("});");
 
@@ -587,7 +584,6 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("ClassLoopIndex = 0,");
             writer.AppendLine("MethodLoopIndex = 0,");
 
-            writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()");
             writer.Unindent();
             writer.AppendLine("});");
         }
@@ -642,7 +638,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("MethodDataSourceIndex = 0,");
         writer.AppendLine("ClassLoopIndex = 0,");
         writer.AppendLine("MethodLoopIndex = 0,");
-        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),");
         writer.AppendLine("ResolvedGenericTypes = new Dictionary<string, Type>()");
         writer.Unindent();
         writer.AppendLine("});");
@@ -730,8 +725,7 @@ public static class DataCombinationGeneratorEmitter
                 writer.AppendLine("MethodDataSourceIndex = 0,");
                 writer.AppendLine("ClassLoopIndex = 0,");
                 writer.AppendLine("MethodLoopIndex = 0,");
-                writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),");
-                writer.AppendLine("ResolvedGenericTypes = instanceMethodTypes");
+                        writer.AppendLine("ResolvedGenericTypes = instanceMethodTypes");
                 writer.Unindent();
                 writer.AppendLine("});");
             }
@@ -1307,9 +1301,7 @@ public static class DataCombinationGeneratorEmitter
 
         // Always write both loop indices (0 for empty combination)
         writer.AppendLine("ClassLoopIndex = 0,");
-        writer.AppendLine("MethodLoopIndex = 0,");
-
-        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>()");
+        writer.AppendLine("MethodLoopIndex = 0");
         writer.Unindent();
         writer.AppendLine("});");
     }
@@ -1327,11 +1319,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("var mergedProperties = new Dictionary<string, Func<Task<object?>>>();");
-        writer.AppendLine("foreach (var kvp in classCombination.PropertyValueFactories) mergedProperties[kvp.Key] = kvp.Value;");
-        writer.AppendLine("foreach (var kvp in methodCombination.PropertyValueFactories) mergedProperties[kvp.Key] = kvp.Value;");
-        writer.AppendLine("foreach (var kvp in propertyCombination.PropertyValueFactories) mergedProperties[kvp.Key] = kvp.Value;");
-        writer.AppendLine();
 
         writer.AppendLine("allCombinations.Add(new TestDataCombination");
         writer.AppendLine("{");
@@ -1342,7 +1329,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("ClassLoopIndex = classCombination.ClassLoopIndex,");
         writer.AppendLine("MethodDataSourceIndex = methodCombination.MethodDataSourceIndex,");
         writer.AppendLine("MethodLoopIndex = methodCombination.MethodLoopIndex,");
-        writer.AppendLine("PropertyValueFactories = mergedProperties,");
         writer.AppendLine("DataGenerationException = classCombination.DataGenerationException ?? methodCombination.DataGenerationException ?? propertyCombination.DataGenerationException,");
         writer.AppendLine("DisplayName = classCombination.DisplayName ?? methodCombination.DisplayName ?? propertyCombination.DisplayName");
         writer.Unindent();
@@ -2119,8 +2105,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("MethodDataSourceIndex = combination.MethodDataSourceIndex,");
             writer.AppendLine("ClassLoopIndex = combination.ClassLoopIndex,");
             writer.AppendLine("MethodLoopIndex = combination.MethodLoopIndex,");
-            writer.AppendLine("PropertyValueFactories = combination.PropertyValueFactories,");
-            writer.AppendLine("DataGenerationException = combination.DataGenerationException,");
+                writer.AppendLine("DataGenerationException = combination.DataGenerationException,");
             writer.AppendLine("DisplayName = combination.DisplayName,");
             writer.AppendLine("RepeatIndex = repeatIndex,");
             writer.AppendLine("ResolvedGenericTypes = combination.ResolvedGenericTypes");
@@ -2332,7 +2317,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("MethodDataSourceIndex = 0,");
         writer.AppendLine("ClassLoopIndex = 0,");
         writer.AppendLine("MethodLoopIndex = 0,");
-        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),");
         
         // Add resolved generic type information
         writer.AppendLine("// Store resolved generic type information");
@@ -2382,7 +2366,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("MethodDataSourceIndex = 0,");
         writer.AppendLine("ClassLoopIndex = 0,");
         writer.AppendLine("MethodLoopIndex = 0,");
-        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),");
         
         // Add resolved generic type information
         writer.AppendLine("// Store resolved generic type information");
@@ -2430,7 +2413,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("MethodDataSourceIndex = 0,");
         writer.AppendLine("ClassLoopIndex = 0,");
         writer.AppendLine("MethodLoopIndex = 0,");
-        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),");
         
         // Add resolved generic type information
         writer.AppendLine("ResolvedGenericTypes = resolvedGenericTypes");
@@ -2532,8 +2514,7 @@ public static class DataCombinationGeneratorEmitter
                 writer.AppendLine("MethodDataSourceIndex = 0,");
                 writer.AppendLine("ClassLoopIndex = 0,");
                 writer.AppendLine("MethodLoopIndex = 0,");
-                writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),");
-                
+                        
                 // Store the data source type for runtime generation
                 var attributeFullName = attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                 writer.AppendLine($"// Store typed data source info for runtime generation: {attributeFullName}");
@@ -2574,7 +2555,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("MethodDataSourceIndex = 0,");
         writer.AppendLine("ClassLoopIndex = 0,");
         writer.AppendLine("MethodLoopIndex = 0,");
-        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),");
         
         // Add resolved generic type information
         writer.AppendLine("ResolvedGenericTypes = resolvedGenericTypes");
@@ -2795,7 +2775,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("MethodDataSourceIndex = 0,");
         writer.AppendLine("ClassLoopIndex = 0,");
         writer.AppendLine("MethodLoopIndex = 0,");
-        writer.AppendLine("PropertyValueFactories = new Dictionary<string, Func<Task<object?>>>(),");
         
         // Generate method data factories for Matrix-based generic tests
         writer.AppendLine("// For Matrix-based tests, delegate to MatrixDataSource at runtime");
@@ -2846,7 +2825,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("MethodDataSourceIndex = combination.MethodDataSourceIndex,");
         writer.AppendLine("ClassLoopIndex = combination.ClassLoopIndex,");
         writer.AppendLine("MethodLoopIndex = combination.MethodLoopIndex,");
-        writer.AppendLine("PropertyValueFactories = combination.PropertyValueFactories,");
         writer.AppendLine("DataGenerationException = combination.DataGenerationException,");
         writer.AppendLine("DisplayName = combination.DisplayName,");
         writer.AppendLine("RepeatIndex = repeatIndex,");

@@ -67,14 +67,8 @@ public sealed class TestBuilder : ITestBuilder
         // Create fresh instances from factories
         var classArguments = await CreateArgumentsFromFactoriesAsync(combination.ClassDataFactories);
         var methodArguments = await CreateArgumentsFromFactoriesAsync(combination.MethodDataFactories);
-        var propertyValues = new Dictionary<string, object?>();
-        foreach (var kvp in combination.PropertyValueFactories)
-        {
-            propertyValues[kvp.Key] = await kvp.Value();
-        }
-
         // Track all objects from data sources
-        TrackDataSourceObjects(classArguments, methodArguments, propertyValues);
+        TrackDataSourceObjects(classArguments, methodArguments);
 
         // Generate unique test ID
         var testId = TestIdentifierService.GenerateTestId(metadata, combination);
@@ -104,7 +98,6 @@ public sealed class TestBuilder : ITestBuilder
             DisplayName = context.GetDisplayName(), // Use the display name from context which may have been updated by discovery events
             Arguments = methodArguments,
             ClassArguments = classArguments,
-            PropertyValues = propertyValues,
             BeforeTestHooks = beforeTestHooks,
             AfterTestHooks = afterTestHooks,
             Context = context
@@ -294,11 +287,10 @@ public sealed class TestBuilder : ITestBuilder
         return context;
     }
 
-    private static void TrackDataSourceObjects(object?[] classArguments, object?[] methodArguments, Dictionary<string, object?> propertyValues)
+    private static void TrackDataSourceObjects(object?[] classArguments, object?[] methodArguments)
     {
         ActiveObjectTracker.IncrementUsage(classArguments);
         ActiveObjectTracker.IncrementUsage(methodArguments);
-        ActiveObjectTracker.IncrementUsage(propertyValues.Values);
     }
 
     /// <summary>
