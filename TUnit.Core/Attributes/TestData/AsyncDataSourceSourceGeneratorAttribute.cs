@@ -9,6 +9,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<T> : TestDataAttribute, 
 
     public async IAsyncEnumerable<Func<Task<T>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        await ObjectInitializer.InitializeAsync(this);
+
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
@@ -39,6 +41,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<T1, T2> : TestDataAttrib
 
     public async IAsyncEnumerable<Func<Task<(T1, T2)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        await ObjectInitializer.InitializeAsync(this);
+
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
@@ -69,6 +73,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3> : TestDataAt
 
     public async IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        await ObjectInitializer.InitializeAsync(this);
+
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
@@ -99,6 +105,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4> : TestDa
 
     public async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        await ObjectInitializer.InitializeAsync(this);
+
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
@@ -129,6 +137,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : Te
 
     public async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4, T5)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        await ObjectInitializer.InitializeAsync(this);
+
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
