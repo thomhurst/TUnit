@@ -41,11 +41,14 @@ public class ClassParametersAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (!namedTypeSymbol
+        var hasDataSourceOrClassConstructor = namedTypeSymbol
                 .GetSelfAndBaseTypes()
                 .SelectMany(x => x.GetAttributes())
                 .Concat(namedTypeSymbol.ContainingAssembly.GetAttributes())
-                .Any(x => x.IsDataSourceAttribute(context.Compilation)))
+                .Any(x => x.IsDataSourceAttribute(context.Compilation) || 
+                          x.IsClassConstructorAttribute(context.Compilation));
+                          
+        if (!hasDataSourceOrClassConstructor)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.NoDataSourceProvided, namedTypeSymbol.Locations.FirstOrDefault()));
         }

@@ -43,7 +43,7 @@ public class MethodDataSourceAttribute : TestDataAttribute
 
     public override async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        var methodInfo = (ClassProvidingDataSource ?? TestContext.Current!.ClassContext.ClassType).GetMethod(MethodNameProvidingDataSource)
+        var methodInfo = (ClassProvidingDataSource ?? dataGeneratorMetadata.TestClassType).GetMethod(MethodNameProvidingDataSource)
             ?? throw new InvalidOperationException($"Method '{MethodNameProvidingDataSource}' not found in class '{ClassProvidingDataSource?.Name ?? "Unknown"}'.");
 
         var methodResult = methodInfo.Invoke(null, Arguments);

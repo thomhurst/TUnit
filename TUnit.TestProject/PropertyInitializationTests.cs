@@ -5,7 +5,7 @@ namespace TUnit.TestProject;
 // Test that properties with IDataSourceAttribute are initialized correctly
 public class PropertyInitializationTests
 {
-    [TestData]
+    [InitializablePropertyGenerator]
     public required InitializableProperty? TestProperty { get; set; }
 
     [NestedDataGenerator]
@@ -89,6 +89,16 @@ public class DeepDependency : IAsyncInitializer
     {
         IsInitialized = true;
         return Task.CompletedTask;
+    }
+}
+
+// Custom data generator for InitializableProperty
+public class InitializablePropertyGeneratorAttribute : AsyncDataSourceGeneratorAttribute<InitializableProperty>
+{
+    protected override async IAsyncEnumerable<Func<Task<InitializableProperty>>> GenerateDataSourcesAsync(
+        DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        yield return async () => await Task.FromResult(new InitializableProperty());
     }
 }
 

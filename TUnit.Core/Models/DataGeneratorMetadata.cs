@@ -1,9 +1,11 @@
-﻿using TUnit.Core.Enums;
+﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Enums;
 
 namespace TUnit.Core;
 
 public record DataGeneratorMetadata
 {
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
     public Type TestClassType => TestInformation.Class.Type;
     public required TestBuilderContextAccessor TestBuilderContext { get; init; }
     public required MemberMetadata[] MembersToGenerate { get; init; }

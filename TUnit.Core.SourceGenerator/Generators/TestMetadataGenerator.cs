@@ -348,8 +348,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         // Generate appropriate setter based on whether property is init-only
                         if (property.SetMethod.IsInitOnly)
                         {
-                            // For init-only properties, use UnsafeAccessor (requires .NET 8+)
+                            // For init-only properties, use UnsafeAccessor on .NET 8+, throw on older frameworks
+                            writer.AppendLine("#if NET8_0_OR_GREATER");
                             writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
+                            writer.AppendLine("#else");
+                            writer.AppendLine($"Setter = (instance, value) => throw new NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
+                            writer.AppendLine("#endif");
                         }
                         else
                         {
@@ -1129,19 +1133,23 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             currentType = currentType.BaseType;
         }
 
-        // Generate UnsafeAccessor methods for init-only properties
-        // This will only compile on .NET 8+ where UnsafeAccessor is available
-        foreach (var property in initOnlyPropertiesWithDataSources)
+        // Generate UnsafeAccessor methods for init-only properties (only on .NET 8+)
+        if (initOnlyPropertiesWithDataSources.Any())
         {
-            var backingFieldName = $"<{property.Name}>k__BackingField";
-            var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            
-            writer.AppendLine($"/// <summary>");
-            writer.AppendLine($"/// UnsafeAccessor for init-only property {property.Name} backing field");
-            writer.AppendLine($"/// </summary>");
-            writer.AppendLine($"[global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
-            writer.AppendLine($"private static extern ref {propertyType} Get{property.Name}BackingField({className} instance);");
-            writer.AppendLine();
+            writer.AppendLine("#if NET8_0_OR_GREATER");
+            foreach (var property in initOnlyPropertiesWithDataSources)
+            {
+                var backingFieldName = $"<{property.Name}>k__BackingField";
+                var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                
+                writer.AppendLine($"/// <summary>");
+                writer.AppendLine($"/// UnsafeAccessor for init-only property {property.Name} backing field");
+                writer.AppendLine($"/// </summary>");
+                writer.AppendLine($"[global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
+                writer.AppendLine($"private static extern ref {propertyType} Get{property.Name}BackingField({className} instance);");
+                writer.AppendLine();
+            }
+            writer.AppendLine("#endif");
         }
     }
 

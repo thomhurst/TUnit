@@ -112,6 +112,27 @@ public static class AttributeExtensions
         return attributeData.AttributeClass.AllInterfaces.Contains(dataAttributeInterface, SymbolEqualityComparer.Default);
     }
 
+    public static bool IsClassConstructorAttribute(this AttributeData? attributeData, Compilation compilation)
+    {
+        if (attributeData?.AttributeClass is null)
+        {
+            return false;
+        }
+
+        var baseType = attributeData.AttributeClass;
+        while (baseType != null)
+        {
+            if (baseType.Name == "BaseClassConstructorAttribute" || 
+                baseType.Name == "ClassConstructorAttribute")
+            {
+                return true;
+            }
+            baseType = baseType.BaseType;
+        }
+
+        return false;
+    }
+
     public static string GetHookType(this AttributeData attributeData)
     {
         return attributeData.ConstructorArguments[0].ToCSharpString();

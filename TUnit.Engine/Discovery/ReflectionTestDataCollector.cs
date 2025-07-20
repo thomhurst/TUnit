@@ -294,6 +294,13 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
                 catch (Exception ex)
                 {
+                    // Log the error for debugging
+                    Console.WriteLine($"Error discovering test {type.FullName}.{method.Name}: {ex.Message}");
+                    if (ex.InnerException != null)
+                    {
+                        Console.WriteLine($"  Inner: {ex.InnerException.Message}");
+                    }
+                    
                     // Create a failed test metadata for this specific test
                     var failedTest = CreateFailedTestMetadata(type, method, ex);
                     discoveredTests.Add(failedTest);
@@ -928,12 +935,21 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         // even if ClassProvidingDataSource is set (which happens with generic InstanceMethodDataSource<T>)
         var targetClass = attr is IAccessesInstanceData ? defaultClass : (attr.ClassProvidingDataSource ?? defaultClass);
 
-        // Get all methods with the specified name
-        var methods = targetClass.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
-            .Where(m => m.Name == attr.MethodNameProvidingDataSource)
-            .ToArray();
+        // Get all methods with the specified name, including inherited methods
+        var bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance;
+        var methods = new List<MethodInfo>();
+        var currentType = targetClass;
+        
+        while (currentType != null && currentType != typeof(object))
+        {
+            methods.AddRange(currentType.GetMethods(bindingFlags | BindingFlags.DeclaredOnly)
+                .Where(m => m.Name == attr.MethodNameProvidingDataSource));
+            currentType = currentType.BaseType;
+        }
+        
+        var methodsArray = methods.ToArray();
 
-        if (methods.Length == 0)
+        if (methodsArray.Length == 0)
         {
             throw new InvalidOperationException(
                 $"Method '{attr.MethodNameProvidingDataSource}' specified in MethodDataSource attribute " +
@@ -942,10 +958,10 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         }
 
         MethodInfo? method;
-        if (methods.Length == 1)
+        if (methodsArray.Length == 1)
         {
             // Only one method with this name, use it
-            method = methods[0];
+            method = methodsArray[0];
         }
         else
         {
@@ -1007,7 +1023,20 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         {
             try
             {
-                instance = Activator.CreateInstance(targetClass);
+                // For instance methods, we need to create an instance with proper constructor data
+                // Check if the default class (test class) has class data sources
+                TestDataSource[]? classDataSources = null;
+                if (attr is IAccessesInstanceData && defaultClass != targetClass)
+                {
+                    // For InstanceMethodDataSource, use the test class's data sources
+                    var classDataAttrs = defaultClass.GetCustomAttributes<ClassDataSourceAttribute>().ToArray();
+                    if (classDataAttrs.Length > 0)
+                    {
+                        classDataSources = classDataAttrs.Select(a => CreateClassDataSource(a)).Where(ds => ds != null).ToArray()!;
+                    }
+                }
+                
+                instance = TestInstanceHelper.CreateTestInstanceWithData(targetClass, classDataSources);
             }
             catch (Exception ex)
             {
@@ -1185,7 +1214,8 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         {
             await foreach (var item in asyncEnumerable.WithCancellation(cancellationToken))
             {
-                var dataRows = ProcessGeneratorItem(item);
+                // Use async-aware processing for discovery
+                var dataRows = AsyncDataSourceHelper.ProcessAsyncGeneratorItemsForDiscovery(item);
                 foreach (var dataRow in dataRows)
                 {
                     yield return dataRow;
@@ -1272,7 +1302,8 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         {
             foreach (var item in enumerable)
             {
-                items.AddRange(ProcessGeneratorItem(item));
+                // Use async-aware processing for better handling of async data sources
+                items.AddRange(AsyncDataSourceHelper.ProcessAsyncGeneratorItemsForDiscovery(item));
             }
         }
         
