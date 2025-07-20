@@ -146,11 +146,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate reflection-based field accessors for init-only properties with data source attributes
         GenerateReflectionFieldAccessors(writer, testMethod.TypeSymbol, className);
 
-        writer.AppendLine("public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestDiscovery.TestMetadata>> GetTestsAsync(string testSessionId)");
+        writer.AppendLine("public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)");
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestDiscovery.TestMetadata>();");
+        writer.AppendLine("var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();");
         writer.AppendLine();
 
         // Generate the TestMetadata<T> with DataCombinationGenerator
@@ -178,7 +178,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // For generic types, we need to use object as the type parameter since we can't resolve generics at compile time
         var metadataTypeParameter = testMethod.IsGenericType ? "object" : className;
 
-        writer.AppendLine($"var metadata = new global::TUnit.Core.TestDiscovery.TestMetadata<{metadataTypeParameter}>");
+        writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{metadataTypeParameter}>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -288,13 +288,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
 
         // Empty hooks for now
-        writer.AppendLine("Hooks = new global::TUnit.Core.TestDiscovery.TestHooks");
+        writer.AppendLine("Hooks = new global::TUnit.Core.TestHooks");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("BeforeClass = global::System.Array.Empty<global::TUnit.Core.TestDiscovery.HookMetadata>(),");
-        writer.AppendLine("AfterClass = global::System.Array.Empty<global::TUnit.Core.TestDiscovery.HookMetadata>(),");
-        writer.AppendLine("BeforeTest = global::System.Array.Empty<global::TUnit.Core.TestDiscovery.HookMetadata>(),");
-        writer.AppendLine("AfterTest = global::System.Array.Empty<global::TUnit.Core.TestDiscovery.HookMetadata>()");
+        writer.AppendLine("BeforeClass = global::System.Array.Empty<global::TUnit.Core.HookMetadata>(),");
+        writer.AppendLine("AfterClass = global::System.Array.Empty<global::TUnit.Core.HookMetadata>(),");
+        writer.AppendLine("BeforeTest = global::System.Array.Empty<global::TUnit.Core.HookMetadata>(),");
+        writer.AppendLine("AfterTest = global::System.Array.Empty<global::TUnit.Core.HookMetadata>()");
         writer.Unindent();
         writer.AppendLine("},");
     }
@@ -1445,11 +1445,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (!dependsOnAttributes.Any())
         {
-            writer.AppendLine("Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDiscovery.TestDependency>(),");
+            writer.AppendLine("Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),");
             return;
         }
 
-        writer.AppendLine("Dependencies = new global::TUnit.Core.TestDiscovery.TestDependency[]");
+        writer.AppendLine("Dependencies = new global::TUnit.Core.TestDependency[]");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -1480,7 +1480,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 // DependsOnAttribute(string testName) - dependency on test in same class
                 var testName = arg.Value?.ToString() ?? "";
-                writer.AppendLine($"new global::TUnit.Core.TestDiscovery.TestDependency {{ MethodName = \"{testName}\" }}");
+                writer.AppendLine($"new global::TUnit.Core.TestDependency {{ MethodName = \"{testName}\" }}");
             }
             else if (arg.Type?.TypeKind == TypeKind.Class || arg.Type?.Name == "Type")
             {
@@ -1492,7 +1492,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType
                         ? namedType.Arity
                         : 0;
-                    writer.AppendLine($"new global::TUnit.Core.TestDiscovery.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity} }}");
+                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity} }}");
                 }
             }
         }
@@ -1505,7 +1505,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 // DependsOnAttribute(string testName, Type[] parameterTypes)
                 var testName = firstArg.Value?.ToString() ?? "";
-                writer.Append($"new global::TUnit.Core.TestDiscovery.TestDependency {{ MethodName = \"{testName}\"");
+                writer.Append($"new global::TUnit.Core.TestDependency {{ MethodName = \"{testName}\"");
 
                 // Handle parameter types
                 if (secondArg.Values.Length > 0)
@@ -1539,7 +1539,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType
                         ? namedType.Arity
                         : 0;
-                    writer.AppendLine($"new global::TUnit.Core.TestDiscovery.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\" }}");
+                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\" }}");
                 }
             }
         }
@@ -1555,7 +1555,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType
                     ? namedType.Arity
                     : 0;
-                writer.Append($"new global::TUnit.Core.TestDiscovery.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\"");
+                writer.Append($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\"");
 
                 // Handle parameter types
                 var paramTypesArg = constructorArgs[2];
@@ -1829,7 +1829,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateGenericTypeInfo(CodeWriter writer, INamedTypeSymbol typeSymbol)
     {
-        writer.AppendLine("GenericTypeInfo = new global::TUnit.Core.TestDiscovery.GenericTypeInfo");
+        writer.AppendLine("GenericTypeInfo = new global::TUnit.Core.GenericTypeInfo");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -1845,7 +1845,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
 
         // Generate constraints
-        writer.AppendLine("Constraints = new global::TUnit.Core.TestDiscovery.GenericParameterConstraints[]");
+        writer.AppendLine("Constraints = new global::TUnit.Core.GenericParameterConstraints[]");
         writer.AppendLine("{");
         writer.Indent();
         foreach (var typeParam in typeSymbol.TypeParameters)
@@ -1861,7 +1861,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateGenericMethodInfo(CodeWriter writer, IMethodSymbol methodSymbol)
     {
-        writer.AppendLine("GenericMethodInfo = new global::TUnit.Core.TestDiscovery.GenericMethodInfo");
+        writer.AppendLine("GenericMethodInfo = new global::TUnit.Core.GenericMethodInfo");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -1877,7 +1877,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
 
         // Generate constraints
-        writer.AppendLine("Constraints = new global::TUnit.Core.TestDiscovery.GenericParameterConstraints[]");
+        writer.AppendLine("Constraints = new global::TUnit.Core.GenericParameterConstraints[]");
         writer.AppendLine("{");
         writer.Indent();
         foreach (var typeParam in methodSymbol.TypeParameters)
@@ -1902,7 +1902,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateGenericParameterConstraints(CodeWriter writer, ITypeParameterSymbol typeParam)
     {
-        writer.AppendLine("new global::TUnit.Core.TestDiscovery.GenericParameterConstraints");
+        writer.AppendLine("new global::TUnit.Core.GenericParameterConstraints");
         writer.AppendLine("{");
         writer.Indent();
 
