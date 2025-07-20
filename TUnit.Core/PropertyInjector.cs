@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.Enums;
 using TUnit.Core.ReferenceTracking;
 
 namespace TUnit.Core;
@@ -12,6 +13,67 @@ public static class PropertyInjector
 {
     private static readonly BindingFlags BackingFieldFlags =
         BindingFlags.Instance | BindingFlags.NonPublic;
+
+    /// <summary>
+    /// Injects property values into a test instance by resolving data sources.
+    /// Works for both regular and init-only properties.
+    /// </summary>
+    public static async Task InjectPropertiesAsync(
+        TestContext testContext,
+        object instance,
+        PropertyDataSource[] propertyDataSources,
+        PropertyInjectionData[] injectionData,
+        MethodMetadata testInformation,
+        string testSessionId)
+    {
+        if (instance == null)
+        {
+            throw new ArgumentNullException(nameof(instance));
+        }
+
+        // Create DataGeneratorMetadata for property data source resolution
+        var dataGeneratorMetadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = new TestBuilderContextAccessor(TestBuilderContext.Current ?? new TestBuilderContext()),
+            MembersToGenerate = Array.Empty<MemberMetadata>(), // Properties don't need member generation
+            TestInformation = testInformation,
+            Type = DataGeneratorType.Property,
+            TestSessionId = testSessionId,
+            TestClassInstance = instance,
+            ClassInstanceArguments = testContext.TestDetails.TestClassArguments
+        };
+
+        // Create a dictionary to hold resolved property values
+        var propertyValues = new Dictionary<string, object?>();
+
+        // Resolve each property data source
+        foreach (var propertyDataSource in propertyDataSources)
+        {
+            try
+            {
+                // Get data rows from the data source attribute
+                var dataRows = propertyDataSource.DataSource.GetDataRowsAsync(dataGeneratorMetadata);
+                
+                await foreach (var factory in dataRows)
+                {
+                    // Get the first value - properties only support single values
+                    var args = await factory();
+                    var value = args?.FirstOrDefault();
+                    
+                    propertyValues[propertyDataSource.PropertyName] = value;
+                    break; // Only take the first value for properties
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to resolve data source for property '{propertyDataSource.PropertyName}': {ex.Message}", ex);
+            }
+        }
+
+        // Now inject the resolved values using the existing logic
+        await InjectPropertiesAsync(testContext, instance, propertyValues, injectionData, 5, 0);
+    }
 
     /// <summary>
     /// Injects property values into a test instance using PropertyInjectionData.

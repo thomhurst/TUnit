@@ -50,8 +50,10 @@ internal class SingleTestExecutor : ISingleTestExecutor
         await PropertyInjector.InjectPropertiesAsync(
             test.Context,
             test.Context.TestDetails.ClassInstance!,
-            test.Context.TestDetails.TestClassInjectedPropertyArguments as Dictionary<string, object?> ?? new Dictionary<string, object?>(test.Context.TestDetails.TestClassInjectedPropertyArguments),
-            test.Metadata.PropertyInjections);
+            test.Metadata.PropertyDataSources,
+            test.Metadata.PropertyInjections,
+            test.Metadata.MethodMetadata,
+            test.Context.TestDetails.TestId);
 
         // Initialize all eligible objects before test starts
         await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);

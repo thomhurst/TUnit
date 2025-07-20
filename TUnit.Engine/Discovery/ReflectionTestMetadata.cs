@@ -154,9 +154,12 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
             // Apply property values using unified PropertyInjector
             await PropertyInjector.InjectPropertiesAsync(
+                context.Context,
                 instance,
-                context.PropertyValues,
-                metadata.PropertyInjections);
+                metadata.PropertyDataSources,
+                metadata.PropertyInjections,
+                metadata.MethodMetadata,
+                context.Context.TestDetails.TestId);
 
             return instance;
         };
