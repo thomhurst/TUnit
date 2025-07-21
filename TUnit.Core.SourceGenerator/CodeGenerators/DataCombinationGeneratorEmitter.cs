@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
@@ -1748,8 +1749,12 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine();
         
         // Check for various data source types that can provide type information
-        var argumentsAttributes = methodDataSources.Where(attr => 
+        // Include both method-level AND class-level Arguments attributes for generic type inference
+        var methodArgumentsAttributes = methodDataSources.Where(attr => 
             attr.AttributeClass?.Name == "ArgumentsAttribute").ToArray();
+        var classArgumentsAttributes = classDataSources.Where(attr => 
+            attr.AttributeClass?.Name == "ArgumentsAttribute").ToArray();
+        var argumentsAttributes = methodArgumentsAttributes;
         
         var typedAsyncDataSources = methodDataSources.Where(attr =>
             attr.AttributeClass != null && 
@@ -1772,9 +1777,9 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine();
             
             // Handle Arguments attributes
-            if (argumentsAttributes.Any())
+            if (argumentsAttributes.Any() || classArgumentsAttributes.Any())
             {
-                EmitArgumentsBasedGenericResolution(writer, methodSymbol, typeSymbol, argumentsAttributes, testMethodMetadata);
+                EmitArgumentsBasedGenericResolution(writer, methodSymbol, typeSymbol, methodArgumentsAttributes, classArgumentsAttributes, testMethodMetadata);
             }
             
             // Handle typed data sources (both async and sync inherit from AsyncDataSourceGeneratorAttribute)
@@ -1835,65 +1840,161 @@ public static class DataCombinationGeneratorEmitter
         CodeWriter writer,
         IMethodSymbol methodSymbol,
         INamedTypeSymbol typeSymbol,
-        AttributeData[] argumentsAttributes,
+        AttributeData[] methodArgumentsAttributes,
+        AttributeData[] classArgumentsAttributes,
         TestMethodMetadata? testMethodMetadata)
     {
-        
-        foreach (var attr in argumentsAttributes)
+        // Generate combinations from class arguments first (for generic type parameters)
+        if (classArgumentsAttributes.Length > 0)
         {
-            if (attr.ConstructorArguments.Length == 0)
+            foreach (var classAttr in classArgumentsAttributes)
             {
-                continue;
-            }
-            
-            writer.AppendLine("{");
-            writer.Indent();
-            
-            // Processing Arguments attribute with {attr.ConstructorArguments.Length} constructor arguments
-            
-            // Generate the argument values
-            writer.AppendLine("var argumentValues = new object?[]");
-            writer.AppendLine("{");
-            writer.Indent();
-            
-            // For Arguments attribute, the constructor arguments are in a params array
-            // So we need to extract the individual values from the array
-            if (attr.ConstructorArguments.Length > 0)
-            {
-                var firstArg = attr.ConstructorArguments[0];
-                if (firstArg.Kind == TypedConstantKind.Array)
+                if (classAttr.ConstructorArguments.Length == 0)
                 {
-                    // Extract individual values from the array
-                    foreach (var value in firstArg.Values)
-                    {
-                        var formattedValue = FormatConstantValue(value);
-                        writer.AppendLine($"{formattedValue},");
-                    }
+                    continue;
                 }
-                else
+                
+                // For each class argument combination, generate method argument combinations
+                EmitClassMethodArgumentCombination(writer, methodSymbol, typeSymbol, classAttr, methodArgumentsAttributes, testMethodMetadata);
+            }
+        }
+        else if (methodArgumentsAttributes.Length > 0)
+        {
+            // No class arguments, just process method arguments
+            foreach (var methodAttr in methodArgumentsAttributes)
+            {
+                if (methodAttr.ConstructorArguments.Length == 0)
                 {
-                    // Single value
-                    var formattedValue = FormatConstantValue(firstArg);
+                    continue;
+                }
+                
+                EmitMethodOnlyArgumentCombination(writer, methodSymbol, typeSymbol, methodAttr, testMethodMetadata);
+            }
+        }
+    }
+    
+    private static void EmitClassMethodArgumentCombination(
+        CodeWriter writer,
+        IMethodSymbol methodSymbol,
+        INamedTypeSymbol typeSymbol,
+        AttributeData classArguments,
+        AttributeData[] methodArgumentsAttributes,
+        TestMethodMetadata? testMethodMetadata)
+    {
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Generate class argument values for constructor/type inference
+        writer.AppendLine("var classArgumentValues = new object?[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        if (classArguments.ConstructorArguments.Length > 0)
+        {
+            var firstArg = classArguments.ConstructorArguments[0];
+            if (firstArg.Kind == TypedConstantKind.Array)
+            {
+                foreach (var value in firstArg.Values)
+                {
+                    var formattedValue = FormatConstantValue(value);
                     writer.AppendLine($"{formattedValue},");
                 }
             }
-            
-            writer.Unindent();
-            writer.AppendLine("};");
+            else
+            {
+                var formattedValue = FormatConstantValue(firstArg);
+                writer.AppendLine($"{formattedValue},");
+            }
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("};");
+        writer.AppendLine();
+        
+        // Infer types from class arguments for generic type parameters
+        writer.AppendLine("var classInferredTypes = new System.Type[classArgumentValues.Length];");
+        writer.AppendLine("for (int i = 0; i < classArgumentValues.Length; i++)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("classInferredTypes[i] = classArgumentValues[i]?.GetType() ?? typeof(object);");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        
+        // Generate method argument combinations for this class
+        if (methodArgumentsAttributes.Length > 0)
+        {
+            foreach (var methodAttr in methodArgumentsAttributes)
+            {
+                if (methodAttr.ConstructorArguments.Length == 0)
+                {
+                    continue;
+                }
+                
+                writer.AppendLine("{");
+                writer.Indent();
+                
+                // Generate method argument values
+                writer.AppendLine("var methodArgumentValues = new object?[]");
+                writer.AppendLine("{");
+                writer.Indent();
+                
+                if (methodAttr.ConstructorArguments.Length > 0)
+                {
+                    var firstArg = methodAttr.ConstructorArguments[0];
+                    if (firstArg.Kind == TypedConstantKind.Array)
+                    {
+                        foreach (var value in firstArg.Values)
+                        {
+                            var formattedValue = FormatConstantValue(value);
+                            writer.AppendLine($"{formattedValue},");
+                        }
+                    }
+                    else
+                    {
+                        var formattedValue = FormatConstantValue(firstArg);
+                        writer.AppendLine($"{formattedValue},");
+                    }
+                }
+                
+                writer.Unindent();
+                writer.AppendLine("};");
+                writer.AppendLine();
+                
+                // Infer types from method arguments for generic method parameters
+                writer.AppendLine("var methodInferredTypes = new System.Type[methodArgumentValues.Length];");
+                writer.AppendLine("for (int i = 0; i < methodArgumentValues.Length; i++)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("methodInferredTypes[i] = methodArgumentValues[i]?.GetType() ?? typeof(object);");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine();
+                
+                // Generate type parameter mapping using class arguments for class types and method arguments for method types
+                EmitCombinedTypeParameterMapping(writer, methodSymbol, typeSymbol, testMethodMetadata);
+                
+                if (testMethodMetadata?.IsGenericType == true)
+                {
+                    EmitGenericTypeInstantiationToList(writer, methodSymbol, typeSymbol, testMethodMetadata);
+                }
+                else if (testMethodMetadata?.IsGenericMethod == true)
+                {
+                    EmitGenericMethodInstantiationToList(writer, methodSymbol, typeSymbol, testMethodMetadata);
+                }
+                
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
+        }
+        else
+        {
+            // No method arguments, just generate one combination with class arguments
+            writer.AppendLine("var methodArgumentValues = new object?[0];");
+            writer.AppendLine("var methodInferredTypes = new System.Type[0];");
             writer.AppendLine();
             
-            // Infer types from argument values
-            writer.AppendLine("var inferredTypes = new System.Type[argumentValues.Length];");
-            writer.AppendLine("for (int i = 0; i < argumentValues.Length; i++)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("inferredTypes[i] = argumentValues[i]?.GetType() ?? typeof(object);");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine();
-            
-            // Generate type parameter mapping
-            EmitTypeParameterMapping(writer, methodSymbol, typeSymbol, testMethodMetadata);
+            EmitCombinedTypeParameterMapping(writer, methodSymbol, typeSymbol, testMethodMetadata);
             
             if (testMethodMetadata?.IsGenericType == true)
             {
@@ -1903,13 +2004,179 @@ public static class DataCombinationGeneratorEmitter
             {
                 EmitGenericMethodInstantiationToList(writer, methodSymbol, typeSymbol, testMethodMetadata);
             }
-            
-            writer.Unindent();
-            writer.AppendLine("}");
         }
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+    }
+    
+    private static void EmitMethodOnlyArgumentCombination(
+        CodeWriter writer,
+        IMethodSymbol methodSymbol,
+        INamedTypeSymbol typeSymbol,
+        AttributeData methodArguments,
+        TestMethodMetadata? testMethodMetadata)
+    {
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // No class arguments available
+        writer.AppendLine("var classArgumentValues = new object?[0];");
+        writer.AppendLine("var classInferredTypes = new System.Type[0];");
+        writer.AppendLine();
+        
+        // Generate method argument values
+        writer.AppendLine("var methodArgumentValues = new object?[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        if (methodArguments.ConstructorArguments.Length > 0)
+        {
+            var firstArg = methodArguments.ConstructorArguments[0];
+            if (firstArg.Kind == TypedConstantKind.Array)
+            {
+                foreach (var value in firstArg.Values)
+                {
+                    var formattedValue = FormatConstantValue(value);
+                    writer.AppendLine($"{formattedValue},");
+                }
+            }
+            else
+            {
+                var formattedValue = FormatConstantValue(firstArg);
+                writer.AppendLine($"{formattedValue},");
+            }
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("};");
+        writer.AppendLine();
+        
+        // Infer types from method arguments
+        writer.AppendLine("var methodInferredTypes = new System.Type[methodArgumentValues.Length];");
+        writer.AppendLine("for (int i = 0; i < methodArgumentValues.Length; i++)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("methodInferredTypes[i] = methodArgumentValues[i]?.GetType() ?? typeof(object);");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        
+        // Generate type parameter mapping
+        EmitCombinedTypeParameterMapping(writer, methodSymbol, typeSymbol, testMethodMetadata);
+        
+        if (testMethodMetadata?.IsGenericType == true)
+        {
+            EmitGenericTypeInstantiationToList(writer, methodSymbol, typeSymbol, testMethodMetadata);
+        }
+        else if (testMethodMetadata?.IsGenericMethod == true)
+        {
+            EmitGenericMethodInstantiationToList(writer, methodSymbol, typeSymbol, testMethodMetadata);
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("}");
     }
 
-    private static void EmitTypeParameterMapping(
+    /// <summary>
+    /// Analyzes method parameters to determine which class type parameter a method parameter corresponds to.
+    /// This enables smart inference where method arguments can infer class-level generic type parameters.
+    /// AOT-compatible: All analysis happens at compile time using Roslyn symbols.
+    /// </summary>
+    /// <param name="methodSymbol">The method being analyzed</param>
+    /// <param name="typeSymbol">The containing generic class</param>
+    /// <param name="classTypeParameterName">The class type parameter name to find (e.g., "T")</param>
+    /// <returns>The zero-based method parameter index that uses the class type parameter, or null if none</returns>
+    private static int? AnalyzeMethodParameterToClassTypeMapping(
+        IMethodSymbol methodSymbol,
+        INamedTypeSymbol typeSymbol,
+        string classTypeParameterName)
+    {
+        // Find the class type parameter symbol
+        var classTypeParameter = typeSymbol.TypeParameters.FirstOrDefault(tp => tp.Name == classTypeParameterName);
+        if (classTypeParameter == null)
+        {
+            return null;
+        }
+        
+        // Analyze each method parameter to see if it uses the class type parameter
+        for (int i = 0; i < methodSymbol.Parameters.Length; i++)
+        {
+            var methodParam = methodSymbol.Parameters[i];
+            if (UsesClassTypeParameter(methodParam.Type, classTypeParameter))
+            {
+                return i; // Return the parameter index for smart inference
+            }
+        }
+        
+        return null; // No method parameter uses this class type parameter
+    }
+    
+    /// <summary>
+    /// Determines if a type references a specific class type parameter.
+    /// Handles direct references, generic collections, arrays, etc.
+    /// AOT-compatible: Pure compile-time analysis using Roslyn symbols.
+    /// </summary>
+    /// <param name="type">The type to analyze</param>
+    /// <param name="classTypeParameter">The class type parameter to look for</param>
+    /// <returns>True if the type uses the class type parameter</returns>
+    private static bool UsesClassTypeParameter(ITypeSymbol type, ITypeParameterSymbol classTypeParameter)
+    {
+        // Direct match: method parameter type is exactly the class type parameter
+        if (SymbolEqualityComparer.Default.Equals(type, classTypeParameter))
+        {
+            return true;
+        }
+        
+        // Generic type: check type arguments (e.g., List<T>, Dictionary<T, string>)
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            foreach (var typeArg in namedType.TypeArguments)
+            {
+                if (UsesClassTypeParameter(typeArg, classTypeParameter))
+                {
+                    return true;
+                }
+            }
+        }
+        
+        // Array type: check element type (e.g., T[], T[,])
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return UsesClassTypeParameter(arrayType.ElementType, classTypeParameter);
+        }
+        
+        // Pointer type: check pointed-to type (e.g., T*)
+        if (type is IPointerTypeSymbol pointerType)
+        {
+            return UsesClassTypeParameter(pointerType.PointedAtType, classTypeParameter);
+        }
+        
+        // Function pointer type: check signature types
+        if (type is IFunctionPointerTypeSymbol functionPointerType)
+        {
+            var signature = functionPointerType.Signature;
+            
+            // Check return type
+            if (UsesClassTypeParameter(signature.ReturnType, classTypeParameter))
+            {
+                return true;
+            }
+            
+            // Check parameter types
+            foreach (var param in signature.Parameters)
+            {
+                if (UsesClassTypeParameter(param.Type, classTypeParameter))
+                {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    private static void EmitCombinedTypeParameterMapping(
         CodeWriter writer,
         IMethodSymbol methodSymbol,
         INamedTypeSymbol typeSymbol,
@@ -1920,23 +2187,57 @@ public static class DataCombinationGeneratorEmitter
         
         if (testMethodMetadata?.IsGenericType == true)
         {
-            // Handle generic class types
+            // Handle generic class types - smart inference from class or method arguments
             var genericParameters = typeSymbol.TypeParameters;
+            writer.AppendLine("// Class type parameters: smart inference from class arguments or method arguments when class parameters match method parameters");
+            
             for (int i = 0; i < genericParameters.Length; i++)
             {
-                var paramName = genericParameters[i].Name;
-                writer.AppendLine($"if (inferredTypes.Length > {i})");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine($"resolvedGenericTypes[\"{paramName}\"] = inferredTypes[{i}];");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine("else");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine($"resolvedGenericTypes[\"{paramName}\"] = typeof(object); // Fallback");
-                writer.Unindent();
-                writer.AppendLine("}");
+                var classParamName = genericParameters[i].Name;
+                
+                // Analyze method parameters to see if any use this class type parameter
+                var methodParamMapping = AnalyzeMethodParameterToClassTypeMapping(methodSymbol, typeSymbol, classParamName);
+                
+                if (methodParamMapping.HasValue)
+                {
+                    // Smart inference: use method argument when it maps to class type parameter
+                    writer.AppendLine($"if (classInferredTypes.Length > {i})");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"// Direct inference from class arguments");
+                    writer.AppendLine($"resolvedGenericTypes[\"{classParamName}\"] = classInferredTypes[{i}];");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                    writer.AppendLine($"else if (methodInferredTypes.Length > {methodParamMapping.Value})");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"// Smart inference from method argument at position {methodParamMapping.Value} (method parameter uses class type {classParamName})");
+                    writer.AppendLine($"resolvedGenericTypes[\"{classParamName}\"] = methodInferredTypes[{methodParamMapping.Value}];");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                    writer.AppendLine("else");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"resolvedGenericTypes[\"{classParamName}\"] = typeof(object); // Fallback when no inference available");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                }
+                else
+                {
+                    // Original logic: only class arguments can infer this type parameter
+                    writer.AppendLine($"if (classInferredTypes.Length > {i})");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"resolvedGenericTypes[\"{classParamName}\"] = classInferredTypes[{i}];");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                    writer.AppendLine("else");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"resolvedGenericTypes[\"{classParamName}\"] = typeof(object); // Fallback");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                }
             }
             
             // Validate constraints for class type parameters
@@ -1952,15 +2253,16 @@ public static class DataCombinationGeneratorEmitter
         
         if (testMethodMetadata?.IsGenericMethod == true)
         {
-            // Handle generic method type parameters
+            // Handle generic method type parameters - these should be inferred from method arguments
             var methodParameters = methodSymbol.TypeParameters;
+            writer.AppendLine("// Method type parameters are inferred from method arguments");
             for (int i = 0; i < methodParameters.Length; i++)
             {
                 var paramName = methodParameters[i].Name;
-                writer.AppendLine($"if (inferredTypes.Length > {i})");
+                writer.AppendLine($"if (methodInferredTypes.Length > {i})");
                 writer.AppendLine("{");
                 writer.Indent();
-                writer.AppendLine($"resolvedGenericTypes[\"{paramName}\"] = inferredTypes[{i}];");
+                writer.AppendLine($"resolvedGenericTypes[\"{paramName}\"] = methodInferredTypes[{i}];");
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine("else");
@@ -2046,8 +2348,9 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("{");
         writer.Indent();
         
-        writer.AppendLine("MethodDataFactories = argumentValues.Select((arg, index) => new Func<Task<object?>>(async () => arg)).ToArray(),");
-        writer.AppendLine("DisplayName = $\"TestWithValue({TUnit.Core.Helpers.ArgumentFormatter.FormatArguments(argumentValues)})\",");
+        writer.AppendLine("MethodDataFactories = methodArgumentValues.Select((arg, index) => new Func<Task<object?>>(async () => arg)).ToArray(),");
+        writer.AppendLine("ClassDataFactories = classArgumentValues.Select((arg, index) => new Func<Task<object?>>(async () => arg)).ToArray(),");
+        writer.AppendLine("DisplayName = $\"TestWithValue({TUnit.Core.Helpers.ArgumentFormatter.FormatArguments(methodArgumentValues)})\",");
         writer.AppendLine("ClassDataSourceIndex = 0,");
         writer.AppendLine("MethodDataSourceIndex = 0,");
         writer.AppendLine("ClassLoopIndex = 0,");
@@ -2229,8 +2532,9 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("{");
         writer.Indent();
         
-        writer.AppendLine("MethodDataFactories = argumentValues.Select((arg, index) => new Func<Task<object?>>(async () => arg)).ToArray(),");
-        writer.AppendLine("DisplayName = $\"GenericMethod<{string.Join(\", \", resolvedGenericTypes.Values.Select(t => t.Name))}>({TUnit.Core.Helpers.ArgumentFormatter.FormatArguments(argumentValues)})\",");
+        writer.AppendLine("MethodDataFactories = methodArgumentValues.Select((arg, index) => new Func<Task<object?>>(async () => arg)).ToArray(),");
+        writer.AppendLine("ClassDataFactories = classArgumentValues.Select((arg, index) => new Func<Task<object?>>(async () => arg)).ToArray(),");
+        writer.AppendLine("DisplayName = $\"GenericMethod<{string.Join(\", \", resolvedGenericTypes.Values.Select(t => t.Name))}>({TUnit.Core.Helpers.ArgumentFormatter.FormatArguments(methodArgumentValues)})\",");
         writer.AppendLine("ClassDataSourceIndex = 0,");
         writer.AppendLine("MethodDataSourceIndex = 0,");
         writer.AppendLine("ClassLoopIndex = 0,");

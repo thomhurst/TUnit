@@ -16,7 +16,15 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         ImmutableArray.Create(
             Rules.GenericTestMissingExplicitInstantiation,
             Rules.DynamicDataSourceNotAotCompatible,
-            Rules.OpenGenericTypeNotAotCompatible
+            Rules.OpenGenericTypeNotAotCompatible,
+            Rules.ExpressionCompileNotAotCompatible,
+            Rules.ReflectionWithoutDynamicallyAccessedMembers,
+            Rules.TypeGetTypeNotAotCompatible,
+            Rules.MakeGenericTypeNotAotCompatible,
+            Rules.ActivatorCreateInstanceWithoutAttribution,
+            Rules.DynamicCodeGenerationNotAotCompatible,
+            Rules.ReflectionEmitNotAotCompatible,
+            Rules.AssemblyLoadFromNotAotCompatible
         );
 
     protected override void InitializeInternal(AnalysisContext context)
@@ -24,6 +32,8 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(AnalyzeGenericTestMethods, SyntaxKind.MethodDeclaration);
         context.RegisterSyntaxNodeAction(AnalyzeGenericTestClasses, SyntaxKind.ClassDeclaration);
         context.RegisterSyntaxNodeAction(AnalyzeDataSourceAttributes, SyntaxKind.Attribute);
+        context.RegisterSyntaxNodeAction(AnalyzeInvocationExpression, SyntaxKind.InvocationExpression);
+        context.RegisterSyntaxNodeAction(AnalyzeMemberAccessExpression, SyntaxKind.SimpleMemberAccessExpression);
     }
 
     private static void AnalyzeGenericTestMethods(SyntaxNodeAnalysisContext context)
@@ -356,6 +366,277 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
 
         // If we can't determine the pattern, assume it's dynamic
         return true;
+    }
+
+    private static void AnalyzeInvocationExpression(SyntaxNodeAnalysisContext context)
+    {
+        var invocation = (InvocationExpressionSyntax)context.Node;
+        var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation);
+
+        if (symbolInfo.Symbol is not IMethodSymbol method)
+        {
+            return;
+        }
+
+        var containingTypeName = method.ContainingType?.ToDisplayString();
+        var methodName = method.Name;
+
+        // Check for Expression.Compile()
+        if (IsExpressionCompile(containingTypeName, methodName))
+        {
+            var diagnostic = Diagnostic.Create(
+                Rules.ExpressionCompileNotAotCompatible,
+                invocation.GetLocation());
+            
+            context.ReportDiagnostic(diagnostic);
+        }
+
+        // Check for Type.GetType()
+        else if (containingTypeName == "System.Type" && methodName == "GetType" && method.Parameters.Length > 0)
+        {
+            if (invocation.ArgumentList.Arguments.Count > 0)
+            {
+                var firstArg = invocation.ArgumentList.Arguments[0];
+                if (firstArg.Expression is LiteralExpressionSyntax literal && 
+                    literal.Token.IsKind(SyntaxKind.StringLiteralToken))
+                {
+                    var diagnostic = Diagnostic.Create(
+                        Rules.TypeGetTypeNotAotCompatible,
+                        invocation.GetLocation(),
+                        literal.Token.ValueText);
+                    
+                    context.ReportDiagnostic(diagnostic);
+                }
+            }
+        }
+
+        // Check for MakeGenericType() and MakeArrayType()
+        else if (containingTypeName == "System.Type" && 
+                (methodName == "MakeGenericType" || methodName == "MakeArrayType"))
+        {
+            var diagnostic = Diagnostic.Create(
+                Rules.MakeGenericTypeNotAotCompatible,
+                invocation.GetLocation(),
+                methodName);
+            
+            context.ReportDiagnostic(diagnostic);
+        }
+
+        // Check for Activator.CreateInstance
+        else if (containingTypeName == "System.Activator" && methodName == "CreateInstance")
+        {
+            string typeToCheck = string.Empty;
+            
+            if (method.TypeParameters.Length > 0)
+            {
+                typeToCheck = method.TypeParameters[0].Name;
+            }
+            else if (invocation.ArgumentList.Arguments.Count > 0 && 
+                     invocation.ArgumentList.Arguments[0].Expression is TypeOfExpressionSyntax typeOfExpr)
+            {
+                typeToCheck = GetTypeFromTypeOfExpression(context, typeOfExpr);
+            }
+
+            if (!string.IsNullOrEmpty(typeToCheck))
+            {
+                var diagnostic = Diagnostic.Create(
+                    Rules.ActivatorCreateInstanceWithoutAttribution,
+                    invocation.GetLocation(),
+                    typeToCheck);
+                
+                context.ReportDiagnostic(diagnostic);
+            }
+        }
+
+        // Check for dynamic code generation methods
+        else if (IsDynamicCodeGeneration(containingTypeName, methodName))
+        {
+            var diagnostic = Diagnostic.Create(
+                Rules.DynamicCodeGenerationNotAotCompatible,
+                invocation.GetLocation(),
+                $"{containingTypeName}.{methodName}");
+            
+            context.ReportDiagnostic(diagnostic);
+        }
+
+        // Check for Reflection.Emit APIs
+        else if (IsReflectionEmit(containingTypeName, methodName))
+        {
+            var diagnostic = Diagnostic.Create(
+                Rules.ReflectionEmitNotAotCompatible,
+                invocation.GetLocation(),
+                $"{containingTypeName}.{methodName}");
+            
+            context.ReportDiagnostic(diagnostic);
+        }
+
+        // Check for dynamic assembly loading
+        else if (IsDynamicAssemblyLoading(containingTypeName, methodName))
+        {
+            var diagnostic = Diagnostic.Create(
+                Rules.AssemblyLoadFromNotAotCompatible,
+                invocation.GetLocation(),
+                $"{containingTypeName}.{methodName}");
+            
+            context.ReportDiagnostic(diagnostic);
+        }
+
+        // Check for reflection methods without proper attribution
+        CheckReflectionMethod(context, method, invocation);
+    }
+
+    private static void AnalyzeMemberAccessExpression(SyntaxNodeAnalysisContext context)
+    {
+        var memberAccess = (MemberAccessExpressionSyntax)context.Node;
+        var symbolInfo = context.SemanticModel.GetSymbolInfo(memberAccess);
+
+        if (symbolInfo.Symbol is IMethodSymbol method)
+        {
+            CheckReflectionMethod(context, method, memberAccess);
+        }
+    }
+
+    private static bool IsExpressionCompile(string? containingTypeName, string methodName)
+    {
+        if (string.IsNullOrEmpty(containingTypeName) || methodName != "Compile")
+        {
+            return false;
+        }
+
+        return containingTypeName?.StartsWith("System.Linq.Expressions.Expression") == true ||
+               containingTypeName == "System.Linq.Expressions.LambdaExpression";
+    }
+
+    private static bool IsDynamicCodeGeneration(string? containingTypeName, string methodName)
+    {
+        if (string.IsNullOrEmpty(containingTypeName))
+        {
+            return false;
+        }
+
+        var dynamicCodePatterns = new[]
+        {
+            ("Microsoft.CSharp.CSharpCodeProvider", "CompileAssemblyFromSource"),
+            ("Microsoft.CSharp.CSharpCodeProvider", "CompileAssemblyFromFile"),
+            ("Microsoft.CSharp.CSharpCodeProvider", "CompileAssemblyFromDom"),
+            ("System.CodeDom.Compiler.CodeDomProvider", "CompileAssemblyFromSource"),
+            ("System.CodeDom.Compiler.CodeDomProvider", "CompileAssemblyFromFile"),
+            ("System.CodeDom.Compiler.CodeDomProvider", "CompileAssemblyFromDom"),
+            ("Microsoft.CodeAnalysis.CSharp.CSharpCompilation", "Emit"),
+            ("Microsoft.CodeAnalysis.Compilation", "Emit")
+        };
+
+        return dynamicCodePatterns.Any(pattern => 
+            containingTypeName == pattern.Item1 && methodName == pattern.Item2);
+    }
+
+    private static bool IsReflectionEmit(string? containingTypeName, string methodName)
+    {
+        if (string.IsNullOrEmpty(containingTypeName))
+        {
+            return false;
+        }
+
+        var reflectionEmitNamespaces = new[]
+        {
+            "System.Reflection.Emit.AssemblyBuilder",
+            "System.Reflection.Emit.ModuleBuilder", 
+            "System.Reflection.Emit.TypeBuilder",
+            "System.Reflection.Emit.MethodBuilder",
+            "System.Reflection.Emit.ConstructorBuilder",
+            "System.Reflection.Emit.PropertyBuilder",
+            "System.Reflection.Emit.FieldBuilder",
+            "System.Reflection.Emit.EventBuilder",
+            "System.Reflection.Emit.ILGenerator",
+            "System.Reflection.Emit.DynamicMethod"
+        };
+
+        return reflectionEmitNamespaces.Any(ns => containingTypeName?.StartsWith(ns) == true) &&
+               IsEmitMethod(methodName);
+    }
+
+    private static bool IsEmitMethod(string methodName)
+    {
+        var emitMethods = new[]
+        {
+            "DefineType", "DefineMethod", "DefineConstructor", "DefineProperty", 
+            "DefineField", "DefineEvent", "CreateType", "Emit", "EmitCall",
+            "EmitCalli", "GetILGenerator", "SetImplementationFlags"
+        };
+
+        return emitMethods.Contains(methodName);
+    }
+
+    private static bool IsDynamicAssemblyLoading(string? containingTypeName, string methodName)
+    {
+        if (string.IsNullOrEmpty(containingTypeName))
+        {
+            return false;
+        }
+
+        var assemblyLoadingPatterns = new[]
+        {
+            ("System.Reflection.Assembly", "LoadFrom"),
+            ("System.Reflection.Assembly", "LoadFile"), 
+            ("System.Reflection.Assembly", "Load"),
+            ("System.AppDomain", "Load"),
+            ("System.AppDomain", "ExecuteAssembly"),
+            ("System.Runtime.Loader.AssemblyLoadContext", "LoadFromAssemblyPath"),
+            ("System.Runtime.Loader.AssemblyLoadContext", "LoadFromAssemblyName"),
+            ("System.Runtime.Loader.AssemblyLoadContext", "LoadFromStream")
+        };
+
+        return assemblyLoadingPatterns.Any(pattern => 
+            containingTypeName == pattern.Item1 && methodName == pattern.Item2);
+    }
+
+    private static void CheckReflectionMethod(SyntaxNodeAnalysisContext context, IMethodSymbol method, SyntaxNode node)
+    {
+        var containingTypeName = method.ContainingType?.ToDisplayString();
+        var methodName = method.Name;
+
+        var reflectionMethods = new[]
+        {
+            ("System.Type", "GetMethods"),
+            ("System.Type", "GetMethod"),
+            ("System.Type", "GetProperties"),
+            ("System.Type", "GetProperty"),
+            ("System.Type", "GetFields"),
+            ("System.Type", "GetField"),
+            ("System.Type", "GetConstructors"),
+            ("System.Type", "GetConstructor"),
+            ("System.Type", "GetMembers"),
+            ("System.Type", "GetMember"),
+            ("System.Type", "GetEvents"),
+            ("System.Type", "GetEvent"),
+            ("System.Type", "GetNestedTypes"),
+            ("System.Type", "GetNestedType"),
+            ("System.Type", "GetInterfaces"),
+            ("System.Reflection.Assembly", "GetTypes"),
+            ("System.Reflection.Assembly", "GetType"),
+            ("System.Reflection.Module", "GetTypes"),
+            ("System.Reflection.Module", "GetType")
+        };
+
+        foreach (var (typeName, methodNameToCheck) in reflectionMethods)
+        {
+            if (containingTypeName == typeName && methodName == methodNameToCheck)
+            {
+                var diagnostic = Diagnostic.Create(
+                    Rules.ReflectionWithoutDynamicallyAccessedMembers,
+                    node.GetLocation(),
+                    $"{typeName}.{methodName}");
+                
+                context.ReportDiagnostic(diagnostic);
+                break;
+            }
+        }
+    }
+
+    private static string GetTypeFromTypeOfExpression(SyntaxNodeAnalysisContext context, TypeOfExpressionSyntax typeOfExpr)
+    {
+        var typeInfo = context.SemanticModel.GetTypeInfo(typeOfExpr.Type);
+        return typeInfo.Type?.ToDisplayString() ?? typeOfExpr.Type.ToString();
     }
 
 }

@@ -46,6 +46,8 @@ public static class DataSourceInvoker
 
     [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern",
         Justification = "Reflection-based data source invocation is expected in non-AOT scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL2072:UnrecognizedReflectionPattern",
+        Justification = "Task type from GetType() is used for property access in reflection scenarios")]
     public static async Task<object?> InvokeMethodAsync(
         object? instance,
         MethodInfo method,
@@ -63,7 +65,7 @@ public static class DataSourceInvoker
                 var taskType = task.GetType();
                 if (taskType.IsGenericType)
                 {
-                    var resultProperty = taskType.GetProperty("Result");
+                    var resultProperty = GetTaskResultProperty(taskType);
                     return resultProperty?.GetValue(task);
                 }
                 
@@ -151,10 +153,12 @@ public static class DataSourceInvoker
 
     [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern",
         Justification = "Reflection-based tuple conversion is expected in non-AOT scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL2072:UnrecognizedReflectionPattern",
+        Justification = "Tuple type from GetType() is used for field access in reflection scenarios")]
     private static object?[]? ConvertTupleToArray(object tuple)
     {
         var tupleType = tuple.GetType();
-        var fields = tupleType.GetFields(BindingFlags.Public | BindingFlags.Instance)
+        var fields = GetTupleFields(tupleType)
             .Where(f => f.Name.StartsWith("Item"))
             .OrderBy(f => f.Name)
             .ToArray();
@@ -192,5 +196,25 @@ public static class DataSourceInvoker
                genericTypeDefinition == typeof(Tuple<,,,,,>) ||
                genericTypeDefinition == typeof(Tuple<,,,,,,>) ||
                genericTypeDefinition == typeof(Tuple<,,,,,,,>);
+    }
+    
+    /// <summary>
+    /// Gets the Result property from a Task type with proper AOT attribution
+    /// </summary>
+    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern",
+        Justification = "Property access required for Task result extraction")]
+    private static PropertyInfo? GetTaskResultProperty([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type taskType)
+    {
+        return taskType.GetProperty("Result");
+    }
+    
+    /// <summary>
+    /// Gets fields from a tuple type with proper AOT attribution
+    /// </summary>
+    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern",
+        Justification = "Field access required for tuple conversion")]
+    private static FieldInfo[] GetTupleFields([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] Type tupleType)
+    {
+        return tupleType.GetFields(BindingFlags.Public | BindingFlags.Instance);
     }
 }

@@ -1,0 +1,46 @@
+using TUnit.Core;
+using TUnit.Assertions;
+
+namespace TUnit.AOT.Tests;
+
+/// <summary>
+/// Global setup to test assembly-level hooks work in AOT scenarios
+/// </summary>
+public static class GlobalSetup
+{
+    public static bool AssemblySetupExecuted { get; private set; }
+    public static bool AssemblyCleanupExecuted { get; private set; }
+
+    [Before(HookType.Assembly)]
+    public static async Task AssemblySetUp()
+    {
+        await Task.Delay(1);
+        AssemblySetupExecuted = true;
+        Console.WriteLine("Assembly setup executed in AOT mode");
+    }
+
+    [After(HookType.Assembly)]
+    public static async Task AssemblyCleanUp()
+    {
+        await Task.Delay(1);
+        AssemblyCleanupExecuted = true;
+        Console.WriteLine("Assembly cleanup executed in AOT mode");
+    }
+}
+
+/// <summary>
+/// Test to verify global hooks executed
+/// </summary>
+public class GlobalHookTests
+{
+    [Test]
+    [DependsOn(nameof(AotCompatibilityTests))] // Run after other tests
+    public void GlobalHooks_ShouldExecute()
+    {
+        // Verify that assembly-level hooks executed in AOT mode
+        Assert.That(GlobalSetup.AssemblySetupExecuted).IsTrue("Assembly setup should have executed");
+        
+        // Note: AssemblyCleanup runs after all tests, so we can't test it here
+        // But its presence validates it's discovered and will be executed
+    }
+}

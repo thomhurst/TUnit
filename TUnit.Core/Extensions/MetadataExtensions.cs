@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace TUnit.Core.Extensions;
 
@@ -14,7 +15,7 @@ public static class MetadataExtensions
 
     public static MethodInfo GetReflectionInfo(this MethodMetadata method)
     {
-        return method.Type.GetMethod(method.Name, method.Parameters.Select(x => x.Type).ToArray())!;
+        return GetMethodFromType(method.Type, method.Name, method.Parameters.Select(x => x.Type).ToArray())!;
     }
 
     public static IEnumerable<Attribute> GetCustomAttributes(this MethodMetadata method)
@@ -25,5 +26,16 @@ public static class MetadataExtensions
             ..method.Type.GetCustomAttributes(),
             ..method.Type.Assembly.GetCustomAttributes()
         ];
+    }
+    
+    /// <summary>
+    /// Gets a method from the specified type with proper AOT attribution
+    /// </summary>
+    private static MethodInfo? GetMethodFromType(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type, 
+        string name, 
+        Type[] parameters)
+    {
+        return type.GetMethod(name, parameters);
     }
 }

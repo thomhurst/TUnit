@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace TUnit.Core.DataSources;
 
@@ -151,7 +152,7 @@ public static class DataSourceProcessor
             var task = (Task)value;
             await task.ConfigureAwait(false);
             
-            var resultProperty = type.GetProperty("Result");
+            var resultProperty = GetTaskResultProperty(type);
             return resultProperty?.GetValue(task);
         }
 
@@ -166,7 +167,7 @@ public static class DataSourceProcessor
                 if (task != null)
                 {
                     await task.ConfigureAwait(false);
-                    var resultProperty = task.GetType().GetProperty("Result");
+                    var resultProperty = GetTaskResultProperty(task.GetType());
                     return resultProperty?.GetValue(task);
                 }
             }
@@ -175,7 +176,7 @@ public static class DataSourceProcessor
         // Check if it's a Func<T>
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))
         {
-            var invokeMethod = type.GetMethod("Invoke");
+            var invokeMethod = GetDelegateInvokeMethod(type);
             var result = invokeMethod?.Invoke(value, null);
             
             // Recursively resolve in case Func returns Task
@@ -185,7 +186,7 @@ public static class DataSourceProcessor
         // Check for other delegate types that might need invocation
         if (typeof(Delegate).IsAssignableFrom(type))
         {
-            var invokeMethod = type.GetMethod("Invoke");
+            var invokeMethod = GetDelegateInvokeMethod(type);
             if (invokeMethod != null && invokeMethod.GetParameters().Length == 0)
             {
                 var result = invokeMethod.Invoke(value, null);
@@ -294,7 +295,7 @@ public static class DataSourceProcessor
             if (item != null)
             {
                 var tupleType = item.GetType();
-                var fields = tupleType.GetFields();
+                var fields = GetTupleFields(tupleType);
                 var values = fields.Select(f => f.GetValue(item)).ToArray();
                 yield return values;
             }
@@ -310,9 +311,40 @@ public static class DataSourceProcessor
     [RequiresUnreferencedCode("Tuple processing requires reflection")]
     private static object?[] ProcessSingleTuple(object result, Type resultType)
     {
-        var fields = resultType.GetFields();
+        var fields = GetTupleFields(resultType);
         return fields.Select(f => f.GetValue(result)).ToArray();
     }
 
+    #endregion
+    
+    #region Helper Methods with Proper Attribution
+    
+    /// <summary>
+    /// Gets the Result property from a Task type with proper AOT attribution
+    /// </summary>
+    [RequiresUnreferencedCode("Property access requires reflection")]
+    private static PropertyInfo? GetTaskResultProperty([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type taskType)
+    {
+        return taskType.GetProperty("Result");
+    }
+    
+    /// <summary>
+    /// Gets the Invoke method from a delegate type with proper AOT attribution  
+    /// </summary>
+    [RequiresUnreferencedCode("Method access requires reflection")]
+    private static MethodInfo? GetDelegateInvokeMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type delegateType)
+    {
+        return delegateType.GetMethod("Invoke");
+    }
+    
+    /// <summary>
+    /// Gets fields from a tuple type with proper AOT attribution
+    /// </summary>
+    [RequiresUnreferencedCode("Field access requires reflection")]
+    private static FieldInfo[] GetTupleFields([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] Type tupleType)
+    {
+        return tupleType.GetFields();
+    }
+    
     #endregion
 }

@@ -14,7 +14,7 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
         await Task.Yield(); // Make it properly async
         
         var sourceType = attribute.ClassProvidingDataSource ?? context.TestClassType;
-        var method = sourceType.GetMethod(attribute.MethodNameProvidingDataSource, 
+        var method = GetMethodFromType(sourceType, attribute.MethodNameProvidingDataSource, 
             BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
 
         if (method == null)
@@ -134,5 +134,11 @@ public class MethodDataSourceGenerator : IDataSourceGenerator<MethodDataSourceAt
         }
         
         return null;
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Method resolution required for data source invocation")]
+    private static MethodInfo? GetMethodFromType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type sourceType, string methodName, BindingFlags bindingFlags)
+    {
+        return sourceType.GetMethod(methodName, bindingFlags);
     }
 }

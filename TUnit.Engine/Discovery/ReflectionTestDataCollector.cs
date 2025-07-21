@@ -1234,6 +1234,12 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
     private static Func<object?[], object> CompileInstanceFactory(ConstructorInfo ctor)
     {
+        // In AOT scenarios, skip expression compilation and use reflection directly
+        if (IsAotEnvironment())
+        {
+            return CreateReflectionInstanceFactory(ctor);
+        }
+        
         try
         {
             var parameters = ctor.GetParameters();
@@ -1258,18 +1264,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         {
             Console.WriteLine($"Warning: Failed to compile instance factory for {ctor.DeclaringType?.Name}: {ex.Message}");
             // Return a fallback factory that uses reflection
-            return args =>
-            {
-                try
-                {
-                    return Activator.CreateInstance(ctor.DeclaringType!, args)
-                           ?? throw new InvalidOperationException("Failed to create instance");
-                }
-                catch (Exception invokeEx)
-                {
-                    throw new InvalidOperationException($"Failed to create instance of {ctor.DeclaringType?.Name}", invokeEx);
-                }
-            };
+            return CreateReflectionInstanceFactory(ctor);
         }
     }
 
@@ -1282,29 +1277,19 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
     private static Func<object, object?[], Task> CompileTestInvoker(Type testClass, MethodInfo testMethod)
     {
+        // In AOT scenarios, skip expression compilation and use reflection directly
+        if (IsAotEnvironment())
+        {
+            return CreateReflectionTestInvoker(testClass, testMethod);
+        }
+        
         try
         {
             // Skip compilation for generic methods - they can't be compiled and will use reflection
             if (testMethod.IsGenericMethodDefinition || testMethod.ContainsGenericParameters)
             {
                 // Return the reflection-based fallback directly without warning
-                return (instance, args) =>
-                {
-                    try
-                    {
-                        var result = testMethod.Invoke(instance, args);
-                        if (result is Task task)
-                        {
-                            return task;
-                        }
-                        return Task.CompletedTask;
-                    }
-                    catch (TargetInvocationException tie)
-                    {
-                        ExceptionDispatchInfo.Capture(tie.InnerException ?? tie).Throw();
-                        throw;
-                    }
-                };
+                return CreateReflectionTestInvoker(testClass, testMethod);
             }
 
             var instanceParam = Expression.Parameter(typeof(object), "instance");
@@ -1489,22 +1474,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         {
             Console.WriteLine($"Warning: Failed to compile test invoker for {testClass.Name}.{testMethod.Name}: {ex.Message}");
             // Return a fallback invoker that uses reflection
-            return (instance, args) =>
-            {
-                try
-                {
-                    var result = testMethod.Invoke(instance, args);
-                    if (result is Task task)
-                    {
-                        return task;
-                    }
-                    return Task.CompletedTask;
-                }
-                catch (Exception invokeEx)
-                {
-                    return Task.FromException(invokeEx);
-                }
-            };
+            return CreateReflectionTestInvoker(testClass, testMethod);
         }
     }
 
@@ -1733,6 +1703,12 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     [UnconditionalSuppressMessage("AOT", "IL3050:Using member 'System.Linq.Expressions.Expression.Lambda' which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling", Justification = "Reflection mode cannot support AOT")]
     private static Func<object, TestContext, Task>? CreateHookInvoker(MethodInfo method)
     {
+        // In AOT scenarios, skip expression compilation and use reflection directly
+        if (IsAotEnvironment())
+        {
+            return CreateReflectionHookInvoker(method);
+        }
+        
         var instanceParam = Expression.Parameter(typeof(object), "instance");
         var contextParam = Expression.Parameter(typeof(TestContext), "context");
 
@@ -1892,7 +1868,15 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             instanceParam,
             contextParam);
 
-        return lambda.Compile();
+        try
+        {
+            return lambda.Compile();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to compile hook invoker for {method.Name}: {ex.Message}");
+            return CreateReflectionHookInvoker(method);
+        }
     }
 
     private static bool IsAsyncMethod(MethodInfo method)
@@ -2378,5 +2362,147 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 Context = context.Context
             };
         }
+    }
+    
+    /// <summary>
+    /// Detects if running in an AOT environment where Expression.Compile() is not available
+    /// </summary>
+    private static bool IsAotEnvironment()
+    {
+        // Check if we're running in a NativeAOT context
+        // This is a simple heuristic - in practice, you might want more sophisticated detection
+        try
+        {
+            // Try to compile a simple expression - if this fails, we're likely in AOT
+            var param = Expression.Parameter(typeof(int), "x");
+            var lambda = Expression.Lambda<Func<int, int>>(param, param);
+            lambda.Compile();
+            return false;
+        }
+        catch
+        {
+            return true;
+        }
+    }
+    
+    /// <summary>
+    /// Creates a reflection-based instance factory with proper AOT attribution
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+    private static Func<object?[], object> CreateReflectionInstanceFactory(ConstructorInfo ctor)
+    {
+        return args =>
+        {
+            try
+            {
+                return ctor.Invoke(args) ?? throw new InvalidOperationException("Failed to create instance");
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to create instance of {ctor.DeclaringType?.Name}", ex);
+            }
+        };
+    }
+    
+    /// <summary>
+    /// Creates a reflection-based test invoker with proper AOT attribution
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+    private static Func<object, object?[], Task> CreateReflectionTestInvoker(Type testClass, MethodInfo testMethod)
+    {
+        return (instance, args) =>
+        {
+            try
+            {
+                var result = testMethod.Invoke(instance, args);
+                if (result is Task task)
+                {
+                    return task;
+                }
+                if (result is ValueTask valueTask)
+                {
+                    return valueTask.AsTask();
+                }
+                return Task.CompletedTask;
+            }
+            catch (TargetInvocationException tie)
+            {
+                ExceptionDispatchInfo.Capture(tie.InnerException ?? tie).Throw();
+                throw;
+            }
+            catch (Exception ex)
+            {
+                return Task.FromException(ex);
+            }
+        };
+    }
+    
+    /// <summary>
+    /// Creates a reflection-based hook invoker with proper AOT attribution
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+    private static Func<object, TestContext, Task> CreateReflectionHookInvoker(MethodInfo method)
+    {
+        return (instance, context) =>
+        {
+            try
+            {
+                var parameters = method.GetParameters();
+                var args = new object?[parameters.Length];
+                
+                // Map parameters based on their types
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    var paramType = parameters[i].ParameterType;
+                    
+                    if (paramType == typeof(TestContext))
+                    {
+                        args[i] = context;
+                    }
+                    else if (paramType == typeof(ClassHookContext))
+                    {
+                        args[i] = context.ClassContext;
+                    }
+                    else if (paramType == typeof(AssemblyHookContext))
+                    {
+                        args[i] = context.ClassContext.AssemblyContext;
+                    }
+                    else if (paramType == typeof(TestSessionContext))
+                    {
+                        args[i] = context.ClassContext.AssemblyContext.TestSessionContext;
+                    }
+                    else if (paramType == typeof(CancellationToken))
+                    {
+                        args[i] = context.CancellationToken;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            $"Hook method {method.Name} has unsupported parameter type {paramType}");
+                    }
+                }
+                
+                var result = method.Invoke(method.IsStatic ? null : instance, args);
+                
+                if (result is Task task)
+                {
+                    return task;
+                }
+                if (result is ValueTask valueTask)
+                {
+                    return valueTask.AsTask();
+                }
+                return Task.CompletedTask;
+            }
+            catch (TargetInvocationException tie)
+            {
+                ExceptionDispatchInfo.Capture(tie.InnerException ?? tie).Throw();
+                throw;
+            }
+            catch (Exception ex)
+            {
+                return Task.FromException(ex);
+            }
+        };
     }
 }

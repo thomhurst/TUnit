@@ -1096,7 +1096,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var genericTypeExpression = GetGenericTypeExpression(typeSymbol);
             writer.AppendLine($"var genericTypeDef = typeof({genericTypeExpression});");
             writer.AppendLine("var constructedType = genericTypeDef.MakeGenericType(typeArguments);");
-            writer.AppendLine("var instance = global::System.Activator.CreateInstance(constructedType);");
+            
+            // Check if we need constructor arguments for the class
+            writer.AppendLine();
+            writer.AppendLine("// Create instance with constructor arguments if needed");
+            writer.AppendLine("object instance;");
+            writer.AppendLine("if (context?.TestDetails?.DataCombination?.ClassDataFactories != null && context.TestDetails.DataCombination.ClassDataFactories.Length > 0)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("// Use class data as constructor arguments");
+            writer.AppendLine("var constructorArgs = new object?[context.TestDetails.DataCombination.ClassDataFactories.Length];");
+            writer.AppendLine("for (int i = 0; i < constructorArgs.Length; i++)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("constructorArgs[i] = await context.TestDetails.DataCombination.ClassDataFactories[i]();");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("instance = global::System.Activator.CreateInstance(constructedType, constructorArgs);");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("// Try parameterless constructor");
+            writer.AppendLine("instance = global::System.Activator.CreateInstance(constructedType);");
+            writer.Unindent();
+            writer.AppendLine("}");
             writer.AppendLine("return instance!;");
         }
         else

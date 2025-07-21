@@ -59,6 +59,7 @@ internal static class GenericTestHelper
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
     [UnconditionalSuppressMessage("Trimming", "IL2075:Target method return value does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy annotation requirements", Justification = "BaseType access in reflection mode requires dynamic access")]
     public static MethodInfo? GetMethodOnImplementationType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type implementationType, string methodName, Type[] parameterTypes)
     {
         // First try exact match on implementation type
@@ -78,12 +79,7 @@ internal static class GenericTestHelper
         var currentType = implementationType.BaseType;
         while (currentType != null)
         {
-            method = currentType.GetMethod(
-                methodName,
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static,
-                null,
-                parameterTypes,
-                null);
+            method = GetMethodFromType(currentType, methodName, parameterTypes);
                 
             if (method != null)
             {
@@ -91,12 +87,8 @@ internal static class GenericTestHelper
                 if (method is { IsVirtual: true, IsFinal: false })
                 {
                     // Try to get the override in the implementation type
-                    var overrideMethod = implementationType.GetMethod(
-                        methodName,
-                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
-                        null,
-                        method.GetParameters().Select(p => p.ParameterType).ToArray(),
-                        null);
+                    var overrideMethod = GetMethodFromType(implementationType, methodName, 
+                        method.GetParameters().Select(p => p.ParameterType).ToArray());
                         
                     if (overrideMethod != null)
                     {
@@ -170,5 +162,22 @@ internal static class GenericTestHelper
         }
         
         return null;
+    }
+    
+    /// <summary>
+    /// Helper method to get method from type with proper AOT attribution
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+    private static MethodInfo? GetMethodFromType(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type,
+        string methodName,
+        Type[] parameterTypes)
+    {
+        return type.GetMethod(
+            methodName,
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static,
+            null,
+            parameterTypes,
+            null);
     }
 }

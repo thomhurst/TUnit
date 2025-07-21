@@ -540,4 +540,76 @@
     <data name="TUnit0200Title" xml:space="preserve">
         <value>Avoid blocking async calls</value>
     </data>
+    <data name="TUnit0061Description" xml:space="preserve">
+        <value>Expression.Compile() is not AOT-compatible. Use source generation or pre-compiled delegates instead.</value>
+    </data>
+    <data name="TUnit0061MessageFormat" xml:space="preserve">
+        <value>Expression.Compile() is not AOT-compatible. Use source generation or pre-compiled delegates instead.</value>
+    </data>
+    <data name="TUnit0061Title" xml:space="preserve">
+        <value>Expression.Compile() not AOT-compatible</value>
+    </data>
+    <data name="TUnit0062Description" xml:space="preserve">
+        <value>Reflection methods like GetMethods(), GetProperties(), GetFields() require [DynamicallyAccessedMembers] attribute for AOT compatibility.</value>
+    </data>
+    <data name="TUnit0062MessageFormat" xml:space="preserve">
+        <value>'{0}' requires [DynamicallyAccessedMembers] attribute on parameter or field for AOT compatibility.</value>
+    </data>
+    <data name="TUnit0062Title" xml:space="preserve">
+        <value>Reflection without DynamicallyAccessedMembers attribute</value>
+    </data>
+    <data name="TUnit0063Description" xml:space="preserve">
+        <value>Type.GetType() with string names is not AOT-compatible. Use typeof() or [DynamicallyAccessedMembers] instead.</value>
+    </data>
+    <data name="TUnit0063MessageFormat" xml:space="preserve">
+        <value>Type.GetType('{0}') is not AOT-compatible. Use typeof() or [DynamicallyAccessedMembers] instead.</value>
+    </data>
+    <data name="TUnit0063Title" xml:space="preserve">
+        <value>Type.GetType() not AOT-compatible</value>
+    </data>
+    <data name="TUnit0064Description" xml:space="preserve">
+        <value>MakeGenericType() and MakeArrayType() are not AOT-compatible. Use concrete types or source generation instead.</value>
+    </data>
+    <data name="TUnit0064MessageFormat" xml:space="preserve">
+        <value>'{0}' is not AOT-compatible. Use concrete types or source generation instead.</value>
+    </data>
+    <data name="TUnit0064Title" xml:space="preserve">
+        <value>Runtime type construction not AOT-compatible</value>
+    </data>
+    <data name="TUnit0065Description" xml:space="preserve">
+        <value>Activator.CreateInstance requires [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] for AOT compatibility.</value>
+    </data>
+    <data name="TUnit0065MessageFormat" xml:space="preserve">
+        <value>Activator.CreateInstance requires [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] on '{0}' for AOT compatibility.</value>
+    </data>
+    <data name="TUnit0065Title" xml:space="preserve">
+        <value>Activator.CreateInstance without proper attribution</value>
+    </data>
+    <data name="TUnit0066Description" xml:space="preserve">
+        <value>Dynamic code generation is not supported in AOT scenarios. Use source generation or static factories instead.</value>
+    </data>
+    <data name="TUnit0066MessageFormat" xml:space="preserve">
+        <value>'{0}' is not AOT-compatible. Use source generation or static factories instead.</value>
+    </data>
+    <data name="TUnit0066Title" xml:space="preserve">
+        <value>Dynamic code generation not AOT-compatible</value>
+    </data>
+    <data name="TUnit0067Description" xml:space="preserve">
+        <value>Reflection.Emit APIs are not AOT-compatible. Use source generation or pre-compiled assemblies instead.</value>
+    </data>
+    <data name="TUnit0067MessageFormat" xml:space="preserve">
+        <value>'{0}' is not AOT-compatible. Use source generation or pre-compiled assemblies instead.</value>
+    </data>
+    <data name="TUnit0067Title" xml:space="preserve">
+        <value>Reflection.Emit not AOT-compatible</value>
+    </data>
+    <data name="TUnit0068Description" xml:space="preserve">
+        <value>Assembly.LoadFrom and similar methods may not work reliably in AOT scenarios. Use static references where possible.</value>
+    </data>
+    <data name="TUnit0068MessageFormat" xml:space="preserve">
+        <value>'{0}' may not work reliably in AOT scenarios. Use static references where possible.</value>
+    </data>
+    <data name="TUnit0068Title" xml:space="preserve">
+        <value>Dynamic assembly loading may not work in AOT</value>
+    </data>
 </root>

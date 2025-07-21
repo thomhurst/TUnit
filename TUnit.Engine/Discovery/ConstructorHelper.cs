@@ -66,7 +66,7 @@ internal static class ConstructorHelper
             if (constructor == null)
             {
                 // Try Activator.CreateInstance as last resort
-                return Activator.CreateInstance(testClass);
+                return CreateInstanceSafely(testClass);
             }
             
             var parameters = constructor.GetParameters();
@@ -94,18 +94,14 @@ internal static class ConstructorHelper
                 }
                 else if (param.ParameterType.IsValueType)
                 {
-                    #pragma warning disable IL2072
-                    defaultArgs[i] = Activator.CreateInstance(param.ParameterType);
-                    #pragma warning restore IL2072
+                    defaultArgs[i] = CreateInstanceSafely(param.ParameterType);
                 }
                 else
                 {
                     // For reference types, try to create an instance
                     try
                     {
-                        #pragma warning disable IL2072
-                        defaultArgs[i] = Activator.CreateInstance(param.ParameterType);
-                        #pragma warning restore IL2072
+                        defaultArgs[i] = CreateInstanceSafely(param.ParameterType);
                     }
                     catch
                     {
@@ -227,18 +223,14 @@ internal static class ConstructorHelper
                         }
                         else if (property.PropertyType.IsValueType)
                         {
-                            #pragma warning disable IL2072
-                            property.SetValue(instance, Activator.CreateInstance(property.PropertyType));
-                            #pragma warning restore IL2072
+                            property.SetValue(instance, CreateInstanceSafely(property.PropertyType));
                         }
                         else
                         {
                             // For complex types, try to create an instance
                             try
                             {
-                                #pragma warning disable IL2072
-                                var value = Activator.CreateInstance(property.PropertyType);
-                                #pragma warning restore IL2072
+                                var value = CreateInstanceSafely(property.PropertyType);
                                 property.SetValue(instance, value);
                             }
                             catch
@@ -252,9 +244,7 @@ internal static class ConstructorHelper
                         // For regular required properties, set default values
                         if (property.PropertyType.IsValueType)
                         {
-                            #pragma warning disable IL2072
-                            property.SetValue(instance, Activator.CreateInstance(property.PropertyType));
-                            #pragma warning restore IL2072
+                            property.SetValue(instance, CreateInstanceSafely(property.PropertyType));
                         }
                         else if (property.PropertyType == typeof(string))
                         {
@@ -265,9 +255,7 @@ internal static class ConstructorHelper
                             // For reference types, try to create an instance or set null
                             try
                             {
-                                #pragma warning disable IL2072
-                                var value = Activator.CreateInstance(property.PropertyType);
-                                #pragma warning restore IL2072
+                                var value = CreateInstanceSafely(property.PropertyType);
                                 property.SetValue(instance, value);
                             }
                             catch
@@ -284,5 +272,14 @@ internal static class ConstructorHelper
                 }
             }
         }
+    }
+    
+    /// <summary>
+    /// AOT-safe wrapper for Activator.CreateInstance with proper attribution
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+    private static object? CreateInstanceSafely([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type)
+    {
+        return Activator.CreateInstance(type);
     }
 }

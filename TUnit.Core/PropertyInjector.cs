@@ -370,14 +370,13 @@ public static class PropertyInjector
         var injectionData = DataSourcePropertyInjectionRegistry.GetInjectionData(type);
         var propertyDataSources = DataSourcePropertyInjectionRegistry.GetPropertyDataSources(type);
 
-        if ((injectionData == null || propertyDataSources == null) && !IsAotMode())
+        // In AOT mode, we must rely entirely on source-generated injection data
+        // If not available, the properties cannot be injected
+        if (injectionData == null || propertyDataSources == null)
         {
-            var discovered = DiscoverDataSourcePropertiesViaReflection(type);
-            if (discovered.properties.Length > 0)
-            {
-                propertyDataSources = discovered.properties;
-                injectionData = discovered.injectionData;
-            }
+            // For AOT compatibility, we cannot fall back to reflection-based discovery
+            // All property injection data must be provided by source generators
+            return;
         }
 
         if (propertyDataSources is { Length: > 0 } &&
@@ -428,8 +427,4 @@ public static class PropertyInjector
         return (properties.ToArray(), injectionData.ToArray());
     }
 
-    private static bool IsAotMode()
-    {
-        return DataSourcePropertyInjectionRegistry.GetInjectionData(typeof(ArgumentsAttribute)) != null;
-    }
 }
