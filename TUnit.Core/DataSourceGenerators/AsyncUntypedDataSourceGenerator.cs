@@ -9,7 +9,7 @@ namespace TUnit.Core.DataSourceGenerators;
 [RequiresDynamicCode("Untyped async data sources require dynamic code generation")]
 public class AsyncUntypedDataSourceGenerator : IAsyncDataSourceGenerator
 {
-    public async IAsyncEnumerable<TestDataCombination> GenerateDataCombinationsAsync(IAsyncDataSourceGeneratorAttribute attribute, DataSourceGenerationContext context)
+    public async IAsyncEnumerable<TestDataCombination> GenerateDataCombinationsAsync(IDataSourceAttribute attribute, DataSourceGenerationContext context)
     {
         var asyncEnumerable = GetAsyncEnumerable(attribute, context);
         await foreach (var combination in ConvertAsyncEnumerableToDataCombinationsAsync(asyncEnumerable, context.DataSourceIndex))
@@ -18,7 +18,7 @@ public class AsyncUntypedDataSourceGenerator : IAsyncDataSourceGenerator
         }
     }
 
-    private static IAsyncEnumerable<Func<Task<object?[]?>>> GetAsyncEnumerable(IAsyncDataSourceGeneratorAttribute attribute, DataSourceGenerationContext context)
+    private static IAsyncEnumerable<Func<Task<object?[]?>>> GetAsyncEnumerable(IDataSourceAttribute attribute, DataSourceGenerationContext context)
     {
         // For now, use a minimal DataGeneratorMetadata - this will need proper implementation
         // when integrating with the full TUnit runtime pipeline

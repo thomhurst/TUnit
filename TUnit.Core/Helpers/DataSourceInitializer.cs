@@ -7,7 +7,7 @@ namespace TUnit.Core.Helpers;
 /// <summary>
 /// Provides centralized logic for initializing data sources and their properties.
 /// Uses a two-pass approach:
-/// 1. First pass: Populate all data sources (IAsyncDataSourceGeneratorAttribute)
+/// 1. First pass: Populate all data sources (IDataSourceAttribute)
 /// 2. Second pass: Initialize objects marked with IRequiresImmediateInitialization
 /// </summary>
 [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.")]
@@ -39,7 +39,7 @@ public static class DataSourceInitializer
     }
 
     /// <summary>
-    /// Pass 1: Populates all properties that have IAsyncDataSourceGeneratorAttribute
+    /// Pass 1: Populates all properties that have IDataSourceAttribute
     /// </summary>
     private static async Task PopulateDataSourcesAsync(object instance, ClassMetadata classMetadata, InitializationContext context)
     {
@@ -57,7 +57,7 @@ public static class DataSourceInitializer
                 // If property is null and has a data source attribute, generate the value
                 if (propertyValue is null)
                 {
-                    var dataAttribute = property.ReflectionInfo.GetCustomAttributesSafe().FirstOrDefault(x => x.GetType().IsAssignableTo(typeof(IAsyncDataSourceGeneratorAttribute)));
+                    var dataAttribute = property.ReflectionInfo.GetCustomAttributesSafe().FirstOrDefault(x => x.GetType().IsAssignableTo(typeof(IDataSourceAttribute)));
 
                     if (dataAttribute is not null)
                     {
@@ -125,7 +125,7 @@ public static class DataSourceInitializer
     }
 
     /// <summary>
-    /// Generates a property value using IAsyncDataSourceGeneratorAttribute
+    /// Generates a property value using IDataSourceAttribute
     /// </summary>
     private static async Task<object?> GeneratePropertyValueAsync(
         object instance,
@@ -133,7 +133,7 @@ public static class DataSourceInitializer
         PropertyMetadata propertyMetadata,
         InitializationContext context)
     {
-        var dataAttribute = (IAsyncDataSourceGeneratorAttribute) attribute;
+        var dataAttribute = (IDataSourceAttribute) attribute;
 
         if (propertyMetadata.ClassMetadata is not null)
         {
@@ -151,7 +151,7 @@ public static class DataSourceInitializer
             TestSessionId = Guid.NewGuid().ToString()
         };
 
-        await using var asyncEnumerator = dataAttribute.GenerateAsync(generatorMetadata).GetAsyncEnumerator();
+        await using var asyncEnumerator = dataAttribute.GetDataRowsAsync(generatorMetadata).GetAsyncEnumerator();
 
         if (await asyncEnumerator.MoveNextAsync())
         {

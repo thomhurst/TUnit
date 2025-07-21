@@ -22,7 +22,7 @@ public interface IDataSourceGenerator<TAttribute> where TAttribute : TestDataAtt
 
 /// <summary>
 /// Interface for generating TestDataCombination objects from async data source attributes.
-/// Specialized for IAsyncDataSourceGeneratorAttribute which doesn't extend TestDataAttribute.
+/// Specialized for data source attributes that use async enumerable data generation.
 /// </summary>
 public interface IAsyncDataSourceGenerator
 {
@@ -32,7 +32,7 @@ public interface IAsyncDataSourceGenerator
     /// <param name="attribute">The async attribute instance</param>
     /// <param name="context">Context information about the test being generated</param>
     /// <returns>An async enumerable of TestDataCombination objects</returns>
-    IAsyncEnumerable<TestDataCombination> GenerateDataCombinationsAsync(IAsyncDataSourceGeneratorAttribute attribute, DataSourceGenerationContext context);
+    IAsyncEnumerable<TestDataCombination> GenerateDataCombinationsAsync(IDataSourceAttribute attribute, DataSourceGenerationContext context);
 }
 
 /// <summary>

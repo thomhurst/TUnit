@@ -110,13 +110,50 @@ public class ReflectionTestDataCollectorTests
         await Assert.That(paramTest!.DataSources.Length).IsEqualTo(2);
 
         // Verify data sources
-        var dataSources = paramTest.DataSources.SelectMany(ds => ds.GetDataRowsAsync(new DataGeneratorMetadata())).ToList();
+        var metadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
+            MembersToGenerate = [],
+            TestInformation = new MethodMetadata
+            {
+                Name = "TestMethod",
+                Type = typeof(object),
+                Class = new ClassMetadata
+                {
+                    Name = "TestClass",
+                    Type = typeof(object),
+                    Namespace = string.Empty,
+                    TypeReference = new TypeReference { AssemblyQualifiedName = typeof(object).AssemblyQualifiedName },
+                    Assembly = AssemblyMetadata.GetOrAdd("Test", () => new AssemblyMetadata { Name = "Test" }),
+                    Parameters = [],
+                    Properties = [],
+                    Parent = null
+                },
+                Parameters = [],
+                GenericTypeCount = 0,
+                ReturnTypeReference = new TypeReference { AssemblyQualifiedName = typeof(void).AssemblyQualifiedName },
+                ReturnType = typeof(void),
+                TypeReference = new TypeReference { AssemblyQualifiedName = typeof(object).AssemblyQualifiedName }
+            },
+            Type = DataGeneratorType.TestParameters,
+            TestSessionId = "test",
+            TestClassInstance = null,
+            ClassInstanceArguments = null
+        };
+        var dataSources = new List<Func<Task<object?[]?>>>();
+        foreach (var ds in paramTest.DataSources)
+        {
+            await foreach (var dataRow in ds.GetDataRowsAsync(metadata))
+            {
+                dataSources.Add(dataRow);
+            }
+        }
         await Assert.That(dataSources.Count).IsEqualTo(2);
 
-        var firstData = dataSources[0]();
+        var firstData = await dataSources[0]();
         await Assert.That(firstData).IsEqualTo([1, 2, 3]);
 
-        var secondData = dataSources[1]();
+        var secondData = await dataSources[1]();
         await Assert.That(secondData).IsEqualTo([4, 5, 6]);
     }
 
@@ -191,13 +228,47 @@ public class ReflectionTestDataCollectorTests
         await Assert.That(methodDataTest!.DataSources.Length).IsEqualTo(1);
 
         // Verify data source produces correct data
-        var dataFactories = methodDataTest.DataSources[0].GetDataRowsAsync(new DataGeneratorMetadata()).ToList();
+        var metadata2 = new DataGeneratorMetadata
+        {
+            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
+            MembersToGenerate = [],
+            TestInformation = new MethodMetadata
+            {
+                Name = "TestMethod",
+                Type = typeof(object),
+                Class = new ClassMetadata
+                {
+                    Name = "TestClass",
+                    Type = typeof(object),
+                    Namespace = string.Empty,
+                    TypeReference = new TypeReference { AssemblyQualifiedName = typeof(object).AssemblyQualifiedName },
+                    Assembly = AssemblyMetadata.GetOrAdd("Test", () => new AssemblyMetadata { Name = "Test" }),
+                    Parameters = [],
+                    Properties = [],
+                    Parent = null
+                },
+                Parameters = [],
+                GenericTypeCount = 0,
+                ReturnTypeReference = new TypeReference { AssemblyQualifiedName = typeof(void).AssemblyQualifiedName },
+                ReturnType = typeof(void),
+                TypeReference = new TypeReference { AssemblyQualifiedName = typeof(object).AssemblyQualifiedName }
+            },
+            Type = DataGeneratorType.TestParameters,
+            TestSessionId = "test",
+            TestClassInstance = null,
+            ClassInstanceArguments = null
+        };
+        var dataFactories = new List<Func<Task<object?[]?>>>();
+        await foreach (var dataRow in methodDataTest.DataSources[0].GetDataRowsAsync(metadata2))
+        {
+            dataFactories.Add(dataRow);
+        }
         await Assert.That(dataFactories.Count).IsEqualTo(2);
 
-        var firstData = dataFactories[0]();
+        var firstData = await dataFactories[0]();
         await Assert.That(firstData[0]).IsEqualTo("test1");
 
-        var secondData = dataFactories[1]();
+        var secondData = await dataFactories[1]();
         await Assert.That(secondData[0]).IsEqualTo("test2");
     }
 }

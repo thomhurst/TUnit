@@ -1,3 +1,3 @@
 namespace TUnit.Core;
 
-internal interface IAsyncUntypedDataSourceGeneratorAttribute : IAsyncDataSourceGeneratorAttribute;
+internal interface IAsyncUntypedDataSourceGeneratorAttribute : IDataSourceAttribute;

@@ -1,9 +1,9 @@
 namespace TUnit.TestProject;
 
 // Data source class that returns tuples for constructor parameters
-public class TupleDataSource : IAsyncDataSourceGeneratorAttribute
+public class TupleDataSource : IDataSourceAttribute
 {
-    public async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         // Return tuples that should be unwrapped into constructor parameters
         yield return () => Task.FromResult<object?[]?>([(42, "Hello")]);
@@ -11,8 +11,6 @@ public class TupleDataSource : IAsyncDataSourceGeneratorAttribute
         yield return () => Task.FromResult<object?[]?>([(123, "Test")]);
         await Task.CompletedTask; // To satisfy async
     }
-
-    public IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata) => GenerateAsync(dataGeneratorMetadata);
 }
 
 // Test class that expects two constructor parameters from tuple unwrapping

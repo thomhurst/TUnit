@@ -316,7 +316,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("};");
         
-        writer.AppendLine("await foreach (var dataSourceFunc in ((global::TUnit.Core.IAsyncDataSourceGeneratorAttribute)generator).GenerateAsync(metadata))");
+        writer.AppendLine("await foreach (var dataSourceFunc in ((global::TUnit.Core.IDataSourceAttribute)generator).GetDataRowsAsync(metadata))");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine("var data = await dataSourceFunc();");

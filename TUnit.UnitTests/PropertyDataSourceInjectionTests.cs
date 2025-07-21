@@ -183,14 +183,10 @@ public class CustomPropertyDataSourceTests
 // Custom data source attribute that inherits from AsyncDataSourceGeneratorAttribute
 public class CustomDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T> : AsyncDataSourceGeneratorAttribute<T>
 {
-    protected override IAsyncEnumerable<Func<Task<T>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override async IAsyncEnumerable<Func<Task<T>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        return GenerateDataSourcesAsyncIterator();
-
-        async IAsyncEnumerable<Func<Task<T>>> GenerateDataSourcesAsyncIterator()
-        {
-            yield return () => Task.FromResult((T)Activator.CreateInstance(typeof(T))!);
-        }
+        yield return () => Task.FromResult((T)Activator.CreateInstance(typeof(T))!);
+        await Task.CompletedTask;
     }
 }
 

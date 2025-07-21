@@ -132,45 +132,8 @@ public static class Rules
     public static readonly DiagnosticDescriptor InstanceMethodSource =
         CreateDescriptor("TUnit0056", UsageCategory, DiagnosticSeverity.Error);
 
-    // AOT Compatibility Rules
-
-    public static readonly DiagnosticDescriptor GenericTestMissingExplicitInstantiation =
-        CreateDescriptor("TUnit0058", UsageCategory, DiagnosticSeverity.Error);
-
-    public static readonly DiagnosticDescriptor DynamicDataSourceNotAotCompatible =
-        CreateDescriptor("TUnit0059", UsageCategory, DiagnosticSeverity.Error);
-
-    public static readonly DiagnosticDescriptor OpenGenericTypeNotAotCompatible =
-        CreateDescriptor("TUnit0060", UsageCategory, DiagnosticSeverity.Error);
-
     public static readonly DiagnosticDescriptor BlockingAsyncCall =
         CreateDescriptor("TUnit0200", UsageCategory, DiagnosticSeverity.Warning);
-
-    // Enhanced AOT Compatibility Rules
-
-    public static readonly DiagnosticDescriptor ExpressionCompileNotAotCompatible =
-        CreateDescriptor("TUnit0061", UsageCategory, DiagnosticSeverity.Error);
-
-    public static readonly DiagnosticDescriptor ReflectionWithoutDynamicallyAccessedMembers =
-        CreateDescriptor("TUnit0062", UsageCategory, DiagnosticSeverity.Error);
-
-    public static readonly DiagnosticDescriptor TypeGetTypeNotAotCompatible =
-        CreateDescriptor("TUnit0063", UsageCategory, DiagnosticSeverity.Error);
-
-    public static readonly DiagnosticDescriptor MakeGenericTypeNotAotCompatible =
-        CreateDescriptor("TUnit0064", UsageCategory, DiagnosticSeverity.Error);
-
-    public static readonly DiagnosticDescriptor ActivatorCreateInstanceWithoutAttribution =
-        CreateDescriptor("TUnit0065", UsageCategory, DiagnosticSeverity.Error);
-
-    public static readonly DiagnosticDescriptor DynamicCodeGenerationNotAotCompatible =
-        CreateDescriptor("TUnit0066", UsageCategory, DiagnosticSeverity.Error);
-
-    public static readonly DiagnosticDescriptor ReflectionEmitNotAotCompatible =
-        CreateDescriptor("TUnit0067", UsageCategory, DiagnosticSeverity.Error);
-
-    public static readonly DiagnosticDescriptor AssemblyLoadFromNotAotCompatible =
-        CreateDescriptor("TUnit0068", UsageCategory, DiagnosticSeverity.Warning);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

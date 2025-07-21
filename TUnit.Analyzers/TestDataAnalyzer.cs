@@ -146,7 +146,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 CheckMethodDataSource(context, attribute, testClassType, types);
             }
 
-            if (attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IAsyncDataSourceGeneratorAttribute.WithoutGlobalPrefix))) == true
+            if (attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithoutGlobalPrefix))) == true
                 && attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IAsyncUntypedDataSourceGeneratorAttribute.WithoutGlobalPrefix))) != true)
             {
                 CheckDataGenerator(context, attribute, types);
@@ -607,7 +607,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }.AsReadOnly();
 
         var baseGeneratorAttribute = selfAndBaseTypes
-            .FirstOrDefault(x => x.Interfaces.Any(i => i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IAsyncDataSourceGeneratorAttribute.WithGlobalPrefix));
+            .FirstOrDefault(x => x.Interfaces.Any(i => i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithGlobalPrefix));
 
         if (baseGeneratorAttribute is null)
         {
@@ -615,6 +615,13 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         if (testDataTypes.Any(x => x.IsGenericDefinition()))
+        {
+            return;
+        }
+
+        // If the base generator attribute has no type arguments (like ArgumentsAttribute which returns object?[]?),
+        // skip compile-time type checking as it will be validated at runtime
+        if (baseGeneratorAttribute.TypeArguments.IsEmpty)
         {
             return;
         }

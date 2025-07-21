@@ -21,10 +21,10 @@ public static class TestDataSourceGenerator
             // Create an instance of the data source
             var dataSource = Activator.CreateInstance(dataSourceType);
             
-            if (dataSource is not IAsyncDataSourceGeneratorAttribute asyncDataSource)
+            if (dataSource is not IDataSourceAttribute asyncDataSource)
             {
                 throw new InvalidOperationException(
-                    $"Data source {dataSourceType.Name} does not implement IAsyncDataSourceGeneratorAttribute");
+                    $"Data source {dataSourceType.Name} does not implement IDataSourceAttribute");
             }
             
             // Create metadata for the data source with resolved generic types
@@ -64,7 +64,7 @@ public static class TestDataSourceGenerator
             };
             
             // Get the first data value from the typed data source
-            await foreach (var factory in asyncDataSource.GenerateAsync(metadata))
+            await foreach (var factory in asyncDataSource.GetDataRowsAsync(metadata))
             {
                 var data = await factory();
                 return data?.Length > 0 ? data[0] : null;
@@ -131,7 +131,7 @@ public static class TestDataSourceGenerator
             };
             
             // Get the first data value from the Matrix data source
-            await foreach (var factory in dataSource.GenerateAsync(metadata))
+            await foreach (var factory in dataSource.GetDataRowsAsync(metadata))
             {
                 var data = await factory();
                 return data?.Length > 0 ? data[0] : null;

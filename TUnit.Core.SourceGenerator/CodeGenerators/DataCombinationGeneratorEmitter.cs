@@ -916,7 +916,7 @@ public static class DataCombinationGeneratorEmitter
 
         writer.AppendLine("int classLoopCounter = 0;");
         writer.AppendLine("int methodLoopCounter = 0;");
-        writer.AppendLine("await foreach (var dataSourceFunc in ((IAsyncDataSourceGeneratorAttribute)generator).GenerateAsync(dataGeneratorMetadata))");
+        writer.AppendLine("await foreach (var dataSourceFunc in ((IDataSourceAttribute)generator).GetDataRowsAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine();
@@ -1540,11 +1540,11 @@ public static class DataCombinationGeneratorEmitter
             writer.Unindent();
             writer.AppendLine("};");
             
-            // Check if it's IAsyncDataSourceGeneratorAttribute (all async data sources implement this public interface)
-            writer.AppendLine($"if (dataSourceGenerator_{varName} is global::TUnit.Core.IAsyncDataSourceGeneratorAttribute asyncGenerator_{varName})");
+            // Check if it's IDataSourceAttribute (all data sources implement this interface)
+            writer.AppendLine($"if (dataSourceGenerator_{varName} is global::TUnit.Core.IDataSourceAttribute asyncGenerator_{varName})");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine($"await foreach (var dataSourceFunc in asyncGenerator_{varName}.GenerateAsync(metadata_{varName}))");
+            writer.AppendLine($"await foreach (var dataSourceFunc in asyncGenerator_{varName}.GetDataRowsAsync(metadata_{varName}))");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("var data = await dataSourceFunc();");
