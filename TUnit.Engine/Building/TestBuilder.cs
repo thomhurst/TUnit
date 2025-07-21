@@ -335,7 +335,7 @@ public sealed class TestBuilder : ITestBuilder
 
     /// <summary>
     /// Recursively injects properties with data sources into a single object.
-    /// Reuses the existing property injection logic from PropertyInjector.
+    /// Reuses the existing property injection logic from PropertyInjector with Func<T> resolution.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Property injection with fallback to reflection for non-AOT scenarios")]
     private static async Task InjectPropertiesIntoObjectAsync(
@@ -389,9 +389,9 @@ public sealed class TestBuilder : ITestBuilder
 #endif
             }
         }
-        catch
+        catch (Exception ex)
         {
-            throw;
+            throw new InvalidOperationException($"Failed to inject properties for type '{instance?.GetType().Name}': {ex.Message}", ex);
         }
     }
 
@@ -424,6 +424,7 @@ public sealed class TestBuilder : ITestBuilder
 
         return propertyDataSources.ToArray();
     }
+
 
     /// Efficiently create arguments array from factories without LINQ overhead
     private static async Task<object?[]> CreateArgumentsFromFactoriesAsync(IReadOnlyList<Func<Task<object?>>> factories)

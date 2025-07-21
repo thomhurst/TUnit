@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
@@ -58,7 +59,12 @@ public class MethodDataSourceAttribute : TestDataAttribute
             yield break;
         }
 
-        var targetType = ClassProvidingDataSource ?? dataGeneratorMetadata.TestClassType;
+        // For property injection, prefer the class containing the property over the test class
+        var targetType = ClassProvidingDataSource 
+            ?? (dataGeneratorMetadata.Type == DataGeneratorType.Property 
+                ? dataGeneratorMetadata.TestClassInstance?.GetType() 
+                : null) 
+            ?? dataGeneratorMetadata.TestClassType;
         var bindingFlags = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance;
 
         var methodInfo = targetType.GetMethod(MethodNameProvidingDataSource, bindingFlags)

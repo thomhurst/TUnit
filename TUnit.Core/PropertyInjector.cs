@@ -53,6 +53,9 @@ public static class PropertyInjector
                     var args = await factory();
                     var value = args?.FirstOrDefault();
 
+                    // Resolve Func<T> values to their actual values
+                    value = await ResolveTestDataValueAsync(value);
+
                     if (value != null && value.GetType().IsClass && value.GetType() != typeof(string))
                     {
                         var propertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
@@ -425,6 +428,76 @@ public static class PropertyInjector
         }
 
         return (properties.ToArray(), injectionData.ToArray());
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Func resolution requires reflection")]
+    private static async Task<object?> ResolveTestDataValueAsync(object? value)
+    {
+        if (value == null)
+        {
+            return null;
+        }
+
+        var type = value.GetType();
+
+        // Check if it's a Func<T>
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))
+        {
+            var returnType = type.GetGenericArguments()[0];
+
+            // Invoke the Func to get the result
+            var invokeMethod = type.GetMethod("Invoke");
+            var result = invokeMethod!.Invoke(value, null);
+
+            // If the result is a Task, await it
+            if (result is Task task)
+            {
+                await task.ConfigureAwait(false);
+
+                // Get the Result property for Task<T>
+                if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>))
+                {
+                    var resultProperty = task.GetType().GetProperty("Result");
+                    return resultProperty?.GetValue(task);
+                }
+
+                // For non-generic Task
+                return null;
+            }
+
+            return result;
+        }
+
+        // Check if it's already a Task<T>
+        if (value is Task task2)
+        {
+            await task2.ConfigureAwait(false);
+
+            var taskType = task2.GetType();
+            if (taskType.IsGenericType && taskType.GetGenericTypeDefinition() == typeof(Task<>))
+            {
+                var resultProperty = taskType.GetProperty("Result");
+                return resultProperty?.GetValue(task2);
+            }
+
+            return null;
+        }
+
+        // Handle other delegate types
+        if (typeof(Delegate).IsAssignableFrom(type))
+        {
+            var invokeMethod = type.GetMethod("Invoke");
+            if (invokeMethod != null && invokeMethod.GetParameters().Length == 0)
+            {
+                // It's a parameterless delegate, invoke it
+                var result = invokeMethod.Invoke(value, null);
+
+                // Recursively resolve in case it returns a Task
+                return await ResolveTestDataValueAsync(result).ConfigureAwait(false);
+            }
+        }
+
+        return value;
     }
 
 }

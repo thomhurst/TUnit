@@ -92,7 +92,7 @@ public class NestedPropertyInjectionTests
 
     public static IEnumerable<Func<PersonWithDataSource>> GetPersonWithDataSourceData()
     {
-        yield return () => new PersonWithDataSource { Name = "John Doe", Address = new Address { Street = "Default St", City = "Default City", Country = new Country { Name = "Default", Code = "DF" } } };
-        yield return () => new PersonWithDataSource { Name = "Jane Smith", Address = new Address { Street = "Another St", City = "Another City", Country = new Country { Name = "Another", Code = "AN" } } };
+        yield return () => new PersonWithDataSource { Name = "John Doe", Address = null! };
+        yield return () => new PersonWithDataSource { Name = "Jane Smith", Address = null! };
     }
 }
