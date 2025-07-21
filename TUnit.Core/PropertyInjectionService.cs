@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Data;
 using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Core.Enums;
+using TUnit.Core.Services;
 using System.Reflection;
 
 namespace TUnit.Core;
@@ -63,8 +64,8 @@ public sealed class PropertyInjectionService
     }
 
     /// <summary>
-    /// Recursively injects properties with data sources into a single object using the new static property source system.
-    /// The PropertySource includes inherited properties, so we only need to check the concrete type.
+    /// Recursively injects properties with data sources into a single object.
+    /// Uses source generation mode when available, falls back to reflection mode.
     /// After injection, handles tracking, initialization, and recursive injection.
     /// </summary>
     public static async Task InjectPropertiesIntoObjectAsync(object instance, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
@@ -73,24 +74,65 @@ public sealed class PropertyInjectionService
         {
             await _injectionTasks.GetOrAdd(instance, async _ =>
             {
-                var type = instance.GetType();
+                var executionMode = ModeDetector.Mode;
 
-                var propertySource = PropertySourceRegistry.GetSource(type);
-
-                if (propertySource?.ShouldInitialize == true)
+                switch (executionMode)
                 {
-                    var propertyMetadata = propertySource.GetPropertyMetadata();
-
-                    foreach (var metadata in propertyMetadata)
-                    {
-                        await ProcessPropertyMetadata(instance, metadata, objectBag, methodMetadata, events);
-                    }
+                    case TestExecutionMode.SourceGeneration:
+                        await InjectPropertiesUsingSourceGenerationAsync(instance, objectBag, methodMetadata, events);
+                        break;
+                    case TestExecutionMode.Reflection:
+                        await InjectPropertiesUsingReflectionAsync(instance, objectBag, methodMetadata, events);
+                        break;
+                    default:
+                        throw new NotSupportedException($"Test execution mode '{executionMode}' is not supported for property injection");
                 }
             });
         }
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Failed to inject properties for type '{instance?.GetType().Name}': {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Injects properties using source-generated metadata (AOT-safe mode).
+    /// </summary>
+    private static async Task InjectPropertiesUsingSourceGenerationAsync(object instance, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
+    {
+        var type = instance.GetType();
+        var propertySource = PropertySourceRegistry.GetSource(type);
+
+        if (propertySource?.ShouldInitialize == true)
+        {
+            var propertyMetadata = propertySource.GetPropertyMetadata();
+
+            foreach (var metadata in propertyMetadata)
+            {
+                await ProcessPropertyMetadata(instance, metadata, objectBag, methodMetadata, events);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Injects properties using runtime reflection (full feature mode).
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+    private static async Task InjectPropertiesUsingReflectionAsync(object instance, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
+    {
+        var type = instance.GetType();
+        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
+            .Where(p => p.CanWrite);
+
+        foreach (var property in properties)
+        {
+            foreach (var attr in property.GetCustomAttributes())
+            {
+                if (attr is IDataSourceAttribute dataSourceAttr)
+                {
+                    await ProcessReflectionPropertyDataSource(instance, property, dataSourceAttr, objectBag, methodMetadata, events);
+                }
+            }
         }
     }
 
@@ -153,6 +195,61 @@ public sealed class PropertyInjectionService
     }
 
     /// <summary>
+    /// Processes a property data source using reflection mode.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+    private static async Task ProcessReflectionPropertyDataSource(object instance, PropertyInfo property, IDataSourceAttribute dataSource, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
+    {
+        // Create metadata for data generation
+        var dataGeneratorMetadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
+            {
+                Events = events,
+                ClassInformation = methodMetadata.Class,
+                MethodInformation = methodMetadata,
+                DataAttribute = dataSource,
+                ObjectBag = objectBag,
+            }),
+            MembersToGenerate =
+            [
+                new PropertyMetadata
+                {
+                    IsStatic = property.GetMethod?.IsStatic ?? false,
+                    Name = property.Name,
+                    ClassMetadata = methodMetadata.Class,
+                    Type = property.PropertyType,
+                    ReflectionInfo = property,
+                    Getter = parent => property.GetValue(parent),
+                }
+            ],
+            TestInformation = methodMetadata,
+            Type = DataGeneratorType.Property,
+            TestSessionId = TestSessionContext.Current!.Id,
+            TestClassInstance = instance,
+            ClassInstanceArguments = TestContext.Current?.TestDetails.TestClassArguments ?? []
+        };
+
+        // Get data from the source
+        var dataRows = dataSource.GetDataRowsAsync(dataGeneratorMetadata);
+
+        await foreach (var factory in dataRows)
+        {
+            var args = await factory();
+            var value = args?.FirstOrDefault();
+
+            // Resolve any Func<T> wrappers
+            value = await ResolveTestDataValueAsync(property.PropertyType, value);
+
+            if (value != null)
+            {
+                await ProcessInjectedPropertyValue(instance, value, (inst, val) => property.SetValue(inst, val), objectBag, methodMetadata, events);
+                break; // Only use first value
+            }
+        }
+    }
+
+    /// <summary>
     /// Processes a single injected property value: tracks it, initializes it, sets it on the instance, and handles cleanup.
     /// </summary>
     private static async Task ProcessInjectedPropertyValue(object instance, object? propertyValue, Action<object, object?> setProperty, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
@@ -194,7 +291,7 @@ public sealed class PropertyInjectionService
         {
             var invokeMethod = type.GetMethod("Invoke");
             var result = invokeMethod!.Invoke(value, null);
-            return Task.FromResult(result);
+            return Task.FromResult<object?>(result);
         }
 
         return Task.FromResult<object?>(value);
