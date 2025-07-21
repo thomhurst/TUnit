@@ -4,30 +4,20 @@ using TUnit.Core.Helpers;
 namespace TUnit.Core.Tracking;
 
 /// <summary>
-/// Unified object tracker that combines reference counting with optional lifecycle management.
+/// Unified static object tracker that combines reference counting with lifecycle management.
 /// Consolidates the functionality of both DataSourceReferenceTracker and ActiveObjectTracker.
 /// </summary>
-public class UnifiedObjectTracker
+public static class UnifiedObjectTracker
 {
-    private readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
-    private readonly bool _enableRecursiveTracking;
-
-    /// <summary>
-    /// Creates a new UnifiedObjectTracker with specified options.
-    /// </summary>
-    /// <param name="enableRecursiveTracking">If true, collections will be recursively tracked</param>
-    public UnifiedObjectTracker(bool enableRecursiveTracking = false)
-    {
-        _enableRecursiveTracking = enableRecursiveTracking;
-    }
-
+    private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
+    private static readonly bool _enableRecursiveTracking = true;
 
     /// <summary>
     /// Tracks an object and increments its reference count.
     /// </summary>
     /// <param name="obj">The object to track</param>
     /// <returns>The tracked object (same instance)</returns>
-    public T TrackObject<T>(T obj) where T : notnull
+    public static T TrackObject<T>(T obj) where T : notnull
     {
         if (ShouldSkipTracking(obj))
         {
@@ -59,7 +49,7 @@ public class UnifiedObjectTracker
     /// </summary>
     /// <param name="obj">The object to track</param>
     /// <returns>The same object instance or null</returns>
-    public object? TrackObject(object? obj)
+    public static object? TrackObject(object? obj)
     {
         if (obj == null)
         {
@@ -92,7 +82,7 @@ public class UnifiedObjectTracker
     /// Tracks multiple objects.
     /// </summary>
     /// <param name="objects">The objects to track</param>
-    public void TrackObjects(IEnumerable<object?> objects)
+    public static void TrackObjects(IEnumerable<object?> objects)
     {
         foreach (var obj in objects)
         {
@@ -105,7 +95,7 @@ public class UnifiedObjectTracker
     /// </summary>
     /// <param name="obj">The object to release</param>
     /// <returns>True if the object has no more references and was removed from tracking</returns>
-    public async Task<bool> ReleaseObject(object? obj)
+    public static async Task<bool> ReleaseObject(object? obj)
     {
         if (obj == null || ShouldSkipTracking(obj))
         {
@@ -156,7 +146,7 @@ public class UnifiedObjectTracker
     /// </summary>
     /// <param name="obj">The object to get counter for</param>
     /// <returns>Counter or null if not tracked</returns>
-    public Counter? GetReferenceInfo(object? obj)
+    public static Counter? GetReferenceInfo(object? obj)
     {
         return obj != null && _trackedObjects.TryGetValue(obj, out var counter) ? counter : null;
     }
@@ -167,7 +157,7 @@ public class UnifiedObjectTracker
     /// <param name="obj">The object to check</param>
     /// <param name="counter">The reference counter if found</param>
     /// <returns>True if the object is tracked</returns>
-    public bool TryGetReference(object? obj, out Counter? counter)
+    public static bool TryGetReference(object? obj, out Counter? counter)
     {
         counter = null;
         if (obj == null || ShouldSkipTracking(obj))
@@ -183,7 +173,7 @@ public class UnifiedObjectTracker
     /// </summary>
     /// <param name="obj">The object to remove</param>
     /// <returns>True if the object was removed</returns>
-    public bool RemoveObject(object? obj)
+    public static bool RemoveObject(object? obj)
     {
         if (obj == null)
         {
@@ -196,12 +186,12 @@ public class UnifiedObjectTracker
     /// <summary>
     /// Gets the count of currently tracked objects.
     /// </summary>
-    public int TrackedObjectCount => _trackedObjects.Count;
+    public static int TrackedObjectCount => _trackedObjects.Count;
 
     /// <summary>
     /// Clears all tracked references. Use with caution!
     /// </summary>
-    public void Clear()
+    public static void Clear()
     {
         _trackedObjects.Clear();
     }

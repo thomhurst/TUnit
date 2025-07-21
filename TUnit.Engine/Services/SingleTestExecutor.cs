@@ -212,17 +212,17 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
         foreach (var arg in testDetails.TestMethodArguments)
         {
-            await ObjectTrackerProvider.Untrack(arg);
+            await UnifiedObjectTracker.ReleaseObject(arg);
         }
 
         foreach (var arg in testDetails.TestClassArguments)
         {
-            await ObjectTrackerProvider.Untrack(arg);
+            await UnifiedObjectTracker.ReleaseObject(arg);
         }
 
         foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
         {
-            await ObjectTrackerProvider.Untrack(kvp.Value);
+            await UnifiedObjectTracker.ReleaseObject(kvp.Value);
         }
     }
 
@@ -355,12 +355,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 continue;
             }
 
-            if (ObjectTrackerProvider.TryGetReference(obj, out var counter))
+            if (UnifiedObjectTracker.TryGetReference(obj, out var counter))
             {
                 var count = counter!.Decrement();
                 if (count == 0)
                 {
-                    ObjectTrackerProvider.Remove(obj);
+                    UnifiedObjectTracker.RemoveObject(obj);
 
                     if (obj is IAsyncDisposable asyncDisposable)
                     {

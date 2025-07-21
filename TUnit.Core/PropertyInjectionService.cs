@@ -259,7 +259,7 @@ public sealed class PropertyInjectionService
             return;
         }
 
-        var trackedValue = ObjectTrackerProvider.Track(propertyValue);
+        var trackedValue = UnifiedObjectTracker.TrackObject(propertyValue);
 
         if (trackedValue != null && ShouldInjectProperties(trackedValue))
         {
@@ -272,7 +272,7 @@ public sealed class PropertyInjectionService
 
         events.OnDispose += async (o, context) =>
         {
-            await ObjectTrackerProvider.Untrack(trackedValue);
+            await UnifiedObjectTracker.ReleaseObject(trackedValue);
         };
     }
 

@@ -282,12 +282,12 @@ public sealed class TestBuilder : ITestBuilder
     {
         foreach (var arg in classArguments)
         {
-            ObjectTrackerProvider.Track(arg);
+            UnifiedObjectTracker.TrackObject(arg);
         }
         
         foreach (var arg in methodArguments)
         {
-            ObjectTrackerProvider.Track(arg);
+            UnifiedObjectTracker.TrackObject(arg);
         }
     }
 
