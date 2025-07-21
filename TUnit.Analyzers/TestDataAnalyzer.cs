@@ -136,20 +136,32 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass,
                     context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.MethodDataSource.WithoutGlobalPrefix)))
             {
-                CheckMethodDataSource(context, attribute, testClassType, types);
+                // For property injection, only validate against the property type, not method parameters
+                var typesToValidate = propertySymbol != null 
+                    ? ImmutableArray.Create(propertySymbol.Type)
+                    : parameters.Select(p => p.Type).ToImmutableArray().WithoutCancellationTokenParameter();
+                CheckMethodDataSource(context, attribute, testClassType, typesToValidate);
             }
 
             if (attribute.AttributeClass?.IsGenericType is true
                 && SymbolEqualityComparer.Default.Equals(attribute.AttributeClass.OriginalDefinition,
                     context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.GenericMethodDataSource.WithoutGlobalPrefix)))
             {
-                CheckMethodDataSource(context, attribute, testClassType, types);
+                // For property injection, only validate against the property type, not method parameters
+                var typesToValidate = propertySymbol != null 
+                    ? ImmutableArray.Create(propertySymbol.Type)
+                    : parameters.Select(p => p.Type).ToImmutableArray().WithoutCancellationTokenParameter();
+                CheckMethodDataSource(context, attribute, testClassType, typesToValidate);
             }
 
             if (attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithoutGlobalPrefix))) == true
                 && attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IAsyncUntypedDataSourceGeneratorAttribute.WithoutGlobalPrefix))) != true)
             {
-                CheckDataGenerator(context, attribute, types);
+                // For property injection, only validate against the property type, not method parameters
+                var typesToValidate = propertySymbol != null 
+                    ? ImmutableArray.Create(propertySymbol.Type)
+                    : types;
+                CheckDataGenerator(context, attribute, typesToValidate);
             }
         }
     }
@@ -517,6 +529,13 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         if (context.Symbol is IPropertySymbol)
         {
+            // First, unwrap IEnumerable if present (for property injection data sources)
+            if (type.IsIEnumerable(context.Compilation, out var propertyEnumerableInnerType))
+            {
+                type = propertyEnumerableInnerType;
+            }
+            
+            // Then unwrap Func<T> if present
             if (type is INamedTypeSymbol { IsGenericType: true } propertyFuncType
                 && SymbolEqualityComparer.Default.Equals(
                     context.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName()),
