@@ -277,20 +277,20 @@ public sealed class PropertyInjectionService
     }
 
     /// <summary>
-    /// Resolves Func<T> values by invoking them.
+    /// Resolves Func<T> values by invoking them without using reflection (AOT-safe).
     /// </summary>
-    private static Task<object?> ResolveTestDataValueAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type, object? value)
+    private static Task<object?> ResolveTestDataValueAsync(Type type, object? value)
     {
         if (value == null)
         {
             return Task.FromResult<object?>(null);
         }
 
-        // Check if it's a Func<T>
-        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))
+        // Check if value is a delegate (includes all Func<T> types)
+        if (value is Delegate del)
         {
-            var invokeMethod = type.GetMethod("Invoke");
-            var result = invokeMethod!.Invoke(value, null);
+            // Use DynamicInvoke which is AOT-safe for parameterless delegates
+            var result = del.DynamicInvoke();
             return Task.FromResult<object?>(result);
         }
 
