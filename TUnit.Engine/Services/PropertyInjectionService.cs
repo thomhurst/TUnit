@@ -77,7 +77,7 @@ internal sealed class PropertyInjectionService
                 if (propertySource?.ShouldInitialize == true)
                 {
                     // First, create all data source objects
-                    var propertyValues = await propertySource.InitializeAsync(instance);
+                    var propertyValues = await propertySource.InjectAsync(instance);
 
                     // Then handle each created value: track, initialize, set property, and setup cleanup
                     foreach (var kvp in propertyValues)

@@ -186,7 +186,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
         GenerateUnsafeAccessorMethods(sb, classInfo);
 
-        GenerateInitializeAsync(sb, classInfo, classTypeName);
+        GenerateInjectAsync(sb, classInfo, classTypeName);
 
         sb.AppendLine("}");
         sb.AppendLine();
@@ -210,9 +210,9 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateInitializeAsync(StringBuilder sb, ClassWithDataSourceProperties classInfo, string classTypeName)
+    private static void GenerateInjectAsync(StringBuilder sb, ClassWithDataSourceProperties classInfo, string classTypeName)
     {
-        sb.AppendLine("    public async Task<Dictionary<string, object?>> InitializeAsync(object instance)");
+        sb.AppendLine("    public async Task<Dictionary<string, object?>> InjectAsync(object instance)");
         sb.AppendLine("    {");
         sb.AppendLine($"        var typedInstance = ({classTypeName})instance;");
         sb.AppendLine("        var testContext = TestContext.Current;");

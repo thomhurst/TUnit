@@ -21,8 +21,8 @@ public interface IPropertySource
     bool ShouldInitialize { get; }
 
     /// <summary>
-    /// Initializes the property on the given instance and returns a dictionary of property names to their initialized values.
+    /// Injects properties into the given instance and returns a dictionary of property names to their injected values.
     /// This allows the engine to handle tracking and lifecycle management of the returned values.
     /// </summary>
-    Task<Dictionary<string, object?>> InitializeAsync(object instance);
+    Task<Dictionary<string, object?>> InjectAsync(object instance);
 }
