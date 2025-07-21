@@ -5,9 +5,10 @@ namespace TUnit.Core.Extensions;
 
 public static class ClassConstructorExtensions
 {
-    public static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(this IClassConstructor classConstructor,
+    public static async Task<T> Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(this IClassConstructor classConstructor,
         ClassConstructorMetadata classConstructorMetadata) where T : class
     {
-        return (T) classConstructor.Create(typeof(T), classConstructorMetadata);
+        var instance = await classConstructor.Create(typeof(T), classConstructorMetadata);
+        return (T) instance;
     }
 }

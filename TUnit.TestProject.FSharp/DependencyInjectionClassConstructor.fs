@@ -16,7 +16,8 @@ type DependencyInjectionClassConstructor() =
         member _.Create(typ, _) =
             if scope.IsNone then
                 scope <- Some(serviceProvider.CreateAsyncScope())
-            ActivatorUtilities.GetServiceOrCreateInstance(scope.Value.ServiceProvider, typ)
+            let instance = ActivatorUtilities.GetServiceOrCreateInstance(scope.Value.ServiceProvider, typ)
+            Task.FromResult(instance)
 
     interface ITestEndEventReceiver with
         member _.OnTestEnd(_testContext) =

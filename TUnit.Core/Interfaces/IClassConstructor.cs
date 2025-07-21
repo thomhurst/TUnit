@@ -13,7 +13,8 @@ public interface IClassConstructor
     /// <param name="type">The type to instantiate. Must have accessible public constructors.</param>
     /// <param name="classConstructorMetadata">Metadata containing the test session ID and builder context for the test being executed.</param>
     /// <returns>
-    /// A new instance of the specified type. The implementation is responsible for resolving constructor
+    /// A task that represents the asynchronous creation operation. The value of the TResult parameter contains 
+    /// a new instance of the specified type. The implementation is responsible for resolving constructor
     /// parameters and dependencies.
     /// </returns>
     /// <remarks>
@@ -22,5 +23,5 @@ public interface IClassConstructor
     /// Implementations can use the provided <see cref="TestBuilderContext"/> from the <paramref name="classConstructorMetadata"/>
     /// to access shared data and event subscriptions for the current test execution.
     /// </remarks>
-    object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata);
+    Task<object> Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata);
 }

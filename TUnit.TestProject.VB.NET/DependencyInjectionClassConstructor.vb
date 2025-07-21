@@ -11,11 +11,12 @@ Public Class DependencyInjectionClassConstructor
     Private ReadOnly _serviceProvider As IServiceProvider = CreateServiceProvider()
     Private _scope As AsyncServiceScope? = Nothing
 
-    Public Function Create(type As Type, classConstructorMetadata As ClassConstructorMetadata) As Object Implements IClassConstructor.Create
+    Public Function Create(type As Type, classConstructorMetadata As ClassConstructorMetadata) As Task(Of Object) Implements IClassConstructor.Create
         If _scope Is Nothing Then
             _scope = _serviceProvider.CreateAsyncScope()
         End If
-        Return ActivatorUtilities.GetServiceOrCreateInstance(_scope.Value.ServiceProvider, type)
+        Dim instance = ActivatorUtilities.GetServiceOrCreateInstance(_scope.Value.ServiceProvider, type)
+        Return Task.FromResult(instance)
     End Function
 
     Public Function OnTestEnd(testContext As TestContext) As ValueTask Implements ITestEndEventReceiver.OnTestEnd
