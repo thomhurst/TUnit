@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Data;
 using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Core.Enums;
+using System.Reflection;
 
 namespace TUnit.Core;
 
@@ -121,8 +122,8 @@ public sealed class PropertyInjectionService
                     Name = metadata.PropertyName,
                     ClassMetadata = methodMetadata.Class,
                     Type = metadata.PropertyType,
-                    ReflectionInfo = metadata.ContainingType.GetProperty(metadata.PropertyName)!,
-                    Getter = parent => metadata.ContainingType.GetProperty(metadata.PropertyName)!.GetValue(parent!)!,
+                    ReflectionInfo = GetPropertyInfo(metadata.ContainingType, metadata.PropertyName),
+                    Getter = parent => GetPropertyInfo(metadata.ContainingType, metadata.PropertyName).GetValue(parent!)!,
                 }
             ],
             TestInformation = methodMetadata,
@@ -141,11 +142,11 @@ public sealed class PropertyInjectionService
             var value = args?.FirstOrDefault();
 
             // Resolve any Func<T> wrappers
-            value = await ResolveTestDataValueAsync(value);
+            value = await ResolveTestDataValueAsync(metadata.PropertyType, value);
 
             if (value != null)
             {
-                await ProcessInjectedPropertyValue(instance, metadata.PropertyName, value, metadata.SetProperty, objectBag, methodMetadata, events);
+                await ProcessInjectedPropertyValue(instance, value, metadata.SetProperty, objectBag, methodMetadata, events);
                 break; // Only use first value
             }
         }
@@ -154,7 +155,7 @@ public sealed class PropertyInjectionService
     /// <summary>
     /// Processes a single injected property value: tracks it, initializes it, sets it on the instance, and handles cleanup.
     /// </summary>
-    private static async Task ProcessInjectedPropertyValue(object instance, string propertyName, object? propertyValue, Action<object, object?> setProperty, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
+    private static async Task ProcessInjectedPropertyValue(object instance, object? propertyValue, Action<object, object?> setProperty, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
     {
         if (propertyValue == null)
         {
@@ -181,22 +182,29 @@ public sealed class PropertyInjectionService
     /// <summary>
     /// Resolves Func<T> values by invoking them.
     /// </summary>
-    [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2075", Justification = "Method invocation is expected for Func<T> resolution")]
-    private static Task<object?> ResolveTestDataValueAsync(object? value)
+    private static Task<object?> ResolveTestDataValueAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type, object? value)
     {
-        if (value == null) return Task.FromResult<object?>(null);
-
-        var type = value.GetType();
+        if (value == null)
+        {
+            return Task.FromResult<object?>(null);
+        }
 
         // Check if it's a Func<T>
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))
         {
             var invokeMethod = type.GetMethod("Invoke");
             var result = invokeMethod!.Invoke(value, null);
-            return Task.FromResult<object?>(result);
+            return Task.FromResult(result);
         }
 
         return Task.FromResult<object?>(value);
     }
 
+    /// <summary>
+    /// Gets PropertyInfo in an AOT-safe manner.
+    /// </summary>
+    private static PropertyInfo GetPropertyInfo([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type containingType, string propertyName)
+    {
+        return containingType.GetProperty(propertyName)!;
+    }
 }
