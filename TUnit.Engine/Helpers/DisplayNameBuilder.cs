@@ -4,14 +4,9 @@ using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Helpers;
 
-/// <summary>
-/// Shared helper class for building display names consistently across both AOT and reflection modes
-/// </summary>
+/// Builds display names consistently across AOT and reflection modes with custom attribute support
 internal static class DisplayNameBuilder
 {
-    /// <summary>
-    /// Builds a display name for a test, checking for DisplayNameAttribute first
-    /// </summary>
     public static string BuildDisplayName(
         TestMetadata metadata,
         object?[] arguments,

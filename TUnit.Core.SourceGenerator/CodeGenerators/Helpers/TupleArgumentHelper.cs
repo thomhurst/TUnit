@@ -2,21 +2,8 @@ using Microsoft.CodeAnalysis;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-/// <summary>
-/// Helper for generating tuple-aware argument access code in source generators.
-/// Handles unwrapping tuple types to access individual tuple items.
-/// </summary>
 public static class TupleArgumentHelper
 {
-    /// <summary>
-    /// Generates code to access an argument that may be a tuple.
-    /// If the parameter type is a tuple, generates args[index].Item1, args[index].Item2, etc.
-    /// Otherwise, generates standard args[index] access.
-    /// </summary>
-    /// <param name="parameterType">The type of the parameter</param>
-    /// <param name="argumentsArrayName">The name of the arguments array (e.g., "args")</param>
-    /// <param name="baseIndex">The base index in the arguments array</param>
-    /// <returns>A list of argument access expressions</returns>
     public static List<string> GenerateArgumentAccess(ITypeSymbol parameterType, string argumentsArrayName, int baseIndex)
     {
         var argumentExpressions = new List<string>();
@@ -41,11 +28,6 @@ public static class TupleArgumentHelper
         return argumentExpressions;
     }
 
-    /// <summary>
-    /// Generates code to access constructor arguments.
-    /// Since data sources already unwrap tuples into individual arguments,
-    /// we simply access each argument by index.
-    /// </summary>
     /// <param name="parameterTypes">The types of all constructor parameters</param>
     /// <param name="argumentsArrayName">The name of the arguments array (e.g., "args")</param>
     /// <returns>A list of argument access expressions for the constructor</returns>

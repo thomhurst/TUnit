@@ -3,14 +3,8 @@ using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-/// <summary>
-/// Shared helper for identifying data source attributes across different generators
-/// </summary>
 internal static class DataSourceAttributeHelper
 {
-    /// <summary>
-    /// Determines if an attribute class is a data source attribute
-    /// </summary>
     public static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)
     {
         if (attributeClass == null)

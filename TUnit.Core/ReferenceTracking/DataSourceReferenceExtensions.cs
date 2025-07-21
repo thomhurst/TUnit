@@ -1,8 +1,5 @@
 namespace TUnit.Core.ReferenceTracking;
 
-/// <summary>
-/// Extension methods for managing data source reference tracking in tests.
-/// </summary>
 public static class DataSourceReferenceExtensions
 {
     /// <summary>
@@ -18,19 +15,16 @@ public static class DataSourceReferenceExtensions
 
         var testDetails = context.TestDetails;
 
-        // Track test method arguments
         foreach (var arg in testDetails.TestMethodArguments)
         {
             DataSourceReferenceTrackerProvider.TrackDataSourceObject(arg);
         }
 
-        // Track test class constructor arguments
         foreach (var arg in testDetails.TestClassArguments)
         {
             DataSourceReferenceTrackerProvider.TrackDataSourceObject(arg);
         }
 
-        // Track injected property values
         foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
         {
             DataSourceReferenceTrackerProvider.TrackDataSourceObject(kvp.Value);
@@ -47,28 +41,22 @@ public static class DataSourceReferenceExtensions
     {
         var testDetails = context.TestDetails;
 
-        // Release test method arguments
         foreach (var arg in testDetails.TestMethodArguments)
         {
             await DataSourceReferenceTrackerProvider.ReleaseDataSourceObject(arg);
         }
 
-        // Release test class constructor arguments
         foreach (var arg in testDetails.TestClassArguments)
         {
             await DataSourceReferenceTrackerProvider.ReleaseDataSourceObject(arg);
         }
 
-        // Release injected property values
         foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
         {
             await DataSourceReferenceTrackerProvider.ReleaseDataSourceObject(kvp.Value);
         }
     }
 
-    /// <summary>
-    /// Gets the current reference tracking statistics.
-    /// </summary>
     public static DataSourceReferenceStats GetReferenceStats()
     {
         var tracker = DataSourceReferenceTrackerProvider.Instance;
@@ -89,9 +77,6 @@ public static class DataSourceReferenceExtensions
     }
 }
 
-/// <summary>
-/// Statistics about currently tracked data source references.
-/// </summary>
 public class DataSourceReferenceStats
 {
     public int TrackedObjectCount { get; init; }
@@ -99,9 +84,6 @@ public class DataSourceReferenceStats
     public List<TrackedObjectInfo> TrackedObjects { get; init; } = new();
 }
 
-/// <summary>
-/// Information about a tracked object.
-/// </summary>
 public class TrackedObjectInfo
 {
     public Type ObjectType { get; init; } = null!;

@@ -2,14 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Engine.Discovery;
 
-/// <summary>
-/// Helper for handling async data sources during discovery in reflection mode
-/// </summary>
+/// Handles async data sources during discovery by creating placeholders to avoid premature evaluation
 internal static class AsyncDataSourceHelper
 {
-    /// <summary>
     /// Processes async generator items without evaluating them during discovery
-    /// </summary>
     public static List<object?[]> ProcessAsyncGeneratorItemsForDiscovery(object? item)
     {
         var items = new List<object?[]>();
@@ -172,18 +168,12 @@ internal static class AsyncDataSourceHelper
         return items;
     }
     
-    /// <summary>
-    /// Checks if test data contains async placeholders that need resolution
-    /// </summary>
     public static bool ContainsAsyncPlaceholders(object?[] arguments)
     {
         return arguments.Any(arg => arg is AsyncDataSourcePlaceholder || 
                                    (arg is string s && s.StartsWith("<async:")));
     }
     
-    /// <summary>
-    /// Resolves async placeholders in test arguments
-    /// </summary>
     public static async Task<object?[]> ResolveAsyncPlaceholders(object?[] arguments)
     {
         var resolved = new object?[arguments.Length];

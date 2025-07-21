@@ -1,18 +1,12 @@
 namespace TUnit.Engine.Discovery;
 
-/// <summary>
-/// Placeholder for async data sources during test discovery.
-/// Actual data will be resolved during test execution.
-/// </summary>
+/// Placeholder for async data sources during test discovery - actual data resolved at execution time
 internal sealed class AsyncDataSourcePlaceholder
 {
     public Func<Task<object?[]?>>? ArrayFactory { get; init; }
     public Func<Task<object?>>? SingleValueFactory { get; init; }
     public Type? ExpectedType { get; init; }
     
-    /// <summary>
-    /// Creates placeholder arguments for display during discovery
-    /// </summary>
     public object?[] GetPlaceholderArguments()
     {
         // For typed async data sources, we can sometimes infer the expected structure
@@ -31,9 +25,6 @@ internal sealed class AsyncDataSourcePlaceholder
         return ["<async>"];
     }
     
-    /// <summary>
-    /// Resolves the actual data by executing the async factory
-    /// </summary>
     public async Task<object?[]> ResolveAsync()
     {
         if (SingleValueFactory != null)

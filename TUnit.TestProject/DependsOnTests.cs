@@ -11,16 +11,14 @@ public class DependsOnTests
     [Test]
     public async Task Test1()
     {
-        // TODO: Fix when TestStart property is added to TestContext or use Timings
-        _test1Start = DateTime.Now; // TestContext.Current!.TestStart!.Value.DateTime;
+        _test1Start = DateTime.Now;
         await Task.Delay(TimeSpan.FromSeconds(5));
     }
 
     [Test, DependsOn(nameof(Test1))]
     public async Task Test2()
     {
-        // TODO: Fix when TestStart property is added to TestContext or use Timings
-        _test2Start = DateTime.Now; // TestContext.Current!.TestStart!.Value.DateTime;
+        _test2Start = DateTime.Now;
         await Task.CompletedTask;
     }
 

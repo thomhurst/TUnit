@@ -6,9 +6,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building;
 
-/// <summary>
-/// Main pipeline that orchestrates the unified test building process using the simplified approach
-/// </summary>
+/// Orchestrates unified test building with streaming support and error handling
 public sealed class UnifiedTestBuilderPipeline
 {
     private readonly ITestDataCollector _dataCollector;
@@ -28,9 +26,6 @@ public sealed class UnifiedTestBuilderPipeline
         _contextProvider = contextBuilder;
     }
 
-    /// <summary>
-    /// Builds all executable tests through the simplified pipeline
-    /// </summary>
     public async Task<IEnumerable<ExecutableTest>> BuildTestsAsync(string testSessionId)
     {
         // Stage 1: Collect test metadata
@@ -76,9 +71,7 @@ public sealed class UnifiedTestBuilderPipeline
         return executableTests;
     }
 
-    /// <summary>
-    /// Builds executable tests as a stream through the pipeline
-    /// </summary>
+    /// Streams executable tests for memory efficiency with large test suites
     public async IAsyncEnumerable<ExecutableTest> BuildTestsStreamAsync(
         string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)

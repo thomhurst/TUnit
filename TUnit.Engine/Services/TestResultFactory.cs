@@ -2,9 +2,6 @@
 
 namespace TUnit.Engine.Services;
 
-/// <summary>
-/// Default test result factory implementation
-/// </summary>
 internal sealed class TestResultFactory : ITestResultFactory
 {
     public TestResult CreatePassedResult(DateTimeOffset startTime)

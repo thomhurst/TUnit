@@ -9,9 +9,6 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building;
 
-/// <summary>
-/// Builds executable tests from expanded test data
-/// </summary>
 public sealed class TestBuilder : ITestBuilder
 {
     private readonly IServiceProvider _serviceProvider;
@@ -24,10 +21,7 @@ public sealed class TestBuilder : ITestBuilder
     }
 
 
-    /// <summary>
-    /// Builds all executable tests from a single TestMetadata using its DataCombinationGenerator delegate.
-    /// This is the new simplified approach that replaces DataSourceExpander.
-    /// </summary>
+    /// Uses the DataCombinationGenerator delegate to avoid reflection overhead
     public async Task<IEnumerable<ExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata)
     {
         var tests = new List<ExecutableTest>();
@@ -287,9 +281,7 @@ public sealed class TestBuilder : ITestBuilder
         ActiveObjectTracker.IncrementUsage(methodArguments);
     }
 
-    /// <summary>
     /// Efficiently create arguments array from factories without LINQ overhead
-    /// </summary>
     private static async Task<object?[]> CreateArgumentsFromFactoriesAsync(IReadOnlyList<Func<Task<object?>>> factories)
     {
         if (factories.Count == 0)

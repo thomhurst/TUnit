@@ -20,28 +20,12 @@ public class TestDataCombination
     public Func<Task<object?>>[] MethodDataFactories { get; init; } = [
     ];
 
-    /// <summary>
-    /// The index of the data source attribute applied to the method.
-    /// -1 if no method data source is present.
-    /// </summary>
     public int MethodDataSourceIndex { get; init; } = -1;
 
-    /// <summary>
-    /// The index of the data source attribute applied to the class.
-    /// -1 if no class data source is present.
-    /// </summary>
     public int ClassDataSourceIndex { get; init; } = -1;
 
-    /// <summary>
-    /// The loop index within the method data source if it returns multiple rows.
-    /// 0 for the first row, 1 for the second, etc.
-    /// </summary>
     public int MethodLoopIndex { get; init; } = 0;
 
-    /// <summary>
-    /// The loop index within the class data source if it returns multiple rows.
-    /// 0 for the first row, 1 for the second, etc.
-    /// </summary>
     public int ClassLoopIndex { get; init; } = 0;
 
 
@@ -51,20 +35,9 @@ public class TestDataCombination
     /// </summary>
     public Exception? DataGenerationException { get; init; }
 
-    /// <summary>
-    /// Custom display name for this combination, typically used for error cases.
-    /// </summary>
     public string? DisplayName { get; init; }
 
-    /// <summary>
-    /// The repeat index for tests using the RepeatAttribute.
-    /// 0 for the first run, 1 for the second, etc.
-    /// </summary>
     public int RepeatIndex { get; init; } = 0;
 
-    /// <summary>
-    /// Resolved generic type arguments for generic tests.
-    /// Key: generic parameter name (e.g., "T"), Value: resolved concrete type.
-    /// </summary>
     public Dictionary<string, Type>? ResolvedGenericTypes { get; init; }
 }

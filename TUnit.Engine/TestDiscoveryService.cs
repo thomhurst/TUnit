@@ -9,9 +9,6 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
 
-/// <summary>
-/// Result of test discovery including tests and execution context
-/// </summary>
 internal sealed class TestDiscoveryResult
 {
     public IEnumerable<ExecutableTest> Tests { get; }
@@ -24,9 +21,7 @@ internal sealed class TestDiscoveryResult
     }
 }
 
-/// <summary>
-/// Unified test discovery service that uses the new pipeline architecture
-/// </summary>
+/// Unified test discovery service using the pipeline architecture with streaming support
 internal sealed class TestDiscoveryService : IDataProducer
 {
     private const int DiscoveryTimeoutSeconds = 60;
@@ -53,9 +48,6 @@ internal sealed class TestDiscoveryService : IDataProducer
         _testFilterService = testFilterService;
     }
 
-    /// <summary>
-    /// Discovers all tests using the unified pipeline
-    /// </summary>
     public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
         var beforeDiscoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken);
@@ -95,9 +87,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         return new TestDiscoveryResult(filteredTests, finalContext);
     }
 
-    /// <summary>
-    /// Discovers tests as a stream, enabling parallel discovery and execution
-    /// </summary>
+    /// Streams test discovery for parallel discovery and execution
     private async IAsyncEnumerable<ExecutableTest> DiscoverTestsStreamAsync(
         string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -142,9 +132,6 @@ internal sealed class TestDiscoveryService : IDataProducer
 
 
 
-    /// <summary>
-    /// Gets all cached test contexts for use by TestFinder
-    /// </summary>
     public IEnumerable<TestContext> GetCachedTestContexts()
     {
         return _cachedTests.Select(t => t.Context);

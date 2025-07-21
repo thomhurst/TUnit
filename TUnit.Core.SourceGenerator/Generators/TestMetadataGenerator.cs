@@ -11,10 +11,6 @@ using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
-/// <summary>
-/// Simplified test metadata generator that emits one TestMetadata<T> per method
-/// with a DataCombinationGenerator delegate for runtime data expansion.
-/// </summary>
 [Generator]
 public sealed class TestMetadataGenerator : IIncrementalGenerator
 {
@@ -1749,9 +1745,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    /// <summary>
-    /// Generates field accessors for init-only properties with data source attributes
-    /// </summary>
     private static void GenerateReflectionFieldAccessors(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)
     {
         // Find all init-only properties with data source attributes
@@ -1785,9 +1778,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var backingFieldName = $"<{property.Name}>k__BackingField";
                 var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
-                writer.AppendLine($"/// <summary>");
-                writer.AppendLine($"/// UnsafeAccessor for init-only property {property.Name} backing field");
-                writer.AppendLine($"/// </summary>");
                 writer.AppendLine($"[global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
                 writer.AppendLine($"private static extern ref {propertyType} Get{property.Name}BackingField({className} instance);");
                 writer.AppendLine();
@@ -1891,8 +1881,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("ParameterPositions = new int[]");
         writer.AppendLine("{");
         writer.Indent();
-        // TODO: Implement parameter position mapping for type inference
-        writer.AppendLine("// TODO: Map type parameters to method argument positions");
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -1959,9 +1947,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 }
 
-/// <summary>
-/// Metadata for a class with [InheritsTests] attribute
-/// </summary>
 public class InheritsTestsClassMetadata
 {
     public required INamedTypeSymbol TypeSymbol { get; init; }

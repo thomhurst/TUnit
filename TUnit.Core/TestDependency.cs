@@ -5,42 +5,21 @@ namespace TUnit.Core;
 /// </summary>
 public sealed class TestDependency : IEquatable<TestDependency>
 {
-    /// <summary>
-    /// The type containing the test method
-    /// </summary>
     public Type? ClassType { get; init; }
 
-    /// <summary>
-    /// Number of generic type parameters on the class (0 for non-generic classes)
-    /// </summary>
     public int ClassGenericArity { get; init; }
 
-    /// <summary>
-    /// The name of the test method
-    /// </summary>
     public string? MethodName { get; init; }
 
-    /// <summary>
-    /// Parameter types of the method (null if not specified)
-    /// </summary>
     public Type[]? MethodParameters { get; init; }
 
-    /// <summary>
-    /// Number of generic type parameters on the method (0 for non-generic methods)
-    /// </summary>
     public int MethodGenericArity { get; init; }
 
-    /// <summary>
-    /// Creates a dependency on a specific test method by name within the same class
-    /// </summary>
     public static TestDependency FromMethodName(string methodName)
     {
         return new TestDependency { MethodName = methodName };
     }
 
-    /// <summary>
-    /// Creates a dependency on all tests in a specific class
-    /// </summary>
     public static TestDependency FromClass(Type classType)
     {
         return new TestDependency
@@ -50,9 +29,6 @@ public sealed class TestDependency : IEquatable<TestDependency>
         };
     }
 
-    /// <summary>
-    /// Creates a dependency on a specific test method in a specific class
-    /// </summary>
     public static TestDependency FromClassAndMethod(Type classType, string methodName)
     {
         return new TestDependency
@@ -63,23 +39,16 @@ public sealed class TestDependency : IEquatable<TestDependency>
         };
     }
 
-    /// <summary>
-    /// Checks if this dependency matches the given test metadata
-    /// </summary>
     public bool Matches(TestMetadata test, TestMetadata? dependentTest = null)
     {
-        // If ClassType is specified, it must match
         if (ClassType != null)
         {
             var testClassType = test.TestClassType;
 
-            // Handle generic type matching
             if (ClassType.IsGenericTypeDefinition && testClassType.IsGenericType)
             {
-                // Match generic type definition
                 if (testClassType.GetGenericTypeDefinition() != ClassType)
                 {
-                    // Check if any base type matches the generic type definition
                     var currentType = testClassType.BaseType;
                     var found = false;
                     while (currentType != null && !found)
@@ -101,7 +70,6 @@ public sealed class TestDependency : IEquatable<TestDependency>
                 return false;
             }
 
-            // Check generic arity if specified
             if (ClassGenericArity > 0)
             {
                 var testGenericArgs = testClassType.IsGenericType
@@ -115,14 +83,12 @@ public sealed class TestDependency : IEquatable<TestDependency>
         }
         else if (dependentTest != null)
         {
-            // If no ClassType specified, assume same class as dependent test
             if (test.TestClassType != dependentTest.TestClassType)
             {
                 return false;
             }
         }
 
-        // If MethodName is specified, it must match
         if (!string.IsNullOrEmpty(MethodName))
         {
             if (test.TestMethodName != MethodName)
@@ -130,7 +96,6 @@ public sealed class TestDependency : IEquatable<TestDependency>
                 return false;
             }
 
-            // Check method parameters if specified
             if (MethodParameters != null)
             {
                 var testParams = test.TestMethodParameterTypes ?? [
@@ -140,7 +105,6 @@ public sealed class TestDependency : IEquatable<TestDependency>
                     return false;
                 }
 
-                // Compare parameter types
                 for (var i = 0; i < MethodParameters.Length; i++)
                 {
                     if (testParams[i] != MethodParameters[i].FullName)
@@ -150,7 +114,6 @@ public sealed class TestDependency : IEquatable<TestDependency>
                 }
             }
 
-            // Check method generic arity if specified
             if (MethodGenericArity > 0)
             {
                 // This would need to be added to TestMetadata if we want to support it
@@ -158,10 +121,8 @@ public sealed class TestDependency : IEquatable<TestDependency>
             }
         }
 
-        // Don't match self-dependencies when only class is specified
         if (ClassType != null && string.IsNullOrEmpty(MethodName) && dependentTest != null)
         {
-            // If depending on all tests in a class, exclude self
             if (test.TestClassType == dependentTest.TestClassType && 
                 test.TestMethodName == dependentTest.TestMethodName)
             {

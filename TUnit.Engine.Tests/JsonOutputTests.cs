@@ -6,7 +6,7 @@ namespace TUnit.Engine.Tests;
 public class JsonOutputTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
-    [Skip("TODO")]
+    [Skip("JSON output validation test - needs implementation to verify JSON output format")]
     public async Task Test()
     {
         var prefix = "myprefix_";

@@ -32,7 +32,6 @@ public abstract record StaticHookMethod
 
     public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => Attributes.OfType<TAttribute>().FirstOrDefault();
 
-    // TODO?
     public TimeSpan? Timeout => GetAttribute<TimeoutAttribute>()?.Timeout;
 
     public required IHookExecutor HookExecutor { get; init; }

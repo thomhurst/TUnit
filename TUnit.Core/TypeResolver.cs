@@ -17,11 +17,6 @@ public sealed class TypeResolver
     private readonly Type? _declaringType;
     private readonly MethodInfo? _declaringMethod;
 
-    /// <summary>
-    /// Creates a TypeResolver for a specific generic context.
-    /// </summary>
-    /// <param name="declaringType">The type containing generic parameters (if any)</param>
-    /// <param name="declaringMethod">The method containing generic parameters (if any)</param>
     public TypeResolver(Type? declaringType = null, MethodInfo? declaringMethod = null)
     {
         _declaringType = declaringType;
@@ -29,18 +24,12 @@ public sealed class TypeResolver
         _genericParameterMap = BuildGenericParameterMap(declaringType, declaringMethod);
     }
 
-    /// <summary>
-    /// Creates a TypeResolver from a test instance, extracting generic arguments from its runtime type.
-    /// </summary>
     public static TypeResolver FromTestInstance(object testInstance, MethodInfo? testMethod = null)
     {
         var testType = testInstance.GetType();
         return new TypeResolver(testType, testMethod);
     }
 
-    /// <summary>
-    /// Resolves a TypeReference to an actual Type.
-    /// </summary>
     [UnconditionalSuppressMessage("AOT", "IL2055:MakeGenericType", Justification = "TypeResolver is not AOT-compatible by design")]
     [UnconditionalSuppressMessage("AOT", "IL3050:RequiresDynamicCode", Justification = "TypeResolver is not AOT-compatible by design")]
     [UnconditionalSuppressMessage("AOT", "IL2057:TypeGetType", Justification = "TypeResolver is not AOT-compatible by design")]
@@ -52,7 +41,6 @@ public sealed class TypeResolver
             throw new ArgumentNullException(nameof(typeReference));
         }
 
-        // Handle generic parameters
         if (typeReference.IsGenericParameter)
         {
             var key = (typeReference.GenericParameterPosition, typeReference.IsMethodGenericParameter);
@@ -67,7 +55,6 @@ public sealed class TypeResolver
                 $"Available parameters: {string.Join(", ", _genericParameterMap.Keys)}");
         }
 
-        // Handle array types
         if (typeReference.IsArray)
         {
             if (typeReference.ElementType == null)
@@ -81,7 +68,6 @@ public sealed class TypeResolver
                 : elementType.MakeArrayType(typeReference.ArrayRank);
         }
 
-        // Handle pointer types
         if (typeReference.IsPointer)
         {
             if (typeReference.ElementType == null)
@@ -93,7 +79,6 @@ public sealed class TypeResolver
             return elementType.MakePointerType();
         }
 
-        // Handle by-reference types
         if (typeReference.IsByRef)
         {
             if (typeReference.ElementType == null)
@@ -105,19 +90,16 @@ public sealed class TypeResolver
             return elementType.MakeByRefType();
         }
 
-        // Handle concrete types
         if (string.IsNullOrEmpty(typeReference.AssemblyQualifiedName))
         {
             throw new InvalidOperationException("Non-generic TypeReference must have AssemblyQualifiedName");
         }
 
-        // Try to get from cache first
         if (_typeCache.TryGetValue(typeReference.AssemblyQualifiedName!, out var cachedType))
         {
             return ApplyGenericArguments(cachedType, typeReference);
         }
 
-        // Resolve the type
         var type = Type.GetType(typeReference.AssemblyQualifiedName);
         if (type == null)
         {
@@ -128,9 +110,6 @@ public sealed class TypeResolver
         return ApplyGenericArguments(type, typeReference);
     }
 
-    /// <summary>
-    /// Resolves multiple TypeReferences in a single operation.
-    /// </summary>
     public Type[] ResolveMany(IEnumerable<TypeReference> typeReferences)
     {
         return typeReferences.Select(Resolve).ToArray();
@@ -143,12 +122,10 @@ public sealed class TypeResolver
             return type;
         }
 
-        // Resolve generic arguments
         var genericArgs = typeReference.GenericArguments
             .Select(Resolve)
             .ToArray();
 
-        // If this is a generic type definition, make it concrete
         if (type.IsGenericTypeDefinition)
         {
             return type.MakeGenericType(genericArgs);
@@ -171,7 +148,6 @@ public sealed class TypeResolver
     {
         var map = new Dictionary<(int position, bool isMethodParameter), Type>();
 
-        // Add type generic parameters
         if (declaringType?.IsGenericType == true)
         {
             var genericArgs = declaringType.GetGenericArguments();
@@ -181,7 +157,6 @@ public sealed class TypeResolver
             }
         }
 
-        // Add method generic parameters
         if (declaringMethod?.IsGenericMethodDefinition == true)
         {
             var genericArgs = declaringMethod.GetGenericArguments();
@@ -194,10 +169,6 @@ public sealed class TypeResolver
         return map;
     }
 
-    /// <summary>
-    /// Creates a simple resolver that doesn't handle generic parameters.
-    /// Useful for non-generic contexts.
-    /// </summary>
     public static TypeResolver CreateSimple()
     {
         return new TypeResolver();

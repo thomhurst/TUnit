@@ -9,9 +9,7 @@ using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Services;
 
-/// <summary>
-/// Optimized event receiver orchestrator with fast-path checks and batching support
-/// </summary>
+/// Optimized event receiver orchestrator with fast-path checks, batching, and lifecycle tracking
 internal sealed class EventReceiverOrchestrator : IDisposable
 {
     private readonly EventReceiverRegistry _registry = new();

@@ -9,9 +9,7 @@ using System.Threading.Channels;
 
 namespace TUnit.Engine.Execution;
 
-/// <summary>
-/// Executes tests as they are discovered via streaming
-/// </summary>
+/// Executes tests as they are discovered via streaming with dependency resolution
 internal sealed class StreamingTestExecutor
 {
     private readonly UnifiedTestExecutor _executor;

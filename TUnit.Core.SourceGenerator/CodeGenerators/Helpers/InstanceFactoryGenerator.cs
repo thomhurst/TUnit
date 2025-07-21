@@ -2,14 +2,8 @@ using Microsoft.CodeAnalysis;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-/// <summary>
-/// Centralized helper for generating instance factory code
-/// </summary>
 public static class InstanceFactoryGenerator
 {
-    /// <summary>
-    /// Generates the instance factory code for a test class
-    /// </summary>
     public static void GenerateInstanceFactory(CodeWriter writer, ITypeSymbol typeSymbol)
     {
         var className = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);

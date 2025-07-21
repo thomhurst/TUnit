@@ -7,10 +7,6 @@ using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
-/// <summary>
-/// Responsible for emitting the unified DataCombinationGenerator delegate code
-/// that handles all data source expansion at compile-time
-/// </summary>
 public static class DataCombinationGeneratorEmitter
 {
     public static void EmitDataCombinationGenerator(
@@ -40,24 +36,10 @@ public static class DataCombinationGeneratorEmitter
         var classDataSources = GetDataSourceAttributes(typeSymbol);
         var propertyDataSources = GetPropertyDataSources(typeSymbol);
 
-        // Debug: Log what we found at compile time
-        writer.AppendLine($"// Compile-time debug: Method '{methodSymbol.Name}' has {methodDataSources.Length} data source attributes");
-        writer.AppendLine($"// Compile-time debug: Method has {methodSymbol.GetAttributes().Length} total attributes");
-        foreach (var attr in methodSymbol.GetAttributes())
-        {
-            writer.AppendLine($"// - Attribute: {attr.AttributeClass?.Name ?? "Unknown"}");
-        }
 
         // Get repeat count from RepeatAttribute
         var repeatCount = GetRepeatCount(methodSymbol, typeSymbol);
         
-        // Debug: Log all attributes on the method
-        writer.AppendLine($"// Method: {methodSymbol.Name}");
-        writer.AppendLine($"// All method attributes count: {methodSymbol.GetAttributes().Length}");
-        foreach (var attr in methodSymbol.GetAttributes())
-        {
-            writer.AppendLine($"// Method attribute: {attr.AttributeClass?.Name}");
-        }
 
         // Check if we have generic types that need resolution
         var hasGenericTypes = testMethodMetadata?.IsGenericType == true;
@@ -95,7 +77,6 @@ public static class DataCombinationGeneratorEmitter
         ImmutableArray<PropertyWithDataSource> propertyDataSources,
         int repeatCount)
     {
-        writer.AppendLine("// Generate all data combinations at compile time");
         writer.AppendLine("var allCombinations = new List<TestDataCombination>();");
         writer.AppendLine("var errorCombination = (TestDataCombination?)null;");
         writer.AppendLine("try");
@@ -106,14 +87,11 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("var classCombinations = new List<TestDataCombination>();");
         writer.AppendLine();
         
-        // Runtime helpers now handle instance data source property initialization
 
         EmitMethodDataCombinations(writer, methodDataSources, methodSymbol, typeSymbol);
         EmitClassDataCombinations(writer, classDataSources, methodSymbol, typeSymbol);
-        // Properties are now resolved directly in PropertyInjector, no need to generate combinations
 
         writer.AppendLine();
-        writer.AppendLine("// Ensure we have at least one combination of each type");
         writer.AppendLine("if (methodCombinations.Count == 0) methodCombinations.Add(new TestDataCombination());");
         writer.AppendLine("if (classCombinations.Count == 0) classCombinations.Add(new TestDataCombination());");
         writer.AppendLine();
@@ -125,7 +103,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("catch (Exception ex)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("// If combination generation fails, store error for yielding after try-catch");
         writer.AppendLine("errorCombination = new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
@@ -136,11 +113,9 @@ public static class DataCombinationGeneratorEmitter
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
-        writer.AppendLine("// Yield combinations outside of try-catch");
         writer.AppendLine("if (errorCombination != null)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("// Apply repeat for error cases too");
         writer.AppendLine($"for (var repeatIndex = 0; repeatIndex <= {repeatCount}; repeatIndex++)");
         writer.AppendLine("{");
         writer.Indent();
@@ -159,14 +134,12 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("else");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("// Apply repeat if specified");
         writer.AppendLine($"for (var repeatIndex = 0; repeatIndex <= {repeatCount}; repeatIndex++)");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine("foreach (var combination in allCombinations)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("// Clone the combination with the repeat index");
         writer.AppendLine("yield return new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
@@ -191,7 +164,6 @@ public static class DataCombinationGeneratorEmitter
 
     private static void EmitMethodDataCombinations(CodeWriter writer, ImmutableArray<AttributeData> methodDataSources, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
-        writer.AppendLine("// Method data sources");
         writer.AppendLine("int methodDataSourceCounter = 0;");
         writer.AppendLine("int classDataSourceCounter = 0;");
         for (var i = 0; i < methodDataSources.Length; i++)
@@ -204,7 +176,6 @@ public static class DataCombinationGeneratorEmitter
     private static void EmitClassDataCombinations(CodeWriter writer, ImmutableArray<AttributeData> classDataSources, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         writer.AppendLine();
-        writer.AppendLine("// Class data sources");
         writer.AppendLine("classDataSourceCounter = 0;");
         writer.AppendLine("methodDataSourceCounter = 0;");
         for (var i = 0; i < classDataSources.Length; i++)
@@ -221,7 +192,6 @@ public static class DataCombinationGeneratorEmitter
         writer.Indent();
 
         // Emit code to get the current indices
-        writer.AppendLine("// Get current indices and increment the appropriate counter");
         writer.AppendLine("var currentClassIndex = classDataSourceCounter;");
         writer.AppendLine("var currentMethodIndex = methodDataSourceCounter;");
 
@@ -285,7 +255,6 @@ public static class DataCombinationGeneratorEmitter
 
     private static void EmitArgumentsAttribute(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
-        writer.AppendLine("// ArgumentsAttribute");
 
         try
         {
@@ -343,14 +312,12 @@ public static class DataCombinationGeneratorEmitter
         }
         catch
         {
-            writer.AppendLine("// Error processing ArgumentsAttribute");
             EmitEmptyCombination(writer, listName);
         }
     }
 
     private static void EmitMethodDataSource(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol)
     {
-        writer.AppendLine("// MethodDataSourceAttribute");
 
         if (attr.ConstructorArguments.Length < 1)
         {
@@ -581,12 +548,10 @@ public static class DataCombinationGeneratorEmitter
         }
 
         writer.AppendLine($"// Instance method data source: {methodName}");
-        writer.AppendLine("// Instance methods are deferred to runtime execution");
         
         // Generate deferred execution that will be called at runtime
         writer.AppendLine($"var deferredInstanceMethod = new Func<Task<object?[][]>>(async () => {{");
         writer.Indent();
-        writer.AppendLine("// This will be executed at runtime when the test instance is available");
         writer.AppendLine("throw new NotSupportedException(");
         writer.AppendLine($"    \"Untyped instance method '{methodName}' requires manual implementation. \" +");
         writer.AppendLine("    \"Please use InstanceMethodDataSourceAttribute<T> for type-safe generic inference.\");");
@@ -642,7 +607,6 @@ public static class DataCombinationGeneratorEmitter
             if (typeArgs.Length > 0)
             {
                 writer.AppendLine($"// Typed instance method data source: {methodName}");
-                writer.AppendLine("// Type inference from InstanceMethodDataSourceAttribute<T>");
                 
                 // Generate type resolution for generics
                 writer.AppendLine("var instanceMethodTypes = new Dictionary<string, Type>();");
@@ -709,7 +673,6 @@ public static class DataCombinationGeneratorEmitter
 
     private static void EmitAsyncUntypedDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
-        writer.AppendLine("// AsyncUntypedDataSourceGeneratorAttribute");
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
@@ -718,7 +681,6 @@ public static class DataCombinationGeneratorEmitter
         var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
         writer.AppendLine($"var generator = {generatorCode};");
 
-        writer.AppendLine("// Create TestInformation for the data generator");
         writer.Append("var testInformation = ");
         TestInformationGenerator.GenerateTestInformation(writer, methodSymbol, typeSymbol);
         writer.AppendLine(";");
@@ -730,13 +692,11 @@ public static class DataCombinationGeneratorEmitter
             EmitNestedDataSourceInitialization(writer, attr.AttributeClass, "generator", methodSymbol, typeSymbol);
         }
 
-        writer.AppendLine("// Create MembersToGenerate array based on whether it's class or method level");
         writer.AppendLine("var membersToGenerate = new MemberMetadata[]");
         writer.AppendLine("{");
         writer.Indent();
         if (isClassLevel)
         {
-            writer.AppendLine("// For class-level data sources, we need constructor parameters");
             var constructorParams = typeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters;
             if (constructorParams != null && constructorParams.Value.Length > 0)
             {
@@ -755,7 +715,6 @@ public static class DataCombinationGeneratorEmitter
         }
         else
         {
-            writer.AppendLine("// For method-level data sources, we need method parameters");
             foreach (var param in methodSymbol.Parameters)
             {
                 writer.AppendLine($"new ParameterMetadata(typeof({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}))");
@@ -790,18 +749,14 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("await foreach (var dataSourceFunc in generator.GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("// For SharedType.None, we must not pre-materialize the data");
-        writer.AppendLine("// as that would create a single instance that gets shared");
         writer.AppendLine();
 
-        writer.AppendLine("// Get the data and use ToObjectArray to handle both tuples and arrays");
         writer.AppendLine("var initialData = await dataSourceFunc();");
         writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
         writer.AppendLine();
         
         if (isClassLevel)
         {
-            writer.AppendLine("// For class data, use ToObjectArray to handle both tuples and arrays");
             writer.AppendLine("var processedData = dataLength == 0 ? new object?[] { null } : ");
             writer.AppendLine("    dataLength == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(initialData![0]) : initialData!;");
             writer.AppendLine();
@@ -822,7 +777,6 @@ public static class DataCombinationGeneratorEmitter
         }
 
         // Handle method data processing before creating TestDataCombination
-        writer.AppendLine("// For method data, process the data using ToObjectArray if needed");
         writer.AppendLine("var processedMethodData = dataLength == 0 ? new object?[] { null } : ");
         writer.AppendLine("    dataLength == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(initialData![0]) : initialData!;");
         writer.AppendLine();
@@ -888,7 +842,6 @@ public static class DataCombinationGeneratorEmitter
 
     private static void EmitAsyncDataSourceGeneratorAttribute(CodeWriter writer, AttributeData attr, string listName, bool isClassLevel, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
-        writer.AppendLine("// AsyncDataSourceGeneratorAttribute");
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
@@ -897,7 +850,6 @@ public static class DataCombinationGeneratorEmitter
         var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
         writer.AppendLine($"var generator = {generatorCode};");
 
-        writer.AppendLine("// Create TestInformation for the data generator");
         writer.Append("var testInformation = ");
         TestInformationGenerator.GenerateTestInformation(writer, methodSymbol, typeSymbol);
         writer.AppendLine(";");
@@ -909,13 +861,11 @@ public static class DataCombinationGeneratorEmitter
             EmitNestedDataSourceInitialization(writer, attr.AttributeClass, "generator", methodSymbol, typeSymbol);
         }
 
-        writer.AppendLine("// Create MembersToGenerate array based on whether it's class or method level");
         writer.AppendLine("var membersToGenerate = new MemberMetadata[]");
         writer.AppendLine("{");
         writer.Indent();
         if (isClassLevel)
         {
-            writer.AppendLine("// For class-level data sources, we need constructor parameters");
             var constructorParams = typeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters;
             if (constructorParams != null && constructorParams.Value.Length > 0)
             {
@@ -934,7 +884,6 @@ public static class DataCombinationGeneratorEmitter
         }
         else
         {
-            writer.AppendLine("// For method-level data sources, we need method parameters");
             foreach (var param in methodSymbol.Parameters)
             {
                 writer.AppendLine($"new ParameterMetadata(typeof({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}))");
@@ -969,23 +918,17 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("await foreach (var dataSourceFunc in ((IAsyncDataSourceGeneratorAttribute)generator).GenerateAsync(dataGeneratorMetadata))");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("// For SharedType.None, we must not pre-materialize the data");
-        writer.AppendLine("// as that would create a single instance that gets shared");
         writer.AppendLine();
 
-        writer.AppendLine("// Get the data and use ToObjectArray to handle both tuples and arrays");
         writer.AppendLine("var initialData = await dataSourceFunc();");
         writer.AppendLine("var dataLength = initialData?.Length ?? 0;");
         writer.AppendLine();
         
         if (isClassLevel)
         {
-            writer.AppendLine("// For class data, each yield from GenerateAsync creates a new test instance");
-            writer.AppendLine("// The data represents constructor arguments for one test instance");
             writer.AppendLine("var processedData = dataLength == 0 ? new object?[] { null } : ");
             writer.AppendLine("    dataLength == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(initialData![0]) : initialData!;");
             writer.AppendLine();
-            writer.AppendLine("// Create factories for the constructor arguments");
             writer.AppendLine("var classFactories = processedData.Select((arg, index) => new Func<Task<object?>>(async () =>");
             writer.AppendLine("{");
             writer.Indent();
@@ -1014,8 +957,7 @@ public static class DataCombinationGeneratorEmitter
         else
         {
             // Handle method data processing before creating TestDataCombination
-            writer.AppendLine("// For method data, process the data using ToObjectArray if needed");
-            writer.AppendLine("var processedMethodData = dataLength == 0 ? new object?[] { null } : ");
+                writer.AppendLine("var processedMethodData = dataLength == 0 ? new object?[] { null } : ");
             writer.AppendLine("    dataLength == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(initialData![0]) : initialData!;");
             writer.AppendLine();
 
@@ -1084,7 +1026,6 @@ public static class DataCombinationGeneratorEmitter
 
     private static void EmitCartesianProduct(CodeWriter writer)
     {
-        writer.AppendLine("// Generate cartesian product of all combinations");
         writer.AppendLine("foreach (var classCombination in classCombinations)");
         writer.AppendLine("{");
         writer.Indent();
@@ -1119,7 +1060,6 @@ public static class DataCombinationGeneratorEmitter
             .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
             .ToImmutableArray();
             
-        // Debug logging - this will be generated into the test code
         // We need to emit this as generated code, not compile-time console output
         return dataSourceAttributes;
     }
@@ -1521,7 +1461,6 @@ public static class DataCombinationGeneratorEmitter
     
     private static void EmitInstanceDataSourcePropertyInitialization(CodeWriter writer, string instanceVarName, string typeVarName, IMethodSymbol methodSymbol, INamedTypeSymbol containingTypeSymbol)
     {
-        writer.AppendLine("// Initialize data source properties on the instance");
         writer.AppendLine($"var instanceType_{instanceVarName} = {instanceVarName}?.GetType();");
         writer.AppendLine($"if (instanceType_{instanceVarName} != null)");
         writer.AppendLine("{");
@@ -1551,7 +1490,6 @@ public static class DataCombinationGeneratorEmitter
         }
         
         writer.AppendLine();
-        writer.AppendLine("// Initialize nested data source properties");
         
         // testInformation should already be defined in the parent scope when this is called
         
@@ -1807,8 +1745,6 @@ public static class DataCombinationGeneratorEmitter
         int repeatCount,
         TestMethodMetadata? testMethodMetadata)
     {
-        writer.AppendLine("// Generic type resolution from data sources");
-        writer.AppendLine("// Extract data values and infer generic type arguments");
         writer.AppendLine();
         
         // Check for various data source types that can provide type information
@@ -1832,34 +1768,29 @@ public static class DataCombinationGeneratorEmitter
         
         if (argumentsAttributes.Any() || typedAsyncDataSources.Any() || untypedDataSources.Any())
         {
-            writer.AppendLine("// Process data sources for generic type resolution");
             writer.AppendLine("var genericCombinations = new List<TestDataCombination>();");
             writer.AppendLine();
             
             // Handle Arguments attributes
             if (argumentsAttributes.Any())
             {
-                writer.AppendLine("// Process Arguments attributes");
                 EmitArgumentsBasedGenericResolution(writer, methodSymbol, typeSymbol, argumentsAttributes, testMethodMetadata);
             }
             
             // Handle typed data sources (both async and sync inherit from AsyncDataSourceGeneratorAttribute)
             if (typedAsyncDataSources.Any())
             {
-                writer.AppendLine("// Process typed data sources");
                 EmitTypedDataSourceGenericResolution(writer, methodSymbol, typeSymbol, typedAsyncDataSources, testMethodMetadata);
             }
             
             // Handle untyped data sources by checking parameter attributes
             if (untypedDataSources.Any())
             {
-                writer.AppendLine("// Process untyped data sources with parameter type inference");
                 EmitParameterBasedGenericResolution(writer, methodSymbol, typeSymbol, untypedDataSources, testMethodMetadata);
             }
             
             // Apply repeat count
             writer.AppendLine();
-            writer.AppendLine("// Apply repeat count to generic combinations");
             writer.AppendLine($"for (var repeatIndex = 0; repeatIndex <= {repeatCount}; repeatIndex++)");
             writer.AppendLine("{");
             writer.Indent();
@@ -1888,7 +1819,6 @@ public static class DataCombinationGeneratorEmitter
         }
         else
         {
-            writer.AppendLine("// No typed data sources found - cannot infer types");
             writer.AppendLine("yield return new TestDataCombination");
             writer.AppendLine("{");
             writer.Indent();
@@ -1908,7 +1838,6 @@ public static class DataCombinationGeneratorEmitter
         AttributeData[] argumentsAttributes,
         TestMethodMetadata? testMethodMetadata)
     {
-        writer.AppendLine("// Process each Arguments attribute to infer types");
         
         foreach (var attr in argumentsAttributes)
         {
@@ -1917,11 +1846,9 @@ public static class DataCombinationGeneratorEmitter
                 continue;
             }
             
-            writer.AppendLine("// Process Arguments attribute");
             writer.AppendLine("{");
             writer.Indent();
             
-            // Add debug logging
             // Processing Arguments attribute with {attr.ConstructorArguments.Length} constructor arguments
             
             // Generate the argument values
@@ -1956,7 +1883,6 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine();
             
             // Infer types from argument values
-            writer.AppendLine("// Infer generic type arguments from argument values");
             writer.AppendLine("var inferredTypes = new System.Type[argumentValues.Length];");
             writer.AppendLine("for (int i = 0; i < argumentValues.Length; i++)");
             writer.AppendLine("{");
@@ -1989,7 +1915,6 @@ public static class DataCombinationGeneratorEmitter
         INamedTypeSymbol typeSymbol,
         TestMethodMetadata? testMethodMetadata)
     {
-        writer.AppendLine("// Map inferred types to generic type parameters");
         writer.AppendLine("var resolvedGenericTypes = new Dictionary<string, System.Type>();");
         writer.AppendLine();
         
@@ -1997,7 +1922,6 @@ public static class DataCombinationGeneratorEmitter
         {
             // Handle generic class types
             var genericParameters = typeSymbol.TypeParameters;
-            writer.AppendLine("// Generic class type parameters");
             for (int i = 0; i < genericParameters.Length; i++)
             {
                 var paramName = genericParameters[i].Name;
@@ -2017,7 +1941,6 @@ public static class DataCombinationGeneratorEmitter
             
             // Validate constraints for class type parameters
             writer.AppendLine();
-            writer.AppendLine("// Create type array from resolved types for constraint validation");
             writer.AppendLine($"var classTypeArgs = new Type[{genericParameters.Length}];");
             for (int i = 0; i < genericParameters.Length; i++)
             {
@@ -2031,7 +1954,6 @@ public static class DataCombinationGeneratorEmitter
         {
             // Handle generic method type parameters
             var methodParameters = methodSymbol.TypeParameters;
-            writer.AppendLine("// Generic method type parameters");
             for (int i = 0; i < methodParameters.Length; i++)
             {
                 var paramName = methodParameters[i].Name;
@@ -2051,7 +1973,6 @@ public static class DataCombinationGeneratorEmitter
             
             // Validate constraints for method type parameters
             writer.AppendLine();
-            writer.AppendLine("// Create type array from resolved types for constraint validation");
             writer.AppendLine($"var methodTypeArgs = new Type[{methodParameters.Length}];");
             for (int i = 0; i < methodParameters.Length; i++)
             {
@@ -2070,13 +1991,11 @@ public static class DataCombinationGeneratorEmitter
         INamedTypeSymbol typeSymbol,
         TestMethodMetadata testMethodMetadata)
     {
-        writer.AppendLine("// Create concrete generic type instance");
         writer.AppendLine("TestDataCombination combination = null;");
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
         
-        writer.AppendLine("// Create TestDataCombination with resolved type information");
         writer.AppendLine("combination = new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
@@ -2089,7 +2008,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("MethodLoopIndex = 0,");
         
         // Add resolved generic type information
-        writer.AppendLine("// Store resolved generic type information");
         writer.AppendLine("ResolvedGenericTypes = resolvedGenericTypes");
         
         writer.Unindent();
@@ -2119,13 +2037,11 @@ public static class DataCombinationGeneratorEmitter
         INamedTypeSymbol typeSymbol,
         TestMethodMetadata testMethodMetadata)
     {
-        writer.AppendLine("// Create concrete generic type instance");
         writer.AppendLine("TestDataCombination combination = null;");
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
         
-        writer.AppendLine("// Create TestDataCombination with resolved type information");
         writer.AppendLine("combination = new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
@@ -2138,7 +2054,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("MethodLoopIndex = 0,");
         
         // Add resolved generic type information
-        writer.AppendLine("// Store resolved generic type information");
         writer.AppendLine("ResolvedGenericTypes = resolvedGenericTypes");
         
         writer.Unindent();
@@ -2167,7 +2082,6 @@ public static class DataCombinationGeneratorEmitter
         INamedTypeSymbol typeSymbol,
         TestMethodMetadata testMethodMetadata)
     {
-        writer.AppendLine("// Create concrete generic method instance");
         writer.AppendLine("TestDataCombination combination = null;");
         writer.AppendLine("try");
         writer.AppendLine("{");
@@ -2223,7 +2137,6 @@ public static class DataCombinationGeneratorEmitter
             var genericBase = GetGenericAsyncDataSourceBase(attr.AttributeClass);
             if (genericBase?.TypeArguments.Length > 0)
             {
-                writer.AppendLine("// Extract type arguments from data source attribute base class");
                 writer.AppendLine("var typedDataSourceTypes = new Dictionary<string, Type>();");
                 
                 // Get the type arguments from the generic base
@@ -2260,7 +2173,6 @@ public static class DataCombinationGeneratorEmitter
                 }
                 
                 // Generate the data combination
-                writer.AppendLine("// Create test data combination with resolved types");
                 writer.AppendLine("genericCombinations.Add(new TestDataCombination");
                 writer.AppendLine("{");
                 writer.Indent();
@@ -2291,7 +2203,6 @@ public static class DataCombinationGeneratorEmitter
                 writer.AppendLine("MethodDataFactories = new Func<Task<object?>>[]");
                 writer.AppendLine("{");
                 writer.Indent();
-                writer.AppendLine("// This will be replaced by runtime data source generation");
                 writer.AppendLine("async () => await global::TUnit.Core.TestDataSourceGenerator.GenerateTypedDataSourceValueAsync(");
                 writer.AppendLine($"    typeof({attributeFullName}), testSessionId, typedDataSourceTypes)");
                 writer.Unindent();
@@ -2309,7 +2220,6 @@ public static class DataCombinationGeneratorEmitter
         INamedTypeSymbol typeSymbol,
         TestMethodMetadata testMethodMetadata)
     {
-        writer.AppendLine("// Create concrete generic method instance");
         writer.AppendLine("TestDataCombination combination = null;");
         writer.AppendLine("try");
         writer.AppendLine("{");
@@ -2451,7 +2361,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine($"// Checking {methodSymbol.Parameters.Length} parameters for typed attributes");
         
         // Look for typed attributes on parameters
-        writer.AppendLine("// Extract types from parameter attributes");
         writer.AppendLine("var parameterBasedTypes = new Dictionary<string, Type>();");
         writer.AppendLine("var foundTypedParameterAttribute = false;");
         writer.AppendLine();
@@ -2510,7 +2419,6 @@ public static class DataCombinationGeneratorEmitter
         // Validate constraints if we found types
         if (methodSymbol is { IsGenericMethod: true, TypeParameters.Length: > 0 })
         {
-            writer.AppendLine("// Validate constraints for method type parameters");
             writer.AppendLine($"var typeArray = new Type[{methodSymbol.TypeParameters.Length}];");
             for (int i = 0; i < methodSymbol.TypeParameters.Length; i++)
             {
@@ -2522,7 +2430,6 @@ public static class DataCombinationGeneratorEmitter
         }
         else if (typeSymbol is { IsGenericType: true, TypeParameters.Length: > 0 })
         {
-            writer.AppendLine("// Validate constraints for class type parameters");
             writer.AppendLine($"var typeArray = new Type[{typeSymbol.TypeParameters.Length}];");
             for (int i = 0; i < typeSymbol.TypeParameters.Length; i++)
             {
@@ -2534,7 +2441,6 @@ public static class DataCombinationGeneratorEmitter
         }
         
         // Create test data combination
-        writer.AppendLine("// Create test data combination with resolved types");
         writer.AppendLine("genericCombinations.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
@@ -2547,7 +2453,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("MethodLoopIndex = 0,");
         
         // Generate method data factories for Matrix-based generic tests
-        writer.AppendLine("// For Matrix-based tests, delegate to MatrixDataSource at runtime");
         writer.AppendLine("MethodDataFactories = new Func<Task<object?>>[]");
         writer.AppendLine("{");
         writer.Indent();
@@ -2565,7 +2470,6 @@ public static class DataCombinationGeneratorEmitter
         writer.AppendLine("else");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("// No typed parameter attributes found");
         writer.AppendLine("genericCombinations.Add(new TestDataCombination");
         writer.AppendLine("{");
         writer.Indent();
@@ -2579,7 +2483,6 @@ public static class DataCombinationGeneratorEmitter
         
         // Apply repeat count and yield the combinations
         writer.AppendLine();
-        writer.AppendLine("// Apply repeat count to parameter-based generic combinations");
         writer.AppendLine("for (var repeatIndex = 0; repeatIndex <= 0; repeatIndex++)");
         writer.AppendLine("{");
         writer.Indent();

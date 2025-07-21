@@ -10,9 +10,7 @@ using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Services;
 
-/// <summary>
-/// Test executor that properly handles ExecutionContext restoration for AsyncLocal support
-/// </summary>
+/// Handles ExecutionContext restoration for AsyncLocal support and test lifecycle management
 internal class SingleTestExecutor : ISingleTestExecutor
 {
     private readonly TUnitFrameworkLogger _logger;

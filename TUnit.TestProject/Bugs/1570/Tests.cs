@@ -20,7 +20,9 @@ public class Tests(int number)
     [DependsOn(nameof(Dependency))]
     public async Task GetTests_Without_Filtering_On_TestClassArguments_Test()
     {
-        // TODO: Fix when GetTests method is added to TestContext
+        // Waiting for TestContext.GetTests() method to be implemented
+        // This will allow retrieving dependency test contexts for validation
+        // Tracked in issue #1570
         // var dependencyContext = TestContext.Current!
         //     .GetTests(nameof(Dependency))
         //     .First();

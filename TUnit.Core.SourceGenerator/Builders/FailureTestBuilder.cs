@@ -2,14 +2,8 @@ using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Builders;
 
-/// <summary>
-/// Builds test definitions for runtime failures
-/// </summary>
 public class FailureTestBuilder
 {
-    /// <summary>
-    /// Generates a failure test metadata for a test that failed during initialization
-    /// </summary>
     public static void GenerateFailureTest(CodeWriter writer, TestMetadataGenerationContext context, string errorMessage)
     {
         // Write header

@@ -219,8 +219,14 @@ public class TestContext : Context
     }
 
     /// <summary>
-    /// TODO: This functionality needs to be handled differently now that ITestFinder doesn't support it
+    /// Reregisters a test with new arguments. This method is currently non-functional as the underlying
+    /// ITestFinder interface has been removed. This functionality may be reimplemented in a future version.
     /// </summary>
+    /// <remarks>
+    /// Previously used for dynamically modifying test arguments at runtime. Consider using data source
+    /// attributes for parameterized tests instead.
+    /// </remarks>
+    [Obsolete("This method is non-functional after the removal of ITestFinder. It will be removed in a future version.")]
     public async Task ReregisterTestWithArguments(object?[]? methodArguments = null, Dictionary<string, object?>? objectBag = null)
     {
         if (methodArguments != null)
@@ -236,7 +242,7 @@ public class TestContext : Context
             }
         }
 
-        // TODO: This functionality needs to be handled differently now that ITestFinder doesn't support it
+        // This method is currently non-functional - see Obsolete attribute above
         await Task.CompletedTask;
     }
 

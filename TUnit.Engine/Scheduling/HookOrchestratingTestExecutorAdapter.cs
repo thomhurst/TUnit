@@ -9,9 +9,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Scheduling;
 
-/// <summary>
-/// Test executor adapter that orchestrates hook execution and supports fail-fast behavior
-/// </summary>
+/// Test executor adapter with hook orchestration, fail-fast support, and class/assembly lifecycle management
 internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDataProducer
 {
     private readonly ISingleTestExecutor _innerExecutor;

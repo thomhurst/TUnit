@@ -2,9 +2,6 @@ using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
-/// <summary>
-/// Simple tests to verify generic type support
-/// </summary>
 [EngineTest(ExpectedResult.Pass)]
 public class SimpleGenericMethodTests
 {
@@ -13,20 +10,16 @@ public class SimpleGenericMethodTests
     [Arguments("hello")]
     public async Task GenericMethod_SimpleCase<T>(T value)
     {
-        // Just verify the method runs with different types
         await Assert.That(value).IsNotEqualTo(default(T));
     }
 }
 
-/// <summary>
-/// Simple generic class test
-/// </summary>
 [EngineTest(ExpectedResult.Pass)]
 public class SimpleGenericClassTests<T>
 {
     [Test]
-    [Arguments(42)]  // Will create SimpleGenericClassTests<int>
-    [Arguments("hello")]  // Will create SimpleGenericClassTests<string>
+    [Arguments(42)]
+    [Arguments("hello")]
     public async Task TestWithValue(T value)
     {
         // Just verify the method runs with the correct type

@@ -259,7 +259,7 @@ public class XUnitMigrationAnalyzerTests
 
     [Test]
     [Arguments("AssemblyFixture(typeof(Exception))", "ClassDataSource<Exception>(Shared = SharedType.PerAssembly)")]
-    [Skip("TODO")]
+    [Skip("Assembly attribute migration is not yet implemented - requires analyzer support for assembly-level attributes")]
     public async Task Assembly_Attributes_Can_Be_Fixed(string attribute, string expected)
     {
         await CodeFixer

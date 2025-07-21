@@ -12,9 +12,7 @@ using TUnit.Core.Data;
 
 namespace TUnit.Engine.Discovery;
 
-/// <summary>
-/// Test data collector for Reflection mode - discovers tests at runtime using reflection
-/// </summary>
+/// Discovers tests at runtime using reflection with assembly scanning and caching
 [RequiresUnreferencedCode("Reflection-based test discovery requires unreferenced code")]
 [RequiresDynamicCode("Expression compilation requires dynamic code generation")]
 public sealed class ReflectionTestDataCollector : ITestDataCollector
@@ -591,7 +589,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return expandedMetadata;
     }
 
-    // Removed CountDataSourceItems - no longer needed since we work directly with IDataSourceAttribute
 
     private static int ExtractRepeatCount(Type testClass, MethodInfo testMethod)
     {
@@ -879,7 +876,6 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         return dataSources.ToArray();
     }
 
-    // Removed - no longer needed since we work directly with IDataSourceAttribute
 
     [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicProperties' in call to 'System.Type.GetProperties(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     private static PropertyDataSource[] ExtractPropertyDataSources([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass)
@@ -912,7 +908,6 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     [UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.NonPublicMethods' in call to 'System.Type.GetMethod(String, BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods', 'DynamicallyAccessedMemberTypes.NonPublicMethods' in call to 'System.Type.GetMethod(String, BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
     [UnconditionalSuppressMessage("Trimming", "IL2067:'type' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicParameterlessConstructor' in call to 'System.Activator.CreateInstance(Type)'", Justification = "Reflection mode requires dynamic access")]
-    // Removed CreateMethodDataSource and CreateClassDataSource - no longer needed since we work directly with IDataSourceAttribute
 
     private static Func<IEnumerable<object?[]>> CreateSyncDataSourceFactory(MethodInfo method, object? instance, object?[] args)
     {
@@ -941,7 +936,6 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     }
 
 
-    // Removed CreateDataSourceFromGenerator - no longer needed since we work directly with IDataSourceAttribute
 
     private static async IAsyncEnumerable<object?[]> CreateAsyncGeneratorEnumerable(
         Attribute attr,
@@ -2150,7 +2144,6 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         };
     }
 
-    // Dummy method to use as a placeholder for failed tests
     private static void DummyFailedTestMethod() { }
 
     private static MethodMetadata CreateMethodMetadata(Type type, MethodInfo method)
@@ -2213,7 +2206,6 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         };
     }
 
-    // Special test metadata class for tests that failed during discovery
     private sealed class FailedTestMetadata : TestMetadata
     {
         private readonly Exception _exception;
@@ -2256,7 +2248,6 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         }
     }
 
-    // Special test metadata class for expanded tests during discovery
     private sealed class ExpandedReflectionTestMetadata : TestMetadata
     {
         private readonly Type _testClass;

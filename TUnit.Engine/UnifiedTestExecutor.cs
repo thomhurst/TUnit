@@ -15,9 +15,7 @@ using ITestExecutor = TUnit.Engine.Interfaces.ITestExecutor;
 
 namespace TUnit.Engine;
 
-/// <summary>
-/// Simplified test executor that works directly with ExecutableTest
-/// </summary>
+/// Simplified test executor with parallelization, dependency handling, and fail-fast support
 internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDisposable, IAsyncDisposable
 {
     private readonly ISingleTestExecutor _singleTestExecutor;
@@ -56,17 +54,11 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
 
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
-    /// <summary>
-    /// Sets the session ID for test reporting
-    /// </summary>
     public void SetSessionId(SessionUid sessionUid)
     {
         _sessionUid = sessionUid;
     }
 
-    /// <summary>
-    /// Executes a collection of tests with proper parallelization and dependency handling
-    /// </summary>
     public async Task ExecuteTests(
         IEnumerable<ExecutableTest> tests,
         ITestExecutionFilter? filter,

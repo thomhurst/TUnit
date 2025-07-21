@@ -3,9 +3,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Events;
 
-/// <summary>
-/// Fast registry for event receiver presence checks
-/// </summary>
+/// Fast registry for event receiver presence checks using bit flags
 internal sealed class EventReceiverRegistry
 {
     // Bit flags for fast checking

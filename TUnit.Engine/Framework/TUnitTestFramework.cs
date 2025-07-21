@@ -9,9 +9,7 @@ using TUnit.Engine.Diagnostics;
 
 namespace TUnit.Engine.Framework;
 
-/// <summary>
-/// Unified test framework implementation with proper ExecutionContext handling
-/// </summary>
+/// Unified test framework with ExecutionContext handling and global exception management
 internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 {
     private readonly IExtension _extension;
