@@ -73,7 +73,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                     foreach (var attr in property.GetAttributes())
                     {
                         if (attr.AttributeClass != null &&
-                            attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default))
+                            (attr.AttributeClass.IsOrInherits(dataSourceInterface) ||
+                             attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default)))
                         {
                             propertiesWithDataSources.Add(new PropertyWithDataSourceAttribute
                             {
