@@ -27,22 +27,22 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static bool IsClassWithDataSourceProperties(SyntaxNode node)
     {
-        if (node is not ClassDeclarationSyntax classDecl)
+        if (node is not TypeDeclarationSyntax typeDecl)
         {
             return false;
         }
 
-        return classDecl.Members
+        return typeDecl.Members
             .OfType<PropertyDeclarationSyntax>()
             .Any(prop => prop.AttributeLists.Count > 0);
     }
 
     private static ClassWithDataSourceProperties? GetClassWithDataSourceProperties(GeneratorSyntaxContext context)
     {
-        var classDecl = (ClassDeclarationSyntax)context.Node;
+        var typeDecl = (TypeDeclarationSyntax)context.Node;
         var semanticModel = context.SemanticModel;
 
-        var typeSymbol = semanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
+        var typeSymbol = semanticModel.GetDeclaredSymbol(typeDecl) as INamedTypeSymbol;
         if (typeSymbol == null || typeSymbol.IsAbstract)
         {
             return null;
