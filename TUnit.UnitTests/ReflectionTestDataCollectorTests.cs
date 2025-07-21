@@ -110,7 +110,7 @@ public class ReflectionTestDataCollectorTests
         await Assert.That(paramTest!.DataSources.Length).IsEqualTo(2);
 
         // Verify data sources
-        var dataSources = paramTest.DataSources.SelectMany(ds => ds.GetDataFactories()).ToList();
+        var dataSources = paramTest.DataSources.SelectMany(ds => ds.GetDataRowsAsync(new DataGeneratorMetadata())).ToList();
         await Assert.That(dataSources.Count).IsEqualTo(2);
 
         var firstData = dataSources[0]();
@@ -191,7 +191,7 @@ public class ReflectionTestDataCollectorTests
         await Assert.That(methodDataTest!.DataSources.Length).IsEqualTo(1);
 
         // Verify data source produces correct data
-        var dataFactories = methodDataTest.DataSources[0].GetDataFactories().ToList();
+        var dataFactories = methodDataTest.DataSources[0].GetDataRowsAsync(new DataGeneratorMetadata()).ToList();
         await Assert.That(dataFactories.Count).IsEqualTo(2);
 
         var firstData = dataFactories[0]();
