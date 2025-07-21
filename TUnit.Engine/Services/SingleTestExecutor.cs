@@ -7,6 +7,7 @@ using TUnit.Core.ReferenceTracking;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Services;
 
@@ -309,6 +310,10 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         return async () =>
         {
+            // Inject properties into arguments just before test execution
+            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments);
+            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments);
+
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(test.Metadata.TimeoutMs!.Value);
 
@@ -329,7 +334,14 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
     private Func<ValueTask> CreateNormalTestAction(ExecutableTest test, object instance, CancellationToken cancellationToken)
     {
-        return async () => await test.InvokeTestAsync(instance, cancellationToken);
+        return async () =>
+        {
+            // Inject properties into arguments just before test execution
+            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments);
+            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments);
+
+            await test.InvokeTestAsync(instance, cancellationToken);
+        };
     }
 
     private async Task AttemptToCompleteTestTask(Task testTask)

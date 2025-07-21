@@ -8,41 +8,38 @@ using TUnit.Core.SourceGenerator.Helpers;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
-// [Generator] - Temporarily disabled
+[Generator]
 public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // Find all classes that have properties with data source attributes
+        // Find all classes that have properties with IDataSourceAttribute
         var classesWithPropertyInjection = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: (node, _) => IsClassWithPropertyDataSources(node),
-                transform: (ctx, _) => GetClassWithPropertyInjection(ctx))
-            .Where(x => x is not null)
+                predicate: (node, _) => IsClassWithDataSourceProperties(node),
+                transform: (ctx, _) => GetClassWithDataSourceProperties(ctx))
+            .Where(x => x != null)
             .Select((x, _) => x!);
 
         // Collect all discovered classes
         var collectedClasses = classesWithPropertyInjection.Collect();
 
-        // Generate IPropertySource implementations
+        // Generate property injection sources
         context.RegisterSourceOutput(collectedClasses, GeneratePropertyInjectionSources);
     }
 
-    private static bool IsClassWithPropertyDataSources(SyntaxNode node)
+    private static bool IsClassWithDataSourceProperties(SyntaxNode node)
     {
         if (node is not ClassDeclarationSyntax classDecl)
             return false;
 
-        // Look for properties with potential data source attributes
+        // Look for properties with attributes that might be data sources
         return classDecl.Members
             .OfType<PropertyDeclarationSyntax>()
-            .Any(prop => prop.AttributeLists
-                .SelectMany(al => al.Attributes)
-                .Any(attr => attr.Name.ToString().Contains("DataSource") || 
-                           attr.Name.ToString().Contains("Arguments")));
+            .Any(prop => prop.AttributeLists.Count > 0);
     }
 
-    private static PropertyInjectionClassInfo? GetClassWithPropertyInjection(GeneratorSyntaxContext context)
+    private static ClassWithDataSourceProperties? GetClassWithDataSourceProperties(GeneratorSyntaxContext context)
     {
         var classDecl = (ClassDeclarationSyntax)context.Node;
         var semanticModel = context.SemanticModel;
@@ -51,280 +48,430 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         if (typeSymbol == null || typeSymbol.IsAbstract)
             return null;
 
-        // Find properties with data source attributes
-        var injectableProperties = new List<PropertyInjectionInfo>();
+        // Find properties with IDataSourceAttribute, including inherited ones
+        var propertiesWithDataSources = new List<PropertyWithDataSourceAttribute>();
+        var dataSourceInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.IDataSourceAttribute");
         
-        foreach (var member in typeSymbol.GetMembers())
+        if (dataSourceInterface == null)
+            return null;
+        
+        // Traverse the inheritance chain to find all properties with data sources
+        var currentType = typeSymbol;
+        var processedProperties = new HashSet<string>(); // Track property names to avoid duplicates due to overrides
+        
+        while (currentType != null)
         {
-            if (member is IPropertySymbol property && 
-                (property.SetMethod != null || HasBackingField(property)))
+            foreach (var member in currentType.GetMembers())
             {
-                var dataSourceAttr = property.GetAttributes()
-                    .FirstOrDefault(a => IsDataSourceAttribute(a.AttributeClass));
-                
-                if (dataSourceAttr != null)
+                if (member is IPropertySymbol property && CanSetProperty(property))
                 {
-                    injectableProperties.Add(new PropertyInjectionInfo
+                    // Skip if we've already processed a property with this name (due to override/new)
+                    if (!processedProperties.Add(property.Name))
+                        continue;
+                        
+                    foreach (var attr in property.GetAttributes())
                     {
-                        Property = property,
-                        DataSourceAttribute = dataSourceAttr
-                    });
+                        if (attr.AttributeClass != null && 
+                            attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default))
+                        {
+                            propertiesWithDataSources.Add(new PropertyWithDataSourceAttribute
+                            {
+                                Property = property,
+                                DataSourceAttribute = attr
+                            });
+                            break; // Only one data source per property
+                        }
+                    }
                 }
             }
+            
+            // Move up the inheritance chain
+            currentType = currentType.BaseType;
+            
+            // Stop at System.Object or if we hit a null base type
+            if (currentType?.SpecialType == SpecialType.System_Object)
+                break;
         }
 
-        if (injectableProperties.Count == 0)
+        if (propertiesWithDataSources.Count == 0)
             return null;
 
-        return new PropertyInjectionClassInfo
+        return new ClassWithDataSourceProperties
         {
-            TypeSymbol = typeSymbol,
-            InjectableProperties = injectableProperties.ToImmutableArray()
+            ClassSymbol = typeSymbol,
+            Properties = propertiesWithDataSources.ToImmutableArray()
         };
     }
 
-    private static bool IsDataSourceAttribute(INamedTypeSymbol? attributeType)
+    private static bool CanSetProperty(IPropertySymbol property)
     {
-        if (attributeType == null)
-            return false;
-
-        // Check if it implements IDataSourceAttribute
-        return attributeType.AllInterfaces.Any(i => 
-            i.ToDisplayString().Contains("TUnit.Core.IDataSourceAttribute"));
+        // Can set if it has a setter OR if it's init-only (we'll use UnsafeAccessor)
+        return property.SetMethod != null || property.SetMethod?.IsInitOnly == true;
     }
 
-    private static bool HasBackingField(IPropertySymbol property)
-    {
-        // Check for init-only properties that need backing field access
-        return property.SetMethod?.IsInitOnly == true;
-    }
-
-    private static void GeneratePropertyInjectionSources(SourceProductionContext context, ImmutableArray<PropertyInjectionClassInfo> classes)
+    private static void GeneratePropertyInjectionSources(SourceProductionContext context, ImmutableArray<ClassWithDataSourceProperties> classes)
     {
         if (classes.IsEmpty)
             return;
 
         var sourceBuilder = new StringBuilder();
         
-        sourceBuilder.AppendLine("// <auto-generated />");
-        sourceBuilder.AppendLine("using System;");
-        sourceBuilder.AppendLine("using System.Threading.Tasks;");
-        sourceBuilder.AppendLine("using TUnit.Core;");
-        sourceBuilder.AppendLine("using TUnit.Core.Interfaces.SourceGenerator;");
-        sourceBuilder.AppendLine("using TUnit.Core.ReferenceTracking;");
-        sourceBuilder.AppendLine();
-
+        WriteFileHeader(sourceBuilder);
+        
+        // Generate module initializer to register sources
+        GenerateModuleInitializer(sourceBuilder, classes);
+        
+        // Generate IPropertySource implementations
         foreach (var classInfo in classes)
         {
-            GeneratePropertyInjectionSource(sourceBuilder, classInfo);
+            GeneratePropertySource(sourceBuilder, classInfo);
         }
 
-        // Generate module initializer
-        GenerateModuleInitializer(sourceBuilder, classes);
 
         context.AddSource("PropertyInjectionSources.g.cs", sourceBuilder.ToString());
     }
 
-    private static void GeneratePropertyInjectionSource(StringBuilder sourceBuilder, PropertyInjectionClassInfo classInfo)
+    private static void WriteFileHeader(StringBuilder sb)
     {
-        var typeName = classInfo.TypeSymbol.ToDisplayString().Replace(".", "_").Replace("<", "_").Replace(">", "_");
-        var sourceClassName = $"{typeName}_PropertyInjectionSource";
-
-        sourceBuilder.AppendLine($"internal sealed class {sourceClassName} : IPropertySource");
-        sourceBuilder.AppendLine("{");
-        sourceBuilder.AppendLine($"    public Type Type => typeof({classInfo.TypeSymbol.ToDisplayString()});");
-        sourceBuilder.AppendLine($"    public string PropertyName => \"{string.Join(", ", classInfo.InjectableProperties.Select(p => p.Property.Name))}\";");
-        sourceBuilder.AppendLine("    public bool ShouldInitialize => true;");
-        sourceBuilder.AppendLine();
-
-        // Generate UnsafeAccessor methods for init-only properties
-        foreach (var propInfo in classInfo.InjectableProperties.Where(p => p.Property.SetMethod?.IsInitOnly == true))
-        {
-            var propertyType = propInfo.Property.Type.ToDisplayString();
-            var backingFieldName = $"<{propInfo.Property.Name}>k__BackingField";
-            
-            sourceBuilder.AppendLine("#if NET8_0_OR_GREATER");
-            sourceBuilder.AppendLine($"    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
-            sourceBuilder.AppendLine($"    private static extern ref {propertyType} Get{propInfo.Property.Name}BackingField({classInfo.TypeSymbol.ToDisplayString()} instance);");
-            sourceBuilder.AppendLine("#endif");
-            sourceBuilder.AppendLine();
-        }
-
-        // Generate InitializeAsync method
-        sourceBuilder.AppendLine("    public async Task InitializeAsync(object instance)");
-        sourceBuilder.AppendLine("    {");
-        sourceBuilder.AppendLine($"        var typedInstance = ({classInfo.TypeSymbol.ToDisplayString()})instance;");
-        sourceBuilder.AppendLine("        var testContext = TestContext.Current;");
-        sourceBuilder.AppendLine("        if (testContext == null) return;");
-        sourceBuilder.AppendLine();
-
-        sourceBuilder.AppendLine("        var dataGeneratorMetadata = new DataGeneratorMetadata");
-        sourceBuilder.AppendLine("        {");
-        sourceBuilder.AppendLine("            TestBuilderContext = new TestBuilderContextAccessor(TestBuilderContext.Current ?? new TestBuilderContext()),");
-        sourceBuilder.AppendLine("            MembersToGenerate = Array.Empty<MemberMetadata>(),");
-        sourceBuilder.AppendLine("            TestInformation = testContext.TestDetails.MethodMetadata,");
-        sourceBuilder.AppendLine("            Type = DataGeneratorType.Property,");
-        sourceBuilder.AppendLine("            TestSessionId = testContext.TestDetails.TestId,");
-        sourceBuilder.AppendLine("            TestClassInstance = instance,");
-        sourceBuilder.AppendLine("            ClassInstanceArguments = testContext.TestDetails.TestClassArguments");
-        sourceBuilder.AppendLine("        };");
-        sourceBuilder.AppendLine();
-
-        // Generate property injection code for each property
-        foreach (var propInfo in classInfo.InjectableProperties)
-        {
-            GeneratePropertyInjection(sourceBuilder, propInfo, classInfo.TypeSymbol);
-        }
-
-        sourceBuilder.AppendLine("    }");
-        sourceBuilder.AppendLine("}");
-        sourceBuilder.AppendLine();
+        sb.AppendLine("// <auto-generated />");
+        sb.AppendLine("using System;");
+        sb.AppendLine("using System.Collections.Generic;");
+        sb.AppendLine("using System.Threading.Tasks;");
+        sb.AppendLine("using TUnit.Core;");
+        sb.AppendLine("using TUnit.Core.Interfaces.SourceGenerator;");
+        sb.AppendLine("using TUnit.Core.ReferenceTracking;");
+        sb.AppendLine("using TUnit.Core.Enums;");
+        sb.AppendLine();
+        sb.AppendLine("namespace TUnit.Core;");
+        sb.AppendLine();
     }
 
-    private static void GeneratePropertyInjection(StringBuilder sourceBuilder, PropertyInjectionInfo propInfo, INamedTypeSymbol classType)
+    private static void GenerateModuleInitializer(StringBuilder sb, ImmutableArray<ClassWithDataSourceProperties> classes)
     {
-        var propertyName = propInfo.Property.Name;
-        var propertyType = propInfo.Property.Type.ToDisplayString();
-        var attributeType = propInfo.DataSourceAttribute.AttributeClass!.ToDisplayString();
-
-        sourceBuilder.AppendLine($"        // Inject {propertyName} property");
-        sourceBuilder.AppendLine("        {");
-        
-        // Create attribute instance
-        var constructorArgs = string.Join(", ", propInfo.DataSourceAttribute.ConstructorArguments.Select(arg => 
-            FormatTypedConstant(arg)));
-        
-        sourceBuilder.AppendLine($"            var dataSource = new {attributeType}({constructorArgs});");
-        sourceBuilder.AppendLine("            var dataRows = dataSource.GetDataRowsAsync(dataGeneratorMetadata);");
-        sourceBuilder.AppendLine();
-        sourceBuilder.AppendLine("            await foreach (var factory in dataRows)");
-        sourceBuilder.AppendLine("            {");
-        sourceBuilder.AppendLine("                var args = await factory();");
-        sourceBuilder.AppendLine("                var value = args?.FirstOrDefault();");
-        sourceBuilder.AppendLine();
-        sourceBuilder.AppendLine("                // Resolve Func<T> values to their actual values");
-        sourceBuilder.AppendLine("                value = await ResolveTestDataValueAsync(value);");
-        sourceBuilder.AppendLine();
-        sourceBuilder.AppendLine($"                if (value is {propertyType} typedValue)");
-        sourceBuilder.AppendLine("                {");
-        
-        // Set property value
-        if (propInfo.Property.SetMethod?.IsInitOnly == true)
-        {
-            sourceBuilder.AppendLine("#if NET8_0_OR_GREATER");
-            sourceBuilder.AppendLine($"                    Get{propertyName}BackingField(typedInstance) = typedValue;");
-            sourceBuilder.AppendLine("#else");
-            sourceBuilder.AppendLine($"                    // Fallback for init-only property in older .NET versions");
-            sourceBuilder.AppendLine($"                    var backingField = typeof({classType.ToDisplayString()}).GetField(\"<{propertyName}>k__BackingField\", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");
-            sourceBuilder.AppendLine("                    backingField?.SetValue(typedInstance, typedValue);");
-            sourceBuilder.AppendLine("#endif");
-        }
-        else
-        {
-            sourceBuilder.AppendLine($"                    typedInstance.{propertyName} = typedValue;");
-        }
-
-        sourceBuilder.AppendLine();
-        sourceBuilder.AppendLine("                    var trackedValue = DataSourceReferenceTrackerProvider.TrackDataSourceObject(typedValue);");
-        sourceBuilder.AppendLine($"                    typedInstance.{propertyName} = ({propertyType})trackedValue;");
-        sourceBuilder.AppendLine();
-        
-        // Recursive property injection for complex objects
-        if (propInfo.Property.Type.TypeKind == TypeKind.Class && 
-            !propInfo.Property.Type.SpecialType.ToString().Contains("String"))
-        {
-            sourceBuilder.AppendLine("                    // Recursively inject nested properties");
-            var nestedTypeName = propInfo.Property.Type.ToDisplayString().Replace(".", "_").Replace("<", "_").Replace(">", "_");
-            sourceBuilder.AppendLine($"                    var nestedInjectionSource = Sources.PropertySources.FirstOrDefault(s => s.Type == typeof({propertyType}));");
-            sourceBuilder.AppendLine("                    if (nestedInjectionSource != null)");
-            sourceBuilder.AppendLine("                    {");
-            sourceBuilder.AppendLine("                        await nestedInjectionSource.InitializeAsync(typedValue);");
-            sourceBuilder.AppendLine("                    }");
-        }
-
-        sourceBuilder.AppendLine();
-        sourceBuilder.AppendLine("                    break;");
-        sourceBuilder.AppendLine("                }");
-        sourceBuilder.AppendLine("            }");
-        sourceBuilder.AppendLine("        }");
-        sourceBuilder.AppendLine();
-    }
-
-    private static void GenerateModuleInitializer(StringBuilder sourceBuilder, ImmutableArray<PropertyInjectionClassInfo> classes)
-    {
-        sourceBuilder.AppendLine("// Module initializer to register property injection sources");
-        sourceBuilder.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
-        sourceBuilder.AppendLine("public static void InitializePropertyInjectionSources()");
-        sourceBuilder.AppendLine("{");
+        sb.AppendLine("internal static class PropertyInjectionInitializer");
+        sb.AppendLine("{");
+        sb.AppendLine("    // Module initializer to register property injection sources");
+        sb.AppendLine("    [System.Runtime.CompilerServices.ModuleInitializer]");
+        sb.AppendLine("    public static void InitializePropertyInjectionSources()");
+        sb.AppendLine("    {");
         
         foreach (var classInfo in classes)
         {
-            var typeName = classInfo.TypeSymbol.ToDisplayString().Replace(".", "_").Replace("<", "_").Replace(">", "_");
-            var sourceClassName = $"{typeName}_PropertyInjectionSource";
-            sourceBuilder.AppendLine($"    SourceRegistrar.RegisterProperty(new {sourceClassName}());");
+            var sourceClassName = GetPropertySourceClassName(classInfo.ClassSymbol);
+            sb.AppendLine($"        PropertySourceRegistry.Register(typeof({classInfo.ClassSymbol.ToDisplayString()}), new {sourceClassName}());");
         }
         
-        sourceBuilder.AppendLine("}");
-        sourceBuilder.AppendLine();
+        sb.AppendLine("    }");
+        sb.AppendLine();
         
-        // Add the Func<T> resolver method
-        GenerateResolverMethod(sourceBuilder);
+        // Add helper methods
+        GenerateHelperMethods(sb);
+        sb.AppendLine("}");
+        sb.AppendLine();
     }
 
-    private static void GenerateResolverMethod(StringBuilder sourceBuilder)
+    private static void GeneratePropertySource(StringBuilder sb, ClassWithDataSourceProperties classInfo)
     {
-        sourceBuilder.AppendLine("// Helper method to resolve Func<T> values");
-        sourceBuilder.AppendLine("private static async Task<object?> ResolveTestDataValueAsync(object? value)");
-        sourceBuilder.AppendLine("{");
-        sourceBuilder.AppendLine("    if (value == null) return null;");
-        sourceBuilder.AppendLine();
-        sourceBuilder.AppendLine("    var type = value.GetType();");
-        sourceBuilder.AppendLine();
-        sourceBuilder.AppendLine("    // Check if it's a Func<T>");
-        sourceBuilder.AppendLine("    if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))");
-        sourceBuilder.AppendLine("    {");
-        sourceBuilder.AppendLine("        var invokeMethod = type.GetMethod(\"Invoke\");");
-        sourceBuilder.AppendLine("        var result = invokeMethod!.Invoke(value, null);");
-        sourceBuilder.AppendLine("        return result;");
-        sourceBuilder.AppendLine("    }");
-        sourceBuilder.AppendLine();
-        sourceBuilder.AppendLine("    return value;");
-        sourceBuilder.AppendLine("}");
+        var sourceClassName = GetPropertySourceClassName(classInfo.ClassSymbol);
+        var classTypeName = classInfo.ClassSymbol.ToDisplayString();
+
+        sb.AppendLine($"internal sealed class {sourceClassName} : IPropertySource");
+        sb.AppendLine("{");
+        sb.AppendLine($"    public Type Type => typeof({classTypeName});");
+        sb.AppendLine($"    public string PropertyName => \"{string.Join(", ", classInfo.Properties.Select(p => p.Property.Name))}\";");
+        sb.AppendLine("    public bool ShouldInitialize => true;");
+        sb.AppendLine();
+
+        // Generate UnsafeAccessor methods for init-only properties
+        GenerateUnsafeAccessorMethods(sb, classInfo);
+
+        // Generate InitializeAsync method
+        GenerateInitializeAsync(sb, classInfo, classTypeName);
+
+        sb.AppendLine("}");
+        sb.AppendLine();
+    }
+
+    private static void GenerateUnsafeAccessorMethods(StringBuilder sb, ClassWithDataSourceProperties classInfo)
+    {
+        foreach (var propInfo in classInfo.Properties)
+        {
+            if (propInfo.Property.SetMethod?.IsInitOnly == true)
+            {
+                var propertyType = propInfo.Property.Type.ToDisplayString();
+                var backingFieldName = $"<{propInfo.Property.Name}>k__BackingField";
+                
+                sb.AppendLine("#if NET8_0_OR_GREATER");
+                sb.AppendLine($"    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
+                sb.AppendLine($"    private static extern ref {propertyType} Get{propInfo.Property.Name}BackingField({classInfo.ClassSymbol.ToDisplayString()} instance);");
+                sb.AppendLine("#endif");
+                sb.AppendLine();
+            }
+        }
+    }
+
+    private static void GenerateInitializeAsync(StringBuilder sb, ClassWithDataSourceProperties classInfo, string classTypeName)
+    {
+        sb.AppendLine("    public async Task InitializeAsync(object instance)");
+        sb.AppendLine("    {");
+        sb.AppendLine($"        var typedInstance = ({classTypeName})instance;");
+        sb.AppendLine("        var testContext = TestContext.Current;");
+        sb.AppendLine("        if (testContext == null) return;");
+        sb.AppendLine();
+
+        sb.AppendLine("        var dataGeneratorMetadata = new DataGeneratorMetadata");
+        sb.AppendLine("        {");
+        sb.AppendLine("            TestBuilderContext = new TestBuilderContextAccessor(TestBuilderContext.Current ?? new TestBuilderContext()),");
+        sb.AppendLine("            MembersToGenerate = Array.Empty<MemberMetadata>(),");
+        sb.AppendLine("            TestInformation = testContext.TestDetails.MethodMetadata,");
+        sb.AppendLine("            Type = DataGeneratorType.Property,");
+        sb.AppendLine("            TestSessionId = testContext.TestDetails.TestId,");
+        sb.AppendLine("            TestClassInstance = instance,");
+        sb.AppendLine("            ClassInstanceArguments = testContext.TestDetails.TestClassArguments");
+        sb.AppendLine("        };");
+        sb.AppendLine();
+
+        // Generate property injection for each property
+        foreach (var propInfo in classInfo.Properties)
+        {
+            GeneratePropertyInjectionCode(sb, propInfo, classInfo.ClassSymbol);
+        }
+
+        sb.AppendLine("    }");
+    }
+
+    private static void GeneratePropertyInjectionCode(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, INamedTypeSymbol classSymbol)
+    {
+        var propertyName = propInfo.Property.Name;
+        var propertyType = propInfo.Property.Type.ToDisplayString();
+        var attributeTypeName = propInfo.DataSourceAttribute.AttributeClass!.ToDisplayString();
+
+        sb.AppendLine($"        // Inject {propertyName} property");
+        sb.AppendLine("        {");
+        
+        // Create attribute instance with constructor arguments
+        GenerateAttributeInstantiation(sb, propInfo.DataSourceAttribute, attributeTypeName);
+        
+        sb.AppendLine("            var dataRows = dataSource.GetDataRowsAsync(dataGeneratorMetadata);");
+        sb.AppendLine();
+        sb.AppendLine("            await foreach (var factory in dataRows)");
+        sb.AppendLine("            {");
+        sb.AppendLine("                var args = await factory();");
+        sb.AppendLine("                var value = args?.FirstOrDefault();");
+        sb.AppendLine();
+        sb.AppendLine("                // Resolve Func<T> values to actual values");
+        sb.AppendLine("                value = await PropertyInjectionInitializer.ResolveTestDataValueAsync(value);");
+        sb.AppendLine();
+        sb.AppendLine($"                if (value != null)");
+        sb.AppendLine("                {");
+        
+        // Set property value (check if it's static)
+        if (propInfo.Property.IsStatic)
+        {
+            GenerateStaticPropertySetting(sb, propInfo, propertyType);
+        }
+        else
+        {
+            GeneratePropertySetting(sb, propInfo, propertyType);
+        }
+        
+        // Handle tracking differently for static vs instance properties
+        if (propInfo.Property.IsStatic)
+        {
+            // For static properties, don't track since they're not per-instance
+        }
+        else
+        {
+            sb.AppendLine();
+            sb.AppendLine("                    // Track the value for disposal/cleanup");
+            sb.AppendLine("                    var trackedValue = DataSourceReferenceTrackerProvider.TrackDataSourceObject(value);");
+            
+            // Update property with tracked value if needed
+            if (propInfo.Property.SetMethod?.IsInitOnly == true)
+            {
+                sb.AppendLine("#if NET8_0_OR_GREATER");
+                sb.AppendLine($"                    Get{propInfo.Property.Name}BackingField(typedInstance) = ({propertyType})trackedValue;");
+                sb.AppendLine("#endif");
+            }
+            else
+            {
+                sb.AppendLine($"                    typedInstance.{propertyName} = ({propertyType})trackedValue;");
+            }
+        }
+        
+        sb.AppendLine();
+        
+        // Recursive property injection
+        GenerateRecursiveInjection(sb, propInfo, propertyType);
+        
+        sb.AppendLine("                    break; // Only take first value");
+        sb.AppendLine("                }");
+        sb.AppendLine("            }");
+        sb.AppendLine("        }");
+        sb.AppendLine();
+    }
+
+    private static void GenerateAttributeInstantiation(StringBuilder sb, AttributeData attributeData, string attributeTypeName)
+    {
+        var constructorArgs = string.Join(", ", attributeData.ConstructorArguments.Select(FormatTypedConstant));
+        
+        sb.AppendLine($"            var dataSource = new {attributeTypeName}({constructorArgs});");
+        
+        // Handle named arguments if any
+        foreach (var namedArg in attributeData.NamedArguments)
+        {
+            var value = FormatTypedConstant(namedArg.Value);
+            sb.AppendLine($"            dataSource.{namedArg.Key} = {value};");
+        }
+    }
+
+    private static void GeneratePropertySetting(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, string propertyType)
+    {
+        if (propInfo.Property.SetMethod?.IsInitOnly == true)
+        {
+            sb.AppendLine("#if NET8_0_OR_GREATER");
+            sb.AppendLine($"                    Get{propInfo.Property.Name}BackingField(typedInstance) = ({propertyType})value;");
+            sb.AppendLine("#else");
+            sb.AppendLine($"                    // Fallback for init-only properties in older .NET");
+            sb.AppendLine($"                    var backingField = typeof({propInfo.Property.ContainingType.ToDisplayString()}).GetField(\"<{propInfo.Property.Name}>k__BackingField\",");
+            sb.AppendLine("                        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");
+            sb.AppendLine("                    backingField?.SetValue(typedInstance, value);");
+            sb.AppendLine("#endif");
+        }
+        else
+        {
+            sb.AppendLine($"                    typedInstance.{propInfo.Property.Name} = ({propertyType})value;");
+        }
+    }
+    
+    private static void GenerateStaticPropertySetting(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, string propertyType)
+    {
+        var className = propInfo.Property.ContainingType.ToDisplayString();
+        sb.AppendLine($"                    {className}.{propInfo.Property.Name} = ({propertyType})value;");
+    }
+
+    private static void GenerateRecursiveInjection(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, string propertyType)
+    {
+        // Only do recursive injection for class types (not primitives, strings, etc.)
+        if (propInfo.Property.Type.TypeKind == TypeKind.Class && 
+            !propInfo.Property.Type.SpecialType.ToString().Contains("String"))
+        {
+            sb.AppendLine("                    // Recursively inject nested properties");
+            
+            // Get the non-nullable type name for typeof operator
+            var nonNullableTypeName = GetNonNullableTypeString(propInfo.Property.Type);
+            sb.AppendLine($"                    var nestedSource = PropertySourceRegistry.GetSource(typeof({nonNullableTypeName}));");
+            sb.AppendLine("                    if (nestedSource != null)");
+            sb.AppendLine("                    {");
+            sb.AppendLine("                        await nestedSource.InitializeAsync(value);");
+            sb.AppendLine("                    }");
+        }
+    }
+
+
+    private static void GenerateHelperMethods(StringBuilder sb)
+    {
+        sb.AppendLine("    // Helper method to resolve Func<T> values");
+        sb.AppendLine("    public static async Task<object?> ResolveTestDataValueAsync(object? value)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        if (value == null) return null;");
+        sb.AppendLine();
+        sb.AppendLine("        var type = value.GetType();");
+        sb.AppendLine();
+        sb.AppendLine("        // Check if it's a Func<T>");
+        sb.AppendLine("        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))");
+        sb.AppendLine("        {");
+        sb.AppendLine("            var invokeMethod = type.GetMethod(\"Invoke\");");
+        sb.AppendLine("            var result = invokeMethod!.Invoke(value, null);");
+        sb.AppendLine("            return result;");
+        sb.AppendLine("        }");
+        sb.AppendLine();
+        sb.AppendLine("        return value;");
+        sb.AppendLine("    }");
+    }
+
+    private static string GetPropertySourceClassName(INamedTypeSymbol classSymbol)
+    {
+        var typeName = classSymbol.ToDisplayString().Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace("+", "_");
+        var hash = Math.Abs(typeName.GetHashCode()).ToString("x8");
+        return $"{typeName}_PropertyInjectionSource_{hash}";
     }
 
     private static string FormatTypedConstant(TypedConstant constant)
     {
-        switch (constant.Kind)
+        return constant.Kind switch
         {
-            case TypedConstantKind.Primitive:
-                if (constant.Value is string str)
-                    return $"\"{str}\"";
-                return constant.Value?.ToString() ?? "null";
-
-            case TypedConstantKind.Enum:
-                return constant.Value?.ToString() ?? "null";
-
-            case TypedConstantKind.Type:
-                return $"typeof({constant.Value})";
-
-            case TypedConstantKind.Array:
-                var elements = constant.Values.Select(FormatTypedConstant);
-                return $"new object[] {{ {string.Join(", ", elements)} }}";
-
-            default:
-                return constant.Value?.ToString() ?? "null";
+            TypedConstantKind.Primitive when constant.Value is string str => $"\"{str}\"",
+            TypedConstantKind.Primitive => constant.Value?.ToString() ?? "null",
+            TypedConstantKind.Enum => FormatEnumConstant(constant),
+            TypedConstantKind.Type => FormatTypeConstant(constant),
+            TypedConstantKind.Array => $"new object[] {{ {string.Join(", ", constant.Values.Select(FormatTypedConstant))} }}",
+            _ => constant.Value?.ToString() ?? "null"
+        };
+    }
+    
+    private static string FormatEnumConstant(TypedConstant constant)
+    {
+        if (constant.Type != null && constant.Value != null)
+        {
+            var enumTypeName = constant.Type.ToDisplayString();
+            return $"({enumTypeName}){constant.Value}";
         }
+        return constant.Value?.ToString() ?? "null";
+    }
+    
+    private static string FormatTypeConstant(TypedConstant constant)
+    {
+        if (constant.Value is ITypeSymbol typeSymbol)
+        {
+            // Get the non-nullable version of the type for typeof operator
+            var displayString = GetNonNullableTypeString(typeSymbol);
+            return $"typeof({displayString})";
+        }
+        
+        return $"typeof({constant.Value})";
+    }
+    
+    private static string GetNonNullableTypeString(ITypeSymbol typeSymbol)
+    {
+        // Handle nullable reference types
+        if (typeSymbol.NullableAnnotation == NullableAnnotation.Annotated)
+        {
+            // For nullable reference types, get the underlying type
+            if (typeSymbol is INamedTypeSymbol { IsReferenceType: true })
+            {
+                return typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
+            }
+        }
+        
+        // Handle nullable value types like int?
+        if (typeSymbol is INamedTypeSymbol namedType && 
+            namedType.IsGenericType && 
+            namedType.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T)
+        {
+            return namedType.TypeArguments[0].ToDisplayString();
+        }
+        
+        var displayString = typeSymbol.ToDisplayString();
+        
+        // Fallback: remove ? suffix if present
+        if (displayString.EndsWith("?"))
+        {
+            displayString = displayString.TrimEnd('?');
+        }
+        
+        return displayString;
     }
 }
 
 // Supporting classes
-internal sealed class PropertyInjectionClassInfo
+internal sealed class ClassWithDataSourceProperties
 {
-    public required INamedTypeSymbol TypeSymbol { get; init; }
-    public required ImmutableArray<PropertyInjectionInfo> InjectableProperties { get; init; }
+    public required INamedTypeSymbol ClassSymbol { get; init; }
+    public required ImmutableArray<PropertyWithDataSourceAttribute> Properties { get; init; }
 }
 
-internal sealed class PropertyInjectionInfo
+internal sealed class PropertyWithDataSourceAttribute
 {
     public required IPropertySymbol Property { get; init; }
     public required AttributeData DataSourceAttribute { get; init; }

@@ -68,9 +68,7 @@ public sealed class TestBuilder : ITestBuilder
         var displayName = GenerateDisplayName(metadata, await GetArgumentsDisplayTextAsync(combination));
         var context = await CreateTestContextAsync(testId, displayName, metadata, methodArguments, classArguments);
 
-        // Recursively inject properties into constructor and method arguments
-        await InjectPropertiesIntoArgumentsAsync(context, classArguments, metadata.MethodMetadata, testId);
-        await InjectPropertiesIntoArgumentsAsync(context, methodArguments, metadata.MethodMetadata, testId);
+        // Property injection moved to execution phase for better performance
 
         // Track all objects from data sources
         TrackDataSourceObjects(classArguments, methodArguments);
@@ -285,145 +283,7 @@ public sealed class TestBuilder : ITestBuilder
         ActiveObjectTracker.IncrementUsage(methodArguments);
     }
 
-    /// <summary>
-    /// Recursively injects properties with data sources into argument objects.
-    /// This extends the existing property injection system to work on constructor and method arguments.
-    /// </summary>
-    private static async Task InjectPropertiesIntoArgumentsAsync(
-        TestContext testContext,
-        object?[] arguments,
-        MethodMetadata methodMetadata,
-        string testSessionId)
-    {
-        if (arguments.Length == 0)
-        {
-            return;
-        }
 
-        foreach (var argument in arguments)
-        {
-            if (argument != null && ShouldInjectProperties(argument))
-            {
-                await InjectPropertiesIntoObjectAsync(testContext, argument, methodMetadata, testSessionId);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Determines if an object should have properties injected based on its type and whether it has nested data sources.
-    /// </summary>
-    private static bool ShouldInjectProperties(object obj)
-    {
-        if (obj == null) return false;
-
-        var type = obj.GetType();
-
-        // Skip primitives, strings, enums, and value types
-        if (type.IsPrimitive || type == typeof(string) || type.IsEnum || type.IsValueType)
-            return false;
-
-        // Skip collections and arrays
-        if (type.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(type))
-            return false;
-
-        // Skip system types
-        if (type.Namespace?.StartsWith("System") == true && type.Assembly == typeof(object).Assembly)
-            return false;
-
-        return true;
-    }
-
-    /// <summary>
-    /// Recursively injects properties with data sources into a single object.
-    /// Reuses the existing property injection logic from PropertyInjector with Func<T> resolution.
-    /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Property injection with fallback to reflection for non-AOT scenarios")]
-    private static async Task InjectPropertiesIntoObjectAsync(
-        TestContext testContext,
-        object instance,
-        MethodMetadata methodMetadata,
-        string testSessionId)
-    {
-        try
-        {
-            // Get injection data for this type from the registry (AOT mode)
-            var type = instance.GetType();
-            var injectionData = DataSourcePropertyInjectionRegistry.GetInjectionData(type);
-            var propertyDataSources = DataSourcePropertyInjectionRegistry.GetPropertyDataSources(type);
-
-            // If AOT data is available, use it
-            if (injectionData != null && propertyDataSources != null && propertyDataSources.Length > 0)
-            {
-                await PropertyInjector.InjectPropertiesAsync(
-                    testContext,
-                    instance,
-                    propertyDataSources,
-                    injectionData,
-                    methodMetadata,
-                    testSessionId);
-            }
-            else
-            {
-                // In AOT mode, we must rely entirely on source-generated injection data
-                // If not available, the properties cannot be injected
-                // This fallback is only for reflection mode
-#if !AOT_MODE
-                // Fall back to reflection-based discovery for properties with data source attributes
-                var discoveredProperties = PropertyInjector.DiscoverInjectableProperties(type);
-                if (discoveredProperties.Length > 0)
-                {
-                    // Create property data sources for discovered properties
-                    var reflectionPropertyDataSources = CreatePropertyDataSourcesFromReflection(type);
-
-                    if (reflectionPropertyDataSources.Length > 0)
-                    {
-                        await PropertyInjector.InjectPropertiesAsync(
-                            testContext,
-                            instance,
-                            reflectionPropertyDataSources,
-                            discoveredProperties,
-                            methodMetadata,
-                            testSessionId);
-                    }
-                }
-#endif
-            }
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to inject properties for type '{instance?.GetType().Name}': {ex.Message}", ex);
-        }
-    }
-
-    /// <summary>
-    /// Creates PropertyDataSource array from reflection when AOT data is not available.
-    /// Only used in reflection mode.
-    /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection-only fallback for non-AOT scenarios")]
-    private static PropertyDataSource[] CreatePropertyDataSourcesFromReflection([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
-    {
-        var propertyDataSources = new List<PropertyDataSource>();
-
-        var properties = type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-
-        foreach (var property in properties)
-        {
-            var dataSourceAttribute = property.GetCustomAttributes(true)
-                .FirstOrDefault(attr => attr is IDataSourceAttribute) as IDataSourceAttribute;
-
-            if (dataSourceAttribute != null)
-            {
-                propertyDataSources.Add(new PropertyDataSource
-                {
-                    PropertyName = property.Name,
-                    PropertyType = property.PropertyType,
-                    DataSource = dataSourceAttribute
-                });
-            }
-        }
-
-        return propertyDataSources.ToArray();
-    }
 
 
     /// Efficiently create arguments array from factories without LINQ overhead
