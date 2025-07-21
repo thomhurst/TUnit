@@ -2926,7 +2926,10 @@ public static class DataCombinationGeneratorEmitter
                     var values = attr.ConstructorArguments[0].Values;
                     for (int i = 0; i < values.Length; i++)
                     {
-                        if (i > 0) writer.Append(", ");
+                        if (i > 0)
+                        {
+                            writer.Append(", ");
+                        }
                         writer.Append(FormatConstantValue(values[i]));
                     }
                 }

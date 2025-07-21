@@ -103,17 +103,26 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         var semanticModel = context.SemanticModel;
 
         var memberAccess = invocation.Expression as MemberAccessExpressionSyntax;
-        if (memberAccess == null) return null;
+        if (memberAccess == null)
+        {
+            return null;
+        }
 
         // Get the MethodInfo being invoked
         var methodInfoExpression = memberAccess.Expression;
         var methodInfoType = semanticModel.GetTypeInfo(methodInfoExpression).Type;
 
-        if (methodInfoType?.Name != "MethodInfo") return null;
+        if (methodInfoType?.Name != "MethodInfo")
+        {
+            return null;
+        }
 
         // Try to extract the method being invoked
         var targetMethod = ExtractTargetMethod(methodInfoExpression, semanticModel);
-        if (targetMethod == null) return null;
+        if (targetMethod == null)
+        {
+            return null;
+        }
 
         return new MethodInvocationInfo
         {
@@ -128,7 +137,10 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         var attributeSymbol = semanticModel.GetSymbolInfo(attribute).Symbol as IMethodSymbol;
         var attributeType = attributeSymbol?.ContainingType;
 
-        if (attributeType?.Name != "MethodDataSourceAttribute") return null;
+        if (attributeType?.Name != "MethodDataSourceAttribute")
+        {
+            return null;
+        }
 
         // Extract method name from attribute arguments
         string? methodName = null;
@@ -141,19 +153,28 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
             }
         }
 
-        if (string.IsNullOrEmpty(methodName)) return null;
+        if (string.IsNullOrEmpty(methodName))
+        {
+            return null;
+        }
 
         // Find the method in the containing type
         var containingClass = attribute.Ancestors().OfType<ClassDeclarationSyntax>().FirstOrDefault();
-        if (containingClass == null) return null;
+        if (containingClass == null)
+        {
+            return null;
+        }
 
         var classSymbol = semanticModel.GetDeclaredSymbol(containingClass) as INamedTypeSymbol;
         var targetMethod = classSymbol?.GetMembers(methodName)
             .OfType<IMethodSymbol>()
             .FirstOrDefault();
 
-        if (targetMethod == null) return null;
-        
+        if (targetMethod == null)
+        {
+            return null;
+        }
+
         // Only include publicly accessible methods for AOT compatibility
         if (!IsAccessibleMethod(targetMethod))
         {
@@ -171,12 +192,18 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
     private static MethodDataSourceInfo? ExtractFromMethod(MethodDeclarationSyntax method, SemanticModel semanticModel)
     {
         var methodSymbol = semanticModel.GetDeclaredSymbol(method) as IMethodSymbol;
-        if (methodSymbol == null) return null;
+        if (methodSymbol == null)
+        {
+            return null;
+        }
 
         // Check if this method could be used as a data source
         var returnType = methodSymbol.ReturnType;
-        if (!IsDataSourceReturnType(returnType)) return null;
-        
+        if (!IsDataSourceReturnType(returnType))
+        {
+            return null;
+        }
+
         // Only include publicly accessible methods for AOT compatibility
         if (!IsAccessibleMethod(methodSymbol))
         {
@@ -263,7 +290,9 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         var (dataSources, invocations) = data;
 
         if (dataSources.IsEmpty && invocations.IsEmpty)
+        {
             return;
+        }
 
         var writer = new CodeWriter();
 
@@ -456,8 +485,11 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         if (method.IsStatic)
         {
             writer.Append($"var result = ");
-            if (isAsync) writer.Append("await ");
-            
+            if (isAsync)
+            {
+                writer.Append("await ");
+            }
+
             var containingType = method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             writer.Append($"{containingType}.{method.Name}(");
             
@@ -475,8 +507,11 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
             writer.AppendLine();
 
             writer.Append($"var result = ");
-            if (isAsync) writer.Append("await ");
-            
+            if (isAsync)
+            {
+                writer.Append("await ");
+            }
+
             writer.Append($"typedInstance.{method.Name}(");
             
             if (parameters.Length > 0)
@@ -536,8 +571,10 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
     private static string GetSafeIdentifierName(string name)
     {
         if (string.IsNullOrEmpty(name))
+        {
             return "Unknown";
-            
+        }
+
         // Replace all invalid characters with underscores
         var result = name
             .Replace(".", "_")

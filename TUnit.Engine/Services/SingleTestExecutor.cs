@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.ReferenceTracking;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -232,19 +233,19 @@ internal class SingleTestExecutor : ISingleTestExecutor
         // Release test method arguments
         foreach (var arg in testDetails.TestMethodArguments)
         {
-            await DataSourceReferenceTrackerProvider.ReleaseDataSourceObject(arg);
+            await ObjectTrackerProvider.ReleaseDataSourceObject(arg);
         }
 
         // Release test class constructor arguments
         foreach (var arg in testDetails.TestClassArguments)
         {
-            await DataSourceReferenceTrackerProvider.ReleaseDataSourceObject(arg);
+            await ObjectTrackerProvider.ReleaseDataSourceObject(arg);
         }
 
         // Release injected property values
         foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
         {
-            await DataSourceReferenceTrackerProvider.ReleaseDataSourceObject(kvp.Value);
+            await ObjectTrackerProvider.ReleaseDataSourceObject(kvp.Value);
         }
     }
 
@@ -386,12 +387,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 continue;
             }
 
-            if (ActiveObjectTracker.TryGetCounter(obj, out var counter))
+            if (ObjectTrackerProvider.TryGetArgumentReference(obj, out var reference))
             {
-                var count = counter!.Decrement();
+                var count = reference!.Decrement();
                 if (count == 0)
                 {
-                    ActiveObjectTracker.RemoveObject(obj);
+                    ObjectTrackerProvider.RemoveArgumentObject(obj);
 
                     if (obj is IAsyncDisposable asyncDisposable)
                     {

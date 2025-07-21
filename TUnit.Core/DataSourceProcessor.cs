@@ -2,6 +2,7 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.ReferenceTracking;
+using TUnit.Core.Tracking;
 
 namespace TUnit.Core;
 
@@ -72,7 +73,7 @@ public static class DataSourceProcessor
         }
 
         // Track the resolved object
-        return DataSourceReferenceTrackerProvider.TrackDataSourceObject(unwrapped);
+        return ObjectTrackerProvider.TrackDataSourceObject(unwrapped);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Data source processing requires reflection on runtime types")]

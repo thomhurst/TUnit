@@ -46,7 +46,10 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
 
     private static bool IsClassWithInjectableProperties(SyntaxNode node)
     {
-        if (node is not ClassDeclarationSyntax classDecl) return false;
+        if (node is not ClassDeclarationSyntax classDecl)
+        {
+            return false;
+        }
 
         // Look for properties that might need injection
         return classDecl.Members
@@ -57,7 +60,10 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
 
     private static bool IsDataSourceAttribute(SyntaxNode node)
     {
-        if (node is not ClassDeclarationSyntax classDecl) return false;
+        if (node is not ClassDeclarationSyntax classDecl)
+        {
+            return false;
+        }
 
         // Check if class implements IDataSourceAttribute or inherits from a data source attribute
         return classDecl.BaseList?.Types.Any(t =>
@@ -72,7 +78,10 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
         var semanticModel = context.SemanticModel;
 
         var classSymbol = semanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
-        if (classSymbol == null) return null;
+        if (classSymbol == null)
+        {
+            return null;
+        }
 
         var injectableProperties = new List<InjectablePropertyInfo>();
 
@@ -88,7 +97,10 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
             }
         }
 
-        if (injectableProperties.Count == 0) return null;
+        if (injectableProperties.Count == 0)
+        {
+            return null;
+        }
 
         return new ClassWithPropertiesInfo
         {
@@ -103,12 +115,17 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
         var semanticModel = context.SemanticModel;
 
         var classSymbol = semanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
-        if (classSymbol == null) return null;
+        if (classSymbol == null)
+        {
+            return null;
+        }
 
         // Check if it implements IDataSourceAttribute
         var dataSourceInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.IDataSourceAttribute");
         if (dataSourceInterface == null || !classSymbol.AllInterfaces.Contains(dataSourceInterface))
+        {
             return null;
+        }
 
         return new DataSourceAttributeInfo
         {
@@ -121,10 +138,14 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
     {
         // Property must be public and writable (either has setter or is init-only)
         if (property.DeclaredAccessibility != Accessibility.Public)
+        {
             return false;
+        }
 
         if (property.SetMethod == null)
+        {
             return false;
+        }
 
         // Check if property has data source attributes or could be injected
         return property.GetAttributes().Any(a => IsDataSourceAttribute(a.AttributeClass)) ||
@@ -134,7 +155,10 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
 
     private static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)
     {
-        if (attributeClass == null) return false;
+        if (attributeClass == null)
+        {
+            return false;
+        }
 
         return attributeClass.AllInterfaces.Any(i =>
             i.Name == "IDataSourceAttribute" &&
@@ -177,7 +201,9 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
     private static PropertyInjectionStrategy DetermineInjectionStrategy(IPropertySymbol property)
     {
         if (property.SetMethod == null)
+        {
             return PropertyInjectionStrategy.Unsupported;
+        }
 
         if (property.SetMethod.IsInitOnly)
         {
@@ -209,7 +235,9 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
 
         // Value types and strings are simple
         if (type.IsValueType || type.SpecialType == SpecialType.System_String)
+        {
             return false;
+        }
 
         // Check for parameterless constructor
         if (type is INamedTypeSymbol namedType)
@@ -224,10 +252,14 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
     private static ImmutableArray<IPropertySymbol> AnalyzeNestedProperties(ITypeSymbol type)
     {
         if (type.IsValueType || type.SpecialType == SpecialType.System_String)
+        {
             return ImmutableArray<IPropertySymbol>.Empty;
+        }
 
         if (type is not INamedTypeSymbol namedType)
+        {
             return ImmutableArray<IPropertySymbol>.Empty;
+        }
 
         return namedType.GetMembers()
             .OfType<IPropertySymbol>()
@@ -240,7 +272,10 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
     {
         var (classes, attributes) = data;
 
-        if (classes.IsEmpty) return;
+        if (classes.IsEmpty)
+        {
+            return;
+        }
 
         var writer = new CodeWriter();
 

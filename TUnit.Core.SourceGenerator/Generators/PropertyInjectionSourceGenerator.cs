@@ -31,7 +31,9 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static bool IsClassWithDataSourceProperties(SyntaxNode node)
     {
         if (node is not ClassDeclarationSyntax classDecl)
+        {
             return false;
+        }
 
         // Look for properties with attributes that might be data sources
         return classDecl.Members
@@ -46,15 +48,19 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         
         var typeSymbol = semanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
         if (typeSymbol == null || typeSymbol.IsAbstract)
+        {
             return null;
+        }
 
         // Find properties with IDataSourceAttribute, including inherited ones
         var propertiesWithDataSources = new List<PropertyWithDataSourceAttribute>();
         var dataSourceInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.IDataSourceAttribute");
         
         if (dataSourceInterface == null)
+        {
             return null;
-        
+        }
+
         // Traverse the inheritance chain to find all properties with data sources
         var currentType = typeSymbol;
         var processedProperties = new HashSet<string>(); // Track property names to avoid duplicates due to overrides
@@ -67,8 +73,10 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 {
                     // Skip if we've already processed a property with this name (due to override/new)
                     if (!processedProperties.Add(property.Name))
+                    {
                         continue;
-                        
+                    }
+
                     foreach (var attr in property.GetAttributes())
                     {
                         if (attr.AttributeClass != null && 
@@ -90,11 +98,15 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             
             // Stop at System.Object or if we hit a null base type
             if (currentType?.SpecialType == SpecialType.System_Object)
+            {
                 break;
+            }
         }
 
         if (propertiesWithDataSources.Count == 0)
+        {
             return null;
+        }
 
         return new ClassWithDataSourceProperties
         {
@@ -112,7 +124,9 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static void GeneratePropertyInjectionSources(SourceProductionContext context, ImmutableArray<ClassWithDataSourceProperties> classes)
     {
         if (classes.IsEmpty)
+        {
             return;
+        }
 
         var sourceBuilder = new StringBuilder();
         
@@ -139,7 +153,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("using System.Threading.Tasks;");
         sb.AppendLine("using TUnit.Core;");
         sb.AppendLine("using TUnit.Core.Interfaces.SourceGenerator;");
-        sb.AppendLine("using TUnit.Core.ReferenceTracking;");
+        sb.AppendLine("using TUnit.Core.Tracking;");
         sb.AppendLine("using TUnit.Core.Enums;");
         sb.AppendLine();
         sb.AppendLine("namespace TUnit.Core;");
@@ -284,7 +298,13 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         {
             sb.AppendLine();
             sb.AppendLine("                    // Track the value for disposal/cleanup");
-            sb.AppendLine("                    var trackedValue = DataSourceReferenceTrackerProvider.TrackDataSourceObject(value);");
+            sb.AppendLine("                    var trackedValue = ObjectTrackerProvider.TrackDataSourceObject(value);");
+            sb.AppendLine();
+            sb.AppendLine("                    // Register disposal handler to release tracked value when test ends");
+            sb.AppendLine("                    testContext.Events.OnDispose += async (o, context) =>");
+            sb.AppendLine("                    {");
+            sb.AppendLine("                        await ObjectTrackerProvider.ReleaseDataSourceObject(trackedValue);");
+            sb.AppendLine("                    };");
             
             // Update property with tracked value if needed
             if (propInfo.Property.SetMethod?.IsInitOnly == true)

@@ -34,11 +34,15 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
     {
         // Look for class declarations that might be data source attributes
         if (node is not ClassDeclarationSyntax classDecl)
+        {
             return false;
+        }
 
         // Must implement IDataSourceAttribute
         if (classDecl.BaseList == null)
+        {
             return false;
+        }
 
         return classDecl.BaseList.Types.Any(t => 
             t.ToString().Contains("IDataSourceAttribute") || 
@@ -52,12 +56,16 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
         
         var typeSymbol = semanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
         if (typeSymbol == null)
+        {
             return null;
+        }
 
         // Check if it implements IDataSourceAttribute
         var dataSourceInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.IDataSourceAttribute");
         if (dataSourceInterface == null || !typeSymbol.AllInterfaces.Contains(dataSourceInterface))
+        {
             return null;
+        }
 
         // Find properties with data source attributes
         var propertiesWithDataSources = new List<PropertyWithDataSourceInfo>();
@@ -81,7 +89,9 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
         }
 
         if (propertiesWithDataSources.Count == 0)
+        {
             return null;
+        }
 
         return new DataSourceTypeInfo
         {
@@ -93,7 +103,9 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
     private static void GenerateRegistrationCode(SourceProductionContext context, ImmutableArray<DataSourceTypeInfo> dataSourceTypes)
     {
         if (dataSourceTypes.IsEmpty)
+        {
             return;
+        }
 
         var writer = new CodeWriter();
         
@@ -272,7 +284,9 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
     private static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)
     {
         if (attributeClass == null)
+        {
             return false;
+        }
 
         // Check if it implements IDataSourceAttribute interface
         return attributeClass.AllInterfaces.Any(i => 
@@ -295,7 +309,10 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
         var constructorArgs = attribute.ConstructorArguments;
         for (int i = 0; i < constructorArgs.Length; i++)
         {
-            if (i > 0) writer.Append(", ");
+            if (i > 0)
+            {
+                writer.Append(", ");
+            }
             WriteArgumentValue(writer, constructorArgs[i]);
         }
 
@@ -308,7 +325,10 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
             writer.Append(" { ");
             for (int i = 0; i < namedArgs.Length; i++)
             {
-                if (i > 0) writer.Append(", ");
+                if (i > 0)
+                {
+                    writer.Append(", ");
+                }
                 writer.Append($"{namedArgs[i].Key} = ");
                 WriteArgumentValue(writer, namedArgs[i].Value);
             }
@@ -324,13 +344,21 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
         {
             case TypedConstantKind.Primitive:
                 if (value.Value == null)
+                {
                     writer.Append("null");
+                }
                 else if (value.Type?.SpecialType == SpecialType.System_String)
+                {
                     writer.Append($"\"{value.Value}\"");
+                }
                 else if (value.Type?.SpecialType == SpecialType.System_Boolean)
+                {
                     writer.Append(value.Value.ToString()?.ToLowerInvariant() ?? "false");
+                }
                 else
+                {
                     writer.Append(value.Value.ToString() ?? "null");
+                }
                 break;
             case TypedConstantKind.Type:
                 writer.Append($"typeof({((ITypeSymbol)value.Value!).GloballyQualified()})");
@@ -339,7 +367,10 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
                 writer.Append("new[] { ");
                 for (int i = 0; i < value.Values.Length; i++)
                 {
-                    if (i > 0) writer.Append(", ");
+                    if (i > 0)
+                    {
+                        writer.Append(", ");
+                    }
                     WriteArgumentValue(writer, value.Values[i]);
                 }
                 writer.Append(" }");

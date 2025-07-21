@@ -89,7 +89,9 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         // Analyze the invocation to determine what types are being resolved
         var symbolInfo = semanticModel.GetSymbolInfo(invocation);
         if (symbolInfo.Symbol is not IMethodSymbol method)
+        {
             return null;
+        }
 
         var containingType = method.ContainingType;
         var typeArguments = new List<ITypeSymbol>();
@@ -146,7 +148,9 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         }
 
         if (typeArguments.Count == 0)
+        {
             return null;
+        }
 
         return new TypeReferenceInfo
         {
@@ -414,8 +418,10 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
     private static void GenerateGenericTypeFactories(CodeWriter writer, ImmutableArray<GenericTestInfo> genericTests)
     {
         if (genericTests.IsDefaultOrEmpty)
+        {
             return;
-            
+        }
+
         var processedTypes = new HashSet<string>();
         
         foreach (var genericTest in genericTests)
@@ -639,7 +645,10 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
 
         public override bool Equals(object? obj)
         {
-            if (obj is not GenericTypeCombination other) return false;
+            if (obj is not GenericTypeCombination other)
+            {
+                return false;
+            }
             return SymbolEqualityComparer.Default.Equals(GenericDefinition, other.GenericDefinition) &&
                    System.Linq.Enumerable.SequenceEqual(TypeArguments, other.TypeArguments, SymbolEqualityComparer.Default);
         }

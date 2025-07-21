@@ -126,12 +126,18 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         var semanticModel = context.SemanticModel;
 
         var methodSymbol = semanticModel.GetDeclaredSymbol(method) as IMethodSymbol;
-        if (methodSymbol == null) return null;
+        if (methodSymbol == null)
+        {
+            return null;
+        }
 
         var returnType = methodSymbol.ReturnType;
         var tupleTypes = ExtractTupleTypesFromReturnType(returnType);
 
-        if (tupleTypes.Count == 0) return null;
+        if (tupleTypes.Count == 0)
+        {
+            return null;
+        }
 
         return new TupleDataSourceInfo
         {
@@ -183,7 +189,10 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
     private static TupleUsageInfo? ExtractFromGenericName(GenericNameSyntax genericName, SemanticModel semanticModel)
     {
         var name = genericName.Identifier.ValueText;
-        if (name is not ("ValueTuple" or "Tuple")) return null;
+        if (name is not ("ValueTuple" or "Tuple"))
+        {
+            return null;
+        }
 
         var typeInfo = semanticModel.GetTypeInfo(genericName);
         if (typeInfo.Type != null && IsTupleType(typeInfo.Type))
@@ -256,7 +265,9 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         var (usages, dataSources) = data;
 
         if (usages.IsEmpty && dataSources.IsEmpty)
+        {
             return;
+        }
 
         var writer = new CodeWriter();
 
@@ -455,7 +466,9 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
     private static void GenerateTupleProcessor(CodeWriter writer, ITypeSymbol tupleType, string processorName)
     {
         if (tupleType is not INamedTypeSymbol namedTupleType || !namedTupleType.IsGenericType || !IsConcreteType(tupleType))
+        {
             return;
+        }
 
         var fullyQualifiedName = tupleType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         var elementTypes = namedTupleType.TypeArguments;
@@ -550,7 +563,9 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
     private static string GetUniqueTupleProcessorName(ITypeSymbol tupleType, HashSet<string> processedNames)
     {
         if (tupleType is not INamedTypeSymbol namedType || !namedType.IsGenericType)
+        {
             return "ProcessUnknownTuple";
+        }
 
         var baseName = namedType.ConstructedFrom.Name; // "ValueTuple" or "Tuple"
         var elementCount = namedType.TypeArguments.Length;

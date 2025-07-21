@@ -4,6 +4,7 @@ using TUnit.Core.Data;
 using TUnit.Core.DataSources;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Services;
@@ -66,7 +67,7 @@ public sealed class TestBuilder : ITestBuilder
         // Generate unique test ID first (needed for property injection)
         var testId = TestIdentifierService.GenerateTestId(metadata, combination);
         var displayName = GenerateDisplayName(metadata, await GetArgumentsDisplayTextAsync(combination));
-        var context = await CreateTestContextAsync(testId, displayName, metadata, methodArguments, classArguments);
+        var context = await CreateTestContextAsync(testId, metadata, methodArguments, classArguments);
 
         // Property injection moved to execution phase for better performance
 
@@ -76,7 +77,7 @@ public sealed class TestBuilder : ITestBuilder
         // Set the data combination for generic type resolution
         context.TestDetails.DataCombination = combination;
 
-        await InvokeDiscoveryEventReceiversAsync(metadata, context);
+        await InvokeDiscoveryEventReceiversAsync(context);
 
         var beforeTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: true);
         var afterTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: false);
@@ -140,7 +141,7 @@ public sealed class TestBuilder : ITestBuilder
         return displayName;
     }
 
-    private async Task<TestContext> CreateTestContextAsync(string testId, string displayName, TestMetadata metadata, object?[]? methodArguments = null, object?[]? classArguments = null)
+    private async Task<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, object?[]? methodArguments = null, object?[]? classArguments = null)
     {
         var testDetails = new TestDetails
         {
@@ -169,7 +170,7 @@ public sealed class TestBuilder : ITestBuilder
             metadata.TestName,
             metadata.TestClassType,
             CancellationToken.None,
-            _serviceProvider ?? new TestServiceProvider());
+            _serviceProvider);
 
         context.TestDetails = testDetails;
 
@@ -177,7 +178,7 @@ public sealed class TestBuilder : ITestBuilder
     }
 
 
-    private async Task InvokeDiscoveryEventReceiversAsync(TestMetadata metadata, TestContext context)
+    private async Task InvokeDiscoveryEventReceiversAsync(TestContext context)
     {
         var discoveredContext = new DiscoveredTestContext(
             context.TestDetails.TestName,
@@ -227,8 +228,8 @@ public sealed class TestBuilder : ITestBuilder
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
         var displayName = customDisplayName ?? $"{metadata.TestName} [DATA GENERATION ERROR]";
 
-        var testDetails = CreateFailedTestDetails(metadata, testId, displayName);
-        var context = CreateFailedTestContext(metadata, testDetails, displayName);
+        var testDetails = CreateFailedTestDetails(metadata, testId);
+        var context = CreateFailedTestContext(metadata, testDetails);
 
         return new FailedExecutableTest(exception)
         {
@@ -243,7 +244,7 @@ public sealed class TestBuilder : ITestBuilder
         };
     }
 
-    private static TestDetails CreateFailedTestDetails(TestMetadata metadata, string testId, string displayName)
+    private static TestDetails CreateFailedTestDetails(TestMetadata metadata, string testId)
     {
         return new TestDetails
         {
@@ -264,7 +265,7 @@ public sealed class TestBuilder : ITestBuilder
         };
     }
 
-    private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails, string displayName)
+    private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails)
     {
         var context = _contextProvider.CreateTestContext(
             metadata.TestName,
@@ -279,12 +280,9 @@ public sealed class TestBuilder : ITestBuilder
 
     private static void TrackDataSourceObjects(object?[] classArguments, object?[] methodArguments)
     {
-        ActiveObjectTracker.IncrementUsage(classArguments);
-        ActiveObjectTracker.IncrementUsage(methodArguments);
+        ObjectTrackerProvider.IncrementArgumentUsage(classArguments);
+        ObjectTrackerProvider.IncrementArgumentUsage(methodArguments);
     }
-
-
-
 
     /// Efficiently create arguments array from factories without LINQ overhead
     private static async Task<object?[]> CreateArgumentsFromFactoriesAsync(IReadOnlyList<Func<Task<object?>>> factories)

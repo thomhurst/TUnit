@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using TUnit.Core.Enums;
 using TUnit.Core.ReferenceTracking;
+using TUnit.Core.Tracking;
 
 namespace TUnit.Core;
 
@@ -118,10 +119,10 @@ public static class PropertyInjector
 
                 testContext.Events.OnDispose += async (o, context) =>
                 {
-                    await DataSourceReferenceTrackerProvider.ReleaseDataSourceObject(value);
+                    await ObjectTrackerProvider.ReleaseDataSourceObject(value);
                 };
 
-                var trackedValue = DataSourceReferenceTrackerProvider.TrackDataSourceObject(value);
+                var trackedValue = ObjectTrackerProvider.TrackDataSourceObject(value);
 
                 injection.Setter(instance, trackedValue);
 
@@ -256,7 +257,7 @@ public static class PropertyInjector
 
             try
             {
-                var trackedValue = DataSourceReferenceTrackerProvider.TrackDataSourceObject(kvp.Value);
+                var trackedValue = ObjectTrackerProvider.TrackDataSourceObject(kvp.Value);
 
                 var setter = CreatePropertySetter(property);
                 setter(instance, trackedValue);
