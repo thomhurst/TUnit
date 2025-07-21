@@ -5,16 +5,16 @@ namespace TUnit.Engine.Framework;
 
 internal sealed class TestRequestHandler : IRequestHandler
 {
-    public async Task HandleRequestAsync(TestExecutionRequest request, TUnitServiceProvider serviceProvider, ExecuteRequestContext context)
+    public async Task HandleRequestAsync(TestExecutionRequest request, TUnitServiceProvider serviceProvider, ExecuteRequestContext context, ITestExecutionFilter? testExecutionFilter)
     {
         switch (request)
         {
             case DiscoverTestExecutionRequest:
-                await HandleDiscoveryRequestAsync(serviceProvider, context);
+                await HandleDiscoveryRequestAsync(serviceProvider, context, testExecutionFilter);
                 break;
 
             case RunTestExecutionRequest runRequest:
-                await HandleRunRequestAsync(serviceProvider, runRequest, context);
+                await HandleRunRequestAsync(serviceProvider, runRequest, context, testExecutionFilter);
                 break;
 
             default:
@@ -27,9 +27,10 @@ internal sealed class TestRequestHandler : IRequestHandler
 
     private async Task HandleDiscoveryRequestAsync(
         TUnitServiceProvider serviceProvider,
-        ExecuteRequestContext context)
+        ExecuteRequestContext context,
+        ITestExecutionFilter? testExecutionFilter)
     {
-        var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, GetFilter(context), context.CancellationToken);
+        var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, testExecutionFilter, context.CancellationToken);
 
 #if NET
         if (discoveryResult.ExecutionContext != null)
@@ -46,27 +47,12 @@ internal sealed class TestRequestHandler : IRequestHandler
         }
     }
 
-    private ITestExecutionFilter? GetFilter(ExecuteRequestContext context)
-    {
-        if (context.Request is RunTestExecutionRequest runRequest)
-        {
-            return runRequest.Filter;
-        }
-
-        if (context.Request is DiscoverTestExecutionRequest discoverTestExecutionRequest)
-        {
-            return discoverTestExecutionRequest.Filter;
-        }
-
-        return null;
-    }
-
     private async Task HandleRunRequestAsync(
         TUnitServiceProvider serviceProvider,
         RunTestExecutionRequest request,
-        ExecuteRequestContext context)
+        ExecuteRequestContext context, ITestExecutionFilter? testExecutionFilter)
     {
-        var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, GetFilter(context), context.CancellationToken);
+        var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, testExecutionFilter, context.CancellationToken);
 
 #if NET
         if (discoveryResult.ExecutionContext != null)

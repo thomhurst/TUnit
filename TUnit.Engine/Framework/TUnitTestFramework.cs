@@ -5,6 +5,7 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
+using TUnit.Core;
 using TUnit.Engine.Diagnostics;
 
 namespace TUnit.Engine.Framework;
@@ -91,9 +92,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
             var serviceProvider = GetOrCreateServiceProvider(context);
 
+            GlobalContext.Current = serviceProvider.ContextProvider.GlobalContext;
+            BeforeTestDiscoveryContext.Current = serviceProvider.ContextProvider.BeforeTestDiscoveryContext;
+            TestDiscoveryContext.Current = serviceProvider.ContextProvider.TestDiscoveryContext;
+            TestSessionContext.Current = serviceProvider.ContextProvider.TestSessionContext;
+
             serviceProvider.CancellationToken.Initialise(context.CancellationToken);
 
-            await _requestHandler.HandleRequestAsync((TestExecutionRequest) context.Request, serviceProvider, context);
+            await _requestHandler.HandleRequestAsync((TestExecutionRequest) context.Request, serviceProvider, context, GetFilter(context));
         }
         catch (Exception e) when (IsCancellationException(e))
         {
@@ -139,6 +145,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             _ => new TUnitServiceProvider(
                 _extension,
                 context,
+                GetFilter(context),
                 context.MessageBus,
                 _frameworkServiceProvider,
                 _capabilities));
@@ -161,5 +168,20 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
                     Uid = new TestNodeUid(Guid.NewGuid().ToString()),
                     Properties = new PropertyBag(new ErrorTestNodeStateProperty(exception))
                 }));
+    }
+
+    private ITestExecutionFilter? GetFilter(ExecuteRequestContext context)
+    {
+        if (context.Request is RunTestExecutionRequest runRequest)
+        {
+            return runRequest.Filter;
+        }
+
+        if (context.Request is DiscoverTestExecutionRequest discoverTestExecutionRequest)
+        {
+            return discoverTestExecutionRequest.Filter;
+        }
+
+        return null;
     }
 }

@@ -8,10 +8,15 @@ namespace TUnit.Core;
 /// <summary>
 /// Builder for creating and managing the context hierarchy with proper parent-child relationships and singleton behavior
 /// </summary>
-public class ContextProvider : IContextProvider
+public class ContextProvider(string testSessionId, string? testFilter) : IContextProvider
 {
     private readonly ConcurrentDictionary<Assembly, AssemblyHookContext> _assemblyContexts = new();
     private readonly ConcurrentDictionary<Type, ClassHookContext> _classContexts = new();
+
+    public GlobalContext GlobalContext { get; } = new()
+    {
+        TestFilter = testFilter,
+    };
 
     /// <summary>
     /// Gets or creates the discovery context
@@ -19,7 +24,7 @@ public class ContextProvider : IContextProvider
     [field: AllowNull, MaybeNull]
     public BeforeTestDiscoveryContext BeforeTestDiscoveryContext => field ??= new BeforeTestDiscoveryContext
     {
-        TestFilter = string.Empty
+        TestFilter = testFilter
     };
 
     /// <summary>
@@ -27,9 +32,9 @@ public class ContextProvider : IContextProvider
     /// </summary>
     [field: AllowNull, MaybeNull]
     public TestDiscoveryContext TestDiscoveryContext => field ??= new TestDiscoveryContext(BeforeTestDiscoveryContext)
-            {
-                TestFilter = null
-            };
+    {
+        TestFilter = testFilter
+    };
 
     /// <summary>
     /// Gets or creates a test session context
@@ -37,7 +42,8 @@ public class ContextProvider : IContextProvider
     [field: AllowNull, MaybeNull]
     public TestSessionContext TestSessionContext => field ??= new TestSessionContext(TestDiscoveryContext)
     {
-        Id = Guid.NewGuid().ToString(), TestFilter = string.Empty
+        Id = testSessionId,
+        TestFilter = testFilter
     };
 
     /// <summary>

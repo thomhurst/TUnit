@@ -93,46 +93,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return methods;
     }
 
-    private static void OnAssemblyLoaded(object? sender, AssemblyLoadEventArgs args)
-    {
-        if (!ShouldScanAssembly(args.LoadedAssembly))
-        {
-            return;
-        }
-
-        lock (_lock)
-        {
-            if (_scannedAssemblies.Contains(args.LoadedAssembly))
-            {
-                return;
-            }
-
-            _scannedAssemblies.Add(args.LoadedAssembly);
-        }
-
-        try
-        {
-            var tests = Task.Run(async () => await DiscoverTestsInAssembly(args.LoadedAssembly)).Result;
-
-            lock (_lock)
-            {
-                _discoveredTests.AddRange(tests);
-
-                // Log expression cache statistics for dynamically loaded assemblies
-                if (DiscoveryDiagnostics.IsEnabled)
-                {
-                    var stats = _expressionCache.GetCacheStatistics();
-                    DiscoveryDiagnostics.RecordEvent("ExpressionCacheStats (Dynamic)",
-                        $"Instance Factories: {stats.InstanceFactories}, Test Invokers: {stats.TestInvokers}");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Warning: Failed to scan dynamically loaded assembly {args.LoadedAssembly.FullName}: {ex.Message}");
-        }
-    }
-
     private static bool ShouldScanAssembly(Assembly assembly)
     {
         var name = assembly.GetName().Name;
@@ -445,7 +405,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 TestClassInstance = null,
                 ClassInstanceArguments = null
             };
-            
+
             // Get data rows from the source
             await foreach (var rowFactory in dataSource.GetDataRowsAsync(metadata))
             {
@@ -680,7 +640,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             // Extract the display name template from the attribute
             // We can't fully process it here because we don't have parameter values yet
             // But we can at least show the template for tests without parameters
-            var displayNameField = typeof(DisplayNameAttribute).GetField("displayName", 
+            var displayNameField = typeof(DisplayNameAttribute).GetField("displayName",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             if (displayNameField != null)
             {
@@ -692,7 +652,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 }
             }
         }
-        
+
         // Default format
         return $"{testClass.Name}.{testMethod.Name}";
     }
@@ -1239,7 +1199,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         {
             return CreateReflectionInstanceFactory(ctor);
         }
-        
+
         try
         {
             var parameters = ctor.GetParameters();
@@ -1282,7 +1242,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         {
             return CreateReflectionTestInvoker(testClass, testMethod);
         }
-        
+
         try
         {
             // Skip compilation for generic methods - they can't be compiled and will use reflection
@@ -1708,7 +1668,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         {
             return CreateReflectionHookInvoker(method);
         }
-        
+
         var instanceParam = Expression.Parameter(typeof(object), "instance");
         var contextParam = Expression.Parameter(typeof(TestContext), "context");
 
@@ -2363,7 +2323,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             };
         }
     }
-    
+
     /// <summary>
     /// Detects if running in an AOT environment where Expression.Compile() is not available
     /// </summary>
@@ -2384,7 +2344,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             return true;
         }
     }
-    
+
     /// <summary>
     /// Creates a reflection-based instance factory with proper AOT attribution
     /// </summary>
@@ -2403,7 +2363,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             }
         };
     }
-    
+
     /// <summary>
     /// Creates a reflection-based test invoker with proper AOT attribution
     /// </summary>
@@ -2436,7 +2396,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             }
         };
     }
-    
+
     /// <summary>
     /// Creates a reflection-based hook invoker with proper AOT attribution
     /// </summary>
@@ -2449,12 +2409,12 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             {
                 var parameters = method.GetParameters();
                 var args = new object?[parameters.Length];
-                
+
                 // Map parameters based on their types
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     var paramType = parameters[i].ParameterType;
-                    
+
                     if (paramType == typeof(TestContext))
                     {
                         args[i] = context;
@@ -2481,9 +2441,9 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                             $"Hook method {method.Name} has unsupported parameter type {paramType}");
                     }
                 }
-                
+
                 var result = method.Invoke(method.IsStatic ? null : instance, args);
-                
+
                 if (result is Task task)
                 {
                     return task;

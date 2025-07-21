@@ -8,5 +8,5 @@ namespace TUnit.Engine.Framework;
 /// </summary>
 internal interface IRequestHandler
 {
-    Task HandleRequestAsync(TestExecutionRequest request, TUnitServiceProvider serviceProvider, ExecuteRequestContext context);
+    Task HandleRequestAsync(TestExecutionRequest request, TUnitServiceProvider serviceProvider, ExecuteRequestContext context, ITestExecutionFilter? testExecutionFilter);
 }

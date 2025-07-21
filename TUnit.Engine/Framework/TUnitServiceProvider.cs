@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
+using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
 using TUnit.Core.Enums;
@@ -21,6 +22,10 @@ namespace TUnit.Engine.Framework;
 
 internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 {
+    public ITestExecutionFilter? Filter
+    {
+        get;
+    }
     private readonly Dictionary<Type, object> _services = new();
 
     // Core services
@@ -38,13 +43,16 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public EventReceiverOrchestrator EventReceiverOrchestrator { get; }
     public ITestFinder TestFinder { get; }
 
-    public TUnitServiceProvider(
-        IExtension extension,
+    public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
+        ITestExecutionFilter? filter,
         IMessageBus messageBus,
         IServiceProvider frameworkServiceProvider,
         ITestFrameworkCapabilities capabilities)
     {
+        Filter = filter;
+        TestSessionId = context.Request.Session.SessionUid.Value;
+
         // Get framework services
         var loggerFactory = frameworkServiceProvider.GetLoggerFactory();
         var outputDevice = frameworkServiceProvider.GetOutputDevice();
@@ -77,9 +85,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
 
-        var contextProvider = Register(new ContextProvider());
+        ContextProvider = Register(new ContextProvider(TestSessionId, Filter?.ToString()));
 
-        HookOrchestrator = Register(new HookOrchestrator(HookCollectionService, Logger, contextProvider, this));
+        HookOrchestrator = Register(new HookOrchestrator(HookCollectionService, Logger, ContextProvider, this));
         EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
 
         // Detect execution mode from command line or environment
@@ -91,7 +99,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var genericResolver = Register<IGenericTypeResolver>(
             CreateGenericTypeResolver(executionMode));
         var testBuilder = Register<ITestBuilder>(
-            new TestBuilder(this, contextProvider));
+            new TestBuilder(this, ContextProvider));
 
         // Create pipeline with all dependencies
         TestBuilderPipeline = Register(
@@ -99,7 +107,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 dataCollector,
                 genericResolver,
                 testBuilder,
-                contextProvider));
+                ContextProvider));
 
         DiscoveryService = Register(new TestDiscoveryService(HookOrchestrator, TestBuilderPipeline, TestFilterService));
 
@@ -126,6 +134,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Initialize console interceptors
         InitializeConsoleInterceptors();
     }
+
+    public ContextProvider ContextProvider { get; }
+
+    public string TestSessionId { get; }
 
     private void InitializeConsoleInterceptors()
     {
@@ -186,7 +198,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             TestExecutionMode.SourceGeneration => new SourceGeneratedGenericTypeResolver(),
             _ => new SourceGeneratedGenericTypeResolver()
         };
-        
+
         return resolver;
     }
 
