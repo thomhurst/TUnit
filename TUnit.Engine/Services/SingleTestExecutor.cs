@@ -93,8 +93,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             test.EndTime = DateTimeOffset.Now;
 
-            await ReleaseDataSourceReferences(test.Context!);
-
             await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
 
             var endClassContext = test.Context!.ClassContext;
@@ -206,25 +204,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
     }
 
-    private async Task ReleaseDataSourceReferences(TestContext context)
-    {
-        var testDetails = context.TestDetails;
-
-        foreach (var arg in testDetails.TestMethodArguments)
-        {
-            await UnifiedObjectTracker.ReleaseObject(arg);
-        }
-
-        foreach (var arg in testDetails.TestClassArguments)
-        {
-            await UnifiedObjectTracker.ReleaseObject(arg);
-        }
-
-        foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
-        {
-            await UnifiedObjectTracker.ReleaseObject(kvp.Value);
-        }
-    }
 
     private TestNodeUpdateMessage CreateUpdateMessage(ExecutableTest test)
     {
