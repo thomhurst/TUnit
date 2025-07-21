@@ -1,87 +1,54 @@
 namespace TUnit.Core.Tracking;
 
 /// <summary>
-/// Provides access to global UnifiedObjectTracker instances for different use cases.
+/// Provides unified object tracking for all test objects with simple Track/Untrack interface.
 /// </summary>
 public static class ObjectTrackerProvider
 {
     /// <summary>
-    /// Tracker for data source objects with automatic disposal and recursive tracking.
-    /// Replaces DataSourceReferenceTracker functionality.
+    /// Single unified tracker for all objects with full lifecycle management.
+    /// Auto-disposal is always enabled when reference count reaches zero.
     /// </summary>
-    public static UnifiedObjectTracker DataSourceTracker { get; } = new(
-        enableAutoDisposal: true, 
+    private static readonly UnifiedObjectTracker Tracker = new(
         enableRecursiveTracking: true);
 
     /// <summary>
-    /// Simple tracker for test arguments without automatic disposal.
-    /// Replaces ActiveObjectTracker functionality.
-    /// </summary>
-    public static UnifiedObjectTracker ArgumentTracker { get; } = new(
-        enableAutoDisposal: false, 
-        enableRecursiveTracking: false);
-
-    /// <summary>
-    /// Tracks objects created from data sources with full lifecycle management.
-    /// Equivalent to DataSourceReferenceTrackerProvider.TrackDataSourceObject.
+    /// Tracks an object for lifecycle management.
     /// </summary>
     /// <param name="obj">The object to track</param>
     /// <returns>The same object instance</returns>
-    public static object? TrackDataSourceObject(object? obj)
+    public static object? Track(object? obj)
     {
-        return DataSourceTracker.TrackObject(obj);
+        return Tracker.TrackObject(obj);
     }
 
     /// <summary>
-    /// Releases objects used in a test with full disposal handling.
-    /// Equivalent to DataSourceReferenceTrackerProvider.ReleaseDataSourceObject.
+    /// Untracks and releases an object, disposing it if necessary.
     /// </summary>
-    /// <param name="obj">The object to release</param>
-    public static async Task ReleaseDataSourceObject(object? obj)
+    /// <param name="obj">The object to untrack and release</param>
+    public static async Task Untrack(object? obj)
     {
-        await DataSourceTracker.ReleaseObject(obj);
+        await Tracker.ReleaseObject(obj);
     }
 
     /// <summary>
-    /// Increments usage count for test arguments.
-    /// Equivalent to ActiveObjectTracker.IncrementUsage.
-    /// </summary>
-    /// <param name="obj">The object to track</param>
-    public static void IncrementArgumentUsage(object? obj)
-    {
-        ArgumentTracker.TrackObject(obj);
-    }
-
-    /// <summary>
-    /// Increments usage count for multiple test arguments.
-    /// Equivalent to ActiveObjectTracker.IncrementUsage(IEnumerable).
-    /// </summary>
-    /// <param name="objects">The objects to track</param>
-    public static void IncrementArgumentUsage(IEnumerable<object?> objects)
-    {
-        ArgumentTracker.TrackObjects(objects);
-    }
-
-    /// <summary>
-    /// Tries to get the reference info for a test argument.
-    /// Equivalent to ActiveObjectTracker.TryGetCounter.
+    /// Gets the reference counter for a tracked object.
     /// </summary>
     /// <param name="obj">The object to check</param>
-    /// <param name="reference">The reference info if found</param>
+    /// <param name="counter">The reference counter if found</param>
     /// <returns>True if the object is tracked</returns>
-    public static bool TryGetArgumentReference(object? obj, out UnifiedObjectTracker.TrackedReference? reference)
+    public static bool TryGetReference(object? obj, out TUnit.Core.Helpers.Counter? counter)
     {
-        return ArgumentTracker.TryGetReference(obj, out reference);
+        return Tracker.TryGetReference(obj, out counter);
     }
 
     /// <summary>
-    /// Removes an argument object from tracking.
-    /// Equivalent to ActiveObjectTracker.RemoveObject.
+    /// Removes an object from tracking without disposal.
     /// </summary>
     /// <param name="obj">The object to remove</param>
     /// <returns>True if the object was removed</returns>
-    public static bool RemoveArgumentObject(object? obj)
+    public static bool Remove(object? obj)
     {
-        return ArgumentTracker.RemoveObject(obj);
+        return Tracker.RemoveObject(obj);
     }
 }

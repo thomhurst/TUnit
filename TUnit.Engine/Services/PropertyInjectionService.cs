@@ -1,15 +1,19 @@
 using TUnit.Core;
 using TUnit.Core.Tracking;
+using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Data;
 
 namespace TUnit.Engine.Services;
 
-public sealed class PropertyInjectionService
+internal sealed class PropertyInjectionService
 {
+    private static readonly GetOnlyDictionary<object, Task> _injectionTasks = new();
+
     /// <summary>
     /// Injects properties with data sources into argument objects just before test execution.
     /// This ensures properties are only initialized when the test is about to run.
     /// </summary>
-    public static async Task InjectPropertiesIntoArgumentsAsync(object?[] arguments)
+    public static async Task InjectPropertiesIntoArgumentsAsync(object?[] arguments, TestContext testContext)
     {
         if (arguments.Length == 0)
         {
@@ -20,7 +24,7 @@ public sealed class PropertyInjectionService
         {
             if (argument != null && ShouldInjectProperties(argument))
             {
-                await InjectPropertiesIntoObjectAsync(argument);
+                await InjectPropertiesIntoObjectAsync(argument, testContext);
             }
         }
     }
@@ -37,19 +41,16 @@ public sealed class PropertyInjectionService
 
         var type = obj.GetType();
 
-        // Skip primitives, strings, enums, and value types
         if (type.IsPrimitive || type == typeof(string) || type.IsEnum || type.IsValueType)
         {
             return false;
         }
 
-        // Skip collections and arrays
         if (type.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(type))
         {
             return false;
         }
 
-        // Skip system types
         if (type.Assembly == typeof(object).Assembly)
         {
             return false;
@@ -61,24 +62,71 @@ public sealed class PropertyInjectionService
     /// <summary>
     /// Recursively injects properties with data sources into a single object using the new static property source system.
     /// The PropertySource includes inherited properties, so we only need to check the concrete type.
+    /// After injection, handles tracking, initialization, and recursive injection.
     /// </summary>
-    private static async Task InjectPropertiesIntoObjectAsync(object instance)
+    private static async Task InjectPropertiesIntoObjectAsync(object instance, TestContext testContext)
     {
         try
         {
             var type = instance.GetType();
 
-            // Use the new static property source registry
-            // The PropertySource for this type includes inherited properties
-            var propertySource = PropertySourceRegistry.GetSource(type);
-            if (propertySource?.ShouldInitialize == true)
+            await _injectionTasks.GetOrAdd(instance, async _ =>
             {
-                await propertySource.InitializeAsync(instance);
-            }
+                var propertySource = PropertySourceRegistry.GetSource(type);
+
+                if (propertySource?.ShouldInitialize == true)
+                {
+                    // First, create all data source objects
+                    var propertyValues = await propertySource.InitializeAsync(instance);
+
+                    // Then handle each created value: track, initialize, set property, and setup cleanup
+                    foreach (var kvp in propertyValues)
+                    {
+                        await ProcessInjectedPropertyValue(instance, kvp.Key, kvp.Value, testContext);
+                    }
+                }
+            });
         }
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Failed to inject properties for type '{instance?.GetType().Name}': {ex.Message}", ex);
         }
     }
+
+    /// <summary>
+    /// Processes a single injected property value: tracks it, initializes it, sets it on the instance, and handles cleanup.
+    /// </summary>
+    [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2075", Justification = "Property reflection is expected in testing framework")]
+    private static async Task ProcessInjectedPropertyValue(object instance, string propertyName, object? propertyValue, TestContext testContext)
+    {
+        if (propertyValue == null)
+        {
+            return;
+        }
+
+        var trackedValue = ObjectTrackerProvider.Track(propertyValue);
+
+        if (trackedValue != null && ShouldInjectProperties(trackedValue))
+        {
+            await InjectPropertiesIntoObjectAsync(trackedValue, testContext);
+        }
+
+        await ObjectInitializer.InitializeAsync(trackedValue);
+
+        var type = instance.GetType();
+        var property = type.GetProperty(propertyName);
+
+        if (property == null || !property.CanWrite)
+        {
+            return;
+        }
+
+        property.SetValue(instance, trackedValue);
+
+        testContext.Events.OnDispose += async (o, context) =>
+        {
+            await ObjectTrackerProvider.Untrack(trackedValue);
+        };
+    }
+
 }

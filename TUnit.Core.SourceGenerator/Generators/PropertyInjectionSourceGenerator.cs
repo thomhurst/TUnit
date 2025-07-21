@@ -13,7 +13,6 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // Find all classes that have properties with IDataSourceAttribute
         var classesWithPropertyInjection = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: (node, _) => IsClassWithDataSourceProperties(node),
@@ -21,10 +20,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             .Where(x => x != null)
             .Select((x, _) => x!);
 
-        // Collect all discovered classes
         var collectedClasses = classesWithPropertyInjection.Collect();
 
-        // Generate property injection sources
         context.RegisterSourceOutput(collectedClasses, GeneratePropertyInjectionSources);
     }
 
@@ -35,7 +32,6 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             return false;
         }
 
-        // Look for properties with attributes that might be data sources
         return classDecl.Members
             .OfType<PropertyDeclarationSyntax>()
             .Any(prop => prop.AttributeLists.Count > 0);
@@ -45,33 +41,30 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     {
         var classDecl = (ClassDeclarationSyntax)context.Node;
         var semanticModel = context.SemanticModel;
-        
+
         var typeSymbol = semanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
         if (typeSymbol == null || typeSymbol.IsAbstract)
         {
             return null;
         }
 
-        // Find properties with IDataSourceAttribute, including inherited ones
         var propertiesWithDataSources = new List<PropertyWithDataSourceAttribute>();
         var dataSourceInterface = semanticModel.Compilation.GetTypeByMetadataName("TUnit.Core.IDataSourceAttribute");
-        
+
         if (dataSourceInterface == null)
         {
             return null;
         }
 
-        // Traverse the inheritance chain to find all properties with data sources
         var currentType = typeSymbol;
-        var processedProperties = new HashSet<string>(); // Track property names to avoid duplicates due to overrides
-        
+        var processedProperties = new HashSet<string>();
+
         while (currentType != null)
         {
             foreach (var member in currentType.GetMembers())
             {
                 if (member is IPropertySymbol property && CanSetProperty(property))
                 {
-                    // Skip if we've already processed a property with this name (due to override/new)
                     if (!processedProperties.Add(property.Name))
                     {
                         continue;
@@ -79,7 +72,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
                     foreach (var attr in property.GetAttributes())
                     {
-                        if (attr.AttributeClass != null && 
+                        if (attr.AttributeClass != null &&
                             attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default))
                         {
                             propertiesWithDataSources.Add(new PropertyWithDataSourceAttribute
@@ -92,11 +85,9 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                     }
                 }
             }
-            
-            // Move up the inheritance chain
+
             currentType = currentType.BaseType;
-            
-            // Stop at System.Object or if we hit a null base type
+
             if (currentType?.SpecialType == SpecialType.System_Object)
             {
                 break;
@@ -117,7 +108,6 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static bool CanSetProperty(IPropertySymbol property)
     {
-        // Can set if it has a setter OR if it's init-only (we'll use UnsafeAccessor)
         return property.SetMethod != null || property.SetMethod?.IsInitOnly == true;
     }
 
@@ -129,13 +119,11 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         }
 
         var sourceBuilder = new StringBuilder();
-        
+
         WriteFileHeader(sourceBuilder);
-        
-        // Generate module initializer to register sources
+
         GenerateModuleInitializer(sourceBuilder, classes);
-        
-        // Generate IPropertySource implementations
+
         foreach (var classInfo in classes)
         {
             GeneratePropertySource(sourceBuilder, classInfo);
@@ -155,6 +143,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("using TUnit.Core.Interfaces.SourceGenerator;");
         sb.AppendLine("using TUnit.Core.Tracking;");
         sb.AppendLine("using TUnit.Core.Enums;");
+        sb.AppendLine("using System.Linq;");
         sb.AppendLine();
         sb.AppendLine("namespace TUnit.Core;");
         sb.AppendLine();
@@ -168,17 +157,16 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("    [System.Runtime.CompilerServices.ModuleInitializer]");
         sb.AppendLine("    public static void InitializePropertyInjectionSources()");
         sb.AppendLine("    {");
-        
+
         foreach (var classInfo in classes)
         {
             var sourceClassName = GetPropertySourceClassName(classInfo.ClassSymbol);
             sb.AppendLine($"        PropertySourceRegistry.Register(typeof({classInfo.ClassSymbol.ToDisplayString()}), new {sourceClassName}());");
         }
-        
+
         sb.AppendLine("    }");
         sb.AppendLine();
-        
-        // Add helper methods
+
         GenerateHelperMethods(sb);
         sb.AppendLine("}");
         sb.AppendLine();
@@ -196,10 +184,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("    public bool ShouldInitialize => true;");
         sb.AppendLine();
 
-        // Generate UnsafeAccessor methods for init-only properties
         GenerateUnsafeAccessorMethods(sb, classInfo);
 
-        // Generate InitializeAsync method
         GenerateInitializeAsync(sb, classInfo, classTypeName);
 
         sb.AppendLine("}");
@@ -214,7 +200,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             {
                 var propertyType = propInfo.Property.Type.ToDisplayString();
                 var backingFieldName = $"<{propInfo.Property.Name}>k__BackingField";
-                
+
                 sb.AppendLine("#if NET8_0_OR_GREATER");
                 sb.AppendLine($"    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
                 sb.AppendLine($"    private static extern ref {propertyType} Get{propInfo.Property.Name}BackingField({classInfo.ClassSymbol.ToDisplayString()} instance);");
@@ -226,11 +212,13 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static void GenerateInitializeAsync(StringBuilder sb, ClassWithDataSourceProperties classInfo, string classTypeName)
     {
-        sb.AppendLine("    public async Task InitializeAsync(object instance)");
+        sb.AppendLine("    public async Task<Dictionary<string, object?>> InitializeAsync(object instance)");
         sb.AppendLine("    {");
         sb.AppendLine($"        var typedInstance = ({classTypeName})instance;");
         sb.AppendLine("        var testContext = TestContext.Current;");
-        sb.AppendLine("        if (testContext == null) return;");
+        sb.AppendLine("        if (testContext == null) return new Dictionary<string, object?>();");
+        sb.AppendLine();
+        sb.AppendLine("        var results = new Dictionary<string, object?>();");
         sb.AppendLine();
 
         sb.AppendLine("        var dataGeneratorMetadata = new DataGeneratorMetadata");
@@ -245,12 +233,12 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("        };");
         sb.AppendLine();
 
-        // Generate property injection for each property
         foreach (var propInfo in classInfo.Properties)
         {
             GeneratePropertyInjectionCode(sb, propInfo, classInfo.ClassSymbol);
         }
 
+        sb.AppendLine("        return results;");
         sb.AppendLine("    }");
     }
 
@@ -262,10 +250,9 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
         sb.AppendLine($"        // Inject {propertyName} property");
         sb.AppendLine("        {");
-        
-        // Create attribute instance with constructor arguments
+
         GenerateAttributeInstantiation(sb, propInfo.DataSourceAttribute, attributeTypeName);
-        
+
         sb.AppendLine("            var dataRows = dataSource.GetDataRowsAsync(dataGeneratorMetadata);");
         sb.AppendLine();
         sb.AppendLine("            await foreach (var factory in dataRows)");
@@ -273,13 +260,11 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("                var args = await factory();");
         sb.AppendLine("                var value = args?.FirstOrDefault();");
         sb.AppendLine();
-        sb.AppendLine("                // Resolve Func<T> values to actual values");
         sb.AppendLine("                value = await PropertyInjectionInitializer.ResolveTestDataValueAsync(value);");
         sb.AppendLine();
         sb.AppendLine($"                if (value != null)");
         sb.AppendLine("                {");
-        
-        // Set property value (check if it's static)
+
         if (propInfo.Property.IsStatic)
         {
             GenerateStaticPropertySetting(sb, propInfo, propertyType);
@@ -288,43 +273,16 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         {
             GeneratePropertySetting(sb, propInfo, propertyType);
         }
-        
-        // Handle tracking differently for static vs instance properties
+
         if (propInfo.Property.IsStatic)
         {
-            // For static properties, don't track since they're not per-instance
         }
         else
         {
-            sb.AppendLine();
-            sb.AppendLine("                    // Track the value for disposal/cleanup");
-            sb.AppendLine("                    var trackedValue = ObjectTrackerProvider.TrackDataSourceObject(value);");
-            sb.AppendLine();
-            sb.AppendLine("                    // Register disposal handler to release tracked value when test ends");
-            sb.AppendLine("                    testContext.Events.OnDispose += async (o, context) =>");
-            sb.AppendLine("                    {");
-            sb.AppendLine("                        await ObjectTrackerProvider.ReleaseDataSourceObject(trackedValue);");
-            sb.AppendLine("                    };");
-            
-            // Update property with tracked value if needed
-            if (propInfo.Property.SetMethod?.IsInitOnly == true)
-            {
-                sb.AppendLine("#if NET8_0_OR_GREATER");
-                sb.AppendLine($"                    Get{propInfo.Property.Name}BackingField(typedInstance) = ({propertyType})trackedValue;");
-                sb.AppendLine("#endif");
-            }
-            else
-            {
-                sb.AppendLine($"                    typedInstance.{propertyName} = ({propertyType})trackedValue;");
-            }
+            sb.AppendLine($"                    results[\"{propertyName}\"] = value;");
         }
-        
-        sb.AppendLine();
-        
-        // Recursive property injection
-        GenerateRecursiveInjection(sb, propInfo, propertyType);
-        
-        sb.AppendLine("                    break; // Only take first value");
+
+        sb.AppendLine("                    break;");
         sb.AppendLine("                }");
         sb.AppendLine("            }");
         sb.AppendLine("        }");
@@ -334,10 +292,9 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static void GenerateAttributeInstantiation(StringBuilder sb, AttributeData attributeData, string attributeTypeName)
     {
         var constructorArgs = string.Join(", ", attributeData.ConstructorArguments.Select(FormatTypedConstant));
-        
+
         sb.AppendLine($"            var dataSource = new {attributeTypeName}({constructorArgs});");
-        
-        // Handle named arguments if any
+
         foreach (var namedArg in attributeData.NamedArguments)
         {
             var value = FormatTypedConstant(namedArg.Value);
@@ -363,31 +320,12 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             sb.AppendLine($"                    typedInstance.{propInfo.Property.Name} = ({propertyType})value;");
         }
     }
-    
+
     private static void GenerateStaticPropertySetting(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, string propertyType)
     {
         var className = propInfo.Property.ContainingType.ToDisplayString();
         sb.AppendLine($"                    {className}.{propInfo.Property.Name} = ({propertyType})value;");
     }
-
-    private static void GenerateRecursiveInjection(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, string propertyType)
-    {
-        // Only do recursive injection for class types (not primitives, strings, etc.)
-        if (propInfo.Property.Type.TypeKind == TypeKind.Class && 
-            !propInfo.Property.Type.SpecialType.ToString().Contains("String"))
-        {
-            sb.AppendLine("                    // Recursively inject nested properties");
-            
-            // Get the non-nullable type name for typeof operator
-            var nonNullableTypeName = GetNonNullableTypeString(propInfo.Property.Type);
-            sb.AppendLine($"                    var nestedSource = PropertySourceRegistry.GetSource(typeof({nonNullableTypeName}));");
-            sb.AppendLine("                    if (nestedSource != null)");
-            sb.AppendLine("                    {");
-            sb.AppendLine("                        await nestedSource.InitializeAsync(value);");
-            sb.AppendLine("                    }");
-        }
-    }
-
 
     private static void GenerateHelperMethods(StringBuilder sb)
     {
@@ -429,7 +367,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             _ => constant.Value?.ToString() ?? "null"
         };
     }
-    
+
     private static string FormatEnumConstant(TypedConstant constant)
     {
         if (constant.Type != null && constant.Value != null)
@@ -439,52 +377,46 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         }
         return constant.Value?.ToString() ?? "null";
     }
-    
+
     private static string FormatTypeConstant(TypedConstant constant)
     {
         if (constant.Value is ITypeSymbol typeSymbol)
         {
-            // Get the non-nullable version of the type for typeof operator
             var displayString = GetNonNullableTypeString(typeSymbol);
             return $"typeof({displayString})";
         }
-        
+
         return $"typeof({constant.Value})";
     }
-    
+
     private static string GetNonNullableTypeString(ITypeSymbol typeSymbol)
     {
-        // Handle nullable reference types
         if (typeSymbol.NullableAnnotation == NullableAnnotation.Annotated)
         {
-            // For nullable reference types, get the underlying type
             if (typeSymbol is INamedTypeSymbol { IsReferenceType: true })
             {
                 return typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
             }
         }
-        
-        // Handle nullable value types like int?
-        if (typeSymbol is INamedTypeSymbol namedType && 
-            namedType.IsGenericType && 
+
+        if (typeSymbol is INamedTypeSymbol namedType &&
+            namedType.IsGenericType &&
             namedType.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T)
         {
             return namedType.TypeArguments[0].ToDisplayString();
         }
-        
+
         var displayString = typeSymbol.ToDisplayString();
-        
-        // Fallback: remove ? suffix if present
+
         if (displayString.EndsWith("?"))
         {
             displayString = displayString.TrimEnd('?');
         }
-        
+
         return displayString;
     }
 }
 
-// Supporting classes
 internal sealed class ClassWithDataSourceProperties
 {
     public required INamedTypeSymbol ClassSymbol { get; init; }

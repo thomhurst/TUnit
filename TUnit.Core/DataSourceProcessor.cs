@@ -73,7 +73,7 @@ public static class DataSourceProcessor
         }
 
         // Track the resolved object
-        return ObjectTrackerProvider.TrackDataSourceObject(unwrapped);
+        return ObjectTrackerProvider.Track(unwrapped);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Data source processing requires reflection on runtime types")]

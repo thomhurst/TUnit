@@ -155,7 +155,6 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.Indent();
         
         writer.AppendLine($"{typeName}.{propertyName} = ({propertyData.Property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})value;");
-        writer.AppendLine($"await global::TUnit.Core.ObjectInitializer.InitializeAsync({typeName}.{propertyName});");
         
         writer.Unindent();
         writer.AppendLine("}");
@@ -290,7 +289,6 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         {
             var fullyQualifiedType = targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             writer.AppendLine($"var instance = new {fullyQualifiedType}();");
-            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
             writer.AppendLine("return instance;");
         }
         else

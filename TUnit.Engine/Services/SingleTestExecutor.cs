@@ -47,11 +47,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
         test.StartTime = DateTimeOffset.Now;
         test.State = TestState.Running;
 
-        // Create the test instance early so it's available for property injection
         var instance = await test.CreateInstanceAsync();
         test.Context.TestDetails.ClassInstance = instance;
 
-        // Now inject properties with the instance available
+        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context);
+        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context);
+
         await PropertyInjector.InjectPropertiesAsync(
             test.Context,
             instance,
@@ -60,24 +61,17 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.Metadata.MethodMetadata,
             test.Context.TestDetails.TestId);
 
-        // Initialize all eligible objects before test starts
         await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
 
-        // Invoke first test event receivers if this is the first test
         var classContext = test.Context.ClassContext;
         var assemblyContext = classContext.AssemblyContext;
         var sessionContext = assemblyContext.TestSessionContext;
 
-        // First test in session
         await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
 
-        // First test in assembly
         await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
 
-        // First test in class
         await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
-
-        // Invoke test start event receivers
         await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken);
 
         try
@@ -97,24 +91,17 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             test.EndTime = DateTimeOffset.Now;
 
-            // Release data source references
             await ReleaseDataSourceReferences(test.Context!);
 
-            // Invoke test end event receivers
             await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
 
-            // Invoke last test event receivers if this is the last test
             var endClassContext = test.Context!.ClassContext;
             var endAssemblyContext = endClassContext.AssemblyContext;
             var endSessionContext = endAssemblyContext.TestSessionContext;
 
-            // Last test in class
             await _eventReceiverOrchestrator.InvokeLastTestInClassEventReceiversAsync(test.Context, endClassContext, cancellationToken);
 
-            // Last test in assembly
             await _eventReceiverOrchestrator.InvokeLastTestInAssemblyEventReceiversAsync(test.Context, endAssemblyContext, cancellationToken);
-
-            // Last test in session
             await _eventReceiverOrchestrator.InvokeLastTestInSessionEventReceiversAsync(test.Context, endSessionContext, cancellationToken);
         }
 
@@ -128,8 +115,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.StartTime!.Value,
             test.Context?.SkipReason ?? "Test skipped");
         test.EndTime = DateTimeOffset.Now;
-
-        // Invoke test skipped event receivers
         await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context!, cancellationToken);
 
         return CreateUpdateMessage(test);
@@ -137,15 +122,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
     private async Task ExecuteTestWithHooksAsync(ExecutableTest test, object instance, CancellationToken cancellationToken)
     {
-        // Instance is already created and properties are already injected
-        // Restore hook contexts before test execution
         RestoreHookContexts(test.Context);
 
         try
         {
             await ExecuteBeforeTestHooksAsync(test.BeforeTestHooks, test.Context, cancellationToken);
 
-            // Restore the test context execution context to make AsyncLocal values available
             test.Context.RestoreExecutionContext();
 
             await InvokeTestWithTimeout(test, instance, cancellationToken);
@@ -168,7 +150,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
     private async Task ExecuteBeforeTestHooksAsync(Func<TestContext, CancellationToken, Task>[] hooks, TestContext context, CancellationToken cancellationToken)
     {
-        // Restore initial context before running hooks
         RestoreHookContexts(context);
         context.RestoreExecutionContext();
 
@@ -178,8 +159,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 await hook(context, cancellationToken);
 
-                // After each hook, restore the context to ensure any AsyncLocal values
-                // set by the hook (via AddAsyncLocalValues) are available to subsequent hooks
                 context.RestoreExecutionContext();
             }
             catch (Exception ex)
@@ -196,7 +175,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             try
             {
-                // Restore hook contexts before executing the hook
                 RestoreHookContexts(context);
 
                 await hook(context, cancellationToken);
@@ -230,22 +208,19 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         var testDetails = context.TestDetails;
 
-        // Release test method arguments
         foreach (var arg in testDetails.TestMethodArguments)
         {
-            await ObjectTrackerProvider.ReleaseDataSourceObject(arg);
+            await ObjectTrackerProvider.Untrack(arg);
         }
 
-        // Release test class constructor arguments
         foreach (var arg in testDetails.TestClassArguments)
         {
-            await ObjectTrackerProvider.ReleaseDataSourceObject(arg);
+            await ObjectTrackerProvider.Untrack(arg);
         }
 
-        // Release injected property values
         foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
         {
-            await ObjectTrackerProvider.ReleaseDataSourceObject(kvp.Value);
+            await ObjectTrackerProvider.Untrack(kvp.Value);
         }
     }
 
@@ -254,7 +229,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
         var testNode = test.Context.ToTestNode()
             .WithProperty(GetTestNodeState(test));
 
-        // Include captured console output
         var standardOutput = test.Context.GetStandardOutput();
         var errorOutput = test.Context.GetErrorOutput();
 
@@ -311,10 +285,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         return async () =>
         {
-            // Inject properties into arguments just before test execution
-            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments);
-            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments);
-
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(test.Metadata.TimeoutMs!.Value);
 
@@ -337,10 +307,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         return async () =>
         {
-            // Inject properties into arguments just before test execution
-            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments);
-            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments);
-
             await test.InvokeTestAsync(instance, cancellationToken);
         };
     }
@@ -387,12 +353,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 continue;
             }
 
-            if (ObjectTrackerProvider.TryGetArgumentReference(obj, out var reference))
+            if (ObjectTrackerProvider.TryGetReference(obj, out var counter))
             {
-                var count = reference!.Decrement();
+                var count = counter!.Decrement();
                 if (count == 0)
                 {
-                    ObjectTrackerProvider.RemoveArgumentObject(obj);
+                    ObjectTrackerProvider.Remove(obj);
 
                     if (obj is IAsyncDisposable asyncDisposable)
                     {
@@ -411,11 +377,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         if (context.ClassContext != null)
         {
-            // Restore assembly context first
             var assemblyContext = context.ClassContext.AssemblyContext;
             AssemblyHookContext.Current = assemblyContext;
 
-            // Then restore class context
             ClassHookContext.Current = context.ClassContext;
         }
     }

@@ -280,8 +280,15 @@ public sealed class TestBuilder : ITestBuilder
 
     private static void TrackDataSourceObjects(object?[] classArguments, object?[] methodArguments)
     {
-        ObjectTrackerProvider.IncrementArgumentUsage(classArguments);
-        ObjectTrackerProvider.IncrementArgumentUsage(methodArguments);
+        foreach (var arg in classArguments)
+        {
+            ObjectTrackerProvider.Track(arg);
+        }
+        
+        foreach (var arg in methodArguments)
+        {
+            ObjectTrackerProvider.Track(arg);
+        }
     }
 
     /// Efficiently create arguments array from factories without LINQ overhead

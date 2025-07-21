@@ -119,10 +119,10 @@ public static class PropertyInjector
 
                 testContext.Events.OnDispose += async (o, context) =>
                 {
-                    await ObjectTrackerProvider.ReleaseDataSourceObject(value);
+                    await ObjectTrackerProvider.Untrack(value);
                 };
 
-                var trackedValue = ObjectTrackerProvider.TrackDataSourceObject(value);
+                var trackedValue = ObjectTrackerProvider.Track(value);
 
                 injection.Setter(instance, trackedValue);
 
@@ -257,7 +257,7 @@ public static class PropertyInjector
 
             try
             {
-                var trackedValue = ObjectTrackerProvider.TrackDataSourceObject(kvp.Value);
+                var trackedValue = ObjectTrackerProvider.Track(kvp.Value);
 
                 var setter = CreatePropertySetter(property);
                 setter(instance, trackedValue);

@@ -395,7 +395,6 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             sb.AppendLine($"        await InitializeStaticPropertiesAsync_{safeName}(testInformation, testSessionId);");
         }
         
-        sb.AppendLine("        await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
         sb.AppendLine("        return instance;");
         sb.AppendLine("    }");
         sb.AppendLine();

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core.Tracking;
 
@@ -8,56 +9,18 @@ namespace TUnit.Core.Tracking;
 /// </summary>
 public class UnifiedObjectTracker
 {
-    private readonly ConcurrentDictionary<object, TrackedReference> _trackedObjects = new();
-    private readonly bool _enableAutoDisposal;
+    private readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
     private readonly bool _enableRecursiveTracking;
 
     /// <summary>
     /// Creates a new UnifiedObjectTracker with specified options.
     /// </summary>
-    /// <param name="enableAutoDisposal">If true, objects will be automatically disposed when their reference count reaches zero</param>
     /// <param name="enableRecursiveTracking">If true, collections will be recursively tracked</param>
-    public UnifiedObjectTracker(bool enableAutoDisposal = false, bool enableRecursiveTracking = false)
+    public UnifiedObjectTracker(bool enableRecursiveTracking = false)
     {
-        _enableAutoDisposal = enableAutoDisposal;
         _enableRecursiveTracking = enableRecursiveTracking;
     }
 
-    /// <summary>
-    /// Simple reference counter for tracked objects
-    /// </summary>
-    public class TrackedReference
-    {
-        private int _activeCount;
-        private readonly object _lock = new();
-        
-        public int ActiveCount 
-        { 
-            get 
-            { 
-                lock (_lock) 
-                { 
-                    return _activeCount; 
-                } 
-            } 
-        }
-        
-        public int Increment()
-        {
-            lock (_lock)
-            {
-                return ++_activeCount;
-            }
-        }
-        
-        public int Decrement()
-        {
-            lock (_lock)
-            {
-                return --_activeCount;
-            }
-        }
-    }
 
     /// <summary>
     /// Tracks an object and increments its reference count.
@@ -71,10 +34,10 @@ public class UnifiedObjectTracker
             return obj;
         }
 
-        var info = _trackedObjects.GetOrAdd(obj, 
-            _ => new TrackedReference());
+        var counter = _trackedObjects.GetOrAdd(obj, 
+            _ => new Counter());
         
-        info.Increment();
+        counter.Increment();
 
         // Handle recursive tracking for collections if enabled
         if (_enableRecursiveTracking && obj is System.Collections.IEnumerable enumerable && !(obj is string))
@@ -108,10 +71,10 @@ public class UnifiedObjectTracker
             return obj;
         }
 
-        var info = _trackedObjects.GetOrAdd(obj, 
-            _ => new TrackedReference());
+        var counter = _trackedObjects.GetOrAdd(obj, 
+            _ => new Counter());
         
-        info.Increment();
+        counter.Increment();
 
         // Handle recursive tracking for collections if enabled
         if (_enableRecursiveTracking && obj is System.Collections.IEnumerable enumerable && !(obj is string))
@@ -149,12 +112,12 @@ public class UnifiedObjectTracker
             return false;
         }
 
-        if (!_trackedObjects.TryGetValue(obj, out var info))
+        if (!_trackedObjects.TryGetValue(obj, out var counter))
         {
             return false;
         }
 
-        var count = info.Decrement();
+        var count = counter.Decrement();
         
         if (count <= 0)
         {
@@ -172,17 +135,14 @@ public class UnifiedObjectTracker
                 }
             }
 
-            // Auto-dispose if enabled
-            if (_enableAutoDisposal)
+            // Always auto-dispose when reference count reaches zero
+            if (obj is IAsyncDisposable asyncDisposable)
             {
-                if (obj is IAsyncDisposable asyncDisposable)
-                {
-                    await asyncDisposable.DisposeAsync();
-                }
-                else if (obj is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
+                await asyncDisposable.DisposeAsync();
+            }
+            else if (obj is IDisposable disposable)
+            {
+                disposable.Dispose();
             }
             
             return true;
@@ -192,30 +152,30 @@ public class UnifiedObjectTracker
     }
 
     /// <summary>
-    /// Gets the reference information for a tracked object.
+    /// Gets the reference counter for a tracked object.
     /// </summary>
-    /// <param name="obj">The object to get info for</param>
-    /// <returns>TrackedReference info or null if not tracked</returns>
-    public TrackedReference? GetReferenceInfo(object? obj)
+    /// <param name="obj">The object to get counter for</param>
+    /// <returns>Counter or null if not tracked</returns>
+    public Counter? GetReferenceInfo(object? obj)
     {
-        return obj != null && _trackedObjects.TryGetValue(obj, out var info) ? info : null;
+        return obj != null && _trackedObjects.TryGetValue(obj, out var counter) ? counter : null;
     }
 
     /// <summary>
-    /// Tries to get the reference info for an object.
+    /// Tries to get the reference counter for an object.
     /// </summary>
     /// <param name="obj">The object to check</param>
-    /// <param name="reference">The reference info if found</param>
+    /// <param name="counter">The reference counter if found</param>
     /// <returns>True if the object is tracked</returns>
-    public bool TryGetReference(object? obj, out TrackedReference? reference)
+    public bool TryGetReference(object? obj, out Counter? counter)
     {
-        reference = null;
+        counter = null;
         if (obj == null || ShouldSkipTracking(obj))
         {
             return false;
         }
         
-        return _trackedObjects.TryGetValue(obj, out reference);
+        return _trackedObjects.TryGetValue(obj, out counter);
     }
 
     /// <summary>

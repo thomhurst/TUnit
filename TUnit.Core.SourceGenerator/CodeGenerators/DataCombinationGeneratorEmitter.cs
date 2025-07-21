@@ -769,8 +769,6 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("    data?.Length == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(data[0]) : data;");
             writer.AppendLine("if (processed == null || index >= processed.Length) throw new InvalidOperationException($\"Data source index {index} is out of range. Data source returned {processed?.Length ?? 0} items.\");");
             writer.AppendLine("var instance = processed[index];");
-            writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
-            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
             writer.AppendLine("return instance;");
             writer.Unindent();
             writer.AppendLine("})).ToArray();");
@@ -938,8 +936,6 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("    data?.Length == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(data[0]) : data;");
             writer.AppendLine("if (processed == null || index >= processed.Length) throw new InvalidOperationException($\"Data source index {index} is out of range. Data source returned {processed?.Length ?? 0} items.\");");
             writer.AppendLine("var instance = processed[index];");
-            writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
-            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
             writer.AppendLine("return instance;");
             writer.Unindent();
             writer.AppendLine("})).ToArray();");
@@ -974,8 +970,6 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("    data?.Length == 1 ? global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(data[0]) : data;");
             writer.AppendLine("if (processed == null || index >= processed.Length) throw new InvalidOperationException($\"Data source index {index} is out of range. Data source returned {processed?.Length ?? 0} items.\");");
             writer.AppendLine("var instance = processed[index];");
-            writer.AppendLine("await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(instance, testInformation, testSessionId);");
-            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
             writer.AppendLine("return instance;");
             writer.Unindent();
             writer.AppendLine("})).ToArray(),");
@@ -1463,14 +1457,6 @@ public static class DataCombinationGeneratorEmitter
     private static void EmitInstanceDataSourcePropertyInitialization(CodeWriter writer, string instanceVarName, string typeVarName, IMethodSymbol methodSymbol, INamedTypeSymbol containingTypeSymbol)
     {
         writer.AppendLine($"var instanceType_{instanceVarName} = {instanceVarName}?.GetType();");
-        writer.AppendLine($"if (instanceType_{instanceVarName} != null)");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        writer.AppendLine($"await global::TUnit.Core.Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync({instanceVarName}, testInformation, testSessionId);");
-        
-        writer.Unindent();
-        writer.AppendLine("}");
         writer.AppendLine();
     }
     
@@ -1552,7 +1538,6 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("var instance = data[0];");
-            writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(instance);");
             writer.AppendLine($"typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).GetProperty(\"{propertyName}\")!.SetValue({instanceName}, ({property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})instance);");
             writer.AppendLine("break;");
             writer.Unindent();
@@ -1566,8 +1551,6 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("}");
         }
         
-        // Finally, initialize the instance itself if it implements IAsyncInitializer
-        writer.AppendLine($"await global::TUnit.Core.ObjectInitializer.InitializeAsync({instanceName});");
         writer.AppendLine();
     }
 

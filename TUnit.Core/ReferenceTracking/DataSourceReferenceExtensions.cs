@@ -19,17 +19,17 @@ public static class DataSourceReferenceExtensions
 
         foreach (var arg in testDetails.TestMethodArguments)
         {
-            ObjectTrackerProvider.TrackDataSourceObject(arg);
+            ObjectTrackerProvider.Track(arg);
         }
 
         foreach (var arg in testDetails.TestClassArguments)
         {
-            ObjectTrackerProvider.TrackDataSourceObject(arg);
+            ObjectTrackerProvider.Track(arg);
         }
 
         foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
         {
-            ObjectTrackerProvider.TrackDataSourceObject(kvp.Value);
+            ObjectTrackerProvider.Track(kvp.Value);
         }
     }
 
@@ -45,17 +45,17 @@ public static class DataSourceReferenceExtensions
 
         foreach (var arg in testDetails.TestMethodArguments)
         {
-            await ObjectTrackerProvider.ReleaseDataSourceObject(arg);
+            await ObjectTrackerProvider.Untrack(arg);
         }
 
         foreach (var arg in testDetails.TestClassArguments)
         {
-            await ObjectTrackerProvider.ReleaseDataSourceObject(arg);
+            await ObjectTrackerProvider.Untrack(arg);
         }
 
         foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
         {
-            await ObjectTrackerProvider.ReleaseDataSourceObject(kvp.Value);
+            await ObjectTrackerProvider.Untrack(kvp.Value);
         }
     }
 
