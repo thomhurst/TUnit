@@ -20,7 +20,6 @@ public class TestsBase
     public TestsBase<AssemblyLoaderGenerator> AssemblyLoaderGenerator = new();
     public TestsBase<DisableReflectionScannerGenerator> DisableReflectionScannerGenerator = new();
     public TestsBase<DynamicTestsGenerator> DynamicTestsGenerator = new();
-    public TestsBase<PolyfillGenerator> PolyfillGenerator = new();
 
     public Task RunTest(string inputFile, Func<string[], Task> assertions)
     {
