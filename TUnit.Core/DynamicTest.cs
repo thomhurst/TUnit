@@ -2,17 +2,11 @@ using System.Linq.Expressions;
 
 namespace TUnit.Core;
 
-/// <summary>
-/// Represents a test discovery result
-/// </summary>
 public class DiscoveryResult
 {
     public static DiscoveryResult Empty => new();
 }
 
-/// <summary>
-/// Discovery result for dynamic tests
-/// </summary>
 public class DynamicDiscoveryResult : DiscoveryResult
 {
     public Expression? TestMethod { get; set; }
@@ -24,22 +18,13 @@ public class DynamicDiscoveryResult : DiscoveryResult
     public Type? TestClassType { get; set; }
 }
 
-/// <summary>
-/// Base class for dynamic tests
-/// </summary>
 public abstract class DynamicTest
 {
     public abstract IEnumerable<DiscoveryResult> GetTests();
 }
 
-/// <summary>
-/// Generic dynamic test
-/// </summary>
 public abstract class DynamicTest<T> : DynamicTest where T : class;
 
-/// <summary>
-/// Concrete dynamic test implementation for runtime use
-/// </summary>
 public class DynamicTestInstance<T> : DynamicTest<T> where T : class
 {
     public Expression<Action<T>>? TestMethod { get; set; }
@@ -65,25 +50,16 @@ public class DynamicTestInstance<T> : DynamicTest<T> where T : class
     }
 }
 
-/// <summary>
-/// Helper class for DynamicTest arguments
-/// </summary>
 public static class DynamicTestHelper
 {
     public static T Argument<T>() => default(T)!;
 }
 
-/// <summary>
-/// Interface for dynamic test sources
-/// </summary>
 public interface IDynamicTestSource
 {
     IReadOnlyList<DynamicTest> CollectDynamicTests(string sessionId);
 }
 
-/// <summary>
-/// Failed dynamic test representation
-/// </summary>
 public class FailedDynamicTest<T> : DynamicTest where T : class
 {
     public string TestId { get; set; } = string.Empty;

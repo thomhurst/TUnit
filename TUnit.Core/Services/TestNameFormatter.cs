@@ -4,9 +4,6 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Services;
 
-/// <summary>
-/// Default implementation of test name formatting service.
-/// </summary>
 public class TestNameFormatter : ITestNameFormatter
 {
     /// <inheritdoc />

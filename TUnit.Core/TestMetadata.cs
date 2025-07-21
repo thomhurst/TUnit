@@ -7,35 +7,17 @@ namespace TUnit.Core;
 /// </summary>
 public abstract class TestMetadata
 {
-    /// <summary>
-    /// Display name for the test
-    /// </summary>
     public required string TestName { get; init; }
 
-    /// <summary>
-    /// The type containing the test method
-    /// </summary>
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
     public required Type TestClassType { get; init; }
 
-    /// <summary>
-    /// The test method name
-    /// </summary>
     public required string TestMethodName { get; init; }
 
-    /// <summary>
-    /// Test categories for filtering
-    /// </summary>
     public string[] Categories { get; init; } = [];
 
-    /// <summary>
-    /// Whether this test should be skipped
-    /// </summary>
     public bool IsSkipped { get; init; }
 
-    /// <summary>
-    /// Skip reason if IsSkipped is true
-    /// </summary>
     public string? SkipReason { get; init; }
 
     /// <summary>
@@ -43,14 +25,8 @@ public abstract class TestMetadata
     /// </summary>
     public int? TimeoutMs { get; init; }
 
-    /// <summary>
-    /// Number of retry attempts allowed
-    /// </summary>
     public int RetryCount { get; init; }
 
-    /// <summary>
-    /// Whether this test can run in parallel
-    /// </summary>
     public bool CanRunInParallel { get; init; } = true;
 
     /// <summary>
@@ -85,14 +61,8 @@ public abstract class TestMetadata
     /// </summary>
     public Func<object, object?[], Task>? TestInvoker { get; init; }
 
-    /// <summary>
-    /// Number of parameters the test method expects
-    /// </summary>
     public int ParameterCount { get; init; }
 
-    /// <summary>
-    /// Parameter types for validation
-    /// </summary>
     public Type[] ParameterTypes { get; init; } = [];
 
     /// <summary>
@@ -105,19 +75,10 @@ public abstract class TestMetadata
     /// </summary>
     public TestHooks Hooks { get; init; } = new();
 
-    /// <summary>
-    /// Source file path where test is defined
-    /// </summary>
     public string? FilePath { get; init; }
 
-    /// <summary>
-    /// Line number where test is defined
-    /// </summary>
     public int? LineNumber { get; init; }
 
-    /// <summary>
-    /// Metadata about the test method
-    /// </summary>
     public required MethodMetadata MethodMetadata { get; init; }
 
     /// <summary>
@@ -207,9 +168,6 @@ public sealed class HookMetadata
     /// </summary>
     public Type? DeclaringType { get; init; }
 
-    /// <summary>
-    /// Whether this is a static hook
-    /// </summary>
     public bool IsStatic { get; init; }
 
     /// <summary>
@@ -277,39 +235,18 @@ public sealed class GenericMethodInfo
 /// </summary>
 public sealed class GenericParameterConstraints
 {
-    /// <summary>
-    /// The generic parameter name
-    /// </summary>
     public required string ParameterName { get; init; }
 
-    /// <summary>
-    /// Base type constraint (if any)
-    /// </summary>
     public Type? BaseTypeConstraint { get; init; }
 
-    /// <summary>
-    /// Interface constraints
-    /// </summary>
     public Type[] InterfaceConstraints { get; init; } = [];
 
-    /// <summary>
-    /// Whether the parameter has a new() constraint
-    /// </summary>
     public bool HasDefaultConstructorConstraint { get; init; }
 
-    /// <summary>
-    /// Whether the parameter has a class constraint
-    /// </summary>
     public bool HasReferenceTypeConstraint { get; init; }
 
-    /// <summary>
-    /// Whether the parameter has a struct constraint
-    /// </summary>
     public bool HasValueTypeConstraint { get; init; }
 
-    /// <summary>
-    /// Whether the parameter has a notnull constraint
-    /// </summary>
     public bool HasNotNullConstraint { get; init; }
 }
 

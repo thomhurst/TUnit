@@ -3,30 +3,18 @@ using System.Reflection;
 
 namespace TUnit.Core.Extensions;
 
-/// <summary>
-/// Simplified extension methods for TestContext
-/// </summary>
 public static class TestContextExtensions
 {
-    /// <summary>
-    /// Gets a service from the test context
-    /// </summary>
     public static T? GetService<T>(this TestContext context) where T : class
     {
         return context.GetService<T>();
     }
 
-    /// <summary>
-    /// Gets the class type name
-    /// </summary>
     public static string GetClassTypeName(this TestContext context)
     {
         return context.TestDetails.ClassType.Name;
     }
 
-    /// <summary>
-    /// Adds a dynamic test to the test context
-    /// </summary>
     [RequiresDynamicCode("Uses MakeGenericMethod for dynamic test registration")]
     public static async Task AddDynamicTest<T>(this TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
     {
@@ -56,9 +44,6 @@ public static class TestContextExtensions
         }
     }
 
-    /// <summary>
-    /// Adds a test to the test context (synonym for AddDynamicTest)
-    /// </summary>
     [RequiresDynamicCode("Uses MakeGenericMethod for dynamic test registration")]
     public static void AddTest<T>(this TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
     {

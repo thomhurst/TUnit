@@ -23,9 +23,6 @@ public static class ArgumentFormatter
         return Format(o, testContext.ArgumentDisplayFormatters);
     }
 
-    /// <summary>
-    /// Formats a collection of arguments into a display string.
-    /// </summary>
     public static string FormatArguments(IEnumerable<object?> arguments)
     {
         return string.Join(", ", arguments.Select(arg => FormatDefault(arg)));
@@ -70,9 +67,6 @@ public static class ArgumentFormatter
         return toString;
     }
 
-    /// <summary>
-    /// Formats a tuple for display.
-    /// </summary>
     private static string FormatTuple(object tuple)
     {
         var elements = TupleHelper.UnwrapTuple(tuple);
@@ -80,9 +74,6 @@ public static class ArgumentFormatter
         return $"({string.Join(", ", formattedElements)})";
     }
 
-    /// <summary>
-    /// Formats an enumerable collection for display.
-    /// </summary>
     private static string FormatEnumerable(IEnumerable enumerable)
     {
         var elements = new List<string>();
