@@ -17,15 +17,10 @@ public record TestBuilderContext
     }
 
     public Guid Id { get; } = Guid.NewGuid();
-    public Dictionary<string, object?> ObjectBag { get; } = [];
-    public TestContextEvents Events { get; } = new();
+    public Dictionary<string, object?> ObjectBag { get; set; } = [];
+    public TestContextEvents Events { get; set; } = new();
 
     public IDataSourceAttribute? DataAttribute { get; set; }
-
-    /// <summary>
-    /// Gets the test method name, if available.
-    /// </summary>
-    public string? TestMethodName { get; init; }
 
     /// <summary>
     /// Gets the test class information, if available during source generation.

@@ -1,7 +1,7 @@
 namespace TUnit.Core.Interfaces.SourceGenerator;
 
 /// <summary>
-/// Represents a source that provides property injection.
+/// Represents a source that provides property injection metadata.
 /// </summary>
 public interface IPropertySource
 {
@@ -11,18 +11,12 @@ public interface IPropertySource
     Type Type { get; }
 
     /// <summary>
-    /// Gets the name of the property.
-    /// </summary>
-    string PropertyName { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the property should be initialized.
+    /// Gets a value indicating whether the type has properties that need injection.
     /// </summary>
     bool ShouldInitialize { get; }
 
     /// <summary>
-    /// Injects properties into the given instance and returns a dictionary of property names to their injected values.
-    /// This allows the engine to handle tracking and lifecycle management of the returned values.
+    /// Gets the metadata for all properties that need data source injection.
     /// </summary>
-    Task<Dictionary<string, object?>> InjectAsync(object instance);
+    IEnumerable<PropertyInjectionMetadata> GetPropertyMetadata();
 }

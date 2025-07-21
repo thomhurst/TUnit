@@ -28,7 +28,8 @@ public static class PropertyInjector
         var dataGeneratorMetadata = new DataGeneratorMetadata
         {
             TestBuilderContext = new TestBuilderContextAccessor(TestBuilderContext.Current ?? new TestBuilderContext()),
-            MembersToGenerate = Array.Empty<MemberMetadata>(),
+            MembersToGenerate = [
+            ],
             TestInformation = testInformation,
             Type = DataGeneratorType.Property,
             TestSessionId = testSessionId,
@@ -421,7 +422,8 @@ public static class PropertyInjector
                         PropertyType = property.PropertyType,
                         Setter = CreatePropertySetter(property),
                         ValueFactory = () => throw new InvalidOperationException("Should not be called"),
-                        NestedPropertyInjections = Array.Empty<PropertyInjectionData>(),
+                        NestedPropertyInjections = [
+                        ],
                         NestedPropertyValueFactory = obj => new Dictionary<string, object?>()
                     });
                 }

@@ -44,14 +44,16 @@ internal class SingleTestExecutor : ISingleTestExecutor
             return CreateUpdateMessage(test);
         }
 
+        TestContext.Current = test.Context;
+
         test.StartTime = DateTimeOffset.Now;
         test.State = TestState.Running;
 
         var instance = await test.CreateInstanceAsync();
         test.Context.TestDetails.ClassInstance = instance;
 
-        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context);
-        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context);
+        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
+        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
 
         await PropertyInjector.InjectPropertiesAsync(
             test.Context,

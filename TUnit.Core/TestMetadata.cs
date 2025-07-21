@@ -163,7 +163,8 @@ public sealed class PropertyInjectionData
     public required Type PropertyType { get; init; }
     public required Action<object, object?> Setter { get; init; }
     public required Func<object?> ValueFactory { get; init; }
-    public PropertyInjectionData[] NestedPropertyInjections { get; init; } = Array.Empty<PropertyInjectionData>();
+    public PropertyInjectionData[] NestedPropertyInjections { get; init; } = [
+    ];
     
     /// <summary>
     /// Factory to extract nested property values from the parent object.

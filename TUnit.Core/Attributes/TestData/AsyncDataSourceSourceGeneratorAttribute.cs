@@ -10,6 +10,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<[DynamicallyAccessedMemb
 
     public async IAsyncEnumerable<Func<Task<T>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this, dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag, dataGeneratorMetadata.TestInformation, dataGeneratorMetadata.TestBuilderContext.Current.Events);
+
         await ObjectInitializer.InitializeAsync(this);
 
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
@@ -39,6 +41,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<
 
     public async IAsyncEnumerable<Func<Task<(T1, T2)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this, dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag, dataGeneratorMetadata.TestInformation, dataGeneratorMetadata.TestBuilderContext.Current.Events);
+
         await ObjectInitializer.InitializeAsync(this);
 
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
@@ -70,6 +74,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<
 
     public async IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this, dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag, dataGeneratorMetadata.TestInformation, dataGeneratorMetadata.TestBuilderContext.Current.Events);
+
         await ObjectInitializer.InitializeAsync(this);
 
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
@@ -103,6 +109,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<
 
     public async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this, dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag, dataGeneratorMetadata.TestInformation, dataGeneratorMetadata.TestBuilderContext.Current.Events);
+
         await ObjectInitializer.InitializeAsync(this);
 
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
@@ -138,6 +146,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<
 
     public async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4, T5)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this, dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag, dataGeneratorMetadata.TestInformation, dataGeneratorMetadata.TestBuilderContext.Current.Events);
+
         await ObjectInitializer.InitializeAsync(this);
 
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))

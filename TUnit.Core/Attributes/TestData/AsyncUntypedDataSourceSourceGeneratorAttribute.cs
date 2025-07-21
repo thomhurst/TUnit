@@ -11,6 +11,8 @@ public abstract class AsyncUntypedDataSourceGeneratorAttribute : TestDataAttribu
 
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this, dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag, dataGeneratorMetadata.TestInformation, dataGeneratorMetadata.TestBuilderContext.Current.Events);
+
         await ObjectInitializer.InitializeAsync(this);
 
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
