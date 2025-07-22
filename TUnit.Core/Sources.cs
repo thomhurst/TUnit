@@ -10,7 +10,7 @@ namespace TUnit.Core;
 internal static class Sources
 {
     public static readonly ConcurrentQueue<Func<Assembly>> AssemblyLoaders = [];
-    public static readonly ConcurrentQueue<ITestSource> TestSources = [];
+    public static readonly ConcurrentDictionary<Type, ConcurrentQueue<ITestSource>> TestSources = new();
     public static readonly ConcurrentQueue<IDynamicTestSource> DynamicTestSources = [];
 
     public static readonly ConcurrentQueue<ITestHookSource> TestHookSources = [];

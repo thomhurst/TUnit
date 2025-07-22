@@ -18,7 +18,7 @@ public static class TestDataCollectorFactory
 
         return executionMode switch
         {
-            TestExecutionMode.SourceGeneration => new AotTestDataCollector(),
+            TestExecutionMode.SourceGeneration => new AotTestDataCollector(filterTypes: null),
             TestExecutionMode.Reflection => new ReflectionTestDataCollector(),
             _ => throw new NotSupportedException($"Test execution mode '{executionMode}' is not supported")
         };
@@ -30,7 +30,7 @@ public static class TestDataCollectorFactory
     public static async Task<ITestDataCollector> CreateAutoDetectAsync(string testSessionId, Assembly[]? assembliesToScan = null)
     {
         // Try AOT mode first (check if any tests were registered)
-        var aotCollector = new AotTestDataCollector();
+        var aotCollector = new AotTestDataCollector(filterTypes: null);
         var aotTests = await aotCollector.CollectTestsAsync(testSessionId);
 
         if (aotTests.Any())

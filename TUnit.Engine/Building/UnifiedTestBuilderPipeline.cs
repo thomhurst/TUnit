@@ -9,7 +9,7 @@ namespace TUnit.Engine.Building;
 /// Orchestrates unified test building with streaming support and error handling
 public sealed class UnifiedTestBuilderPipeline
 {
-    private readonly ITestDataCollector _dataCollector;
+    private readonly Func<HashSet<Type>?, ITestDataCollector> _dataCollectorFactory;
     private readonly IGenericTypeResolver _genericResolver;
     private readonly ITestBuilder _testBuilder;
     private readonly IContextProvider _contextProvider;
@@ -20,7 +20,20 @@ public sealed class UnifiedTestBuilderPipeline
         ITestBuilder testBuilder,
         IContextProvider contextBuilder)
     {
-        _dataCollector = dataCollector ?? throw new ArgumentNullException(nameof(dataCollector));
+        // For backward compatibility, create a factory that ignores filter types
+        _dataCollectorFactory = _ => dataCollector ?? throw new ArgumentNullException(nameof(dataCollector));
+        _genericResolver = genericResolver ?? throw new ArgumentNullException(nameof(genericResolver));
+        _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
+        _contextProvider = contextBuilder;
+    }
+    
+    public UnifiedTestBuilderPipeline(
+        Func<HashSet<Type>?, ITestDataCollector> dataCollectorFactory,
+        IGenericTypeResolver genericResolver,
+        ITestBuilder testBuilder,
+        IContextProvider contextBuilder)
+    {
+        _dataCollectorFactory = dataCollectorFactory ?? throw new ArgumentNullException(nameof(dataCollectorFactory));
         _genericResolver = genericResolver ?? throw new ArgumentNullException(nameof(genericResolver));
         _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
         _contextProvider = contextBuilder;
@@ -28,8 +41,14 @@ public sealed class UnifiedTestBuilderPipeline
 
     public async Task<IEnumerable<ExecutableTest>> BuildTestsAsync(string testSessionId)
     {
+        return await BuildTestsAsync(testSessionId, filterTypes: null);
+    }
+    
+    public async Task<IEnumerable<ExecutableTest>> BuildTestsAsync(string testSessionId, HashSet<Type>? filterTypes)
+    {
         // Stage 1: Collect test metadata
-        var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId);
+        var dataCollector = _dataCollectorFactory(filterTypes);
+        var collectedMetadata = await dataCollector.CollectTestsAsync(testSessionId);
 
         var executableTests = new List<ExecutableTest>();
 
@@ -76,8 +95,19 @@ public sealed class UnifiedTestBuilderPipeline
         string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        await foreach (var test in BuildTestsStreamAsync(testSessionId, filterTypes: null, cancellationToken))
+        {
+            yield return test;
+        }
+    }
+    
+    public async IAsyncEnumerable<ExecutableTest> BuildTestsStreamAsync(
+        string testSessionId,
+        HashSet<Type>? filterTypes,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
         // Stream from collectors
-        await foreach (var metadata in CollectTestsStreamAsync(testSessionId, cancellationToken))
+        await foreach (var metadata in CollectTestsStreamAsync(testSessionId, filterTypes, cancellationToken))
         {
             // Resolve generic types for this metadata
             IEnumerable<TestMetadata> resolvedMetadataList;
@@ -124,10 +154,13 @@ public sealed class UnifiedTestBuilderPipeline
 
     private async IAsyncEnumerable<TestMetadata> CollectTestsStreamAsync(
         string testSessionId,
+        HashSet<Type>? filterTypes,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        var dataCollector = _dataCollectorFactory(filterTypes);
+        
         // Check if collector supports streaming
-        if (_dataCollector is IStreamingTestDataCollector streamingCollector)
+        if (dataCollector is IStreamingTestDataCollector streamingCollector)
         {
             await foreach (var test in streamingCollector.CollectTestsStreamAsync(testSessionId, cancellationToken))
             {
@@ -137,7 +170,7 @@ public sealed class UnifiedTestBuilderPipeline
         else
         {
             // Fall back to collection-based for non-streaming collectors
-            var tests = await _dataCollector.CollectTestsAsync(testSessionId);
+            var tests = await dataCollector.CollectTestsAsync(testSessionId);
             foreach (var test in tests)
             {
                 cancellationToken.ThrowIfCancellationRequested();

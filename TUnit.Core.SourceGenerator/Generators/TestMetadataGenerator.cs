@@ -1430,7 +1430,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("public static void Initialize()");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register(new {testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_TestSource_{guid}());");
+        writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register({GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)}, new {testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_TestSource_{guid}());");
         writer.Unindent();
         writer.AppendLine("}");
         writer.Unindent();

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using TUnit.Core;
+using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Engine.Building.Interfaces;
 
 namespace TUnit.Engine.Building.Collectors;
@@ -9,13 +10,43 @@ namespace TUnit.Engine.Building.Collectors;
 /// </summary>
 public sealed class AotTestDataCollector : ITestDataCollector
 {
+    private readonly HashSet<Type>? _filterTypes;
+    
+    public AotTestDataCollector(HashSet<Type>? filterTypes = null)
+    {
+        _filterTypes = filterTypes;
+    }
+    
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
         // Use indexed collection to maintain order
         var resultsByIndex = new ConcurrentDictionary<int, IEnumerable<TestMetadata>>();
 
         // Collect tests from all registered test sources using true parallel processing
-        var testSourcesList = Sources.TestSources.ToList();
+        var testSourcesList = new List<ITestSource>();
+        
+        if (_filterTypes == null || _filterTypes.Count == 0)
+        {
+            // No filter - get all test sources
+            testSourcesList = Sources.TestSources.SelectMany(kvp => kvp.Value).ToList();
+        }
+        else
+        {
+            // Filter to only requested types
+            foreach (var type in _filterTypes)
+            {
+                if (Sources.TestSources.TryGetValue(type, out var queue))
+                {
+                    testSourcesList.AddRange(queue);
+                }
+            }
+            
+            // Also check the "all types" queue for backward compatibility
+            if (Sources.TestSources.TryGetValue(typeof(object), out var allTypesQueue))
+            {
+                testSourcesList.AddRange(allTypesQueue);
+            }
+        }
         
         var parallelOptions = new ParallelOptions
         {

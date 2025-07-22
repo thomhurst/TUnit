@@ -58,9 +58,12 @@ internal sealed class TestDiscoveryService : IDataProducer
         }
 #endif
 
+        // Extract types from filter for optimized discovery
+        var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
+
         var tests = new List<ExecutableTest>();
 
-        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, cancellationToken))
+        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken))
         {
             tests.Add(test);
         }
@@ -90,6 +93,7 @@ internal sealed class TestDiscoveryService : IDataProducer
     /// Streams test discovery for parallel discovery and execution
     private async IAsyncEnumerable<ExecutableTest> DiscoverTestsStreamAsync(
         string testSessionId,
+        HashSet<Type>? filterTypes,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -99,7 +103,7 @@ internal sealed class TestDiscoveryService : IDataProducer
             cts.CancelAfter(TimeSpan.FromSeconds(DiscoveryTimeoutSeconds));
         }
 
-        await foreach (var test in BuildTestsAsync(testSessionId, cts.Token))
+        await foreach (var test in BuildTestsAsync(testSessionId, filterTypes, cts.Token))
         {
             _dependencyResolver.RegisterTest(test);
 
@@ -119,9 +123,10 @@ internal sealed class TestDiscoveryService : IDataProducer
 
 
     private async IAsyncEnumerable<ExecutableTest> BuildTestsAsync(string testSessionId,
+        HashSet<Type>? filterTypes,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var executableTests = await _testBuilderPipeline.BuildTestsAsync(testSessionId);
+        var executableTests = await _testBuilderPipeline.BuildTestsAsync(testSessionId, filterTypes);
 
         foreach (var test in executableTests)
         {

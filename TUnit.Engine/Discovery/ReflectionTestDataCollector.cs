@@ -119,6 +119,72 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return methods;
     }
 
+    private static readonly HashSet<string> ExcludedAssemblyNames = new()
+    {
+        // .NET runtime and framework assemblies
+        "mscorlib",
+        "System",
+        "System.Core",
+        "System.Runtime",
+        "System.Private.CoreLib",
+        "System.Collections",
+        "System.Linq",
+        "System.Threading",
+        "System.Text.RegularExpressions",
+        "System.Diagnostics.Debug",
+        "System.Runtime.Extensions",
+        "System.Collections.Concurrent",
+        "System.Text.Json",
+        "System.Memory",
+        "System.Net.Http",
+        "System.IO.FileSystem",
+        "System.Console",
+        "System.Diagnostics.Process",
+        "System.ComponentModel.TypeConverter",
+        "System.ComponentModel.Primitives",
+        "System.ObjectModel",
+        "System.Private.Uri",
+        "System.Private.Xml",
+        "netstandard",
+        
+        // Microsoft platform assemblies
+        "Microsoft.CSharp",
+        "Microsoft.Win32.Primitives",
+        "Microsoft.Win32.Registry",
+        "Microsoft.VisualBasic.Core",
+        "Microsoft.VisualBasic",
+        
+        // TUnit framework assemblies (except test projects)
+        "TUnit",
+        "TUnit.Core", 
+        "TUnit.Engine",
+        "TUnit.Assertions",
+        
+        // Test platform assemblies
+        "testhost",
+        "Microsoft.TestPlatform.CoreUtilities",
+        "Microsoft.TestPlatform.CommunicationUtilities",
+        "Microsoft.TestPlatform.CrossPlatEngine",
+        "Microsoft.TestPlatform.Common",
+        "Microsoft.TestPlatform.PlatformAbstractions",
+        "Microsoft.Testing.Platform",
+        
+        // Common third-party assemblies
+        "Newtonsoft.Json",
+        "Castle.Core",
+        "Moq",
+        "xunit.core",
+        "xunit.assert",
+        "xunit.execution.desktop",
+        "nunit.framework",
+        "FluentAssertions",
+        "AutoFixture",
+        "FakeItEasy",
+        "Shouldly",
+        "NSubstitute",
+        "Rhino.Mocks"
+    };
+
     private static bool ShouldScanAssembly(Assembly assembly)
     {
         var name = assembly.GetName().Name;
@@ -127,63 +193,21 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
-        // Skip system and framework assemblies more aggressively
-        if (name.StartsWith("System.") ||
-            name.StartsWith("Microsoft.") ||
-            name.StartsWith("netstandard") ||
-            name.StartsWith("mscorlib") ||
-            name.StartsWith("Windows.") ||
-            name.StartsWith("PresentationFramework") ||
-            name.StartsWith("PresentationCore") ||
-            name.StartsWith("WindowsBase") ||
-            name.StartsWith("Accessibility") ||
-            name.StartsWith("DirectWriteForwarder") ||
-            name.StartsWith("SMDiagnostics") ||
-            name.StartsWith("System") ||
-            name.StartsWith("Microsoft") ||
-            name.StartsWith("NuGet.") ||
-            name.StartsWith("Newtonsoft.") ||
-            name.StartsWith("Castle.") ||
-            name.StartsWith("Moq") ||
-            name.StartsWith("xunit") ||
-            name.StartsWith("nunit") ||
-            name.StartsWith("FluentAssertions") ||
-            name.StartsWith("AutoFixture") ||
-            name.StartsWith("FakeItEasy") ||
-            name.StartsWith("Shouldly") ||
-            name.StartsWith("NSubstitute") ||
-            name.StartsWith("Rhino.Mocks") ||
-            name.StartsWith("testhost") ||
-            name.StartsWith("MSTest") ||
-            name.StartsWith("vstest") ||
-            name.StartsWith("Microsoft.TestPlatform") ||
-            name.StartsWith("Microsoft.Testing.Platform") ||
-            name.StartsWith("anonymously") ||
-            name.Contains("resources") ||
-            name.Contains("resources.dll") ||
-            name.Contains("XmlSerializers") ||
-            name.EndsWith(".resources") ||
-            name.EndsWith(".XmlSerializers"))
+        if (ExcludedAssemblyNames.Contains(name))
         {
             return false;
         }
 
-        // Skip TUnit framework assemblies (except test projects)
-        if ((name.StartsWith("TUnit.") && !name.Contains("Test")) ||
-            name == "TUnit.Core" ||
-            name == "TUnit.Engine" ||
-            name == "TUnit.Assertions")
+        if (name.EndsWith(".resources") || name.EndsWith(".XmlSerializers"))
         {
             return false;
         }
 
-        // Skip assemblies that are likely to cause issues
         if (assembly.IsDynamic)
         {
             return false;
         }
 
-        // Skip assemblies in certain locations (single-file apps will have empty locations)
         try
         {
 #pragma warning disable IL3000 // Avoid accessing Assembly file path when publishing as a single file
@@ -201,7 +225,12 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
         catch
         {
-            // If we can't get the location, skip this assembly to be safe
+            return false;
+        }
+
+        if (!assembly.GetReferencedAssemblies().Any(a => 
+            a.Name != null && (a.Name.StartsWith("TUnit") || a.Name == "TUnit")))
+        {
             return false;
         }
 
@@ -217,16 +246,14 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         Type[] types;
         try
         {
-            types = assembly.GetTypes();
+            types = assembly.GetExportedTypes();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to get types from assembly {assembly.FullName}: {ex.Message}");
+            Console.WriteLine($"Warning: Failed to get exported types from assembly {assembly.FullName}: {ex.Message}");
             return discoveredTests;
         }
 
-        // Include both concrete classes and abstract classes (for inherited tests)
-        // Exclude compiler-generated types
         var filteredTypes = types.Where(t => t.IsClass && !IsCompilerGenerated(t));
 
         Console.WriteLine($"Checking {filteredTypes.Count()} types...");
@@ -251,20 +278,20 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             try
             {
                 // Check if this class inherits tests from base classes
-                var inheritsTests = type.GetCustomAttribute<InheritsTestsAttribute>() != null;
+                var inheritsTests = type.IsDefined(typeof(InheritsTestsAttribute), inherit: false);
 
                 if (inheritsTests)
                 {
                     // Get all methods including inherited ones
                     testMethods = GetAllTestMethods(type)
-                        .Where(m => m.GetCustomAttribute<TestAttribute>() != null && !m.IsAbstract)
+                        .Where(m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
                         .ToArray();
                 }
                 else
                 {
                     // Only get declared methods
                     testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
-                        .Where(m => m.GetCustomAttribute<TestAttribute>() != null && !m.IsAbstract)
+                        .Where(m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
                         .ToArray();
                 }
             }
@@ -311,7 +338,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // Get test methods from the generic type definition
         var testMethods = genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
-            .Where(m => m.GetCustomAttribute<TestAttribute>() != null && !m.IsAbstract)
+            .Where(m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
             .ToArray();
 
         if (testMethods.Length == 0)
@@ -790,17 +817,17 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     private static bool CanRunInParallel(Type testClass, MethodInfo testMethod)
     {
         // Check if NotInParallel attribute is present at any level
-        if (testMethod.GetCustomAttribute<NotInParallelAttribute>() != null)
+        if (testMethod.IsDefined(typeof(NotInParallelAttribute), inherit: false))
         {
             return false;
         }
 
-        if (testClass.GetCustomAttribute<NotInParallelAttribute>() != null)
+        if (testClass.IsDefined(typeof(NotInParallelAttribute), inherit: false))
         {
             return false;
         }
 
-        if (testClass.Assembly.GetCustomAttribute<NotInParallelAttribute>() != null)
+        if (testClass.Assembly.IsDefined(typeof(NotInParallelAttribute), inherit: false))
         {
             return false;
         }
@@ -1876,7 +1903,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     private static bool IsCompilerGenerated(Type type)
     {
         // Check if type has CompilerGeneratedAttribute
-        if (type.GetCustomAttribute<CompilerGeneratedAttribute>() != null)
+        if (type.IsDefined(typeof(CompilerGeneratedAttribute), inherit: false))
         {
             return true;
         }

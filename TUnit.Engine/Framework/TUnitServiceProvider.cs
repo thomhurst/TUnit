@@ -10,8 +10,10 @@ using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
+using TUnit.Engine.Building.Collectors;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Building.Resolvers;
+using TUnit.Engine.Discovery;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -93,9 +95,22 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Detect execution mode from command line or environment
         var executionMode = GetExecutionMode(CommandLineOptions);
 
+        // Create data collector factory that creates collectors with filter types
+#pragma warning disable IL2026 // Using member which has 'RequiresUnreferencedCodeAttribute'
+#pragma warning disable IL3050 // Using member which has 'RequiresDynamicCodeAttribute'
+        Func<HashSet<Type>?, ITestDataCollector> dataCollectorFactory = filterTypes =>
+        {
+            return executionMode switch
+            {
+                TestExecutionMode.SourceGeneration => new AotTestDataCollector(filterTypes),
+                TestExecutionMode.Reflection => new ReflectionTestDataCollector(),
+                _ => throw new NotSupportedException($"Test execution mode '{executionMode}' is not supported")
+            };
+        };
+#pragma warning restore IL3050
+#pragma warning restore IL2026
+
         // Create pipeline dependencies
-        var dataCollector = Register<ITestDataCollector>(
-            TestDataCollectorFactory.Create(executionMode, assembliesToScan: null));
         var genericResolver = Register<IGenericTypeResolver>(
             CreateGenericTypeResolver(executionMode));
         var testBuilder = Register<ITestBuilder>(
@@ -104,7 +119,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create pipeline with all dependencies
         TestBuilderPipeline = Register(
             new UnifiedTestBuilderPipeline(
-                dataCollector,
+                dataCollectorFactory,
                 genericResolver,
                 testBuilder,
                 ContextProvider));
