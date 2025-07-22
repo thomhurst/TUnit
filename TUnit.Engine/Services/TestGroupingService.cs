@@ -8,12 +8,12 @@ namespace TUnit.Engine.Services;
 /// </summary>
 internal interface ITestGroupingService
 {
-    Task<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<ExecutableTest> tests);
+    ValueTask<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<ExecutableTest> tests);
 }
 
 internal sealed class TestGroupingService : ITestGroupingService
 {
-    public Task<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<ExecutableTest> tests)
+    public ValueTask<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<ExecutableTest> tests)
     {
         // Use collection directly if already materialized, otherwise create efficient list
         var allTests = tests as IReadOnlyList<ExecutableTest> ?? tests.ToList();
@@ -50,7 +50,7 @@ internal sealed class TestGroupingService : ITestGroupingService
             ParallelGroups = parallelGroups
         };
 
-        return Task.FromResult(result);
+        return new ValueTask<GroupedTests>(result);
     }
 
     private static void ProcessNotInParallelConstraint(

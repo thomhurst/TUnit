@@ -279,11 +279,11 @@ public sealed class PropertyInjectionService
     /// <summary>
     /// Resolves Func<T> values by invoking them without using reflection (AOT-safe).
     /// </summary>
-    private static Task<object?> ResolveTestDataValueAsync(Type type, object? value)
+    private static ValueTask<object?> ResolveTestDataValueAsync(Type type, object? value)
     {
         if (value == null)
         {
-            return Task.FromResult<object?>(null);
+            return new ValueTask<object?>(result: null);
         }
 
         // Check if value is a delegate (includes all Func<T> types)
@@ -291,10 +291,10 @@ public sealed class PropertyInjectionService
         {
             // Use DynamicInvoke which is AOT-safe for parameterless delegates
             var result = del.DynamicInvoke();
-            return Task.FromResult<object?>(result);
+            return new ValueTask<object?>(result);
         }
 
-        return Task.FromResult<object?>(value);
+        return new ValueTask<object?>(value);
     }
 
     /// <summary>

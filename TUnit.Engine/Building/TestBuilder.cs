@@ -141,7 +141,7 @@ public sealed class TestBuilder : ITestBuilder
         return displayName;
     }
 
-    private async Task<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, object?[]? methodArguments = null, object?[]? classArguments = null)
+    private ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, object?[]? methodArguments = null, object?[]? classArguments = null)
     {
         var testDetails = new TestDetails
         {
@@ -174,7 +174,7 @@ public sealed class TestBuilder : ITestBuilder
 
         context.TestDetails = testDetails;
 
-        return await Task.FromResult(context);
+        return new ValueTask<TestContext>(context);
     }
 
 
