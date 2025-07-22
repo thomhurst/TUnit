@@ -26,6 +26,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     ];
     private static readonly object _lock = new();
     private static readonly ExpressionCacheService _expressionCache = new();
+    private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
 
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
@@ -243,14 +244,21 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var discoveredTests = new List<TestMetadata>();
 
-        Type[] types;
-        try
+        Type[] types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
         {
-            types = assembly.GetExportedTypes();
-        }
-        catch (Exception ex)
+            try
+            {
+                return asm.GetExportedTypes();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to get exported types from assembly {asm.FullName}: {ex.Message}");
+                return Array.Empty<Type>();
+            }
+        });
+
+        if (types.Length == 0)
         {
-            Console.WriteLine($"Warning: Failed to get exported types from assembly {assembly.FullName}: {ex.Message}");
             return discoveredTests;
         }
 
@@ -509,7 +517,12 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             GenericTypeInfo = ExtractGenericTypeInfo(testClass),
             GenericMethodInfo = ExtractGenericMethodInfo(testMethod),
             GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
-            AttributeFactory = () => testMethod.GetCustomAttributes().Concat(testClass.GetCustomAttributes()).ToArray(),
+            AttributeFactory = () =>
+            [
+                ..testMethod.GetCustomAttributes(),
+                ..testClass.GetCustomAttributes(),
+                ..testClass.Assembly.GetCustomAttributes(),
+            ],
             PropertyInjections = PropertyInjector.DiscoverInjectableProperties(testClass)
         };
 
@@ -706,8 +719,8 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             }
         }
 
-        // Default format
-        return $"{testClass.Name}.{testMethod.Name}";
+        // Default format - just method name to match source generation
+        return testMethod.Name;
     }
 
     private static string[] ExtractCategories(Type testClass, MethodInfo testMethod)
@@ -1524,8 +1537,10 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 foreach (var method in methods)
                 {
                     // Check for Before attributes
-                    var beforeAttrs = method.GetCustomAttributes<BeforeAttribute>();
-                    foreach (var attr in beforeAttrs)
+                    if (method.IsDefined(typeof(BeforeAttribute), inherit: false))
+                    {
+                        var beforeAttrs = method.GetCustomAttributes<BeforeAttribute>();
+                        foreach (var attr in beforeAttrs)
                     {
                         // Skip TestDiscovery hooks - they run during discovery phase, not test execution
                         if (attr.HookType.HasFlag(HookType.TestDiscovery))
@@ -1546,10 +1561,13 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                             }
                         }
                     }
+                    }
 
                     // Check for After attributes
-                    var afterAttrs = method.GetCustomAttributes<AfterAttribute>();
-                    foreach (var attr in afterAttrs)
+                    if (method.IsDefined(typeof(AfterAttribute), inherit: false))
+                    {
+                        var afterAttrs = method.GetCustomAttributes<AfterAttribute>();
+                        foreach (var attr in afterAttrs)
                     {
                         // Skip TestDiscovery hooks - they run during discovery phase, not test execution
                         if (attr.HookType.HasFlag(HookType.TestDiscovery))
@@ -1570,6 +1588,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                             }
                         }
                     }
+                    }
                 }
             }
             catch (Exception ex)
@@ -1584,7 +1603,45 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         try
         {
             var assembly = testClass.Assembly;
-            var assemblyTypes = assembly.GetTypes()
+            
+            // Get cached types for this assembly
+            var exportedTypes = _assemblyTypesCache.GetOrAdd(assembly, asm =>
+            {
+                try
+                {
+                    return asm.GetExportedTypes();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to get exported types from assembly {asm.FullName}: {ex.Message}");
+                    return Array.Empty<Type>();
+                }
+            });
+            
+            // Early exit if assembly has no hook attributes
+            var hasHooks = false;
+            foreach (var type in exportedTypes)
+            {
+                if (type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
+                    .Any(m => m.IsDefined(typeof(BeforeAttribute), inherit: false) || m.IsDefined(typeof(AfterAttribute), inherit: false)))
+                {
+                    hasHooks = true;
+                    break;
+                }
+            }
+            
+            if (!hasHooks)
+            {
+                return new TestHooks
+                {
+                    BeforeClass = beforeClass.ToArray(),
+                    AfterClass = afterClass.ToArray(),
+                    BeforeTest = beforeTest.ToArray(),
+                    AfterTest = afterTest.ToArray()
+                };
+            }
+            
+            var assemblyTypes = exportedTypes
                 .Where(t => t is { IsClass: true, IsAbstract: false } && ShouldScanTypeForHooks(t))
                 .ToList();
 
@@ -1599,9 +1656,11 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     foreach (var method in methods)
                     {
                         // Check for assembly-level Before hooks
-                        var beforeAttrs = method.GetCustomAttributes<BeforeAttribute>()
-                            .Where(a => a.HookType.HasFlag(HookType.Assembly) && !a.HookType.HasFlag(HookType.TestDiscovery));
-                        foreach (var attr in beforeAttrs)
+                        if (method.IsDefined(typeof(BeforeAttribute), inherit: false))
+                        {
+                            var beforeAttrs = method.GetCustomAttributes<BeforeAttribute>()
+                                .Where(a => a.HookType.HasFlag(HookType.Assembly) && !a.HookType.HasFlag(HookType.TestDiscovery));
+                            foreach (var attr in beforeAttrs)
                         {
                             var hookMetadata = CreateHookMetadata(method, attr, true);
                             if (hookMetadata != null)
@@ -1609,17 +1668,21 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                                 beforeClass.Add(hookMetadata);
                             }
                         }
+                        }
 
                         // Check for assembly-level After hooks
-                        var afterAttrs = method.GetCustomAttributes<AfterAttribute>()
-                            .Where(a => a.HookType.HasFlag(HookType.Assembly) && !a.HookType.HasFlag(HookType.TestDiscovery));
-                        foreach (var attr in afterAttrs)
+                        if (method.IsDefined(typeof(AfterAttribute), inherit: false))
+                        {
+                            var afterAttrs = method.GetCustomAttributes<AfterAttribute>()
+                                .Where(a => a.HookType.HasFlag(HookType.Assembly) && !a.HookType.HasFlag(HookType.TestDiscovery));
+                            foreach (var attr in afterAttrs)
                         {
                             var hookMetadata = CreateHookMetadata(method, attr, false);
                             if (hookMetadata != null)
                             {
                                 afterClass.Add(hookMetadata);
                             }
+                        }
                         }
                     }
                 }

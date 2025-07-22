@@ -37,7 +37,7 @@ public sealed class TestBuilder : ITestBuilder
                 // Check if this combination has a data generation exception
                 if (combination.DataGenerationException != null)
                 {
-                    var failedTest = CreateFailedTestForDataGenerationError(metadata, combination.DataGenerationException, combination, combination.DisplayName);
+                    var failedTest = await CreateFailedTestForDataGenerationError(metadata, combination.DataGenerationException, combination, combination.DisplayName);
                     tests.Add(failedTest);
                 }
                 else
@@ -50,7 +50,7 @@ public sealed class TestBuilder : ITestBuilder
         catch (Exception ex)
         {
             // If data combination generation fails, create a failed test
-            var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
+            var failedTest = await CreateFailedTestForDataGenerationError(metadata, ex);
             tests.Add(failedTest);
             return tests;
         }
@@ -213,23 +213,25 @@ public sealed class TestBuilder : ITestBuilder
         discoveredContext.TransferTo(context);
     }
 
-    private ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
+    private async Task<ExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
-        return CreateFailedTestForDataGenerationError(metadata, exception, null);
+        return await CreateFailedTestForDataGenerationError(metadata, exception, null);
     }
 
-    private ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, string? customDisplayName)
+    private async Task<ExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, string? customDisplayName)
     {
-        return CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination(), customDisplayName);
+        return await CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination(), customDisplayName);
     }
 
-    private ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination, string? customDisplayName)
+    private async Task<ExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination, string? customDisplayName)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
         var displayName = customDisplayName ?? $"{metadata.TestName} [DATA GENERATION ERROR]";
 
         var testDetails = CreateFailedTestDetails(metadata, testId);
         var context = CreateFailedTestContext(metadata, testDetails);
+
+        await InvokeDiscoveryEventReceiversAsync(context);
 
         return new FailedExecutableTest(exception)
         {
@@ -261,7 +263,7 @@ public sealed class TestBuilder : ITestBuilder
             ReturnType = typeof(Task),
             ClassMetadata = MetadataBuilder.CreateClassMetadata(metadata),
             MethodMetadata = metadata.MethodMetadata,
-            Attributes = [],
+            Attributes = metadata.AttributeFactory.Invoke(),
         };
     }
 
