@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using TUnit.Core;
 using TUnit.Engine.Building.Interfaces;
 
@@ -10,20 +11,45 @@ public sealed class AotTestDataCollector : ITestDataCollector
 {
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
-        var allTests = new List<TestMetadata>();
+        // Use indexed collection to maintain order
+        var resultsByIndex = new ConcurrentDictionary<int, IEnumerable<TestMetadata>>();
 
-        // Collect tests from all registered test sources
-        foreach (var testSource in Sources.TestSources)
+        // Collect tests from all registered test sources using true parallel processing
+        var testSourcesList = Sources.TestSources.ToList();
+        
+        var parallelOptions = new ParallelOptions
         {
-            try
+            MaxDegreeOfParallelism = Environment.ProcessorCount
+        };
+
+        await Task.Run(() =>
+        {
+            Parallel.ForEach(testSourcesList.Select((source, index) => new { source, index }), parallelOptions, item =>
             {
-                var tests = await testSource.GetTestsAsync(testSessionId);
+                var testSource = item.source;
+                var index = item.index;
+                
+                try
+                {
+                    // Run async method synchronously since we're already on thread pool
+                    var tests = testSource.GetTestsAsync(testSessionId).GetAwaiter().GetResult();
+                    resultsByIndex[index] = tests;
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException(
+                        $"Failed to collect tests from source {testSource.GetType().Name}: {ex.Message}", ex);
+                }
+            });
+        });
+
+        // Reassemble results in original order
+        var allTests = new List<TestMetadata>();
+        for (int i = 0; i < testSourcesList.Count; i++)
+        {
+            if (resultsByIndex.TryGetValue(i, out var tests))
+            {
                 allTests.AddRange(tests);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException(
-                    $"Failed to collect tests from source {testSource.GetType().Name}: {ex.Message}", ex);
             }
         }
 

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -37,29 +38,54 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
         Console.WriteLine($"Scanning {assemblies.Count} assemblies for tests...");
 
-        var newTests = new List<TestMetadata>();
+        // Use indexed collection to maintain order
+        var resultsByIndex = new ConcurrentDictionary<int, List<TestMetadata>>();
 
-        foreach (var assembly in assemblies)
+        // Use true parallel processing with thread pool threads
+        var parallelOptions = new ParallelOptions
         {
-            lock (_lock)
-            {
-                if (!_scannedAssemblies.Add(assembly))
-                {
-                    continue;
-                }
-            }
+            MaxDegreeOfParallelism = Environment.ProcessorCount
+        };
 
-            try
+        await Task.Run(() =>
+        {
+            Parallel.ForEach(assemblies.Select((assembly, index) => new { assembly, index }), parallelOptions, item =>
             {
-                Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
-                var testsInAssembly = await DiscoverTestsInAssembly(assembly);
-                newTests.AddRange(testsInAssembly);
-            }
-            catch (Exception ex)
+                var assembly = item.assembly;
+                var index = item.index;
+                
+                lock (_lock)
+                {
+                    if (!_scannedAssemblies.Add(assembly))
+                    {
+                        resultsByIndex[index] = new List<TestMetadata>();
+                        return;
+                    }
+                }
+
+                try
+                {
+                    Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
+                    // Run async method synchronously since we're already on thread pool
+                    var testsInAssembly = DiscoverTestsInAssembly(assembly).GetAwaiter().GetResult();
+                    resultsByIndex[index] = testsInAssembly.ToList();
+                }
+                catch (Exception ex)
+                {
+                    // Create a failed test metadata for the assembly that couldn't be scanned
+                    var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
+                    resultsByIndex[index] = new List<TestMetadata> { failedTest };
+                }
+            });
+        });
+
+        // Reassemble results in original order
+        var newTests = new List<TestMetadata>();
+        for (int i = 0; i < assemblies.Count; i++)
+        {
+            if (resultsByIndex.TryGetValue(i, out var tests))
             {
-                // Create a failed test metadata for the assembly that couldn't be scanned
-                var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
-                newTests.Add(failedTest);
+                newTests.AddRange(tests);
             }
         }
 
