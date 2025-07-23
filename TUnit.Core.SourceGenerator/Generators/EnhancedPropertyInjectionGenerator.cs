@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Extensions;
-using TUnit.Core.SourceGenerator.Helpers;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
