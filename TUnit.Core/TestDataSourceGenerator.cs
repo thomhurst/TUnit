@@ -30,7 +30,7 @@ public static class TestDataSourceGenerator
             // Create metadata for the data source with resolved generic types
             var metadata = new DataGeneratorMetadata
             {
-                TestBuilderContext = null!,
+                TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
                 MembersToGenerate = [
                 ],
                 TestInformation = new MethodMetadata
@@ -97,7 +97,7 @@ public static class TestDataSourceGenerator
             // Create metadata for the Matrix data source
             var metadata = new DataGeneratorMetadata
             {
-                TestBuilderContext = null!,
+                TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
                 MembersToGenerate = [
                 ],
                 TestInformation = new MethodMetadata

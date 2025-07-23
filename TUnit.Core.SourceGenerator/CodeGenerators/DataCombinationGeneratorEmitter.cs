@@ -2429,6 +2429,7 @@ public static class DataCombinationGeneratorEmitter
                 var attributeTypeArgs = genericBase.TypeArguments;
                 
                 // Map to generic parameters based on position
+                // Handle both generic methods and generic classes
                 if (methodSymbol.IsGenericMethod)
                 {
                     // For generic methods, map to method type parameters
@@ -2443,7 +2444,9 @@ public static class DataCombinationGeneratorEmitter
                     var typeArgStrings = attributeTypeArgs.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
                     EmitGenericConstraintValidation(writer, methodSymbol.TypeParameters, typeArgStrings, "method");
                 }
-                else if (typeSymbol.IsGenericType)
+                
+                // Always check for generic class parameters, regardless of whether the method is generic
+                if (typeSymbol.IsGenericType)
                 {
                     // For generic classes, map to class type parameters
                     for (int i = 0; i < Math.Min(attributeTypeArgs.Length, typeSymbol.TypeParameters.Length); i++)
