@@ -82,12 +82,19 @@ public static class DataCombinationGenerator
         var methodCombinations = GenerateCombinations(methodDataLists, DataSourceType.Method).ToArray();
         var classCombinations = GenerateCombinations(classDataLists, DataSourceType.Class).ToArray();
 
+        // If no data sources at all, create single empty combination
+        if (methodCombinations.Length == 0 && classCombinations.Length == 0)
+        {
+            yield return new TestDataCombination
+            {
+                DisplayName = testMetadata.TestName,
+                ResolvedGenericTypes = resolvedGenericTypes
+            };
+            yield break;
+        }
+
         // Combine all data sources
-        // DefaultIfEmpty() ensures we generate at least one test even when there are no data sources
-        // - If both are empty: both return null, we get one test with no data
-        // - If only class has data: method returns null, we get tests with only class data
-        // - If only method has data: class returns null, we get tests with only method data
-        // - If both have data: we get all combinations
+        // DefaultIfEmpty() ensures we handle cases where only one type has data
         foreach (var classCombo in classCombinations.DefaultIfEmpty())
         {
             foreach (var methodCombo in methodCombinations.DefaultIfEmpty())
@@ -99,10 +106,8 @@ public static class DataCombinationGenerator
 
                 yield return new TestDataCombination
                 {
-                    ClassDataFactories = classCombo?.Factories ?? [
-                    ],
-                    MethodDataFactories = methodCombo?.Factories ?? [
-                    ],
+                    ClassDataFactories = classCombo?.Factories ?? [],
+                    MethodDataFactories = methodCombo?.Factories ?? [],
                     ClassDataSourceIndex = classCombo?.DataSourceIndex ?? 0,
                     MethodDataSourceIndex = methodCombo?.DataSourceIndex ?? 0,
                     ClassLoopIndex = classCombo?.LoopIndex ?? 0,
@@ -118,7 +123,7 @@ public static class DataCombinationGenerator
     private static DataGeneratorMetadata CreateDataGeneratorMetadata(
         TestMetadata testMetadata,
         string testSessionId,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type? testClassType)
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type testClassType)
     {
         return new DataGeneratorMetadata
         {
