@@ -60,56 +60,27 @@ public static class DataCombinationGenerator
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type? testClassType)
     {
         // Handle typed data sources that infer generic types
-        var resolvedGenericTypes = new Dictionary<string, Type>();
-        if (testMetadata.GenericTypeInfo != null && methodDataSources.Any(ds => ds.GetType().IsGenericType))
-        {
-            // Extract generic type arguments from typed data sources
-            foreach (var dataSource in methodDataSources)
-            {
-                var dsType = dataSource.GetType();
-                if (dsType.IsGenericType && dsType.GetGenericTypeDefinition().Name.StartsWith("TypedDataSourceAttribute"))
-                {
-                    var typeArg = dsType.GetGenericArguments()[0];
-                    // Map to generic parameter - this is simplified, real implementation would need proper mapping
-                    if (testMetadata.GenericTypeInfo.ParameterNames.Length > 0)
-                    {
-                        resolvedGenericTypes[testMetadata.GenericTypeInfo.ParameterNames[0]] = typeArg;
-                    }
-                }
-            }
-        }
+        var resolvedGenericTypes = ResolveGenericTypesFromDataSources(
+            testMetadata, 
+            methodDataSources, 
+            classDataSources,
+            propertyDataSources);
         
         // Create data generator metadata for data sources
         var dataGeneratorMetadata = CreateDataGeneratorMetadata(testMetadata, testSessionId, testClassType);
         
         // Get method data
-        var methodDataLists = new List<List<Func<Task<object?[]?>>>>();
-        foreach (var dataSource in methodDataSources)
-        {
-            var dataList = new List<Func<Task<object?[]?>>>();
-            await foreach (var data in dataSource.GetDataRowsAsync(dataGeneratorMetadata))
-            {
-                dataList.Add(data);
-            }
-            methodDataLists.Add(dataList);
-        }
+        var methodDataLists = await CollectDataSourceFactoriesAsync(methodDataSources, dataGeneratorMetadata);
         
         // Get class data
-        var classDataLists = new List<List<Func<Task<object?[]?>>>>();
-        foreach (var dataSource in classDataSources)
-        {
-            var dataList = new List<Func<Task<object?[]?>>>();
-            await foreach (var data in dataSource.GetDataRowsAsync(dataGeneratorMetadata))
-            {
-                dataList.Add(data);
-            }
-            classDataLists.Add(dataList);
-        }
+        var classDataLists = await CollectDataSourceFactoriesAsync(classDataSources, dataGeneratorMetadata);
+        
+        // Note: Property data sources are handled separately by PropertyInjector
+        // and don't participate in combination generation at this time
         
         // Generate combinations
-        var methodCombinations = GenerateCombinations(methodDataLists);
-        var classCombinations = GenerateCombinations(classDataLists);
-        
+        var methodCombinations = GenerateCombinations(methodDataLists, DataSourceType.Method);
+        var classCombinations = GenerateCombinations(classDataLists, DataSourceType.Class);
         // If no data sources, create single empty combination
         if (!methodCombinations.Any() && !classCombinations.Any())
         {
@@ -121,32 +92,15 @@ public static class DataCombinationGenerator
             yield break;
         }
         
-        // Combine class and method data
+        // Combine all data sources
         foreach (var classCombo in classCombinations.DefaultIfEmpty())
         {
             foreach (var methodCombo in methodCombinations.DefaultIfEmpty())
             {
-                var displayNameParts = new List<string> { testMetadata.TestName };
-                
-                // Add class data to display name
-                if (classCombo != null)
-                {
-                    var classData = await GetDataForDisplay(classCombo.Factories);
-                    if (classData.Any())
-                    {
-                        displayNameParts.Add($"Class({string.Join(", ", classData.Select(FormatValue))})");
-                    }
-                }
-                
-                // Add method data to display name
-                if (methodCombo != null)
-                {
-                    var methodData = await GetDataForDisplay(methodCombo.Factories);
-                    if (methodData.Any())
-                    {
-                        displayNameParts.Add($"({string.Join(", ", methodData.Select(FormatValue))})");
-                    }
-                }
+                var displayName = await GenerateDisplayNameAsync(
+                    testMetadata,
+                    classCombo,
+                    methodCombo);
                 
                 yield return new TestDataCombination
                 {
@@ -156,7 +110,7 @@ public static class DataCombinationGenerator
                     MethodDataSourceIndex = methodCombo?.DataSourceIndex ?? 0,
                     ClassLoopIndex = classCombo?.LoopIndex ?? 0,
                     MethodLoopIndex = methodCombo?.LoopIndex ?? 0,
-                    DisplayName = string.Join(" - ", displayNameParts),
+                    DisplayName = displayName,
                     ResolvedGenericTypes = resolvedGenericTypes
                 };
             }
@@ -181,7 +135,9 @@ public static class DataCombinationGenerator
         };
     }
     
-    private static IEnumerable<DataCombination> GenerateCombinations(List<List<Func<Task<object?[]?>>>> dataLists)
+    private static IEnumerable<DataCombination> GenerateCombinations(
+        List<List<Func<Task<object?[]?>>>> dataLists, 
+        DataSourceType sourceType)
     {
         if (!dataLists.Any() || dataLists.All(list => !list.Any()))
         {
@@ -189,12 +145,14 @@ public static class DataCombinationGenerator
         }
         
         var indices = new int[dataLists.Count];
-        var dataSourceIndex = 0;
+        var loopIndex = 0;
         
         while (true)
         {
             // Create current combination
             var factories = new List<Func<Task<object?>>>();
+            var currentDataSourceIndex = 0;
+            
             for (int i = 0; i < dataLists.Count; i++)
             {
                 if (dataLists[i].Any())
@@ -205,15 +163,24 @@ public static class DataCombinationGenerator
                         var data = await dataFactory();
                         return data?.FirstOrDefault();
                     });
+                    
+                    // Track which data source we're on
+                    if (indices[i] > 0 || i == 0)
+                    {
+                        currentDataSourceIndex = i;
+                    }
                 }
             }
             
             yield return new DataCombination
             {
                 Factories = factories.ToArray(),
-                DataSourceIndex = dataSourceIndex,
-                LoopIndex = indices[0] // Use first index as loop index
+                DataSourceIndex = currentDataSourceIndex,
+                LoopIndex = loopIndex,
+                SourceType = sourceType
             };
+            
+            loopIndex++;
             
             // Increment indices
             var carry = 1;
@@ -225,7 +192,6 @@ public static class DataCombinationGenerator
                 if (indices[i] >= dataLists[i].Count)
                 {
                     indices[i] = 0;
-                    dataSourceIndex++;
                 }
                 else
                 {
@@ -256,10 +222,143 @@ public static class DataCombinationGenerator
         return value.ToString() ?? "null";
     }
     
+    private static Dictionary<string, Type> ResolveGenericTypesFromDataSources(
+        TestMetadata testMetadata,
+        IDataSourceAttribute[] methodDataSources,
+        IDataSourceAttribute[] classDataSources,
+        PropertyDataSource[] propertyDataSources)
+    {
+        var resolvedTypes = new Dictionary<string, Type>();
+        
+        if (testMetadata.GenericTypeInfo == null && testMetadata.GenericMethodInfo == null)
+        {
+            return resolvedTypes;
+        }
+        
+        // Process all data sources to find typed ones
+        var allDataSources = methodDataSources
+            .Concat(classDataSources);
+            
+        foreach (var dataSource in allDataSources)
+        {
+            var dsType = dataSource.GetType();
+            if (!dsType.IsGenericType) continue;
+            
+            var genericDef = dsType.GetGenericTypeDefinition();
+            if (genericDef.Name.StartsWith("TypedDataSourceAttribute"))
+            {
+                var typeArgs = dsType.GetGenericArguments();
+                
+                // Map generic type arguments based on position and constraints
+                MapGenericTypeArguments(
+                    testMetadata.GenericTypeInfo, 
+                    testMetadata.GenericMethodInfo,
+                    typeArgs,
+                    resolvedTypes);
+            }
+        }
+        
+        return resolvedTypes;
+    }
+    
+    private static void MapGenericTypeArguments(
+        GenericTypeInfo? classGenericInfo,
+        GenericMethodInfo? methodGenericInfo,
+        Type[] typeArguments,
+        Dictionary<string, Type> resolvedTypes)
+    {
+        var typeArgIndex = 0;
+        
+        // First map method generic parameters
+        if (methodGenericInfo != null)
+        {
+            for (int i = 0; i < methodGenericInfo.ParameterNames.Length && typeArgIndex < typeArguments.Length; i++)
+            {
+                var paramName = methodGenericInfo.ParameterNames[i];
+                if (!resolvedTypes.ContainsKey(paramName))
+                {
+                    resolvedTypes[paramName] = typeArguments[typeArgIndex++];
+                }
+            }
+        }
+        
+        // Then map class generic parameters
+        if (classGenericInfo != null)
+        {
+            for (int i = 0; i < classGenericInfo.ParameterNames.Length && typeArgIndex < typeArguments.Length; i++)
+            {
+                var paramName = classGenericInfo.ParameterNames[i];
+                if (!resolvedTypes.ContainsKey(paramName))
+                {
+                    resolvedTypes[paramName] = typeArguments[typeArgIndex++];
+                }
+            }
+        }
+    }
+    
+    private static async Task<List<List<Func<Task<object?[]?>>>>> CollectDataSourceFactoriesAsync(
+        IDataSourceAttribute[] dataSources,
+        DataGeneratorMetadata metadata)
+    {
+        var dataLists = new List<List<Func<Task<object?[]?>>>>();
+        
+        foreach (var dataSource in dataSources)
+        {
+            var dataList = new List<Func<Task<object?[]?>>>();
+            await foreach (var data in dataSource.GetDataRowsAsync(metadata))
+            {
+                dataList.Add(data);
+            }
+            if (dataList.Any())
+            {
+                dataLists.Add(dataList);
+            }
+        }
+        
+        return dataLists;
+    }
+    
+    private static async Task<string> GenerateDisplayNameAsync(
+        TestMetadata testMetadata,
+        DataCombination? classCombo,
+        DataCombination? methodCombo)
+    {
+        var parts = new List<string> { testMetadata.TestName };
+        
+        // Add class data
+        if (classCombo != null)
+        {
+            var classData = await GetDataForDisplay(classCombo.Factories);
+            if (classData.Any())
+            {
+                parts.Add($"Class({string.Join(", ", classData.Select(FormatValue))})");
+            }
+        }
+        
+        // Add method data
+        if (methodCombo != null)
+        {
+            var methodData = await GetDataForDisplay(methodCombo.Factories);
+            if (methodData.Any())
+            {
+                parts.Add($"({string.Join(", ", methodData.Select(FormatValue))})");
+            }
+        }
+        
+        return string.Join(" - ", parts);
+    }
+    
+    private enum DataSourceType
+    {
+        Class,
+        Method
+    }
+    
     private class DataCombination
     {
         public required Func<Task<object?>>[] Factories { get; init; }
         public required int DataSourceIndex { get; init; }
         public required int LoopIndex { get; init; }
+        public DataSourceType SourceType { get; init; }
     }
 }
