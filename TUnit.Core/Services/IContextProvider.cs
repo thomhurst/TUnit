@@ -42,6 +42,6 @@ public interface IContextProvider
         string testName,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type classType,
-        CancellationToken cancellationToken,
-        IServiceProvider serviceProvider);
+        TestBuilderContext testBuilderContext,
+        CancellationToken cancellationToken);
 }

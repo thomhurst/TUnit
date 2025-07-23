@@ -5,15 +5,16 @@ namespace TUnit.Engine.Building.Interfaces;
 /// <summary>
 /// Interface for building executable tests from test metadata using the simplified approach
 /// </summary>
-public interface ITestBuilder
+internal interface ITestBuilder
 {
     /// <summary>
     /// Builds an executable test from metadata and data combination
     /// </summary>
     /// <param name="metadata">The test metadata</param>
-    /// <param name="combination">The test data combination</param>
+    /// <param name="testData">The test data</param>
+    /// <param name="testBuilderContext"></param>
     /// <returns>An executable test ready for execution</returns>
-    Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestDataCombination combination);
+    Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestBuilder.TestData testData, TestBuilderContext testBuilderContext);
 
     /// <summary>
     /// Builds all executable tests from a single TestMetadata using its DataCombinationGenerator delegate.

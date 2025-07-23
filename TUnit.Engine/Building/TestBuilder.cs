@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.Data;
-using TUnit.Core.DataSources;
+using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Core.Tracking;
@@ -11,19 +11,22 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building;
 
-public sealed class TestBuilder : ITestBuilder
+internal sealed class TestBuilder : ITestBuilder
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly string _sessionId;
+    private readonly IHookCollectionService _hookCollectionService;
     private readonly IContextProvider _contextProvider;
 
-    public TestBuilder(IServiceProvider serviceProvider, IContextProvider contextProvider)
+    public TestBuilder(IServiceProvider serviceProvider, string sessionId, IHookCollectionService hookCollectionService, IContextProvider contextProvider)
     {
         _serviceProvider = serviceProvider;
+        _sessionId = sessionId;
+        _hookCollectionService = hookCollectionService;
         _contextProvider = contextProvider;
     }
 
 
-    /// Uses the DataCombinationGenerator delegate to avoid reflection overhead
     public async Task<IEnumerable<ExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata)
     {
         var tests = new List<ExecutableTest>();
@@ -34,17 +37,26 @@ public sealed class TestBuilder : ITestBuilder
             var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext());
 
             var classDataAttributeIndex = 0;
-            foreach (var classDataSource in metadata.ClassDataSources)
+            foreach (var classDataSource in GetDataSources(metadata.ClassDataSources))
             {
                 classDataAttributeIndex++;
 
                 var classDataLoopIndex = 0;
-                await foreach (var classDataFactory in classDataSource.GetDataRowsAsync(DataCombinationGenerator.CreateDataGeneratorMetadata()))
+                await foreach (var classDataFactory in classDataSource.GetDataRowsAsync(
+                                   DataGeneratorMetadataCreator.CreateDataGeneratorMetadata
+                                   (
+                                       testMetadata: metadata,
+                                       testSessionId: _sessionId,
+                                       generatorType: DataGeneratorType.ClassParameters,
+                                       testClassInstance: null,
+                                       classInstanceArguments: null,
+                                       contextAccessor
+                                   )))
                 {
                     classDataLoopIndex++;
 
                     var methodDataAttributeIndex = 0;
-                    foreach (var methodDataSource in metadata.DataSources)
+                    foreach (var methodDataSource in GetDataSources(metadata.DataSources))
                     {
                         methodDataAttributeIndex++;
 
@@ -58,7 +70,16 @@ public sealed class TestBuilder : ITestBuilder
                         }
 
                         var methodDataLoopIndex = 0;
-                        await foreach (var methodDataFactory in methodDataSource.GetDataRowsAsync(DataCombinationGenerator.CreateDataGeneratorMetadata()))
+                        await foreach (var methodDataFactory in methodDataSource.GetDataRowsAsync(
+                                           DataGeneratorMetadataCreator.CreateDataGeneratorMetadata
+                                           (
+                                               testMetadata: metadata,
+                                               testSessionId: _sessionId,
+                                               generatorType: DataGeneratorType.TestParameters,
+                                               testClassInstance: instance,
+                                               classInstanceArguments: classData,
+                                               contextAccessor
+                                           )))
                         {
                             methodDataLoopIndex++;
 
@@ -79,28 +100,12 @@ public sealed class TestBuilder : ITestBuilder
                                 MethodData = methodData
                             };
 
-                            var test = await BuildTestAsync(metadata, testData);
+                            var test = await BuildTestAsync(metadata, testData, contextAccessor.Current);
                             tests.Add(test);
+
+                            contextAccessor.Current = new TestBuilderContext();
                         }
                     }
-                }
-            }
-
-            // Use the DataCombinationGenerator directly - no reflection needed
-            var asyncCombinations = metadata.DataCombinationGenerator(contextAccessor);
-
-            await foreach (var combination in asyncCombinations)
-            {
-                // Check if this combination has a data generation exception
-                if (combination.DataGenerationException != null)
-                {
-                    var failedTest = await CreateFailedTestForDataGenerationError(metadata, combination.DataGenerationException, combination, combination.DisplayName);
-                    tests.Add(failedTest);
-                }
-                else
-                {
-                    var test = await BuildTestAsync(metadata, combination);
-                    tests.Add(test);
                 }
             }
         }
@@ -115,42 +120,44 @@ public sealed class TestBuilder : ITestBuilder
         return tests;
     }
 
-    private async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData)
+    private static IDataSourceAttribute[] GetDataSources(IDataSourceAttribute[] dataSources)
     {
-        throw new NotImplementedException();
+        if (dataSources.Length == 0)
+        {
+            return [NoDataSource.Instance];
+        }
+
+        return dataSources;
     }
 
-    public async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestDataCombination combination)
+    public async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
-        // Create fresh instances from factories
-        var classArguments = await CreateArgumentsFromFactoriesAsync(combination.ClassDataFactories);
-        var methodArguments = await CreateArgumentsFromFactoriesAsync(combination.MethodDataFactories);
+        // Generate unique test ID
+        var testId = TestIdentifierService.GenerateTestId(metadata, testData);
 
-        // Generate unique test ID first (needed for property injection)
-        var testId = TestIdentifierService.GenerateTestId(metadata, combination);
-        var displayName = GenerateDisplayName(metadata, await GetArgumentsDisplayTextAsync(combination));
-        var context = await CreateTestContextAsync(testId, metadata, methodArguments, classArguments);
+        // Create test context with the provided arguments
+        var context = await CreateTestContextAsync(testId, metadata, testData, testBuilderContext);
 
-        // Property injection moved to execution phase for better performance
+        // Set the test class instance that was already created
+        context.TestDetails.ClassInstance = testData.TestClassInstance;
 
         // Track all objects from data sources
-        TrackDataSourceObjects(classArguments, methodArguments);
+        TrackDataSourceObjects(context, testData.ClassData, testData.MethodData);
 
-        // Set the data combination for generic type resolution
-        context.TestDetails.DataCombination = combination;
-
+        // Invoke discovery event receivers
         await InvokeDiscoveryEventReceiversAsync(context);
 
+        // Create hooks
         var beforeTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: true);
         var afterTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: false);
 
-        // Use the CreateExecutableTestFactory directly - no reflection needed
+        // Create the executable test
         var creationContext = new ExecutableTestCreationContext
         {
             TestId = testId,
             DisplayName = context.GetDisplayName(), // Use the display name from context which may have been updated by discovery events
-            Arguments = methodArguments,
-            ClassArguments = classArguments,
+            Arguments = testData.MethodData,
+            ClassArguments = testData.ClassData,
             BeforeTestHooks = beforeTestHooks,
             AfterTestHooks = afterTestHooks,
             Context = context
@@ -159,51 +166,17 @@ public sealed class TestBuilder : ITestBuilder
         return metadata.CreateExecutableTestFactory(creationContext, metadata);
     }
 
-    private static async Task<string> GetArgumentsDisplayTextAsync(TestDataCombination combination)
-    {
-        var allArgs = new List<object?>();
-        allArgs.AddRange(await Task.WhenAll(combination.ClassDataFactories.Select(f => f())));
-        allArgs.AddRange(await Task.WhenAll(combination.MethodDataFactories.Select(f => f())));
-
-        if (allArgs.Count == 0)
-        {
-            return string.Empty;
-        }
-
-        // Use shared formatter for consistent formatting
-        return TestDataFormatter.FormatArguments(allArgs.ToArray());
-    }
-
     private async Task<Func<TestContext, CancellationToken, Task>[]> CreateTestHooksAsync(Type testClassType, bool isBeforeHook)
     {
-        if (_serviceProvider?.GetService(typeof(IHookCollectionService)) is not IHookCollectionService hookCollectionService)
-        {
-            return [
-            ];
-        }
-
         var hooks = isBeforeHook
-            ? await hookCollectionService.CollectBeforeTestHooksAsync(testClassType)
-            : await hookCollectionService.CollectAfterTestHooksAsync(testClassType);
+            ? await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType)
+            : await _hookCollectionService.CollectAfterTestHooksAsync(testClassType);
 
         return hooks.ToArray();
     }
 
 
-    private static string GenerateDisplayName(TestMetadata metadata, string argumentsDisplayText)
-    {
-        // Build default display name - custom display names are handled by discovery event receivers
-        var displayName = metadata.TestName;
-
-        if (!string.IsNullOrEmpty(argumentsDisplayText))
-        {
-            displayName += $"({argumentsDisplayText})";
-        }
-
-        return displayName;
-    }
-
-    private ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, object?[]? methodArguments = null, object?[]? classArguments = null)
+    private ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
         var testDetails = new TestDetails
         {
@@ -211,14 +184,13 @@ public sealed class TestBuilder : ITestBuilder
             TestName = metadata.TestName,
             ClassType = metadata.TestClassType,
             MethodName = metadata.TestMethodName,
-            ClassInstance = null,
-            TestMethodArguments = methodArguments ?? [],
-            TestClassArguments = classArguments ?? [],
+            ClassInstance = testData.TestClassInstance,
+            TestMethodArguments = testData.MethodData,
+            TestClassArguments = testData.ClassData,
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
             TestMethodParameterTypes = metadata.ParameterTypes,
-            ReturnType = typeof(Task),
-            ClassMetadata = MetadataBuilder.CreateClassMetadata(metadata),
+            ReturnType = metadata.MethodMetadata.ReturnType ?? typeof(void),
             MethodMetadata = metadata.MethodMetadata,
             Attributes =  metadata.AttributeFactory.Invoke()
         };
@@ -231,8 +203,8 @@ public sealed class TestBuilder : ITestBuilder
         var context = _contextProvider.CreateTestContext(
             metadata.TestName,
             metadata.TestClassType,
-            CancellationToken.None,
-            _serviceProvider);
+            testBuilderContext,
+            CancellationToken.None);
 
         context.TestDetails = testDetails;
 
@@ -316,14 +288,13 @@ public sealed class TestBuilder : ITestBuilder
             TestName = metadata.TestName,
             ClassType = metadata.TestClassType,
             MethodName = metadata.TestMethodName,
-            ClassInstance = null,
+            ClassInstance = null!,
             TestMethodArguments = [],
             TestClassArguments = [],
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
             TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task),
-            ClassMetadata = MetadataBuilder.CreateClassMetadata(metadata),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = metadata.AttributeFactory.Invoke(),
         };
@@ -334,55 +305,28 @@ public sealed class TestBuilder : ITestBuilder
         var context = _contextProvider.CreateTestContext(
             metadata.TestName,
             metadata.TestClassType,
-            CancellationToken.None,
-            new TestServiceProvider());
+            new TestBuilderContext(),
+            CancellationToken.None);
 
         context.TestDetails = testDetails;
 
         return context;
     }
 
-    private static void TrackDataSourceObjects(object?[] classArguments, object?[] methodArguments)
+    private static void TrackDataSourceObjects(TestContext context, object?[] classArguments, object?[] methodArguments)
     {
         foreach (var arg in classArguments)
         {
-            UnifiedObjectTracker.TrackObject(arg);
+            UnifiedObjectTracker.TrackObject(context.Events, arg);
         }
 
         foreach (var arg in methodArguments)
         {
-            UnifiedObjectTracker.TrackObject(arg);
+            UnifiedObjectTracker.TrackObject(context.Events, arg);
         }
     }
 
-    /// Efficiently create arguments array from factories without LINQ overhead
-    private static async Task<object?[]> CreateArgumentsFromFactoriesAsync(IReadOnlyList<Func<Task<object?>>> factories)
-    {
-        if (factories.Count == 0)
-        {
-            return [];
-        }
-
-        var arguments = new object?[factories.Count];
-        var tasks = new Task<object?>[factories.Count];
-
-        // Start all tasks
-        for (int i = 0; i < factories.Count; i++)
-        {
-            tasks[i] = factories[i]();
-        }
-
-        // Wait for all and collect results - safe to use Result after WhenAll
-        var results = await Task.WhenAll(tasks);
-        for (int i = 0; i < results.Length; i++)
-        {
-            arguments[i] = results[i];
-        }
-
-        return arguments;
-    }
-
-    private class TestData
+    internal class TestData
     {
         public required object TestClassInstance { get; init; }
 

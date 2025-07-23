@@ -10,7 +10,6 @@ namespace TUnit.Core.Tracking;
 internal static class UnifiedObjectTracker
 {
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
-    private static readonly bool _enableRecursiveTracking = true;
 
     /// <summary>
     /// Tracks an object and increments its reference count.
@@ -18,9 +17,9 @@ internal static class UnifiedObjectTracker
     /// <param name="events">Events for the test instance</param>
     /// <param name="obj">The object to track</param>
     /// <returns>The tracked object (same instance)</returns>
-    public static T TrackObject<T>(TestContextEvents events, T obj) where T : notnull
+    public static T TrackObject<T>(TestContextEvents events, T obj)
     {
-        if (ShouldSkipTracking(obj))
+        if (obj == null || ShouldSkipTracking(obj))
         {
             return obj;
         }
@@ -29,61 +28,12 @@ internal static class UnifiedObjectTracker
 
         counter.Increment();
 
-        events.OnDispose += async (sender, args) =>
+        events.OnDispose += async (_, _) =>
         {
-            if (await ReleaseObject(obj))
-            {
-                // Optionally handle post-release logic here
-            }
+            await ReleaseObject(obj);
         };
 
         return obj;
-    }
-
-    /// <summary>
-    /// Tracks an object if it's not null.
-    /// </summary>
-    /// <param name="obj">The object to track</param>
-    /// <returns>The same object instance or null</returns>
-    public static object? TrackObject(object? obj)
-    {
-        if (obj == null)
-        {
-            return null;
-        }
-
-        if (ShouldSkipTracking(obj))
-        {
-            return obj;
-        }
-
-        var counter = _trackedObjects.GetOrAdd(obj,
-            _ => new Counter());
-
-        counter.Increment();
-
-        // Handle recursive tracking for collections if enabled
-        if (_enableRecursiveTracking && obj is System.Collections.IEnumerable enumerable && !(obj is string))
-        {
-            foreach (var item in enumerable)
-            {
-                TrackObject(item);
-            }
-        }
-
-        return obj;
-    }
-
-    /// <summary>
-    /// Tracks multiple objects.
-    /// </summary>
-    /// <param name="objects">The objects to track</param>
-    public static void TrackObjects(IEnumerable<object?> objects)
-    {
-        foreach (var obj in objects)
-        {
-            TrackObject(obj);
-        }
     }
 
     /// <summary>
@@ -91,16 +41,16 @@ internal static class UnifiedObjectTracker
     /// </summary>
     /// <param name="obj">The object to release</param>
     /// <returns>True if the object has no more references and was removed from tracking</returns>
-    public static async Task<bool> ReleaseObject(object? obj)
+    private static async Task ReleaseObject(object? obj)
     {
-        if (obj == null || ShouldSkipTracking(obj))
+        if (obj == null)
         {
-            return false;
+            return;
         }
 
         if (!_trackedObjects.TryGetValue(obj, out var counter))
         {
-            return false;
+            return;
         }
 
         var count = counter.Decrement();
@@ -109,19 +59,6 @@ internal static class UnifiedObjectTracker
         {
             _trackedObjects.TryRemove(obj, out _);
 
-            // Handle recursive release for collections if enabled
-            if (_enableRecursiveTracking && obj is System.Collections.IEnumerable enumerable && !(obj is string))
-            {
-                foreach (var item in enumerable)
-                {
-                    if (item != null)
-                    {
-                        await ReleaseObject(item);
-                    }
-                }
-            }
-
-            // Always auto-dispose when reference count reaches zero
             if (obj is IAsyncDisposable asyncDisposable)
             {
                 await asyncDisposable.DisposeAsync();
@@ -130,11 +67,7 @@ internal static class UnifiedObjectTracker
             {
                 disposable.Dispose();
             }
-
-            return true;
         }
-
-        return false;
     }
 
     /// <summary>
@@ -195,7 +128,7 @@ internal static class UnifiedObjectTracker
     /// <summary>
     /// Determines if an object should be skipped from tracking.
     /// </summary>
-    private static bool ShouldSkipTracking(object obj)
+    private static bool ShouldSkipTracking(object? obj)
     {
         return obj is not IDisposable and not IAsyncDisposable;
     }

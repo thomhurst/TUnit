@@ -13,12 +13,15 @@ namespace TUnit.Core;
 /// </summary>
 public class TestContext : Context
 {
-    public TestContext(string testName, CancellationToken cancellationToken, IServiceProvider serviceProvider, ClassHookContext classContext) : base(classContext)
+    public TestContext(string testName, IServiceProvider serviceProvider, ClassHookContext classContext, TestBuilderContext testBuilderContext, CancellationToken cancellationToken) : base(classContext)
     {
         TestName = testName;
         CancellationToken = cancellationToken;
         ServiceProvider = serviceProvider;
         ClassContext = classContext;
+
+        Events = testBuilderContext.Events;
+        ObjectBag = testBuilderContext.ObjectBag;
     }
 
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
@@ -158,7 +161,7 @@ public class TestContext : Context
         return $"{TestName}({arguments})";
     }
 
-    public Dictionary<string, object?> ObjectBag { get; } = new();
+    public Dictionary<string, object?> ObjectBag { get; }
 
     public bool ReportResult { get; set; } = true;
 

@@ -1,11 +1,12 @@
 using System.Text;
 using TUnit.Core;
+using TUnit.Engine.Building;
 
 namespace TUnit.Engine.Services;
 
 internal static class TestIdentifierService
 {
-    public static string GenerateTestId(TestMetadata metadata, TestDataCombination combination)
+    public static string GenerateTestId(TestMetadata metadata, TestBuilder.TestData combination)
     {
         var methodMetadata = metadata.MethodMetadata;
         var classMetadata = methodMetadata.Class;

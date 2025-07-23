@@ -78,13 +78,6 @@ public abstract class TestMetadata
     public string TestSessionId { get; set; } = Guid.NewGuid().ToString();
 
     /// <summary>
-    /// Generator delegate that produces all data combinations for this test.
-    /// Now uses runtime generation instead of compile-time generation.
-    /// </summary>
-    public virtual Func<TestBuilderContextAccessor?, IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator =>
-        (contextAccessor) => Core.DataCombinationGenerator.GenerateCombinationsAsync(this, TestSessionId, TestClassType, contextAccessor);
-
-    /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.
     /// Both AOT and reflection modes must provide delegates with identical signatures.
     /// The delegates encapsulate all mode-specific behavior.
