@@ -54,7 +54,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 var assembly = item.assembly;
                 var index = item.index;
-                
+
                 lock (_lock)
                 {
                     if (!_scannedAssemblies.Add(assembly))
@@ -147,20 +147,20 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         "System.Private.Uri",
         "System.Private.Xml",
         "netstandard",
-        
+
         // Microsoft platform assemblies
         "Microsoft.CSharp",
         "Microsoft.Win32.Primitives",
         "Microsoft.Win32.Registry",
         "Microsoft.VisualBasic.Core",
         "Microsoft.VisualBasic",
-        
+
         // TUnit framework assemblies (except test projects)
         "TUnit",
-        "TUnit.Core", 
+        "TUnit.Core",
         "TUnit.Engine",
         "TUnit.Assertions",
-        
+
         // Test platform assemblies
         "testhost",
         "Microsoft.TestPlatform.CoreUtilities",
@@ -169,7 +169,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         "Microsoft.TestPlatform.Common",
         "Microsoft.TestPlatform.PlatformAbstractions",
         "Microsoft.Testing.Platform",
-        
+
         // Common third-party assemblies
         "Newtonsoft.Json",
         "Castle.Core",
@@ -229,7 +229,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
-        if (!assembly.GetReferencedAssemblies().Any(a => 
+        if (!assembly.GetReferencedAssemblies().Any(a =>
             a.Name != null && (a.Name.StartsWith("TUnit") || a.Name == "TUnit")))
         {
             return false;
@@ -263,9 +263,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         var filteredTypes = types.Where(t => t.IsClass && !IsCompilerGenerated(t));
-
-        Console.WriteLine($"Checking {filteredTypes.Count()} types...");
-
+        
         foreach (var type in filteredTypes)
         {
             // Skip abstract types - they can't be instantiated
@@ -547,7 +545,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         try
         {
             // Get all data combinations from the base metadata
-            var dataCombinationGenerator = baseMetadata.DataCombinationGenerator();
+            var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext());
+            var dataCombinationGenerator = baseMetadata.DataCombinationGenerator(contextAccessor);
             var combinationIndex = 0;
 
             await foreach (var combination in dataCombinationGenerator)
@@ -1603,7 +1602,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         try
         {
             var assembly = testClass.Assembly;
-            
+
             // Get cached types for this assembly
             var exportedTypes = _assemblyTypesCache.GetOrAdd(assembly, asm =>
             {
@@ -1617,7 +1616,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     return Array.Empty<Type>();
                 }
             });
-            
+
             // Early exit if assembly has no hook attributes
             var hasHooks = false;
             foreach (var type in exportedTypes)
@@ -1629,7 +1628,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     break;
                 }
             }
-            
+
             if (!hasHooks)
             {
                 return new TestHooks
@@ -1640,7 +1639,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                     AfterTest = afterTest.ToArray()
                 };
             }
-            
+
             var assemblyTypes = exportedTypes
                 .Where(t => t is { IsClass: true, IsAbstract: false } && ShouldScanTypeForHooks(t))
                 .ToList();
@@ -2277,9 +2276,9 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             _displayName = displayName;
         }
 
-        public override Func<IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator
+        public override Func<TestBuilderContextAccessor?, IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator
         {
-            get => () => GenerateFailedCombination();
+            get => (contextAccessor) => GenerateFailedCombination();
         }
 
         public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
@@ -2314,7 +2313,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         private readonly MethodInfo _testMethod;
         private readonly TestDataCombination _combination;
         private readonly int _combinationIndex;
-        private Func<IAsyncEnumerable<TestDataCombination>>? _dataCombinationGenerator;
+        private Func<TestBuilderContextAccessor?, IAsyncEnumerable<TestDataCombination>>? _dataCombinationGenerator;
         private Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest>? _createExecutableTestFactory;
 
         public ExpandedReflectionTestMetadata(
@@ -2329,13 +2328,13 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             _combinationIndex = combinationIndex;
         }
 
-        public override Func<IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator
+        public override Func<TestBuilderContextAccessor?, IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator
         {
             get
             {
                 if (_dataCombinationGenerator == null)
                 {
-                    _dataCombinationGenerator = () => GenerateSingleCombination();
+                    _dataCombinationGenerator = (contextAccessor) => GenerateSingleCombination();
                 }
                 return _dataCombinationGenerator;
             }

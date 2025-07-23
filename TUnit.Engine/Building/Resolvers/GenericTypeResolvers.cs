@@ -135,7 +135,8 @@ public sealed class ReflectionGenericTypeResolver : IGenericTypeResolver
             }
 
             // Get the first data combination to infer types
-            var dataCombinations = genericTest.DataCombinationGenerator();
+            var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext());
+            var dataCombinations = genericTest.DataCombinationGenerator(contextAccessor);
             TestDataCombination? firstCombination = null;
             await foreach (var combination in dataCombinations)
             {

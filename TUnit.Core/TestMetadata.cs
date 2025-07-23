@@ -81,8 +81,8 @@ public abstract class TestMetadata
     /// Generator delegate that produces all data combinations for this test.
     /// Now uses runtime generation instead of compile-time generation.
     /// </summary>
-    public virtual Func<IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator => 
-        () => Core.DataCombinationGenerator.GenerateCombinationsAsync(this, TestSessionId, TestClassType);
+    public virtual Func<TestBuilderContextAccessor?, IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator => 
+        (contextAccessor) => Core.DataCombinationGenerator.GenerateCombinationsAsync(this, TestSessionId, TestClassType, contextAccessor);
 
     /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.

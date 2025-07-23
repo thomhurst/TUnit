@@ -7,7 +7,7 @@ namespace TUnit.Core.Tracking;
 /// Unified static object tracker that combines reference counting with lifecycle management.
 /// Consolidates the functionality of both DataSourceReferenceTracker and ActiveObjectTracker.
 /// </summary>
-public static class UnifiedObjectTracker
+internal static class UnifiedObjectTracker
 {
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
     private static readonly bool _enableRecursiveTracking = true;
@@ -15,31 +15,27 @@ public static class UnifiedObjectTracker
     /// <summary>
     /// Tracks an object and increments its reference count.
     /// </summary>
+    /// <param name="events">Events for the test instance</param>
     /// <param name="obj">The object to track</param>
     /// <returns>The tracked object (same instance)</returns>
-    public static T TrackObject<T>(T obj) where T : notnull
+    public static T TrackObject<T>(TestContextEvents events, T obj) where T : notnull
     {
         if (ShouldSkipTracking(obj))
         {
             return obj;
         }
 
-        var counter = _trackedObjects.GetOrAdd(obj,
-            _ => new Counter());
+        var counter = _trackedObjects.GetOrAdd(obj, _ => new Counter());
 
         counter.Increment();
 
-        // Handle recursive tracking for collections if enabled
-        if (_enableRecursiveTracking && obj is System.Collections.IEnumerable enumerable && !(obj is string))
+        events.OnDispose += async (sender, args) =>
         {
-            foreach (var item in enumerable)
+            if (await ReleaseObject(obj))
             {
-                if (item != null)
-                {
-                    TrackObject(item);
-                }
+                // Optionally handle post-release logic here
             }
-        }
+        };
 
         return obj;
     }
@@ -201,7 +197,6 @@ public static class UnifiedObjectTracker
     /// </summary>
     private static bool ShouldSkipTracking(object obj)
     {
-        var type = obj.GetType();
-        return type.IsPrimitive || type == typeof(string) || type.IsEnum;
+        return obj is not IDisposable and not IAsyncDisposable;
     }
 }

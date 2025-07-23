@@ -30,7 +30,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     }
 
     [field: AllowNull, MaybeNull]
-    public override Func<IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator
+    public override Func<TestBuilderContextAccessor?, IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator
     {
         get
         {
@@ -55,7 +55,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
     }
 
-    private async IAsyncEnumerable<TestDataCombination> GenerateDataCombinations()
+    private async IAsyncEnumerable<TestDataCombination> GenerateDataCombinations(TestBuilderContextAccessor? contextAccessor)
     {
         // Wrap the entire data generation in error handling
         await foreach (var combination in DataCombinationBuilder.BuildCombinationsWithErrorHandlingAsync(GenerateDataCombinationsCore))

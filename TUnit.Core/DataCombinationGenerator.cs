@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Enums;
+using TUnit.Core.Tracking;
 
 namespace TUnit.Core;
 
@@ -14,7 +15,8 @@ public static class DataCombinationGenerator
     public static async IAsyncEnumerable<TestDataCombination> GenerateCombinationsAsync(
         TestMetadata testMetadata,
         string testSessionId,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type testClassType)
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type testClassType,
+        TestBuilderContextAccessor? testBuilderContextAccessor = null)
     {
         // Extract data sources from metadata
         var methodDataSources = testMetadata.DataSources;
@@ -31,7 +33,8 @@ public static class DataCombinationGenerator
             propertyDataSources,
             testMetadata,
             testSessionId,
-            testClassType))
+            testClassType,
+            testBuilderContextAccessor))
         {
             for (var repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
             {
@@ -57,7 +60,8 @@ public static class DataCombinationGenerator
         PropertyDataSource[] propertyDataSources,
         TestMetadata testMetadata,
         string testSessionId,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type testClassType)
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type testClassType,
+        TestBuilderContextAccessor? testBuilderContextAccessor)
     {
         // Handle typed data sources that infer generic types
         var resolvedGenericTypes = ResolveGenericTypesFromDataSources(
@@ -66,24 +70,24 @@ public static class DataCombinationGenerator
             classDataSources,
             propertyDataSources);
 
-        // Create data generator metadata for data sources
-        var dataGeneratorMetadata = CreateDataGeneratorMetadata(testMetadata, testSessionId, testClassType);
+        // Create context accessor if not provided
+        var contextAccessor = testBuilderContextAccessor ?? new TestBuilderContextAccessor(new TestBuilderContext());
 
-        // Get method data
-        var methodDataLists = await CollectDataSourceFactoriesAsync(methodDataSources, dataGeneratorMetadata);
+        // First, generate class data combinations
+        var classMetadata = CreateDataGeneratorMetadata(
+            testMetadata, 
+            testSessionId, 
+            testClassType,
+            DataGeneratorType.ClassParameters,
+            testClassInstance: null,
+            classInstanceArguments: null,
+            contextAccessor);
 
-        // Get class data
-        var classDataLists = await CollectDataSourceFactoriesAsync(classDataSources, dataGeneratorMetadata);
-
-        // Note: Property data sources are handled separately by PropertyInjector
-        // and don't participate in combination generation at this time
-
-        // Generate combinations
-        var methodCombinations = GenerateCombinations(methodDataLists, DataSourceType.Method).ToArray();
+        var classDataLists = await CollectDataSourceFactoriesAsync(classDataSources, classMetadata);
         var classCombinations = GenerateCombinations(classDataLists, DataSourceType.Class).ToArray();
 
-        // If no data sources at all, create single empty combination
-        if (methodCombinations.Length == 0 && classCombinations.Length == 0)
+        // If no data sources at all, handle simple case
+        if (classCombinations.Length == 0 && methodDataSources.Length == 0)
         {
             yield return new TestDataCombination
             {
@@ -93,10 +97,70 @@ public static class DataCombinationGenerator
             yield break;
         }
 
-        // Combine all data sources
-        // DefaultIfEmpty() ensures we handle cases where only one type has data
+        // For each class combination, create instance and generate method combinations
         foreach (var classCombo in classCombinations.DefaultIfEmpty())
         {
+            object? instance = null;
+            object?[]? classArgs = null;
+            Exception? instanceCreationError = null;
+
+            try
+            {
+                // Get class arguments and create instance
+                classArgs = classCombo != null 
+                    ? await CreateArgumentsFromFactoriesAsync(classCombo.Factories)
+                    : Array.Empty<object?>();
+
+                // Track class arguments
+                foreach (var arg in classArgs)
+                {
+                    TrackObject(contextAccessor.Current.Events, arg);
+                }
+
+                // Create instance if we have a factory
+                if (testMetadata.InstanceFactory != null)
+                {
+                    instance = testMetadata.InstanceFactory(classArgs);
+                    TrackObject(contextAccessor.Current.Events, instance);
+                }
+            }
+            catch (Exception ex)
+            {
+                instanceCreationError = ex;
+            }
+
+            // If instance creation failed, yield a failed combination
+            if (instanceCreationError != null)
+            {
+                yield return new TestDataCombination
+                {
+                    ClassDataFactories = classCombo?.Factories ?? [],
+                    MethodDataFactories = [],
+                    ClassDataSourceIndex = classCombo?.DataSourceIndex ?? 0,
+                    MethodDataSourceIndex = 0,
+                    ClassLoopIndex = classCombo?.LoopIndex ?? 0,
+                    MethodLoopIndex = 0,
+                    DisplayName = $"{testMetadata.TestName} [INSTANCE CREATION FAILED]",
+                    DataGenerationException = instanceCreationError,
+                    ResolvedGenericTypes = resolvedGenericTypes
+                };
+                continue;
+            }
+
+            // Now generate method data combinations with instance context
+            var methodMetadata = CreateDataGeneratorMetadata(
+                testMetadata,
+                testSessionId,
+                testClassType,
+                DataGeneratorType.TestParameters,
+                testClassInstance: instance,
+                classInstanceArguments: classArgs,
+                contextAccessor);
+
+            var methodDataLists = await CollectDataSourceFactoriesAsync(methodDataSources, methodMetadata);
+            var methodCombinations = GenerateCombinations(methodDataLists, DataSourceType.Method).ToArray();
+
+            // Generate combinations for this instance
             foreach (var methodCombo in methodCombinations.DefaultIfEmpty())
             {
                 var displayName = await GenerateDisplayNameAsync(
@@ -123,17 +187,26 @@ public static class DataCombinationGenerator
     private static DataGeneratorMetadata CreateDataGeneratorMetadata(
         TestMetadata testMetadata,
         string testSessionId,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type testClassType)
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type testClassType,
+        DataGeneratorType generatorType,
+        object? testClassInstance,
+        object?[]? classInstanceArguments,
+        TestBuilderContextAccessor contextAccessor)
     {
+        // Determine which parameters we're generating for
+        var parametersToGenerate = generatorType == DataGeneratorType.ClassParameters
+            ? testMetadata.MethodMetadata.Class.Parameters
+            : testMetadata.MethodMetadata.Parameters;
+
         return new DataGeneratorMetadata
         {
-            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
-            MembersToGenerate = [],
+            TestBuilderContext = contextAccessor,
+            MembersToGenerate = parametersToGenerate,
             TestInformation = testMetadata.MethodMetadata,
-            Type = DataGeneratorType.TestParameters,
+            Type = generatorType,
             TestSessionId = testSessionId,
-            TestClassInstance = null,
-            ClassInstanceArguments = null
+            TestClassInstance = testClassInstance,
+            ClassInstanceArguments = classInstanceArguments
         };
     }
 
@@ -348,6 +421,24 @@ public static class DataCombinationGenerator
         }
 
         return string.Join(" - ", parts);
+    }
+
+    private static async Task<object?[]> CreateArgumentsFromFactoriesAsync(Func<Task<object?>>[] factories)
+    {
+        var args = new object?[factories.Length];
+        for (int i = 0; i < factories.Length; i++)
+        {
+            args[i] = await factories[i]();
+        }
+        return args;
+    }
+
+    private static void TrackObject<T>(TestContextEvents events, T? obj)
+    {
+        if (obj != null)
+        {
+            UnifiedObjectTracker.TrackObject(obj);
+        }
     }
 
     private enum DataSourceType

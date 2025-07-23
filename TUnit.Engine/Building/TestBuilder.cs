@@ -30,8 +30,11 @@ public sealed class TestBuilder : ITestBuilder
 
         try
         {
+            // Create a context accessor for data generation
+            var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext());
+            
             // Use the DataCombinationGenerator directly - no reflection needed
-            var asyncCombinations = metadata.DataCombinationGenerator();
+            var asyncCombinations = metadata.DataCombinationGenerator(contextAccessor);
             await foreach (var combination in asyncCombinations)
             {
                 // Check if this combination has a data generation exception
