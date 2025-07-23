@@ -67,34 +67,6 @@ public class TestMetadata<
     public Func<T, object?[], CancellationToken, Task>? InvokeTypedTest { get; init; }
 
 
-    /// <summary>
-    /// Backing field for the DataCombinationGenerator property
-    /// </summary>
-    private Func<IAsyncEnumerable<TestDataCombination>>? _dataCombinationGenerator;
-
-    /// <summary>
-    /// Generator delegate that produces all data combinations for this test.
-    /// </summary>
-    public override Func<IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator
-    {
-        get
-        {
-            if (_dataCombinationGenerator != null)
-            {
-                return _dataCombinationGenerator;
-            }
-
-            // Return empty enumerable if no generator is set
-            return () => EmptyAsyncEnumerable();
-        }
-    }
-
-    #pragma warning disable CS1998 // Async method lacks 'await' operators
-    private static async IAsyncEnumerable<TestDataCombination> EmptyAsyncEnumerable()
-    {
-        yield break;
-    }
-    #pragma warning restore CS1998
 
     /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.
@@ -156,10 +128,10 @@ public class TestMetadata<
     }
 
     /// <summary>
-    /// Sets the data combination generator for this test metadata
+    /// Sets up runtime data combination generation for this test by updating the TestSessionId
     /// </summary>
-    public void SetDataCombinationGenerator(Func<IAsyncEnumerable<TestDataCombination>> generator)
+    public void UseRuntimeDataGeneration(string testSessionId)
     {
-        _dataCombinationGenerator = generator;
+        TestSessionId = testSessionId;
     }
 }

@@ -156,10 +156,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
 
-        // Generate the data combination method inside the class
-        writer.AppendLine();
-        DataCombinationGeneratorEmitter.EmitDataCombinationGenerator(writer, testMethod.MethodSymbol, testMethod.TypeSymbol, combinationGuid, testMethod);
-
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -209,8 +205,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("};");
 
-        // Set the DataCombinationGenerator after construction
-        writer.AppendLine($"metadata.SetDataCombinationGenerator(() => GenerateCombinations_{combinationGuid}(testSessionId));");
+        // Set the test to use runtime data generation
+        writer.AppendLine($"metadata.UseRuntimeDataGeneration(testSessionId);");
 
         writer.AppendLine("tests.Add(metadata);");
     }
@@ -222,6 +218,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("Categories = global::System.Array.Empty<string>(),");
         writer.AppendLine("TimeoutMs = null,");
         writer.AppendLine("RetryCount = 0,");
+        writer.AppendLine("RepeatCount = 1,"); // TODO: Extract from RepeatAttribute if present
         writer.AppendLine("CanRunInParallel = true,");
 
         // Generate dependencies

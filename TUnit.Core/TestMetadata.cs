@@ -23,6 +23,8 @@ public abstract class TestMetadata
     public int? TimeoutMs { get; init; }
 
     public int RetryCount { get; init; }
+    
+    public int RepeatCount { get; init; } = 1;
 
     public bool CanRunInParallel { get; init; } = true;
 
@@ -71,10 +73,16 @@ public abstract class TestMetadata
     public PropertyInjectionData[] PropertyInjections { get; init; } = [];
 
     /// <summary>
-    /// Generator delegate that produces all data combinations for this test.
-    /// Used by TestBuilder to expand test data without reflection.
+    /// Test session ID used for data generation
     /// </summary>
-    public abstract Func<IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator { get; }
+    public string TestSessionId { get; set; } = Guid.NewGuid().ToString();
+
+    /// <summary>
+    /// Generator delegate that produces all data combinations for this test.
+    /// Now uses runtime generation instead of compile-time generation.
+    /// </summary>
+    public virtual Func<IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator => 
+        () => Core.DataCombinationGenerator.GenerateCombinationsAsync(this, TestSessionId, TestClassType);
 
     /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.
