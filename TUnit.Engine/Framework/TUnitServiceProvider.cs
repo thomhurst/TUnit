@@ -12,13 +12,11 @@ using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Collectors;
 using TUnit.Engine.Building.Interfaces;
-using TUnit.Engine.Building.Resolvers;
 using TUnit.Engine.Discovery;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
-using IGenericTypeResolver = TUnit.Engine.Building.Interfaces.IGenericTypeResolver;
 
 namespace TUnit.Engine.Framework;
 
@@ -87,7 +85,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
 
-        ContextProvider = Register(new ContextProvider(TestSessionId, Filter?.ToString()));
+        ContextProvider = Register(new ContextProvider(this, TestSessionId, Filter?.ToString()));
 
         HookOrchestrator = Register(new HookOrchestrator(HookCollectionService, Logger, ContextProvider, this));
         EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
@@ -110,17 +108,13 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 #pragma warning restore IL3050
 #pragma warning restore IL2026
 
-        // Create pipeline dependencies
-        var genericResolver = Register<IGenericTypeResolver>(
-            CreateGenericTypeResolver(executionMode));
         var testBuilder = Register<ITestBuilder>(
-            new TestBuilder(this, ContextProvider));
+            new TestBuilder(this, TestSessionId, HookCollectionService, ContextProvider));
 
         // Create pipeline with all dependencies
         TestBuilderPipeline = Register(
             new UnifiedTestBuilderPipeline(
                 dataCollectorFactory,
-                genericResolver,
                 testBuilder,
                 ContextProvider));
 
@@ -203,18 +197,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Default to auto-detect based on available tests
         return TestExecutionMode.SourceGeneration;
-    }
-
-    private static IGenericTypeResolver CreateGenericTypeResolver(TestExecutionMode executionMode)
-    {
-        IGenericTypeResolver resolver = executionMode switch
-        {
-            TestExecutionMode.Reflection => new ReflectionGenericTypeResolver(),
-            TestExecutionMode.SourceGeneration => new SourceGeneratedGenericTypeResolver(),
-            _ => new SourceGeneratedGenericTypeResolver()
-        };
-
-        return resolver;
     }
 
     public async ValueTask DisposeAsync()

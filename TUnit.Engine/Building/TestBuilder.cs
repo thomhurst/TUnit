@@ -1,6 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
-using TUnit.Core.Data;
 using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
@@ -34,7 +32,10 @@ internal sealed class TestBuilder : ITestBuilder
         try
         {
             // Create a context accessor for data generation
-            var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext());
+            var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
+            {
+                TestMetadata = metadata.MethodMetadata
+            });
 
             var classDataAttributeIndex = 0;
             foreach (var classDataSource in GetDataSources(metadata.ClassDataSources))
@@ -83,27 +84,34 @@ internal sealed class TestBuilder : ITestBuilder
                         {
                             methodDataLoopIndex++;
 
-                            classData = await classDataFactory() ?? [];
-
-                            instance = metadata.InstanceFactory(classData);
-
-                            var methodData = await methodDataFactory() ?? [];
-
-                            var testData = new TestData
+                            for (int i = 0; i < metadata.RepeatCount + 1; i++)
                             {
-                                TestClassInstance = instance,
-                                ClassDataSourceAttributeIndex = classDataAttributeIndex,
-                                ClassDataLoopIndex = classDataLoopIndex,
-                                ClassData = classData,
-                                MethodDataSourceAttributeIndex = methodDataAttributeIndex,
-                                MethodDataLoopIndex = methodDataLoopIndex,
-                                MethodData = methodData
-                            };
+                                classData = await classDataFactory() ?? [];
 
-                            var test = await BuildTestAsync(metadata, testData, contextAccessor.Current);
-                            tests.Add(test);
+                                instance = metadata.InstanceFactory(classData);
 
-                            contextAccessor.Current = new TestBuilderContext();
+                                var methodData = await methodDataFactory() ?? [];
+
+                                var testData = new TestData
+                                {
+                                    TestClassInstance = instance,
+                                    ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                                    ClassDataLoopIndex = classDataLoopIndex,
+                                    ClassData = classData,
+                                    MethodDataSourceAttributeIndex = methodDataAttributeIndex,
+                                    MethodDataLoopIndex = methodDataLoopIndex,
+                                    MethodData = methodData,
+                                    RepeatIndex = i
+                                };
+
+                                var test = await BuildTestAsync(metadata, testData, contextAccessor.Current);
+                                tests.Add(test);
+
+                                contextAccessor.Current = new TestBuilderContext
+                                {
+                                    TestMetadata = metadata.MethodMetadata
+                                };
+                            }
                         }
                     }
                 }
@@ -305,7 +313,10 @@ internal sealed class TestBuilder : ITestBuilder
         var context = _contextProvider.CreateTestContext(
             metadata.TestName,
             metadata.TestClassType,
-            new TestBuilderContext(),
+            new TestBuilderContext
+            {
+                TestMetadata = metadata.MethodMetadata
+            },
             CancellationToken.None);
 
         context.TestDetails = testDetails;
@@ -337,5 +348,6 @@ internal sealed class TestBuilder : ITestBuilder
         public required int MethodDataSourceAttributeIndex { get; init; }
         public required int MethodDataLoopIndex { get; init; }
         public required object?[] MethodData { get; init; }
+        public required int RepeatIndex { get; init; }
     }
 }

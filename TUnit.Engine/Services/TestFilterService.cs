@@ -116,7 +116,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
                 }
             }
         }
-        
+
         // Register test for execution (keeping original functionality)
     }
 
@@ -147,27 +147,13 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
     private string BuildPath(ExecutableTest test)
     {
         var metadata = test.Metadata;
-        
+
         // For generic types, use the ClassMetadata which has the correct name
-        string assemblyName;
-        string namespaceName;
-        string classTypeName;
-        
-        if (test.Context?.TestDetails?.ClassMetadata != null)
-        {
-            var classMetadata = test.Context.TestDetails.ClassMetadata;
-            assemblyName = classMetadata.Assembly?.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
-            namespaceName = classMetadata.Namespace ?? "*";
-            classTypeName = classMetadata.Name;
-        }
-        else
-        {
-            // Fallback to the type-based approach for non-generic tests
-            var assembly = metadata.TestClassType.Assembly.GetName();
-            assemblyName = assembly.Name ?? "*";
-            namespaceName = metadata.TestClassType.Namespace ?? "*";
-            classTypeName = metadata.TestClassType.Name;
-        }
+
+        var classMetadata = test.Context.TestDetails.MethodMetadata.Class;
+        var assemblyName = classMetadata.Assembly?.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
+        var namespaceName = classMetadata.Namespace ?? "*";
+        var classTypeName = classMetadata.Name;
 
         return $"/{assemblyName}/{namespaceName}/{classTypeName}/{metadata.TestMethodName}";
     }
@@ -180,16 +166,16 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
     {
         try
         {
-            if (executableTest.Context.TestDetails.ClassMetadata.Name == "AllDataSourcesCombinedTests")
+            if (executableTest.Context.TestDetails.MethodMetadata.Class.Name == "AllDataSourcesCombinedTests")
             {
                 Console.Write("");
             }
             var path = BuildPath(executableTest);
             var propertyBag = BuildPropertyBag(executableTest);
             _logger.LogDebug($"Checking TreeNodeFilter for path: {path}");
-            
+
             // Additional debug for generic tests
-            if (executableTest.Context?.TestDetails?.ClassMetadata?.Name == "SimpleGenericClassTests")
+            if (executableTest.Context.TestDetails.MethodMetadata.Class.Name == "SimpleGenericClassTests")
             {
                 Console.WriteLine($"DEBUG: Built path for generic test: {path}");
                 Console.WriteLine($"DEBUG: Test display name: {executableTest.DisplayName}");

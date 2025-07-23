@@ -112,7 +112,10 @@ public class ReflectionTestDataCollectorTests
         // Verify data sources
         var metadata = new DataGeneratorMetadata
         {
-            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
+            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
+            {
+                TestMetadata = null
+            }),
             MembersToGenerate = [],
             TestInformation = new MethodMetadata
             {
@@ -230,7 +233,10 @@ public class ReflectionTestDataCollectorTests
         // Verify data source produces correct data
         var metadata2 = new DataGeneratorMetadata
         {
-            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
+            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
+            {
+                TestMetadata = null
+            }),
             MembersToGenerate = [],
             TestInformation = new MethodMetadata
             {

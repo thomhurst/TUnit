@@ -42,7 +42,7 @@ public static class JsonExtensions
         return new TestJson
         {
             Categories = testDetails.Categories,
-            ClassType = testDetails.ClassMetadata?.Type.FullName ?? testDetails.ClassType?.FullName ?? "Unknown",
+            ClassType = testDetails.MethodMetadata.Class.Type.FullName ?? testDetails.ClassType.FullName ?? "Unknown",
             Result = context.Result?.ToJsonModel(),
             Timeout = testDetails.Timeout,
             CustomProperties = testDetails.CustomProperties.ToDictionary(

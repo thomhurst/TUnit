@@ -28,7 +28,7 @@ public class TrxAsserter
             Console.WriteLine(@$"Output: {commandResult.StandardOutput}");
 
             throw new Exception($"""
-                                 Error asserting results for {TestContext.Current!.TestDetails.ClassMetadata.Name}: {e.Message}
+                                 Error asserting results for {TestContext.Current!.TestDetails.MethodMetadata.Class.Name}: {e.Message}
 
                                  Expression: {assertionExpression}
                                  """, e);

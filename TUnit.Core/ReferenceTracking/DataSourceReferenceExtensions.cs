@@ -18,7 +18,7 @@ public static class DataSourceReferenceExtensions
 
     public static void TrackClassArguments(this TestContext context)
     {
-        foreach (var arg in context.TestDetails.ClassMetadataArguments)
+        foreach (var arg in context.TestDetails.TestClassArguments)
         {
             UnifiedObjectTracker.TrackObject(context.Events, arg);
         }

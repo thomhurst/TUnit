@@ -580,7 +580,10 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
         return new DataGeneratorMetadata
         {
-            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
+            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
+            {
+                TestMetadata = null! // TODO
+            }),
             MembersToGenerate = type == Core.Enums.DataGeneratorType.TestParameters
                 ? [..methodMetadata.Parameters]
                 : [],

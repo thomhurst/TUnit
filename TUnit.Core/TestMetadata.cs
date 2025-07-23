@@ -30,11 +30,11 @@ public abstract class TestMetadata
 
     public TestDependency[] Dependencies { get; init; } = [];
 
-    public IDataSourceAttribute[] DataSources { get; init; } = [];
+    public required IDataSourceAttribute[] DataSources { get; init; } = [];
 
-    public IDataSourceAttribute[] ClassDataSources { get; init; } = [];
+    public required IDataSourceAttribute[] ClassDataSources { get; init; } = [];
 
-    public PropertyDataSource[] PropertyDataSources { get; init; } = [];
+    public required PropertyDataSource[] PropertyDataSources { get; init; } = [];
 
     /// <summary>
     /// AOT-safe factory to create test class instance

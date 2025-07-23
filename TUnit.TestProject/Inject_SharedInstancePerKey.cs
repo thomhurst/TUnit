@@ -29,7 +29,7 @@ public class InjectSharedPerKey1(DummyReferenceTypeClass dummyReferenceTypeClass
             {
                 throw new InvalidOperationException("TestContext.Current is null. This can happen if the test is not run in a TUnit test environment.");
             }
-            return TestContext.Current.TestDetails.ClassMetadata.Namespace + "." + TestContext.Current.TestDetails.ClassMetadata.Name + "_" + TestContext.Current.TestDetails.TestName;
+            return TestContext.Current.TestDetails.MethodMetadata.Class.Namespace + "." + TestContext.Current.TestDetails.MethodMetadata.Class.Name + "_" + TestContext.Current.TestDetails.TestName;
         }
     }
 
@@ -55,7 +55,7 @@ public class InjectSharedPerKey1(DummyReferenceTypeClass dummyReferenceTypeClass
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.PerClass), NotInParallel]
 public class InjectSharedPerKey2(DummyReferenceTypeClass dummyReferenceTypeClass)
 {
-    public static string Key => TestContext.Current!.TestDetails.ClassMetadata.Namespace + "." + TestContext.Current.TestDetails.ClassMetadata.Name + "_" + TestContext.Current.TestDetails.TestName;
+    public static string Key => TestContext.Current!.TestDetails.MethodMetadata.Class.Namespace + "." + TestContext.Current.TestDetails.MethodMetadata.Class.Name + "_" + TestContext.Current.TestDetails.TestName;
 
     [Test, Repeat(5)]
     public async Task Test1()
@@ -79,7 +79,7 @@ public class InjectSharedPerKey2(DummyReferenceTypeClass dummyReferenceTypeClass
 [ClassDataSource<DummyReferenceTypeClass>(Shared = SharedType.PerClass), NotInParallel]
 public class InjectSharedPerKey3(DummyReferenceTypeClass dummyReferenceTypeClass)
 {
-    public static string Key => TestContext.Current!.TestDetails.ClassMetadata.Namespace + "." + TestContext.Current.TestDetails.ClassMetadata.Name + "_"
+    public static string Key => TestContext.Current!.TestDetails.MethodMetadata.Class.Namespace + "." + TestContext.Current.TestDetails.MethodMetadata.Class.Name + "_"
         + TestContext.Current.TestDetails.TestName;
 
     [Test, Repeat(5)]

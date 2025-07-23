@@ -37,7 +37,7 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
         }
 
         var dataClasses = tests
-            .SelectMany(x => x.TestDetails.ClassMetadataArguments)
+            .SelectMany(x => x.TestDetails.MethodMetadata.ClassArguments)
             .OfType<DataClass>()
             .ToArray();
 
@@ -48,7 +48,7 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
 
         foreach (var test in tests)
         {
-            var dataClass = test.TestDetails.ClassMetadataArguments.OfType<DataClass>().First();
+            var dataClass = test.TestDetails.MethodMetadata.ClassArguments.OfType<DataClass>().First();
 
             if (!dataClass.Disposed)
             {

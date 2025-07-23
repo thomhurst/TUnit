@@ -6,10 +6,10 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using TUnit.Core;
 using TUnit.Core.Helpers;
+using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
-using TUnit.Core.Data;
 
 namespace TUnit.Engine.Discovery;
 
@@ -315,8 +315,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 try
                 {
-                    var expandedTests = await BuildExpandedTestMetadata(type, method);
-                    discoveredTests.AddRange(expandedTests);
+                    discoveredTests.Add(await BuildTestMetadata(type, method));
                 }
                 catch (Exception ex)
                 {
@@ -359,7 +358,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         // For each data source combination, create a concrete generic type
         foreach (var dataSource in classDataSources)
         {
-            var dataItems = await GetDataFromSourceAsync(dataSource);
+            var dataItems = await GetDataFromSourceAsync(dataSource, null!); // TODO
 
             foreach (var dataRow in dataItems)
             {
@@ -388,8 +387,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
                         if (concreteMethod != null)
                         {
-                            var expandedTests = await BuildExpandedTestMetadata(concreteType, concreteMethod);
-                            discoveredTests.AddRange(expandedTests);
+                            // TODO: We probably can't resolve it here?
+                            var expandedTests = await BuildTestMetadata(concreteType, concreteMethod);
+                            discoveredTests.Add(expandedTests);
                         }
                     }
                 }
@@ -427,7 +427,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return typeArguments;
     }
 
-    private static async Task<List<object?[]>> GetDataFromSourceAsync(IDataSourceAttribute dataSource)
+    private static async Task<List<object?[]>> GetDataFromSourceAsync(IDataSourceAttribute dataSource, MethodMetadata methodMetadata)
     {
         var data = new List<object?[]>();
 
@@ -436,7 +436,11 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             // Create minimal metadata for discovery
             var metadata = new DataGeneratorMetadata
             {
-                TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
+                TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
+                {
+                    TestMetadata = methodMetadata,
+                    DataSourceAttribute = dataSource
+                }),
                 MembersToGenerate = [
                 ],
                 TestInformation = new MethodMetadata
@@ -488,219 +492,57 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return await Task.FromResult(data);
     }
 
-    private static async Task<List<TestMetadata>> BuildExpandedTestMetadata(Type testClass, MethodInfo testMethod)
+    private static Task<TestMetadata> BuildTestMetadata(Type testClass, MethodInfo testMethod)
     {
         // Create a base ReflectionTestMetadata instance
         var testName = GenerateTestName(testClass, testMethod);
-        var baseMetadata = new ReflectionTestMetadata(testClass, testMethod)
-        {
-            TestName = testName,
-            TestClassType = testClass,
-            TestMethodName = testMethod.Name,
-            Categories = ExtractCategories(testClass, testMethod),
-            IsSkipped = IsTestSkipped(testClass, testMethod, out var skipReason),
-            SkipReason = skipReason,
-            TimeoutMs = ExtractTimeout(testClass, testMethod),
-            RetryCount = ExtractRetryCount(testClass, testMethod),
-            CanRunInParallel = CanRunInParallel(testClass, testMethod),
-            Dependencies = ExtractDependencies(testClass, testMethod),
-            DataSources = ExtractMethodDataSources(testMethod),
-            ClassDataSources = ExtractClassDataSources(testClass),
-            PropertyDataSources = ExtractPropertyDataSources(testClass),
-            InstanceFactory = CreateInstanceFactory(testClass),
-            TestInvoker = CreateTestInvoker(testClass, testMethod),
-            ParameterCount = testMethod.GetParameters().Length,
-            ParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType).ToArray(),
-            TestMethodParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
-            Hooks = DiscoverHooks(testClass),
-            FilePath = ExtractFilePath(testMethod),
-            LineNumber = ExtractLineNumber(testMethod),
-            MethodMetadata = BuildMethodMetadata(testClass, testMethod),
-            GenericTypeInfo = ExtractGenericTypeInfo(testClass),
-            GenericMethodInfo = ExtractGenericMethodInfo(testMethod),
-            GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
-            AttributeFactory = () =>
-            [
-                ..testMethod.GetCustomAttributes(),
-                ..testClass.GetCustomAttributes(),
-                ..testClass.Assembly.GetCustomAttributes(),
-            ],
-            PropertyInjections = PropertyInjector.DiscoverInjectableProperties(testClass)
-        };
-
-        // Check if we should expand data sources during discovery
-        var hasDataSources = baseMetadata.DataSources.Length > 0 ||
-                           baseMetadata.ClassDataSources.Length > 0 ||
-                           baseMetadata.PropertyDataSources.Length > 0;
-
-
-        // Only expand if there are data sources
-        if (!hasDataSources)
-        {
-            return
-            [
-                baseMetadata
-            ];
-        }
-
-        // Expand data sources to create individual test metadata for each combination
-        var expandedMetadata = new List<TestMetadata>();
 
         try
         {
-            // Get all data combinations from the base metadata
-            var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext());
-            var dataCombinationGenerator = baseMetadata.DataCombinationGenerator(contextAccessor);
-            var combinationIndex = 0;
-
-            await foreach (var combination in dataCombinationGenerator)
+            return Task.FromResult<TestMetadata>(new ReflectionTestMetadata(testClass, testMethod)
             {
-                // Create a new metadata instance for each combination
-                var expandedTest = new ExpandedReflectionTestMetadata(testClass, testMethod, combination, combinationIndex++)
-                {
-                    TestName = testName,
-                    TestClassType = baseMetadata.TestClassType,
-                    TestMethodName = baseMetadata.TestMethodName,
-                    Categories = baseMetadata.Categories,
-                    IsSkipped = baseMetadata.IsSkipped,
-                    SkipReason = baseMetadata.SkipReason,
-                    TimeoutMs = baseMetadata.TimeoutMs,
-                    RetryCount = baseMetadata.RetryCount,
-                    CanRunInParallel = baseMetadata.CanRunInParallel,
-                    Dependencies = baseMetadata.Dependencies,
-                    DataSources = baseMetadata.DataSources,
-                    ClassDataSources = baseMetadata.ClassDataSources,
-                    PropertyDataSources = baseMetadata.PropertyDataSources,
-                    InstanceFactory = baseMetadata.InstanceFactory,
-                    TestInvoker = baseMetadata.TestInvoker,
-                    ParameterCount = baseMetadata.ParameterCount,
-                    ParameterTypes = baseMetadata.ParameterTypes,
-                    TestMethodParameterTypes = baseMetadata.TestMethodParameterTypes,
-                    Hooks = baseMetadata.Hooks,
-                    FilePath = baseMetadata.FilePath,
-                    LineNumber = baseMetadata.LineNumber,
-                    MethodMetadata = baseMetadata.MethodMetadata,
-                    GenericTypeInfo = baseMetadata.GenericTypeInfo,
-                    GenericMethodInfo = baseMetadata.GenericMethodInfo,
-                    GenericMethodTypeArguments = baseMetadata.GenericMethodTypeArguments,
-                    AttributeFactory = baseMetadata.AttributeFactory,
-                    PropertyInjections = baseMetadata.PropertyInjections
-                };
-
-                expandedMetadata.Add(expandedTest);
-
-                // Limit expansion to prevent memory issues with very large data sets
-                if (combinationIndex >= 10000)
-                {
-                    Console.WriteLine($"Warning: Test {testName} has more than 10000 data combinations. Limiting to 10000 for discovery.");
-                    break;
-                }
-            }
+                TestName = testName,
+                TestClassType = testClass,
+                TestMethodName = testMethod.Name,
+                Categories = ExtractCategories(testClass, testMethod),
+                IsSkipped = IsTestSkipped(testClass, testMethod, out var skipReason),
+                SkipReason = skipReason,
+                TimeoutMs = ExtractTimeout(testClass, testMethod),
+                RetryCount = ExtractRetryCount(testClass, testMethod),
+                CanRunInParallel = CanRunInParallel(testClass, testMethod),
+                Dependencies = ExtractDependencies(testClass, testMethod),
+                DataSources = ExtractMethodDataSources(testMethod),
+                ClassDataSources = ExtractClassDataSources(testClass),
+                PropertyDataSources = ExtractPropertyDataSources(testClass),
+                InstanceFactory = CreateInstanceFactory(testClass)!,
+                TestInvoker = CreateTestInvoker(testClass, testMethod),
+                ParameterCount = testMethod.GetParameters().Length,
+                ParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType).ToArray(),
+                TestMethodParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
+                Hooks = DiscoverHooks(testClass),
+                FilePath = ExtractFilePath(testMethod),
+                LineNumber = ExtractLineNumber(testMethod),
+                MethodMetadata = BuildMethodMetadata(testClass, testMethod),
+                GenericTypeInfo = ExtractGenericTypeInfo(testClass),
+                GenericMethodInfo = ExtractGenericMethodInfo(testMethod),
+                GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
+                AttributeFactory = () =>
+                [
+                    ..testMethod.GetCustomAttributes(),
+                    ..testClass.GetCustomAttributes(),
+                    ..testClass.Assembly.GetCustomAttributes(),
+                ],
+                PropertyInjections = PropertyInjector.DiscoverInjectableProperties(testClass)
+            });
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to expand data sources for {testName}: {ex.Message}. Falling back to single test.");
-            return
-            [
-                baseMetadata
-            ];
+            return Task.FromResult(CreateFailedTestMetadata(testClass, testMethod, ex));
         }
-
-        // If no combinations were generated, return the base metadata
-        if (expandedMetadata.Count == 0)
-        {
-            return
-            [
-                baseMetadata
-            ];
-        }
-
-        return expandedMetadata;
     }
 
 
-    private static int ExtractRepeatCount(Type testClass, MethodInfo testMethod)
-    {
-        // Check method level first
-        var methodRepeat = testMethod.GetCustomAttribute<RepeatAttribute>();
-        if (methodRepeat != null)
-        {
-            return methodRepeat.Times;
-        }
-
-        // Check class level
-        var classRepeat = testClass.GetCustomAttribute<RepeatAttribute>();
-        if (classRepeat != null)
-        {
-            return classRepeat.Times;
-        }
-
-        // Check assembly level
-        var assemblyRepeat = testClass.Assembly.GetCustomAttribute<RepeatAttribute>();
-        if (assemblyRepeat != null)
-        {
-            return assemblyRepeat.Times;
-        }
-
-        return 1;
-    }
-
-    private static string GenerateDataDrivenTestName(Type testClass, MethodInfo testMethod, int methodIndex, int classIndex, int repeatIndex, int testIndex)
-    {
-        return $"{testClass.Name}.{testMethod.Name}[{testIndex}]";
-    }
-
-    private static TestMetadata BuildSingleTestMetadata(Type testClass, MethodInfo testMethod, string testName, int repeatIndex)
-    {
-        return BuildTestMetadata(testClass, testMethod, testName);
-    }
-
-    private static TestMetadata BuildTestMetadata(Type testClass, MethodInfo testMethod, string? testName = null)
-    {
-        if (testName == null)
-        {
-            testName = GenerateTestName(testClass, testMethod);
-        }
-
-        var metadata = new ReflectionTestMetadata(testClass, testMethod)
-        {
-            TestName = testName,
-            TestClassType = testClass,
-            TestMethodName = testMethod.Name,
-            Categories = ExtractCategories(testClass, testMethod),
-            IsSkipped = IsTestSkipped(testClass, testMethod, out var skipReason),
-            SkipReason = skipReason,
-            TimeoutMs = ExtractTimeout(testClass, testMethod),
-            RetryCount = ExtractRetryCount(testClass, testMethod),
-            CanRunInParallel = CanRunInParallel(testClass, testMethod),
-            Dependencies = ExtractDependencies(testClass, testMethod),
-            DataSources = ExtractMethodDataSources(testMethod),
-            ClassDataSources = ExtractClassDataSources(testClass),
-            PropertyDataSources = ExtractPropertyDataSources(testClass),
-            InstanceFactory = CreateInstanceFactory(testClass),
-            TestInvoker = CreateTestInvoker(testClass, testMethod),
-            ParameterCount = testMethod.GetParameters().Length,
-            ParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType).ToArray(),
-            TestMethodParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
-            Hooks = DiscoverHooks(testClass),
-            FilePath = ExtractFilePath(testMethod),
-            LineNumber = ExtractLineNumber(testMethod),
-            GenericTypeInfo = ExtractGenericTypeInfo(testClass),
-            GenericMethodInfo = ExtractGenericMethodInfo(testMethod),
-            GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
-            AttributeFactory = () =>
-            [
-                ..testMethod.GetCustomAttributes(),
-                ..testClass.GetCustomAttributes(),
-                ..testClass.Assembly.GetCustomAttributes(),
-            ],
-            MethodMetadata = BuildMethodMetadata(testClass, testMethod)
-        };
-
-        return metadata;
-    }
-
-private static string GenerateTestName(Type testClass, MethodInfo testMethod)
+    private static string GenerateTestName(Type testClass, MethodInfo testMethod)
     {
         // Check for DisplayNameAttribute and extract the template
         var displayNameAttr = testMethod.GetCustomAttribute<DisplayNameAttribute>();
@@ -934,329 +776,18 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         return propertyDataSources.ToArray();
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.NonPublicMethods' in call to 'System.Type.GetMethod(String, BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
-    [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods', 'DynamicallyAccessedMemberTypes.NonPublicMethods' in call to 'System.Type.GetMethod(String, BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
-    [UnconditionalSuppressMessage("Trimming", "IL2067:'type' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicParameterlessConstructor' in call to 'System.Activator.CreateInstance(Type)'", Justification = "Reflection mode requires dynamic access")]
-
-    private static Func<IEnumerable<object?[]>> CreateSyncDataSourceFactory(MethodInfo method, object? instance, object?[] args)
-    {
-        return () =>
-        {
-            var result = method.Invoke(instance, args);
-            if (result is IEnumerable<object?[]> enumerable)
-            {
-                return enumerable;
-            }
-            return [];
-        };
-    }
-
-    private static Func<Task<IEnumerable<object?[]>>> CreateTaskDataSourceFactory(MethodInfo method, object? instance, object?[] args)
-    {
-        return () =>
-        {
-            var result = method.Invoke(instance, args);
-            if (result is Task<IEnumerable<object?[]>> task)
-            {
-                return task;
-            }
-            return Task.FromResult(Enumerable.Empty<object?[]>());
-        };
-    }
-
-
-
-    private static async IAsyncEnumerable<object?[]> CreateAsyncGeneratorEnumerable(
-        Attribute attr,
-        Type attrType,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass,
-        MethodInfo testMethod,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        var metadata = CreateDataGeneratorMetadata(testClass, testMethod);
-
-        // Get the GenerateDataSourcesAsync method
-        var generateMethod = attrType.GetMethod("GenerateDataSourcesAsync",
-            BindingFlags.NonPublic | BindingFlags.Instance);
-
-        if (generateMethod == null)
-        {
-            throw new InvalidOperationException($"Could not find GenerateDataSourcesAsync method on {attrType.Name}");
-        }
-
-        // Invoke the async generator
-        var result = generateMethod.Invoke(attr, [metadata]);
-
-        // Handle the async enumerable result
-        if (result is IAsyncEnumerable<object> asyncEnumerable)
-        {
-            await foreach (var item in asyncEnumerable.WithCancellation(cancellationToken))
-            {
-                // Use async-aware processing for discovery
-                var dataRows = AsyncDataSourceHelper.ProcessAsyncGeneratorItemsForDiscovery(item);
-                foreach (var dataRow in dataRows)
-                {
-                    yield return dataRow;
-                }
-            }
-        }
-    }
-
-    private static DataGeneratorMetadata CreateDataGeneratorMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass, MethodInfo testMethod)
-    {
-        // Create TypeReference for the class
-        var classTypeRef = new TypeReference
-        {
-            AssemblyQualifiedName = testClass.AssemblyQualifiedName
-        };
-
-        // Create AssemblyMetadata
-        var assemblyMetadata = AssemblyMetadata.GetOrAdd(testClass.Assembly.FullName ?? testClass.Assembly.GetName().Name ?? "Unknown",
-            () => new AssemblyMetadata { Name = testClass.Assembly.FullName ?? testClass.Assembly.GetName().Name ?? "Unknown" });
-
-        // Create ClassMetadata
-        var classMetadata = ClassMetadata.GetOrAdd(testClass.FullName ?? testClass.Name, () => new ClassMetadata
-        {
-            Name = testClass.Name,
-            TypeReference = classTypeRef,
-            Type = testClass,
-            Namespace = testClass.Namespace,
-            Assembly = assemblyMetadata,
-            Parameters = [
-            ], // Constructor parameters, empty for now
-            Properties = [
-            ], // Properties, empty for now
-            Parent = null // Parent class, null for now
-        });
-
-        // Create parameter metadata for the test method
-        var parameterMetadataList = new List<ParameterMetadata>();
-        var methodParams = testMethod.GetParameters();
-        foreach (var param in methodParams)
-        {
-            var paramTypeRef = new TypeReference
-            {
-                AssemblyQualifiedName = param.ParameterType.AssemblyQualifiedName
-            };
-
-            var paramMetadata = new ParameterMetadata(param.ParameterType)
-            {
-                Name = param.Name ?? "param",
-                TypeReference = paramTypeRef,
-                ReflectionInfo = param  // This is crucial for MatrixDataSourceAttribute
-            };
-
-            parameterMetadataList.Add(paramMetadata);
-        }
-
-        // Create MethodMetadata with actual method info
-        var methodMetadata = new MethodMetadata
-        {
-            Name = testMethod.Name,
-            TypeReference = classTypeRef,
-            Type = testClass,
-            Parameters = parameterMetadataList.ToArray(),
-            GenericTypeCount = testMethod.IsGenericMethodDefinition ? testMethod.GetGenericArguments().Length : 0,
-            Class = classMetadata,
-            ReturnTypeReference = new TypeReference { AssemblyQualifiedName = testMethod.ReturnType.AssemblyQualifiedName },
-            ReturnType = testMethod.ReturnType
-        };
-
-        return new DataGeneratorMetadata
-        {
-            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
-            MembersToGenerate = parameterMetadataList.ToArray(),  // Pass the parameters as members to generate
-            TestInformation = methodMetadata,
-            Type = global::TUnit.Core.Enums.DataGeneratorType.TestParameters,
-            TestSessionId = Guid.NewGuid().ToString(),
-            TestClassInstance = null,
-            ClassInstanceArguments = null
-        };
-    }
-
-    private static List<object?[]> ProcessGeneratorResult(object? result)
-    {
-        var items = new List<object?[]>();
-
-        if (result is IEnumerable<object> enumerable)
-        {
-            foreach (var item in enumerable)
-            {
-                // Use async-aware processing for better handling of async data sources
-                items.AddRange(AsyncDataSourceHelper.ProcessAsyncGeneratorItemsForDiscovery(item));
-            }
-        }
-
-        return items;
-    }
-
-    private static List<object?[]> ProcessGeneratorItem(object? item)
-    {
-        var items = new List<object?[]>();
-
-        if (item is Func<Task<object?[]?>> taskFunc)
-        {
-            var data = taskFunc().GetAwaiter().GetResult();
-            if (data != null)
-            {
-                items.Add(data);
-            }
-        }
-        else if (item is Func<Task<object?>> singleTaskFunc)
-        {
-            var data = singleTaskFunc().GetAwaiter().GetResult();
-            items.Add([data]);
-        }
-        else if (item is Task<object?[]?> task)
-        {
-            var data = task.GetAwaiter().GetResult();
-            if (data != null)
-            {
-                items.Add(data);
-            }
-        }
-        else if (item is Func<object?[]?> func)
-        {
-            var data = func();
-            if (data != null)
-            {
-                items.Add(data);
-            }
-        }
-        else if (item is Func<object?> singleFunc)
-        {
-            var data = singleFunc();
-            items.Add([data]);
-        }
-        else if (item is object?[] array)
-        {
-            items.Add(array);
-        }
-        else if (global::TUnit.Engine.Helpers.TupleHelper.TryParseTupleToObjectArray(item, out object?[]? tupleValues))
-        {
-            items.Add(tupleValues!);
-        }
-        else if (item != null)
-        {
-            // Check if it's a Func<Task<T>> where T is a specific type
-            var itemType = item.GetType();
-            if (itemType.IsGenericType && itemType.GetGenericTypeDefinition() == typeof(Func<>))
-            {
-                var returnType = itemType.GetGenericArguments()[0];
-                if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>))
-                {
-                    // It's a Func<Task<T>>, invoke it and await the result
-                    var funcDelegate = (Delegate)item;
-                    var taskResult = funcDelegate.DynamicInvoke();
-                    if (taskResult is Task taskObj)
-                    {
-                        taskObj.Wait();
-                        var resultProperty = taskObj.GetType().GetProperty("Result");
-                        if (resultProperty != null)
-                        {
-                            var result = resultProperty.GetValue(taskObj);
-                            items.Add([result]);
-                        }
-                    }
-                }
-                else
-                {
-                    // It's a regular Func<T>, invoke it
-                    var regularFunc = (Delegate)item;
-                    var result = regularFunc.DynamicInvoke();
-                    items.Add([result]);
-                }
-            }
-            else
-            {
-                items.Add([item]);
-            }
-        }
-
-        return items;
-    }
-
-    private static Func<CancellationToken, IAsyncEnumerable<object?[]>> CreateAsyncDataSourceFactory(MethodInfo method, object? instance, object?[] args)
-    {
-        return cancellationToken =>
-        {
-            var result = method.Invoke(instance, args);
-            if (result is IAsyncEnumerable<object?[]> asyncEnumerable)
-            {
-                return asyncEnumerable;
-            }
-            return EmptyAsyncEnumerable();
-        };
-    }
-
-    private static Func<IEnumerable<object?[]>> CreateWrappedDataSourceFactory(MethodInfo method, object? instance, object?[] args)
-    {
-        return () =>
-        {
-            var result = method.Invoke(instance, args);
-
-            // If result is null, return empty
-            if (result == null)
-            {
-                return [];
-            }
-
-            var resultType = result.GetType();
-
-            // If result is a tuple, extract values
-            if (resultType.Name.StartsWith("ValueTuple"))
-            {
-                // Extract tuple values
-                var fields = resultType.GetFields();
-                var values = fields.Select(f => f.GetValue(result)).ToArray();
-                return [[values]];
-            }
-
-            // If result is an array of tuples, extract each tuple's values
-            if (resultType.IsArray && resultType.GetElementType()?.Name.StartsWith("ValueTuple") == true)
-            {
-                var array = (Array)result;
-                var results = new List<object?[]>();
-                foreach (var item in array)
-                {
-                    if (item != null)
-                    {
-                        var tupleType = item.GetType();
-                        var fields = tupleType.GetFields();
-                        var values = fields.Select(f => f.GetValue(item)).ToArray();
-                        results.Add(values);
-                    }
-                }
-                return results;
-            }
-
-            // If result is an array or IEnumerable (but not string), treat each element as separate test data
-            if (result is System.Collections.IEnumerable enumerable and not string)
-            {
-                var results = new List<object?[]>();
-                foreach (var item in enumerable)
-                {
-                    results.Add([item]);
-                }
-                return results;
-            }
-
-            // Single value
-            return [[result]];
-        };
-    }
 
     [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicConstructors' in call to 'System.Type.GetConstructors()'", Justification = "Reflection mode requires dynamic access")]
-    private static Func<object?[], object>? CreateInstanceFactory([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type testClass)
+    private static Func<object?[], object> CreateInstanceFactory([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type testClass)
     {
         var constructors = testClass.GetConstructors();
+
         if (constructors.Length == 0)
         {
-            return null;
+            return _ => Activator.CreateInstance(testClass)!;
         }
 
-        var ctor = constructors.FirstOrDefault(c => c.GetParameters().Length == 0)
-                   ?? constructors.First();
+        var ctor = constructors.FirstOrDefault(c => c.GetParameters().Length == 0) ?? constructors.First();
 
         return _expressionCache.GetOrCreateInstanceFactory(ctor, CompileInstanceFactory);
     }
@@ -1729,25 +1260,6 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         return true;
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods', 'DynamicallyAccessedMemberTypes.NonPublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
-    [UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods', 'DynamicallyAccessedMemberTypes.NonPublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
-    private static IEnumerable<MethodInfo> GetMethodsFromClassHierarchy([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type type)
-    {
-        var methods = new List<MethodInfo>();
-        var currentType = type;
-
-        while (currentType != null && currentType != typeof(object))
-        {
-            methods.AddRange(currentType.GetMethods(
-                BindingFlags.Public | BindingFlags.NonPublic |
-                BindingFlags.Instance | BindingFlags.Static |
-                BindingFlags.DeclaredOnly));
-            currentType = currentType.BaseType;
-        }
-
-        return methods;
-    }
-
     private static HookMetadata? CreateHookMetadata(MethodInfo method, HookAttribute hookAttr, bool isBeforeHook)
     {
         var hookInvoker = CreateHookInvoker(method);
@@ -2065,12 +1577,6 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         };
     }
 
-    private static async IAsyncEnumerable<object?[]> EmptyAsyncEnumerable()
-    {
-        await Task.CompletedTask;
-        yield break;
-    }
-
     private static MethodMetadata BuildMethodMetadata(Type testClass, MethodInfo testMethod)
     {
         var parameters = testMethod.GetParameters()
@@ -2153,8 +1659,19 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             TestName = testName,
             TestClassType = testClass,
             TestMethodName = "AssemblyScanFailed",
-            MethodMetadata = CreateDummyMethodMetadata(testClass, "AssemblyScanFailed"),
-            AttributeFactory = () => [
+            MethodMetadata = CreateDummyMethodMetadata(testClass,
+                "AssemblyScanFailed"),
+            AttributeFactory = () =>
+            [
+            ],
+            DataSources =
+            [
+            ],
+            ClassDataSources =
+            [
+            ],
+            PropertyDataSources =
+            [
             ]
         };
     }
@@ -2170,12 +1687,21 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             TestName = testName,
             TestClassType = type,
             TestMethodName = method.Name,
-            MethodMetadata = CreateMethodMetadata(type, method),
-            AttributeFactory = () => method.GetCustomAttributes().ToArray()
+            MethodMetadata = CreateMethodMetadata(type,
+                method),
+            AttributeFactory = () => method.GetCustomAttributes()
+                .ToArray(),
+            DataSources =
+            [
+            ],
+            ClassDataSources =
+            [
+            ],
+            PropertyDataSources =
+            [
+            ]
         };
     }
-
-    private static void DummyFailedTestMethod() { }
 
     private static MethodMetadata CreateMethodMetadata(Type type, MethodInfo method)
     {
@@ -2251,148 +1777,6 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
         public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
         {
             get => (context, metadata) => new FailedExecutableTest(_exception)
-            {
-                TestId = context.TestId,
-                DisplayName = context.DisplayName,
-                Metadata = metadata,
-                Arguments = context.Arguments,
-                ClassArguments = context.ClassArguments,
-                BeforeTestHooks = context.BeforeTestHooks,
-                AfterTestHooks = context.AfterTestHooks,
-                Context = context.Context
-            };
-        }
-
-        private async IAsyncEnumerable<TestDataCombination> GenerateFailedCombination()
-        {
-            yield return new TestDataCombination
-            {
-                DataGenerationException = _exception,
-                DisplayName = _displayName
-            };
-            await Task.CompletedTask;
-        }
-    }
-
-    private sealed class ExpandedReflectionTestMetadata : TestMetadata
-    {
-        private readonly Type _testClass;
-        private readonly MethodInfo _testMethod;
-        private readonly TestDataCombination _combination;
-        private readonly int _combinationIndex;
-        private Func<TestBuilderContextAccessor?, IAsyncEnumerable<TestDataCombination>>? _dataCombinationGenerator;
-        private Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest>? _createExecutableTestFactory;
-
-        public ExpandedReflectionTestMetadata(
-            Type testClass,
-            MethodInfo testMethod,
-            TestDataCombination combination,
-            int combinationIndex)
-        {
-            _testClass = testClass;
-            _testMethod = testMethod;
-            _combination = combination;
-            _combinationIndex = combinationIndex;
-        }
-
-        public override Func<TestBuilderContextAccessor?, IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator
-        {
-            get
-            {
-                if (_dataCombinationGenerator == null)
-                {
-                    _dataCombinationGenerator = (contextAccessor) => GenerateSingleCombination();
-                }
-                return _dataCombinationGenerator;
-            }
-        }
-
-        public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
-        {
-            get
-            {
-                if (_createExecutableTestFactory == null)
-                {
-                    _createExecutableTestFactory = CreateExecutableTest;
-                }
-                return _createExecutableTestFactory;
-            }
-        }
-
-        private async IAsyncEnumerable<TestDataCombination> GenerateSingleCombination()
-        {
-            // Return only the specific combination this test represents
-            yield return _combination;
-            await Task.CompletedTask;
-        }
-
-        private ExecutableTest CreateExecutableTest(ExecutableTestCreationContext context, TestMetadata metadata)
-        {
-            // Create instance factory that uses reflection
-            #pragma warning disable CS1998 // Async method lacks 'await' operators
-            Func<TestContext, Task<object>> createInstance = async (testContext) =>
-            {
-                #pragma warning restore CS1998
-                if (InstanceFactory == null)
-                {
-                    throw new InvalidOperationException($"No instance factory for {_testClass.Name}");
-                }
-
-                var instance = InstanceFactory(context.ClassArguments);
-
-                // Apply property values using unified PropertyInjector
-                await PropertyInjector.InjectPropertiesAsync(
-                    context.Context,
-                    instance,
-                    metadata.PropertyDataSources,
-                    metadata.PropertyInjections,
-                    metadata.MethodMetadata,
-                    context.Context.TestDetails.TestId);
-
-                return instance;
-            };
-
-            // Create test invoker with CancellationToken support
-            // Determine if the test method has a CancellationToken parameter
-            var hasCancellationToken = ParameterTypes.Any(t => t == typeof(CancellationToken));
-            var cancellationTokenIndex = hasCancellationToken
-                ? Array.IndexOf(ParameterTypes, typeof(CancellationToken))
-                : -1;
-
-            Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
-            {
-                if (TestInvoker == null)
-                {
-                    throw new InvalidOperationException($"No test invoker for {_testMethod.Name}");
-                }
-
-                if (hasCancellationToken)
-                {
-                    // Insert CancellationToken at the correct position
-                    var argsWithToken = new object?[args.Length + 1];
-                    var argIndex = 0;
-
-                    for (int i = 0; i < argsWithToken.Length; i++)
-                    {
-                        if (i == cancellationTokenIndex)
-                        {
-                            argsWithToken[i] = cancellationToken;
-                        }
-                        else if (argIndex < args.Length)
-                        {
-                            argsWithToken[i] = args[argIndex++];
-                        }
-                    }
-
-                    await TestInvoker(instance, argsWithToken);
-                }
-                else
-                {
-                    await TestInvoker(instance, args);
-                }
-            };
-
-            return new UnifiedExecutableTest(createInstance, invokeTest)
             {
                 TestId = context.TestId,
                 DisplayName = context.DisplayName,

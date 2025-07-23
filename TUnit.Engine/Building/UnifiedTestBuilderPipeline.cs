@@ -10,31 +10,26 @@ namespace TUnit.Engine.Building;
 internal sealed class UnifiedTestBuilderPipeline
 {
     private readonly Func<HashSet<Type>?, ITestDataCollector> _dataCollectorFactory;
-    private readonly IGenericTypeResolver _genericResolver;
     private readonly ITestBuilder _testBuilder;
     private readonly IContextProvider _contextProvider;
 
     public UnifiedTestBuilderPipeline(
         ITestDataCollector dataCollector,
-        IGenericTypeResolver genericResolver,
         ITestBuilder testBuilder,
         IContextProvider contextBuilder)
     {
         // For backward compatibility, create a factory that ignores filter types
         _dataCollectorFactory = _ => dataCollector ?? throw new ArgumentNullException(nameof(dataCollector));
-        _genericResolver = genericResolver ?? throw new ArgumentNullException(nameof(genericResolver));
         _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
         _contextProvider = contextBuilder;
     }
 
     public UnifiedTestBuilderPipeline(
         Func<HashSet<Type>?, ITestDataCollector> dataCollectorFactory,
-        IGenericTypeResolver genericResolver,
         ITestBuilder testBuilder,
         IContextProvider contextBuilder)
     {
         _dataCollectorFactory = dataCollectorFactory ?? throw new ArgumentNullException(nameof(dataCollectorFactory));
-        _genericResolver = genericResolver ?? throw new ArgumentNullException(nameof(genericResolver));
         _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
         _contextProvider = contextBuilder;
     }
@@ -58,8 +53,7 @@ internal sealed class UnifiedTestBuilderPipeline
         {
             try
             {
-                var resolved = await _genericResolver.ResolveGenericsAsync([metadata]);
-                resolvedMetadata.AddRange(resolved);
+                resolvedMetadata.AddRange([metadata]);
             }
             catch (Exception ex)
             {
@@ -114,7 +108,7 @@ internal sealed class UnifiedTestBuilderPipeline
             ExecutableTest? failedTest = null;
             try
             {
-                resolvedMetadataList = await _genericResolver.ResolveGenericsAsync([metadata]);
+                resolvedMetadataList = [metadata];
             }
             catch (Exception ex)
             {
@@ -191,14 +185,13 @@ internal sealed class UnifiedTestBuilderPipeline
             TestName = metadata.TestName,
             ClassType = metadata.TestClassType,
             MethodName = metadata.TestMethodName,
-            ClassInstance = null,
+            ClassInstance = null!,
             TestMethodArguments = [],
             TestClassArguments = [],
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
             TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task),
-            ClassMetadata = MetadataBuilder.CreateClassMetadata(metadata),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = [],
         };
@@ -206,8 +199,11 @@ internal sealed class UnifiedTestBuilderPipeline
         var context = _contextProvider.CreateTestContext(
             metadata.TestName,
             metadata.TestClassType,
-            CancellationToken.None,
-            new TestServiceProvider());
+            new TestBuilderContext
+            {
+                TestMetadata = metadata.MethodMetadata
+            },
+            CancellationToken.None);
 
         context.TestDetails = testDetails;
 
@@ -248,14 +244,13 @@ internal sealed class UnifiedTestBuilderPipeline
             TestName = metadata.TestName,
             ClassType = metadata.TestClassType,
             MethodName = metadata.TestMethodName,
-            ClassInstance = null,
+            ClassInstance = null!,
             TestMethodArguments = [],
             TestClassArguments = [],
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
             TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task),
-            ClassMetadata = MetadataBuilder.CreateClassMetadata(metadata),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = [],
         };
@@ -263,8 +258,11 @@ internal sealed class UnifiedTestBuilderPipeline
         var context = _contextProvider.CreateTestContext(
             metadata.TestName,
             metadata.TestClassType,
-            CancellationToken.None,
-            new TestServiceProvider());
+            new TestBuilderContext
+            {
+                TestMetadata = metadata.MethodMetadata
+            },
+            CancellationToken.None);
 
         context.TestDetails = testDetails;
 

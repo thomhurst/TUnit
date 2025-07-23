@@ -10,7 +10,7 @@ internal static class TestIdentifierService
     {
         var methodMetadata = metadata.MethodMetadata;
         var classMetadata = methodMetadata.Class;
-        
+
         // Pre-size arrays to avoid LINQ chains and multiple enumerations
         var constructorParameters = classMetadata.Parameters;
         var constructorParameterTypes = new Type[constructorParameters.Length];
@@ -18,7 +18,7 @@ internal static class TestIdentifierService
         {
             constructorParameterTypes[i] = constructorParameters[i].Type;
         }
-        
+
         var methodParameters = methodMetadata.Parameters;
         var methodParameterTypes = new Type[methodParameters.Length];
         for (int i = 0; i < methodParameters.Length; i++)
@@ -35,18 +35,18 @@ internal static class TestIdentifierService
           .Append('.')
           .Append(classTypeWithParameters)
           .Append('.')
-          .Append(combination.ClassDataSourceIndex)
+          .Append(combination.ClassDataSourceAttributeIndex)
           .Append('.')
-          .Append(combination.ClassLoopIndex)
+          .Append(combination.ClassDataLoopIndex)
           .Append('.')
           .Append(methodWithParameters)
           .Append('.')
-          .Append(combination.MethodDataSourceIndex)
+          .Append(combination.MethodDataSourceAttributeIndex)
           .Append('.')
-          .Append(combination.MethodLoopIndex)
+          .Append(combination.MethodDataLoopIndex)
           .Append('.')
           .Append(combination.RepeatIndex);
-          
+
         return sb.ToString();
     }
 
@@ -55,12 +55,12 @@ internal static class TestIdentifierService
         // For backward compatibility, use default combination values
         return GenerateFailedTestId(metadata, new TestDataCombination());
     }
-    
+
     public static string GenerateFailedTestId(TestMetadata metadata, TestDataCombination combination)
     {
         var methodMetadata = metadata.MethodMetadata;
         var classMetadata = methodMetadata.Class;
-        
+
         // Pre-size arrays to avoid LINQ chains and multiple enumerations
         var constructorParameters = classMetadata.Parameters;
         var constructorParameterTypes = new Type[constructorParameters.Length];
@@ -68,7 +68,7 @@ internal static class TestIdentifierService
         {
             constructorParameterTypes[i] = constructorParameters[i].Type;
         }
-        
+
         var methodParameters = methodMetadata.Parameters;
         var methodParameterTypes = new Type[methodParameters.Length];
         for (int i = 0; i < methodParameters.Length; i++)
@@ -97,21 +97,21 @@ internal static class TestIdentifierService
           .Append('.')
           .Append(combination.RepeatIndex)
           .Append("_DataGenerationError");
-          
+
         return sb.ToString();
     }
-    
+
     private static string BuildTypeWithParameters(string typeName, Type[] parameterTypes)
     {
         if (parameterTypes.Length == 0)
         {
             return typeName;
         }
-        
+
         // Use StringBuilder for efficient parameter list construction
         var sb = new StringBuilder(typeName.Length + (parameterTypes.Length * 20)); // Estimate capacity
         sb.Append(typeName).Append('(');
-        
+
         for (int i = 0; i < parameterTypes.Length; i++)
         {
             if (i > 0)
@@ -120,7 +120,7 @@ internal static class TestIdentifierService
             }
             sb.Append(parameterTypes[i]);
         }
-        
+
         sb.Append(')');
         return sb.ToString();
     }

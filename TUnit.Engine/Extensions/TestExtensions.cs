@@ -22,8 +22,8 @@ internal static class TestExtensions
                     new LinePosition(testDetails.TestLineNumber, 0)
                 )),
                 new TestMethodIdentifierProperty(
-                    Namespace: testDetails.ClassMetadata.Type.Namespace ?? testDetails.ClassType?.Namespace ?? "GlobalNamespace",
-                    AssemblyFullName: testDetails.ClassMetadata?.Type.Assembly.FullName ?? testDetails.ClassType?.Assembly.FullName ?? "UnknownAssembly",
+                    Namespace: testDetails.MethodMetadata.Class.Type.Namespace ?? testDetails.ClassType?.Namespace ?? "GlobalNamespace",
+                    AssemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.FullName!,
                     TypeName: testContext.GetClassTypeName(),
                     MethodName: testDetails.TestName,
                     ParameterTypeFullNames: CreateParameterTypeArray(testDetails.TestMethodParameterTypes),
@@ -43,7 +43,7 @@ internal static class TestExtensions
                 }),
 
                 // TRX Report Properties
-                new TrxFullyQualifiedTypeNameProperty(testDetails.ClassMetadata?.Type.FullName ?? testDetails.ClassType?.FullName ?? "UnknownType"),
+                new TrxFullyQualifiedTypeNameProperty(testDetails.MethodMetadata.Class?.Type.FullName ?? testDetails.ClassType?.FullName ?? "UnknownType"),
                 new TrxCategoriesProperty([..testDetails.Categories]),
             ])
         };

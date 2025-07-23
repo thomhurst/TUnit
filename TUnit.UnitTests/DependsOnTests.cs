@@ -16,11 +16,17 @@ public class DependsOnTests
             TestMethodName = methodName,
             TestName = methodName,
             ParameterCount = parameterCount,
-            ParameterTypes = parameterTypes ?? [
+            ParameterTypes = parameterTypes
+                ??
+                [
+                ],
+            TestMethodParameterTypes = parameterTypeNames
+                ??
+                [
+                ],
+            AttributeFactory = () =>
+            [
             ],
-            TestMethodParameterTypes = parameterTypeNames ?? [
-            ],
-            AttributeFactory = () => [],
             MethodMetadata = new MethodMetadata
             {
                 Type = typeof(T),
@@ -29,7 +35,8 @@ public class DependsOnTests
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
                 ReturnTypeReference = TypeReference.CreateConcrete(typeof(void).AssemblyQualifiedName ?? "System.Void"),
-                Parameters = [
+                Parameters =
+                [
                 ],
                 Class = new ClassMetadata
                 {
@@ -39,14 +46,27 @@ public class DependsOnTests
                     Namespace = typeof(T).Namespace ?? string.Empty,
                     Assembly = new AssemblyMetadata
                     {
-                        Name = typeof(T).Assembly.GetName().Name ?? string.Empty
+                        Name = typeof(T).Assembly.GetName()
+                                .Name
+                            ?? string.Empty
                     },
                     Parent = null,
-                    Parameters = [
+                    Parameters =
+                    [
                     ],
-                    Properties = [
+                    Properties =
+                    [
                     ]
                 }
+            },
+            DataSources = new IDataSourceAttribute[]
+            {
+            },
+            ClassDataSources = new IDataSourceAttribute[]
+            {
+            },
+            PropertyDataSources = new PropertyDataSource[]
+            {
             }
         };
     }
