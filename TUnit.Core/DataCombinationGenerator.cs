@@ -23,8 +23,8 @@ public static class DataCombinationGenerator
         var classDataSources = testMetadata.ClassDataSources;
         var propertyDataSources = testMetadata.PropertyDataSources;
 
-        // Get repeat count (default to 1 if no repeat attribute)
-        var repeatCount = testMetadata.RepeatCount + 1;
+        // Get repeat count
+        var repeatCount = Math.Max(1, testMetadata.RepeatCount);
 
         // Generate combinations for all data sources uniformly
         await foreach (var combination in GenerateCombinationsForDataSourcesAsync(

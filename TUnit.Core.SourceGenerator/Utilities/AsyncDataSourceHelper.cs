@@ -55,7 +55,12 @@ internal static class AsyncDataSourceHelper
         writer.AppendLine("enumerator.DisposeAsync().AsTask().Wait();");
         writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine("catch { }");
+        writer.AppendLine("catch");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("// Ignore disposal errors for async enumerator");
+        writer.Unindent();
+        writer.AppendLine("}");
         writer.AppendLine("cts.Dispose();");
         writer.Unindent();
         writer.AppendLine("}");

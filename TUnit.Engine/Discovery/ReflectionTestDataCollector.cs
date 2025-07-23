@@ -59,7 +59,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     if (!_scannedAssemblies.Add(assembly))
                     {
-                        resultsByIndex[index] = new List<TestMetadata>();
+                        resultsByIndex[index] =
+                        [
+                        ];
                         return;
                     }
                 }
@@ -75,7 +77,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     // Create a failed test metadata for the assembly that couldn't be scanned
                     var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
-                    resultsByIndex[index] = new List<TestMetadata> { failedTest };
+                    resultsByIndex[index] =
+                    [
+                        failedTest
+                    ];
                 }
             });
         });
@@ -120,9 +125,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return methods;
     }
 
-    private static readonly HashSet<string> ExcludedAssemblyNames = new()
-    {
-        // .NET runtime and framework assemblies
+    private static readonly HashSet<string> ExcludedAssemblyNames =
+    [
         "mscorlib",
         "System",
         "System.Core",
@@ -184,7 +188,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         "Shouldly",
         "NSubstitute",
         "Rhino.Mocks"
-    };
+    ];
 
     private static bool ShouldScanAssembly(Assembly assembly)
     {
@@ -253,7 +257,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             catch (Exception ex)
             {
                 Console.WriteLine($"Warning: Failed to get exported types from assembly {asm.FullName}: {ex.Message}");
-                return Array.Empty<Type>();
+                return [];
             }
         });
 
@@ -263,7 +267,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         var filteredTypes = types.Where(t => t.IsClass && !IsCompilerGenerated(t));
-        
+
         foreach (var type in filteredTypes)
         {
             // Skip abstract types - they can't be instantiated
@@ -1613,7 +1617,8 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Warning: Failed to get exported types from assembly {asm.FullName}: {ex.Message}");
-                    return Array.Empty<Type>();
+                    return [
+                    ];
                 }
             });
 
@@ -1964,40 +1969,7 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
 
     private static bool IsCompilerGenerated(Type type)
     {
-        // Check if type has CompilerGeneratedAttribute
-        if (type.IsDefined(typeof(CompilerGeneratedAttribute), inherit: false))
-        {
-            return true;
-        }
-
-        // Check for compiler-generated naming patterns
-        var typeName = type.Name;
-
-        // Compiler-generated types often start with <> or contain special characters
-        if (typeName.StartsWith("<>") || typeName.StartsWith("<"))
-        {
-            return true;
-        }
-
-        // Check for async state machine pattern (e.g., <MethodName>d__1)
-        if (typeName.Contains(">d__"))
-        {
-            return true;
-        }
-
-        // Check for display class pattern (e.g., <>c__DisplayClass)
-        if (typeName.Contains("__DisplayClass"))
-        {
-            return true;
-        }
-
-        // Check for anonymous type pattern
-        if (typeName.Contains("AnonymousType"))
-        {
-            return true;
-        }
-
-        return false;
+        return type.IsDefined(typeof(CompilerGeneratedAttribute), inherit: false);
     }
 
     private static string? ExtractFilePath(MethodInfo method)
