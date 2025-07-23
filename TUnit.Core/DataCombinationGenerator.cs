@@ -75,8 +75,8 @@ public static class DataCombinationGenerator
 
         // First, generate class data combinations
         var classMetadata = CreateDataGeneratorMetadata(
-            testMetadata, 
-            testSessionId, 
+            testMetadata,
+            testSessionId,
             testClassType,
             DataGeneratorType.ClassParameters,
             testClassInstance: null,
@@ -107,7 +107,7 @@ public static class DataCombinationGenerator
             try
             {
                 // Get class arguments and create instance
-                classArgs = classCombo != null 
+                classArgs = classCombo != null
                     ? await CreateArgumentsFromFactoriesAsync(classCombo.Factories)
                     : Array.Empty<object?>();
 
@@ -201,7 +201,7 @@ public static class DataCombinationGenerator
         return new DataGeneratorMetadata
         {
             TestBuilderContext = contextAccessor,
-            MembersToGenerate = parametersToGenerate,
+            MembersToGenerate = [..parametersToGenerate],
             TestInformation = testMetadata.MethodMetadata,
             Type = generatorType,
             TestSessionId = testSessionId,
