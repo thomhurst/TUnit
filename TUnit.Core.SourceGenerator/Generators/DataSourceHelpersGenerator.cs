@@ -111,7 +111,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
         // Deduplicate types by their fully qualified name
         var uniqueTypes = filteredTypes
-            .GroupBy(t => t.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
+            .GroupBy(t => t.TypeSymbol.GloballyQualified())
             .Select(g => g.First())
             .ToArray();
 
@@ -135,7 +135,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         sb.AppendLine("    {");
         foreach (var typeWithProperties in uniqueTypes)
         {
-            var fullyQualifiedType = typeWithProperties.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var fullyQualifiedType = typeWithProperties.TypeSymbol.GloballyQualified();
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
             sb.AppendLine($"        global::TUnit.Core.Helpers.DataSourceHelpers.RegisterPropertyInitializer<{fullyQualifiedType}>(InitializePropertiesAsync_{safeName});");
         }
@@ -255,7 +255,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
     private static void GenerateTypeSpecificHelpers(StringBuilder sb, TypeWithDataSourceProperties typeInfo)
     {
         var typeSymbol = typeInfo.TypeSymbol;
-        var fullyQualifiedTypeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var fullyQualifiedTypeName = typeSymbol.GloballyQualified();
         var safeName = fullyQualifiedTypeName.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
 
         // Separate data source properties into init-only and settable
@@ -472,7 +472,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
-            var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var fullyQualifiedType = dataSourceType.GloballyQualified();
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
             
             sb.AppendLine("        {");
@@ -486,7 +486,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             var firstArg = attr.ConstructorArguments[0];
             if (firstArg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol dataSourceType })
             {
-                var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var fullyQualifiedType = dataSourceType.GloballyQualified();
                 var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
                 
                 sb.AppendLine("        {");
@@ -527,7 +527,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
-            var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var fullyQualifiedType = dataSourceType.GloballyQualified();
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
             
             sb.AppendLine("        {");
@@ -541,7 +541,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             var firstArg = attr.ConstructorArguments[0];
             if (firstArg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol dataSourceType })
             {
-                var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var fullyQualifiedType = dataSourceType.GloballyQualified();
                 var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
                 
                 sb.AppendLine("        {");
@@ -648,7 +648,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
-            var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var fullyQualifiedType = dataSourceType.GloballyQualified();
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
             
             sb.AppendLine("        {");
@@ -662,7 +662,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             var firstArg = attr.ConstructorArguments[0];
             if (firstArg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol dataSourceType })
             {
-                var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var fullyQualifiedType = dataSourceType.GloballyQualified();
                 var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
                 
                 sb.AppendLine("        {");
@@ -703,7 +703,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
-            var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var fullyQualifiedType = dataSourceType.GloballyQualified();
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
             
             sb.AppendLine("        {");
@@ -717,7 +717,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             var firstArg = attr.ConstructorArguments[0];
             if (firstArg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol dataSourceType })
             {
-                var fullyQualifiedType = dataSourceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var fullyQualifiedType = dataSourceType.GloballyQualified();
                 var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
                 
                 sb.AppendLine("        {");
@@ -747,8 +747,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             SpecialType.System_Char => "'\\0'",
             SpecialType.System_String => "\"\"",
             SpecialType.System_DateTime => "default(System.DateTime)",
-            _ when type.TypeKind == TypeKind.Enum => $"default({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})",
-            _ when type.CanBeReferencedByName => $"default({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})",
+            _ when type.TypeKind == TypeKind.Enum => $"default({type.GloballyQualified()})",
+            _ when type.CanBeReferencedByName => $"default({type.GloballyQualified()})",
             _ => "null"
         };
     }
@@ -761,8 +761,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             TypedConstantKind.Primitive when constant.Value is char ch => $"'{ch}'",
             TypedConstantKind.Primitive when constant.Value is bool b => b.ToString().ToLowerInvariant(),
             TypedConstantKind.Primitive => constant.Value?.ToString() ?? "null",
-            TypedConstantKind.Enum => $"({constant.Type!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}){constant.Value}",
-            TypedConstantKind.Type => $"typeof({((ITypeSymbol)constant.Value!).ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})",
+            TypedConstantKind.Enum => $"({constant.Type!.GloballyQualified()}){constant.Value}",
+            TypedConstantKind.Type => $"typeof({((ITypeSymbol)constant.Value!).GloballyQualified()})",
             _ when constant.IsNull => "null",
             _ => "null"
         };

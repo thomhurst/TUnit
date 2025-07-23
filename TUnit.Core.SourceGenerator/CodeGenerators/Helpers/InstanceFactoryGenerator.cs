@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
@@ -6,7 +7,7 @@ public static class InstanceFactoryGenerator
 {
     public static void GenerateInstanceFactory(CodeWriter writer, ITypeSymbol typeSymbol)
     {
-        var className = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var className = typeSymbol.GloballyQualified();
 
         if (typeSymbol.HasParameterizedConstructor())
         {

@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
@@ -260,11 +261,11 @@ public class GenericTypeResolver
     {
         // Generate type map entry
         var typeArgs = string.Join(", ", instantiation.TypeArguments.Select(t =>
-            $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})"));
+            $"typeof({t.GloballyQualified()})"));
         var key = $"new Type[] {{ {typeArgs} }}";
 
         var genericArgs = string.Join(", ", instantiation.TypeArguments.Select(t =>
-            t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+            t.GloballyQualified()));
 
         sb.AppendLine($@"    GenericTypeMap.Add({key}, () => new {instantiation.TypeSymbol.ToDisplayString()}<{genericArgs}>());");
     }

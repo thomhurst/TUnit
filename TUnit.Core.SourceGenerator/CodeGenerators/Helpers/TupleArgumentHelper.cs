@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
@@ -15,13 +16,13 @@ public static class TupleArgumentHelper
             {
                 var tupleElement = tupleElements[i];
                 var itemProperty = $"Item{i + 1}";
-                var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{tupleElement.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argumentsArrayName}[{baseIndex}].{itemProperty})";
+                var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{tupleElement.GloballyQualified()}>({argumentsArrayName}[{baseIndex}].{itemProperty})";
                 argumentExpressions.Add(castExpression);
             }
         }
         else
         {
-            var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argumentsArrayName}[{baseIndex}])";
+            var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argumentsArrayName}[{baseIndex}])";
             argumentExpressions.Add(castExpression);
         }
         
@@ -39,7 +40,7 @@ public static class TupleArgumentHelper
         for (int i = 0; i < parameterTypes.Count; i++)
         {
             var parameterType = parameterTypes[i];
-            var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argumentsArrayName}[{i}])";
+            var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argumentsArrayName}[{i}])";
             argumentExpressions.Add(castExpression);
         }
         
@@ -66,14 +67,14 @@ public static class TupleArgumentHelper
                 {
                     var tupleElement = tupleElements[i];
                     var itemProperty = $"Item{i + 1}";
-                    var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{tupleElement.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argumentsArrayName}[{argumentIndex}].{itemProperty})";
+                    var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{tupleElement.GloballyQualified()}>({argumentsArrayName}[{argumentIndex}].{itemProperty})";
                     allArguments.Add(castExpression);
                 }
                 argumentIndex++;
             }
             else
             {
-                var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>({argumentsArrayName}[{argumentIndex}])";
+                var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameter.Type.GloballyQualified()}>({argumentsArrayName}[{argumentIndex}])";
                 allArguments.Add(castExpression);
                 argumentIndex++;
             }

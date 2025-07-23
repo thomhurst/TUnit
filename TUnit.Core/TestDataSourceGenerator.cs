@@ -14,7 +14,9 @@ public static class TestDataSourceGenerator
     public static async Task<object?> GenerateTypedDataSourceValueAsync(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type dataSourceType,
         string testSessionId,
-        Dictionary<string, Type> resolvedGenericTypes)
+        Dictionary<string, Type> resolvedGenericTypes,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType,
+        string testMethodName)
     {
         try
         {
@@ -27,7 +29,7 @@ public static class TestDataSourceGenerator
                     $"Data source {dataSourceType.Name} does not implement IDataSourceAttribute");
             }
             
-            // Create metadata for the data source with resolved generic types
+            // Create metadata for the data source with resolved generic types and actual type information
             var metadata = new DataGeneratorMetadata
             {
                 TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
@@ -35,26 +37,23 @@ public static class TestDataSourceGenerator
                 ],
                 TestInformation = new MethodMetadata
                 {
-                    Name = "GenericTest",
-                    Type = typeof(object),
-                    GenericTypeCount = 0,
-                    Parameters = [
-                    ],
+                    Name = testMethodName,
+                    Type = testClassType, // Use the test class type as a reasonable default
+                    GenericTypeCount = resolvedGenericTypes.Count,
+                    Parameters = [], // Avoiding reflection to maintain AOT compatibility
                     ReturnType = typeof(Task),
                     ReturnTypeReference = TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Runtime"),
-                    TypeReference = TypeReference.CreateConcrete("System.Object, System.Runtime"),
+                    TypeReference = TypeReference.CreateConcrete(testClassType.AssemblyQualifiedName ?? "System.Object, System.Runtime"),
                     Class = new ClassMetadata
                     {
-                        Type = typeof(object),
-                        Name = "GenericTestClass",
-                        Namespace = "TUnit.TestProject",
+                        Type = testClassType,
+                        Name = testClassType.Name,
+                        Namespace = testClassType.Namespace ?? string.Empty,
                         Parent = null,
-                        TypeReference = TypeReference.CreateConcrete("System.Object, System.Runtime"),
-                        Assembly = new AssemblyMetadata { Name = "TUnit.TestProject" },
-                        Parameters = [
-                        ],
-                        Properties = [
-                        ]
+                        TypeReference = TypeReference.CreateConcrete(testClassType.AssemblyQualifiedName ?? "System.Object, System.Runtime"),
+                        Assembly = new AssemblyMetadata { Name = testClassType.Assembly.GetName().Name ?? "Unknown" },
+                        Parameters = [], // Avoiding reflection to maintain AOT compatibility
+                        Properties = [] // Avoiding reflection to maintain AOT compatibility
                     }
                 },
                 Type = DataGeneratorType.TestParameters,
@@ -80,6 +79,7 @@ public static class TestDataSourceGenerator
         }
     }
 
+
     /// <summary>
     /// Generate a single data value from Matrix-based data sources at runtime
     /// </summary>
@@ -87,7 +87,9 @@ public static class TestDataSourceGenerator
     [RequiresDynamicCode("MatrixDataSourceAttribute requires dynamic code generation for runtime matrix generation and enum reflection. This attribute is inherently incompatible with AOT compilation.")]
     public static async Task<object?> GenerateMatrixDataSourceValueAsync(
         string testSessionId,
-        Dictionary<string, Type> resolvedGenericTypes)
+        Dictionary<string, Type> resolvedGenericTypes,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type testClassType,
+        string testMethodName)
     {
         try
         {
@@ -102,26 +104,23 @@ public static class TestDataSourceGenerator
                 ],
                 TestInformation = new MethodMetadata
                 {
-                    Name = "GenericMatrixTest",
-                    Type = typeof(object),
-                    GenericTypeCount = 0,
-                    Parameters = [
-                    ],
+                    Name = testMethodName,
+                    Type = testClassType, // Use the test class type as a reasonable default
+                    GenericTypeCount = resolvedGenericTypes.Count,
+                    Parameters = [], // Avoiding reflection to maintain AOT compatibility
                     ReturnType = typeof(Task),
                     ReturnTypeReference = TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Runtime"),
-                    TypeReference = TypeReference.CreateConcrete("System.Object, System.Runtime"),
+                    TypeReference = TypeReference.CreateConcrete(testClassType.AssemblyQualifiedName ?? "System.Object, System.Runtime"),
                     Class = new ClassMetadata
                     {
-                        Type = typeof(object),
-                        Name = "GenericMatrixTestClass",
-                        Namespace = "TUnit.TestProject",
+                        Type = testClassType,
+                        Name = testClassType.Name,
+                        Namespace = testClassType.Namespace ?? string.Empty,
                         Parent = null,
-                        TypeReference = TypeReference.CreateConcrete("System.Object, System.Runtime"),
-                        Assembly = new AssemblyMetadata { Name = "TUnit.TestProject" },
-                        Parameters = [
-                        ],
-                        Properties = [
-                        ]
+                        TypeReference = TypeReference.CreateConcrete(testClassType.AssemblyQualifiedName ?? "System.Object, System.Runtime"),
+                        Assembly = new AssemblyMetadata { Name = testClassType.Assembly.GetName().Name ?? "Unknown" },
+                        Parameters = [], // Avoiding reflection to maintain AOT compatibility
+                        Properties = [] // Avoiding reflection to maintain AOT compatibility
                     }
                 },
                 Type = DataGeneratorType.TestParameters,

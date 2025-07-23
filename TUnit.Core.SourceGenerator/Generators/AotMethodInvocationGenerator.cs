@@ -464,7 +464,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
             for (int i = 0; i < parameters.Length; i++)
             {
                 var param = parameters[i];
-                var paramType = param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var paramType = param.Type.GloballyQualified();
                 
                 // Skip parameters with unresolved type parameters
                 if (ContainsTypeParameters(param.Type))
@@ -490,7 +490,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
                 writer.Append("await ");
             }
 
-            var containingType = method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var containingType = method.ContainingType.GloballyQualified();
             writer.Append($"{containingType}.{method.Name}(");
             
             if (parameters.Length > 0)
@@ -502,8 +502,8 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine($"if (instance is not {method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)} typedInstance)");
-            writer.AppendLine($"    throw new InvalidOperationException($\"Expected instance of type {{typeof({method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName}}, got {{instance?.GetType().FullName ?? \"null\"}}\");");
+            writer.AppendLine($"if (instance is not {method.ContainingType.GloballyQualified()} typedInstance)");
+            writer.AppendLine($"    throw new InvalidOperationException($\"Expected instance of type {{typeof({method.ContainingType.GloballyQualified()}).FullName}}, got {{instance?.GetType().FullName ?? \"null\"}}\");");
             writer.AppendLine();
 
             writer.Append($"var result = ");
@@ -554,7 +554,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
 
     private static string GetMethodKey(IMethodSymbol method)
     {
-        var typeName = method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var typeName = method.ContainingType.GloballyQualified();
         var methodName = method.Name;
         var parameterCount = method.Parameters.Length;
         return $"{typeName}.{methodName}({parameterCount})";

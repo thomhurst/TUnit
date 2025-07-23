@@ -71,8 +71,10 @@ public static class TypeExtensions
         return false;
     }
 
-    public static string GloballyQualified(this ISymbol typeSymbol) =>
-        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    public static string GloballyQualified(this ISymbol typeSymbol)
+    {
+        return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    }
 
     public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);

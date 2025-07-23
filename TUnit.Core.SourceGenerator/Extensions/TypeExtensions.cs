@@ -205,8 +205,19 @@ public static class TypeExtensions
         return false;
     }
 
-    public static string GloballyQualified(this ISymbol typeSymbol) =>
-        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    public static string GloballyQualified(this ISymbol typeSymbol)
+    {
+        if(typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && namedTypeSymbol.IsGenericDefinition())
+        {
+            var genericTypeArguments = namedTypeSymbol.TypeArguments.Length;
+
+            var commas = new string(',', genericTypeArguments - 1);
+
+            return $"{typeSymbol.OriginalDefinition.GloballyQualifiedNonGeneric()}<{commas}>";
+        }
+
+        return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    }
 
     public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);

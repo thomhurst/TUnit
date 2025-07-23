@@ -106,7 +106,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         
         foreach (var typeGroup in propertiesByType)
         {
-            var typeName = typeGroup.Key.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var typeName = typeGroup.Key.GloballyQualified();
             writer.AppendLine($"// Initialize static properties for {typeName}");
             
             foreach (var propertyData in typeGroup)
@@ -154,7 +154,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
         
-        writer.AppendLine($"{typeName}.{propertyName} = ({propertyData.Property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})value;");
+        writer.AppendLine($"{typeName}.{propertyName} = ({propertyData.Property.Type.GloballyQualified()})value;");
         
         writer.Unindent();
         writer.AppendLine("}");
@@ -172,7 +172,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
     private static void GenerateIndividualPropertyInitializer(CodeWriter writer, PropertyWithDataSource propertyData)
     {
         var propertyName = propertyData.Property.Name;
-        var typeName = propertyData.Property.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var typeName = propertyData.Property.ContainingType.GloballyQualified();
         var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyName}";
         
         writer.AppendLine();
@@ -265,7 +265,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             return;
         }
 
-        var fullyQualifiedType = targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var fullyQualifiedType = targetType.GloballyQualified();
         writer.AppendLine($"var data = {fullyQualifiedType}.{methodName}();");
         writer.AppendLine("return await global::TUnit.Core.Helpers.DataSourceHelpers.ProcessDataSourceResultGeneric(data);");
     }
@@ -287,7 +287,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         
         if (targetType != null)
         {
-            var fullyQualifiedType = targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var fullyQualifiedType = targetType.GloballyQualified();
             writer.AppendLine($"var instance = new {fullyQualifiedType}();");
             writer.AppendLine("return instance;");
         }

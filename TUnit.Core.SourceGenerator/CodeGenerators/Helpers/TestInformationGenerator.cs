@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
@@ -63,7 +64,7 @@ public static class TestInformationGenerator
     
     private static void GenerateClassMetadata(CodeWriter writer, INamedTypeSymbol typeSymbol)
     {
-        var qualifiedName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var qualifiedName = typeSymbol.GloballyQualified();
         var safeTypeName = GetSafeTypeDisplayString(typeSymbol);
         
         writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", () => new global::TUnit.Core.ClassMetadata");
@@ -106,6 +107,6 @@ public static class TestInformationGenerator
             return "object";
         }
         
-        return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        return type.GloballyQualified();
     }
 }

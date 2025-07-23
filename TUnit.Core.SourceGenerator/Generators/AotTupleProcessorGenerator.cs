@@ -328,7 +328,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         {
             if (IsConcreteType(tupleType))
             {
-                var fullyQualifiedName = tupleType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var fullyQualifiedName = tupleType.GloballyQualified();
                 if (!processorNameMap.ContainsKey(fullyQualifiedName))
                 {
                     var processorName = GetUniqueTupleProcessorName(tupleType, new HashSet<string>(processorNameMap.Values));
@@ -348,7 +348,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         {
             if (IsConcreteType(tupleType))
             {
-                var fullyQualifiedName = tupleType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var fullyQualifiedName = tupleType.GloballyQualified();
                 var processorName = processorNameMap[fullyQualifiedName];
                 if (processedProcessorNames.Add(processorName))
                 {
@@ -374,7 +374,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         {
             if (IsConcreteType(tupleType))
             {
-                var fullyQualifiedName = tupleType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var fullyQualifiedName = tupleType.GloballyQualified();
                 
                 // Avoid duplicate entries by signature
                 if (processedSignatures.Add(fullyQualifiedName))
@@ -397,7 +397,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         {
             if (IsConcreteType(tupleType))
             {
-                var fullyQualifiedName = tupleType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var fullyQualifiedName = tupleType.GloballyQualified();
                 writer.AppendLine($"typeof({fullyQualifiedName}),");
             }
         }
@@ -470,7 +470,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
             return;
         }
 
-        var fullyQualifiedName = tupleType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var fullyQualifiedName = tupleType.GloballyQualified();
         var elementTypes = namedTupleType.TypeArguments;
         
         // Only generate for concrete types (no type parameters)
@@ -580,7 +580,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         }
         
         // Generate a unique name by adding type hash
-        var typeSignature = tupleType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var typeSignature = tupleType.GloballyQualified();
         var hash = Math.Abs(typeSignature.GetHashCode()).ToString();
         var uniqueName = $"{baseProcName}_{hash}";
         

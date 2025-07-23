@@ -401,7 +401,7 @@ public static class DataCombinationGeneratorEmitter
 
     private static void EmitStaticMethodDataSource(CodeWriter writer, string methodName, string listName, bool isClassLevel, ITypeSymbol typeSymbol, IMethodSymbol dataSourceMethod, AttributeData attr, IMethodSymbol methodSymbol)
     {
-        var fullyQualifiedTypeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var fullyQualifiedTypeName = typeSymbol.GloballyQualified();
 
         // Get the Arguments property from the attribute
         var argumentsProperty = attr.NamedArguments.FirstOrDefault(x => x.Key == "Arguments");
@@ -619,7 +619,7 @@ public static class DataCombinationGeneratorEmitter
                     {
                         var typeParam = methodSymbol.TypeParameters[i];
                         var typeArg = typeArgs[i];
-                        writer.AppendLine($"instanceMethodTypes[\"{typeParam.Name}\"] = typeof({typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)});");
+                        writer.AppendLine($"instanceMethodTypes[\"{typeParam.Name}\"] = typeof({typeArg.GloballyQualified()});");
                     }
                 }
                 else if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol)
@@ -628,19 +628,19 @@ public static class DataCombinationGeneratorEmitter
                     {
                         var typeParam = namedTypeSymbol.TypeParameters[i];
                         var typeArg = typeArgs[i];
-                        writer.AppendLine($"instanceMethodTypes[\"{typeParam.Name}\"] = typeof({typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)});");
+                        writer.AppendLine($"instanceMethodTypes[\"{typeParam.Name}\"] = typeof({typeArg.GloballyQualified()});");
                     }
                 }
                 
                 // Validate constraints if we have generic parameters
                 if (methodSymbol is { IsGenericMethod: true, TypeParameters.Length: > 0 })
                 {
-                    var typeArgStrings = typeArgs.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                    var typeArgStrings = typeArgs.Select(t => $"typeof({t.GloballyQualified()})");
                     EmitGenericConstraintValidation(writer, methodSymbol.TypeParameters, typeArgStrings, "method");
                 }
                 else if (typeSymbol is INamedTypeSymbol { IsGenericType: true, TypeParameters.Length: > 0 } namedTypeForConstraints)
                 {
-                    var typeArgStrings = typeArgs.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                    var typeArgStrings = typeArgs.Select(t => $"typeof({t.GloballyQualified()})");
                     EmitGenericConstraintValidation(writer, namedTypeForConstraints.TypeParameters, typeArgStrings, "class");
                 }
                 
@@ -703,7 +703,7 @@ public static class DataCombinationGeneratorEmitter
             {
                 foreach (var param in constructorParams.Value)
                 {
-                    writer.AppendLine($"new ParameterMetadata(typeof({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}))");
+                    writer.AppendLine($"new ParameterMetadata(typeof({param.Type.GloballyQualified()}))");
                     writer.AppendLine("{");
                     writer.Indent();
                     writer.AppendLine($"Name = \"{param.Name}\",");
@@ -718,12 +718,12 @@ public static class DataCombinationGeneratorEmitter
         {
             foreach (var param in methodSymbol.Parameters)
             {
-                writer.AppendLine($"new ParameterMetadata(typeof({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}))");
+                writer.AppendLine($"new ParameterMetadata(typeof({param.Type.GloballyQualified()}))");
                 writer.AppendLine("{");
                 writer.Indent();
                 writer.AppendLine($"Name = \"{param.Name}\",");
                 writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(param.Type)},");
-                writer.AppendLine($"ReflectionInfo = typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).GetMethod(\"{methodSymbol.Name}\", new Type[] {{ {string.Join(", ", methodSymbol.Parameters.Select(p => $"typeof({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})"))} }})?.GetParameters().FirstOrDefault(p => p.Name == \"{param.Name}\")!");
+                writer.AppendLine($"ReflectionInfo = typeof({typeSymbol.GloballyQualified()}).GetMethod(\"{methodSymbol.Name}\", new Type[] {{ {string.Join(", ", methodSymbol.Parameters.Select(p => $"typeof({p.Type.GloballyQualified()})"))} }})?.GetParameters().FirstOrDefault(p => p.Name == \"{param.Name}\")!");
                 writer.Unindent();
                 writer.AppendLine("},");
             }
@@ -870,7 +870,7 @@ public static class DataCombinationGeneratorEmitter
             {
                 foreach (var param in constructorParams.Value)
                 {
-                    writer.AppendLine($"new ParameterMetadata(typeof({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}))");
+                    writer.AppendLine($"new ParameterMetadata(typeof({param.Type.GloballyQualified()}))");
                     writer.AppendLine("{");
                     writer.Indent();
                     writer.AppendLine($"Name = \"{param.Name}\",");
@@ -885,7 +885,7 @@ public static class DataCombinationGeneratorEmitter
         {
             foreach (var param in methodSymbol.Parameters)
             {
-                writer.AppendLine($"new ParameterMetadata(typeof({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}))");
+                writer.AppendLine($"new ParameterMetadata(typeof({param.Type.GloballyQualified()}))");
                 writer.AppendLine("{");
                 writer.Indent();
                 writer.AppendLine($"Name = \"{param.Name}\",");
@@ -1171,8 +1171,8 @@ public static class DataCombinationGeneratorEmitter
         {
             // Get the fully qualified name without generic arguments
             var typeName = currentType.IsGenericType 
-                ? currentType.ConstructedFrom.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
-                : currentType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                ? currentType.ConstructedFrom.GloballyQualified()
+                : currentType.GloballyQualified();
                 
             // For generic types, compare the base name without type parameters
             if (typeName.StartsWith(baseTypeName + "<") || typeName == baseTypeName)
@@ -1199,7 +1199,7 @@ public static class DataCombinationGeneratorEmitter
             // Check if this is a constructed generic type that matches our base
             if (currentType is { IsGenericType: true, ConstructedFrom: not null })
             {
-                var typeName = currentType.ConstructedFrom.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var typeName = currentType.ConstructedFrom.GloballyQualified();
                 if (typeName.StartsWith("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
                     typeName.StartsWith("global::TUnit.Core.DataSourceGeneratorAttribute"))
                 {
@@ -1256,7 +1256,7 @@ public static class DataCombinationGeneratorEmitter
             if (constant.Kind == TypedConstantKind.Array)
             {
                 var elementType = constant.Type is IArrayTypeSymbol arrayType
-                    ? arrayType.ElementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                    ? arrayType.ElementType.GloballyQualified()
                     : "object";
                 var values = constant.Values.Select(FormatConstantValue);
                 return $"new {elementType}[] {{ {string.Join(", ", values)} }}";
@@ -1264,7 +1264,7 @@ public static class DataCombinationGeneratorEmitter
 
             if (constant is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol })
             {
-                return $"typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
+                return $"typeof({typeSymbol.GloballyQualified()})";
             }
 
             if (constant.Value is string str)
@@ -1538,7 +1538,7 @@ public static class DataCombinationGeneratorEmitter
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("var instance = data[0];");
-            writer.AppendLine($"typeof({typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).GetProperty(\"{propertyName}\")!.SetValue({instanceName}, ({property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})instance);");
+            writer.AppendLine($"typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{propertyName}\")!.SetValue({instanceName}, ({property.Type.GloballyQualified()})instance);");
             writer.AppendLine("break;");
             writer.Unindent();
             writer.AppendLine("}");
@@ -1630,7 +1630,7 @@ public static class DataCombinationGeneratorEmitter
                 // All arguments should be elements of this array
                 var elementType = arrayType.ElementType;
                 var elements = arguments.Select(arg => FormatConstantValueWithType(arg, elementType));
-                var arrayLiteral = $"new {elementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}[] {{ {string.Join(", ", elements)} }}";
+                var arrayLiteral = $"new {elementType.GloballyQualified()}[] {{ {string.Join(", ", elements)} }}";
                 formattedArgs.Add(arrayLiteral);
                 return formattedArgs;
             }
@@ -1638,7 +1638,7 @@ public static class DataCombinationGeneratorEmitter
             {
                 // All arguments should be elements of this enumerable
                 var elements = arguments.Select(arg => FormatConstantValueWithType(arg, enumerableElementType));
-                var arrayLiteral = $"new {enumerableElementType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object"}[] {{ {string.Join(", ", elements)} }}";
+                var arrayLiteral = $"new {enumerableElementType?.GloballyQualified() ?? "object"}[] {{ {string.Join(", ", elements)} }}";
                 formattedArgs.Add(arrayLiteral);
                 return formattedArgs;
             }
@@ -1666,14 +1666,14 @@ public static class DataCombinationGeneratorEmitter
                     var elementType = arrayType.ElementType;
                     var remainingArgs = arguments.Skip(parameters.Length - 1);
                     var elements = remainingArgs.Select(arg => FormatConstantValueWithType(arg, elementType));
-                    var arrayLiteral = $"new {elementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}[] {{ {string.Join(", ", elements)} }}";
+                    var arrayLiteral = $"new {elementType.GloballyQualified()}[] {{ {string.Join(", ", elements)} }}";
                     formattedArgs.Add(arrayLiteral);
                 }
                 else if (IsEnumerableType(lastParamType, out var enumerableElementType))
                 {
                     var remainingArgs = arguments.Skip(parameters.Length - 1);
                     var elements = remainingArgs.Select(arg => FormatConstantValueWithType(arg, enumerableElementType));
-                    var arrayLiteral = $"new {enumerableElementType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object"}[] {{ {string.Join(", ", elements)} }}";
+                    var arrayLiteral = $"new {enumerableElementType?.GloballyQualified() ?? "object"}[] {{ {string.Join(", ", elements)} }}";
                     formattedArgs.Add(arrayLiteral);
                 }
                 
@@ -1705,14 +1705,14 @@ public static class DataCombinationGeneratorEmitter
             
             // Create an array literal for the params parameter
             var paramsElements = remainingArgs.Select(arg => FormatConstantValueWithType(arg, paramsElementType));
-            var paramsArrayLiteral = $"new {paramsElementType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object"}[] {{ {string.Join(", ", paramsElements)} }}";
+            var paramsArrayLiteral = $"new {paramsElementType?.GloballyQualified() ?? "object"}[] {{ {string.Join(", ", paramsElements)} }}";
             formattedArgs.Add(paramsArrayLiteral);
         }
         else if (lastParameter?.IsParams == true)
         {
             // No arguments for params parameter, create empty array
             var paramsElementType = (lastParameter.Type as IArrayTypeSymbol)?.ElementType;
-            var paramsArrayLiteral = $"new {paramsElementType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object"}[0]";
+            var paramsArrayLiteral = $"new {paramsElementType?.GloballyQualified() ?? "object"}[0]";
             formattedArgs.Add(paramsArrayLiteral);
         }
 
@@ -2437,11 +2437,11 @@ public static class DataCombinationGeneratorEmitter
                     {
                         var typeParam = methodSymbol.TypeParameters[i];
                         var typeArg = attributeTypeArgs[i];
-                        writer.AppendLine($"typedDataSourceTypes[\"{typeParam.Name}\"] = typeof({typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)});");
+                        writer.AppendLine($"typedDataSourceTypes[\"{typeParam.Name}\"] = typeof({typeArg.GloballyQualified()});");
                     }
                     
                     // Validate constraints for method type parameters
-                    var typeArgStrings = attributeTypeArgs.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                    var typeArgStrings = attributeTypeArgs.Select(t => $"typeof({t.GloballyQualified()})");
                     EmitGenericConstraintValidation(writer, methodSymbol.TypeParameters, typeArgStrings, "method");
                 }
                 
@@ -2453,11 +2453,11 @@ public static class DataCombinationGeneratorEmitter
                     {
                         var typeParam = typeSymbol.TypeParameters[i];
                         var typeArg = attributeTypeArgs[i];
-                        writer.AppendLine($"typedDataSourceTypes[\"{typeParam.Name}\"] = typeof({typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)});");
+                        writer.AppendLine($"typedDataSourceTypes[\"{typeParam.Name}\"] = typeof({typeArg.GloballyQualified()});");
                     }
                     
                     // Validate constraints for class type parameters
-                    var typeArgStrings = attributeTypeArgs.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                    var typeArgStrings = attributeTypeArgs.Select(t => $"typeof({t.GloballyQualified()})");
                     EmitGenericConstraintValidation(writer, typeSymbol.TypeParameters, typeArgStrings, "class");
                 }
                 
@@ -2487,13 +2487,26 @@ public static class DataCombinationGeneratorEmitter
                 writer.AppendLine("MethodLoopIndex = 0,");
                         
                 // Store the data source type for runtime generation
-                var attributeFullName = attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var attributeFullName = attr.AttributeClass.GloballyQualified();
                 writer.AppendLine($"// Store typed data source info for runtime generation: {attributeFullName}");
                 writer.AppendLine("MethodDataFactories = new Func<Task<object?>>[]");
                 writer.AppendLine("{");
                 writer.Indent();
                 writer.AppendLine("async () => await global::TUnit.Core.TestDataSourceGenerator.GenerateTypedDataSourceValueAsync(");
-                writer.AppendLine($"    typeof({attributeFullName}), testSessionId, typedDataSourceTypes)");
+                writer.AppendLine($"    typeof({attributeFullName}), testSessionId, typedDataSourceTypes,");
+                
+                // For generic types, use the original definition to avoid unresolved type parameters
+                if (typeSymbol.IsGenericType)
+                {
+                    var originalDefinition = typeSymbol.OriginalDefinition;
+                    writer.AppendLine($"    typeof({originalDefinition.GloballyQualified()}),");
+                }
+                else
+                {
+                    writer.AppendLine($"    typeof({typeSymbol.GloballyQualified()}),");
+                }
+                
+                writer.AppendLine($"    \"{methodSymbol.Name}\")");
                 writer.Unindent();
                 writer.AppendLine("},");
                 
@@ -2607,7 +2620,7 @@ public static class DataCombinationGeneratorEmitter
             {
                 if (constraintType.TypeKind == TypeKind.Interface)
                 {
-                    var interfaceName = constraintType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    var interfaceName = constraintType.GloballyQualified();
                     writer.AppendLine($"if (!typeof({interfaceName}).IsAssignableFrom(type))");
                     writer.AppendLine("{");
                     writer.Indent();
@@ -2617,7 +2630,7 @@ public static class DataCombinationGeneratorEmitter
                 }
                 else if (constraintType.TypeKind == TypeKind.Class)
                 {
-                    var baseClassName = constraintType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    var baseClassName = constraintType.GloballyQualified();
                     writer.AppendLine($"if (!typeof({baseClassName}).IsAssignableFrom(type))");
                     writer.AppendLine("{");
                     writer.Indent();
@@ -2666,7 +2679,7 @@ public static class DataCombinationGeneratorEmitter
                 // Check if this is a generic attribute (e.g., Matrix<T>)
                 if (attr.AttributeClass?.IsGenericType == true)
                 {
-                    var baseTypeName = attr.AttributeClass.ConstructedFrom.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    var baseTypeName = attr.AttributeClass.ConstructedFrom.GloballyQualified();
                     writer.AppendLine($"// Found generic attribute: {baseTypeName}");
                     
                     // Extract type arguments from the attribute
@@ -2683,7 +2696,7 @@ public static class DataCombinationGeneratorEmitter
                             {
                                 var typeParam = methodSymbol.TypeParameters[paramIndex];
                                 var typeArg = typeArgs[0]; // Take first type argument from attribute
-                                writer.AppendLine($"parameterBasedTypes[\"{typeParam.Name}\"] = typeof({typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)});");
+                                writer.AppendLine($"parameterBasedTypes[\"{typeParam.Name}\"] = typeof({typeArg.GloballyQualified()});");
                             }
                         }
                         else if (typeSymbol.IsGenericType)
@@ -2693,7 +2706,7 @@ public static class DataCombinationGeneratorEmitter
                             {
                                 var typeParam = typeSymbol.TypeParameters[paramIndex];
                                 var typeArg = typeArgs[0];
-                                writer.AppendLine($"parameterBasedTypes[\"{typeParam.Name}\"] = typeof({typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)});");
+                                writer.AppendLine($"parameterBasedTypes[\"{typeParam.Name}\"] = typeof({typeArg.GloballyQualified()});");
                             }
                         }
                     }
@@ -2748,7 +2761,20 @@ public static class DataCombinationGeneratorEmitter
         writer.Indent();
         writer.AppendLine("// This will be replaced by runtime Matrix data source generation");
         writer.AppendLine("async () => await global::TUnit.Core.TestDataSourceGenerator.GenerateMatrixDataSourceValueAsync(");
-        writer.AppendLine("    testSessionId, parameterBasedTypes)");
+        writer.AppendLine($"    testSessionId, parameterBasedTypes,");
+        
+        // For generic types, use the original definition to avoid unresolved type parameters
+        if (typeSymbol.IsGenericType)
+        {
+            var originalDefinition = typeSymbol.OriginalDefinition;
+            writer.AppendLine($"    typeof({originalDefinition.GloballyQualified()}),");
+        }
+        else
+        {
+            writer.AppendLine($"    typeof({typeSymbol.GloballyQualified()}),");
+        }
+        
+        writer.AppendLine($"    \"{methodSymbol.Name}\")");
         writer.Unindent();
         writer.AppendLine("},");
         
@@ -2858,7 +2884,7 @@ public static class DataCombinationGeneratorEmitter
             {
                 if (constraintType.TypeKind == TypeKind.Interface)
                 {
-                    var interfaceName = constraintType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    var interfaceName = constraintType.GloballyQualified();
                     writer.AppendLine($"if (!typeof({interfaceName}).IsAssignableFrom(type))");
                     writer.AppendLine("{");
                     writer.Indent();
@@ -2868,7 +2894,7 @@ public static class DataCombinationGeneratorEmitter
                 }
                 else if (constraintType.TypeKind == TypeKind.Class)
                 {
-                    var baseClassName = constraintType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    var baseClassName = constraintType.GloballyQualified();
                     writer.AppendLine($"if (!typeof({baseClassName}).IsAssignableFrom(type))");
                     writer.AppendLine("{");
                     writer.Indent();
@@ -2944,7 +2970,7 @@ public static class DataCombinationGeneratorEmitter
                 writer.AppendLine("async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()");
                 writer.AppendLine("{");
                 writer.Indent();
-                writer.AppendLine($"var result = {typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{dataSourceMethodName}();");
+                writer.AppendLine($"var result = {typeSymbol.GloballyQualified()}.{dataSourceMethodName}();");
                 writer.AppendLine("yield return () => Task.FromResult(ConvertToObjectArray(result));");
                 writer.Unindent();
                 writer.AppendLine("}");
@@ -2966,12 +2992,12 @@ public static class DataCombinationGeneratorEmitter
         else if (attrName == "global::TUnit.Core.ClassDataSourceAttribute" && attrClass.IsGenericType)
         {
             var genericArg = attrClass.TypeArguments[0];
-            writer.Append($"new ClassDataSourceAttribute<{genericArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>()");
+            writer.Append($"new ClassDataSourceAttribute<{genericArg.GloballyQualified()}>()");;
         }
         else
         {
             // For other data source types, generate a basic instantiation
-            writer.Append($"new {attrClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}()");
+            writer.Append($"new {attrClass.GloballyQualified()}()");;
         }
     }
 }

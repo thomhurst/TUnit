@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
@@ -81,7 +82,7 @@ public static class RequiredPropertyHelper
             SpecialType.System_Decimal => "0m",
             SpecialType.System_Single => "0f",
             SpecialType.System_Double => "0d",
-            _ => $"default({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})"
+            _ => $"default({type.GloballyQualified()})"
         };
     }
 }

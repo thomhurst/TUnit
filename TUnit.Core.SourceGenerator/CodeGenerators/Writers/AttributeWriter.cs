@@ -167,7 +167,7 @@ public class AttributeWriter
 
             sourceCodeWriter.Append($"{propertySymbol.Name} = ");
 
-            var propertyType = propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var propertyType = propertySymbol.Type.GloballyQualified();
             var isNullable = propertySymbol.Type.NullableAnnotation == NullableAnnotation.Annotated;
             
             if (propertySymbol.Type.IsReferenceType && !isNullable)

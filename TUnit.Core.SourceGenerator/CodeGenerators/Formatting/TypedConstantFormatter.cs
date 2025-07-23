@@ -1,11 +1,11 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 
 public class TypedConstantFormatter : ITypedConstantFormatter
 {
-    private static readonly SymbolDisplayFormat FullyQualifiedFormat = SymbolDisplayFormat.FullyQualifiedFormat;
     
     public string FormatForCode(TypedConstant constant, ITypeSymbol? targetType = null)
     {
@@ -24,7 +24,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 
             case TypedConstantKind.Type:
                 var type = (ITypeSymbol)constant.Value!;
-                return $"typeof({type.ToDisplayString(FullyQualifiedFormat)})";
+                return $"typeof({type.GloballyQualified()})";
                 
             case TypedConstantKind.Array:
                 return FormatArrayForCode(constant, targetType);
@@ -57,7 +57,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 
             case TypedConstantKind.Type:
                 var type = (ITypeSymbol)constant.Value!;
-                return type.ToDisplayString(FullyQualifiedFormat);
+                return type.GloballyQualified();
                 
             case TypedConstantKind.Array:
                 var elements = constant.Values.Select(v => FormatForTestId(v));
@@ -100,15 +100,15 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 var memberName = GetEnumMemberName(enumType, value);
                 if (memberName != null)
                 {
-                    var enumTypeName = targetType.ToDisplayString(FullyQualifiedFormat);
+                    var enumTypeName = targetType.GloballyQualified();
                     return $"{enumTypeName}.{memberName}";
                 }
                 
                 // Fallback to cast for non-member values
                 var formattedValue = FormatPrimitive(value);
                 return formattedValue != null && formattedValue.StartsWith("-") 
-                    ? $"({targetType.ToDisplayString(FullyQualifiedFormat)})({formattedValue})"
-                    : $"({targetType.ToDisplayString(FullyQualifiedFormat)}){formattedValue}";
+                    ? $"({targetType.GloballyQualified()})({formattedValue})"
+                    : $"({targetType.GloballyQualified()}){formattedValue}";
             }
 
             // Special handling for char to numeric conversions
@@ -185,14 +185,14 @@ public class TypedConstantFormatter : ITypedConstantFormatter
         var memberName = GetEnumMemberName(enumType, constant.Value);
         if (memberName != null)
         {
-            return $"{enumType.ToDisplayString(FullyQualifiedFormat)}.{memberName}";
+            return $"{enumType.GloballyQualified()}.{memberName}";
         }
 
         // Fallback to cast syntax
         var formattedValue = FormatPrimitive(constant.Value);
         return formattedValue != null && formattedValue.StartsWith("-")
-            ? $"({enumType.ToDisplayString(FullyQualifiedFormat)})({formattedValue})"
-            : $"({enumType.ToDisplayString(FullyQualifiedFormat)}){formattedValue}";
+            ? $"({enumType.GloballyQualified()})({formattedValue})"
+            : $"({enumType.GloballyQualified()}){formattedValue}";
     }
 
     private string FormatArrayForCode(TypedConstant constant, ITypeSymbol? targetType = null)
@@ -209,7 +209,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
         }
         
         var elements = constant.Values.Select(v => FormatForCode(v, elementType));
-        var elementTypeString = elementType?.ToDisplayString(FullyQualifiedFormat) ?? "object";
+        var elementTypeString = elementType?.GloballyQualified() ?? "object";
         return $"new {elementTypeString}[] {{ {string.Join(", ", elements)} }}";
     }
 

@@ -588,8 +588,7 @@ internal static class CodeGenerationHelpers
     private static string GetAssemblyQualifiedName(ITypeSymbol typeSymbol)
     {
         // Build assembly qualified name
-        var typeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat
-            .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+        var typeName = typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
 
         // For well-known types, use simplified names
         if (typeSymbol.ContainingAssembly.Name == "System.Private.CoreLib" ||

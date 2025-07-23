@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Utilities;
 
 namespace TUnit.Core.SourceGenerator.Generators;
@@ -551,7 +552,7 @@ internal sealed class GenericTypeResolver
             var typeArgs = kvp.Key;
 
             writer.Append("{ new Type[] { ");
-            writer.Append(string.Join(", ", typeArgs.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})")));
+            writer.Append(string.Join(", ", typeArgs.Select(t => $"typeof({t.GloballyQualified()})")));
             writer.Append(" }, ");
             writer.Append($"CreateMetadata_{SafeTypeName(typeArgs)}() }},");
             writer.AppendLine();
@@ -595,7 +596,7 @@ internal sealed class GenericTypeResolver
     private void GenerateMetadataCreationMethod(CodeWriter writer, ITypeSymbol[] typeArgs, GenericTestInfo testInfo)
     {
         var methodName = $"CreateMetadata_{SafeTypeName(typeArgs)}";
-        var typeArgsDisplay = string.Join(", ", typeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+        var typeArgsDisplay = string.Join(", ", typeArgs.Select(t => t.GloballyQualified()));
 
         writer.AppendLine($"private static TestMetadata {methodName}() => new()");
         writer.AppendLine("{");
@@ -603,7 +604,7 @@ internal sealed class GenericTypeResolver
 
         writer.AppendLine($"TestId = \"GenericTest<{typeArgsDisplay}>\",");
         writer.AppendLine("TestName = \"GenericTest\",");
-        writer.AppendLine($"TestClassType = typeof({testInfo.OriginalType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}<{typeArgsDisplay}>),");
+        writer.AppendLine($"TestClassType = typeof({testInfo.OriginalType.GloballyQualified()}<{typeArgsDisplay}>),");
         writer.AppendLine($"TestMethodName = \"{testInfo.TestMethods.FirstOrDefault()?.Name ?? "Unknown"}\",");
         writer.AppendLine("FilePath = string.Empty,"); // Would need syntax reference for actual file path
         writer.AppendLine("LineNumber = 0,");

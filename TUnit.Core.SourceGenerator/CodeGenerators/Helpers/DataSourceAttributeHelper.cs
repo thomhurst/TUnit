@@ -13,7 +13,7 @@ internal static class DataSourceAttributeHelper
         }
 
         var name = attributeClass.Name;
-        var fullyQualifiedName = attributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var fullyQualifiedName = attributeClass.GloballyQualified();
         
         // Check by simple name first (more flexible)
         if (name == "ArgumentsAttribute" ||

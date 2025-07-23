@@ -303,7 +303,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
                 // Only generate code for concrete types
                 if (IsConcreteType(type))
                 {
-                    var fullyQualifiedName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    var fullyQualifiedName = type.GloballyQualified();
                     var assemblyQualifiedName = GetAssemblyQualifiedName(type);
                     
                     writer.AppendLine($"_typeCache[\"{assemblyQualifiedName}\"] = typeof({fullyQualifiedName});");
@@ -348,7 +348,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
                 // Only generate code for concrete types
                 if (IsConcreteType(type))
                 {
-                    var fullyQualifiedName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    var fullyQualifiedName = type.GloballyQualified();
                     var assemblyQualifiedName = GetAssemblyQualifiedName(type);
                     writer.AppendLine($"\"{assemblyQualifiedName}\" => typeof({fullyQualifiedName}),");
                 }
@@ -394,7 +394,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         if (genericTypeCombinations.Count > 0)
         {
             writer.AppendLine("// Handle known generic type combinations");
-            writer.AppendLine($"if (genericTypeDefinition == typeof({genericTypeCombinations[0].GenericDefinition.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}) && typeArguments.Length == {genericTypeCombinations[0].TypeArguments.Length})");
+            writer.AppendLine($"if (genericTypeDefinition == typeof({genericTypeCombinations[0].GenericDefinition.GloballyQualified()}) && typeArguments.Length == {genericTypeCombinations[0].TypeArguments.Length})");
             writer.AppendLine("{");
             writer.Indent();
             
@@ -428,7 +428,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         {
             if (genericTest.TypeSymbol != null)
             {
-                var typeName = genericTest.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var typeName = genericTest.TypeSymbol.GloballyQualified();
                 if (processedTypes.Add(typeName))
                 {
                     GenerateGenericTypeFactory(writer, genericTest.TypeSymbol);
@@ -446,7 +446,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         }
         
         var safeName = GetSafeTypeName(genericType);
-        var fullyQualifiedName = genericType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var fullyQualifiedName = genericType.GloballyQualified();
         
         writer.AppendLine($"/// <summary>");
         writer.AppendLine($"/// Factory for creating instances of {genericType.Name}");
@@ -506,7 +506,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
                 break;
             }
             
-            var fullyQualifiedName = typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var fullyQualifiedName = typeArg.GloballyQualified();
             conditions.Add($"typeArguments[{i}] == typeof({fullyQualifiedName})");
         }
         
@@ -523,11 +523,11 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         // Build the constructed type with concrete types only
         var typeArgStrings = combination.TypeArguments
             .Where(t => t.TypeKind != TypeKind.TypeParameter)
-            .Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+            .Select(t => t.GloballyQualified());
             
         if (typeArgStrings.Count() == combination.TypeArguments.Length)
         {
-            var constructedType = $"{combination.GenericDefinition.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}<{string.Join(", ", typeArgStrings)}>";
+            var constructedType = $"{combination.GenericDefinition.GloballyQualified()}<{string.Join(", ", typeArgStrings)}>";
             writer.AppendLine($"var result = typeof({constructedType});");
             writer.AppendLine("_genericTypeCache[cacheKey] = result;");
             writer.AppendLine("return result;");
@@ -565,7 +565,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
     private static string GetAssemblyQualifiedName(ITypeSymbol type)
     {
         // Simplified assembly qualified name generation
-        var typeName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var typeName = type.GloballyQualified();
         var assemblyName = type.ContainingAssembly?.Name ?? "UnknownAssembly";
         return $"{typeName}, {assemblyName}";
     }

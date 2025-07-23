@@ -335,7 +335,7 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
 
         foreach (var classInfo in classes)
         {
-            var fullyQualifiedTypeName = classInfo.ClassSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var fullyQualifiedTypeName = classInfo.ClassSymbol.GloballyQualified();
             var injectorMethodName = GetInjectorMethodName(classInfo.ClassSymbol);
 
             writer.AppendLine($"// Register injector for {classInfo.ClassSymbol.Name}");
@@ -376,7 +376,7 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
     private static void GenerateClassSpecificInjector(CodeWriter writer, ClassWithPropertiesInfo classInfo)
     {
         var className = classInfo.ClassSymbol.Name;
-        var fullyQualifiedTypeName = classInfo.ClassSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var fullyQualifiedTypeName = classInfo.ClassSymbol.GloballyQualified();
         var injectorMethodName = GetInjectorMethodName(classInfo.ClassSymbol);
 
         writer.AppendLine($"/// <summary>");
@@ -399,7 +399,7 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
     private static void GeneratePropertyInjectionCode(CodeWriter writer, InjectablePropertyInfo propertyInfo, INamedTypeSymbol containingType)
     {
         var propertyName = propertyInfo.Property.Name;
-        var propertyType = propertyInfo.Property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var propertyType = propertyInfo.Property.Type.GloballyQualified();
 
         writer.AppendLine($"// Inject {propertyName} property");
         writer.AppendLine($"if (propertyValues.TryGetValue(\"{propertyName}\", out var {propertyName.ToLowerInvariant()}Value))");
@@ -429,7 +429,7 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
             case PropertyInjectionStrategy.DirectSetter:
                 if (propertyInfo.Property.IsStatic)
                 {
-                    var typeName = containingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    var typeName = containingType.GloballyQualified();
                     writer.AppendLine($"{typeName}.{propertyName} = typedValue{propertyName};");
                 }
                 else
@@ -454,7 +454,7 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
 
             case PropertyInjectionStrategy.ReflectionFallback:
                 writer.AppendLine("// Reflection fallback - should be avoided in AOT scenarios");
-                writer.AppendLine($"var property = typeof({containingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).GetProperty(\"{propertyName}\");");
+                writer.AppendLine($"var property = typeof({containingType.GloballyQualified()}).GetProperty(\"{propertyName}\");");
                 writer.AppendLine($"property?.SetValue(instance, typedValue{propertyName});");
                 break;
         }
@@ -516,8 +516,8 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
     private static void GenerateUnsafeAccessorMethod(CodeWriter writer, INamedTypeSymbol containingType, IPropertySymbol property)
     {
         var methodName = GetUnsafeAccessorMethodName(containingType, property);
-        var typeName = containingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var typeName = containingType.GloballyQualified();
+        var propertyType = property.Type.GloballyQualified();
         var backingFieldName = $"<{property.Name}>k__BackingField";
 
         writer.AppendLine($"[global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
@@ -528,8 +528,8 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
     private static void GenerateBackingFieldAccessorMethod(CodeWriter writer, INamedTypeSymbol containingType, IPropertySymbol property)
     {
         var methodName = GetBackingFieldAccessorMethodName(containingType, property);
-        var typeName = containingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var typeName = containingType.GloballyQualified();
+        var propertyType = property.Type.GloballyQualified();
         var backingFieldName = $"<{property.Name}>k__BackingField";
 
         writer.AppendLine($"[global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");

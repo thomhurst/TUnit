@@ -130,7 +130,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateSimplifiedTestMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
     {
-        var className = testMethod.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var className = testMethod.TypeSymbol.GloballyQualified();
         var methodName = testMethod.MethodSymbol.Name;
         var guid = Guid.NewGuid().ToString("N");
         var combinationGuid = Guid.NewGuid().ToString("N").Substring(0, 8);
@@ -245,7 +245,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateDataSources(writer, compilation, testMethod);
 
         // Generate property injections
-        GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+        GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
 
         // Parameter types
         writer.AppendLine("ParameterTypes = new global::System.Type[]");
@@ -412,7 +412,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     { Value: ITypeSymbol missingMethodTypeArg } _, _, ..
                 ])
             {
-                writer.AppendLine($"new global::TUnit.Core.MethodDataSourceAttribute(typeof({missingMethodTypeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}), \"{methodName}\"),");
+                writer.AppendLine($"new global::TUnit.Core.MethodDataSourceAttribute(typeof({missingMethodTypeArg.GloballyQualified()}), \"{methodName}\"),");
             }
             else
             {
@@ -428,7 +428,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ])
         {
             // MethodDataSource(Type, string) constructor
-            writer.AppendLine($"new global::TUnit.Core.MethodDataSourceAttribute(typeof({typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}), \"{methodName}\")");
+            writer.AppendLine($"new global::TUnit.Core.MethodDataSourceAttribute(typeof({typeArg.GloballyQualified()}), \"{methodName}\")");
         }
         else
         {
@@ -479,7 +479,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var isStatic = dataSourceMethod.IsStatic;
         var returnType = dataSourceMethod.ReturnType;
-        var fullyQualifiedType = targetType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var fullyQualifiedType = targetType.GloballyQualified();
 
         // Generate async enumerable that yields Func<Task<object?[]?>>
         writer.AppendLine("async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()");
@@ -492,7 +492,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // Use the captured arguments
             var argsList = string.Join(", ", dataSourceMethod.Parameters.Select((p, i) =>
-                $"(({p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})arguments[{i}])"));
+                $"(({p.Type.GloballyQualified()})arguments[{i}])"));
             methodCall = $"{dataSourceMethod.Name}({argsList})";
         }
         else
@@ -686,7 +686,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
         {
             var genericArg = attr.AttributeClass.TypeArguments[0];
-            writer.AppendLine($"new global::TUnit.Core.ClassDataSourceAttribute<{genericArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>(),");
+            writer.AppendLine($"new global::TUnit.Core.ClassDataSourceAttribute<{genericArg.GloballyQualified()}>(),");
         }
         else
         {
@@ -739,12 +739,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             case TypedConstantKind.Type:
                 var type = constant.Value as ITypeSymbol;
-                writer.Append($"typeof({type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                writer.Append($"typeof({type?.GloballyQualified()})");
                 break;
 
             case TypedConstantKind.Array:
                 var elementType = constant.Type is IArrayTypeSymbol arrayType
-                    ? arrayType.ElementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                    ? arrayType.ElementType.GloballyQualified()
                     : "object";
                 writer.Append($"new {elementType}[] {{ ");
                 for (int i = 0; i < constant.Values.Length; i++)
@@ -787,7 +787,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (dataSourceAttr != null)
                     {
                         processedProperties.Add(property.Name);
-                        var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                        var propertyType = property.Type.GloballyQualified();
 
                         writer.AppendLine("new global::TUnit.Core.PropertyInjectionData");
                         writer.AppendLine("{");
@@ -860,7 +860,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         writer.AppendLine("{");
                         writer.Indent();
                         writer.AppendLine($"PropertyName = \"{property.Name}\",");
-                        writer.AppendLine($"PropertyType = typeof({property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
+                        writer.AppendLine($"PropertyType = typeof({property.Type.GloballyQualified()}),");
                         writer.Append("DataSource = ");
                         GenerateDataSourceAttribute(writer, dataSourceAttr, testMethod.MethodSymbol, typeSymbol);
                         writer.Unindent();
@@ -956,8 +956,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (dataSourceAttr != null)
                     {
                         nestedProcessedProperties.Add(property.Name);
-                        var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                        var className = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                        var propertyType = property.Type.GloballyQualified();
+                        var className = typeSymbol.GloballyQualified();
 
                         writer.AppendLine("new global::TUnit.Core.PropertyInjectionData");
                         writer.AppendLine("{");
@@ -1008,7 +1008,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (dataSourceAttr != null)
                     {
                         processedProperties.Add(property.Name);
-                        var className = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                        var className = typeSymbol.GloballyQualified();
 
                         writer.AppendLine($"if (obj is {className} typedObj)");
                         writer.AppendLine("{");
@@ -1030,7 +1030,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Check if last parameter is CancellationToken (regardless of whether it has a default value)
         var hasCancellationToken = parameters.Length > 0 &&
-            parameters.Last().Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == "global::System.Threading.CancellationToken";
+            parameters.Last().Type.GloballyQualified() == "global::System.Threading.CancellationToken";
 
         // Parameters that come from args (excluding CancellationToken)
         var parametersFromArgs = hasCancellationToken
@@ -1127,7 +1127,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else
         {
             // Non-generic type but might have generic method
-            writer.AppendLine($"return new {typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}();");
+            writer.AppendLine($"return new {typeSymbol.GloballyQualified()}();");
         }
 
         writer.Unindent();
@@ -1266,7 +1266,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     else
                     {
                         // This shouldn't happen if we set up requiredParamCount correctly
-                        argsToPass.Add($"default({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                        argsToPass.Add($"default({param.Type.GloballyQualified()})");
                     }
                 }
 
@@ -1370,7 +1370,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     else
                     {
                         // This shouldn't happen if we set up requiredParamCount correctly
-                        argsToPass.Add($"default({param.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                        argsToPass.Add($"default({param.Type.GloballyQualified()})");
                     }
                 }
 
@@ -1509,7 +1509,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var classType = arg.Value as ITypeSymbol;
                 if (classType != null)
                 {
-                    var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    var className = classType.GloballyQualified();
                     var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType
                         ? namedType.Arity
                         : 0;
@@ -1536,7 +1536,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     {
                         if (secondArg.Values[i].Value is ITypeSymbol paramType)
                         {
-                            writer.Append($"typeof({paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                            writer.Append($"typeof({paramType.GloballyQualified()})");
                             if (i < secondArg.Values.Length - 1)
                             {
                                 writer.Append(", ");
@@ -1556,7 +1556,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                 if (classType != null)
                 {
-                    var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    var className = classType.GloballyQualified();
                     var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType
                         ? namedType.Arity
                         : 0;
@@ -1572,7 +1572,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (classType != null)
             {
-                var className = classType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var className = classType.GloballyQualified();
                 var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType
                     ? namedType.Arity
                     : 0;
@@ -1587,7 +1587,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     {
                         if (paramTypesArg.Values[i].Value is ITypeSymbol paramType)
                         {
-                            writer.Append($"typeof({paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})");
+                            writer.Append($"typeof({paramType.GloballyQualified()})");
                             if (i < paramTypesArg.Values.Length - 1)
                             {
                                 writer.Append(", ");
@@ -1606,7 +1606,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         if (!parameter.HasExplicitDefaultValue)
         {
-            return $"default({parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})";
+            return $"default({parameter.Type.GloballyQualified()})";
         }
 
         var defaultValue = parameter.ExplicitDefaultValue;
@@ -1801,7 +1801,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             foreach (var property in initOnlyPropertiesWithDataSources)
             {
                 var backingFieldName = $"<{property.Name}>k__BackingField";
-                var propertyType = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var propertyType = property.Type.GloballyQualified();
 
                 writer.AppendLine($"[global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
                 writer.AppendLine($"private static extern ref {propertyType} Get{property.Name}BackingField({className} instance);");
@@ -1815,7 +1815,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         // For generic types, we need to generate the open generic type definition
         // e.g., MyClass<T> becomes MyClass<>
-        var typeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var typeName = typeSymbol.GloballyQualified();
 
         // Remove the generic arguments to get the open generic type
         var genericIndex = typeName.IndexOf('<');
@@ -1838,7 +1838,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return "typeof(object)";
         }
 
-        var fullyQualifiedName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var fullyQualifiedName = typeSymbol.GloballyQualified();
         return $"typeof({fullyQualifiedName})";
     }
 
@@ -1926,7 +1926,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var baseTypeConstraint = typeParam.ConstraintTypes.FirstOrDefault(c => c.TypeKind == TypeKind.Class);
         if (baseTypeConstraint != null)
         {
-            writer.AppendLine($"BaseTypeConstraint = typeof({baseTypeConstraint.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}),");
+            writer.AppendLine($"BaseTypeConstraint = typeof({baseTypeConstraint.GloballyQualified()}),");
         }
 
         // Generate interface constraints
@@ -1936,7 +1936,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Indent();
         foreach (var constraintType in interfaceConstraints)
         {
-            var constraintTypeName = constraintType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            var constraintTypeName = constraintType.GloballyQualified();
             writer.AppendLine($"typeof({constraintTypeName}),");
         }
         writer.Unindent();
