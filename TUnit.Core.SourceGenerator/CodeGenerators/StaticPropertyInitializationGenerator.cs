@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.Text;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Models;
+using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
 
@@ -210,12 +211,14 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("}");
     }
 
+    private static readonly TypedConstantFormatter _formatter = new();
+    
     private static void GenerateArgumentsDataSource(CodeWriter writer, AttributeData attr)
     {
         if (attr.ConstructorArguments.Length > 0)
         {
             var value = attr.ConstructorArguments[0];
-            var formattedValue = DataCombinationGeneratorEmitter.FormatConstantValue(value);
+            var formattedValue = _formatter.FormatForCode(value);
             // For static properties, we want the raw value, not wrapped in an array
             if (formattedValue.StartsWith("ImmutableArray.Create<object>(") && formattedValue.EndsWith(")"))
             {
