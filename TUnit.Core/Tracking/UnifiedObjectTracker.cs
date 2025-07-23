@@ -17,11 +17,11 @@ internal static class UnifiedObjectTracker
     /// <param name="events">Events for the test instance</param>
     /// <param name="obj">The object to track</param>
     /// <returns>The tracked object (same instance)</returns>
-    public static T TrackObject<T>(TestContextEvents events, T obj)
+    public static void TrackObject(TestContextEvents events, object? obj)
     {
         if (obj == null || ShouldSkipTracking(obj))
         {
-            return obj;
+            return;
         }
 
         var counter = _trackedObjects.GetOrAdd(obj, _ => new Counter());
@@ -32,8 +32,6 @@ internal static class UnifiedObjectTracker
         {
             await ReleaseObject(obj);
         };
-
-        return obj;
     }
 
     /// <summary>

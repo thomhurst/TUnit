@@ -9,7 +9,7 @@ namespace TUnit.Engine.Discovery;
 /// </summary>
 internal sealed class ReflectionTestMetadata : TestMetadata
 {
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.NonPublicMethods
@@ -18,7 +18,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     private readonly MethodInfo _testMethod;
 
     public ReflectionTestMetadata(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.NonPublicConstructors
             | DynamicallyAccessedMemberTypes.PublicMethods
             | DynamicallyAccessedMemberTypes.NonPublicMethods
@@ -27,19 +27,6 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     {
         _testClass = testClass;
         _testMethod = testMethod;
-    }
-
-    [field: AllowNull, MaybeNull]
-    public override Func<TestBuilderContextAccessor?, IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator
-    {
-        get
-        {
-            if (field == null)
-            {
-                field = GenerateDataCombinations;
-            }
-            return field;
-        }
     }
 
     [field: AllowNull, MaybeNull]
@@ -341,7 +328,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     {
         var combinations = new List<MethodDataCombination>();
         int loopIndex = 0;
-        
+
         var metadata = CreateDataGeneratorMetadata(global::TUnit.Core.Enums.DataGeneratorType.TestParameters);
 
         await foreach (var rowFactory in dataSource.GetDataRowsAsync(metadata))
@@ -478,7 +465,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     {
         var combinations = new List<ClassDataCombination>();
         int loopIndex = 0;
-        
+
         var metadata = CreateDataGeneratorMetadata(global::TUnit.Core.Enums.DataGeneratorType.ClassParameters);
 
         await foreach (var rowFactory in dataSource.GetDataRowsAsync(metadata))
@@ -488,7 +475,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             {
                 continue;
             }
-            
+
             var dataFactories = row.Select(value => new Func<Task<object?>>(async () =>
             {
                 var resolvedValue = await ResolveTestDataValueAsync(value);
@@ -524,7 +511,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             try
             {
                 var metadata = CreateDataGeneratorMetadata(global::TUnit.Core.Enums.DataGeneratorType.Property);
-                
+
                 // Get first data row for property
                 var firstRow = await GetFirstDataRowAsync(propertyDataSource.DataSource, metadata);
                 if (firstRow != null)
@@ -551,7 +538,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
         return combinations;
     }
-    
+
     [UnconditionalSuppressMessage("AOT", "IL2072:Target method argument does not satisfy 'DynamicallyAccessedMemberTypes' requirements", Justification = "Reflection mode cannot support AOT")]
     [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", Justification = "Reflection mode cannot support AOT")]
     private DataGeneratorMetadata CreateDataGeneratorMetadata(global::TUnit.Core.Enums.DataGeneratorType type)
@@ -573,7 +560,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             ],
             Parent = null
         });
-        
+
         var methodMetadata = new MethodMetadata
         {
             Name = _testMethod.Name,
@@ -590,13 +577,13 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             ReturnType = _testMethod.ReturnType,
             TypeReference = new TypeReference { AssemblyQualifiedName = (_testMethod.DeclaringType ?? _testClass).AssemblyQualifiedName }
         };
-        
+
         return new DataGeneratorMetadata
         {
             TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()),
-            MembersToGenerate = type == global::TUnit.Core.Enums.DataGeneratorType.TestParameters 
-                ? methodMetadata.Parameters 
-                : Array.Empty<MemberMetadata>(),
+            MembersToGenerate = type == Core.Enums.DataGeneratorType.TestParameters
+                ? [..methodMetadata.Parameters]
+                : [],
             TestInformation = methodMetadata,
             Type = type,
             TestSessionId = "reflection-discovery",
@@ -604,7 +591,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             ClassInstanceArguments = null
         };
     }
-    
+
     private async Task<Func<Task<object?[]?>>?> GetFirstDataRowAsync(IDataSourceAttribute dataSource, DataGeneratorMetadata metadata)
     {
         await foreach (var row in dataSource.GetDataRowsAsync(metadata))

@@ -8,55 +8,27 @@ public static class DataSourceReferenceExtensions
     /// Tracks all data source objects in the current test context.
     /// Call this at the beginning of your test if you want to manually manage references.
     /// </summary>
-    public static void TrackDataSourceObjects(this TestContext context)
+    public static void TrackMethodArguments(this TestContext context)
     {
-        if (context?.TestDetails == null)
+        foreach (var arg in context.TestDetails.TestMethodArguments)
         {
-            return;
-        }
-
-        var testDetails = context.TestDetails;
-
-        foreach (var arg in testDetails.TestMethodArguments)
-        {
-            UnifiedObjectTracker.TrackObject(arg);
-        }
-
-        foreach (var arg in testDetails.TestClassArguments)
-        {
-            UnifiedObjectTracker.TrackObject(arg);
-        }
-
-        foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
-        {
-            UnifiedObjectTracker.TrackObject(kvp.Value);
+            UnifiedObjectTracker.TrackObject(context.Events, arg);
         }
     }
 
-    /// <summary>
-    /// Releases all data source objects in the current test context.
-    /// Call this at the end of your test or in cleanup hooks.
-    /// </summary>
-    /// <param name="context">The test context</param>
-    /// <param name="disposeIfPossible">If true, dispose objects that implement IDisposable when their reference count reaches zero</param>
-    public static async Task ReleaseDataSourceObjects(this TestContext context, bool disposeIfPossible = true)
+    public static void TrackClassArguments(this TestContext context)
     {
-        var testDetails = context.TestDetails;
-
-        foreach (var arg in testDetails.TestMethodArguments)
+        foreach (var arg in context.TestDetails.ClassMetadataArguments)
         {
-            await UnifiedObjectTracker.ReleaseObject(arg);
-        }
-
-        foreach (var arg in testDetails.TestClassArguments)
-        {
-            await UnifiedObjectTracker.ReleaseObject(arg);
-        }
-
-        foreach (var kvp in testDetails.TestClassInjectedPropertyArguments)
-        {
-            await UnifiedObjectTracker.ReleaseObject(kvp.Value);
+            UnifiedObjectTracker.TrackObject(context.Events, arg);
         }
     }
 
+    public static void TrackPropertyArguments(this TestContext context)
+    {
+        foreach (var kvp in context.TestDetails.TestClassInjectedPropertyArguments)
+        {
+            UnifiedObjectTracker.TrackObject(context.Events, kvp.Value);
+        }
+    }
 }

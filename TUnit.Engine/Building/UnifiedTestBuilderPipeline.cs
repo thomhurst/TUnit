@@ -7,7 +7,7 @@ using TUnit.Engine.Services;
 namespace TUnit.Engine.Building;
 
 /// Orchestrates unified test building with streaming support and error handling
-public sealed class UnifiedTestBuilderPipeline
+internal sealed class UnifiedTestBuilderPipeline
 {
     private readonly Func<HashSet<Type>?, ITestDataCollector> _dataCollectorFactory;
     private readonly IGenericTypeResolver _genericResolver;

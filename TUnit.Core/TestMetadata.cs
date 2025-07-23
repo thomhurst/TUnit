@@ -40,7 +40,7 @@ public abstract class TestMetadata
     /// AOT-safe factory to create test class instance
     /// Accepts constructor arguments array (empty array for parameterless constructors)
     /// </summary>
-    public required Func<object?[], object> InstanceFactory { get; init; }
+    public Func<object?[], object> InstanceFactory { get; init; } = null!;
 
     /// <summary>
     /// AOT-safe test method invoker

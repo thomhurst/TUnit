@@ -151,9 +151,8 @@ public sealed class PropertyInjectionService
             TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
             {
                 Events = events,
-                ClassInformation = methodMetadata.Class,
-                MethodInformation = methodMetadata,
-                DataAttribute = dataSource,
+                TestMetadata = methodMetadata,
+                DataSourceAttribute = dataSource,
                 ObjectBag = objectBag,
             }),
             MembersToGenerate =
@@ -171,8 +170,8 @@ public sealed class PropertyInjectionService
             TestInformation = methodMetadata,
             Type = DataGeneratorType.Property,
             TestSessionId = TestSessionContext.Current!.Id,
-            TestClassInstance = instance,
-            ClassInstanceArguments = TestContext.Current?.TestDetails.TestClassArguments ?? []
+            TestClassInstance = TestContext.Current?.TestDetails.ClassInstance,
+            ClassInstanceArguments = TestContext.Current?.TestDetails.TestClassArguments
         };
 
         // Get data from the source
@@ -206,9 +205,8 @@ public sealed class PropertyInjectionService
             TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
             {
                 Events = events,
-                ClassInformation = methodMetadata.Class,
-                MethodInformation = methodMetadata,
-                DataAttribute = dataSource,
+                TestMetadata = methodMetadata,
+                DataSourceAttribute = dataSource,
                 ObjectBag = objectBag,
             }),
             MembersToGenerate =
@@ -259,21 +257,16 @@ public sealed class PropertyInjectionService
             return;
         }
 
-        var trackedValue = UnifiedObjectTracker.TrackObject(propertyValue);
+        UnifiedObjectTracker.TrackObject(events, propertyValue);
 
-        if (trackedValue != null && ShouldInjectProperties(trackedValue))
+        if (ShouldInjectProperties(propertyValue))
         {
-            await InjectPropertiesIntoObjectAsync(trackedValue, objectBag, methodMetadata, events);
+            await InjectPropertiesIntoObjectAsync(propertyValue, objectBag, methodMetadata, events);
         }
 
-        await ObjectInitializer.InitializeAsync(trackedValue);
+        await ObjectInitializer.InitializeAsync(propertyValue);
 
-        setProperty(instance, trackedValue);
-
-        events.OnDispose += async (o, context) =>
-        {
-            await UnifiedObjectTracker.ReleaseObject(trackedValue);
-        };
+        setProperty(instance, propertyValue);
     }
 
     /// <summary>

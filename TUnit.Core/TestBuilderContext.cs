@@ -20,23 +20,26 @@ public record TestBuilderContext
     public Dictionary<string, object?> ObjectBag { get; set; } = [];
     public TestContextEvents Events { get; set; } = new();
 
-    public IDataSourceAttribute? DataAttribute { get; set; }
-
-    /// <summary>
-    /// Gets the test class information, if available during source generation.
-    /// </summary>
-    public ClassMetadata? ClassInformation { get; init; }
+    public IDataSourceAttribute? DataSourceAttribute { get; set; }
 
     /// <summary>
     /// Gets the test method information, if available during source generation.
     /// </summary>
-    public MethodMetadata? MethodInformation { get; init; }
+    public required MethodMetadata TestMetadata { get; init; }
 
     public void RegisterForInitialization(object? obj)
     {
         Events.OnInitialize += async (sender, args) =>
         {
             await ObjectInitializer.InitializeAsync(obj);
+        };
+    }
+
+    internal static TestBuilderContext FromTestContext(TestContext testContext, IDataSourceAttribute? dataSourceAttribute)
+    {
+        return new TestBuilderContext
+        {
+            Events = testContext.Events, TestMetadata = testContext.TestDetails.MethodMetadata, DataSourceAttribute = dataSourceAttribute, ObjectBag = testContext.ObjectBag,
         };
     }
 }

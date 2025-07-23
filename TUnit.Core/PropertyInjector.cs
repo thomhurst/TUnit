@@ -27,7 +27,7 @@ public static class PropertyInjector
 
         var dataGeneratorMetadata = new DataGeneratorMetadata
         {
-            TestBuilderContext = new TestBuilderContextAccessor(TestBuilderContext.Current ?? new TestBuilderContext()),
+            TestBuilderContext = new TestBuilderContextAccessor(TestBuilderContext.Current ?? TestBuilderContext.FromTestContext(testContext, propertyDataSources.ElementAtOrDefault(0)?.DataSource)),
             MembersToGenerate = [
             ],
             TestInformation = testInformation,
@@ -118,26 +118,21 @@ public static class PropertyInjector
                     await ObjectInitializer.InitializeAsync(value);
                 });
 
-                testContext.Events.OnDispose += async (o, context) =>
-                {
-                    await UnifiedObjectTracker.ReleaseObject(value);
-                };
+                UnifiedObjectTracker.TrackObject(testContext.Events, value);
 
-                var trackedValue = UnifiedObjectTracker.TrackObject(value);
+                injection.Setter(instance, value);
 
-                injection.Setter(instance, trackedValue);
-
-                if (trackedValue != null &&
+                if (value != null &&
                     injection.NestedPropertyInjections.Length > 0 &&
                     injection.NestedPropertyValueFactory != null)
                 {
                     try
                     {
-                        var nestedPropertyValues = injection.NestedPropertyValueFactory(trackedValue);
+                        var nestedPropertyValues = injection.NestedPropertyValueFactory(value);
 
                         await InjectPropertiesWithValuesAsync(
                             testContext,
-                            trackedValue,
+                            value,
                             nestedPropertyValues,
                             injection.NestedPropertyInjections,
                             maxRecursionDepth,
@@ -258,21 +253,22 @@ public static class PropertyInjector
 
             try
             {
-                var trackedValue = UnifiedObjectTracker.TrackObject(kvp.Value);
+                var propertyValue = kvp.Value;
+                UnifiedObjectTracker.TrackObject(testContext.Events, propertyValue);
 
                 var setter = CreatePropertySetter(property);
-                setter(instance, trackedValue);
+                setter(instance, propertyValue);
 
-                if (trackedValue != null && ShouldRecurse(trackedValue))
+                if (propertyValue != null && ShouldRecurse(propertyValue))
                 {
-                    var nestedInjectionData = DiscoverInjectableProperties(trackedValue.GetType());
+                    var nestedInjectionData = DiscoverInjectableProperties(propertyValue.GetType());
                     if (nestedInjectionData.Length > 0)
                     {
                         var nestedPropertyValues = new Dictionary<string, object?>();
 
                         await InjectPropertiesWithValuesAsync(
                             testContext,
-                            trackedValue,
+                            propertyValue,
                             nestedPropertyValues,
                             nestedInjectionData,
                             maxRecursionDepth,

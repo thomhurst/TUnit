@@ -2248,11 +2248,6 @@ private static string GenerateTestName(Type testClass, MethodInfo testMethod)
             _displayName = displayName;
         }
 
-        public override Func<TestBuilderContextAccessor?, IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator
-        {
-            get => (contextAccessor) => GenerateFailedCombination();
-        }
-
         public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
         {
             get => (context, metadata) => new FailedExecutableTest(_exception)
