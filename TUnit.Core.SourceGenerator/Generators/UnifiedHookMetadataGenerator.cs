@@ -448,6 +448,11 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("private static readonly global::System.Collections.Generic.Dictionary<global::System.Type, global::System.Collections.Generic.Dictionary<global::TUnit.Core.HookType, global::System.Collections.Generic.List<global::TUnit.Core.Hooks.StaticHookMethod>>> _staticHooksByType = new();");
         writer.AppendLine("private static readonly global::System.Collections.Generic.Dictionary<global::System.Type, global::System.Collections.Generic.Dictionary<global::TUnit.Core.HookType, global::System.Collections.Generic.List<global::TUnit.Core.Hooks.InstanceHookMethod>>> _instanceHooksByType = new();");
         writer.AppendLine();
+        
+        // Add cache for inheritance lookups
+        writer.AppendLine("// Cache for inheritance-aware hook lookups");
+        writer.AppendLine("private static readonly global::System.Collections.Concurrent.ConcurrentDictionary<(global::System.Type, global::TUnit.Core.HookType), global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod>> _instanceHookCache = new();");
+        writer.AppendLine();
 
         // Also keep the existing fields for backward compatibility during refactoring
         var hookGroups = hooks.GroupBy(h => new { h.HookType, h.HookKind });
@@ -616,7 +621,8 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         // Generate convenience method for test hooks that need a specific class type
         using (writer.BeginBlock("public IReadOnlyList<InstanceHookMethod> GetInstanceHooksForClass(Type classType, HookType hookType)"))
         {
-            writer.AppendLine("return GetHooksForType<InstanceHookMethod>(classType, hookType).ToList();");
+            writer.AppendLine("var key = (classType, hookType);");
+            writer.AppendLine("return _instanceHookCache.GetOrAdd(key, k => GetHooksForType<InstanceHookMethod>(k.Item1, k.Item2).ToList());");
         }
         writer.AppendLine();
     }

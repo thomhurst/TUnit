@@ -24,9 +24,9 @@ public static class UnifiedObjectTracker
             return obj;
         }
 
-        var counter = _trackedObjects.GetOrAdd(obj, 
+        var counter = _trackedObjects.GetOrAdd(obj,
             _ => new Counter());
-        
+
         counter.Increment();
 
         // Handle recursive tracking for collections if enabled
@@ -40,7 +40,7 @@ public static class UnifiedObjectTracker
                 }
             }
         }
-        
+
         return obj;
     }
 
@@ -61,9 +61,9 @@ public static class UnifiedObjectTracker
             return obj;
         }
 
-        var counter = _trackedObjects.GetOrAdd(obj, 
+        var counter = _trackedObjects.GetOrAdd(obj,
             _ => new Counter());
-        
+
         counter.Increment();
 
         // Handle recursive tracking for collections if enabled
@@ -108,11 +108,11 @@ public static class UnifiedObjectTracker
         }
 
         var count = counter.Decrement();
-        
+
         if (count <= 0)
         {
             _trackedObjects.TryRemove(obj, out _);
-            
+
             // Handle recursive release for collections if enabled
             if (_enableRecursiveTracking && obj is System.Collections.IEnumerable enumerable && !(obj is string))
             {
@@ -134,10 +134,10 @@ public static class UnifiedObjectTracker
             {
                 disposable.Dispose();
             }
-            
+
             return true;
         }
-        
+
         return false;
     }
 
@@ -164,7 +164,7 @@ public static class UnifiedObjectTracker
         {
             return false;
         }
-        
+
         return _trackedObjects.TryGetValue(obj, out counter);
     }
 
@@ -179,7 +179,7 @@ public static class UnifiedObjectTracker
         {
             return false;
         }
-        
+
         return _trackedObjects.TryRemove(obj, out _);
     }
 
