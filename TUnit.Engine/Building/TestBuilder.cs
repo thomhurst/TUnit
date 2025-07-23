@@ -32,9 +32,63 @@ public sealed class TestBuilder : ITestBuilder
         {
             // Create a context accessor for data generation
             var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext());
-            
+
+            var classDataAttributeIndex = 0;
+            foreach (var classDataSource in metadata.ClassDataSources)
+            {
+                classDataAttributeIndex++;
+
+                var classDataLoopIndex = 0;
+                await foreach (var classDataFactory in classDataSource.GetDataRowsAsync(DataCombinationGenerator.CreateDataGeneratorMetadata()))
+                {
+                    classDataLoopIndex++;
+
+                    var methodDataAttributeIndex = 0;
+                    foreach (var methodDataSource in metadata.DataSources)
+                    {
+                        methodDataAttributeIndex++;
+
+                        var classData = await classDataFactory() ?? [];
+
+                        var instance = metadata.InstanceFactory(classData);
+
+                        if (instance is null)
+                        {
+                            throw new InvalidOperationException($"Error creating test class instance for {metadata.TestClassType.FullName}. ");
+                        }
+
+                        var methodDataLoopIndex = 0;
+                        await foreach (var methodDataFactory in methodDataSource.GetDataRowsAsync(DataCombinationGenerator.CreateDataGeneratorMetadata()))
+                        {
+                            methodDataLoopIndex++;
+
+                            classData = await classDataFactory() ?? [];
+
+                            instance = metadata.InstanceFactory(classData);
+
+                            var methodData = await methodDataFactory() ?? [];
+
+                            var testData = new TestData
+                            {
+                                TestClassInstance = instance,
+                                ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                                ClassDataLoopIndex = classDataLoopIndex,
+                                ClassData = classData,
+                                MethodDataSourceAttributeIndex = methodDataAttributeIndex,
+                                MethodDataLoopIndex = methodDataLoopIndex,
+                                MethodData = methodData
+                            };
+
+                            var test = await BuildTestAsync(metadata, testData);
+                            tests.Add(test);
+                        }
+                    }
+                }
+            }
+
             // Use the DataCombinationGenerator directly - no reflection needed
             var asyncCombinations = metadata.DataCombinationGenerator(contextAccessor);
+
             await foreach (var combination in asyncCombinations)
             {
                 // Check if this combination has a data generation exception
@@ -59,6 +113,11 @@ public sealed class TestBuilder : ITestBuilder
         }
 
         return tests;
+    }
+
+    private async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestDataCombination combination)
@@ -321,5 +380,18 @@ public sealed class TestBuilder : ITestBuilder
         }
 
         return arguments;
+    }
+
+    private class TestData
+    {
+        public required object TestClassInstance { get; init; }
+
+        public required int ClassDataSourceAttributeIndex { get; init; }
+        public required int ClassDataLoopIndex { get; init; }
+        public required object?[] ClassData { get; init; }
+
+        public required int MethodDataSourceAttributeIndex { get; init; }
+        public required int MethodDataLoopIndex { get; init; }
+        public required object?[] MethodData { get; init; }
     }
 }

@@ -10,15 +10,13 @@ public class TestDataCombination
     /// Factory functions that create constructor arguments for the test class instance.
     /// Each function is invoked to get a fresh instance for test isolation.
     /// </summary>
-    public Func<Task<object?>>[] ClassDataFactories { get; init; } = [
-    ];
+    public Func<Task<object?>>[] ClassDataFactories { get; init; } = [];
 
     /// <summary>
     /// Factory functions that create arguments for the test method invocation.
     /// Each function is invoked to get a fresh instance for test isolation.
     /// </summary>
-    public Func<Task<object?>>[] MethodDataFactories { get; init; } = [
-    ];
+    public Func<Task<object?>>[] MethodDataFactories { get; init; } = [];
 
     public int MethodDataSourceIndex { get; init; } = -1;
 

@@ -23,7 +23,7 @@ public abstract class TestMetadata
     public int? TimeoutMs { get; init; }
 
     public int RetryCount { get; init; }
-    
+
     public int RepeatCount { get; init; } = 1;
 
     public bool CanRunInParallel { get; init; } = true;
@@ -40,7 +40,7 @@ public abstract class TestMetadata
     /// AOT-safe factory to create test class instance
     /// Accepts constructor arguments array (empty array for parameterless constructors)
     /// </summary>
-    public Func<object?[], object>? InstanceFactory { get; init; }
+    public required Func<object?[], object> InstanceFactory { get; init; }
 
     /// <summary>
     /// AOT-safe test method invoker
@@ -81,7 +81,7 @@ public abstract class TestMetadata
     /// Generator delegate that produces all data combinations for this test.
     /// Now uses runtime generation instead of compile-time generation.
     /// </summary>
-    public virtual Func<TestBuilderContextAccessor?, IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator => 
+    public virtual Func<TestBuilderContextAccessor?, IAsyncEnumerable<TestDataCombination>> DataCombinationGenerator =>
         (contextAccessor) => Core.DataCombinationGenerator.GenerateCombinationsAsync(this, TestSessionId, TestClassType, contextAccessor);
 
     /// <summary>
@@ -173,7 +173,7 @@ public sealed class PropertyInjectionData
     public required Func<object?> ValueFactory { get; init; }
     public PropertyInjectionData[] NestedPropertyInjections { get; init; } = [
     ];
-    
+
     /// <summary>
     /// Factory to extract nested property values from the parent object.
     /// Returns a dictionary mapping property names to their values for nested injection.

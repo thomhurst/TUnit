@@ -109,7 +109,7 @@ public static class DataCombinationGenerator
                 // Get class arguments and create instance
                 classArgs = classCombo != null
                     ? await CreateArgumentsFromFactoriesAsync(classCombo.Factories)
-                    : Array.Empty<object?>();
+                    : [];
 
                 // Track class arguments
                 foreach (var arg in classArgs)
@@ -184,7 +184,7 @@ public static class DataCombinationGenerator
     }
 
 
-    private static DataGeneratorMetadata CreateDataGeneratorMetadata(
+    public static DataGeneratorMetadata CreateDataGeneratorMetadata(
         TestMetadata testMetadata,
         string testSessionId,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type testClassType,
