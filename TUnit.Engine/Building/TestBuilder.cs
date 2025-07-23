@@ -226,7 +226,7 @@ public sealed class TestBuilder : ITestBuilder
     private async Task<ExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination, string? customDisplayName)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
-        var displayName = customDisplayName ?? $"{metadata.TestName} [DATA GENERATION ERROR]";
+        var displayName = customDisplayName ?? $"{metadata.TestClassType.Name}.{metadata.TestName}";
 
         var testDetails = CreateFailedTestDetails(metadata, testId);
         var context = CreateFailedTestContext(metadata, testDetails);
@@ -286,7 +286,7 @@ public sealed class TestBuilder : ITestBuilder
         {
             UnifiedObjectTracker.TrackObject(arg);
         }
-        
+
         foreach (var arg in methodArguments)
         {
             UnifiedObjectTracker.TrackObject(arg);

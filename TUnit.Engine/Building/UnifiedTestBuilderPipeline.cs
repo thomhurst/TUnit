@@ -26,7 +26,7 @@ public sealed class UnifiedTestBuilderPipeline
         _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
         _contextProvider = contextBuilder;
     }
-    
+
     public UnifiedTestBuilderPipeline(
         Func<HashSet<Type>?, ITestDataCollector> dataCollectorFactory,
         IGenericTypeResolver genericResolver,
@@ -43,7 +43,7 @@ public sealed class UnifiedTestBuilderPipeline
     {
         return await BuildTestsAsync(testSessionId, filterTypes: null);
     }
-    
+
     public async Task<IEnumerable<ExecutableTest>> BuildTestsAsync(string testSessionId, HashSet<Type>? filterTypes)
     {
         // Stage 1: Collect test metadata
@@ -100,7 +100,7 @@ public sealed class UnifiedTestBuilderPipeline
             yield return test;
         }
     }
-    
+
     public async IAsyncEnumerable<ExecutableTest> BuildTestsStreamAsync(
         string testSessionId,
         HashSet<Type>? filterTypes,
@@ -123,7 +123,7 @@ public sealed class UnifiedTestBuilderPipeline
                 resolvedMetadataList = [
                 ];
             }
-            
+
             if (failedTest != null)
             {
                 yield return failedTest;
@@ -158,7 +158,7 @@ public sealed class UnifiedTestBuilderPipeline
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var dataCollector = _dataCollectorFactory(filterTypes);
-        
+
         // Check if collector supports streaming
         if (dataCollector is IStreamingTestDataCollector streamingCollector)
         {
@@ -182,7 +182,7 @@ public sealed class UnifiedTestBuilderPipeline
     private ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata);
-        var displayName = $"{metadata.TestName} [DATA GENERATION ERROR]";
+        var displayName = $"{metadata.TestClassType.Name}.{metadata.TestName}";
 
         // Create a minimal test context for failed test
         var testDetails = new TestDetails
@@ -208,7 +208,7 @@ public sealed class UnifiedTestBuilderPipeline
             metadata.TestClassType,
             CancellationToken.None,
             new TestServiceProvider());
-        
+
         context.TestDetails = testDetails;
 
 
@@ -265,7 +265,7 @@ public sealed class UnifiedTestBuilderPipeline
             metadata.TestClassType,
             CancellationToken.None,
             new TestServiceProvider());
-        
+
         context.TestDetails = testDetails;
 
         return new FailedExecutableTest(exception)
