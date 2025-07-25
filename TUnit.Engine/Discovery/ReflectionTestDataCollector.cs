@@ -87,7 +87,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // Reassemble results in original order
         var newTests = new List<TestMetadata>();
-        for (int i = 0; i < assemblies.Count; i++)
+        for (var i = 0; i < assemblies.Count; i++)
         {
             if (resultsByIndex.TryGetValue(i, out var tests))
             {
@@ -248,7 +248,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var discoveredTests = new List<TestMetadata>();
 
-        Type[] types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
+        var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
         {
             try
             {
@@ -410,7 +410,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         var typeArguments = new Type[genericParameters.Length];
 
         // For each generic parameter, determine the concrete type from the data
-        for (int i = 0; i < genericParameters.Length && i < dataRow.Length; i++)
+        for (var i = 0; i < genericParameters.Length && i < dataRow.Length; i++)
         {
             if (dataRow[i] != null)
             {
@@ -1374,7 +1374,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 // Two parameters - typically context + CancellationToken
                 var argsList = new List<Expression>();
 
-                for (int i = 0; i < 2; i++)
+                for (var i = 0; i < 2; i++)
                 {
                     var paramType = parameters[i].ParameterType;
 
@@ -1877,7 +1877,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 var args = new object?[parameters.Length];
 
                 // Map parameters based on their types
-                for (int i = 0; i < parameters.Length; i++)
+                for (var i = 0; i < parameters.Length; i++)
                 {
                     var paramType = parameters[i].ParameterType;
 

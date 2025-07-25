@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 
@@ -13,6 +14,12 @@ T>(string methodNameProvidingDataSource)
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
 public class MethodDataSourceAttribute : TestDataAttribute
 {
+    private const BindingFlags BindingFlags = System.Reflection.BindingFlags.Public
+        | System.Reflection.BindingFlags.NonPublic
+        | System.Reflection.BindingFlags.Static
+        | System.Reflection.BindingFlags.Instance
+        | System.Reflection.BindingFlags.FlattenHierarchy;
+
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
     public Type? ClassProvidingDataSource { get; }
     public string MethodNameProvidingDataSource { get; }
@@ -59,15 +66,9 @@ public class MethodDataSourceAttribute : TestDataAttribute
             yield break;
         }
 
-        // For property injection, prefer the class containing the property over the test class
-        var targetType = ClassProvidingDataSource 
-            ?? (dataGeneratorMetadata.Type == DataGeneratorType.Property 
-                ? dataGeneratorMetadata.TestClassInstance?.GetType() 
-                : null) 
-            ?? dataGeneratorMetadata.TestClassType;
-        var bindingFlags = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance;
+        var targetType = ClassProvidingDataSource ?? dataGeneratorMetadata.TestClassType ;
 
-        var methodInfo = targetType.GetMethod(MethodNameProvidingDataSource, bindingFlags)
+        var methodInfo = targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags)
             ?? throw new InvalidOperationException($"Method '{MethodNameProvidingDataSource}' not found in class '{targetType.Name}'.");
 
         // Determine if it's an instance method
@@ -90,7 +91,7 @@ public class MethodDataSourceAttribute : TestDataAttribute
         {
             await foreach (var item in ConvertToAsyncEnumerable(methodResult))
             {
-                yield return () => Task.FromResult<object?[]?>(ConvertToObjectArray(item));
+                yield return () => Task.FromResult<object?[]?>(item.ToObjectArray());
             }
         }
         // If it's Task<IEnumerable>
@@ -103,12 +104,12 @@ public class MethodDataSourceAttribute : TestDataAttribute
             {
                 foreach (var item in enumerable)
                 {
-                    yield return () => Task.FromResult<object?[]?>(ConvertToObjectArray(item));
+                    yield return () => Task.FromResult<object?[]?>(item.ToObjectArray());
                 }
             }
             else
             {
-                yield return () => Task.FromResult<object?[]?>(ConvertToObjectArray(taskResult));
+                yield return () => Task.FromResult<object?[]?>(taskResult.ToObjectArray());
             }
         }
         // Regular IEnumerable
@@ -116,12 +117,12 @@ public class MethodDataSourceAttribute : TestDataAttribute
         {
             foreach (var item in enumerable)
             {
-                yield return () => Task.FromResult<object?[]?>(ConvertToObjectArray(item));
+                yield return () => Task.FromResult<object?[]?>(item.ToObjectArray());
             }
         }
         else
         {
-            yield return () => Task.FromResult<object?[]?>(ConvertToObjectArray(methodResult));
+            yield return () => Task.FromResult<object?[]?>(methodResult.ToObjectArray());
         }
     }
 
@@ -174,34 +175,5 @@ public class MethodDataSourceAttribute : TestDataAttribute
         }
 
         return null;
-    }
-
-    private static object?[] ConvertToObjectArray(object? item)
-    {
-        if (item == null)
-        {
-            return [null];
-        }
-
-        if (item is object?[] objArray)
-        {
-            return objArray;
-        }
-
-        // Handle tuples by unwrapping them
-        if (TupleHelper.IsTupleType(item.GetType()))
-        {
-            return TupleHelper.UnwrapTuple(item);
-        }
-
-        if (item.GetType().IsArray)
-        {
-            var array = (Array)item;
-            var result = new object?[array.Length];
-            array.CopyTo(result, 0);
-            return result;
-        }
-
-        return [item];
     }
 }

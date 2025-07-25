@@ -37,7 +37,7 @@ internal class ChannelConsumerManager
         await LoggingExtensions.LogInformationAsync(_logger, $"Starting {parallelism} universal work-stealing consumers");
 
         // Create universal work-stealing consumers that can pull from ALL channels
-        for (int i = 0; i < parallelism; i++)
+        for (var i = 0; i < parallelism; i++)
         {
             var consumerId = i;
             _consumerTasks.Add(Task.Run(async () =>

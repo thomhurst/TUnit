@@ -178,7 +178,7 @@ internal static class AsyncDataSourceHelper
     {
         var resolved = new object?[arguments.Length];
         
-        for (int i = 0; i < arguments.Length; i++)
+        for (var i = 0; i < arguments.Length; i++)
         {
             if (arguments[i] is AsyncDataSourcePlaceholder placeholder)
             {

@@ -85,7 +85,7 @@ internal static class ConstructorHelper
             
             // Try to create default values for parameters
             var defaultArgs = new object?[parameters.Length];
-            for (int i = 0; i < parameters.Length; i++)
+            for (var i = 0; i < parameters.Length; i++)
             {
                 var param = parameters[i];
                 if (param.HasDefaultValue)
@@ -129,7 +129,7 @@ internal static class ConstructorHelper
             return false;
         }
         
-        for (int i = 0; i < parameters.Length; i++)
+        for (var i = 0; i < parameters.Length; i++)
         {
             var paramType = parameters[i].ParameterType;
             // Get the type from the generic attribute if possible
@@ -192,7 +192,7 @@ internal static class ConstructorHelper
         foreach (var property in properties)
         {
             // In C# 11+, required properties are marked with RequiredMemberAttribute at the member level
-            bool isRequired = property.GetCustomAttribute<System.Runtime.CompilerServices.RequiredMemberAttribute>() != null ||
+            var isRequired = property.GetCustomAttribute<System.Runtime.CompilerServices.RequiredMemberAttribute>() != null ||
                             property.GetCustomAttributes().Any(a => a.GetType().Name == "RequiredAttribute");
             
             // Also check if property is marked with 'required' modifier by checking if it's init-only and the type has RequiredMemberAttribute

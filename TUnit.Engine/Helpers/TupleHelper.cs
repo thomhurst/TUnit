@@ -126,7 +126,7 @@ internal class TupleHelper
         var itemProperties = new List<PropertyInfo>(8);
         
         // Pre-filter and sort Item properties without LINQ
-        for (int i = 0; i < allProperties.Length; i++)
+        for (var i = 0; i < allProperties.Length; i++)
         {
             var prop = allProperties[i];
             if (prop.Name.StartsWith("Item"))

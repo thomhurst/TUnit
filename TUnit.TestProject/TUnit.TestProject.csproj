@@ -55,26 +55,9 @@
         <None Update="testconfig.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Remove="TestSessionAfterTestsb7e72d6a41f342238b9e690f28e8d99d.txt" />
-        <None Remove="e2f50fb55cd948be9544a911b401fa0e-AfterTestAttributeTests.txt" />
-        <None Remove="d8d11a8ce597411bbe6505b53ac4bba1-AfterTestAttributeTests.txt" />
-        <None Remove="c97a2073a10247689fa1fdcaedfafd74-AfterTestAttributeTests.txt" />
-        <None Remove="c452ab83841a420e90782a34bc1a96f6-AfterTestAttributeTests.txt" />
-        <None Remove="b93a114287324139a5f1bc58fa840240-AfterTestAttributeTests.txt" />
-        <None Remove="9e6dd33bed9849eea292a2836f0955b2-AfterTestAttributeTests.txt" />
-        <None Remove="97005a19636c4a48b29a47b86e7f4e86-AfterTestAttributeTests.txt" />
-        <None Remove="4ad4e031bb64493193ba3efec36417e5-AfterTestAttributeTests.txt" />
-        <None Remove="49aee1b9857e423ea8c3518481e28e55-AfterTestAttributeTests.txt" />
-        <None Remove="4618bc4530e442509ab8ea8db5df2286-AfterTestAttributeTests.txt" />
-        <None Remove="44af63b09d9241fc8cb5cbf1afb0ecaa-AfterTestAttributeTests.txt" />
-        <None Remove="40fcf458d40b4b8ab43588be67cc3fff-AfterTestAttributeTests.txt" />
-        <None Remove="1b71e9d1f6dd4c4c83a2612f36090e76-AfterTestAttributeTests.txt" />
-        <None Remove="1570083403674ffebd9c1530c844552d-AfterTestAttributeTests.txt" />
-        <None Remove="02e8f430c5764d3ca67328562d2da5d2-AfterTestAttributeTests.txt" />
-        <None Remove="02280a3165c04e308ec0757321e61677-AfterTestAttributeTests.txt" />
-        <None Remove="0147f666bbd746038b423eb75736d989-AfterTestAttributeTests.txt" />
     </ItemGroup>
 
     <Import Project="..\TestProject.targets" />
+    <Import Project="..\SourceGenerationDebug.props" />
 
 </Project>

@@ -485,7 +485,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     {
         // Parallelize for larger counts
         var tasks = new Task[receivers.Length];
-        for (int i = 0; i < receivers.Length; i++)
+        for (var i = 0; i < receivers.Length; i++)
         {
             var receiver = receivers[i];
             tasks[i] = InvokeReceiverAsync(receiver, invoker, cancellationToken);

@@ -63,7 +63,7 @@ internal class TestFinder : ITestFinder
             return false;
         }
 
-        for (int i = 0; i < testParamTypes.Length; i++)
+        for (var i = 0; i < testParamTypes.Length; i++)
         {
             if (testParamTypes[i] != expectedParamTypes[i])
             {

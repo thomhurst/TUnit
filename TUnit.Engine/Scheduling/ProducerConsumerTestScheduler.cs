@@ -126,7 +126,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         
         // Route all tests to channels in batches
         const int batchSize = 100;
-        for (int i = 0; i < readyTests.Count; i += batchSize)
+        for (var i = 0; i < readyTests.Count; i += batchSize)
         {
             var batch = readyTests.Skip(i).Take(batchSize);
             await Task.WhenAll(batch.Select(state => RouteTestAsync(state, cancellationToken)));

@@ -76,7 +76,7 @@ public sealed class AotTestDataCollector : ITestDataCollector
 
         // Reassemble results in original order
         var allTests = new List<TestMetadata>();
-        for (int i = 0; i < testSourcesList.Count; i++)
+        for (var i = 0; i < testSourcesList.Count; i++)
         {
             if (resultsByIndex.TryGetValue(i, out var tests))
             {

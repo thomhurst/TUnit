@@ -72,8 +72,13 @@ internal static class CodeGenerationHelpers
                     // For params arrays, expand the array elements
                     if (arg.Kind == TypedConstantKind.Array)
                     {
-                        var elements = arg.Values.Select(TypedConstantParser.GetRawTypedConstantValue);
-                        argStrings.AddRange(elements);
+                        // Check if the array is initialized before accessing it
+                        if (!arg.Values.IsDefault)
+                        {
+                            var elements = arg.Values.Select(TypedConstantParser.GetRawTypedConstantValue);
+                            argStrings.AddRange(elements);
+                        }
+                        // If Values is default/uninitialized, don't add any arguments for the params array
                     }
                     else
                     {

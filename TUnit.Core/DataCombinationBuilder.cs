@@ -10,7 +10,6 @@ public static class DataCombinationBuilder
     /// Builds all data combinations from the provided data sources using cartesian product logic.
     /// Used by both AOT (at compile time) and reflection (at runtime) modes.
     /// </summary>
-    #pragma warning disable CS1998 // Async method lacks 'await' operators
     public static async IAsyncEnumerable<TestDataCombination> BuildCombinationsAsync(
         IEnumerable<MethodDataCombination> methodCombinations,
         IEnumerable<ClassDataCombination> classCombinations,
@@ -40,26 +39,24 @@ public static class DataCombinationBuilder
         {
             foreach (var classCombination in classCombs)
             {
-                foreach (var propertyCombination in propertyCombs)
+                for (var repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
                 {
-                    for (int repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
+                    yield return new TestDataCombination
                     {
-                        yield return new TestDataCombination
-                        {
-                            MethodDataFactories = methodCombination.DataFactories,
-                            ClassDataFactories = classCombination.DataFactories,
-                            MethodDataSourceIndex = methodCombination.DataSourceIndex,
-                            MethodLoopIndex = methodCombination.LoopIndex,
-                            ClassDataSourceIndex = classCombination.DataSourceIndex,
-                            ClassLoopIndex = classCombination.LoopIndex,
-                            RepeatIndex = repeatIndex
-                        };
-                    }
+                        MethodDataFactories = methodCombination.DataFactories,
+                        ClassDataFactories = classCombination.DataFactories,
+                        MethodDataSourceIndex = methodCombination.DataSourceIndex,
+                        MethodLoopIndex = methodCombination.LoopIndex,
+                        ClassDataSourceIndex = classCombination.DataSourceIndex,
+                        ClassLoopIndex = classCombination.LoopIndex,
+                        RepeatIndex = repeatIndex
+                    };
                 }
             }
         }
+
+        await Task.CompletedTask;
     }
-    #pragma warning restore CS1998
 
     /// <summary>
     /// Wraps exception handling around data combination generation.
@@ -71,7 +68,7 @@ public static class DataCombinationBuilder
         var enumerator = generator().GetAsyncEnumerator();
         var yielded = new List<TestDataCombination>();
         TestDataCombination? errorCombination = null;
-        
+
         try
         {
             while (await enumerator.MoveNextAsync())
@@ -92,13 +89,13 @@ public static class DataCombinationBuilder
         {
             await enumerator.DisposeAsync();
         }
-        
+
         // Yield all collected combinations
         foreach (var combination in yielded)
         {
             yield return combination;
         }
-        
+
         // Yield error combination if there was an exception
         if (errorCombination != null)
         {

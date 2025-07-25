@@ -4,6 +4,7 @@ using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Services;
 
@@ -61,7 +62,7 @@ internal sealed class TestBuilder : ITestBuilder
                     {
                         methodDataAttributeIndex++;
 
-                        var classData = await classDataFactory() ?? [];
+                        var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
 
                         var instance = metadata.InstanceFactory(classData);
 
@@ -84,13 +85,13 @@ internal sealed class TestBuilder : ITestBuilder
                         {
                             methodDataLoopIndex++;
 
-                            for (int i = 0; i < metadata.RepeatCount + 1; i++)
+                            for (var i = 0; i < metadata.RepeatCount + 1; i++)
                             {
-                                classData = await classDataFactory() ?? [];
+                                classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
 
                                 instance = metadata.InstanceFactory(classData);
 
-                                var methodData = await methodDataFactory() ?? [];
+                                var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
 
                                 var testData = new TestData
                                 {

@@ -109,7 +109,7 @@ public static class DiscoveryConfiguration
     private static bool IsRunningInCI()
     {
         // Use cached environment variables instead of repeated lookups
-        for (int i = 0; i < _cachedCiEnvVars.Length; i++)
+        for (var i = 0; i < _cachedCiEnvVars.Length; i++)
         {
             if (!string.IsNullOrEmpty(_cachedCiEnvVars[i]))
             {
@@ -122,7 +122,7 @@ public static class DiscoveryConfiguration
     private static bool IsRunningInContainer()
     {
         // Use cached environment variables instead of repeated lookups
-        for (int i = 0; i < _cachedContainerEnvVars.Length; i++)
+        for (var i = 0; i < _cachedContainerEnvVars.Length; i++)
         {
             if (!string.IsNullOrEmpty(_cachedContainerEnvVars[i]))
             {

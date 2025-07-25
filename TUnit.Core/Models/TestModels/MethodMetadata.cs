@@ -13,6 +13,7 @@ public record MethodMetadata : MemberMetadata
 
     public required ClassMetadata Class { get; init; }
 
+    public object?[]? ClassArguments { get; init; }
 
     public required TypeReference ReturnTypeReference { get; init; }
 

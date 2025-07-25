@@ -79,7 +79,7 @@ internal static class TestExtensions
         }
 
         var array = new string[parameterTypes.Count];
-        for (int i = 0; i < parameterTypes.Count; i++)
+        for (var i = 0; i < parameterTypes.Count; i++)
         {
             array[i] = parameterTypes[i].FullName!;
         }

@@ -66,7 +66,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         // If no data sources and no repeat, yield a single empty combination
         if (!methodDataSources.Any() && !classDataSources.Any() && !propertyDataSources.Any())
         {
-            for (int repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
+            for (var repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
             {
                 yield return new TestDataCombination
                 {
@@ -170,7 +170,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 var argsWithToken = new object?[args.Length + 1];
                 var argIndex = 0;
 
-                for (int i = 0; i < argsWithToken.Length; i++)
+                for (var i = 0; i < argsWithToken.Length; i++)
                 {
                     if (i == cancellationTokenIndex)
                     {
@@ -327,7 +327,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     private async Task<IEnumerable<MethodDataCombination>> ProcessMethodDataSourceAsync(IDataSourceAttribute dataSource)
     {
         var combinations = new List<MethodDataCombination>();
-        int loopIndex = 0;
+        var loopIndex = 0;
 
         var metadata = CreateDataGeneratorMetadata(global::TUnit.Core.Enums.DataGeneratorType.TestParameters);
 
@@ -464,7 +464,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     private async Task<IEnumerable<ClassDataCombination>> ProcessClassDataSourceAsync(IDataSourceAttribute dataSource)
     {
         var combinations = new List<ClassDataCombination>();
-        int loopIndex = 0;
+        var loopIndex = 0;
 
         var metadata = CreateDataGeneratorMetadata(global::TUnit.Core.Enums.DataGeneratorType.ClassParameters);
 

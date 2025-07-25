@@ -352,17 +352,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             GenerateMethodDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
         }
-        else if (attrName == "global::TUnit.Core.ArgumentsAttribute")
-        {
-            GenerateArgumentsAttribute(writer, attr);
-        }
-        else if (attrName == "global::TUnit.Core.ClassDataSourceAttribute" && attrClass.IsGenericType)
-        {
-            GenerateClassDataSourceAttribute(writer, attr);
-        }
         else
         {
-            // For other data source attributes, generate using the generic attribute instantiation method
+            // Use the generic attribute instantiation method for all other attributes
+            // This properly handles generics on the attribute type
             var generatedCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
             writer.AppendLine($"{generatedCode},");
         }
@@ -404,33 +397,29 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (dataSourceMethod == null)
         {
             // Still generate the attribute even if method not found - it will fail at runtime with proper error
-            if (attr.ConstructorArguments is
-                [
-                    { Value: ITypeSymbol missingMethodTypeArg } _, _, ..
-                ])
-            {
-                writer.AppendLine($"new global::TUnit.Core.MethodDataSourceAttribute(typeof({missingMethodTypeArg.GloballyQualified()}), \"{methodName}\"),");
-            }
-            else
-            {
-                writer.AppendLine($"new global::TUnit.Core.MethodDataSourceAttribute(\"{methodName}\"),");
-            }
+            // Use CodeGenerationHelpers to properly handle any generics on the attribute
+            var generatedCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
+            writer.AppendLine($"{generatedCode},");
             return;
         }
 
         // Generate the attribute with factory
+        // We need to manually construct this to properly add the Factory property
+        var attrClass = attr.AttributeClass!;
+        var attrTypeName = attrClass.GloballyQualified();
+        
         if (attr.ConstructorArguments is
             [
                 { Value: ITypeSymbol typeArg } _, _, ..
             ])
         {
             // MethodDataSource(Type, string) constructor
-            writer.AppendLine($"new global::TUnit.Core.MethodDataSourceAttribute(typeof({typeArg.GloballyQualified()}), \"{methodName}\")");
+            writer.AppendLine($"new {attrTypeName}(typeof({typeArg.GloballyQualified()}), \"{methodName}\")");
         }
         else
         {
             // MethodDataSource(string) constructor
-            writer.AppendLine($"new global::TUnit.Core.MethodDataSourceAttribute(\"{methodName}\")");
+            writer.AppendLine($"new {attrTypeName}(\"{methodName}\")");
         }
         writer.AppendLine("{");
         writer.Indent();
@@ -438,6 +427,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Check if the attribute has Arguments property set
         var argumentsProperty = attr.NamedArguments.FirstOrDefault(x => x.Key == "Arguments");
         var hasArguments = argumentsProperty is { Key: not null, Value.IsNull: false };
+
+        // Copy over any Arguments property if present
+        if (hasArguments)
+        {
+            writer.Append("Arguments = ");
+            WriteTypedConstant(writer, argumentsProperty.Value);
+            writer.AppendLine(",");
+        }
 
         // Set the Factory property with a strongly-typed function
         writer.AppendLine("Factory = (dataGeneratorMetadata) =>");
@@ -458,15 +455,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateMethodDataSourceFactory(writer, dataSourceMethod, targetType, methodSymbol, attr, hasArguments);
 
         writer.Unindent();
-        writer.AppendLine("},");
-
-        // Copy over any Arguments property if present
-        if (hasArguments)
-        {
-            writer.Append("Arguments = ");
-            WriteTypedConstant(writer, argumentsProperty.Value);
-            writer.AppendLine(",");
-        }
+        writer.AppendLine("}");
 
         writer.Unindent();
         writer.AppendLine("},");
@@ -657,38 +646,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return type.AllInterfaces.Any(i =>
             i.OriginalDefinition.ToDisplayString() == "System.Collections.IEnumerable" ||
             (i.IsGenericType && i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>"));
-    }
-
-    private static void GenerateArgumentsAttribute(CodeWriter writer, AttributeData attr)
-    {
-        writer.AppendLine("new global::TUnit.Core.ArgumentsAttribute(");
-        writer.Indent();
-
-        // Write constructor arguments
-        for (int i = 0; i < attr.ConstructorArguments.Length; i++)
-        {
-            WriteTypedConstant(writer, attr.ConstructorArguments[i]);
-            if (i < attr.ConstructorArguments.Length - 1)
-            {
-                writer.Append(", ");
-            }
-        }
-
-        writer.Unindent();
-        writer.AppendLine("),");
-    }
-
-    private static void GenerateClassDataSourceAttribute(CodeWriter writer, AttributeData attr)
-    {
-        if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
-        {
-            var genericArg = attr.AttributeClass.TypeArguments[0];
-            writer.AppendLine($"new global::TUnit.Core.ClassDataSourceAttribute<{genericArg.GloballyQualified()}>(),");
-        }
-        else
-        {
-            writer.AppendLine("// Unable to generate ClassDataSourceAttribute");
-        }
     }
 
     private static void WriteTypedConstant(CodeWriter writer, TypedConstant constant)
@@ -1063,63 +1020,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (testMethod.IsGenericType)
         {
-            writer.AppendLine("// Get resolved generic types from the test context parameter");
-            writer.AppendLine("if (context?.TestDetails?.DataCombination?.ResolvedGenericTypes == null)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("throw new global::System.InvalidOperationException(\"No resolved generic types available for generic test instantiation\");");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine();
-            writer.AppendLine("var resolvedTypes = context.TestDetails.DataCombination.ResolvedGenericTypes;");
-            writer.AppendLine();
+            writer.AppendLine("// Generic type instantiation requires resolved types at runtime");
+            writer.AppendLine("throw new global::System.InvalidOperationException(\"Generic test class instantiation should be handled by the test framework\");");
 
-            // Generate code to map type parameters to resolved types
-            writer.AppendLine("// Map generic type parameters to resolved types");
-            writer.AppendLine("var typeArguments = new global::System.Type[]");
-            writer.AppendLine("{");
-            writer.Indent();
-            foreach (var typeParam in typeSymbol.TypeParameters)
-            {
-                writer.AppendLine($"resolvedTypes[\"{typeParam.Name}\"],");
-            }
-            writer.Unindent();
-            writer.AppendLine("};");
-            writer.AppendLine();
-
-            // Generate code to construct the generic type
-            writer.AppendLine("// Construct the generic type using typeof for strong typing");
-            // Use typeof with the open generic type definition
-            var genericTypeExpression = GetGenericTypeExpression(typeSymbol);
-            writer.AppendLine($"var genericTypeDef = typeof({genericTypeExpression});");
-            writer.AppendLine("var constructedType = genericTypeDef.MakeGenericType(typeArguments);");
-            
-            // Check if we need constructor arguments for the class
-            writer.AppendLine();
-            writer.AppendLine("// Create instance with constructor arguments if needed");
-            writer.AppendLine("object instance;");
-            writer.AppendLine("if (context?.TestDetails?.DataCombination?.ClassDataFactories != null && context.TestDetails.DataCombination.ClassDataFactories.Length > 0)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("// Use class data as constructor arguments");
-            writer.AppendLine("var constructorArgs = new object?[context.TestDetails.DataCombination.ClassDataFactories.Length];");
-            writer.AppendLine("for (int i = 0; i < constructorArgs.Length; i++)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("constructorArgs[i] = await context.TestDetails.DataCombination.ClassDataFactories[i]();");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("instance = global::System.Activator.CreateInstance(constructedType, constructorArgs);");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("else");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("// Try parameterless constructor");
-            writer.AppendLine("instance = global::System.Activator.CreateInstance(constructedType);");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("return instance!;");
         }
         else
         {
@@ -1137,62 +1040,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (testMethod.IsGenericMethod || testMethod.IsGenericType)
         {
-            writer.AppendLine("// Get resolved generic types from the test context parameter");
-            writer.AppendLine("var resolvedTypes = context?.TestDetails?.DataCombination?.ResolvedGenericTypes;");
-            writer.AppendLine();
-
-            // Get the method (handle both generic methods and methods in generic types)
-            writer.AppendLine("// Get the method to invoke");
-            writer.AppendLine("var instanceType = instance.GetType();");
-            writer.AppendLine($"var methodInfo = instanceType.GetMethod(\"{methodSymbol.Name}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);");
-            writer.AppendLine();
-
-            if (testMethod.IsGenericMethod)
-            {
-                writer.AppendLine("// Construct generic method if needed");
-                writer.AppendLine("if (methodInfo.IsGenericMethodDefinition && resolvedTypes != null)");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("var methodTypeArgs = new global::System.Type[]");
-                writer.AppendLine("{");
-                writer.Indent();
-                foreach (var typeParam in methodSymbol.TypeParameters)
-                {
-                    writer.AppendLine($"resolvedTypes[\"{typeParam.Name}\"],");
-                }
-                writer.Unindent();
-                writer.AppendLine("};");
-                writer.AppendLine("methodInfo = methodInfo.MakeGenericMethod(methodTypeArgs);");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine();
-            }
-
-            // Handle parameters
-            writer.AppendLine("// Prepare method arguments");
-            writer.AppendLine("var methodArgs = args;");
-
-            // Check if method has CancellationToken parameter
-            var hasCancellationToken = methodSymbol.Parameters.Any(p => p.Type.ToDisplayString() == "System.Threading.CancellationToken");
-            if (hasCancellationToken)
-            {
-                writer.AppendLine("// Add CancellationToken if needed");
-                writer.AppendLine("var argsList = args.ToList();");
-                writer.AppendLine("argsList.Add(cancellationToken);");
-                writer.AppendLine("methodArgs = argsList.ToArray();");
-            }
-
-            writer.AppendLine();
-            writer.AppendLine("// Invoke the method");
-            writer.AppendLine("var result = methodInfo.Invoke(instance, methodArgs);");
-
-            // Handle async methods
-            writer.AppendLine("if (result is Task task)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("await task;");
-            writer.Unindent();
-            writer.AppendLine("}");
+            writer.AppendLine("// Generic method invocation should be handled by the test framework");
+            writer.AppendLine("throw new global::System.InvalidOperationException(\"Generic test method invocation should be handled by the test framework\");");
         }
         else
         {

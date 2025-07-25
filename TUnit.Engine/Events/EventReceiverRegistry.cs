@@ -148,7 +148,7 @@ internal sealed class EventReceiverRegistry
             {
                 // Cast array to specific type
                 var typedArray = new T[receivers.Length];
-                for (int i = 0; i < receivers.Length; i++)
+                for (var i = 0; i < receivers.Length; i++)
                 {
                     typedArray[i] = (T)receivers[i];
                 }

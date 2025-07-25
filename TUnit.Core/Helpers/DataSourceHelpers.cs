@@ -21,39 +21,12 @@ public static class DataSourceHelpers
             return null;
         }
 
-        // For AOT compatibility, we manually check for common Func<T> patterns
-        // This is not ideal but necessary until we find a better solution
-        
-        switch (value)
+        if(value.GetType().IsGenericType && value.GetType().GetGenericTypeDefinition() == typeof(Func<>))
         {
-            // Common primitive types
-            case Func<string> f: return f();
-            case Func<int> f: return f();
-            case Func<long> f: return f();
-            case Func<double> f: return f();
-            case Func<float> f: return f();
-            case Func<bool> f: return f();
-            case Func<decimal> f: return f();
-            case Func<DateTime> f: return f();
-            case Func<Guid> f: return f();
-            
-            // Common tuple types
-            case Func<(int, string, bool)> f: return f();
-            case Func<(object?, object?)> f: return f();
-            case Func<(object?, object?, object?)> f: return f();
-            
-            // Arrays
-            case Func<string[]> f: return f();
-            case Func<int[]> f: return f();
-            case Func<object?[]> f: return f();
-            
-            // Generic object - must be last as it catches everything
-            case Func<object> f: return f();
-            
-            default:
-                // For non-Func types, return as-is
-                return value;
+            return ((Delegate)value).DynamicInvoke();
         }
+
+        return value;
     }
 
     /// <summary>
@@ -84,7 +57,7 @@ public static class DataSourceHelpers
         if (unwrapped.Length > 1)
         {
             // Multiple values from tuple - create a factory for each that returns the specific element
-            return unwrapped.Select((_, index) => new Func<Task<object?>>(() => 
+            return unwrapped.Select((_, index) => new Func<Task<object?>>(() =>
             {
                 var freshUnwrapped = UnwrapTupleAot(value);
                 return Task.FromResult<object?>(index < freshUnwrapped.Length ? freshUnwrapped[index] : null);
@@ -278,7 +251,7 @@ public static class DataSourceHelpers
         // Determine how many factories we need to return based on the data structure
         // We need to evaluate the data once to understand its structure
         var sampleData = InvokeIfFunc(data);
-        
+
         // Always unwrap tuples - they explicitly represent multiple values
         if (IsTuple(sampleData))
         {
@@ -286,7 +259,7 @@ public static class DataSourceHelpers
             // For tuples, return individual factories for each parameter
             if (expectedParameterCount > 0 && unwrapped.Length == expectedParameterCount)
             {
-                return unwrapped.Select((_, index) => new Func<Task<object?>>(() => 
+                return unwrapped.Select((_, index) => new Func<Task<object?>>(() =>
                 {
                     var freshData = InvokeIfFunc(data);
                     var freshUnwrapped = UnwrapTupleAot(freshData);
@@ -296,14 +269,14 @@ public static class DataSourceHelpers
             // If parameter count doesn't match, return as single tuple value
             return [() => Task.FromResult<object?>(InvokeIfFunc(data))];
         }
-        
+
         // For arrays, decide based on expected parameter count
         if (sampleData is object?[] array && expectedParameterCount > 0)
         {
             // If expecting multiple parameters and array length matches, unwrap it
             if (expectedParameterCount > 1 && array.Length == expectedParameterCount)
             {
-                return array.Select((_, index) => new Func<Task<object?>>(() => 
+                return array.Select((_, index) => new Func<Task<object?>>(() =>
                 {
                     var freshData = InvokeIfFunc(data);
                     if (freshData is object?[] freshArray && index < freshArray.Length)
@@ -316,7 +289,7 @@ public static class DataSourceHelpers
             // If expecting 1 parameter, keep array as single value
             // Or if array length doesn't match expected count, treat as single value
         }
-        
+
         // Default: return as single value, invoking the original function each time
         return [() => Task.FromResult<object?>(InvokeIfFunc(data))];
     }
@@ -358,6 +331,8 @@ public static class DataSourceHelpers
 
     public static object?[] ToObjectArray(this object? item)
     {
+        item = InvokeIfFunc(item);
+
         if (item is null)
         {
             return [ null ];

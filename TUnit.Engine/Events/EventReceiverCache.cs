@@ -56,7 +56,7 @@ internal sealed class EventReceiverCache
             var receivers = factory(testClassType);
             // Pre-size array and avoid LINQ Cast + ToArray
             var array = new object[receivers.Length];
-            for (int i = 0; i < receivers.Length; i++)
+            for (var i = 0; i < receivers.Length; i++)
             {
                 array[i] = receivers[i];
             }
@@ -65,7 +65,7 @@ internal sealed class EventReceiverCache
         
         // Cast back to specific type
         var result = new T[cached.Length];
-        for (int i = 0; i < cached.Length; i++)
+        for (var i = 0; i < cached.Length; i++)
         {
             result[i] = (T)cached[i];
         }

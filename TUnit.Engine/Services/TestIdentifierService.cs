@@ -14,14 +14,14 @@ internal static class TestIdentifierService
         // Pre-size arrays to avoid LINQ chains and multiple enumerations
         var constructorParameters = classMetadata.Parameters;
         var constructorParameterTypes = new Type[constructorParameters.Length];
-        for (int i = 0; i < constructorParameters.Length; i++)
+        for (var i = 0; i < constructorParameters.Length; i++)
         {
             constructorParameterTypes[i] = constructorParameters[i].Type;
         }
 
         var methodParameters = methodMetadata.Parameters;
         var methodParameterTypes = new Type[methodParameters.Length];
-        for (int i = 0; i < methodParameters.Length; i++)
+        for (var i = 0; i < methodParameters.Length; i++)
         {
             methodParameterTypes[i] = methodParameters[i].Type;
         }
@@ -64,14 +64,14 @@ internal static class TestIdentifierService
         // Pre-size arrays to avoid LINQ chains and multiple enumerations
         var constructorParameters = classMetadata.Parameters;
         var constructorParameterTypes = new Type[constructorParameters.Length];
-        for (int i = 0; i < constructorParameters.Length; i++)
+        for (var i = 0; i < constructorParameters.Length; i++)
         {
             constructorParameterTypes[i] = constructorParameters[i].Type;
         }
 
         var methodParameters = methodMetadata.Parameters;
         var methodParameterTypes = new Type[methodParameters.Length];
-        for (int i = 0; i < methodParameters.Length; i++)
+        for (var i = 0; i < methodParameters.Length; i++)
         {
             methodParameterTypes[i] = methodParameters[i].Type;
         }
@@ -112,7 +112,7 @@ internal static class TestIdentifierService
         var sb = new StringBuilder(typeName.Length + (parameterTypes.Length * 20)); // Estimate capacity
         sb.Append(typeName).Append('(');
 
-        for (int i = 0; i < parameterTypes.Length; i++)
+        for (var i = 0; i < parameterTypes.Length; i++)
         {
             if (i > 0)
             {
