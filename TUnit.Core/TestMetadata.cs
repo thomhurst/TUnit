@@ -38,9 +38,10 @@ public abstract class TestMetadata
 
     /// <summary>
     /// AOT-safe factory to create test class instance
-    /// Accepts constructor arguments array (empty array for parameterless constructors)
+    /// Accepts type arguments for generic types and constructor arguments array
+    /// For non-generic types, typeArgs will be Type.EmptyTypes
     /// </summary>
-    public Func<object?[], object> InstanceFactory { get; init; } = null!;
+    public Func<Type[], object?[], object> InstanceFactory { get; init; } = null!;
 
     /// <summary>
     /// AOT-safe test method invoker

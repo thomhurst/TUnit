@@ -136,7 +136,10 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 throw new InvalidOperationException($"No instance factory for {_testClass.Name}");
             }
 
-            var instance = InstanceFactory(context.ClassArguments);
+            // Get type arguments for generic types
+            var typeArgs = testContext.TestDetails.TestClassArguments?.OfType<Type>().ToArray() ?? Type.EmptyTypes;
+            
+            var instance = InstanceFactory(typeArgs, context.ClassArguments);
 
             // Apply property values using unified PropertyInjector
             await PropertyInjector.InjectPropertiesAsync(

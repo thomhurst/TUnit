@@ -778,18 +778,33 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
 
     [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicConstructors' in call to 'System.Type.GetConstructors()'", Justification = "Reflection mode requires dynamic access")]
-    private static Func<object?[], object> CreateInstanceFactory([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type testClass)
+    private static Func<Type[], object?[], object> CreateInstanceFactory([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type testClass)
     {
+        // For generic types, we need to handle MakeGenericType
+        if (testClass.IsGenericTypeDefinition)
+        {
+            return (typeArgs, args) =>
+            {
+                var closedType = testClass.MakeGenericType(typeArgs);
+                if (args.Length == 0)
+                {
+                    return Activator.CreateInstance(closedType)!;
+                }
+                return Activator.CreateInstance(closedType, args)!;
+            };
+        }
+
         var constructors = testClass.GetConstructors();
 
         if (constructors.Length == 0)
         {
-            return _ => Activator.CreateInstance(testClass)!;
+            return (_, _) => Activator.CreateInstance(testClass)!;
         }
 
         var ctor = constructors.FirstOrDefault(c => c.GetParameters().Length == 0) ?? constructors.First();
 
-        return _expressionCache.GetOrCreateInstanceFactory(ctor, CompileInstanceFactory);
+        var factory = _expressionCache.GetOrCreateInstanceFactory(ctor, CompileInstanceFactory);
+        return (_, args) => factory(args);
     }
 
     private static Func<object?[], object> CompileInstanceFactory(ConstructorInfo ctor)

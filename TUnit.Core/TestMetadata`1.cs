@@ -11,13 +11,13 @@ public class TestMetadata<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
     T> : TestMetadata, ITypedTestMetadata where T : class
 {
-    private Func<object?[], T>? _instanceFactory;
+    private Func<Type[], object?[], T>? _instanceFactory;
     private Func<T, object?[], Task>? _testInvoker;
 
     /// <summary>
     /// Strongly typed instance factory
     /// </summary>
-    public new Func<object?[], T>? InstanceFactory
+    public new Func<Type[], object?[], T>? InstanceFactory
     {
         get => _instanceFactory;
         init
@@ -26,7 +26,7 @@ public class TestMetadata<
             // Also set the base class property with a wrapper
             if (value != null)
             {
-                base.InstanceFactory = args => value(args);
+                base.InstanceFactory = (typeArgs, args) => value(typeArgs, args);
             }
         }
     }
@@ -48,17 +48,6 @@ public class TestMetadata<
         }
     }
 
-    /// <summary>
-    /// Instance creator delegate for unified execution model.
-    /// Created at compile-time for AOT mode, at runtime for reflection mode.
-    /// </summary>
-    public Func<TestContext, Task<object>>? CreateInstance { get; init; }
-
-    /// <summary>
-    /// Test invoker delegate with CancellationToken support for unified execution model.
-    /// Handles all parameter injection including CancellationToken.
-    /// </summary>
-    public Func<object, object?[], TestContext, CancellationToken, Task>? InvokeTest { get; init; }
 
     /// <summary>
     /// Strongly typed test invoker with CancellationToken support.
@@ -75,24 +64,6 @@ public class TestMetadata<
     {
         get
         {
-            // Use pre-set delegates if available
-            if (CreateInstance != null && InvokeTest != null)
-            {
-                return (context, metadata) => new UnifiedExecutableTest(
-                    (testContext) => CreateInstance(testContext),
-                    (instance, args, testContext, cancellationToken) => InvokeTest(instance, args, testContext, cancellationToken))
-                {
-                    TestId = context.TestId,
-                    DisplayName = context.DisplayName,
-                    Metadata = metadata,
-                    Arguments = context.Arguments,
-                    ClassArguments = context.ClassArguments,
-                    BeforeTestHooks = context.BeforeTestHooks,
-                    AfterTestHooks = context.AfterTestHooks,
-                    Context = context.Context
-                };
-            }
-
             // For AOT mode, create delegates from the strongly-typed ones
             if (InstanceFactory != null && InvokeTypedTest != null)
             {
@@ -101,7 +72,12 @@ public class TestMetadata<
                     var typedMetadata = (TestMetadata<T>)metadata;
 
                     // Create instance delegate that uses context
-                    Func<TestContext, Task<object>> createInstance = (testContext) => Task.FromResult<object>(typedMetadata.InstanceFactory!(context.ClassArguments));
+                    Func<TestContext, Task<object>> createInstance = (testContext) => 
+                    {
+                        // Get type arguments from test context if generic
+                        var typeArgs = testContext.TestDetails.TestClassArguments?.OfType<Type>().ToArray() ?? Type.EmptyTypes;
+                        return Task.FromResult<object>(typedMetadata.InstanceFactory!(typeArgs, context.ClassArguments));
+                    };
 
                     // Convert InvokeTypedTest to the expected signature
                     Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
@@ -123,7 +99,7 @@ public class TestMetadata<
                 };
             }
 
-            throw new InvalidOperationException($"Either (CreateInstance and InvokeTest) or (InstanceFactory and InvokeTypedTest) must be set for {typeof(T).Name}");
+            throw new InvalidOperationException($"InstanceFactory and InvokeTypedTest must be set for {typeof(T).Name}");
         }
     }
 

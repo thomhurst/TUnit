@@ -64,7 +64,12 @@ internal sealed class TestBuilder : ITestBuilder
 
                         var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
 
-                        var instance = metadata.InstanceFactory(classData);
+                        // Get type arguments for generic types
+                        var typeArgs = metadata.GenericTypeInfo != null 
+                            ? Type.EmptyTypes // TODO: Resolve actual type arguments from test data
+                            : Type.EmptyTypes;
+                        
+                        var instance = metadata.InstanceFactory(typeArgs, classData);
 
                         if (instance is null)
                         {
@@ -89,7 +94,7 @@ internal sealed class TestBuilder : ITestBuilder
                             {
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
 
-                                instance = metadata.InstanceFactory(classData);
+                                instance = metadata.InstanceFactory(typeArgs, classData);
 
                                 var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
 

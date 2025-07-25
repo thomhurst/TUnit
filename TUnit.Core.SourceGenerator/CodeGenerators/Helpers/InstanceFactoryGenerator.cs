@@ -9,6 +9,14 @@ public static class InstanceFactoryGenerator
     {
         var className = typeSymbol.GloballyQualified();
 
+        // Check if this is a generic type definition
+        if (typeSymbol is INamedTypeSymbol namedType && namedType.IsGenericType && namedType.TypeArguments.Any(ta => ta is ITypeParameterSymbol))
+        {
+            // Generate factory that uses MakeGenericType
+            GenerateGenericInstanceFactory(writer, namedType);
+            return;
+        }
+
         if (typeSymbol.HasParameterizedConstructor())
         {
             var constructor = GetPrimaryConstructor(typeSymbol);
@@ -28,11 +36,11 @@ public static class InstanceFactoryGenerator
 
             if (!requiredProperties.Any())
             {
-                writer.AppendLine($"InstanceFactory = args => new {className}(),");
+                writer.AppendLine($"InstanceFactory = (typeArgs, args) => new {className}(),");
             }
             else
             {
-                writer.AppendLine($"InstanceFactory = args => new {className}()");
+                writer.AppendLine($"InstanceFactory = (typeArgs, args) => new {className}()");
                 writer.AppendLine("{");
                 writer.Indent();
 
@@ -67,7 +75,7 @@ public static class InstanceFactoryGenerator
 
     private static void GenerateTypedConstructorCall(CodeWriter writer, string className, IMethodSymbol constructor)
     {
-        writer.AppendLine("InstanceFactory = args =>");
+        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -116,6 +124,52 @@ public static class InstanceFactoryGenerator
             }
 
             writer.AppendLine(";");
+        }
+
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
+
+    private static void GenerateGenericInstanceFactory(CodeWriter writer, INamedTypeSymbol genericType)
+    {
+        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        // Get the open generic type
+        writer.AppendLine($"var openGenericType = typeof({genericType.OriginalDefinition.GloballyQualified()});");
+        writer.AppendLine();
+        
+        // Create the closed generic type
+        writer.AppendLine("var closedGenericType = openGenericType.MakeGenericType(typeArgs);");
+        writer.AppendLine();
+        
+        // Check for constructor parameters
+        var constructor = GetPrimaryConstructor(genericType);
+        if (constructor != null && constructor.Parameters.Length > 0)
+        {
+            writer.AppendLine("// Create instance with constructor arguments");
+            writer.AppendLine("return global::System.Activator.CreateInstance(closedGenericType, args);");
+        }
+        else
+        {
+            writer.AppendLine("// Create instance with parameterless constructor");
+            writer.AppendLine("var instance = global::System.Activator.CreateInstance(closedGenericType);");
+            
+            // Check for required properties
+            var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(genericType);
+            if (requiredProperties.Any())
+            {
+                writer.AppendLine();
+                writer.AppendLine("// Set required properties");
+                foreach (var property in requiredProperties)
+                {
+                    var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
+                    writer.AppendLine($"closedGenericType.GetProperty(\"{property.Name}\")?.SetValue(instance, {defaultValue});");
+                }
+            }
+            
+            writer.AppendLine("return instance!;");
         }
 
         writer.Unindent();
