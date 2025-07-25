@@ -145,7 +145,7 @@ internal static class MetadataGenerationHelper
     /// </summary>
     public static string GenerateParameterMetadataGeneric(IParameterSymbol parameter, IMethodSymbol? containingMethod = null)
     {
-        var safeType = CodeGenerationHelpers.ContainsTypeParameter(parameter.Type) ? "object" : parameter.Type.GloballyQualified();
+        var safeType = CodeGenerationHelpers.GetSafeTypeName(parameter.Type);
         var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
         
         return $@"new global::TUnit.Core.ParameterMetadata<{safeType}>
@@ -161,7 +161,7 @@ internal static class MetadataGenerationHelper
     /// </summary>
     public static string GenerateParameterMetadata(IParameterSymbol parameter, IMethodSymbol? containingMethod = null)
     {
-        var safeType = CodeGenerationHelpers.ContainsTypeParameter(parameter.Type) ? "object" : parameter.Type.GloballyQualified();
+        var safeType = CodeGenerationHelpers.GetSafeTypeName(parameter.Type);
         var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
         
         return $@"new global::TUnit.Core.ParameterMetadata(typeof({safeType}))
@@ -254,8 +254,8 @@ internal static class MetadataGenerationHelper
     /// </summary>
     public static string GeneratePropertyMetadata(IPropertySymbol property, INamedTypeSymbol containingType)
     {
-        var safeTypeNameForReflection = CodeGenerationHelpers.ContainsTypeParameter(containingType) ? "object" : containingType.GloballyQualified();
-        var safePropertyTypeName = CodeGenerationHelpers.ContainsTypeParameter(property.Type) ? "object" : property.Type.GloballyQualified();
+        var safeTypeNameForReflection = CodeGenerationHelpers.GetSafeTypeName(containingType);
+        var safePropertyTypeName = CodeGenerationHelpers.GetSafeTypeName(property.Type);
         
         return $@"new global::TUnit.Core.PropertyMetadata
 {{
@@ -273,7 +273,7 @@ internal static class MetadataGenerationHelper
     /// </summary>
     private static string GetPropertyAccessor(INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
     {
-        var safeTypeName = CodeGenerationHelpers.ContainsTypeParameter(namedTypeSymbol) ? "object" : namedTypeSymbol.GloballyQualified();
+        var safeTypeName = CodeGenerationHelpers.GetSafeTypeName(namedTypeSymbol);
         return property.IsStatic
             ? $"_ => {safeTypeName}.{property.Name}"
             : $"o => (({safeTypeName})o).{property.Name}";

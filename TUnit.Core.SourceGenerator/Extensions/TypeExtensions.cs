@@ -213,7 +213,7 @@ public static class TypeExtensions
 
             var commas = new string(',', genericTypeArguments - 1);
 
-            return $"{typeSymbol.OriginalDefinition.GloballyQualifiedNonGeneric()}<{commas}>";
+            return $"{namedTypeSymbol.OriginalDefinition.ToDisplayString(DisplayFormats.FullyQualifiedGenericTypeOnly)}<{commas}>";
         }
 
         return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);

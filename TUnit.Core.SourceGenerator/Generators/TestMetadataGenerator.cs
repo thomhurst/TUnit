@@ -270,7 +270,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Indent();
         foreach (var param in methodSymbol.Parameters)
         {
-            var paramType = CodeGenerationHelpers.ContainsTypeParameter(param.Type) ? "object" : param.Type.ToDisplayString();
+            var paramType = CodeGenerationHelpers.GetTypeDisplayString(param.Type);
             writer.AppendLine($"\"{paramType}\",");
         }
         writer.Unindent();

@@ -57,4 +57,17 @@ public class DisplayFormats
     );
 
     public static readonly SymbolDisplayFormat NameOnly = new(miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+    
+    public static readonly SymbolDisplayFormat FullyQualifiedGenericTypeOnly = new(
+        SymbolDisplayGlobalNamespaceStyle.Included,
+        SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+        SymbolDisplayGenericsOptions.None,
+        SymbolDisplayMemberOptions.None,
+        SymbolDisplayDelegateStyle.NameOnly,
+        SymbolDisplayExtensionMethodStyle.Default,
+        SymbolDisplayParameterOptions.None,
+        SymbolDisplayPropertyStyle.NameOnly,
+        SymbolDisplayLocalOptions.None,
+        miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes
+    );
 }

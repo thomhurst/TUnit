@@ -26,7 +26,7 @@ internal static class CodeGenerationHelpers
             foreach (var param in method.Parameters)
             {
                 var parameterIndex = method.Parameters.IndexOf(param);
-                var typeForConstructor = ContainsTypeParameter(param.Type) ? "object" : param.Type.GloballyQualified();
+                var typeForConstructor = GetSafeTypeName(param.Type);
                 using (writer.BeginObjectInitializer($"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))", ","))
                 {
                     writer.AppendLine($"Name = \"{param.Name}\",");
@@ -157,6 +157,77 @@ internal static class CodeGenerationHelpers
         }
 
         return false;
+    }
+    
+    /// <summary>
+    /// Gets a safe type name for use in typeof() expressions.
+    /// Returns "object" only for actual type parameters or types containing them.
+    /// Returns open generic forms (e.g., List<>) for generic type definitions.
+    /// </summary>
+    public static string GetSafeTypeName(ITypeSymbol type)
+    {
+        // Only use "object" for actual type parameters (like T)
+        if (type is ITypeParameterSymbol)
+        {
+            return "object";
+        }
+        
+        // For named types, check if we can create an open generic form
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            // If any type arguments contain type parameters, we need to check if we can use the open generic form
+            if (namedType.TypeArguments.Any(ContainsTypeParameter))
+            {
+                // Use the open generic form (e.g., List<> or Dictionary<,>)
+                var genericTypeDefinition = namedType.OriginalDefinition;
+                var commas = new string(',', genericTypeDefinition.TypeParameters.Length - 1);
+                return $"{genericTypeDefinition.ToDisplayString(DisplayFormats.FullyQualifiedGenericTypeOnly)}<{commas}>";
+            }
+        }
+        
+        // For arrays of type parameters, we need to use "object"
+        if (type is IArrayTypeSymbol arrayType && ContainsTypeParameter(arrayType.ElementType))
+        {
+            return "object";
+        }
+        
+        // For everything else, use the fully qualified name
+        return type.GloballyQualified();
+    }
+    
+    /// <summary>
+    /// Gets a string representation of a type suitable for display purposes.
+    /// This is used for TestMethodParameterTypes which needs simple string representations.
+    /// </summary>
+    public static string GetTypeDisplayString(ITypeSymbol type)
+    {
+        // For type parameters, just return the parameter name
+        if (type is ITypeParameterSymbol typeParam)
+        {
+            return typeParam.Name;
+        }
+        
+        // For named types with type parameters, we need special handling
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            // If any type arguments contain type parameters, create an open generic form string
+            if (namedType.TypeArguments.Any(ContainsTypeParameter))
+            {
+                var genericTypeDefinition = namedType.OriginalDefinition;
+                var commas = new string(',', genericTypeDefinition.TypeParameters.Length - 1);
+                return $"{genericTypeDefinition.ToDisplayString(DisplayFormats.FullyQualifiedGenericTypeOnly)}<{commas}>";
+            }
+        }
+        
+        // For arrays with type parameters
+        if (type is IArrayTypeSymbol arrayType && ContainsTypeParameter(arrayType.ElementType))
+        {
+            var elementDisplay = GetTypeDisplayString(arrayType.ElementType);
+            return $"{elementDisplay}[]";
+        }
+        
+        // For everything else, use the fully qualified name
+        return type.GloballyQualified();
     }
 
     /// <summary>
