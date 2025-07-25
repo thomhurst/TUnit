@@ -1020,9 +1020,33 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (testMethod.IsGenericType)
         {
-            writer.AppendLine("// Generic type instantiation requires resolved types at runtime");
-            writer.AppendLine("throw new global::System.InvalidOperationException(\"Generic test class instantiation should be handled by the test framework\");");
-
+            writer.AppendLine("// Get the open generic type from class metadata");
+            writer.AppendLine($"var openGenericType = typeof({typeSymbol.OriginalDefinition.GloballyQualified()});");
+            writer.AppendLine();
+            writer.AppendLine("// Get the resolved generic type arguments");
+            writer.AppendLine("// These are typically resolved from test data and stored in the test metadata");
+            writer.AppendLine("var typeArguments = context.TestDetails.TestMethodParameterTypes?.Length > 0");
+            writer.AppendLine("    ? global::System.Type.GetTypeArray(context.TestDetails.TestMethodParameterTypes)");
+            writer.AppendLine("    : global::System.Type.EmptyTypes;");
+            writer.AppendLine();
+            writer.AppendLine("// If we have generic type info, use it to get the correct number of type arguments");
+            writer.AppendLine("var genericTypeInfo = context.TestDetails.TestClassArguments?.OfType<global::System.Type>().ToArray();");
+            writer.AppendLine("if (genericTypeInfo?.Length > 0)");
+            writer.AppendLine("{");
+            writer.AppendLine("    typeArguments = genericTypeInfo;");
+            writer.AppendLine("}");
+            writer.AppendLine();
+            writer.AppendLine("// Create the closed generic type");
+            writer.AppendLine("var closedGenericType = openGenericType.MakeGenericType(typeArguments);");
+            writer.AppendLine();
+            writer.AppendLine("// Create an instance of the closed generic type");
+            writer.AppendLine("var instance = global::System.Activator.CreateInstance(closedGenericType);");
+            writer.AppendLine("if (instance == null)");
+            writer.AppendLine("{");
+            writer.AppendLine("    throw new global::System.InvalidOperationException($\"Failed to create instance of {closedGenericType}\");");
+            writer.AppendLine("}");
+            writer.AppendLine();
+            writer.AppendLine("return instance;");
         }
         else
         {
@@ -1038,10 +1062,90 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        if (testMethod.IsGenericMethod || testMethod.IsGenericType)
+        if (testMethod.IsGenericMethod)
         {
-            writer.AppendLine("// Generic method invocation should be handled by the test framework");
-            writer.AppendLine("throw new global::System.InvalidOperationException(\"Generic test method invocation should be handled by the test framework\");");
+            writer.AppendLine("// Get the method info for the generic method");
+            writer.AppendLine($"var methodInfo = instance.GetType().GetMethod(\"{methodSymbol.Name}\", ");
+            writer.AppendLine("    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);");
+            writer.AppendLine();
+            writer.AppendLine("if (methodInfo == null)");
+            writer.AppendLine("{");
+            writer.AppendLine($"    throw new global::System.InvalidOperationException(\"Method '{methodSymbol.Name}' not found on type \" + instance.GetType());");
+            writer.AppendLine("}");
+            writer.AppendLine();
+            writer.AppendLine("// Check if the method is generic and needs type arguments");
+            writer.AppendLine("if (methodInfo.IsGenericMethodDefinition)");
+            writer.AppendLine("{");
+            writer.AppendLine("    // Get generic type arguments from the test context or metadata");
+            writer.AppendLine("    // These should be resolved based on the test data");
+            writer.AppendLine("    var genericArgs = context.TestDetails.TestMethodParameterTypes?.Length > 0");
+            writer.AppendLine("        ? global::System.Type.GetTypeArray(context.TestDetails.TestMethodParameterTypes)");
+            writer.AppendLine("        : global::System.Type.EmptyTypes;");
+            writer.AppendLine();
+            writer.AppendLine("    // Make the generic method with resolved type arguments");
+            writer.AppendLine("    methodInfo = methodInfo.MakeGenericMethod(genericArgs);");
+            writer.AppendLine("}");
+            writer.AppendLine();
+            writer.AppendLine("// Prepare method arguments");
+            writer.AppendLine("var methodParams = args;");
+            writer.AppendLine("if (cancellationToken != global::System.Threading.CancellationToken.None)");
+            writer.AppendLine("{");
+            writer.AppendLine("    // Check if the method has a CancellationToken parameter");
+            writer.AppendLine("    var parameters = methodInfo.GetParameters();");
+            writer.AppendLine("    if (parameters.Length > args.Length && ");
+            writer.AppendLine("        parameters[parameters.Length - 1].ParameterType == typeof(global::System.Threading.CancellationToken))");
+            writer.AppendLine("    {");
+            writer.AppendLine("        // Add the cancellation token to the arguments");
+            writer.AppendLine("        var newArgs = new object?[args.Length + 1];");
+            writer.AppendLine("        Array.Copy(args, newArgs, args.Length);");
+            writer.AppendLine("        newArgs[args.Length] = cancellationToken;");
+            writer.AppendLine("        methodParams = newArgs;");
+            writer.AppendLine("    }");
+            writer.AppendLine("}");
+            writer.AppendLine();
+            writer.AppendLine("// Invoke the method");
+            writer.AppendLine("var result = methodInfo.Invoke(instance, methodParams);");
+            writer.AppendLine();
+            writer.AppendLine("// Handle async methods");
+            writer.AppendLine("if (result is global::System.Threading.Tasks.Task task)");
+            writer.AppendLine("{");
+            writer.AppendLine("    await task;");
+            writer.AppendLine("}");
+        }
+        else if (testMethod.IsGenericType)
+        {
+            // For generic types with non-generic methods, we can invoke normally
+            writer.AppendLine($"// Cast to dynamic to handle generic type at runtime");
+            writer.AppendLine("dynamic typedInstance = instance;");
+            writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
+            
+            var methodName = methodSymbol.Name;
+            var isAsync = methodSymbol.IsAsync || methodSymbol.ReturnType.Name == "Task" || methodSymbol.ReturnType.Name == "ValueTask";
+            var hasCancellationToken = methodSymbol.Parameters.Any(p => p.Type.Name == "CancellationToken");
+            
+            if (methodSymbol.Parameters.Length == 0 || (methodSymbol.Parameters.Length == 1 && hasCancellationToken))
+            {
+                var methodCall = hasCancellationToken
+                    ? $"typedInstance.{methodName}(cancellationToken)"
+                    : $"typedInstance.{methodName}()";
+                if (isAsync)
+                {
+                    writer.AppendLine($"await {methodCall};");
+                }
+                else
+                {
+                    writer.AppendLine($"{methodCall};");
+                }
+            }
+            else
+            {
+                writer.AppendLine("// Invoke with the provided arguments");
+                writer.AppendLine($"var result = typedInstance.{methodName}(args);");
+                writer.AppendLine("if (result is global::System.Threading.Tasks.Task task)");
+                writer.AppendLine("{");
+                writer.AppendLine("    await task;");
+                writer.AppendLine("}");
+            }
         }
         else
         {
