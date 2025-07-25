@@ -528,7 +528,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("await foreach (var item in result)");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(ConvertToObjectArray(item));");
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
             writer.Unindent();
             writer.AppendLine("}");
         }
@@ -542,7 +542,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("foreach (var item in enumerable)");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(ConvertToObjectArray(item));");
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
             writer.Unindent();
             writer.AppendLine("}");
             writer.Unindent();
@@ -550,7 +550,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("else");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(ConvertToObjectArray(taskResult));");
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(taskResult));");
             writer.Unindent();
             writer.AppendLine("}");
         }
@@ -563,7 +563,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("foreach (var item in enumerable)");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(ConvertToObjectArray(item));");
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
             writer.Unindent();
             writer.AppendLine("}");
             writer.Unindent();
@@ -571,61 +571,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("else");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(ConvertToObjectArray(result));");
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
             writer.Unindent();
             writer.AppendLine("}");
         }
         else
         {
             // Single value
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(ConvertToObjectArray(result));");
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
         }
 
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
 
-        // Generate helper method for converting to object array
-        writer.AppendLine("object?[]? ConvertToObjectArray(object? item)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("if (item == null) return new object?[] { null };");
-        writer.AppendLine("if (item is object?[] objArray) return objArray;");
-        writer.AppendLine();
-        writer.AppendLine("// Handle ValueTuples");
-        writer.AppendLine("var type = item.GetType();");
-        writer.AppendLine("if (type.Name.StartsWith(\"ValueTuple\"))");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("// Use reflection to extract tuple fields");
-        writer.AppendLine("var fields = type.GetFields();");
-        writer.AppendLine("var values = new object?[fields.Length];");
-        writer.AppendLine("for (int i = 0; i < fields.Length; i++)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("values[i] = fields[i].GetValue(item);");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine("return values;");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-        writer.AppendLine("// Handle regular arrays");
-        writer.AppendLine("if (type.IsArray)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("var array = (Array)item;");
-        writer.AppendLine("var result = new object?[array.Length];");
-        writer.AppendLine("array.CopyTo(result, 0);");
-        writer.AppendLine("return result;");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-        writer.AppendLine("// Single value");
-        writer.AppendLine("return new[] { item };");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
 
         writer.AppendLine("return Factory();");
     }
