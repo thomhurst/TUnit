@@ -167,10 +167,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var methodName = testMethod.MethodSymbol.Name;
 
-        // For generic types, we need to use object as the type parameter since we can't resolve generics at compile time
-        var metadataTypeParameter = testMethod.IsGenericType ? "object" : className;
-
-        writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{metadataTypeParameter}>");
+        // For generic types or methods, use GenericTestMetadata; for concrete types, use TestMetadata<T>
+        if (testMethod.IsGenericType || testMethod.IsGenericMethod)
+        {
+            writer.AppendLine("var metadata = new global::TUnit.Core.GenericTestMetadata");
+        }
+        else
+        {
+            writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{className}>");
+        }
+        
         writer.AppendLine("{");
         writer.Indent();
 
@@ -200,7 +206,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("};");
 
         // Set the test to use runtime data generation
-        writer.AppendLine($"metadata.UseRuntimeDataGeneration(testSessionId);");
+        if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
+        {
+            writer.AppendLine($"metadata.UseRuntimeDataGeneration(testSessionId);");
+        }
+        else
+        {
+            // For generic types/methods, set TestSessionId directly
+            writer.AppendLine($"metadata.TestSessionId = testSessionId;");
+        }
 
         writer.AppendLine("tests.Add(metadata);");
     }
@@ -988,12 +1002,88 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Use centralized instance factory generator for all types (generic and non-generic)
         InstanceFactoryGenerator.GenerateInstanceFactory(writer, testMethod.TypeSymbol);
 
-        // Test invoker for non-generic types
+        // For generic types or methods, we need to use reflection to invoke the test method
         var isAsync = IsAsyncMethod(testMethod.MethodSymbol);
-        GenerateConcreteTestInvoker(writer, testMethod, className, methodName, isAsync, hasCancellationToken, parametersFromArgs);
+        if (testMethod.IsGenericType || testMethod.IsGenericMethod)
+        {
+            GenerateGenericTestInvoker(writer, testMethod, methodName, isAsync, hasCancellationToken, parametersFromArgs);
+        }
+        else
+        {
+            GenerateConcreteTestInvoker(writer, testMethod, className, methodName, isAsync, hasCancellationToken, parametersFromArgs);
+        }
     }
 
 
+
+    private static void GenerateGenericTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string methodName, bool isAsync, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
+    {
+        writer.AppendLine("TestInvoker = async (instance, args) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Use reflection to invoke the method on the generic type instance
+        writer.AppendLine("var instanceType = instance.GetType();");
+        writer.AppendLine($"var method = instanceType.GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);");
+        writer.AppendLine("if (method == null)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"throw new System.InvalidOperationException($\"Method '{methodName}' not found on type {{instanceType.FullName}}\");");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        
+        // Handle generic method case
+        if (testMethod.IsGenericMethod && testMethod.MethodSymbol.TypeParameters.Length > 0)
+        {
+            writer.AppendLine("// Make the method generic if it has type parameters");
+            writer.AppendLine("if (method.IsGenericMethodDefinition)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("// For now, infer type arguments from the actual argument types");
+            writer.AppendLine("var typeArgs = new System.Type[" + testMethod.MethodSymbol.TypeParameters.Length + "];");
+            
+            // Simple type inference - use the type of the first argument that corresponds to each type parameter
+            // This is a simplified approach and may need enhancement for complex scenarios
+            writer.AppendLine("for (int i = 0; i < typeArgs.Length && i < args.Length; i++)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("typeArgs[i] = args[i]?.GetType() ?? typeof(object);");
+            writer.Unindent();
+            writer.AppendLine("}");
+            
+            writer.AppendLine("method = method.MakeGenericMethod(typeArgs);");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine();
+        }
+        
+        writer.AppendLine("// Prepare method arguments");
+        writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationToken ? " + 1" : "") + "];");
+        writer.AppendLine("args.CopyTo(methodArgs, 0);");
+        
+        if (hasCancellationToken)
+        {
+            writer.AppendLine("methodArgs[args.Length] = global::TUnit.Core.TestContext.Current?.CancellationToken ?? System.Threading.CancellationToken.None;");
+        }
+        
+        writer.AppendLine();
+        writer.AppendLine("// Invoke the method");
+        writer.AppendLine("var result = method.Invoke(instance, methodArgs);");
+        
+        if (isAsync)
+        {
+            writer.AppendLine("if (result is Task task)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("await task;");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+    }
 
     private static void GenerateConcreteTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string className, string methodName, bool isAsync, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
     {
