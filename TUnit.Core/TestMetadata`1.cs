@@ -72,10 +72,10 @@ public class TestMetadata<
                     var typedMetadata = (TestMetadata<T>)metadata;
 
                     // Create instance delegate that uses context
-                    Func<TestContext, Task<object>> createInstance = (testContext) => 
+                    Func<TestContext, Task<object>> createInstance = testContext =>
                     {
                         // Get type arguments from test context if generic
-                        var typeArgs = testContext.TestDetails.TestClassArguments?.OfType<Type>().ToArray() ?? Type.EmptyTypes;
+                        var typeArgs = testContext.TestDetails.MethodMetadata.Class.Parameters.Select(x => x.Type).ToArray();
                         return Task.FromResult<object>(typedMetadata.InstanceFactory!(typeArgs, context.ClassArguments));
                     };
 
@@ -92,8 +92,6 @@ public class TestMetadata<
                         Metadata = metadata,
                         Arguments = context.Arguments,
                         ClassArguments = context.ClassArguments,
-                            BeforeTestHooks = context.BeforeTestHooks,
-                        AfterTestHooks = context.AfterTestHooks,
                         Context = context.Context
                     };
                 };

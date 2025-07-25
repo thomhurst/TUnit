@@ -15,23 +15,36 @@ internal sealed class HookCollectionService : IHookCollectionService
     private readonly ConcurrentDictionary<Type, IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> _beforeClassHooksCache = new();
     private readonly ConcurrentDictionary<Type, IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> _afterClassHooksCache = new();
 
+    // Type-indexed hook registry for O(1) lookup
+    private readonly Lazy<Dictionary<Type, List<(int order, InstanceHookMethod hook)>>> _beforeTestHooksByType;
+    private readonly Lazy<Dictionary<Type, List<(int order, InstanceHookMethod hook)>>> _afterTestHooksByType;
+
+    public HookCollectionService()
+    {
+        _beforeTestHooksByType = new Lazy<Dictionary<Type, List<(int, InstanceHookMethod)>>>(BuildBeforeTestHooksIndex);
+        _afterTestHooksByType = new Lazy<Dictionary<Type, List<(int, InstanceHookMethod)>>>(BuildAfterTestHooksIndex);
+    }
+
     public ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeTestHooksAsync(Type testClassType)
     {
         var hooks = _beforeTestHooksCache.GetOrAdd(testClassType, type =>
         {
             var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
+            var hooksByType = _beforeTestHooksByType.Value;
 
-            foreach (var source in Sources.TestHookSources)
+            // Walk up the inheritance chain - O(inheritance_depth) instead of O(all_hooks)
+            var currentType = type;
+            while (currentType != null)
             {
-                var sourceHooks = source.CollectBeforeTestHooks(string.Empty);
-                foreach (var hook in sourceHooks)
+                if (hooksByType.TryGetValue(currentType, out var typeHooks))
                 {
-                    if (hook.MethodInfo?.Class?.Type != null && IsHookApplicableToClass(hook.MethodInfo.Class.Type, type))
+                    foreach (var (order, hook) in typeHooks)
                     {
                         var hookFunc = CreateInstanceHookDelegate(hook);
-                        allHooks.Add((hook.Order, hookFunc));
+                        allHooks.Add((order, hookFunc));
                     }
                 }
+                currentType = currentType.BaseType;
             }
 
             return allHooks
@@ -48,18 +61,21 @@ internal sealed class HookCollectionService : IHookCollectionService
         var hooks = _afterTestHooksCache.GetOrAdd(testClassType, type =>
         {
             var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
+            var hooksByType = _afterTestHooksByType.Value;
 
-            foreach (var source in Sources.TestHookSources)
+            // Walk up the inheritance chain - O(inheritance_depth) instead of O(all_hooks)
+            var currentType = type;
+            while (currentType != null)
             {
-                var sourceHooks = source.CollectAfterTestHooks(string.Empty);
-                foreach (var hook in sourceHooks)
+                if (hooksByType.TryGetValue(currentType, out var typeHooks))
                 {
-                    if (hook.MethodInfo?.Class?.Type != null && IsHookApplicableToClass(hook.MethodInfo.Class.Type, type))
+                    foreach (var (order, hook) in typeHooks)
                     {
                         var hookFunc = CreateInstanceHookDelegate(hook);
-                        allHooks.Add((hook.Order, hookFunc));
+                        allHooks.Add((order, hookFunc));
                     }
                 }
+                currentType = currentType.BaseType;
             }
 
             return allHooks
@@ -421,5 +437,47 @@ internal sealed class HookCollectionService : IHookCollectionService
                 await hook.Body(context, cancellationToken);
             }
         };
+    }
+
+    private Dictionary<Type, List<(int order, InstanceHookMethod hook)>> BuildBeforeTestHooksIndex()
+    {
+        var index = new Dictionary<Type, List<(int, InstanceHookMethod)>>();
+
+        foreach (var source in Sources.TestHookSources)
+        {
+            var hooks = source.CollectBeforeTestHooks(string.Empty);
+            foreach (var hook in hooks)
+            {
+                if (!index.TryGetValue(hook.MethodInfo.Class.Type, out var list))
+                {
+                    list = [];
+                    index[hook.MethodInfo.Class.Type] = list;
+                }
+                list.Add((hook.Order, hook));
+            }
+        }
+
+        return index;
+    }
+
+    private Dictionary<Type, List<(int order, InstanceHookMethod hook)>> BuildAfterTestHooksIndex()
+    {
+        var index = new Dictionary<Type, List<(int, InstanceHookMethod)>>();
+
+        foreach (var source in Sources.TestHookSources)
+        {
+            var hooks = source.CollectAfterTestHooks(string.Empty);
+            foreach (var hook in hooks)
+            {
+                if (!index.TryGetValue(hook.MethodInfo.Class.Type, out var list))
+                {
+                    list = [];
+                    index[hook.MethodInfo.Class.Type] = list;
+                }
+                list.Add((hook.Order, hook));
+            }
+        }
+
+        return index;
     }
 }

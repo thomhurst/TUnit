@@ -125,7 +125,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create single test executor with ExecutionContext support
         var singleTestExecutor = Register<ISingleTestExecutor>(
-            new SingleTestExecutor(Logger, EventReceiverOrchestrator));
+            new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService));
 
         TestExecutor = Register(new UnifiedTestExecutor(
             singleTestExecutor,

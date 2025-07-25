@@ -18,12 +18,14 @@ internal class SingleTestExecutor : ISingleTestExecutor
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestResultFactory _resultFactory;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
+    private readonly IHookCollectionService _hookCollectionService;
     private SessionUid? _sessionUid;
 
-    public SingleTestExecutor(TUnitFrameworkLogger logger, EventReceiverOrchestrator eventReceiverOrchestrator)
+    public SingleTestExecutor(TUnitFrameworkLogger logger, EventReceiverOrchestrator eventReceiverOrchestrator, IHookCollectionService hookCollectionService)
     {
         _logger = logger;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
+        _hookCollectionService = hookCollectionService;
         _resultFactory = new TestResultFactory();
     }
 
@@ -124,9 +126,14 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         RestoreHookContexts(test.Context);
 
+        // Collect hooks lazily at execution time
+        var testClassType = test.Context.TestDetails.ClassType;
+        var beforeTestHooks = await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType);
+        var afterTestHooks = await _hookCollectionService.CollectAfterTestHooksAsync(testClassType);
+
         try
         {
-            await ExecuteBeforeTestHooksAsync(test.BeforeTestHooks, test.Context, cancellationToken);
+            await ExecuteBeforeTestHooksAsync(beforeTestHooks, test.Context, cancellationToken);
 
             test.Context.RestoreExecutionContext();
 
@@ -142,13 +149,13 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         finally
         {
-            await ExecuteAfterTestHooksAsync(test.AfterTestHooks, test.Context, cancellationToken);
+            await ExecuteAfterTestHooksAsync(afterTestHooks, test.Context, cancellationToken);
             await DecrementAndDisposeTrackedObjectsAsync(test);
         }
     }
 
 
-    private async Task ExecuteBeforeTestHooksAsync(Func<TestContext, CancellationToken, Task>[] hooks, TestContext context, CancellationToken cancellationToken)
+    private async Task ExecuteBeforeTestHooksAsync(IReadOnlyList<Func<TestContext, CancellationToken, Task>> hooks, TestContext context, CancellationToken cancellationToken)
     {
         RestoreHookContexts(context);
         context.RestoreExecutionContext();
@@ -169,7 +176,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
     }
 
-    private async Task ExecuteAfterTestHooksAsync(Func<TestContext, CancellationToken, Task>[] hooks, TestContext context, CancellationToken cancellationToken)
+    private async Task ExecuteAfterTestHooksAsync(IReadOnlyList<Func<TestContext, CancellationToken, Task>> hooks, TestContext context, CancellationToken cancellationToken)
     {
         foreach (var hook in hooks)
         {

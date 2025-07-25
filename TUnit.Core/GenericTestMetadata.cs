@@ -88,8 +88,6 @@ public sealed class GenericTestMetadata : TestMetadata
                     Metadata = metadata,
                     Arguments = context.Arguments,
                     ClassArguments = context.ClassArguments,
-                    BeforeTestHooks = context.BeforeTestHooks,
-                    AfterTestHooks = context.AfterTestHooks,
                     Context = context.Context
                 };
             };

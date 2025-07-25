@@ -215,8 +215,6 @@ internal sealed class UnifiedTestBuilderPipeline
             Metadata = metadata,
             Arguments = [],
             ClassArguments = [],
-            BeforeTestHooks = [],
-            AfterTestHooks = [],
             Context = context,
             State = TestState.Failed,
             Result = new TestResult
@@ -273,8 +271,6 @@ internal sealed class UnifiedTestBuilderPipeline
             Metadata = metadata,
             Arguments = [],
             ClassArguments = [],
-            BeforeTestHooks = [],
-            AfterTestHooks = [],
             Context = context,
             State = TestState.Failed,
             Result = new TestResult

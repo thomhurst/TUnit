@@ -200,8 +200,6 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             Metadata = metadata,
             Arguments = context.Arguments,
             ClassArguments = context.ClassArguments,
-            BeforeTestHooks = context.BeforeTestHooks,
-            AfterTestHooks = context.AfterTestHooks,
             Context = context.Context
         };
     }

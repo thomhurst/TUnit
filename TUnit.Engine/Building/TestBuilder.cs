@@ -161,32 +161,17 @@ internal sealed class TestBuilder : ITestBuilder
         // Invoke discovery event receivers
         await InvokeDiscoveryEventReceiversAsync(context);
 
-        // Create hooks
-        var beforeTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: true);
-        var afterTestHooks = await CreateTestHooksAsync(metadata.TestClassType, isBeforeHook: false);
-
-        // Create the executable test
+        // Create the executable test (hooks are now collected lazily at execution time)
         var creationContext = new ExecutableTestCreationContext
         {
             TestId = testId,
             DisplayName = context.GetDisplayName(), // Use the display name from context which may have been updated by discovery events
             Arguments = testData.MethodData,
             ClassArguments = testData.ClassData,
-            BeforeTestHooks = beforeTestHooks,
-            AfterTestHooks = afterTestHooks,
             Context = context
         };
 
         return metadata.CreateExecutableTestFactory(creationContext, metadata);
-    }
-
-    private async Task<Func<TestContext, CancellationToken, Task>[]> CreateTestHooksAsync(Type testClassType, bool isBeforeHook)
-    {
-        var hooks = isBeforeHook
-            ? await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType)
-            : await _hookCollectionService.CollectAfterTestHooksAsync(testClassType);
-
-        return hooks.ToArray();
     }
 
 
@@ -288,8 +273,6 @@ internal sealed class TestBuilder : ITestBuilder
             Metadata = metadata,
             Arguments = [],
             ClassArguments = [],
-            BeforeTestHooks = [],
-            AfterTestHooks = [],
             Context = context
         };
     }

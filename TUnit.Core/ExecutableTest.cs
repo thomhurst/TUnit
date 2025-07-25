@@ -27,10 +27,6 @@ public abstract class ExecutableTest
 
     public Dictionary<string, object?> PropertyValues { get; init; } = new();
 
-    public required Func<TestContext, CancellationToken, Task>[] BeforeTestHooks { get; init; }
-
-    public required Func<TestContext, CancellationToken, Task>[] AfterTestHooks { get; init; }
-
     public required TestContext Context
     {
         get;
