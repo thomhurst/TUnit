@@ -7,7 +7,7 @@ namespace TUnit.Core;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-internal static class Sources
+public static class Sources
 {
     public static readonly ConcurrentQueue<Func<Assembly>> AssemblyLoaders = [];
     public static readonly ConcurrentDictionary<Type, ConcurrentQueue<ITestSource>> TestSources = new(Environment.ProcessorCount * 2, 1000);
