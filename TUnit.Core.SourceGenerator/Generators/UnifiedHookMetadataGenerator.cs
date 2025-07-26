@@ -347,7 +347,6 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("[ModuleInitializer]");
                 using (writer.BeginBlock("public static void Initialize()"))
                 {
-                    writer.AppendLine("// Initialize hook registry - this populates the Sources dictionaries");
                     writer.AppendLine("_ = new GeneratedHookRegistry();");
                 }
             }
@@ -370,8 +369,6 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateStorageFields(CodeWriter writer, List<HookMethodMetadata> hooks)
     {
-        // No fields needed - we're populating Sources directly
-        writer.AppendLine("// Hooks are populated directly into TUnit.Core.Sources dictionaries");
     }
 
     private static void GenerateStaticConstructor(CodeWriter writer, List<HookMethodMetadata> hooks)
@@ -407,7 +404,6 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                 // Skip generic types with unresolved type parameters
                 if (HasUnresolvedTypeParameters(typeSymbol))
                 {
-                    writer.AppendLine($"// Skipping hooks from generic type: {typeSymbol.ToDisplayString()}");
                     continue;
                 }
                 
@@ -421,7 +417,6 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                 // Generate test hook registrations
                 if (testHooks.Any())
                 {
-                    writer.AppendLine($"// Test hooks for {typeDisplay}");
                     
                     var beforeTestHooks = testHooks.Where(h => h.HookKind == "Before").ToList();
                     if (beforeTestHooks.Any())
@@ -451,7 +446,6 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                 // Generate class hook registrations
                 if (classHooks.Any())
                 {
-                    writer.AppendLine($"// Class hooks for {typeDisplay}");
                     
                     var beforeClassHooks = classHooks.Where(h => h.HookKind == "Before").ToList();
                     if (beforeClassHooks.Any())
@@ -476,7 +470,6 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                 var assembly = (IAssemblySymbol)assemblyGroup.Key!;
                 var assemblyName = assembly.Name;
                 
-                writer.AppendLine($"// Assembly hooks for {assemblyName}");
                 writer.AppendLine($"var {assemblyName.Replace(".", "_")}_assembly = typeof({assemblyGroup.First().TypeSymbol.GloballyQualified()}).Assembly;");
                 
                 var beforeAssemblyHooks = assemblyGroup.Where(h => h.HookKind == "Before").ToList();
@@ -496,7 +489,6 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             var testSessionHooks = hooks.Where(h => h.HookType == "TestSession").ToList();
             if (testSessionHooks.Any())
             {
-                writer.AppendLine("// Test session hooks");
                 
                 var beforeTestSessionHooks = testSessionHooks.Where(h => h.HookKind == "Before").ToList();
                 if (beforeTestSessionHooks.Any())
@@ -514,7 +506,6 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             var testDiscoveryHooks = hooks.Where(h => h.HookType == "TestDiscovery").ToList();
             if (testDiscoveryHooks.Any())
             {
-                writer.AppendLine("// Test discovery hooks");
                 
                 var beforeTestDiscoveryHooks = testDiscoveryHooks.Where(h => h.HookKind == "Before").ToList();
                 if (beforeTestDiscoveryHooks.Any())
@@ -556,7 +547,6 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         // Skip hooks from generic types with unresolved type parameters
         if (HasUnresolvedTypeParameters(hook.TypeSymbol))
         {
-            writer.AppendLine($"// Skipping delegate for hook from generic type: {hook.TypeSymbol.ToDisplayString()}");
             return;
         }
 

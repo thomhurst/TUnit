@@ -13,7 +13,6 @@ internal static class Sources
     public static readonly ConcurrentDictionary<Type, ConcurrentQueue<ITestSource>> TestSources = new(Environment.ProcessorCount * 2, 1000);
     public static readonly ConcurrentQueue<IDynamicTestSource> DynamicTestSources = [];
 
-    // Type-indexed hook storage for O(1) lookup
     public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.InstanceHookMethod>> BeforeTestHooks = new();
     public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.InstanceHookMethod>> AfterTestHooks = new();
     public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.StaticHookMethod<TestContext>>> BeforeEveryTestHooks = new();

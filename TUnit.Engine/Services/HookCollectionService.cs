@@ -21,7 +21,6 @@ internal sealed class HookCollectionService : IHookCollectionService
         {
             var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
 
-            // Walk up the inheritance chain - O(inheritance_depth)
             var currentType = type;
             while (currentType != null)
             {
@@ -51,7 +50,6 @@ internal sealed class HookCollectionService : IHookCollectionService
         {
             var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
 
-            // Walk up the inheritance chain - O(inheritance_depth)
             var currentType = type;
             while (currentType != null)
             {
@@ -81,7 +79,6 @@ internal sealed class HookCollectionService : IHookCollectionService
         {
             var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
 
-            // Walk up the inheritance chain
             var currentType = type;
             while (currentType != null)
             {
@@ -111,7 +108,6 @@ internal sealed class HookCollectionService : IHookCollectionService
         {
             var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
 
-            // Walk up the inheritance chain
             var currentType = type;
             while (currentType != null)
             {
@@ -141,7 +137,6 @@ internal sealed class HookCollectionService : IHookCollectionService
         {
             var allHooks = new List<(int order, Func<ClassHookContext, CancellationToken, Task> hook)>();
 
-            // Walk up the inheritance chain
             var currentType = type;
             while (currentType != null)
             {
@@ -171,7 +166,6 @@ internal sealed class HookCollectionService : IHookCollectionService
         {
             var allHooks = new List<(int order, Func<ClassHookContext, CancellationToken, Task> hook)>();
 
-            // Walk up the inheritance chain
             var currentType = type;
             while (currentType != null)
             {
