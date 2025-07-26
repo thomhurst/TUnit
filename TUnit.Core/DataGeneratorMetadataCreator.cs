@@ -17,6 +17,16 @@ internal static class DataGeneratorMetadataCreator
             ? testMetadata.MethodMetadata.Class.Parameters
             : testMetadata.MethodMetadata.Parameters;
 
+        // Filter out CancellationToken if it's the last parameter (handled by the engine)
+        if (generatorType == DataGeneratorType.TestParameters && parametersToGenerate.Length > 0)
+        {
+            var lastParam = parametersToGenerate[^1];
+            if (lastParam.Type == typeof(System.Threading.CancellationToken))
+            {
+                parametersToGenerate = parametersToGenerate[..^1];
+            }
+        }
+
         return new DataGeneratorMetadata
         {
             TestBuilderContext = contextAccessor,
