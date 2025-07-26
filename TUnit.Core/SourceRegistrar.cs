@@ -64,50 +64,6 @@ public class SourceRegistrar
         Sources.DynamicTestSources.Enqueue(testSource);
     }
 
-    /// <summary>
-    /// Registers a test hook source.
-    /// </summary>
-    /// <param name="testSource">The test hook source to register.</param>
-    public static void RegisterTestHookSource(ITestHookSource testSource)
-    {
-        Sources.TestHookSources.Enqueue(testSource);
-    }
-
-    /// <summary>
-    /// Registers a class hook source.
-    /// </summary>
-    /// <param name="testSource">The class hook source to register.</param>
-    public static void RegisterClassHookSource(IClassHookSource testSource)
-    {
-        Sources.ClassHookSources.Enqueue(testSource);
-    }
-
-    /// <summary>
-    /// Registers an assembly hook source.
-    /// </summary>
-    /// <param name="testSource">The assembly hook source to register.</param>
-    public static void RegisterAssemblyHookSource(IAssemblyHookSource testSource)
-    {
-        Sources.AssemblyHookSources.Enqueue(testSource);
-    }
-
-    /// <summary>
-    /// Registers a test session hook source.
-    /// </summary>
-    /// <param name="testSource">The test session hook source to register.</param>
-    public static void RegisterTestSessionHookSource(ITestSessionHookSource testSource)
-    {
-        Sources.TestSessionHookSources.Enqueue(testSource);
-    }
-
-    /// <summary>
-    /// Registers a test discovery hook source.
-    /// </summary>
-    /// <param name="testSource">The test discovery hook source to register.</param>
-    public static void RegisterTestDiscoveryHookSource(ITestDiscoveryHookSource testSource)
-    {
-        Sources.TestDiscoveryHookSources.Enqueue(testSource);
-    }
 
     /// <summary>
     /// Registers a global initializer.
