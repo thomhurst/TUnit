@@ -68,8 +68,12 @@ public class MethodDataSourceAttribute : TestDataAttribute
 
         var targetType = ClassProvidingDataSource ?? dataGeneratorMetadata.TestClassType ;
 
-        var methodInfo = targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags)
-            ?? throw new InvalidOperationException($"Method '{MethodNameProvidingDataSource}' not found in class '{targetType.Name}'.");
+        var methodInfo = targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
+
+        if (methodInfo is null)
+        {
+            throw new InvalidOperationException($"Method '{MethodNameProvidingDataSource}' not found in class '{targetType.Name}'.");
+        }
 
         // Determine if it's an instance method
         object? instance = null;
