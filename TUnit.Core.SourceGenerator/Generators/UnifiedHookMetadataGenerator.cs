@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -448,7 +449,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("private static readonly global::System.Collections.Generic.Dictionary<global::System.Type, global::System.Collections.Generic.Dictionary<global::TUnit.Core.HookType, global::System.Collections.Generic.List<global::TUnit.Core.Hooks.StaticHookMethod>>> _staticHooksByType = new();");
         writer.AppendLine("private static readonly global::System.Collections.Generic.Dictionary<global::System.Type, global::System.Collections.Generic.Dictionary<global::TUnit.Core.HookType, global::System.Collections.Generic.List<global::TUnit.Core.Hooks.InstanceHookMethod>>> _instanceHooksByType = new();");
         writer.AppendLine();
-        
+
         // Add cache for inheritance lookups
         writer.AppendLine("// Cache for inheritance-aware hook lookups");
         writer.AppendLine("private static readonly global::System.Collections.Concurrent.ConcurrentDictionary<(global::System.Type, global::TUnit.Core.HookType), global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.Hooks.InstanceHookMethod>> _instanceHookCache = new();");
@@ -655,7 +656,10 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"ClassType = typeof({typeDisplay}),");
         }
 
-        writer.AppendLine("MethodInfo = null!,"); // Will be populated by runtime
+        // Generate MethodInfo metadata
+        writer.Append("MethodInfo = ");
+        SourceInformationWriter.GenerateMethodInformation(writer, hook.Context.SemanticModel.Compilation, hook.TypeSymbol, hook.MethodSymbol, null, ',');
+        writer.AppendLine();
         writer.AppendLine("HookExecutor = null!,"); // This will be set by the engine
         writer.AppendLine($"Order = {hook.Order},");
         writer.AppendLine($"Body = {delegateKey}_Body" + (isInstanceHook ? "" : ","));
@@ -1205,5 +1209,5 @@ public class HookMethodMetadata
     public required string HookKind { get; init; } // Before, After, BeforeEvery, AfterEvery
     public required string HookType { get; init; } // Test, Class, Assembly, TestSession, TestDiscovery
     public required int Order { get; init; }
-    public GeneratorAttributeSyntaxContext? Context { get; init; }
+    public required GeneratorAttributeSyntaxContext Context { get; init; }
 }
