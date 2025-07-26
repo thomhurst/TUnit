@@ -351,7 +351,7 @@ public static class DataSourceHelpers
 
         if (item is IEnumerable enumerable)
         {
-            return enumerable.Cast<object?>().ToArray();
+            return enumerable.Cast<object?>().Select(InvokeIfFunc).ToArray();
         }
 
         if (IsTuple(item))

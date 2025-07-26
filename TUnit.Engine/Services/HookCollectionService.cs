@@ -448,12 +448,20 @@ internal sealed class HookCollectionService : IHookCollectionService
             var hooks = source.CollectBeforeTestHooks(string.Empty);
             foreach (var hook in hooks)
             {
-                if (!index.TryGetValue(hook.MethodInfo.Class.Type, out var list))
+                try
                 {
-                    list = [];
-                    index[hook.MethodInfo.Class.Type] = list;
+                    if (!index.TryGetValue(hook.MethodInfo.Class.Type, out var list))
+                    {
+                        list = [];
+                        index[hook.MethodInfo.Class.Type] = list;
+                    }
+                    list.Add((hook.Order, hook));
                 }
-                list.Add((hook.Order, hook));
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
         }
 

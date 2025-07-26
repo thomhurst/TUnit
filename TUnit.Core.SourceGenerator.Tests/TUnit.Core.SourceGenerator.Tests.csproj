@@ -31,6 +31,10 @@
     <None Include="..\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="HooksTests.Test.verified.txt">
+      <ParentFile>TimeoutCancellationTokenTests</ParentFile>
+      <DependentUpon>HooksTests.cs</DependentUpon>
+    </None>
   </ItemGroup>
 
   <Import Project="..\TestProject.targets" />

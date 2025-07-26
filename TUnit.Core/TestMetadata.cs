@@ -103,8 +103,6 @@ public sealed class HookMetadata
     public required HookLevel Level { get; init; }
     public int Order { get; init; }
 
-    public string? DelegateKey { get; init; }
-
     public Type? DeclaringType { get; init; }
 
     public bool IsStatic { get; init; }
