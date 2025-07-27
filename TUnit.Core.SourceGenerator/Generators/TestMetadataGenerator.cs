@@ -1090,34 +1090,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
 
-            // Generate cases for each valid argument count (from required params up to total params from args)
-            for (var argCount = requiredParamCount; argCount <= parametersFromArgs.Length; argCount++)
+            // Check if last parameter is params array
+            var hasParams = parametersFromArgs.Length > 0 && parametersFromArgs[parametersFromArgs.Length - 1].IsParams;
+            
+            // For params arrays, we need to handle any number of arguments >= required count
+            // Generate a reasonable number of cases plus a default that handles the rest
+            var casesToGenerate = hasParams ? 10 : parametersFromArgs.Length - requiredParamCount + 1;
+            
+            // Generate cases for each valid argument count
+            for (var i = 0; i < casesToGenerate && requiredParamCount + i <= parametersFromArgs.Length + 5; i++)
             {
+                var argCount = requiredParamCount + i;
                 writer.AppendLine($"case {argCount}:");
                 writer.Indent();
 
-                // Build the arguments to pass, including default values for optional parameters
-                var argsToPass = new List<string>();
-                for (var i = 0; i < parametersFromArgs.Length; i++)
-                {
-                    var param = parametersFromArgs[i];
-                    if (i < argCount)
-                    {
-                        // Use tuple-aware argument access
-                        var argumentExpressions = TupleArgumentHelper.GenerateArgumentAccess(param.Type, "args", i);
-                        argsToPass.AddRange(argumentExpressions);
-                    }
-                    else if (param.HasExplicitDefaultValue)
-                    {
-                        // Use the default value
-                        argsToPass.Add(GetDefaultValueString(param));
-                    }
-                    else
-                    {
-                        // This shouldn't happen if we set up requiredParamCount correctly
-                        argsToPass.Add($"default({param.Type.GloballyQualified()})");
-                    }
-                }
+                // Build the arguments to pass, handling params arrays correctly
+                var argsToPass = TupleArgumentHelper.GenerateArgumentAccessWithParams(parametersFromArgs, "args", argCount);
 
                 // Add CancellationToken if present
                 if (hasCancellationToken)
@@ -1194,34 +1182,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
 
-            // Generate cases for each valid argument count (from required params up to total params from args)
-            for (var argCount = requiredParamCount; argCount <= parametersFromArgs.Length; argCount++)
+            // Check if last parameter is params array
+            var hasParams = parametersFromArgs.Length > 0 && parametersFromArgs[parametersFromArgs.Length - 1].IsParams;
+            
+            // For params arrays, we need to handle any number of arguments >= required count
+            // Generate a reasonable number of cases plus a default that handles the rest
+            var casesToGenerate = hasParams ? 10 : parametersFromArgs.Length - requiredParamCount + 1;
+            
+            // Generate cases for each valid argument count
+            for (var i = 0; i < casesToGenerate && requiredParamCount + i <= parametersFromArgs.Length + 5; i++)
             {
+                var argCount = requiredParamCount + i;
                 writer.AppendLine($"case {argCount}:");
                 writer.Indent();
 
-                // Build the arguments to pass, including default values for optional parameters
-                var argsToPass = new List<string>();
-                for (var i = 0; i < parametersFromArgs.Length; i++)
-                {
-                    var param = parametersFromArgs[i];
-                    if (i < argCount)
-                    {
-                        // Use tuple-aware argument access
-                        var argumentExpressions = TupleArgumentHelper.GenerateArgumentAccess(param.Type, "args", i);
-                        argsToPass.AddRange(argumentExpressions);
-                    }
-                    else if (param.HasExplicitDefaultValue)
-                    {
-                        // Use the default value
-                        argsToPass.Add(GetDefaultValueString(param));
-                    }
-                    else
-                    {
-                        // This shouldn't happen if we set up requiredParamCount correctly
-                        argsToPass.Add($"default({param.Type.GloballyQualified()})");
-                    }
-                }
+                // Build the arguments to pass, handling params arrays correctly
+                var argsToPass = TupleArgumentHelper.GenerateArgumentAccessWithParams(parametersFromArgs, "args", argCount);
 
                 // Add CancellationToken if present
                 if (hasCancellationToken)
