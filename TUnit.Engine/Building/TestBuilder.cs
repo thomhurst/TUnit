@@ -65,17 +65,9 @@ internal sealed class TestBuilder : ITestBuilder
                     var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
 
                     // Check if we need to create an instance early for method data sources
-                    var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
-                    
-                    // For data sources that may require early instantiation, only create instance if we can safely resolve generic types
-                    var hasConditionalInstantiationDataSource = metadata.DataSources.Any(ds => ds is IMayRequireEarlyInstantiation);
-                    var canCreateInstanceForConditionalDataSource = hasConditionalInstantiationDataSource && 
+                    // Only create instances if we can safely resolve generic types
+                    var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData) &&
                         (!metadata.TestClassType.IsGenericTypeDefinition || classData.Length > 0);
-                    
-                    if (canCreateInstanceForConditionalDataSource)
-                    {
-                        needsInstanceForMethodDataSources = true;
-                    }
                     
                     object? instanceForMethodDataSources = null;
 
@@ -137,7 +129,7 @@ internal sealed class TestBuilder : ITestBuilder
                                                testMetadata: metadata,
                                                testSessionId: _sessionId,
                                                generatorType: DataGeneratorType.TestParameters,
-                                               testClassInstance: methodDataSource is IAccessesInstanceData || (methodDataSource is IMayRequireEarlyInstantiation && canCreateInstanceForConditionalDataSource) ? instanceForMethodDataSources : null,
+                                               testClassInstance: methodDataSource is IAccessesInstanceData ? instanceForMethodDataSources : null,
                                                classInstanceArguments: classData,
                                                contextAccessor
                                            )))
@@ -313,8 +305,8 @@ internal sealed class TestBuilder : ITestBuilder
         var genericParameters = genericClassType.GetGenericArguments();
         var typeMapping = new Dictionary<Type, Type>();
 
-        // First, try to infer from data sources that may require early instantiation
-        if (metadata.DataSources.Any(ds => ds is IMayRequireEarlyInstantiation))
+        // First, try to infer from data sources that access instance data
+        if (metadata.DataSources.Any(ds => ds is IAccessesInstanceData))
         {
             // Look at the test method parameters to find attributes that can help with generic type inference
             foreach (var param in metadata.MethodMetadata.Parameters)
