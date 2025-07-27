@@ -387,9 +387,13 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
                         if (concreteMethod != null)
                         {
-                            // TODO: We probably can't resolve it here?
-                            var expandedTests = await BuildTestMetadata(concreteType, concreteMethod);
-                            discoveredTests.Add(expandedTests);
+                            // Build test metadata for the concrete type
+                            // The concrete type already has its generic arguments resolved
+                            // For generic types with primary constructors that were resolved from class-level data sources,
+                            // we need to ensure the class data sources contain the specific data for this instantiation
+                            var testMetadata = await BuildTestMetadataWithClassData(concreteType, concreteMethod, dataRow);
+                            
+                            discoveredTests.Add(testMetadata);
                         }
                     }
                 }
@@ -519,6 +523,56 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return await Task.FromResult(data);
+    }
+
+    private static Task<TestMetadata> BuildTestMetadataWithClassData(Type testClass, MethodInfo testMethod, object?[] classData)
+    {
+        // Create a base ReflectionTestMetadata instance
+        var testName = GenerateTestName(testClass, testMethod);
+
+        try
+        {
+            return Task.FromResult<TestMetadata>(new ReflectionTestMetadata(testClass, testMethod)
+            {
+                TestName = testName,
+                TestClassType = testClass,
+                TestMethodName = testMethod.Name,
+                Categories = ExtractCategories(testClass, testMethod),
+                IsSkipped = IsTestSkipped(testClass, testMethod, out var skipReason),
+                SkipReason = skipReason,
+                TimeoutMs = ExtractTimeout(testClass, testMethod),
+                RetryCount = ExtractRetryCount(testClass, testMethod),
+                CanRunInParallel = CanRunInParallel(testClass, testMethod),
+                Dependencies = ExtractDependencies(testClass, testMethod),
+                DataSources = ExtractMethodDataSources(testMethod),
+                // For generic types instantiated from class data, use specific data for this instance
+                ClassDataSources = [new StaticDataSourceAttribute(new[] { classData })],
+                PropertyDataSources = ExtractPropertyDataSources(testClass),
+                InstanceFactory = CreateInstanceFactory(testClass)!,
+                TestInvoker = CreateTestInvoker(testClass, testMethod),
+                ParameterCount = testMethod.GetParameters().Length,
+                ParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType).ToArray(),
+                TestMethodParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
+                Hooks = DiscoverHooks(testClass),
+                FilePath = ExtractFilePath(testMethod),
+                LineNumber = ExtractLineNumber(testMethod),
+                MethodMetadata = BuildMethodMetadata(testClass, testMethod),
+                GenericTypeInfo = ExtractGenericTypeInfo(testClass),
+                GenericMethodInfo = ExtractGenericMethodInfo(testMethod),
+                GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
+                AttributeFactory = () =>
+                [
+                    ..testMethod.GetCustomAttributes(),
+                    ..testClass.GetCustomAttributes(),
+                    ..testClass.Assembly.GetCustomAttributes(),
+                ],
+                PropertyInjections = PropertyInjector.DiscoverInjectableProperties(testClass)
+            });
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to build test metadata for {testClass.Name}.{testMethod.Name}: {ex.Message}", ex);
+        }
     }
 
     private static Task<TestMetadata> BuildTestMetadata(Type testClass, MethodInfo testMethod)
@@ -821,6 +875,23 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
                 return Activator.CreateInstance(closedType, args)!;
             };
+        }
+        
+        // For already-constructed generic types (e.g., from DiscoverGenericTests)
+        // we don't need type arguments - the type is already closed
+        if (testClass.IsConstructedGenericType)
+        {
+            var constructedTypeConstructors = testClass.GetConstructors();
+            if (constructedTypeConstructors.Length == 0)
+            {
+                return (_, _) => Activator.CreateInstance(testClass)!;
+            }
+
+            var constructedTypeCtor = constructedTypeConstructors.FirstOrDefault(c => c.GetParameters().Length == 0) ?? constructedTypeConstructors.First();
+            var constructedTypeFactory = _expressionCache.GetOrCreateInstanceFactory(constructedTypeCtor, CompileInstanceFactory);
+            
+            // Return a factory that ignores type arguments since the type is already closed
+            return (_, args) => constructedTypeFactory(args);
         }
 
         var constructors = testClass.GetConstructors();
