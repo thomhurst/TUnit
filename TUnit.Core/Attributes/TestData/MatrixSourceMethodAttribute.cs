@@ -23,9 +23,9 @@ public class MatrixMethodAttribute<[DynamicallyAccessedMembers(DynamicallyAccess
             throw new Exception($"Method {methodName} not found on {typeof(TClass).Name}");
         }
 
-        var result = instance != null
-            ? methodInfo.Invoke(instance, null)
-            : methodInfo.Invoke(null, null);
+        var result = methodInfo.IsStatic
+            ? methodInfo.Invoke(null, null)
+            : methodInfo.Invoke(instance, null);
 
         if (result is object?[] objectArray)
         {

@@ -26,6 +26,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
 
         var classType = testInformation.Class.Type;
 
+
         var exclusions = GetExclusions(dataGeneratorMetadata.Type == DataGeneratorType.TestParameters
             ? dataGeneratorMetadata.TestInformation.GetCustomAttributes()
             : classType.GetCustomAttributesSafe());
@@ -60,6 +61,25 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         var matrixAttribute = sourceGeneratedParameterInformation.ReflectionInfo.GetCustomAttributesSafe()
             .OfType<MatrixAttribute>()
             .FirstOrDefault();
+
+        // Check if this is an instance data attribute and we don't have an instance
+        if (matrixAttribute is IAccessesInstanceData && dataGeneratorMetadata.TestClassInstance == null)
+        {
+            var className = dataGeneratorMetadata.TestInformation.Class.Type.Name;
+            if (dataGeneratorMetadata.TestInformation.Class.Type.IsGenericTypeDefinition)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot use MatrixInstanceMethod attribute in generic class '{className}' when the generic type parameters " +
+                    $"must be inferred from the matrix values. This creates a circular dependency: " +
+                    $"the instance is needed to get the matrix values, but the generic types (which come from the matrix values) " +
+                    $"are needed to create the instance. Consider using static methods for matrix data sources in generic classes, " +
+                    $"or provide the generic type arguments explicitly using [Arguments] or other data source attributes.");
+            }
+            
+            throw new InvalidOperationException(
+                $"Instance is required for MatrixInstanceMethod but no instance is available. " +
+                $"This typically happens when the test class requires data that hasn't been expanded yet.");
+        }
 
         var objects = matrixAttribute?.GetObjects(dataGeneratorMetadata.TestClassInstance);
 
@@ -120,4 +140,5 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         return elements.Aggregate(_seed, (accumulator, enumerable)
             => accumulator.SelectMany(x => enumerable.Select(x.Append)));
     }
+
 }

@@ -66,6 +66,17 @@ internal sealed class TestBuilder : ITestBuilder
 
                     // Check if we need to create an instance early for method data sources
                     var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
+                    
+                    // For MatrixDataSource, only create instance if we can safely resolve generic types
+                    var hasMatrixDataSource = metadata.DataSources.Any(ds => ds is MatrixDataSourceAttribute);
+                    var canCreateInstanceForMatrix = hasMatrixDataSource && 
+                        (!metadata.TestClassType.IsGenericTypeDefinition || classData.Length > 0);
+                    
+                    if (canCreateInstanceForMatrix)
+                    {
+                        needsInstanceForMethodDataSources = true;
+                    }
+                    
                     object? instanceForMethodDataSources = null;
 
                     if (needsInstanceForMethodDataSources)
@@ -94,8 +105,8 @@ internal sealed class TestBuilder : ITestBuilder
                                 }
                                 catch (GenericTypeResolutionException) when (classData.Length == 0)
                                 {
-                                    // If we can't resolve from constructor args, try to infer from instance method data sources
-                                    var resolvedTypes = TryInferClassGenericsFromInstanceMethodDataSources(metadata);
+                                    // If we can't resolve from constructor args, try to infer from data sources
+                                    var resolvedTypes = TryInferClassGenericsFromDataSources(metadata);
                                     instanceForMethodDataSources = metadata.InstanceFactory(resolvedTypes, classData);
                                 }
                             }
@@ -126,7 +137,7 @@ internal sealed class TestBuilder : ITestBuilder
                                                testMetadata: metadata,
                                                testSessionId: _sessionId,
                                                generatorType: DataGeneratorType.TestParameters,
-                                               testClassInstance: methodDataSource is IAccessesInstanceData ? instanceForMethodDataSources : null,
+                                               testClassInstance: methodDataSource is IAccessesInstanceData || (methodDataSource is MatrixDataSourceAttribute && canCreateInstanceForMatrix) ? instanceForMethodDataSources : null,
                                                classInstanceArguments: classData,
                                                contextAccessor
                                            )))
@@ -295,12 +306,42 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", 
-        Justification = "Instance method data sources require reflection to get method info")]
-    private static Type[] TryInferClassGenericsFromInstanceMethodDataSources(TestMetadata metadata)
+        Justification = "Data sources require reflection to get method and parameter info")]
+    private static Type[] TryInferClassGenericsFromDataSources(TestMetadata metadata)
     {
         var genericClassType = metadata.TestClassType;
         var genericParameters = genericClassType.GetGenericArguments();
         var typeMapping = new Dictionary<Type, Type>();
+
+        // First, try to infer from MatrixDataSource attributes on parameters
+        if (metadata.DataSources.Any(ds => ds is MatrixDataSourceAttribute))
+        {
+            // Look at the test method parameters to find Matrix attributes
+            foreach (var param in metadata.MethodMetadata.Parameters)
+            {
+                // Check if the parameter type is a generic parameter of the class
+                if (param.Type.IsGenericParameter && 
+                    genericParameters.Contains(param.Type) &&
+                    param.ReflectionInfo != null)
+                {
+                    // Check for Matrix attributes using reflection
+                    var attrs = param.ReflectionInfo.GetCustomAttributes(false);
+                    foreach (var attr in attrs)
+                    {
+                        var attrType = attr.GetType();
+                        
+                        // Check if it's a generic Matrix attribute
+                        if (attrType.IsGenericType && 
+                            attrType.GetGenericTypeDefinition().Name.StartsWith("Matrix"))
+                        {
+                            var matrixTypeArg = attrType.GetGenericArguments()[0];
+                            typeMapping[param.Type] = matrixTypeArg;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
         // Look for instance method data sources
         foreach (var dataSource in metadata.DataSources)
@@ -374,7 +415,7 @@ internal sealed class TestBuilder : ITestBuilder
             if (!typeMapping.TryGetValue(genericParam, out var resolvedType))
             {
                 throw new InvalidOperationException(
-                    $"Could not resolve type for generic parameter '{genericParam.Name}' of type '{genericClassType.Name}' from instance method data sources");
+                    $"Could not resolve type for generic parameter '{genericParam.Name}' of type '{genericClassType.Name}' from data sources");
             }
             resolvedTypes[i] = resolvedType;
         }
