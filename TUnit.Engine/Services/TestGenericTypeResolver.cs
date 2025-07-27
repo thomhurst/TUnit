@@ -34,11 +34,19 @@ internal sealed class TestGenericTypeResolver
         // Resolve method generic arguments if the test method is generic
         if (metadata.GenericMethodInfo != null)
         {
-            result.ResolvedMethodGenericArguments = ResolveMethodGenericArguments(
-                metadata.MethodMetadata,
-                metadata.GenericMethodInfo,
-                testData.MethodData,
-                metadata.ParameterTypes);
+            // Check if generic method type arguments are already resolved
+            if (metadata.GenericMethodTypeArguments != null && metadata.GenericMethodTypeArguments.Length > 0)
+            {
+                result.ResolvedMethodGenericArguments = metadata.GenericMethodTypeArguments;
+            }
+            else
+            {
+                result.ResolvedMethodGenericArguments = ResolveMethodGenericArguments(
+                    metadata.MethodMetadata,
+                    metadata.GenericMethodInfo,
+                    testData.MethodData,
+                    metadata.ParameterTypes);
+            }
         }
 
         return result;
@@ -102,8 +110,16 @@ internal sealed class TestGenericTypeResolver
         object?[] methodArguments,
         Type[] parameterTypes)
     {
-
         var typeMapping = new Dictionary<Type, Type>();
+
+        // Diagnostic information for debugging
+        if (methodArguments.Length != parameterTypes.Length)
+        {
+            throw new GenericTypeResolutionException(
+                $"Argument count mismatch: {methodArguments.Length} arguments provided but {parameterTypes.Length} parameters expected. " +
+                $"Arguments: [{string.Join(", ", methodArguments.Select(a => a?.GetType()?.Name ?? "null"))}]. " +
+                $"Parameter types: [{string.Join(", ", parameterTypes.Select(t => $"{t.Name}(IsGeneric:{t.IsGenericParameter})"))}]");
+        }
 
         // Map parameter types to argument types
         for (var i = 0; i < Math.Min(parameterTypes.Length, methodArguments.Length); i++)
@@ -114,19 +130,39 @@ internal sealed class TestGenericTypeResolver
             if (argValue != null)
             {
                 var argType = argValue.GetType();
-                InferTypeMapping(paramType, argType, typeMapping, genericMethodInfo.ParameterPositions);
+                
+                // If the parameter type is a generic parameter, map it directly
+                if (paramType.IsGenericParameter)
+                {
+                    typeMapping[paramType] = argType;
+                }
+                else
+                {
+                    // Try to infer nested generic types
+                    InferTypeMapping(paramType, argType, typeMapping, genericMethodInfo.ParameterPositions);
+                }
+            }
+            else if (paramType.IsGenericParameter && methodArguments.Length > 0)
+            {
+                // If we have a null argument but the parameter is generic,
+                // we can't infer the type from a null value
+                // This might happen with data sources that haven't been invoked yet
             }
         }
 
         // Create resolved types array based on the generic method info
         var resolvedTypes = new Type[genericMethodInfo.ParameterNames.Length];
+        
+        
         for (var i = 0; i < genericMethodInfo.ParameterNames.Length; i++)
         {
             // Try to find the resolved type in our mapping
             Type? resolvedType = null;
             foreach (var kvp in typeMapping)
             {
-                if (kvp.Key.Name == genericMethodInfo.ParameterNames[i])
+                // The key in typeMapping is a generic parameter Type object
+                // We need to match it by name with the parameter name from metadata
+                if (kvp.Key.IsGenericParameter && kvp.Key.Name == genericMethodInfo.ParameterNames[i])
                 {
                     resolvedType = kvp.Value;
                     break;
@@ -135,8 +171,13 @@ internal sealed class TestGenericTypeResolver
 
             if (resolvedType == null)
             {
+                // Provide more detailed error information
+                var mappedTypes = string.Join(", ", typeMapping.Select(kvp => $"{kvp.Key.Name}={kvp.Value.Name}"));
+                var paramNames = string.Join(", ", genericMethodInfo.ParameterNames);
                 throw new GenericTypeResolutionException(
-                    $"Could not resolve type for generic parameter '{genericMethodInfo.ParameterNames[i]}' in method");
+                    $"Could not resolve type for generic parameter '{genericMethodInfo.ParameterNames[i]}' in method. " +
+                    $"Available mappings: [{mappedTypes}]. " +
+                    $"Expected parameters: [{paramNames}]");
             }
 
             resolvedTypes[i] = resolvedType;
