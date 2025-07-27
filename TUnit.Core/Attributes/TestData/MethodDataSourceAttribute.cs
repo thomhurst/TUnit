@@ -95,7 +95,23 @@ public class MethodDataSourceAttribute : TestDataAttribute
         object? instance = null;
         if (!methodInfo.IsStatic)
         {
-            instance = dataGeneratorMetadata.TestClassInstance ?? Activator.CreateInstance(targetType);
+            if (dataGeneratorMetadata.TestClassInstance != null)
+            {
+                instance = dataGeneratorMetadata.TestClassInstance;
+            }
+            else if (targetType.IsGenericTypeDefinition)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot use instance method '{MethodNameProvidingDataSource}' in generic class '{targetType.Name}' " +
+                    $"when generic type parameters cannot be resolved. Instance method data sources in generic classes " +
+                    $"require that the generic types can be inferred from constructor arguments or other data sources. " +
+                    $"Consider using static methods for data sources in generic classes, or provide constructor arguments " +
+                    $"that allow generic type inference.");
+            }
+            else
+            {
+                instance = Activator.CreateInstance(targetType);
+            }
         }
 
         var methodResult = methodInfo.Invoke(instance, Arguments);
