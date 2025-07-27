@@ -141,7 +141,7 @@ public static class InstanceFactoryGenerator
         writer.AppendLine();
         
         // Create the closed generic type
-        writer.AppendLine("var closedGenericType = openGenericType.MakeGenericType(typeArgs);");
+        writer.AppendLine("var closedGenericType = global::TUnit.Core.Helpers.GenericTypeHelper.MakeGenericTypeSafe(openGenericType, typeArgs);");
         writer.AppendLine();
         
         // Check for constructor parameters

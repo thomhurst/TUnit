@@ -376,6 +376,16 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 try
                 {
+                    // Validate type arguments match generic parameters
+                    var genericParams = genericTypeDefinition.GetGenericArguments();
+                    if (typeArguments.Length != genericParams.Length)
+                    {
+                        throw new InvalidOperationException(
+                            $"Type argument count mismatch: {genericTypeDefinition.Name} expects {genericParams.Length} type arguments but got {typeArguments.Length}. " +
+                            $"Generic parameters: [{string.Join(", ", genericParams.Select(p => p.Name))}], " +
+                            $"Type arguments: [{string.Join(", ", typeArguments.Select(t => t.Name))}]");
+                    }
+
                     // Create concrete type
                     var concreteType = genericTypeDefinition.MakeGenericType(typeArguments);
 
@@ -400,7 +410,11 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 catch (Exception ex)
                 {
                     throw new InvalidOperationException(
-                        $"Failed to create concrete type for {genericTypeDefinition.Name}: {ex.Message}", ex);
+                        $"Failed to create concrete type for {genericTypeDefinition.FullName ?? genericTypeDefinition.Name}. " +
+                        $"Error: {ex.Message}. " +
+                        $"Generic parameter count: {genericTypeDefinition.GetGenericArguments().Length}, " +
+                        $"Type arguments provided: {typeArguments?.Length ?? 0}, " +
+                        $"Data row length: {dataRow?.Length ?? 0}", ex);
                 }
             }
         }
@@ -868,6 +882,18 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             return (typeArgs, args) =>
             {
+                if (typeArgs == null || typeArgs.Length == 0)
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot create instance of generic type definition {testClass.FullName} without type arguments.");
+                }
+                
+                if (typeArgs.Length != testClass.GetGenericArguments().Length)
+                {
+                    throw new InvalidOperationException(
+                        $"Type argument count mismatch for {testClass.FullName}: expected {testClass.GetGenericArguments().Length}, got {typeArgs.Length}");
+                }
+                
                 var closedType = testClass.MakeGenericType(typeArgs);
                 if (args.Length == 0)
                 {

@@ -26,9 +26,41 @@ public sealed class GenericTestMetadata : TestMetadata
                     }
 
                     // Get type arguments from test context if generic
-                    var typeArgs = testContext.TestDetails.TestClassArguments?.OfType<Type>().ToArray() ?? Type.EmptyTypes;
+                    // For generic types, we need to infer the type arguments from the actual argument values
+                    Type[] typeArgs;
+                    if (TestClassType.IsGenericTypeDefinition && context.ClassArguments != null && context.ClassArguments.Length > 0)
+                    {
+                        // Infer type arguments from the constructor argument values
+                        var genericParams = TestClassType.GetGenericArguments();
+                        typeArgs = new Type[genericParams.Length];
+                        
+                        // For single generic parameter, use the first argument's type
+                        if (genericParams.Length == 1 && context.ClassArguments.Length >= 1)
+                        {
+                            typeArgs[0] = context.ClassArguments[0]?.GetType() ?? typeof(object);
+                        }
+                        else
+                        {
+                            // For multiple generic parameters, try to match one-to-one
+                            for (var i = 0; i < genericParams.Length; i++)
+                            {
+                                if (i < context.ClassArguments.Length && context.ClassArguments[i] != null)
+                                {
+                                    typeArgs[i] = context.ClassArguments[i]!.GetType();
+                                }
+                                else
+                                {
+                                    typeArgs[i] = typeof(object);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        typeArgs = testContext.TestDetails.TestClassArguments?.OfType<Type>().ToArray() ?? Type.EmptyTypes;
+                    }
                     
-                    var instance = InstanceFactory(typeArgs, context.ClassArguments);
+                    var instance = InstanceFactory(typeArgs, context.ClassArguments ?? Array.Empty<object?>());
 
                     // Apply property values using unified PropertyInjector
                     await PropertyInjector.InjectPropertiesAsync(
