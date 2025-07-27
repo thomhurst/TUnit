@@ -7,7 +7,7 @@ public class NestedPropertyInjectionTests
 {
     public class PersonWithDataSource
     {
-        [MethodDataSource(nameof(GetAddressData))]
+        [MethodDataSource<PersonWithDataSource>(nameof(GetAddressData))]
         public required Address Address { get; set; }
 
         public string Name { get; set; } = string.Empty;
@@ -31,7 +31,7 @@ public class NestedPropertyInjectionTests
 
     public class Address
     {
-        [MethodDataSource(nameof(GetCountryData))]
+        [MethodDataSource<Address>(nameof(GetCountryData))]
         public required Country Country { get; set; }
 
         public string Street { get; set; } = string.Empty;
