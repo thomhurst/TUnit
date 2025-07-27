@@ -109,7 +109,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 #pragma warning restore IL2026
 
         var testBuilder = Register<ITestBuilder>(
-            new TestBuilder(this, TestSessionId, HookCollectionService, ContextProvider));
+            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider));
 
         // Create pipeline with all dependencies
         TestBuilderPipeline = Register(

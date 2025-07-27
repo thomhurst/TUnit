@@ -5,23 +5,20 @@ using TUnit.Core.Services;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
-using TUnit.Engine.Interfaces;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building;
 
 internal sealed class TestBuilder : ITestBuilder
 {
-    private readonly IServiceProvider _serviceProvider;
     private readonly string _sessionId;
-    private readonly IHookCollectionService _hookCollectionService;
+    private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private readonly IContextProvider _contextProvider;
 
-    public TestBuilder(IServiceProvider serviceProvider, string sessionId, IHookCollectionService hookCollectionService, IContextProvider contextProvider)
+    public TestBuilder(string sessionId, EventReceiverOrchestrator eventReceiverOrchestrator, IContextProvider contextProvider)
     {
-        _serviceProvider = serviceProvider;
         _sessionId = sessionId;
-        _hookCollectionService = hookCollectionService;
+        _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _contextProvider = contextProvider;
     }
 
@@ -38,6 +35,13 @@ internal sealed class TestBuilder : ITestBuilder
                 TestMetadata = metadata.MethodMetadata
             });
 
+            if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
+            {
+                var failedTest = await CreateFailedTestForClassDataSourceCircularDependency(metadata);
+                tests.Add(failedTest);
+                return tests;
+            }
+
             var classDataAttributeIndex = 0;
             foreach (var classDataSource in GetDataSources(metadata.ClassDataSources))
             {
@@ -50,19 +54,60 @@ internal sealed class TestBuilder : ITestBuilder
                                        testMetadata: metadata,
                                        testSessionId: _sessionId,
                                        generatorType: DataGeneratorType.ClassParameters,
-                                       testClassInstance: null,
+                                       testClassInstance: null, // Never pass instance for class data sources (circular dependency)
                                        classInstanceArguments: null,
                                        contextAccessor
                                    )))
                 {
                     classDataLoopIndex++;
 
+                    var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+
+                    // Check if we need to create an instance early for method data sources
+                    var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
+                    object? instanceForMethodDataSources = null;
+
+                    if (needsInstanceForMethodDataSources)
+                    {
+                        try
+                        {
+                            // Try to resolve class generic types using class data for early instance creation
+                            if (metadata.TestClassType.IsGenericTypeDefinition)
+                            {
+                                var tempTestData = new TestData
+                                {
+                                    TestClassInstance = null!,
+                                    ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                                    ClassDataLoopIndex = classDataLoopIndex,
+                                    ClassData = classData,
+                                    MethodDataSourceAttributeIndex = 0,
+                                    MethodDataLoopIndex = 0,
+                                    MethodData = [],
+                                    RepeatIndex = 0
+                                };
+
+                                var resolution = TestGenericTypeResolver.Resolve(metadata, tempTestData);
+                                instanceForMethodDataSources = metadata.InstanceFactory(resolution.ResolvedClassGenericArguments, classData);
+                            }
+                            else
+                            {
+                                // Non-generic class
+                                instanceForMethodDataSources = metadata.InstanceFactory([], classData);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // If we can't create instance for method data sources, fail the test
+                            var failedTest = await CreateFailedTestForInstanceDataSourceError(metadata, ex);
+                            tests.Add(failedTest);
+                            continue;
+                        }
+                    }
+
                     var methodDataAttributeIndex = 0;
                     foreach (var methodDataSource in GetDataSources(metadata.DataSources))
                     {
                         methodDataAttributeIndex++;
-
-                        var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
 
                         var methodDataLoopIndex = 0;
                         await foreach (var methodDataFactory in methodDataSource.GetDataRowsAsync(
@@ -71,7 +116,7 @@ internal sealed class TestBuilder : ITestBuilder
                                                testMetadata: metadata,
                                                testSessionId: _sessionId,
                                                generatorType: DataGeneratorType.TestParameters,
-                                               testClassInstance: null, // We don't have instance yet
+                                               testClassInstance: methodDataSource is IAccessesInstanceData ? instanceForMethodDataSources : null,
                                                classInstanceArguments: classData,
                                                contextAccessor
                                            )))
@@ -97,9 +142,9 @@ internal sealed class TestBuilder : ITestBuilder
                                 };
 
                                 // Resolve generic types for both class and method
-                                Type[] resolvedClassGenericArgs = Type.EmptyTypes;
-                                Type[] resolvedMethodGenericArgs = Type.EmptyTypes;
-                                
+                                Type[] resolvedClassGenericArgs;
+                                Type[] resolvedMethodGenericArgs;
+
                                 try
                                 {
                                     var resolution = TestGenericTypeResolver.Resolve(metadata, tempTestData);
@@ -120,7 +165,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 {
                                     throw new InvalidOperationException($"Error creating test class instance for {metadata.TestClassType.FullName}.");
                                 }
-                                
+
                                 // Create the final test data with the actual instance
                                 var testData = new TestData
                                 {
@@ -247,30 +292,8 @@ internal sealed class TestBuilder : ITestBuilder
             context.TestDetails.TestName,
             context);
 
-        // Try to get EventReceiverOrchestrator from service provider
-        var eventReceiverOrchestrator = _serviceProvider?.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
-        if (eventReceiverOrchestrator != null)
         {
-            // Use the orchestrator for consistency with other event receivers
-            await eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
-        }
-        else
-        {
-            // Fallback to attribute-only if orchestrator not available
-            foreach (var attribute in context.TestDetails.Attributes)
-            {
-                if (attribute is ITestDiscoveryEventReceiver receiver)
-                {
-                    try
-                    {
-                        await receiver.OnTestDiscovered(discoveredContext);
-                    }
-                    catch (Exception ex)
-                    {
-                        _ = ex;
-                    }
-                }
-            }
+            await _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
         }
 
         discoveredContext.TransferTo(context);
@@ -354,6 +377,30 @@ internal sealed class TestBuilder : ITestBuilder
         {
             UnifiedObjectTracker.TrackObject(context.Events, arg);
         }
+    }
+
+    private async Task<ExecutableTest> CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
+    {
+        var message = $"Failed to create instance for method data source expansion: {exception.Message}";
+        return await CreateFailedTestForDataGenerationError(metadata, exception, message);
+    }
+
+    private async Task<ExecutableTest> CreateFailedTestForClassDataSourceCircularDependency(TestMetadata metadata)
+    {
+        var instanceClassDataSources = metadata.ClassDataSources
+            .Where(ds => ds is IAccessesInstanceData)
+            .Select(ds => ds.GetType().Name)
+            .ToList();
+
+        var dataSourceNames = string.Join(", ", instanceClassDataSources);
+        var genericParams = string.Join(", ", metadata.TestClassType.GetGenericArguments().Select(t => t.Name));
+
+        var message = $"Cannot use instance method data sources ({dataSourceNames}) for class constructor arguments with generic test class '{metadata.TestClassType.Name}<{genericParams}>'. " +
+                      "This creates a circular dependency: instance data sources need an instance, but the instance needs constructor arguments from class data sources. " +
+                      "Consider using static method data sources for class constructor arguments instead.";
+
+        var exception = new InvalidOperationException(message);
+        return await CreateFailedTestForDataGenerationError(metadata, exception, message);
     }
 
     internal class TestData
