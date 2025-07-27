@@ -55,18 +55,18 @@ public class NonImplementingClassDataSource : DataSourceGeneratorAttribute<NonIm
     }
 }
 
-[EngineTest(ExpectedResult.Pass)]
 public class GenericConstraintValidationTests
 {
     [Test]
     [StringDataSourceForConstraint]
+    [EngineTest(ExpectedResult.Pass)]
     public async Task GenericMethodWithClassConstraint_ValidType<T>(T value) where T : class
     {
         // This should pass - string satisfies class constraint
         await Assert.That(value).IsNotNull();
         await Assert.That(typeof(T)).IsEqualTo(typeof(string));
     }
-    
+
     [Test]
     [IntDataSourceForConstraint]
     [Skip("Expected to fail - int violates class constraint")]
@@ -75,16 +75,17 @@ public class GenericConstraintValidationTests
         // This should fail during constraint validation - int is a value type
         await Task.CompletedTask;
     }
-    
+
     [Test]
     [TestClassDataSource]
+    [EngineTest(ExpectedResult.Pass)]
     public async Task GenericMethodWithInterfaceConstraint_ValidType<T>(T value) where T : ITestInterface
     {
         // This should pass - TestClass implements ITestInterface
         await Assert.That(typeof(T)).IsEqualTo(typeof(TestClass));
         await Task.CompletedTask;
     }
-    
+
     [Test]
     [NonImplementingClassDataSource]
     [Skip("Expected to fail - NonImplementingClass doesn't implement ITestInterface")]
@@ -93,15 +94,16 @@ public class GenericConstraintValidationTests
         // This should fail during constraint validation - NonImplementingClass doesn't implement ITestInterface
         await Task.CompletedTask;
     }
-    
+
     [Test]
     [Arguments(5)]
+    [EngineTest(ExpectedResult.Pass)]
     public async Task GenericMethodWithStructConstraint_ValidType<T>(T value) where T : struct
     {
         // This should pass - int satisfies struct constraint
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
     }
-    
+
     [Test]
     [Arguments("invalid")]
     [Skip("Expected to fail - string violates struct constraint")]
