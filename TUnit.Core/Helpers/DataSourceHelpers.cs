@@ -338,13 +338,21 @@ public static class DataSourceHelpers
             return [ null ];
         }
 
-        if(item is object?[] array)
+        // Check if it's specifically object?[] (not other array types like string[])
+        // We need to check the element type because string[] is assignable to object?[] due to covariance
+        if(item is object?[] array && item.GetType().GetElementType() == typeof(object))
         {
             return array;
         }
 
         // Don't treat strings as character arrays
         if (item is string)
+        {
+            return [item];
+        }
+
+        // Check if it's any other kind of array (string[], int[], etc.)
+        if (item is Array)
         {
             return [item];
         }
