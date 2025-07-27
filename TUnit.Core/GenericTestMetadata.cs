@@ -26,9 +26,16 @@ public sealed class GenericTestMetadata : TestMetadata
                     }
 
                     // Get type arguments from test context if generic
-                    // For generic types, we need to infer the type arguments from the actual argument values
                     Type[] typeArgs;
-                    if (TestClassType.IsGenericTypeDefinition && context.ClassArguments != null && context.ClassArguments.Length > 0)
+                    
+                    // First, check if we have resolved class generic arguments from the context
+                    // This happens when type inference was done in TestBuilder
+                    if (context.ResolvedClassGenericArguments.Length > 0)
+                    {
+                        typeArgs = context.ResolvedClassGenericArguments;
+                    }
+                    // Fall back to inferring from constructor arguments if available
+                    else if (TestClassType.IsGenericTypeDefinition && context.ClassArguments != null && context.ClassArguments.Length > 0)
                     {
                         // Infer type arguments from the constructor argument values
                         var genericParams = TestClassType.GetGenericArguments();

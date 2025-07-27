@@ -86,6 +86,16 @@ internal sealed class TestGenericTypeResolver
             }
         }
 
+        // If we couldn't infer all types from constructor arguments, check if this is
+        // a parameterless constructor case where we might be able to infer from method data later
+        if (typeMapping.Count < genericParameters.Length && constructorArguments.Length == 0)
+        {
+            // For classes with parameterless constructors, throw a specific exception
+            // that can be caught and handled by the caller
+            throw new GenericTypeResolutionException(
+                $"Could not resolve type for generic parameter(s) of type '{genericClassType.Name}' from constructor arguments. Type inference from method data may be required.");
+        }
+
         // Resolve all generic parameters
         var resolvedTypes = new Type[genericParameters.Length];
         for (var i = 0; i < genericParameters.Length; i++)

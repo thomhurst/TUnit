@@ -1,5 +1,6 @@
 using TUnit.Core;
 using TUnit.Core.Enums;
+using TUnit.Core.Exceptions;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Core.Tracking;
@@ -151,6 +152,27 @@ internal sealed class TestBuilder : ITestBuilder
                                     resolvedClassGenericArgs = resolution.ResolvedClassGenericArguments;
                                     resolvedMethodGenericArgs = resolution.ResolvedMethodGenericArguments;
                                 }
+                                catch (GenericTypeResolutionException) when (
+                                    metadata.TestClassType.IsGenericTypeDefinition &&
+                                    classData.Length == 0 &&
+                                    methodData.Length > 0)
+                                {
+                                    // Special handling for generic classes with no constructor arguments
+                                    // but with method parameters that can help infer the generic types
+                                    try
+                                    {
+                                        resolvedClassGenericArgs = TryInferClassGenericsFromMethodData(
+                                            metadata, methodData);
+                                        resolvedMethodGenericArgs = Type.EmptyTypes; // No method generics in this case
+                                    }
+                                    catch (Exception innerEx)
+                                    {
+                                        // If we still can't resolve, create a failed test
+                                        var failedTest = await CreateFailedTestForDataGenerationError(metadata, innerEx);
+                                        tests.Add(failedTest);
+                                        continue;
+                                    }
+                                }
                                 catch (Exception ex)
                                 {
                                     // If generic resolution fails, create a failed test
@@ -160,6 +182,10 @@ internal sealed class TestBuilder : ITestBuilder
                                 }
 
                                 // Now create the instance with resolved generic arguments
+                                if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
+                                {
+                                    throw new InvalidOperationException($"Cannot create instance of generic type {metadata.TestClassType.Name} with empty type arguments");
+                                }
                                 var instance = metadata.InstanceFactory(resolvedClassGenericArgs, classData);
                                 if (instance is null)
                                 {
@@ -203,6 +229,60 @@ internal sealed class TestBuilder : ITestBuilder
         }
 
         return tests;
+    }
+
+    private static Type[] TryInferClassGenericsFromMethodData(TestMetadata metadata, object?[] methodData)
+    {
+        var genericClassType = metadata.TestClassType;
+        var genericParameters = genericClassType.GetGenericArguments();
+        var typeMapping = new Dictionary<Type, Type>();
+
+        // Try to match method parameter types with actual data types
+        for (var i = 0; i < Math.Min(metadata.ParameterTypes.Length, methodData.Length); i++)
+        {
+            var paramType = metadata.ParameterTypes[i];
+            var argValue = methodData[i];
+
+            if (argValue != null)
+            {
+                var argType = argValue.GetType();
+                
+                // If the parameter type is object (placeholder for generic parameter in source-gen)
+                // and we have data, we can infer the type
+                if (paramType == typeof(object))
+                {
+                    // Check if this corresponds to a class generic parameter
+                    // by looking at the method metadata
+                    var methodParam = metadata.MethodMetadata.Parameters[i];
+                    
+                    if (methodParam.TypeReference.IsGenericParameter && !methodParam.TypeReference.IsMethodGenericParameter)
+                    {
+                        var genericParamName = methodParam.TypeReference.GenericParameterName;
+                        // Find the matching generic parameter in the class
+                        var matchingClassParam = genericParameters.FirstOrDefault(p => p.Name == genericParamName);
+                        if (matchingClassParam != null)
+                        {
+                            typeMapping[matchingClassParam] = argType;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Build the resolved types array
+        var resolvedTypes = new Type[genericParameters.Length];
+        for (var i = 0; i < genericParameters.Length; i++)
+        {
+            var genericParam = genericParameters[i];
+            if (!typeMapping.TryGetValue(genericParam, out var resolvedType))
+            {
+                throw new InvalidOperationException(
+                    $"Could not resolve type for generic parameter '{genericParam.Name}' of type '{genericClassType.Name}' from method data");
+            }
+            resolvedTypes[i] = resolvedType;
+        }
+
+        return resolvedTypes;
     }
 
     private static IDataSourceAttribute[] GetDataSources(IDataSourceAttribute[] dataSources)
