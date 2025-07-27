@@ -20,10 +20,12 @@ internal static class DataGeneratorMetadataCreator
         // Filter out CancellationToken if it's the last parameter (handled by the engine)
         if (generatorType == DataGeneratorType.TestParameters && parametersToGenerate.Length > 0)
         {
-            var lastParam = parametersToGenerate[^1];
+            var lastParam = parametersToGenerate[parametersToGenerate.Length - 1];
             if (lastParam.Type == typeof(System.Threading.CancellationToken))
             {
-                parametersToGenerate = parametersToGenerate[..^1];
+                var newArray = new ParameterMetadata[parametersToGenerate.Length - 1];
+                Array.Copy(parametersToGenerate, 0, newArray, 0, parametersToGenerate.Length - 1);
+                parametersToGenerate = newArray;
             }
         }
 

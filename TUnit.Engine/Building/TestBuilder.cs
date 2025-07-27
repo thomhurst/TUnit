@@ -64,12 +64,38 @@ internal sealed class TestBuilder : ITestBuilder
 
                         var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
 
-                        // Get type arguments for generic types
-                        var typeArgs = metadata.GenericTypeInfo != null 
-                            ? Type.EmptyTypes // TODO: Resolve actual type arguments from test data
-                            : Type.EmptyTypes;
+                        // Create initial test data for type resolution
+                        var initialTestData = new TestData
+                        {
+                            TestClassInstance = null!, // Will be set after resolution
+                            ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                            ClassDataLoopIndex = classDataLoopIndex,
+                            ClassData = classData,
+                            MethodDataSourceAttributeIndex = 0,
+                            MethodDataLoopIndex = 0,
+                            MethodData = [],
+                            RepeatIndex = 0
+                        };
+
+                        // Resolve generic types if needed
+                        Type[] resolvedClassGenericArgs = Type.EmptyTypes;
+                        if (metadata.GenericTypeInfo != null)
+                        {
+                            try
+                            {
+                                var resolution = TestGenericTypeResolver.Resolve(metadata, initialTestData);
+                                resolvedClassGenericArgs = resolution.ResolvedClassGenericArguments;
+                            }
+                            catch (Exception ex)
+                            {
+                                // If generic resolution fails, create a failed test
+                                var failedTest = await CreateFailedTestForDataGenerationError(metadata, ex);
+                                tests.Add(failedTest);
+                                continue;
+                            }
+                        }
                         
-                        var instance = metadata.InstanceFactory(typeArgs, classData);
+                        var instance = metadata.InstanceFactory(resolvedClassGenericArgs, classData);
 
                         if (instance is null)
                         {
@@ -94,7 +120,7 @@ internal sealed class TestBuilder : ITestBuilder
                             {
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
 
-                                instance = metadata.InstanceFactory(typeArgs, classData);
+                                instance = metadata.InstanceFactory(resolvedClassGenericArgs, classData);
 
                                 var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
 
@@ -109,6 +135,21 @@ internal sealed class TestBuilder : ITestBuilder
                                     MethodData = methodData,
                                     RepeatIndex = i
                                 };
+
+                                // Resolve generic types for both class and method
+                                try
+                                {
+                                    var resolution = TestGenericTypeResolver.Resolve(metadata, testData);
+                                    testData.ResolvedClassGenericArguments = resolution.ResolvedClassGenericArguments;
+                                    testData.ResolvedMethodGenericArguments = resolution.ResolvedMethodGenericArguments;
+                                }
+                                catch (Exception ex)
+                                {
+                                    // If generic resolution fails, create a failed test
+                                    var failedTest = await CreateFailedTestForDataGenerationError(metadata, ex);
+                                    tests.Add(failedTest);
+                                    continue;
+                                }
 
                                 var test = await BuildTestAsync(metadata, testData, contextAccessor.Current);
                                 tests.Add(test);
@@ -338,5 +379,17 @@ internal sealed class TestBuilder : ITestBuilder
         public required int MethodDataLoopIndex { get; init; }
         public required object?[] MethodData { get; init; }
         public required int RepeatIndex { get; init; }
+
+        /// <summary>
+        /// Resolved generic type arguments for the test class.
+        /// Will be Type.EmptyTypes if the class is not generic.
+        /// </summary>
+        public Type[] ResolvedClassGenericArguments { get; set; } = Type.EmptyTypes;
+
+        /// <summary>
+        /// Resolved generic type arguments for the test method.
+        /// Will be Type.EmptyTypes if the method is not generic.
+        /// </summary>
+        public Type[] ResolvedMethodGenericArguments { get; set; } = Type.EmptyTypes;
     }
 }
