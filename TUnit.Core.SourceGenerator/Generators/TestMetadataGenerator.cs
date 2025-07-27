@@ -999,19 +999,31 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("if (method.IsGenericMethodDefinition)");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("// For now, infer type arguments from the actual argument types");
+            writer.AppendLine("// Use the resolved generic types from the test context");
+            writer.AppendLine("var testContext = global::TUnit.Core.TestContext.Current;");
+            writer.AppendLine("var resolvedTypes = testContext?.TestDetails?.MethodGenericArguments;");
+            writer.AppendLine();
+            writer.AppendLine("if (resolvedTypes != null && resolvedTypes.Length > 0)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("// Use the pre-resolved generic types");
+            writer.AppendLine("method = method.MakeGenericMethod(resolvedTypes);");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("// Fallback: infer type arguments from the actual argument types");
             writer.AppendLine("var typeArgs = new System.Type[" + testMethod.MethodSymbol.TypeParameters.Length + "];");
-            
-            // Simple type inference - use the type of the first argument that corresponds to each type parameter
-            // This is a simplified approach and may need enhancement for complex scenarios
             writer.AppendLine("for (int i = 0; i < typeArgs.Length && i < args.Length; i++)");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("typeArgs[i] = args[i]?.GetType() ?? typeof(object);");
             writer.Unindent();
             writer.AppendLine("}");
-            
             writer.AppendLine("method = method.MakeGenericMethod(typeArgs);");
+            writer.Unindent();
+            writer.AppendLine("}");
             writer.Unindent();
             writer.AppendLine("}");
             writer.AppendLine();

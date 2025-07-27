@@ -29,6 +29,18 @@ public class TestDetails
 
     public required IReadOnlyList<Attribute> Attributes { get; init; }
     public object?[] ClassMetadataArguments => TestClassArguments;
+    
+    /// <summary>
+    /// Resolved generic type arguments for the test method.
+    /// Will be Type.EmptyTypes if the method is not generic.
+    /// </summary>
+    public Type[] MethodGenericArguments { get; set; } = Type.EmptyTypes;
+    
+    /// <summary>
+    /// Resolved generic type arguments for the test class.
+    /// Will be Type.EmptyTypes if the class is not generic.
+    /// </summary>
+    public Type[] ClassGenericArguments { get; set; } = Type.EmptyTypes;
 }
 
 /// <summary>

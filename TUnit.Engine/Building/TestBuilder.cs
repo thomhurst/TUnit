@@ -194,7 +194,9 @@ internal sealed class TestBuilder : ITestBuilder
             DisplayName = context.GetDisplayName(), // Use the display name from context which may have been updated by discovery events
             Arguments = testData.MethodData,
             ClassArguments = testData.ClassData,
-            Context = context
+            Context = context,
+            ResolvedMethodGenericArguments = testData.ResolvedMethodGenericArguments,
+            ResolvedClassGenericArguments = testData.ResolvedClassGenericArguments
         };
 
         return metadata.CreateExecutableTestFactory(creationContext, metadata);
@@ -217,7 +219,9 @@ internal sealed class TestBuilder : ITestBuilder
             TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = metadata.MethodMetadata.ReturnType ?? typeof(void),
             MethodMetadata = metadata.MethodMetadata,
-            Attributes =  metadata.AttributeFactory.Invoke()
+            Attributes =  metadata.AttributeFactory.Invoke(),
+            MethodGenericArguments = testData.ResolvedMethodGenericArguments,
+            ClassGenericArguments = testData.ResolvedClassGenericArguments
         };
 
         foreach (var category in metadata.Categories)
