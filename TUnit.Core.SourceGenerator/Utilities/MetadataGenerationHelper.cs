@@ -77,8 +77,8 @@ internal static class MetadataGenerationHelper
         writer.AppendLine("{");
         writer.Indent();
         
-        var safeTypeDisplay = CodeGenerationHelpers.ContainsTypeParameter(methodSymbol.ContainingType) ? "object" : methodSymbol.ContainingType.GloballyQualified();
-        var safeReturnTypeDisplay = CodeGenerationHelpers.ContainsTypeParameter(methodSymbol.ReturnType) ? "object" : methodSymbol.ReturnType.GloballyQualified();
+        var safeTypeDisplay = CodeGenerationHelpers.GetSafeTypeName(methodSymbol.ContainingType);
+        var safeReturnTypeDisplay = CodeGenerationHelpers.GetSafeTypeName(methodSymbol.ReturnType);
         
         writer.AppendLine($"Type = typeof({safeTypeDisplay}),");
         writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ContainingType)},");
@@ -101,7 +101,7 @@ internal static class MetadataGenerationHelper
     public static string GenerateClassMetadataGetOrAdd(INamedTypeSymbol typeSymbol, string? parentExpression = null)
     {
         var qualifiedName = $"{typeSymbol.ContainingAssembly.Name}:{typeSymbol.GloballyQualified()}";
-        var safeTypeName = CodeGenerationHelpers.ContainsTypeParameter(typeSymbol) ? "object" : typeSymbol.GloballyQualified();
+        var safeTypeName = CodeGenerationHelpers.GetSafeTypeName(typeSymbol);
         
         var writer = new CodeWriter();
         writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", () => ");
@@ -260,11 +260,8 @@ internal static class MetadataGenerationHelper
         
         var paramTypes = method.Parameters.Select(p => 
         {
-            if (CodeGenerationHelpers.ContainsTypeParameter(p.Type))
-            {
-                return "typeof(object)";
-            }
-            return $"typeof({p.Type.GloballyQualified()})";
+            var safeTypeName = CodeGenerationHelpers.GetSafeTypeName(p.Type);
+            return $"typeof({safeTypeName})";
         });
         
         return $"new global::System.Type[] {{ {string.Join(", ", paramTypes)} }}";

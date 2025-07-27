@@ -1683,8 +1683,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         if (isGeneric)
         {
-            // For generic types, use typeof(object) as placeholder since we can't resolve generics at compile time
-            return "typeof(object)";
+            // For generic types, use the open generic form (e.g., typeof(List<>)) instead of typeof(object)
+            var safeTypeName = CodeGenerationHelpers.GetSafeTypeName(typeSymbol);
+            return $"typeof({safeTypeName})";
         }
 
         var fullyQualifiedName = typeSymbol.GloballyQualified();
