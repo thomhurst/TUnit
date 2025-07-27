@@ -10,26 +10,26 @@ public class GenericInstanceMethodDataSourceTests
 {
     // Test with typed InstanceMethodDataSource<T> for generic type inference
     [Test]
-    [InstanceMethodDataSource<int>(nameof(GetIntData))]
+    [InstanceMethodDataSource(nameof(GetIntData))]
     [GenerateGenericTest(typeof(int))]
     public async Task GenericMethodWithTypedInstanceMethodDataSource<T>(T value)
     {
-        // T should be inferred as int from InstanceMethodDataSource<int>
+        // T should be inferred as int from InstanceMethodDataSource
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
         await Task.CompletedTask;
     }
-    
+
     // Test with multiple typed InstanceMethodDataSource for different types
     [Test]
-    [InstanceMethodDataSource<string>(nameof(GetStringData))]
+    [InstanceMethodDataSource(nameof(GetStringData))]
     [GenerateGenericTest(typeof(string))]
     public async Task GenericMethodWithStringInstanceMethodDataSource<T>(T value)
     {
-        // T should be inferred as string from InstanceMethodDataSource<string>
+        // T should be inferred as string from InstanceMethodDataSource
         await Assert.That(typeof(T)).IsEqualTo(typeof(string));
         await Task.CompletedTask;
     }
-    
+
     // Instance method that would provide int data
     public IEnumerable<int> GetIntData()
     {
@@ -37,7 +37,7 @@ public class GenericInstanceMethodDataSourceTests
         yield return 2;
         yield return 3;
     }
-    
+
     // Instance method that would provide string data
     public IEnumerable<string> GetStringData()
     {
@@ -55,14 +55,14 @@ public class GenericInstanceMethodDataSourceTests
 public class GenericClassInstanceMethodDataSourceTests<T> where T : class
 {
     [Test]
-    [InstanceMethodDataSource<string>(nameof(GetStringData))]
+    [InstanceMethodDataSource(nameof(GetStringData))]
     public async Task TestWithInstanceMethodDataSource(T value)
     {
-        // T should be inferred as string from InstanceMethodDataSource<string>
+        // T should be inferred as string from InstanceMethodDataSource
         await Assert.That(typeof(T)).IsEqualTo(typeof(string));
         await Task.CompletedTask;
     }
-    
+
     public IEnumerable<string> GetStringData()
     {
         yield return "instance";
