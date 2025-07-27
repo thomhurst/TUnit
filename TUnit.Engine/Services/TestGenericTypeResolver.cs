@@ -158,11 +158,13 @@ internal sealed class TestGenericTypeResolver
         {
             // Try to find the resolved type in our mapping
             Type? resolvedType = null;
+            var targetName = genericMethodInfo.ParameterNames[i];
+            
             foreach (var kvp in typeMapping)
             {
                 // The key in typeMapping is a generic parameter Type object
                 // We need to match it by name with the parameter name from metadata
-                if (kvp.Key.IsGenericParameter && kvp.Key.Name == genericMethodInfo.ParameterNames[i])
+                if (kvp.Key.IsGenericParameter && kvp.Key.Name == targetName)
                 {
                     resolvedType = kvp.Value;
                     break;
@@ -172,12 +174,19 @@ internal sealed class TestGenericTypeResolver
             if (resolvedType == null)
             {
                 // Provide more detailed error information
-                var mappedTypes = string.Join(", ", typeMapping.Select(kvp => $"{kvp.Key.Name}={kvp.Value.Name}"));
+                var mappedTypes = string.Join(", ", typeMapping.Select(kvp => $"{kvp.Key.Name}(IsGeneric:{kvp.Key.IsGenericParameter})={kvp.Value.Name}"));
                 var paramNames = string.Join(", ", genericMethodInfo.ParameterNames);
+                var parameterInfo = string.Join(", ", parameterTypes.Select((t, idx) => 
+                    $"[{idx}]{t}(IsGeneric:{t.IsGenericParameter},IsConstructed:{t.IsConstructedGenericType})"));
+                var argumentInfo = string.Join(", ", methodArguments.Select((a, idx) => 
+                    $"[{idx}]{a?.GetType() ?? (object)"null"}"));
+                    
                 throw new GenericTypeResolutionException(
-                    $"Could not resolve type for generic parameter '{genericMethodInfo.ParameterNames[i]}' in method. " +
+                    $"Could not resolve type for generic parameter '{targetName}' in method. " +
                     $"Available mappings: [{mappedTypes}]. " +
-                    $"Expected parameters: [{paramNames}]");
+                    $"Expected parameters: [{paramNames}]. " +
+                    $"Parameter types: {parameterInfo}. " +
+                    $"Arguments: {argumentInfo}");
             }
 
             resolvedTypes[i] = resolvedType;

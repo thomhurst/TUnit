@@ -64,44 +64,6 @@ internal sealed class TestBuilder : ITestBuilder
 
                         var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
 
-                        // Create initial test data for type resolution
-                        var initialTestData = new TestData
-                        {
-                            TestClassInstance = null!, // Will be set after resolution
-                            ClassDataSourceAttributeIndex = classDataAttributeIndex,
-                            ClassDataLoopIndex = classDataLoopIndex,
-                            ClassData = classData,
-                            MethodDataSourceAttributeIndex = 0,
-                            MethodDataLoopIndex = 0,
-                            MethodData = [],
-                            RepeatIndex = 0
-                        };
-
-                        // Resolve generic types if needed
-                        Type[] resolvedClassGenericArgs = Type.EmptyTypes;
-                        if (metadata.GenericTypeInfo != null)
-                        {
-                            try
-                            {
-                                var resolution = TestGenericTypeResolver.Resolve(metadata, initialTestData);
-                                resolvedClassGenericArgs = resolution.ResolvedClassGenericArguments;
-                            }
-                            catch (Exception ex)
-                            {
-                                // If generic resolution fails, create a failed test
-                                var failedTest = await CreateFailedTestForDataGenerationError(metadata, ex);
-                                tests.Add(failedTest);
-                                continue;
-                            }
-                        }
-                        
-                        var instance = metadata.InstanceFactory(resolvedClassGenericArgs, classData);
-
-                        if (instance is null)
-                        {
-                            throw new InvalidOperationException($"Error creating test class instance for {metadata.TestClassType.FullName}. ");
-                        }
-
                         var methodDataLoopIndex = 0;
                         await foreach (var methodDataFactory in methodDataSource.GetDataRowsAsync(
                                            DataGeneratorMetadataCreator.CreateDataGeneratorMetadata
@@ -109,7 +71,7 @@ internal sealed class TestBuilder : ITestBuilder
                                                testMetadata: metadata,
                                                testSessionId: _sessionId,
                                                generatorType: DataGeneratorType.TestParameters,
-                                               testClassInstance: instance,
+                                               testClassInstance: null, // We don't have instance yet
                                                classInstanceArguments: classData,
                                                contextAccessor
                                            )))
@@ -119,14 +81,12 @@ internal sealed class TestBuilder : ITestBuilder
                             for (var i = 0; i < metadata.RepeatCount + 1; i++)
                             {
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
-
-                                instance = metadata.InstanceFactory(resolvedClassGenericArgs, classData);
-
                                 var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
 
-                                var testData = new TestData
+                                // Create a temporary test data for generic type resolution
+                                var tempTestData = new TestData
                                 {
-                                    TestClassInstance = instance,
+                                    TestClassInstance = null!, // Temporary placeholder
                                     ClassDataSourceAttributeIndex = classDataAttributeIndex,
                                     ClassDataLoopIndex = classDataLoopIndex,
                                     ClassData = classData,
@@ -137,11 +97,14 @@ internal sealed class TestBuilder : ITestBuilder
                                 };
 
                                 // Resolve generic types for both class and method
+                                Type[] resolvedClassGenericArgs = Type.EmptyTypes;
+                                Type[] resolvedMethodGenericArgs = Type.EmptyTypes;
+                                
                                 try
                                 {
-                                    var resolution = TestGenericTypeResolver.Resolve(metadata, testData);
-                                    testData.ResolvedClassGenericArguments = resolution.ResolvedClassGenericArguments;
-                                    testData.ResolvedMethodGenericArguments = resolution.ResolvedMethodGenericArguments;
+                                    var resolution = TestGenericTypeResolver.Resolve(metadata, tempTestData);
+                                    resolvedClassGenericArgs = resolution.ResolvedClassGenericArguments;
+                                    resolvedMethodGenericArgs = resolution.ResolvedMethodGenericArguments;
                                 }
                                 catch (Exception ex)
                                 {
@@ -150,6 +113,28 @@ internal sealed class TestBuilder : ITestBuilder
                                     tests.Add(failedTest);
                                     continue;
                                 }
+
+                                // Now create the instance with resolved generic arguments
+                                var instance = metadata.InstanceFactory(resolvedClassGenericArgs, classData);
+                                if (instance is null)
+                                {
+                                    throw new InvalidOperationException($"Error creating test class instance for {metadata.TestClassType.FullName}.");
+                                }
+                                
+                                // Create the final test data with the actual instance
+                                var testData = new TestData
+                                {
+                                    TestClassInstance = instance,
+                                    ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                                    ClassDataLoopIndex = classDataLoopIndex,
+                                    ClassData = classData,
+                                    MethodDataSourceAttributeIndex = methodDataAttributeIndex,
+                                    MethodDataLoopIndex = methodDataLoopIndex,
+                                    MethodData = methodData,
+                                    RepeatIndex = i,
+                                    ResolvedClassGenericArguments = resolvedClassGenericArgs,
+                                    ResolvedMethodGenericArguments = resolvedMethodGenericArgs
+                                };
 
                                 var test = await BuildTestAsync(metadata, testData, contextAccessor.Current);
                                 tests.Add(test);
