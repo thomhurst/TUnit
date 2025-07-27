@@ -404,23 +404,52 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return discoveredTests;
     }
 
-    private static Type[] DetermineGenericTypeArguments(Type genericTypeDefinition, object?[] dataRow)
+    private static Type[]? DetermineGenericTypeArguments(Type genericTypeDefinition, object?[] dataRow)
     {
         var genericParameters = genericTypeDefinition.GetGenericArguments();
+        
+        // If no data row or empty data, can't determine types
+        if (dataRow.Length == 0)
+        {
+            return null;
+        }
+        
         var typeArguments = new Type[genericParameters.Length];
 
-        // For each generic parameter, determine the concrete type from the data
-        for (var i = 0; i < genericParameters.Length && i < dataRow.Length; i++)
+        // For generic classes with constructors, we need to infer types from constructor parameters
+        // We should match the number of generic parameters, not the number of data items
+        if (genericParameters.Length == 1 && dataRow.Length >= 1)
         {
-            if (dataRow[i] != null)
+            // Single generic parameter - use first non-null argument's type
+            for (var i = 0; i < dataRow.Length; i++)
             {
-                typeArguments[i] = dataRow[i]!.GetType();
+                if (dataRow[i] != null)
+                {
+                    typeArguments[0] = dataRow[i]!.GetType();
+                    break;
+                }
             }
-            else
+            
+            // If we couldn't determine the type, return null
+            if (typeArguments[0] == null)
             {
-                // If data is null, we can't determine the type
-                // Use object as a fallback
-                typeArguments[i] = typeof(object);
+                return null;
+            }
+        }
+        else
+        {
+            // Multiple generic parameters - try to match one-to-one with data
+            for (var i = 0; i < genericParameters.Length; i++)
+            {
+                if (i < dataRow.Length && dataRow[i] != null)
+                {
+                    typeArguments[i] = dataRow[i]!.GetType();
+                }
+                else
+                {
+                    // Can't determine all generic types
+                    return null;
+                }
             }
         }
 

@@ -133,6 +133,42 @@ internal sealed class TestGenericTypeResolver
                     }
                 }
             }
+            
+            // Handle multiple generic parameters where each Object parameter corresponds to a generic parameter
+            // Count how many Object parameters we have
+            var objectParameterIndices = new List<int>();
+            for (var i = 0; i < parameterTypes.Length; i++)
+            {
+                if (parameterTypes[i] == typeof(object))
+                {
+                    objectParameterIndices.Add(i);
+                }
+            }
+            
+            // If the number of Object parameters matches the number of generic parameters
+            if (objectParameterIndices.Count == genericMethodInfo.ParameterNames.Length)
+            {
+                var resolvedTypes = new Type[genericMethodInfo.ParameterNames.Length];
+                
+                // Map each Object parameter to its corresponding generic parameter
+                for (var i = 0; i < objectParameterIndices.Count; i++)
+                {
+                    var paramIndex = objectParameterIndices[i];
+                    if (paramIndex < methodArguments.Length && methodArguments[paramIndex] != null)
+                    {
+                        resolvedTypes[i] = methodArguments[paramIndex]!.GetType();
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Could not resolve type for generic parameter at position {i}");
+                    }
+                }
+                
+                // Validate against constraints from metadata
+                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes);
+                
+                return resolvedTypes;
+            }
         }
         
         // Handle the case where all parameter types are Object
