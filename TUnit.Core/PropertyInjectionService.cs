@@ -139,6 +139,7 @@ public sealed class PropertyInjectionService
     /// <summary>
     /// Processes property injection using metadata: creates data source, gets values, and injects them.
     /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
     private static async Task ProcessPropertyMetadata(object instance, PropertyInjectionMetadata metadata, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata,
         TestContextEvents events)
     {
@@ -161,7 +162,7 @@ public sealed class PropertyInjectionService
                 {
                     IsStatic = false,
                     Name = metadata.PropertyName,
-                    ClassMetadata = methodMetadata.Class,
+                    ClassMetadata = GetClassMetadataForType(metadata.ContainingType),
                     Type = metadata.PropertyType,
                     ReflectionInfo = GetPropertyInfo(metadata.ContainingType, metadata.PropertyName),
                     Getter = parent => GetPropertyInfo(metadata.ContainingType, metadata.PropertyName).GetValue(parent!)!,
@@ -215,7 +216,7 @@ public sealed class PropertyInjectionService
                 {
                     IsStatic = property.GetMethod?.IsStatic ?? false,
                     Name = property.Name,
-                    ClassMetadata = methodMetadata.Class,
+                    ClassMetadata = GetClassMetadataForType(property.DeclaringType!),
                     Type = property.PropertyType,
                     ReflectionInfo = property,
                     Getter = parent => property.GetValue(parent),
@@ -296,5 +297,27 @@ public sealed class PropertyInjectionService
     private static PropertyInfo GetPropertyInfo([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type containingType, string propertyName)
     {
         return containingType.GetProperty(propertyName)!;
+    }
+
+    /// <summary>
+    /// Gets or creates ClassMetadata for the specified type.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
+    private static ClassMetadata GetClassMetadataForType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
+    {
+        return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => new ClassMetadata
+        {
+            Type = type,
+            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
+            Name = type.Name,
+            Namespace = type.Namespace ?? string.Empty,
+            Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().Name ?? type.Assembly.FullName ?? "Unknown", () => new AssemblyMetadata 
+            { 
+                Name = type.Assembly.GetName().Name ?? type.Assembly.FullName ?? "Unknown" 
+            }),
+            Properties = [],
+            Parameters = [],
+            Parent = type.DeclaringType != null ? GetClassMetadataForType(type.DeclaringType) : null
+        });
     }
 }

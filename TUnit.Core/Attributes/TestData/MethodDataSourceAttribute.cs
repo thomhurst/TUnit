@@ -73,8 +73,8 @@ public class MethodDataSourceAttribute : TestDataAttribute
 
         var item1 = dataGeneratorMetadata.MembersToGenerate[0];
 
-        var targetType = (item1 as PropertyMetadata)?.ClassMetadata?.Type
-            ?? ClassProvidingDataSource
+        var targetType = ClassProvidingDataSource
+            ?? (item1 as PropertyMetadata)?.ClassMetadata?.Type
             ?? dataGeneratorMetadata.TestClassType;
 
         var methodInfo = targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
