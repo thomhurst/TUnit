@@ -27,7 +27,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         var classType = testInformation.Class.Type;
 
         var exclusions = GetExclusions(dataGeneratorMetadata.Type == DataGeneratorType.TestParameters
-            ? classType.GetMethod(testInformation.Name, testInformation.Parameters.Select(x => x.Type).ToArray())!.GetCustomAttributesSafe()
+            ? dataGeneratorMetadata.TestInformation.GetCustomAttributes()
             : classType.GetCustomAttributesSafe());
 
         foreach (var row in GetMatrixValues(parameterInformation.Select(p => GetAllArguments(dataGeneratorMetadata, p))))

@@ -22,20 +22,21 @@ public static class MetadataExtensions
     {
         return
         [
-            ..method.GetReflectionInfo().GetCustomAttributes(),
-            ..method.Type.GetCustomAttributes(),
-            ..method.Type.Assembly.GetCustomAttributes()
+            ..method.GetReflectionInfo().GetCustomAttributesSafe(),
+            ..method.Type.GetCustomAttributesSafe(),
+            ..method.Type.Assembly.GetCustomAttributesSafe()
         ];
     }
-    
+
     /// <summary>
     /// Gets a method from the specified type with proper AOT attribution
     /// </summary>
     private static MethodInfo? GetMethodFromType(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type, 
-        string name, 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type,
+        string name,
         Type[] parameters)
     {
-        return type.GetMethod(name, parameters);
+        return type.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.FlattenHierarchy, null, parameters, null)
+            ?? throw new InvalidOperationException($"Method '{name}' with parameters {string.Join(", ", parameters.Select(p => p.Name))} not found in type '{type.FullName}'.");
     }
 }
