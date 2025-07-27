@@ -111,6 +111,30 @@ internal sealed class TestGenericTypeResolver
         object?[] methodArguments,
         Type[] parameterTypes)
     {
+        // Handle the case where some parameter types are Object (placeholders for generic parameters)
+        // This happens when data sources provide untyped data or when we have mixed generic/non-generic parameters
+        if (parameterTypes.Any(t => t == typeof(object)) && methodArguments.Length > 0)
+        {
+            // Check if this is a simple generic method with one type parameter and mixed parameters
+            if (genericMethodInfo.ParameterNames.Length == 1 && parameterTypes.Length >= 1)
+            {
+                // Find the first Object parameter type - this should correspond to our generic parameter
+                for (var i = 0; i < parameterTypes.Length; i++)
+                {
+                    if (parameterTypes[i] == typeof(object) && i < methodArguments.Length && methodArguments[i] != null)
+                    {
+                        var resolvedTypes = new Type[1];
+                        resolvedTypes[0] = methodArguments[i]!.GetType();
+                        
+                        // Validate against constraints from metadata
+                        ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes);
+                        
+                        return resolvedTypes;
+                    }
+                }
+            }
+        }
+        
         // Handle the case where all parameter types are Object
         // This happens when data sources provide untyped data
         if (parameterTypes.All(t => t == typeof(object)) && methodArguments.Length > 0)
