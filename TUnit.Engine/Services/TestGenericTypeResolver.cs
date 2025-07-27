@@ -253,6 +253,24 @@ internal sealed class TestGenericTypeResolver
                 
                 return resolvedTypes;
             }
+            
+            // Handle single generic parameter case
+            if (genericMethodInfo.ParameterNames.Length == 1 && methodArguments.Length >= 1)
+            {
+                var resolvedTypes = new Type[1];
+                
+                // For a single generic parameter, infer from the first argument
+                if (methodArguments[0] != null)
+                {
+                    resolvedTypes[0] = methodArguments[0]!.GetType();
+                }
+                else
+                {
+                    throw new GenericTypeResolutionException($"Could not resolve generic parameter '{genericMethodInfo.ParameterNames[0]}' from null argument");
+                }
+                
+                return resolvedTypes;
+            }
         }
         
         // Try the original approach for cases with typed parameters
