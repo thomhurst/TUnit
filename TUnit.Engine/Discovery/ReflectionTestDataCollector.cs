@@ -1828,8 +1828,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             TestName = testName,
             TestClassType = type,
             TestMethodName = method.Name,
-            MethodMetadata = CreateMethodMetadata(type,
-                method),
+            MethodMetadata = MetadataBuilder.CreateMethodMetadata(type, method),
             AttributeFactory = () => method.GetCustomAttributes()
                 .ToArray(),
             DataSources =
@@ -1844,37 +1843,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         };
     }
 
-    private static MethodMetadata CreateMethodMetadata(Type type, MethodInfo method)
-    {
-        return new MethodMetadata
-        {
-            Name = method.Name,
-            Type = type,
-            Class = new ClassMetadata
-            {
-                Name = type.Name,
-                Type = type,
-                TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!),
-                Namespace = type.Namespace ?? string.Empty,
-                Assembly = new AssemblyMetadata { Name = type.Assembly.GetName().Name ?? "Unknown" },
-                Parameters = [
-                ],
-                Properties = [
-                ],
-                Parent = null
-            },
-            Parameters = method.GetParameters().Select(p => new ParameterMetadata(p.ParameterType)
-            {
-                Name = p.Name ?? "unnamed",
-                TypeReference = TypeReference.CreateConcrete(p.ParameterType.AssemblyQualifiedName!),
-                ReflectionInfo = p
-            }).ToArray(),
-            GenericTypeCount = method.IsGenericMethodDefinition ? method.GetGenericArguments().Length : 0,
-            ReturnTypeReference = TypeReference.CreateConcrete(method.ReturnType.AssemblyQualifiedName!),
-            ReturnType = method.ReturnType,
-            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!)
-        };
-    }
 
     private static MethodMetadata CreateDummyMethodMetadata(Type type, string methodName)
     {

@@ -49,4 +49,39 @@ internal static class MetadataBuilder
             ReturnType = typeof(Task),
         };
     }
+
+    /// <summary>
+    /// Creates method metadata from reflection info with proper ReflectionInfo populated
+    /// </summary>
+    [UnconditionalSuppressMessage("AOT", "IL2072:'value' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.MethodMetadata.Type.init'", Justification = "Type annotations are handled by reflection")]
+    [UnconditionalSuppressMessage("AOT", "IL2067:'Type' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ParameterMetadata.ParameterMetadata(Type)'", Justification = "Parameter types are known through reflection")]
+    public static MethodMetadata CreateMethodMetadata(Type type, System.Reflection.MethodInfo method)
+    {
+        return new MethodMetadata
+        {
+            Name = method.Name,
+            Type = type,
+            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
+            Class = new ClassMetadata
+            {
+                Name = type.Name,
+                Type = type,
+                TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
+                Namespace = type.Namespace ?? string.Empty,
+                Assembly = new AssemblyMetadata { Name = type.Assembly.GetName().Name ?? "Unknown" },
+                Parameters = [],
+                Properties = [],
+                Parent = null
+            },
+            Parameters = method.GetParameters().Select(p => new ParameterMetadata(p.ParameterType)
+            {
+                Name = p.Name ?? "unnamed",
+                TypeReference = TypeReference.CreateConcrete(p.ParameterType.AssemblyQualifiedName ?? p.ParameterType.FullName ?? p.ParameterType.Name),
+                ReflectionInfo = p
+            }).ToArray(),
+            GenericTypeCount = method.IsGenericMethodDefinition ? method.GetGenericArguments().Length : 0,
+            ReturnTypeReference = TypeReference.CreateConcrete(method.ReturnType.AssemblyQualifiedName ?? method.ReturnType.FullName ?? method.ReturnType.Name),
+            ReturnType = method.ReturnType,
+        };
+    }
 }
