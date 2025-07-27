@@ -67,14 +67,6 @@ internal sealed class TestBuilder : ITestBuilder
                     // Check if we need to create an instance early for method data sources
                     var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
                     
-                    // For generic classes, only create instances if we can safely resolve generic types
-                    if (needsInstanceForMethodDataSources && metadata.TestClassType.IsGenericTypeDefinition && classData.Length == 0)
-                    {
-                        // Don't create instance early for generic classes without constructor data
-                        // The data source attribute itself will handle the error with a clear message
-                        needsInstanceForMethodDataSources = false;
-                    }
-                    
                     object? instanceForMethodDataSources = null;
 
                     if (needsInstanceForMethodDataSources)
