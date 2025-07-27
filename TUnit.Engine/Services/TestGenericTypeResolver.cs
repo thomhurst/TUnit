@@ -251,6 +251,9 @@ internal sealed class TestGenericTypeResolver
                     }
                 }
                 
+                // Validate against constraints from metadata
+                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes);
+                
                 return resolvedTypes;
             }
             
@@ -268,6 +271,9 @@ internal sealed class TestGenericTypeResolver
                 {
                     throw new GenericTypeResolutionException($"Could not resolve generic parameter '{genericMethodInfo.ParameterNames[0]}' from null argument");
                 }
+                
+                // Validate against constraints from metadata
+                ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes);
                 
                 return resolvedTypes;
             }
