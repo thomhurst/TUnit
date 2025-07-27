@@ -77,6 +77,13 @@ public class MethodDataSourceAttribute : TestDataAttribute
             ?? (item1 as PropertyMetadata)?.ClassMetadata?.Type
             ?? dataGeneratorMetadata.TestClassType;
 
+        // If we have a test class instance and no explicit class was provided,
+        // use the instance's actual type (which will be the constructed generic type)
+        if (ClassProvidingDataSource == null && dataGeneratorMetadata.TestClassInstance != null)
+        {
+            targetType = dataGeneratorMetadata.TestClassInstance.GetType();
+        }
+
         var methodInfo = targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
 
         if (methodInfo is null)

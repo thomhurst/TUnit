@@ -87,8 +87,17 @@ internal sealed class TestBuilder : ITestBuilder
                                     RepeatIndex = 0
                                 };
 
-                                var resolution = TestGenericTypeResolver.Resolve(metadata, tempTestData);
-                                instanceForMethodDataSources = metadata.InstanceFactory(resolution.ResolvedClassGenericArguments, classData);
+                                try
+                                {
+                                    var resolution = TestGenericTypeResolver.Resolve(metadata, tempTestData);
+                                    instanceForMethodDataSources = metadata.InstanceFactory(resolution.ResolvedClassGenericArguments, classData);
+                                }
+                                catch (GenericTypeResolutionException) when (classData.Length == 0)
+                                {
+                                    // If we can't resolve from constructor args, try to infer from instance method data sources
+                                    var resolvedTypes = TryInferClassGenericsFromInstanceMethodDataSources(metadata);
+                                    instanceForMethodDataSources = metadata.InstanceFactory(resolvedTypes, classData);
+                                }
                             }
                             else
                             {
@@ -278,6 +287,94 @@ internal sealed class TestBuilder : ITestBuilder
             {
                 throw new InvalidOperationException(
                     $"Could not resolve type for generic parameter '{genericParam.Name}' of type '{genericClassType.Name}' from method data");
+            }
+            resolvedTypes[i] = resolvedType;
+        }
+
+        return resolvedTypes;
+    }
+
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", 
+        Justification = "Instance method data sources require reflection to get method info")]
+    private static Type[] TryInferClassGenericsFromInstanceMethodDataSources(TestMetadata metadata)
+    {
+        var genericClassType = metadata.TestClassType;
+        var genericParameters = genericClassType.GetGenericArguments();
+        var typeMapping = new Dictionary<Type, Type>();
+
+        // Look for instance method data sources
+        foreach (var dataSource in metadata.DataSources)
+        {
+            if (dataSource is InstanceMethodDataSourceAttribute instanceMethodDataSource)
+            {
+                // Get the method info
+                var methodName = instanceMethodDataSource.MethodNameProvidingDataSource;
+                var method = genericClassType.GetMethod(methodName, 
+                    System.Reflection.BindingFlags.Public | 
+                    System.Reflection.BindingFlags.NonPublic | 
+                    System.Reflection.BindingFlags.Instance);
+                
+                if (method != null)
+                {
+                    var returnType = method.ReturnType;
+                    
+                    // Check if return type is IEnumerable<T> or similar
+                    if (returnType.IsGenericType)
+                    {
+                        var genericDef = returnType.GetGenericTypeDefinition();
+                        if (genericDef == typeof(IEnumerable<>) || 
+                            genericDef == typeof(IAsyncEnumerable<>) ||
+                            genericDef == typeof(List<>) ||
+                            genericDef == typeof(Task<>))
+                        {
+                            var elementType = returnType.GetGenericArguments()[0];
+                            
+                            // If Task<T>, unwrap to get the actual type
+                            if (genericDef == typeof(Task<>) && elementType.IsGenericType)
+                            {
+                                var innerGenericDef = elementType.GetGenericTypeDefinition();
+                                if (innerGenericDef == typeof(IEnumerable<>) || 
+                                    innerGenericDef == typeof(IAsyncEnumerable<>) ||
+                                    innerGenericDef == typeof(List<>))
+                                {
+                                    elementType = elementType.GetGenericArguments()[0];
+                                }
+                            }
+                            
+                            // Now try to match this element type with method parameters
+                            // that use the class generic parameter
+                            for (var i = 0; i < metadata.ParameterTypes.Length; i++)
+                            {
+                                var paramType = metadata.ParameterTypes[i];
+                                if (paramType == typeof(object)) // Placeholder for generic parameter
+                                {
+                                    var methodParam = metadata.MethodMetadata.Parameters[i];
+                                    if (methodParam.TypeReference.IsGenericParameter && !methodParam.TypeReference.IsMethodGenericParameter)
+                                    {
+                                        var genericParamName = methodParam.TypeReference.GenericParameterName;
+                                        var matchingClassParam = genericParameters.FirstOrDefault(p => p.Name == genericParamName);
+                                        if (matchingClassParam != null)
+                                        {
+                                            typeMapping[matchingClassParam] = elementType;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Build the resolved types array
+        var resolvedTypes = new Type[genericParameters.Length];
+        for (var i = 0; i < genericParameters.Length; i++)
+        {
+            var genericParam = genericParameters[i];
+            if (!typeMapping.TryGetValue(genericParam, out var resolvedType))
+            {
+                throw new InvalidOperationException(
+                    $"Could not resolve type for generic parameter '{genericParam.Name}' of type '{genericClassType.Name}' from instance method data sources");
             }
             resolvedTypes[i] = resolvedType;
         }
