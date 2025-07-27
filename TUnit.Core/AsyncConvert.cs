@@ -37,16 +37,16 @@ public static class AsyncConvert
                 | MethodImplOptions.AggressiveOptimization
 #endif
     )]
-    public static ValueTask Convert(Func<Task> action)
+    public static async ValueTask Convert(Func<Task> action)
     {
         var task = action();
 
         if (task is { IsCompleted: true, IsFaulted: false })
         {
-            return default(ValueTask);
+            return;
         }
 
-        return new ValueTask(task);
+        await task;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining
@@ -54,27 +54,29 @@ public static class AsyncConvert
                 | MethodImplOptions.AggressiveOptimization
 #endif
     )]
-    public static ValueTask ConvertObject(object? invoke)
+    public static async ValueTask ConvertObject(object? invoke)
     {
         if (invoke is null)
         {
-            return default(ValueTask);
+            return;
         }
 
         if (invoke is Func<object> syncFunc)
         {
             syncFunc();
-            return default(ValueTask);
+            return;
         }
 
         if (invoke is Func<Task> asyncFunc)
         {
-            return Convert(asyncFunc);
+            await Convert(asyncFunc);
+            return;
         }
 
         if (invoke is Func<ValueTask> asyncValueFunc)
         {
-            return Convert(asyncValueFunc);
+            await Convert(asyncValueFunc);
+            return;
         }
 
 
@@ -82,18 +84,22 @@ public static class AsyncConvert
         {
             if (task is { IsCompleted: true, IsFaulted: false })
             {
-                return default(ValueTask);
+                return;
             }
 
-            if (task.IsFaulted || !task.IsCompleted)
-            {
-                return new ValueTask(task);
-            }
+            await task;
+            return;
         }
 
         if (invoke is ValueTask valueTask)
         {
-            return valueTask;
+            if(valueTask is { IsCompleted: true, IsFaulted: false })
+            {
+                return;
+            }
+
+            await valueTask;
+            return;
         }
 
         // If it has a GetAwaiter method, we can assume it's an awaitable type
@@ -101,21 +107,20 @@ public static class AsyncConvert
         {
             if (awaitable is { IsCompleted: true, IsFaulted: false })
             {
-                return default(ValueTask);
+                return;
             }
 
-            return new ValueTask(awaitable);
+            await awaitable;
+            return;
         }
 
         var type = invoke.GetType();
         if (type.IsGenericType
             && type.GetGenericTypeDefinition().FullName == "Microsoft.FSharp.Control.FSharpAsync`1")
         {
-            return StartAsFSharpTask(invoke, type);
+            await StartAsFSharpTask(invoke, type);
+            return;
         }
-
-        // We can assume it's not awaitable, and so the invocation should have completed synchronously.
-        return default(ValueTask);
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The source field does not have matching annotations.")]
@@ -131,6 +136,12 @@ public static class AsyncConvert
 
         var fSharpTask = (Task) startAsTaskOpenGenericMethod.MakeGenericMethod(type.GetGenericArguments()[0])
             .Invoke(null, [invoke, null, null])!;
+
+        // Ensure exceptions are observed by accessing the Exception property
+        if (fSharpTask.IsFaulted)
+        {
+            _ = fSharpTask.Exception;
+        }
 
         return new ValueTask(fSharpTask);
     }
