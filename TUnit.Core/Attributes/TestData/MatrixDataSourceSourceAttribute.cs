@@ -7,7 +7,7 @@ namespace TUnit.Core;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 [RequiresDynamicCode("MatrixDataSourceAttribute requires dynamic code generation for runtime matrix generation and enum reflection. This attribute is inherently incompatible with AOT compilation.")]
 [RequiresUnreferencedCode("MatrixDataSourceAttribute may require unreferenced code for enum reflection and matrix generation. This attribute is inherently incompatible with AOT compilation.")]
-public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttribute
+public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttribute, IMayRequireEarlyInstantiation
 {
     protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {

@@ -67,12 +67,12 @@ internal sealed class TestBuilder : ITestBuilder
                     // Check if we need to create an instance early for method data sources
                     var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
                     
-                    // For MatrixDataSource, only create instance if we can safely resolve generic types
-                    var hasMatrixDataSource = metadata.DataSources.Any(ds => ds is MatrixDataSourceAttribute);
-                    var canCreateInstanceForMatrix = hasMatrixDataSource && 
+                    // For data sources that may require early instantiation, only create instance if we can safely resolve generic types
+                    var hasConditionalInstantiationDataSource = metadata.DataSources.Any(ds => ds is IMayRequireEarlyInstantiation);
+                    var canCreateInstanceForConditionalDataSource = hasConditionalInstantiationDataSource && 
                         (!metadata.TestClassType.IsGenericTypeDefinition || classData.Length > 0);
                     
-                    if (canCreateInstanceForMatrix)
+                    if (canCreateInstanceForConditionalDataSource)
                     {
                         needsInstanceForMethodDataSources = true;
                     }
@@ -137,7 +137,7 @@ internal sealed class TestBuilder : ITestBuilder
                                                testMetadata: metadata,
                                                testSessionId: _sessionId,
                                                generatorType: DataGeneratorType.TestParameters,
-                                               testClassInstance: methodDataSource is IAccessesInstanceData || (methodDataSource is MatrixDataSourceAttribute && canCreateInstanceForMatrix) ? instanceForMethodDataSources : null,
+                                               testClassInstance: methodDataSource is IAccessesInstanceData || (methodDataSource is IMayRequireEarlyInstantiation && canCreateInstanceForConditionalDataSource) ? instanceForMethodDataSources : null,
                                                classInstanceArguments: classData,
                                                contextAccessor
                                            )))
@@ -313,10 +313,10 @@ internal sealed class TestBuilder : ITestBuilder
         var genericParameters = genericClassType.GetGenericArguments();
         var typeMapping = new Dictionary<Type, Type>();
 
-        // First, try to infer from MatrixDataSource attributes on parameters
-        if (metadata.DataSources.Any(ds => ds is MatrixDataSourceAttribute))
+        // First, try to infer from data sources that may require early instantiation
+        if (metadata.DataSources.Any(ds => ds is IMayRequireEarlyInstantiation))
         {
-            // Look at the test method parameters to find Matrix attributes
+            // Look at the test method parameters to find attributes that can help with generic type inference
             foreach (var param in metadata.MethodMetadata.Parameters)
             {
                 // Check if the parameter type is a generic parameter of the class
