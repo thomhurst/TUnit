@@ -66,7 +66,16 @@ public class MethodDataSourceAttribute : TestDataAttribute
             yield break;
         }
 
-        var targetType = ClassProvidingDataSource ?? dataGeneratorMetadata.TestClassType ;
+        if (dataGeneratorMetadata.MembersToGenerate.Length == 0)
+        {
+            throw new InvalidOperationException("No members to generate were provided.");
+        }
+
+        var item1 = dataGeneratorMetadata.MembersToGenerate[0];
+
+        var targetType = (item1 as PropertyMetadata)?.ClassMetadata?.Type
+            ?? ClassProvidingDataSource
+            ?? dataGeneratorMetadata.TestClassType;
 
         var methodInfo = targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
 

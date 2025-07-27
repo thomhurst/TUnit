@@ -104,7 +104,12 @@ internal static class MetadataGenerationHelper
         var safeTypeName = CodeGenerationHelpers.ContainsTypeParameter(typeSymbol) ? "object" : typeSymbol.GloballyQualified();
         
         var writer = new CodeWriter();
-        writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", () => new global::TUnit.Core.ClassMetadata");
+        writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", () => ");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Create the ClassMetadata instance
+        writer.AppendLine("var classMetadata = new global::TUnit.Core.ClassMetadata");
         writer.AppendLine("{");
         writer.Indent();
         
@@ -125,6 +130,22 @@ internal static class MetadataGenerationHelper
         }
         writer.AppendLine($"Properties = {GeneratePropertyMetadataArray(typeSymbol)},");
         writer.AppendLine($"Parent = {parentExpression ?? "null"}");
+        
+        writer.Unindent();
+        writer.AppendLine("};");
+        writer.AppendLine();
+        
+        // Set ClassMetadata reference on each property
+        writer.AppendLine("// Set ClassMetadata reference on properties to avoid circular dependency");
+        writer.AppendLine("foreach (var prop in classMetadata.Properties)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("prop.ClassMetadata = classMetadata;");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        
+        writer.AppendLine("return classMetadata;");
         
         writer.Unindent();
         writer.Append("})");
