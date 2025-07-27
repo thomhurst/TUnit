@@ -53,19 +53,34 @@ public static class PropertyInjector
                 await foreach (var factory in dataRows)
                 {
                     var args = await factory();
-                    var value = args?.FirstOrDefault();
+                    
+                    // For tuple properties, we need to reconstruct the tuple from the unpacked elements
+                    var propertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
+                    object? value;
+                    
+                    if (propertyInjection != null && IsTupleType(propertyInjection.PropertyType) && args != null && args.Length > 1)
+                    {
+                        // The data source has unpacked the tuple, we need to reconstruct it
+                        #pragma warning disable IL2072 // Target parameter argument does not satisfy requirements
+                        value = CreateTupleFromElements(propertyInjection.PropertyType, args);
+                        #pragma warning restore IL2072
+                    }
+                    else
+                    {
+                        value = args?.FirstOrDefault();
+                    }
 
                     // Resolve Func<T> values to their actual values
                     value = await ResolveTestDataValueAsync(value);
 
                     if (value != null && value.GetType().IsClass && value.GetType() != typeof(string))
                     {
-                        var propertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
-                        if (propertyInjection?.NestedPropertyInjections?.Length > 0 && propertyInjection.NestedPropertyValueFactory != null)
+                        var nestedInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
+                        if (nestedInjection?.NestedPropertyInjections?.Length > 0 && nestedInjection.NestedPropertyValueFactory != null)
                         {
                             await InjectPropertiesWithValuesAsync(testContext, value,
-                                propertyInjection.NestedPropertyValueFactory(value),
-                                propertyInjection.NestedPropertyInjections, 5, 0);
+                                nestedInjection.NestedPropertyValueFactory(value),
+                                nestedInjection.NestedPropertyInjections, 5, 0);
                         }
 
                         await ObjectInitializer.InitializeAsync(value);
@@ -497,6 +512,41 @@ public static class PropertyInjector
         }
 
         return value;
+    }
+
+    private static bool IsTupleType(Type type)
+    {
+        return type.IsGenericType && type.GetGenericTypeDefinition().FullName?.StartsWith("System.ValueTuple") == true;
+    }
+
+    [UnconditionalSuppressMessage("AOT", "IL2067:UnrecognizedReflectionPattern", 
+        Justification = "Tuple types have public constructors and are safe for AOT")]
+    private static object? CreateTupleFromElements(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type tupleType, 
+        object?[] elements)
+    {
+        if (!tupleType.IsGenericType)
+        {
+            return elements.FirstOrDefault();
+        }
+
+        var genericArgs = tupleType.GetGenericArguments();
+        if (genericArgs.Length != elements.Length)
+        {
+            // If lengths don't match, just return the first element
+            return elements.FirstOrDefault();
+        }
+
+        // Create the tuple using Activator.CreateInstance
+        try
+        {
+            return Activator.CreateInstance(tupleType, elements);
+        }
+        catch
+        {
+            // If creation fails, return the first element
+            return elements.FirstOrDefault();
+        }
     }
 
 }

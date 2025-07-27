@@ -113,7 +113,7 @@ public class MethodDataSourceAttribute : TestDataAttribute
             await task.ConfigureAwait(false);
             var taskResult = GetTaskResult(task);
 
-            if (taskResult is System.Collections.IEnumerable enumerable and not string)
+            if (taskResult is System.Collections.IEnumerable enumerable and not string && !DataSourceHelpers.IsTuple(taskResult))
             {
                 foreach (var item in enumerable)
                 {
@@ -125,8 +125,9 @@ public class MethodDataSourceAttribute : TestDataAttribute
                 yield return () => Task.FromResult<object?[]?>(taskResult.ToObjectArray());
             }
         }
-        // Regular IEnumerable
-        else if (methodResult is System.Collections.IEnumerable enumerable and not string)
+        // Regular IEnumerable - but check if it's a tuple first
+        // Tuples implement IEnumerable but should be treated as single values
+        else if (methodResult is System.Collections.IEnumerable enumerable and not string && !DataSourceHelpers.IsTuple(methodResult))
         {
             foreach (var item in enumerable)
             {

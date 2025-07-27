@@ -9,22 +9,10 @@ public static class TupleArgumentHelper
     {
         var argumentExpressions = new List<string>();
         
-        if (IsTupleType(parameterType))
-        {
-            var tupleElements = GetTupleElements(parameterType);
-            for (int i = 0; i < tupleElements.Count; i++)
-            {
-                var tupleElement = tupleElements[i];
-                var itemProperty = $"Item{i + 1}";
-                var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{tupleElement.GloballyQualified()}>({argumentsArrayName}[{baseIndex}].{itemProperty})";
-                argumentExpressions.Add(castExpression);
-            }
-        }
-        else
-        {
-            var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argumentsArrayName}[{baseIndex}])";
-            argumentExpressions.Add(castExpression);
-        }
+        // For method parameters, tuples are NOT supported - the data source
+        // must return already unpacked values matching the method signature
+        var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argumentsArrayName}[{baseIndex}])";
+        argumentExpressions.Add(castExpression);
         
         return argumentExpressions;
     }
@@ -48,7 +36,7 @@ public static class TupleArgumentHelper
     }
 
     /// <summary>
-    /// Generates method invocation arguments, handling tuple unwrapping.
+    /// Generates method invocation arguments.
     /// </summary>
     /// <param name="parameters">The method parameters</param>
     /// <param name="argumentsArrayName">The name of the arguments array</param>
@@ -56,67 +44,14 @@ public static class TupleArgumentHelper
     public static string GenerateMethodInvocationArguments(IList<IParameterSymbol> parameters, string argumentsArrayName)
     {
         var allArguments = new List<string>();
-        var argumentIndex = 0;
         
-        foreach (var parameter in parameters)
+        for (int i = 0; i < parameters.Count; i++)
         {
-            if (IsTupleType(parameter.Type))
-            {
-                var tupleElements = GetTupleElements(parameter.Type);
-                for (int i = 0; i < tupleElements.Count; i++)
-                {
-                    var tupleElement = tupleElements[i];
-                    var itemProperty = $"Item{i + 1}";
-                    var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{tupleElement.GloballyQualified()}>({argumentsArrayName}[{argumentIndex}].{itemProperty})";
-                    allArguments.Add(castExpression);
-                }
-                argumentIndex++;
-            }
-            else
-            {
-                var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameter.Type.GloballyQualified()}>({argumentsArrayName}[{argumentIndex}])";
-                allArguments.Add(castExpression);
-                argumentIndex++;
-            }
+            var parameter = parameters[i];
+            var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameter.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
+            allArguments.Add(castExpression);
         }
         
         return string.Join(", ", allArguments);
-    }
-
-    /// <summary>
-    /// Checks if a type is a tuple type (ValueTuple).
-    /// </summary>
-    private static bool IsTupleType(ITypeSymbol type)
-    {
-        if (type is not INamedTypeSymbol namedType)
-        {
-            return false;
-        }
-
-        return namedType.IsTupleType || 
-               (namedType.IsGenericType && namedType.ConstructedFrom.Name.StartsWith("ValueTuple"));
-    }
-
-    /// <summary>
-    /// Gets the individual element types from a tuple type.
-    /// </summary>
-    private static List<ITypeSymbol> GetTupleElements(ITypeSymbol tupleType)
-    {
-        if (tupleType is INamedTypeSymbol { IsTupleType: true } namedType)
-        {
-            return namedType.TupleElements.IsDefault ?
-                [
-                ]
-                : namedType.TupleElements.Select(e => e.Type).ToList();
-        }
-        
-        if (tupleType is INamedTypeSymbol { IsGenericType: true } genericType && genericType.ConstructedFrom.Name.StartsWith("ValueTuple"))
-        {
-            return genericType.TypeArguments.ToList();
-        }
-        
-        return
-        [
-        ];
     }
 }

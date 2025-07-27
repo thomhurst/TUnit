@@ -357,14 +357,16 @@ public static class DataSourceHelpers
             return [item];
         }
 
-        if (item is IEnumerable enumerable)
-        {
-            return enumerable.Cast<object?>().Select(InvokeIfFunc).ToArray();
-        }
-
+        // Check tuples before IEnumerable because tuples implement IEnumerable
+        // but need special unwrapping logic
         if (IsTuple(item))
         {
             return UnwrapTupleAot(item);
+        }
+
+        if (item is IEnumerable enumerable)
+        {
+            return enumerable.Cast<object?>().Select(InvokeIfFunc).ToArray();
         }
 
         return [item];
