@@ -11,6 +11,21 @@ public record ClassMetadata : MemberMetadata
 
     public static ClassMetadata GetOrAdd(string name, Func<ClassMetadata> factory)
     {
+        // First try to get existing value
+        if (Cache.TryGetValue(name, out var existing))
+        {
+            // If Parameters is empty but we're trying to add one with parameters,
+            // update the cache with the new value
+            var newValue = factory();
+            if (existing.Parameters.Length == 0 && newValue.Parameters.Length > 0)
+            {
+                Cache.TryUpdate(name, newValue, existing);
+                return newValue;
+            }
+            return existing;
+        }
+        
+        // Otherwise add new value
         return Cache.GetOrAdd(name, _ => factory());
     }
 

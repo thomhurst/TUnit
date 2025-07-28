@@ -577,21 +577,35 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     private DataGeneratorMetadata CreateDataGeneratorMetadata(global::TUnit.Core.Enums.DataGeneratorType type)
     {
         // Create minimal metadata structures for reflection mode
-        var classMetadata = ClassMetadata.GetOrAdd(_testClass.FullName ?? _testClass.Name, () => new ClassMetadata
+        var classMetadata = ClassMetadata.GetOrAdd(_testClass.FullName ?? _testClass.Name, () => 
         {
-            Type = _testClass,
-            Name = _testClass.Name,
-            Namespace = _testClass.Namespace ?? string.Empty,
-            TypeReference = new TypeReference { AssemblyQualifiedName = _testClass.AssemblyQualifiedName },
-            Assembly = AssemblyMetadata.GetOrAdd(_testClass.Assembly.GetName().Name ?? "Unknown", () => new AssemblyMetadata
+            // Get constructor parameters for the class
+            var constructors = _testClass.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+            var constructor = constructors.FirstOrDefault();
+            
+            var constructorParameters = constructor?.GetParameters().Select((p, i) => new ParameterMetadata(p.ParameterType)
             {
-                Name = _testClass.Assembly.GetName().Name ?? "Unknown"
-            }),
-            Parameters = [
-            ],
-            Properties = [
-            ],
-            Parent = null
+                Name = p.Name ?? $"param{i}",
+                TypeReference = new TypeReference { AssemblyQualifiedName = p.ParameterType.AssemblyQualifiedName },
+                ReflectionInfo = p
+            }).ToArray() ?? Array.Empty<ParameterMetadata>();
+
+
+            return new ClassMetadata
+            {
+                Type = _testClass,
+                Name = _testClass.Name,
+                Namespace = _testClass.Namespace ?? string.Empty,
+                TypeReference = new TypeReference { AssemblyQualifiedName = _testClass.AssemblyQualifiedName },
+                Assembly = AssemblyMetadata.GetOrAdd(_testClass.Assembly.GetName().Name ?? "Unknown", () => new AssemblyMetadata
+                {
+                    Name = _testClass.Assembly.GetName().Name ?? "Unknown"
+                }),
+                Parameters = constructorParameters,
+                Properties = [
+                ],
+                Parent = null
+            };
         });
 
         var methodMetadata = new MethodMetadata
@@ -612,16 +626,14 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         };
 
         // Filter out CancellationToken parameters for consistency with source generation mode
-        var membersToGenerate = type == Core.Enums.DataGeneratorType.TestParameters
-            ? methodMetadata.Parameters
-            : [];
-
-        // Debug: Log the method and its parameters
-        System.Diagnostics.Debug.WriteLine($"[ReflectionTestMetadata] Method: {_testMethod.Name}, Type: {type}, Parameters: {membersToGenerate.Length}");
-        for (int i = 0; i < membersToGenerate.Length; i++)
+        var membersToGenerate = type switch
         {
-            System.Diagnostics.Debug.WriteLine($"  Param[{i}]: {membersToGenerate[i].Name} : {membersToGenerate[i].Type}");
-        }
+            Core.Enums.DataGeneratorType.TestParameters => methodMetadata.Parameters,
+            Core.Enums.DataGeneratorType.ClassParameters => classMetadata.Parameters,
+            Core.Enums.DataGeneratorType.Property => classMetadata.Properties,
+            _ => Array.Empty<MemberMetadata>()
+        };
+
 
         // Filter out CancellationToken if it's the last parameter (handled by the engine)
         if (type == Core.Enums.DataGeneratorType.TestParameters && membersToGenerate.Length > 0)
@@ -629,14 +641,11 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             var lastParam = membersToGenerate[membersToGenerate.Length - 1];
             if (lastParam.Type == typeof(System.Threading.CancellationToken))
             {
-                System.Diagnostics.Debug.WriteLine($"[ReflectionTestMetadata] Filtering out CancellationToken parameter from {_testMethod.Name}");
                 var newArray = new ParameterMetadata[membersToGenerate.Length - 1];
                 Array.Copy(membersToGenerate, 0, newArray, 0, membersToGenerate.Length - 1);
                 membersToGenerate = newArray;
             }
         }
-
-        System.Diagnostics.Debug.WriteLine($"[ReflectionTestMetadata] Final members count for {_testMethod.Name}: {membersToGenerate.Length}");
 
         return new DataGeneratorMetadata
         {

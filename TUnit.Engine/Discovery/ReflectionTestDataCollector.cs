@@ -480,6 +480,15 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
         try
         {
+            // During discovery, we need to create dummy parameter metadata for data sources to work
+            // This is used to infer generic type arguments from the data
+            var dummyParameter = new ParameterMetadata(typeof(object))
+            {
+                Name = "param0",
+                TypeReference = new TypeReference { AssemblyQualifiedName = typeof(object).AssemblyQualifiedName },
+                ReflectionInfo = null!
+            };
+            
             // Create minimal metadata for discovery
             var metadata = new DataGeneratorMetadata
             {
@@ -488,8 +497,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     TestMetadata = methodMetadata,
                     DataSourceAttribute = dataSource
                 }),
-                MembersToGenerate = [
-                ],
+                MembersToGenerate = [ dummyParameter ],
                 TestInformation = new MethodMetadata
                 {
                     Name = "Discovery",
@@ -501,8 +509,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                         Namespace = string.Empty,
                         TypeReference = new TypeReference { AssemblyQualifiedName = typeof(object).AssemblyQualifiedName },
                         Assembly = AssemblyMetadata.GetOrAdd("Discovery", () => new AssemblyMetadata { Name = "Discovery" }),
-                        Parameters = [
-                        ],
+                        Parameters = [ dummyParameter ],
                         Properties = [
                         ],
                         Parent = null
@@ -1737,29 +1744,42 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             .Cast<ParameterMetadata>()
             .ToArray();
 
-        var classMetadata = new ClassMetadata
+        var classMetadata = ClassMetadata.GetOrAdd(testClass.FullName ?? testClass.Name, () => 
         {
-            Type = testClass,
-            TypeReference = new TypeReference
+            // Get constructor parameters for the class
+            var constructors = testClass.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+            var constructor = constructors.FirstOrDefault();
+            
+            var constructorParameters = constructor?.GetParameters().Select((p, i) => new ParameterMetadata(p.ParameterType)
             {
-                AssemblyQualifiedName = testClass.AssemblyQualifiedName,
-                IsGenericParameter = testClass.IsGenericParameter,
-                GenericParameterPosition = testClass.IsGenericParameter ? testClass.GenericParameterPosition : 0,
-                IsMethodGenericParameter = false,
-                GenericParameterName = testClass.IsGenericParameter ? testClass.Name : null
-            },
-            Name = testClass.Name,
-            Namespace = testClass.Namespace ?? string.Empty,
-            Assembly = new AssemblyMetadata
+                Name = p.Name ?? $"param{i}",
+                TypeReference = new TypeReference { AssemblyQualifiedName = p.ParameterType.AssemblyQualifiedName },
+                ReflectionInfo = p
+            }).ToArray() ?? Array.Empty<ParameterMetadata>();
+            
+            return new ClassMetadata
             {
-                Name = testClass.Assembly.GetName().Name ?? string.Empty
-            },
-            Parent = null,
-            Parameters = [
-            ],
-            Properties = [
-            ]
-        };
+                Type = testClass,
+                TypeReference = new TypeReference
+                {
+                    AssemblyQualifiedName = testClass.AssemblyQualifiedName,
+                    IsGenericParameter = testClass.IsGenericParameter,
+                    GenericParameterPosition = testClass.IsGenericParameter ? testClass.GenericParameterPosition : 0,
+                    IsMethodGenericParameter = false,
+                    GenericParameterName = testClass.IsGenericParameter ? testClass.Name : null
+                },
+                Name = testClass.Name,
+                Namespace = testClass.Namespace ?? string.Empty,
+                Assembly = new AssemblyMetadata
+                {
+                    Name = testClass.Assembly.GetName().Name ?? string.Empty
+                },
+                Parent = null,
+                Parameters = constructorParameters,
+                Properties = [
+                ]
+            };
+        });
 
         return new MethodMetadata
         {

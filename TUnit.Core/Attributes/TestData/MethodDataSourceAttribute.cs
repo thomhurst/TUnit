@@ -68,7 +68,7 @@ public class MethodDataSourceAttribute : TestDataAttribute
 
         if (dataGeneratorMetadata.MembersToGenerate.Length == 0)
         {
-            throw new InvalidOperationException("No members to generate were provided.");
+            throw new InvalidOperationException($"No members to generate were provided for {dataGeneratorMetadata.Type}");
         }
 
         var item1 = dataGeneratorMetadata.MembersToGenerate[0];

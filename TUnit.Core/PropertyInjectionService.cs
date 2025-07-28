@@ -305,19 +305,33 @@ public sealed class PropertyInjectionService
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
     private static ClassMetadata GetClassMetadataForType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
-        return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => new ClassMetadata
+        return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => 
         {
-            Type = type,
-            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
-            Name = type.Name,
-            Namespace = type.Namespace ?? string.Empty,
-            Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().Name ?? type.Assembly.FullName ?? "Unknown", () => new AssemblyMetadata 
-            { 
-                Name = type.Assembly.GetName().Name ?? type.Assembly.FullName ?? "Unknown" 
-            }),
-            Properties = [],
-            Parameters = [],
-            Parent = type.DeclaringType != null ? GetClassMetadataForType(type.DeclaringType) : null
+            // Get constructor parameters for the class
+            var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+            var constructor = constructors.FirstOrDefault();
+            
+            var constructorParameters = constructor?.GetParameters().Select((p, i) => new ParameterMetadata(p.ParameterType)
+            {
+                Name = p.Name ?? $"param{i}",
+                TypeReference = new TypeReference { AssemblyQualifiedName = p.ParameterType.AssemblyQualifiedName },
+                ReflectionInfo = p
+            }).ToArray() ?? Array.Empty<ParameterMetadata>();
+
+            return new ClassMetadata
+            {
+                Type = type,
+                TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
+                Name = type.Name,
+                Namespace = type.Namespace ?? string.Empty,
+                Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().Name ?? type.Assembly.FullName ?? "Unknown", () => new AssemblyMetadata 
+                { 
+                    Name = type.Assembly.GetName().Name ?? type.Assembly.FullName ?? "Unknown" 
+                }),
+                Properties = [],
+                Parameters = constructorParameters,
+                Parent = type.DeclaringType != null ? GetClassMetadataForType(type.DeclaringType) : null
+            };
         });
     }
 }
