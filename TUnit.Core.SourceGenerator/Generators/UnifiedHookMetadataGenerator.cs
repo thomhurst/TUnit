@@ -614,7 +614,15 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                         methodCall += "()";
                     }
 
-                    writer.AppendLine($"await AsyncConvert.ConvertObject(() => {methodCall});");
+                    // Check if method returns void
+                    if (hook.MethodSymbol.ReturnsVoid)
+                    {
+                        writer.AppendLine($"{methodCall};");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"await AsyncConvert.ConvertObject(() => {methodCall});");
+                    }
                 }
                 else
                 {
@@ -684,7 +692,15 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                         writer.AppendLine($"var parameters = new object[0];");
                     }
                     
-                    writer.AppendLine($"await AsyncConvert.ConvertObject(() => method!.Invoke(null, parameters));");
+                    // Check if method returns void
+                    if (hook.MethodSymbol.ReturnsVoid)
+                    {
+                        writer.AppendLine($"method!.Invoke(null, parameters);");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"await AsyncConvert.ConvertObject(() => method!.Invoke(null, parameters));");
+                    }
                 }
                 else
                 {
