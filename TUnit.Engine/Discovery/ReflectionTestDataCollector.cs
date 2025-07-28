@@ -801,6 +801,94 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
+    /// Infers generic type mappings from parameter and argument types
+    /// </summary>
+    private static void InferGenericTypeMapping(Type paramType, Type argType, Dictionary<Type, Type> typeMapping)
+    {
+        // Direct generic parameter
+        if (paramType.IsGenericParameter)
+        {
+            // Check if we already have a mapping for this parameter
+            if (typeMapping.TryGetValue(paramType, out var existingType))
+            {
+                // If the existing type is more specific (derived from current), keep it
+                if (existingType.IsAssignableFrom(argType))
+                {
+                    typeMapping[paramType] = argType;
+                }
+                // Otherwise keep the more general type
+            }
+            else
+            {
+                typeMapping[paramType] = argType;
+            }
+            return;
+        }
+
+        // Generic types (e.g., IEnumerable<T>, Func<T1,T2>, etc.)
+        if (paramType.IsGenericType && argType.IsGenericType)
+        {
+            var paramGenDef = paramType.GetGenericTypeDefinition();
+            
+            // Check if argument type directly matches or implements the parameter generic type
+            if (argType.GetGenericTypeDefinition() == paramGenDef)
+            {
+                var paramGenArgs = paramType.GetGenericArguments();
+                var argGenArgs = argType.GetGenericArguments();
+                
+                for (int i = 0; i < paramGenArgs.Length && i < argGenArgs.Length; i++)
+                {
+                    InferGenericTypeMapping(paramGenArgs[i], argGenArgs[i], typeMapping);
+                }
+            }
+            else
+            {
+                // Check interfaces implemented by the argument type
+                foreach (var iface in argType.GetInterfaces())
+                {
+                    if (iface.IsGenericType && iface.GetGenericTypeDefinition() == paramGenDef)
+                    {
+                        var paramGenArgs = paramType.GetGenericArguments();
+                        var ifaceGenArgs = iface.GetGenericArguments();
+                        
+                        for (int i = 0; i < paramGenArgs.Length && i < ifaceGenArgs.Length; i++)
+                        {
+                            InferGenericTypeMapping(paramGenArgs[i], ifaceGenArgs[i], typeMapping);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        else if (paramType.IsGenericType && !argType.IsGenericType)
+        {
+            // Handle non-generic types that implement generic interfaces
+            var paramGenDef = paramType.GetGenericTypeDefinition();
+            
+            foreach (var iface in argType.GetInterfaces())
+            {
+                if (iface.IsGenericType && iface.GetGenericTypeDefinition() == paramGenDef)
+                {
+                    var paramGenArgs = paramType.GetGenericArguments();
+                    var ifaceGenArgs = iface.GetGenericArguments();
+                    
+                    for (int i = 0; i < paramGenArgs.Length && i < ifaceGenArgs.Length; i++)
+                    {
+                        InferGenericTypeMapping(paramGenArgs[i], ifaceGenArgs[i], typeMapping);
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Array types
+        if (paramType.IsArray && argType.IsArray)
+        {
+            InferGenericTypeMapping(paramType.GetElementType()!, argType.GetElementType()!, typeMapping);
+        }
+    }
+
+    /// <summary>
     /// Checks if the argument type is compatible with the parameter type through covariance
     /// </summary>
     private static bool IsCovariantCompatible(Type paramType, Type argType)
@@ -870,25 +958,33 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     // Try to infer type arguments from the actual arguments
                     var genericParams = testMethod.GetGenericArguments();
-                    var typeArguments = new Type[genericParams.Length];
+                    var typeMapping = new Dictionary<Type, Type>();
                     var methodParams = testMethod.GetParameters();
 
-                    // Map generic parameters to concrete types based on arguments
-                    for (int i = 0; i < genericParams.Length; i++)
+                    // Build type mapping from method parameters and actual arguments
+                    for (int j = 0; j < methodParams.Length && j < args.Length; j++)
                     {
-                        // Find a parameter that uses this generic type
-                        for (int j = 0; j < methodParams.Length && j < args.Length; j++)
+                        if (args[j] != null)
                         {
                             var paramType = methodParams[j].ParameterType;
-                            if (paramType == genericParams[i] && args[j] != null)
-                            {
-                                typeArguments[i] = args[j]?.GetType() ?? paramType;
-                                break;
-                            }
+                            var argType = args[j].GetType();
+                            InferGenericTypeMapping(paramType, argType, typeMapping);
                         }
+                    }
 
-                        // If we couldn't infer the type, default to object
-                        typeArguments[i] ??= typeof(object);
+                    // Create type arguments array from the mapping
+                    var typeArguments = new Type[genericParams.Length];
+                    for (int i = 0; i < genericParams.Length; i++)
+                    {
+                        if (typeMapping.TryGetValue(genericParams[i], out var inferredType))
+                        {
+                            typeArguments[i] = inferredType;
+                        }
+                        else
+                        {
+                            // If we couldn't infer the type, default to object
+                            typeArguments[i] = typeof(object);
+                        }
                     }
 
                     methodToInvoke = testMethod.MakeGenericMethod(typeArguments);

@@ -24,7 +24,7 @@ public abstract class TestMetadata
 
     public int RetryCount { get; init; }
 
-    public int RepeatCount { get; init; } = 1;
+    public int RepeatCount { get; init; }
 
     public bool CanRunInParallel { get; init; } = true;
 
