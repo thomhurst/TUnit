@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
+using System.Threading;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
@@ -469,9 +470,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 PropertyDataSources = ReflectionAttributeExtractor.ExtractPropertyDataSources(testClass),
                 InstanceFactory = CreateInstanceFactory(testClass)!,
                 TestInvoker = CreateTestInvoker(testClass, testMethod),
-                ParameterCount = testMethod.GetParameters().Length,
-                ParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType).ToArray(),
-                TestMethodParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
+                ParameterCount = GetParametersWithoutCancellationToken(testMethod).Length,
+                ParameterTypes = GetParametersWithoutCancellationToken(testMethod).Select(p => p.ParameterType).ToArray(),
+                TestMethodParameterTypes = GetParametersWithoutCancellationToken(testMethod).Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
                 FilePath = ExtractFilePath(testMethod),
                 LineNumber = ExtractLineNumber(testMethod),
                 MethodMetadata = MetadataBuilder.CreateMethodMetadata(testClass, testMethod),
@@ -598,6 +599,19 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     private static bool IsCompilerGenerated(Type type)
     {
         return type.IsDefined(typeof(CompilerGeneratedAttribute), inherit: false);
+    }
+    
+    private static ParameterInfo[] GetParametersWithoutCancellationToken(MethodInfo method)
+    {
+        var parameters = method.GetParameters();
+        
+        // Check if last parameter is CancellationToken and exclude it
+        if (parameters.Length > 0 && parameters[^1].ParameterType == typeof(CancellationToken))
+        {
+            return parameters.Take(parameters.Length - 1).ToArray();
+        }
+        
+        return parameters;
     }
 
     private static string? ExtractFilePath(MethodInfo method)
@@ -742,7 +756,16 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             try
             {
-                return ctor.Invoke(args) ?? throw new InvalidOperationException("Failed to create instance");
+                // Cast arguments to the expected parameter types
+                var parameters = ctor.GetParameters();
+                var castedArgs = new object?[parameters.Length];
+                
+                for (int i = 0; i < parameters.Length && i < args.Length; i++)
+                {
+                    castedArgs[i] = CastHelper.Cast(parameters[i].ParameterType, args[i]);
+                }
+                
+                return ctor.Invoke(castedArgs) ?? throw new InvalidOperationException("Failed to create instance");
             }
             catch (Exception ex)
             {
@@ -761,7 +784,16 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             try
             {
-                var result = testMethod.Invoke(instance, args);
+                // Cast arguments to the expected parameter types
+                var parameters = testMethod.GetParameters();
+                var castedArgs = new object?[parameters.Length];
+                
+                for (int i = 0; i < parameters.Length && i < args.Length; i++)
+                {
+                    castedArgs[i] = CastHelper.Cast(parameters[i].ParameterType, args[i]);
+                }
+                
+                var result = testMethod.Invoke(instance, castedArgs);
                 if (result is Task task)
                 {
                     return task;
