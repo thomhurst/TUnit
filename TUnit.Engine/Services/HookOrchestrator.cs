@@ -184,14 +184,8 @@ internal sealed class HookOrchestrator
         ExecutionContext.Restore(classContext);
 #endif
 
-        // Add test to class context if it exists and hasn't been added already
+        // Get the class context (test should already be added during creation in ContextProvider)
         var classContextObject = _contextProvider.GetOrCreateClassContext(testClassType);
-
-        // Check if test is already in the context (from InitializeContextsWithTestsAsync)
-        if (!classContextObject.Tests.Contains(test.Context))
-        {
-            classContextObject.AddTest(test.Context);
-        }
 
         // Execute BeforeEveryTest hooks in the accumulated context
         await ExecuteBeforeEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
