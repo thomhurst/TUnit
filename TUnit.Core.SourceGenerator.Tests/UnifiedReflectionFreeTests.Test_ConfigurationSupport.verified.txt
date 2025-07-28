@@ -5,16 +5,16 @@
 #pragma warning disable
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ConcreteClass2_SecondTest_TestSource_81ab8c2977c24f5cb0cee5d88576dda7 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class ConfigurationTest_TestWithConfiguration_TestSource_6d2c5287dd6a4657a35c8ba3a7c0d844 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
     {
         var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
-        var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.AbstractTests.ConcreteClass2>
+        var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ConfigurationTest>
         {
-            TestName = "SecondTest",
-            TestClassType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-            TestMethodName = "SecondTest",
+            TestName = "TestWithConfiguration",
+            TestClassType = typeof(global::TUnit.TestProject.ConfigurationTest),
+            TestMethodName = "TestWithConfiguration",
             Categories = global::System.Array.Empty<string>(),
             TimeoutMs = null,
             RetryCount = 0,
@@ -23,9 +23,7 @@ internal sealed class ConcreteClass2_SecondTest_TestSource_81ab8c2977c24f5cb0cee
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
-                new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.InheritsTestsAttribute(),
-                new global::TUnit.TestProject.Attributes.ClassDisplayNameAttribute()
+                new global::TUnit.Core.TestAttribute()
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -47,22 +45,22 @@ internal sealed class ConcreteClass2_SecondTest_TestSource_81ab8c2977c24f5cb0cee
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
 {
-Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AbstractTests.ConcreteClass2, TestsBase`1"),
-Name = "SecondTest",
+Type = typeof(global::TUnit.TestProject.ConfigurationTest),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConfigurationTest, UnifiedReflectionFreeTests"),
+Name = "TestWithConfiguration",
 GenericTypeCount = 0,
 ReturnType = typeof(void),
 ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass2", () => 
+Class = global::TUnit.Core.ClassMetadata.GetOrAdd("UnifiedReflectionFreeTests:global::TUnit.TestProject.ConfigurationTest", () => 
 {
 var classMetadata = new global::TUnit.Core.ClassMetadata
 {
-Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AbstractTests.ConcreteClass2, TestsBase`1"),
-Name = "ConcreteClass2",
-Namespace = "TUnit.TestProject.AbstractTests",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+Type = typeof(global::TUnit.TestProject.ConfigurationTest),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConfigurationTest, UnifiedReflectionFreeTests"),
+Name = "ConfigurationTest",
+Namespace = "TUnit.TestProject",
+Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("UnifiedReflectionFreeTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "UnifiedReflectionFreeTests" }),
 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
 Parent = null
@@ -75,17 +73,17 @@ prop.ClassMetadata = classMetadata;
 return classMetadata;
 })
 },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AbstractTests.ConcreteClass2(),
+            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConfigurationTest(),
             TestInvoker = async (instance, args) =>
             {
-                var typedInstance = (global::TUnit.TestProject.AbstractTests.ConcreteClass2)instance;
+                var typedInstance = (global::TUnit.TestProject.ConfigurationTest)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                typedInstance.SecondTest();
+                typedInstance.TestWithConfiguration();
                 await Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                instance.SecondTest();
+                instance.TestWithConfiguration();
                 await Task.CompletedTask;
             },
         };
@@ -94,11 +92,11 @@ return classMetadata;
         return tests;
     }
 }
-internal static class ConcreteClass2_SecondTest_ModuleInitializer_81ab8c2977c24f5cb0cee5d88576dda7
+internal static class ConfigurationTest_TestWithConfiguration_ModuleInitializer_6d2c5287dd6a4657a35c8ba3a7c0d844
 {
     [System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2), new ConcreteClass2_SecondTest_TestSource_81ab8c2977c24f5cb0cee5d88576dda7());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConfigurationTest), new ConfigurationTest_TestWithConfiguration_TestSource_6d2c5287dd6a4657a35c8ba3a7c0d844());
     }
 }
