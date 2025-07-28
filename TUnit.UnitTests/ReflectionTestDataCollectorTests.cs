@@ -326,10 +326,7 @@ public class ReflectionHookTests
             t.TestMethodName == nameof(ReflectionTestDataCollector_DiscoverHooks));
 
         await Assert.That(thisTest).IsNotNull();
-        await Assert.That(thisTest!.Hooks.BeforeClass.Length).IsEqualTo(1);
-        await Assert.That(thisTest.Hooks.AfterClass.Length).IsEqualTo(1);
-        await Assert.That(thisTest.Hooks.BeforeTest.Length).IsEqualTo(1);
-        await Assert.That(thisTest.Hooks.AfterTest.Length).IsEqualTo(1);
+        // Hooks are now discovered separately by ReflectionHookDiscoveryService
     }
 }
 

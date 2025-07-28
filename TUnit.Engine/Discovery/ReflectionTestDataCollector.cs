@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
@@ -26,7 +25,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     [
     ];
     private static readonly object _lock = new();
-    private static readonly ExpressionCacheService _expressionCache = new();
     private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
 
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
@@ -103,13 +101,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             _discoveredTests.AddRange(newTests);
 
-            // Log expression cache statistics
-            if (DiscoveryDiagnostics.IsEnabled)
-            {
-                var stats = _expressionCache.GetCacheStatistics();
-                DiscoveryDiagnostics.RecordEvent("ExpressionCacheStats",
-                    $"Instance Factories: {stats.InstanceFactories}, Test Invokers: {stats.TestInvokers}");
-            }
 
             return _discoveredTests.ToList();
         }
@@ -347,7 +338,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         var discoveredTests = new List<TestMetadata>();
 
         // Extract class-level data sources that will determine the generic type arguments
-        var classDataSources = ExtractClassDataSources(genericTypeDefinition);
+        var classDataSources = ReflectionAttributeExtractor.ExtractDataSources(genericTypeDefinition);
 
         if (classDataSources.Length == 0)
         {
@@ -379,7 +370,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
 
                 // Determine generic type arguments from the data
-                var typeArguments = DetermineGenericTypeArguments(genericTypeDefinition, dataRow);
+                var typeArguments = ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataRow);
                 if (typeArguments == null || typeArguments.Length == 0)
                 {
                     continue;
@@ -387,18 +378,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 try
                 {
-                    // Validate type arguments match generic parameters
-                    var genericParams = genericTypeDefinition.GetGenericArguments();
-                    if (typeArguments.Length != genericParams.Length)
-                    {
-                        throw new InvalidOperationException(
-                            $"Type argument count mismatch: {genericTypeDefinition.Name} expects {genericParams.Length} type arguments but got {typeArguments.Length}. " +
-                            $"Generic parameters: [{string.Join(", ", genericParams.Select(p => p.Name))}], " +
-                            $"Type arguments: [{string.Join(", ", typeArguments.Select(t => t.Name))}]");
-                    }
-
-                    // Create concrete type
-                    var concreteType = genericTypeDefinition.MakeGenericType(typeArguments);
+                    // Create concrete type with validation
+                    var concreteType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, typeArguments);
 
                     // Build tests for each method in the concrete type
                     foreach (var genericMethod in testMethods)
@@ -412,7 +393,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                             // The concrete type already has its generic arguments resolved
                             // For generic types with primary constructors that were resolved from class-level data sources,
                             // we need to ensure the class data sources contain the specific data for this instantiation
-                            var testMetadata = await BuildTestMetadataWithClassData(concreteType, concreteMethod, dataRow);
+                            var testMetadata = await BuildTestMetadata(concreteType, concreteMethod, dataRow);
 
                             discoveredTests.Add(testMetadata);
                         }
@@ -433,57 +414,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return discoveredTests;
     }
 
-    private static Type[]? DetermineGenericTypeArguments(Type genericTypeDefinition, object?[] dataRow)
-    {
-        var genericParameters = genericTypeDefinition.GetGenericArguments();
-
-        // If no data row or empty data, can't determine types
-        if (dataRow.Length == 0)
-        {
-            return null;
-        }
-
-        var typeArguments = new Type[genericParameters.Length];
-
-        // For generic classes with constructors, we need to infer types from constructor parameters
-        // We should match the number of generic parameters, not the number of data items
-        if (genericParameters.Length == 1 && dataRow.Length >= 1)
-        {
-            // Single generic parameter - use first non-null argument's type
-            for (var i = 0; i < dataRow.Length; i++)
-            {
-                if (dataRow[i] != null)
-                {
-                    typeArguments[0] = dataRow[i]!.GetType();
-                    break;
-                }
-            }
-
-            // If we couldn't determine the type, return null
-            if (typeArguments[0] == null)
-            {
-                return null;
-            }
-        }
-        else
-        {
-            // Multiple generic parameters - try to match one-to-one with data
-            for (var i = 0; i < genericParameters.Length; i++)
-            {
-                if (i < dataRow.Length && dataRow[i] != null)
-                {
-                    typeArguments[i] = dataRow[i]!.GetType();
-                }
-                else
-                {
-                    // Can't determine all generic types
-                    return null;
-                }
-            }
-        }
-
-        return typeArguments;
-    }
 
     private static async Task<List<object?[]>> GetDataFromSourceAsync(IDataSourceAttribute dataSource, MethodMetadata methodMetadata)
     {
@@ -513,7 +443,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return await Task.FromResult(data);
     }
 
-    private static Task<TestMetadata> BuildTestMetadataWithClassData(Type testClass, MethodInfo testMethod, object?[] classData)
+    private static Task<TestMetadata> BuildTestMetadata(Type testClass, MethodInfo testMethod, object?[]? classData = null)
     {
         // Create a base ReflectionTestMetadata instance
         var testName = GenerateTestName(testClass, testMethod);
@@ -525,90 +455,30 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 TestName = testName,
                 TestClassType = testClass,
                 TestMethodName = testMethod.Name,
-                Categories = ExtractCategories(testClass, testMethod),
-                IsSkipped = IsTestSkipped(testClass, testMethod, out var skipReason),
+                Categories = ReflectionAttributeExtractor.ExtractCategories(testClass, testMethod),
+                IsSkipped = ReflectionAttributeExtractor.IsTestSkipped(testClass, testMethod, out var skipReason),
                 SkipReason = skipReason,
-                TimeoutMs = ExtractTimeout(testClass, testMethod),
-                RetryCount = ExtractRetryCount(testClass, testMethod),
-                CanRunInParallel = CanRunInParallel(testClass, testMethod),
-                Dependencies = ExtractDependencies(testClass, testMethod),
-                DataSources = ExtractMethodDataSources(testMethod),
-                // For generic types instantiated from class data, use specific data for this instance
-                ClassDataSources =
-                [
-                    new StaticDataSourceAttribute(new[]
-                    {
-                        classData
-                    })
-                ],
-                PropertyDataSources = ExtractPropertyDataSources(testClass),
+                TimeoutMs = ReflectionAttributeExtractor.ExtractTimeout(testClass, testMethod),
+                RetryCount = ReflectionAttributeExtractor.ExtractRetryCount(testClass, testMethod),
+                CanRunInParallel = ReflectionAttributeExtractor.CanRunInParallel(testClass, testMethod),
+                Dependencies = ReflectionAttributeExtractor.ExtractDependencies(testClass, testMethod),
+                DataSources = ReflectionAttributeExtractor.ExtractDataSources(testMethod),
+                ClassDataSources = classData != null 
+                    ? [new StaticDataSourceAttribute(new[] { classData })]
+                    : ReflectionAttributeExtractor.ExtractDataSources(testClass),
+                PropertyDataSources = ReflectionAttributeExtractor.ExtractPropertyDataSources(testClass),
                 InstanceFactory = CreateInstanceFactory(testClass)!,
                 TestInvoker = CreateTestInvoker(testClass, testMethod),
                 ParameterCount = testMethod.GetParameters().Length,
                 ParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType).ToArray(),
                 TestMethodParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
-                Hooks = DiscoverHooks(testClass),
                 FilePath = ExtractFilePath(testMethod),
                 LineNumber = ExtractLineNumber(testMethod),
                 MethodMetadata = MetadataBuilder.CreateMethodMetadata(testClass, testMethod),
-                GenericTypeInfo = ExtractGenericTypeInfo(testClass),
-                GenericMethodInfo = ExtractGenericMethodInfo(testMethod),
+                GenericTypeInfo = ReflectionGenericTypeResolver.ExtractGenericTypeInfo(testClass),
+                GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(testMethod),
                 GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
-                AttributeFactory = () =>
-                [
-                    ..testMethod.GetCustomAttributes(),
-                    ..testClass.GetCustomAttributes(),
-                    ..testClass.Assembly.GetCustomAttributes(),
-                ],
-                PropertyInjections = PropertyInjector.DiscoverInjectableProperties(testClass)
-            });
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to build test metadata for {testClass.Name}.{testMethod.Name}: {ex.Message}", ex);
-        }
-    }
-
-    private static Task<TestMetadata> BuildTestMetadata(Type testClass, MethodInfo testMethod)
-    {
-        // Create a base ReflectionTestMetadata instance
-        var testName = GenerateTestName(testClass, testMethod);
-
-        try
-        {
-            return Task.FromResult<TestMetadata>(new ReflectionTestMetadata(testClass, testMethod)
-            {
-                TestName = testName,
-                TestClassType = testClass,
-                TestMethodName = testMethod.Name,
-                Categories = ExtractCategories(testClass, testMethod),
-                IsSkipped = IsTestSkipped(testClass, testMethod, out var skipReason),
-                SkipReason = skipReason,
-                TimeoutMs = ExtractTimeout(testClass, testMethod),
-                RetryCount = ExtractRetryCount(testClass, testMethod),
-                CanRunInParallel = CanRunInParallel(testClass, testMethod),
-                Dependencies = ExtractDependencies(testClass, testMethod),
-                DataSources = ExtractMethodDataSources(testMethod),
-                ClassDataSources = ExtractClassDataSources(testClass),
-                PropertyDataSources = ExtractPropertyDataSources(testClass),
-                InstanceFactory = CreateInstanceFactory(testClass)!,
-                TestInvoker = CreateTestInvoker(testClass, testMethod),
-                ParameterCount = testMethod.GetParameters().Length,
-                ParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType).ToArray(),
-                TestMethodParameterTypes = testMethod.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
-                Hooks = DiscoverHooks(testClass),
-                FilePath = ExtractFilePath(testMethod),
-                LineNumber = ExtractLineNumber(testMethod),
-                MethodMetadata = MetadataBuilder.CreateMethodMetadata(testClass, testMethod),
-                GenericTypeInfo = ExtractGenericTypeInfo(testClass),
-                GenericMethodInfo = ExtractGenericMethodInfo(testMethod),
-                GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
-                AttributeFactory = () =>
-                [
-                    ..testMethod.GetCustomAttributesSafe(),
-                    ..testClass.GetCustomAttributesSafe(),
-                    ..testClass.Assembly.GetCustomAttributesSafe(),
-                ],
+                AttributeFactory = () => ReflectionAttributeExtractor.GetAllAttributes(testClass, testMethod),
                 PropertyInjections = PropertyInjector.DiscoverInjectableProperties(testClass)
             });
         }
@@ -645,213 +515,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return testMethod.Name;
     }
 
-    private static string[] ExtractCategories(Type testClass, MethodInfo testMethod)
-    {
-        var categories = new HashSet<string>();
-
-        // Get categories from assembly
-        var assemblyCategories = testClass.Assembly.GetCustomAttributes<CategoryAttribute>();
-        foreach (var attr in assemblyCategories)
-            categories.Add(attr.Category);
-
-        // Get categories from class
-        var classCategories = testClass.GetCustomAttributes<CategoryAttribute>();
-        foreach (var attr in classCategories)
-            categories.Add(attr.Category);
-
-        // Get categories from method
-        var methodCategories = testMethod.GetCustomAttributes<CategoryAttribute>();
-        foreach (var attr in methodCategories)
-            categories.Add(attr.Category);
-
-        return categories.ToArray();
-    }
-
-    private static bool IsTestSkipped(Type testClass, MethodInfo testMethod, out string? skipReason)
-    {
-        // Check method-level skip
-        var methodSkip = testMethod.GetCustomAttribute<SkipAttribute>();
-        if (methodSkip != null)
-        {
-            skipReason = methodSkip.Reason;
-            return true;
-        }
-
-        // Check class-level skip
-        var classSkip = testClass.GetCustomAttribute<SkipAttribute>();
-        if (classSkip != null)
-        {
-            skipReason = classSkip.Reason;
-            return true;
-        }
-
-        // Check assembly-level skip
-        var assemblySkip = testClass.Assembly.GetCustomAttribute<SkipAttribute>();
-        if (assemblySkip != null)
-        {
-            skipReason = assemblySkip.Reason;
-            return true;
-        }
-
-        skipReason = null;
-        return false;
-    }
-
-    private static int? ExtractTimeout(Type testClass, MethodInfo testMethod)
-    {
-        // Check method-level timeout (highest priority)
-        var methodTimeout = testMethod.GetCustomAttribute<TimeoutAttribute>();
-        if (methodTimeout != null)
-        {
-            return (int) methodTimeout.Timeout.TotalMilliseconds;
-        }
-
-        // Check class-level timeout
-        var classTimeout = testClass.GetCustomAttribute<TimeoutAttribute>();
-        if (classTimeout != null)
-        {
-            return (int) classTimeout.Timeout.TotalMilliseconds;
-        }
-
-        // Check assembly-level timeout
-        var assemblyTimeout = testClass.Assembly.GetCustomAttribute<TimeoutAttribute>();
-        if (assemblyTimeout != null)
-        {
-            return (int) assemblyTimeout.Timeout.TotalMilliseconds;
-        }
-
-        return null;
-    }
-
-    private static int ExtractRetryCount(Type testClass, MethodInfo testMethod)
-    {
-        // Check method-level retry (highest priority)
-        var methodRetry = testMethod.GetCustomAttribute<RetryAttribute>();
-        if (methodRetry != null)
-        {
-            return methodRetry.Times;
-        }
-
-        // Check class-level retry
-        var classRetry = testClass.GetCustomAttribute<RetryAttribute>();
-        if (classRetry != null)
-        {
-            return classRetry.Times;
-        }
-
-        // Check assembly-level retry
-        var assemblyRetry = testClass.Assembly.GetCustomAttribute<RetryAttribute>();
-        if (assemblyRetry != null)
-        {
-            return assemblyRetry.Times;
-        }
-
-        return 0;
-    }
-
-    private static bool CanRunInParallel(Type testClass, MethodInfo testMethod)
-    {
-        // Check if NotInParallel attribute is present at any level
-        if (testMethod.IsDefined(typeof(NotInParallelAttribute), inherit: false))
-        {
-            return false;
-        }
-
-        if (testClass.IsDefined(typeof(NotInParallelAttribute), inherit: false))
-        {
-            return false;
-        }
-
-        if (testClass.Assembly.IsDefined(typeof(NotInParallelAttribute), inherit: false))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private static TestDependency[] ExtractDependencies(Type testClass, MethodInfo testMethod)
-    {
-        var dependencies = new List<TestDependency>();
-
-        // Get dependencies from method
-        var methodDependencies = testMethod.GetCustomAttributes<DependsOnAttribute>();
-        foreach (var attr in methodDependencies)
-        {
-            dependencies.Add(attr.ToTestDependency());
-        }
-
-        // Get dependencies from class
-        var classDependencies = testClass.GetCustomAttributes<DependsOnAttribute>();
-        foreach (var attr in classDependencies)
-        {
-            dependencies.Add(attr.ToTestDependency());
-        }
-
-        return dependencies.ToArray();
-    }
-
-    private static IDataSourceAttribute[] ExtractMethodDataSources(MethodInfo testMethod)
-    {
-        var dataSources = new List<IDataSourceAttribute>();
-
-        // Simply check for IDataSourceAttribute interface
-        foreach (var attr in testMethod.GetCustomAttributes())
-        {
-            if (attr is IDataSourceAttribute dataSourceAttr)
-            {
-                dataSources.Add(dataSourceAttr);
-            }
-        }
-
-        return dataSources.ToArray();
-    }
-
-    private static IDataSourceAttribute[] ExtractClassDataSources(Type testClass)
-    {
-        var dataSources = new List<IDataSourceAttribute>();
-
-
-        // Simply check for IDataSourceAttribute interface
-        foreach (var attr in testClass.GetCustomAttributes())
-        {
-            if (attr is IDataSourceAttribute dataSourceAttr)
-            {
-                dataSources.Add(dataSourceAttr);
-            }
-        }
-
-        return dataSources.ToArray();
-    }
-
-
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicProperties' in call to 'System.Type.GetProperties(BindingFlags)'",
-        Justification = "Reflection mode requires dynamic access")]
-    private static PropertyDataSource[] ExtractPropertyDataSources([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass)
-    {
-        var propertyDataSources = new List<PropertyDataSource>();
-
-        var properties = testClass.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-            .Where(p => p.CanWrite);
-
-        foreach (var property in properties)
-        {
-            // Simply check for IDataSourceAttribute interface
-            foreach (var attr in property.GetCustomAttributes())
-            {
-                if (attr is IDataSourceAttribute dataSourceAttr)
-                {
-                    propertyDataSources.Add(new PropertyDataSource
-                    {
-                        PropertyName = property.Name, PropertyType = property.PropertyType, DataSource = dataSourceAttr
-                    });
-                }
-            }
-        }
-
-        return propertyDataSources.ToArray();
-    }
 
 
     [UnconditionalSuppressMessage("Trimming",
@@ -896,7 +559,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             }
 
             var constructedTypeCtor = constructedTypeConstructors.FirstOrDefault(c => c.GetParameters().Length == 0) ?? constructedTypeConstructors.First();
-            var constructedTypeFactory = _expressionCache.GetOrCreateInstanceFactory(constructedTypeCtor, CompileInstanceFactory);
+            var constructedTypeFactory = CreateReflectionInstanceFactory(constructedTypeCtor);
 
             // Return a factory that ignores type arguments since the type is already closed
             return (_, args) => constructedTypeFactory(args);
@@ -911,693 +574,18 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var ctor = constructors.FirstOrDefault(c => c.GetParameters().Length == 0) ?? constructors.First();
 
-        var factory = _expressionCache.GetOrCreateInstanceFactory(ctor, CompileInstanceFactory);
+        var factory = CreateReflectionInstanceFactory(ctor);
         return (_, args) => factory(args);
     }
 
-    private static Func<object?[], object> CompileInstanceFactory(ConstructorInfo ctor)
-    {
-        // In AOT scenarios, skip expression compilation and use reflection directly
-        if (IsAotEnvironment())
-        {
-            return CreateReflectionInstanceFactory(ctor);
-        }
 
-        try
-        {
-            var parameters = ctor.GetParameters();
-            var paramExpr = Expression.Parameter(typeof(object[]), "args");
-
-            var argExpressions = new Expression[parameters.Length];
-            for (var i = 0; i < parameters.Length; i++)
-            {
-                var indexExpr = Expression.ArrayIndex(paramExpr, Expression.Constant(i));
-                var convertExpr = Expression.Convert(indexExpr, parameters[i].ParameterType);
-                argExpressions[i] = convertExpr;
-            }
-
-            var newExpr = Expression.New(ctor, argExpressions);
-            var lambdaExpr = Expression.Lambda<Func<object?[], object>>(
-                Expression.Convert(newExpr, typeof(object)),
-                paramExpr);
-
-            return lambdaExpr.Compile();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Warning: Failed to compile instance factory for {ctor.DeclaringType?.Name}: {ex.Message}");
-            // Return a fallback factory that uses reflection
-            return CreateReflectionInstanceFactory(ctor);
-        }
-    }
-
-    [UnconditionalSuppressMessage("AOT",
-        "IL3050:Using member 'System.Linq.Expressions.Expression.Call(Type, String, Type[], params Expression[])' which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling",
-        Justification = "Reflection mode cannot support AOT")]
     private static Func<object, object?[], Task> CreateTestInvoker(Type testClass, MethodInfo testMethod)
     {
-        return _expressionCache.GetOrCreateTestInvoker(testClass, testMethod,
-            key => CompileTestInvoker(key.Item1, key.Item2));
+        return CreateReflectionTestInvoker(testClass, testMethod);
     }
 
-    private static Func<object, object?[], Task> CompileTestInvoker(Type testClass, MethodInfo testMethod)
-    {
-        // In AOT scenarios, skip expression compilation and use reflection directly
-        if (IsAotEnvironment())
-        {
-            return CreateReflectionTestInvoker(testClass, testMethod);
-        }
 
-        try
-        {
-            // Skip compilation for generic methods - they can't be compiled and will use reflection
-            if (testMethod.IsGenericMethodDefinition || testMethod.ContainsGenericParameters)
-            {
-                // Return the reflection-based fallback directly without warning
-                return CreateReflectionTestInvoker(testClass, testMethod);
-            }
-
-            var instanceParam = Expression.Parameter(typeof(object), "instance");
-            var argsParam = Expression.Parameter(typeof(object[]), "args");
-
-            var instanceExpr = testMethod.IsStatic
-                ? null
-                : Expression.Convert(instanceParam, testClass);
-
-            var parameters = testMethod.GetParameters();
-            var argExpressions = new Expression[parameters.Length];
-
-            // Count required parameters (non-optional)
-            var requiredParamCount = parameters.Count(p => !p.IsOptional);
-
-            // First, add a runtime check for parameter count mismatch
-            var paramCountMismatchCheck = Expression.IfThen(
-                Expression.OrElse(
-                    Expression.LessThan(
-                        Expression.ArrayLength(argsParam),
-                        Expression.Constant(requiredParamCount)
-                    ),
-                    Expression.GreaterThan(
-                        Expression.ArrayLength(argsParam),
-                        Expression.Constant(parameters.Length)
-                    )
-                ),
-                Expression.Throw(
-                    Expression.New(
-                        typeof(ArgumentException).GetConstructor([typeof(string)])!,
-                        Expression.Call(
-                            typeof(string).GetMethod("Format", [typeof(string), typeof(object[])])!,
-                            Expression.Constant($"Test method '{testClass.Name}.{testMethod.Name}' expects {{0}}-{{1}} parameter(s) but received {{2}}. " +
-                                $"Expected parameters: {string.Join(", ", parameters.Select(p => $"{p.ParameterType.Name} {p.Name}{(p.IsOptional ? " (optional)" : "")}"))}"),
-                            Expression.NewArrayInit(
-                                typeof(object),
-                                Expression.Convert(Expression.Constant(requiredParamCount), typeof(object)),
-                                Expression.Convert(Expression.Constant(parameters.Length), typeof(object)),
-                                Expression.Convert(Expression.ArrayLength(argsParam), typeof(object))
-                            )
-                        )
-                    )
-                )
-            );
-
-            for (var i = 0; i < parameters.Length; i++)
-            {
-                var parameter = parameters[i];
-                var argIndex = i;
-
-                // Check if this parameter has a value in the args array
-                var hasValue = Expression.LessThan(
-                    Expression.Constant(argIndex),
-                    Expression.ArrayLength(argsParam)
-                );
-
-                if (parameter.IsOptional)
-                {
-                    // For optional parameters, use default value if not provided
-                    var indexExpr = Expression.ArrayIndex(argsParam, Expression.Constant(i));
-
-                    // Use CastHelper.Cast to handle implicit/explicit conversion operators
-                    var castMethod = typeof(CastHelper).GetMethod(nameof(CastHelper.Cast),
-                        BindingFlags.Public | BindingFlags.Static,
-                        null,
-                        [typeof(Type), typeof(object)],
-                        null);
-
-                    var castExpr = Expression.Call(
-                        castMethod!,
-                        Expression.Constant(parameter.ParameterType),
-                        indexExpr
-                    );
-
-                    // Convert the result to the expected parameter type
-                    var convertedExpr = Expression.Convert(castExpr, parameter.ParameterType);
-
-                    // Use conditional to check if we have the argument or use default
-                    argExpressions[i] = Expression.Condition(
-                        hasValue,
-                        convertedExpr,
-                        Expression.Constant(parameter.DefaultValue, parameter.ParameterType)
-                    );
-                }
-                else
-                {
-                    // For required parameters, always use the provided value
-                    var indexExpr = Expression.ArrayIndex(argsParam, Expression.Constant(i));
-
-                    // Use CastHelper.Cast to handle implicit/explicit conversion operators
-                    var castMethod = typeof(CastHelper).GetMethod(nameof(CastHelper.Cast),
-                        BindingFlags.Public | BindingFlags.Static,
-                        null,
-                        [typeof(Type), typeof(object)],
-                        null);
-
-                    var castExpr = Expression.Call(
-                        castMethod!,
-                        Expression.Constant(parameter.ParameterType),
-                        indexExpr
-                    );
-
-                    // Convert the result to the expected parameter type
-                    argExpressions[i] = Expression.Convert(castExpr, parameter.ParameterType);
-                }
-            }
-
-            var callExpr = testMethod.IsStatic
-                ? Expression.Call(testMethod, argExpressions)
-                : Expression.Call(instanceExpr!, testMethod, argExpressions);
-
-            Expression body;
-            if (testMethod.ReturnType == typeof(Task))
-            {
-                body = Expression.Block(
-                    paramCountMismatchCheck,
-                    callExpr
-                );
-            }
-            else if (testMethod.ReturnType == typeof(void))
-            {
-                body = Expression.Block(
-                    paramCountMismatchCheck,
-                    callExpr,
-                    Expression.Constant(Task.CompletedTask)
-                );
-            }
-            else if (testMethod.ReturnType.IsGenericType &&
-                     testMethod.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
-            {
-                var callWithCheck = Expression.Block(
-                    paramCountMismatchCheck,
-                    callExpr
-                );
-                var taskType = testMethod.ReturnType.GetGenericArguments()[0];
-                var convertMethod = typeof(ReflectionTestDataCollector)
-                    .GetMethod(nameof(ConvertToNonGenericTask), BindingFlags.NonPublic | BindingFlags.Static)!
-                    .MakeGenericMethod(taskType);
-                body = Expression.Call(convertMethod, callWithCheck);
-            }
-            else if (testMethod.ReturnType == typeof(ValueTask))
-            {
-                var callWithCheck = Expression.Block(
-                    paramCountMismatchCheck,
-                    callExpr
-                );
-                body = Expression.Call(
-                    callWithCheck,
-                    typeof(ValueTask).GetMethod("AsTask")!);
-            }
-            else if (testMethod.ReturnType.IsGenericType &&
-                     testMethod.ReturnType.GetGenericTypeDefinition() == typeof(ValueTask<>))
-            {
-                var callWithCheck = Expression.Block(
-                    paramCountMismatchCheck,
-                    callExpr
-                );
-                var taskType = testMethod.ReturnType.GetGenericArguments()[0];
-                var convertMethod = typeof(ReflectionTestDataCollector)
-                    .GetMethod(nameof(ConvertValueTaskToTask), BindingFlags.NonPublic | BindingFlags.Static)!
-                    .MakeGenericMethod(taskType);
-                body = Expression.Call(convertMethod, callWithCheck);
-            }
-            else
-            {
-                // Sync method returning a value
-                body = Expression.Block(
-                    paramCountMismatchCheck,
-                    callExpr,
-                    Expression.Constant(Task.CompletedTask)
-                );
-            }
-
-            var lambda = Expression.Lambda<Func<object, object?[], Task>>(
-                body,
-                instanceParam,
-                argsParam);
-
-            return lambda.Compile();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Warning: Failed to compile test invoker for {testClass.Name}.{testMethod.Name}: {ex.Message}");
-            // Return a fallback invoker that uses reflection
-            return CreateReflectionTestInvoker(testClass, testMethod);
-        }
-    }
-
-    private static Task ConvertToNonGenericTask<T>(Task<T> task)
-    {
-        return task;
-    }
-
-    private static Task ConvertValueTaskToTask<T>(ValueTask<T> valueTask)
-    {
-        return valueTask.AsTask();
-    }
-
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2026:Using member 'System.Reflection.Assembly.GetTypes()' which has 'RequiresUnreferencedCodeAttribute' can break functionality when trimming application code",
-        Justification = "Reflection mode cannot support trimming")]
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'",
-        Justification = "Reflection mode requires dynamic access")]
-    private static TestHooks DiscoverHooks([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type testClass)
-    {
-        var beforeClass = new List<HookMetadata>();
-        var afterClass = new List<HookMetadata>();
-        var beforeTest = new List<HookMetadata>();
-        var afterTest = new List<HookMetadata>();
-
-        // Only scan the test class hierarchy, not all assemblies
-        var currentType = testClass;
-        while (currentType != null && currentType != typeof(object))
-        {
-            try
-            {
-                var methods = currentType.GetMethods(
-                    BindingFlags.Public | BindingFlags.NonPublic |
-                    BindingFlags.Instance | BindingFlags.Static |
-                    BindingFlags.DeclaredOnly);
-
-                foreach (var method in methods)
-                {
-                    // Check for Before attributes
-                    if (method.IsDefined(typeof(BeforeAttribute), inherit: false))
-                    {
-                        var beforeAttrs = method.GetCustomAttributes<BeforeAttribute>();
-                        foreach (var attr in beforeAttrs)
-                        {
-                            // Skip TestDiscovery hooks - they run during discovery phase, not test execution
-                            if (attr.HookType.HasFlag(HookType.TestDiscovery))
-                            {
-                                continue;
-                            }
-
-                            var hookMetadata = CreateHookMetadata(method, attr, true);
-                            if (hookMetadata != null)
-                            {
-                                if (attr.HookType.HasFlag(HookType.Class))
-                                {
-                                    beforeClass.Add(hookMetadata);
-                                }
-                                if (attr.HookType.HasFlag(HookType.Test))
-                                {
-                                    beforeTest.Add(hookMetadata);
-                                }
-                            }
-                        }
-                    }
-
-                    // Check for After attributes
-                    if (method.IsDefined(typeof(AfterAttribute), inherit: false))
-                    {
-                        var afterAttrs = method.GetCustomAttributes<AfterAttribute>();
-                        foreach (var attr in afterAttrs)
-                        {
-                            // Skip TestDiscovery hooks - they run during discovery phase, not test execution
-                            if (attr.HookType.HasFlag(HookType.TestDiscovery))
-                            {
-                                continue;
-                            }
-
-                            var hookMetadata = CreateHookMetadata(method, attr, false);
-                            if (hookMetadata != null)
-                            {
-                                if (attr.HookType.HasFlag(HookType.Class))
-                                {
-                                    afterClass.Add(hookMetadata);
-                                }
-                                if (attr.HookType.HasFlag(HookType.Test))
-                                {
-                                    afterTest.Add(hookMetadata);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Warning: Failed to scan hooks in type {currentType.FullName}: {ex.Message}");
-            }
-
-            currentType = currentType.BaseType;
-        }
-
-        // Also check for assembly-level hooks in the test class's assembly only
-        try
-        {
-            var assembly = testClass.Assembly;
-
-            // Get cached types for this assembly
-            var exportedTypes = _assemblyTypesCache.GetOrAdd(assembly, asm =>
-            {
-                try
-                {
-                    return asm.GetExportedTypes();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Warning: Failed to get exported types from assembly {asm.FullName}: {ex.Message}");
-                    return
-                    [
-                    ];
-                }
-            });
-
-            // Early exit if assembly has no hook attributes
-            var hasHooks = false;
-            foreach (var type in exportedTypes)
-            {
-                if (type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
-                    .Any(m => m.IsDefined(typeof(BeforeAttribute), inherit: false) || m.IsDefined(typeof(AfterAttribute), inherit: false)))
-                {
-                    hasHooks = true;
-                    break;
-                }
-            }
-
-            if (!hasHooks)
-            {
-                return new TestHooks
-                {
-                    BeforeClass = beforeClass.ToArray(), AfterClass = afterClass.ToArray(), BeforeTest = beforeTest.ToArray(), AfterTest = afterTest.ToArray()
-                };
-            }
-
-            var assemblyTypes = exportedTypes
-                .Where(t => t is { IsClass: true, IsAbstract: false } && ShouldScanTypeForHooks(t))
-                .ToList();
-
-            foreach (var type in assemblyTypes)
-            {
-                try
-                {
-                    var methods = type.GetMethods(
-                        BindingFlags.Public | BindingFlags.NonPublic |
-                        BindingFlags.Instance | BindingFlags.Static);
-
-                    foreach (var method in methods)
-                    {
-                        // Check for assembly-level Before hooks
-                        if (method.IsDefined(typeof(BeforeAttribute), inherit: false))
-                        {
-                            var beforeAttrs = method.GetCustomAttributes<BeforeAttribute>()
-                                .Where(a => a.HookType.HasFlag(HookType.Assembly) && !a.HookType.HasFlag(HookType.TestDiscovery));
-                            foreach (var attr in beforeAttrs)
-                            {
-                                var hookMetadata = CreateHookMetadata(method, attr, true);
-                                if (hookMetadata != null)
-                                {
-                                    beforeClass.Add(hookMetadata);
-                                }
-                            }
-                        }
-
-                        // Check for assembly-level After hooks
-                        if (method.IsDefined(typeof(AfterAttribute), inherit: false))
-                        {
-                            var afterAttrs = method.GetCustomAttributes<AfterAttribute>()
-                                .Where(a => a.HookType.HasFlag(HookType.Assembly) && !a.HookType.HasFlag(HookType.TestDiscovery));
-                            foreach (var attr in afterAttrs)
-                            {
-                                var hookMetadata = CreateHookMetadata(method, attr, false);
-                                if (hookMetadata != null)
-                                {
-                                    afterClass.Add(hookMetadata);
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (Exception)
-                {
-                    // Skip hooks from this type and continue
-                    continue;
-                }
-            }
-        }
-        catch (Exception)
-        {
-            // Return empty hooks if assembly scan fails
-            // This allows tests to run without hooks rather than failing entirely
-        }
-
-        return new TestHooks
-        {
-            BeforeClass = beforeClass.ToArray(), AfterClass = afterClass.ToArray(), BeforeTest = beforeTest.ToArray(), AfterTest = afterTest.ToArray()
-        };
-    }
-
-    private static bool ShouldScanTypeForHooks(Type type)
-    {
-        // Skip types that are likely to cause issues
-        var name = type.FullName ?? type.Name;
-
-        if (name.Contains("PrivateImplementationDetails") ||
-            name.Contains("__") ||
-            name.Contains("<>") ||
-            name.Contains("Resources") ||
-            name.Contains("AssemblyInfo"))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private static HookMetadata? CreateHookMetadata(MethodInfo method, HookAttribute hookAttr, bool isBeforeHook)
-    {
-        var hookInvoker = CreateHookInvoker(method);
-        if (hookInvoker == null)
-        {
-            return null;
-        }
-
-        var level = HookLevel.Test;
-        if (hookAttr.HookType.HasFlag(HookType.Assembly))
-        {
-            level = HookLevel.Assembly;
-        }
-        else if (hookAttr.HookType.HasFlag(HookType.Class))
-        {
-            level = HookLevel.Class;
-        }
-
-        return new HookMetadata
-        {
-            Name = method.Name,
-            Level = level,
-            Order = hookAttr.Order,
-            DeclaringType = method.DeclaringType,
-            IsStatic = method.IsStatic,
-            IsAsync = IsAsyncMethod(method),
-            ReturnsValueTask = method.ReturnType == typeof(ValueTask),
-            HookInvoker = hookInvoker
-        };
-    }
-
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2026:Using member 'System.Linq.Expressions.Expression.Property(Expression, String)' which has 'RequiresUnreferencedCodeAttribute' can break functionality when trimming application code",
-        Justification = "Reflection mode cannot support trimming")]
-    [UnconditionalSuppressMessage("AOT",
-        "IL3050:Using member 'System.Linq.Expressions.Expression.Lambda' which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling",
-        Justification = "Reflection mode cannot support AOT")]
-    private static Func<object, TestContext, Task>? CreateHookInvoker(MethodInfo method)
-    {
-        // In AOT scenarios, skip expression compilation and use reflection directly
-        if (IsAotEnvironment())
-        {
-            return CreateReflectionHookInvoker(method);
-        }
-
-        var instanceParam = Expression.Parameter(typeof(object), "instance");
-        var contextParam = Expression.Parameter(typeof(TestContext), "context");
-
-        // Check parameters
-        var parameters = method.GetParameters();
-        if (parameters.Length > 2)
-        {
-            throw new InvalidOperationException(
-                $"Hook method {method.Name} has too many parameters. Maximum allowed is 2, but found {parameters.Length}.");
-        }
-
-        Expression? callExpr;
-        if (parameters.Length == 0)
-        {
-            // No parameters
-            callExpr = method.IsStatic
-                ? Expression.Call(method)
-                : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method);
-        }
-        else if (parameters.Length == 1)
-        {
-            // Single parameter
-            var paramType = parameters[0].ParameterType;
-
-            if (paramType == typeof(TestContext))
-            {
-                callExpr = method.IsStatic
-                    ? Expression.Call(method, contextParam)
-                    : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, contextParam);
-            }
-            else if (paramType == typeof(ClassHookContext))
-            {
-                var classContextExpr = Expression.Property(contextParam, nameof(TestContext.ClassContext));
-                callExpr = method.IsStatic
-                    ? Expression.Call(method, classContextExpr)
-                    : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, classContextExpr);
-            }
-            else if (paramType == typeof(AssemblyHookContext))
-            {
-                var classContextExpr = Expression.Property(contextParam, nameof(TestContext.ClassContext));
-                var assemblyContextExpr = Expression.Property(classContextExpr, nameof(ClassHookContext.AssemblyContext));
-                callExpr = method.IsStatic
-                    ? Expression.Call(method, assemblyContextExpr)
-                    : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, assemblyContextExpr);
-            }
-            else if (paramType == typeof(TestSessionContext))
-            {
-                var classContextExpr = Expression.Property(contextParam, nameof(TestContext.ClassContext));
-                var assemblyContextExpr = Expression.Property(classContextExpr, nameof(ClassHookContext.AssemblyContext));
-                var sessionContextExpr = Expression.Property(assemblyContextExpr, nameof(AssemblyHookContext.TestSessionContext));
-                callExpr = method.IsStatic
-                    ? Expression.Call(method, sessionContextExpr)
-                    : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, sessionContextExpr);
-            }
-            else if (paramType == typeof(CancellationToken))
-            {
-                var cancellationTokenExpr = Expression.Property(contextParam, nameof(TestContext.CancellationToken));
-                callExpr = method.IsStatic
-                    ? Expression.Call(method, cancellationTokenExpr)
-                    : Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, cancellationTokenExpr);
-            }
-            else
-            {
-                throw new InvalidOperationException(
-                    $"Hook method {method.Name} has unsupported parameter type {paramType}. " +
-                    "Supported types are: TestContext, ClassHookContext, AssemblyHookContext, TestSessionContext, CancellationToken.");
-            }
-        }
-        else if (parameters.Length == 2)
-        {
-            // Two parameters - typically context + CancellationToken
-            var argsList = new List<Expression>();
-
-            for (var i = 0; i < 2; i++)
-            {
-                var paramType = parameters[i].ParameterType;
-
-                if (paramType == typeof(TestContext))
-                {
-                    argsList.Add(contextParam);
-                }
-                else if (paramType == typeof(ClassHookContext))
-                {
-                    var classContextExpr = Expression.Property(contextParam, nameof(TestContext.ClassContext));
-                    argsList.Add(classContextExpr);
-                }
-                else if (paramType == typeof(AssemblyHookContext))
-                {
-                    var classContextExpr = Expression.Property(contextParam, nameof(TestContext.ClassContext));
-                    var assemblyContextExpr = Expression.Property(classContextExpr, nameof(ClassHookContext.AssemblyContext));
-                    argsList.Add(assemblyContextExpr);
-                }
-                else if (paramType == typeof(TestSessionContext))
-                {
-                    var classContextExpr = Expression.Property(contextParam, nameof(TestContext.ClassContext));
-                    var assemblyContextExpr = Expression.Property(classContextExpr, nameof(ClassHookContext.AssemblyContext));
-                    var sessionContextExpr = Expression.Property(assemblyContextExpr, nameof(AssemblyHookContext.TestSessionContext));
-                    argsList.Add(sessionContextExpr);
-                }
-                else if (paramType == typeof(CancellationToken))
-                {
-                    argsList.Add(Expression.Property(contextParam, nameof(TestContext.CancellationToken)));
-                }
-                else
-                {
-                    throw new InvalidOperationException(
-                        $"Hook method {method.Name} has unsupported parameter type {paramType} at position {i}. " +
-                        "Supported types are: TestContext, ClassHookContext, AssemblyHookContext, TestSessionContext, CancellationToken.");
-                }
-            }
-
-            // Use correct overload for static vs instance methods
-            if (method.IsStatic)
-            {
-                // For static methods, use overload without instance
-                callExpr = Expression.Call(method, argsList);
-            }
-            else
-            {
-                // For instance methods, include the instance
-                callExpr = Expression.Call(Expression.Convert(instanceParam, method.DeclaringType!), method, argsList);
-            }
-        }
-        else
-        {
-            throw new InvalidOperationException(
-                $"Hook method {method.Name} has unexpected parameter count {parameters.Length}. " +
-                "Hook methods must have 0, 1, or 2 parameters.");
-        }
-
-        // Convert return type to Task
-        Expression body;
-        if (method.ReturnType == typeof(Task))
-        {
-            body = callExpr;
-        }
-        else if (method.ReturnType == typeof(ValueTask))
-        {
-            body = Expression.Call(callExpr, typeof(ValueTask).GetMethod("AsTask")!);
-        }
-        else if (method.ReturnType == typeof(void))
-        {
-            body = Expression.Block(
-                callExpr,
-                Expression.Constant(Task.CompletedTask)
-            );
-        }
-        else
-        {
-            throw new InvalidOperationException(
-                $"Hook method {method.Name} has unsupported return type {method.ReturnType}. " +
-                "Hook methods must return void, Task, or ValueTask.");
-        }
-
-        var lambda = Expression.Lambda<Func<object, TestContext, Task>>(
-            body,
-            instanceParam,
-            contextParam);
-
-        try
-        {
-            return lambda.Compile();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Warning: Failed to compile hook invoker for {method.Name}: {ex.Message}");
-            return CreateReflectionHookInvoker(method);
-        }
-    }
+    // Hook discovery has been separated into ReflectionHookDiscoveryService
 
     private static bool IsAsyncMethod(MethodInfo method)
     {
@@ -1626,85 +614,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return null;
     }
 
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2065:Value passed to implicit 'this' parameter of method 'System.Type.GetInterfaces()' can not be statically determined and may not meet 'DynamicallyAccessedMembersAttribute' requirements",
-        Justification = "Reflection mode requires dynamic access")]
-    private static GenericTypeInfo? ExtractGenericTypeInfo(Type testClass)
-    {
-        if (!testClass.IsGenericTypeDefinition)
-        {
-            return null;
-        }
-
-        var genericParams = testClass.GetGenericArguments();
-        var constraints = new GenericParameterConstraints[genericParams.Length];
-
-        for (var i = 0; i < genericParams.Length; i++)
-        {
-            var param = genericParams[i];
-            constraints[i] = new GenericParameterConstraints
-            {
-                ParameterName = param.Name,
-                BaseTypeConstraint = param.BaseType != typeof(object) ? param.BaseType : null,
-                InterfaceConstraints = param.GetInterfaces(),
-                HasDefaultConstructorConstraint = param.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint),
-                HasReferenceTypeConstraint = param.GenericParameterAttributes.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint),
-                HasValueTypeConstraint = param.GenericParameterAttributes.HasFlag(GenericParameterAttributes.NotNullableValueTypeConstraint),
-                HasNotNullConstraint = false // .NET doesn't expose this via reflection
-            };
-        }
-
-        return new GenericTypeInfo
-        {
-            ParameterNames = genericParams.Select(p => p.Name).ToArray(), Constraints = constraints
-        };
-    }
-
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2065:Value passed to implicit 'this' parameter of method 'System.Type.GetInterfaces()' can not be statically determined and may not meet 'DynamicallyAccessedMembersAttribute' requirements",
-        Justification = "Reflection mode requires dynamic access")]
-    private static GenericMethodInfo? ExtractGenericMethodInfo(MethodInfo method)
-    {
-        if (!method.IsGenericMethodDefinition)
-        {
-            return null;
-        }
-
-        var genericParams = method.GetGenericArguments();
-        var constraints = new GenericParameterConstraints[genericParams.Length];
-        var parameterPositions = new List<int>();
-
-        // Map generic parameters to method argument positions
-        var methodParams = method.GetParameters();
-        for (var i = 0; i < methodParams.Length; i++)
-        {
-            var paramType = methodParams[i].ParameterType;
-            if (paramType.IsGenericParameter && Array.IndexOf(genericParams, paramType) >= 0)
-            {
-                parameterPositions.Add(i);
-            }
-        }
-
-        for (var i = 0; i < genericParams.Length; i++)
-        {
-            var param = genericParams[i];
-            constraints[i] = new GenericParameterConstraints
-            {
-                ParameterName = param.Name,
-                BaseTypeConstraint = param.BaseType != typeof(object) ? param.BaseType : null,
-                InterfaceConstraints = param.GetInterfaces(),
-                HasDefaultConstructorConstraint = param.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint),
-                HasReferenceTypeConstraint = param.GenericParameterAttributes.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint),
-                HasValueTypeConstraint = param.GenericParameterAttributes.HasFlag(GenericParameterAttributes.NotNullableValueTypeConstraint),
-                HasNotNullConstraint = false // .NET doesn't expose this via reflection
-            };
-        }
-
-        return new GenericMethodInfo
-        {
-            ParameterNames = genericParams.Select(p => p.Name).ToArray(), Constraints = constraints, ParameterPositions = parameterPositions.ToArray()
-        };
-    }
 
 
     private static TestMetadata CreateFailedTestMetadataForAssembly(Assembly assembly, Exception ex)
@@ -1822,26 +731,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
-    /// <summary>
-    /// Detects if running in an AOT environment where Expression.Compile() is not available
-    /// </summary>
-    private static bool IsAotEnvironment()
-    {
-        // Check if we're running in a NativeAOT context
-        // This is a simple heuristic - in practice, you might want more sophisticated detection
-        try
-        {
-            // Try to compile a simple expression - if this fails, we're likely in AOT
-            var param = Expression.Parameter(typeof(int), "x");
-            var lambda = Expression.Lambda<Func<int, int>>(param, param);
-            lambda.Compile();
-            return false;
-        }
-        catch
-        {
-            return true;
-        }
-    }
 
     /// <summary>
     /// Creates a reflection-based instance factory with proper AOT attribution
@@ -1895,72 +784,4 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         };
     }
 
-    /// <summary>
-    /// Creates a reflection-based hook invoker with proper AOT attribution
-    /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
-    private static Func<object, TestContext, Task> CreateReflectionHookInvoker(MethodInfo method)
-    {
-        return (instance, context) =>
-        {
-            try
-            {
-                var parameters = method.GetParameters();
-                var args = new object?[parameters.Length];
-
-                // Map parameters based on their types
-                for (var i = 0; i < parameters.Length; i++)
-                {
-                    var paramType = parameters[i].ParameterType;
-
-                    if (paramType == typeof(TestContext))
-                    {
-                        args[i] = context;
-                    }
-                    else if (paramType == typeof(ClassHookContext))
-                    {
-                        args[i] = context.ClassContext;
-                    }
-                    else if (paramType == typeof(AssemblyHookContext))
-                    {
-                        args[i] = context.ClassContext.AssemblyContext;
-                    }
-                    else if (paramType == typeof(TestSessionContext))
-                    {
-                        args[i] = context.ClassContext.AssemblyContext.TestSessionContext;
-                    }
-                    else if (paramType == typeof(CancellationToken))
-                    {
-                        args[i] = context.CancellationToken;
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException(
-                            $"Hook method {method.Name} has unsupported parameter type {paramType}");
-                    }
-                }
-
-                var result = method.Invoke(method.IsStatic ? null : instance, args);
-
-                if (result is Task task)
-                {
-                    return task;
-                }
-                if (result is ValueTask valueTask)
-                {
-                    return valueTask.AsTask();
-                }
-                return Task.CompletedTask;
-            }
-            catch (TargetInvocationException tie)
-            {
-                ExceptionDispatchInfo.Capture(tie.InnerException ?? tie).Throw();
-                throw;
-            }
-            catch (Exception ex)
-            {
-                return Task.FromException(ex);
-            }
-        };
-    }
 }

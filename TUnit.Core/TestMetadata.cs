@@ -55,8 +55,6 @@ public abstract class TestMetadata
 
     public string[] TestMethodParameterTypes { get; init; } = [];
 
-    public TestHooks Hooks { get; init; } = new();
-
     public string? FilePath { get; init; }
 
     public int? LineNumber { get; init; }
@@ -84,44 +82,6 @@ public abstract class TestMetadata
     /// The delegates encapsulate all mode-specific behavior.
     /// </summary>
     public abstract Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory { get; }
-}
-
-public sealed class TestHooks
-{
-    public HookMetadata[] BeforeClass { get; init; } = [];
-
-    public HookMetadata[] AfterClass { get; init; } = [];
-
-    public HookMetadata[] BeforeTest { get; init; } = [];
-
-    public HookMetadata[] AfterTest { get; init; } = [];
-}
-
-public sealed class HookMetadata
-{
-    public required string Name { get; init; }
-    public required HookLevel Level { get; init; }
-    public int Order { get; init; }
-
-    public Type? DeclaringType { get; init; }
-
-    public bool IsStatic { get; init; }
-
-    public bool IsAsync { get; init; }
-
-    /// <summary>
-    /// Whether this hook returns ValueTask (requires special handling)
-    /// </summary>
-    public bool ReturnsValueTask { get; init; }
-
-    public Func<object, TestContext, Task>? HookInvoker { get; init; }
-}
-
-public enum HookLevel
-{
-    Assembly,
-    Class,
-    Test
 }
 
 public sealed class GenericTypeInfo
