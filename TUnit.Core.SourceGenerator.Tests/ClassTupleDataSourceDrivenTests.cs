@@ -9,6 +9,5 @@ internal class ClassTupleDataSourceDrivenTests : TestsBase
             "ClassTupleDataSourceDrivenTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

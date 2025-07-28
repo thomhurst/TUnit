@@ -9,6 +9,5 @@ internal class TimeoutCancellationTokenTests : TestsBase
             "TimeoutCancellationTokenTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

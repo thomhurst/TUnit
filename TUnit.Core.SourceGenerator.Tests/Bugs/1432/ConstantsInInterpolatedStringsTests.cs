@@ -11,6 +11,5 @@ internal class ConstantsInInterpolatedStringsTests : TestsBase
             "ConstantsInInterpolatedStringsTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

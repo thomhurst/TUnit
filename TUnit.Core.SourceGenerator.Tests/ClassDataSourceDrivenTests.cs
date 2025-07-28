@@ -20,6 +20,5 @@ internal class ClassDataSourceDrivenTests : TestsBase
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

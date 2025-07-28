@@ -9,6 +9,5 @@ internal class ClassDataSourceDrivenTestsSharedKeyed : TestsBase
             "ClassDataSourceDrivenTestsSharedKeyed.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

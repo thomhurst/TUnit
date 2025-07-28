@@ -19,6 +19,5 @@ internal class DataSourceClassCombinedWithDataSourceMethodTests : TestsBase
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

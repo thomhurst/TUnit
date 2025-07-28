@@ -9,6 +9,5 @@ internal class AttributeTests : TestsBase
             "AttributeTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

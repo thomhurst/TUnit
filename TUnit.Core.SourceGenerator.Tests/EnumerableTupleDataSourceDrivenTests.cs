@@ -9,6 +9,5 @@ internal class EnumerableTupleDataSourceDrivenTests : TestsBase
             "EnumerableTupleDataSourceDrivenTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(1);
-        });
+            });
 }

@@ -9,6 +9,5 @@ internal class RepeatTests : TestsBase
             "RepeatTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

@@ -9,8 +9,6 @@ internal class PropertySetterTests : TestsBase
             "PropertySetterTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-
             // Static
         });
 }

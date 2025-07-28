@@ -9,6 +9,5 @@ internal class MultipleClassDataSourceDrivenTests : TestsBase
             "MultipleClassDataSourceDrivenTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

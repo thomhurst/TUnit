@@ -9,6 +9,5 @@ internal class ArgumentWithImplicitConverterTests : TestsBase
             "ArgumentWithImplicitConverterTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

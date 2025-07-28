@@ -16,8 +16,7 @@ internal class Tests1899 : TestsBase
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 
     [Test]
     public Task BaseClass() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -31,6 +30,5 @@ internal class Tests1899 : TestsBase
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

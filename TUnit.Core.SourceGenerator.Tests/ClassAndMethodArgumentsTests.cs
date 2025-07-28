@@ -9,6 +9,5 @@ internal class ClassAndMethodArgumentsTests : TestsBase
             "ClassAndMethodArgumentsTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

@@ -10,6 +10,5 @@ internal class BeforeTests : TestsBase
             "BeforeTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

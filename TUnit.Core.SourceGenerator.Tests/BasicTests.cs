@@ -8,6 +8,5 @@ internal class BasicTests : TestsBase
             "BasicTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

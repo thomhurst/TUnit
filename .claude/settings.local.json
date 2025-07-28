@@ -148,7 +148,8 @@
       "Bash(del TestTypedDataSources.cs)",
       "Bash(tasklist)",
       "Bash(tail:*)",
-      "Bash(del GenericTestExample.cs)"
+      "Bash(del GenericTestExample.cs)",
+      "Bash(pwsh:*)"
     ],
     "deny": []
   },

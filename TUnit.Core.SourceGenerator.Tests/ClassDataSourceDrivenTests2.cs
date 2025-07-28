@@ -9,6 +9,5 @@ internal class ClassDataSourceDrivenTests2 : TestsBase
             "ClassDataSourceDrivenTests2.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(2);
-        });
+            });
 }

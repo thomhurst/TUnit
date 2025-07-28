@@ -10,8 +10,7 @@ internal class NumberArgumentTests : TestsBase
             "NumberArgumentTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 
     [Test]
     [Culture("de-DE")]

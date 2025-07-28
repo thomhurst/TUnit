@@ -12,17 +12,12 @@ public class ReflectionTestDataCollectorTests
     [Test]
     public async Task ReflectionTestDataCollector_DiscoversSingleTest()
     {
-        // Arrange
         var collector = new ReflectionTestDataCollector();
-
-        // Act
         var tests = (await collector.CollectTestsAsync("123")).ToList();
-
-        // Assert
+        
         await Assert.That(tests).IsNotNull();
         await Assert.That(tests.Count).IsGreaterThan(0);
-
-        // Should find this test itself
+        
         var thisTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_DiscoversSingleTest));
         await Assert.That(thisTest).IsNotNull();
         await Assert.That(thisTest!.TestClassType).IsEqualTo(typeof(ReflectionTestDataCollectorTests));
@@ -33,13 +28,9 @@ public class ReflectionTestDataCollectorTests
     [Category("Discovery")]
     public async Task ReflectionTestDataCollector_ExtractsCategories()
     {
-        // Arrange
         var collector = new ReflectionTestDataCollector();
-
-        // Act
         var tests = (await collector.CollectTestsAsync("123")).ToList();
-
-        // Assert
+        
         var thisTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsCategories));
         await Assert.That(thisTest).IsNotNull();
         await Assert.That(thisTest!.Categories).Contains("Reflection");
@@ -50,13 +41,9 @@ public class ReflectionTestDataCollectorTests
     [Timeout(5000)]
     public async Task ReflectionTestDataCollector_ExtractsTimeout(CancellationToken cancellationToken)
     {
-        // Arrange
         var collector = new ReflectionTestDataCollector();
-
-        // Act
         var tests = (await collector.CollectTestsAsync("123")).ToList();
-
-        // Assert
+        
         var thisTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsTimeout));
         await Assert.That(thisTest).IsNotNull();
         await Assert.That(thisTest!.TimeoutMs).IsEqualTo(5000);
@@ -66,20 +53,15 @@ public class ReflectionTestDataCollectorTests
     [Skip("Test skip functionality")]
     public async Task ReflectionTestDataCollector_ExtractsSkipAttribute()
     {
-        // This test should be discovered but marked as skipped
         await Task.CompletedTask;
     }
 
     [Test]
     public async Task ReflectionTestDataCollector_ExtractsSkipAttributeFromDiscovery()
     {
-        // Arrange
         var collector = new ReflectionTestDataCollector();
-
-        // Act
         var tests = (await collector.CollectTestsAsync("123")).ToList();
-
-        // Assert
+        
         var skippedTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsSkipAttribute));
         await Assert.That(skippedTest).IsNotNull();
         await Assert.That(skippedTest!.IsSkipped).IsTrue();
@@ -91,25 +73,19 @@ public class ReflectionTestDataCollectorTests
     [Arguments(4, 5, 6)]
     public async Task ReflectionTestDataCollector_ExtractsArgumentsDataSource(int a, int b, int c)
     {
-        // Test with parameters
         await Assert.That(a + b + c).IsGreaterThan(0);
     }
 
     [Test]
     public async Task ReflectionTestDataCollector_ExtractsArgumentsFromDiscovery()
     {
-        // Arrange
         var collector = new ReflectionTestDataCollector();
-
-        // Act
         var tests = (await collector.CollectTestsAsync("123")).ToList();
-
-        // Assert
+        
         var paramTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsArgumentsDataSource));
         await Assert.That(paramTest).IsNotNull();
         await Assert.That(paramTest!.DataSources.Length).IsEqualTo(2);
-
-        // Verify data sources
+        
         var metadata = new DataGeneratorMetadata
         {
             TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
@@ -164,13 +140,9 @@ public class ReflectionTestDataCollectorTests
     [Retry(3)]
     public async Task ReflectionTestDataCollector_ExtractsRetryCount()
     {
-        // Arrange
         var collector = new ReflectionTestDataCollector();
-
-        // Act
         var tests = (await collector.CollectTestsAsync("123")).ToList();
-
-        // Assert
+        
         var thisTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsRetryCount));
         await Assert.That(thisTest).IsNotNull();
         await Assert.That(thisTest!.RetryCount).IsEqualTo(3);
@@ -180,13 +152,9 @@ public class ReflectionTestDataCollectorTests
     [NotInParallel]
     public async Task ReflectionTestDataCollector_ExtractsNotInParallel()
     {
-        // Arrange
         var collector = new ReflectionTestDataCollector();
-
-        // Act
         var tests = (await collector.CollectTestsAsync("123")).ToList();
-
-        // Assert
+        
         var thisTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsNotInParallel));
         await Assert.That(thisTest).IsNotNull();
         await Assert.That(thisTest!.CanRunInParallel).IsFalse();
@@ -195,10 +163,8 @@ public class ReflectionTestDataCollectorTests
     [Test]
     public async Task TestDataCollectorFactory_CreatesReflectionCollectorForReflectionMode()
     {
-        // Act
         var collector = TestDataCollectorFactory.Create(TestExecutionMode.Reflection);
-
-        // Assert
+        
         await Assert.That(collector).IsNotNull();
         await Assert.That(collector).IsTypeOf<ReflectionTestDataCollector>();
     }
@@ -219,18 +185,13 @@ public class ReflectionTestDataCollectorTests
     [Test]
     public async Task ReflectionTestDataCollector_ExtractsMethodDataSourceFromDiscovery()
     {
-        // Arrange
         var collector = new ReflectionTestDataCollector();
-
-        // Act
         var tests = (await collector.CollectTestsAsync("123")).ToList();
-
-        // Assert
+        
         var methodDataTest = tests.FirstOrDefault(t => t.TestMethodName == nameof(ReflectionTestDataCollector_ExtractsMethodDataSource));
         await Assert.That(methodDataTest).IsNotNull();
         await Assert.That(methodDataTest!.DataSources.Length).IsEqualTo(1);
-
-        // Verify data source produces correct data
+        
         var metadata2 = new DataGeneratorMetadata
         {
             TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
@@ -314,19 +275,14 @@ public class ReflectionHookTests
     [Test]
     public async Task ReflectionTestDataCollector_DiscoverHooks()
     {
-        // Arrange
         var collector = new ReflectionTestDataCollector();
-
-        // Act
         var tests = (await collector.CollectTestsAsync("123")).ToList();
-
-        // Assert
+        
         var thisTest = tests.FirstOrDefault(t =>
             t.TestClassType == typeof(ReflectionHookTests) &&
             t.TestMethodName == nameof(ReflectionTestDataCollector_DiscoverHooks));
 
         await Assert.That(thisTest).IsNotNull();
-        // Hooks are now discovered separately by ReflectionHookDiscoveryService
     }
 }
 
@@ -351,13 +307,9 @@ public class ReflectionGenericTests
     [Test]
     public async Task ReflectionTestDataCollector_DiscoverGenericTypeInfo()
     {
-        // Arrange
         var collector = new ReflectionTestDataCollector();
-
-        // Act
         var tests = (await collector.CollectTestsAsync("123")).ToList();
-
-        // Assert
+        
         var genericTest = tests.FirstOrDefault(t =>
             t.TestClassType.IsGenericTypeDefinition &&
             t.TestClassType.Name.StartsWith("ReflectionGenericTestClass"));
@@ -371,13 +323,9 @@ public class ReflectionGenericTests
     [Test]
     public async Task ReflectionTestDataCollector_DiscoverGenericMethodInfo()
     {
-        // Arrange
         var collector = new ReflectionTestDataCollector();
-
-        // Act
         var tests = (await collector.CollectTestsAsync("123")).ToList();
-
-        // Assert
+        
         var genericMethodTest = tests.FirstOrDefault(t =>
             t is { TestMethodName: "GenericMethodTest", TestClassType.IsGenericTypeDefinition: true });
 

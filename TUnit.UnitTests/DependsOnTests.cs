@@ -73,79 +73,63 @@ public class DependsOnTests
     [Test]
     public async Task TestDependency_FromMethodName_MatchesSameClass()
     {
-        // Arrange
         var dependency = TestDependency.FromMethodName("TestMethod");
         var testMetadata = CreateTestMetadata<DependsOnTests>("test1", "TestMethod");
         var dependentTest = CreateTestMetadata<DependsOnTests>("test2", "DependentTest");
-
-        // Act
+        
         var matches = dependency.Matches(testMetadata, dependentTest);
-
-        // Assert
+        
         await Assert.That(matches).IsTrue();
     }
 
     [Test]
     public async Task TestDependency_FromMethodName_DoesNotMatchDifferentClass()
     {
-        // Arrange
         var dependency = TestDependency.FromMethodName("TestMethod");
         var testMetadata = CreateTestMetadata<string>("test1", "TestMethod");
         var dependentTest = CreateTestMetadata<DependsOnTests>("test2", "DependentTest");
-
-        // Act
+        
         var matches = dependency.Matches(testMetadata, dependentTest);
-
-        // Assert
+        
         await Assert.That(matches).IsFalse();
     }
 
     [Test]
     public async Task TestDependency_FromClass_MatchesAllTestsInClass()
     {
-        // Arrange
         var dependency = TestDependency.FromClass(typeof(DependsOnTests));
         var testMetadata = CreateTestMetadata<DependsOnTests>("test1", "AnyTestMethod");
-
-        // Act
+        
         var matches = dependency.Matches(testMetadata);
-
-        // Assert
+        
         await Assert.That(matches).IsTrue();
     }
 
     [Test]
     public async Task TestDependency_FromClass_DoesNotMatchSelf()
     {
-        // Arrange
         var dependency = TestDependency.FromClass(typeof(DependsOnTests));
         var testMetadata = CreateTestMetadata<DependsOnTests>("test1", "TestMethod");
-
-        // Act - same test as dependent
+        
         var matches = dependency.Matches(testMetadata, testMetadata);
-
-        // Assert
+        
         await Assert.That(matches).IsFalse();
     }
 
     [Test]
     public async Task TestDependency_FromClassAndMethod_MatchesSpecificTest()
     {
-        // Arrange
         var dependency = TestDependency.FromClassAndMethod(typeof(DependsOnTests), "SpecificMethod");
         var testMetadata = CreateTestMetadata<DependsOnTests>("test1", "SpecificMethod");
-
-        // Act
+        
         var matches = dependency.Matches(testMetadata);
-
-        // Assert
+        
         await Assert.That(matches).IsTrue();
     }
 
     [Test]
     public async Task TestDependency_WithParameters_MatchesCorrectOverload()
     {
-        // Arrange
         var dependency = new TestDependency
         {
             ClassType = typeof(DependsOnTests),
@@ -153,18 +137,15 @@ public class DependsOnTests
             MethodParameters = [typeof(string), typeof(int)]
         };
         var testMetadata = CreateTestMetadata<DependsOnTests>("test1", "OverloadedMethod", 2);
-
-        // Act
+        
         var matches = dependency.Matches(testMetadata);
-
-        // Assert
+        
         await Assert.That(matches).IsTrue();
     }
 
     [Test]
     public async Task TestDependency_WithParameters_DoesNotMatchWrongOverload()
     {
-        // Arrange
         var dependency = new TestDependency
         {
             ClassType = typeof(DependsOnTests),
@@ -172,24 +153,19 @@ public class DependsOnTests
             MethodParameters = [typeof(string), typeof(int)]
         };
         var testMetadata = CreateTestMetadata<DependsOnTests>("test1", "OverloadedMethod", 1);
-
-        // Act
+        
         var matches = dependency.Matches(testMetadata);
-
-        // Assert
+        
         await Assert.That(matches).IsFalse();
     }
 
     [Test]
     public async Task DependsOnAttribute_ToTestDependency_CreatesCorrectDependency()
     {
-        // Arrange
         var attr = new DependsOnAttribute("TestMethod");
-
-        // Act
+        
         var dependency = attr.ToTestDependency();
-
-        // Assert
+        
         await Assert.That(dependency.MethodName).IsEqualTo("TestMethod");
         await Assert.That(dependency.ClassType).IsNull();
     }
@@ -197,13 +173,10 @@ public class DependsOnTests
     [Test]
     public async Task GenericDependsOnAttribute_ToTestDependency_CreatesCorrectDependency()
     {
-        // Arrange
-        var attr = new DependsOnAttribute<string>(); // Depends on all tests in string class
-
-        // Act
+        var attr = new DependsOnAttribute<string>();
+        
         var dependency = attr.ToTestDependency();
-
-        // Assert
+        
         await Assert.That(dependency.ClassType).IsEqualTo(typeof(string));
         await Assert.That(dependency.MethodName).IsNull();
     }
@@ -211,46 +184,36 @@ public class DependsOnTests
     [Test]
     public async Task TestDependency_FromClass_MatchesInheritedTests()
     {
-        // Arrange
         var dependency = TestDependency.FromClass(typeof(BaseTestClass));
         var testMetadata = CreateTestMetadata<DerivedTestClass>("test1", "InheritedTest");
-
-        // Act
+        
         var matches = dependency.Matches(testMetadata);
-
-        // Assert
+        
         await Assert.That(matches).IsTrue();
     }
 
     [Test]
     public async Task TestDependency_WithGenericBase_MatchesInheritedTests()
     {
-        // Arrange
         var dependency = TestDependency.FromClass(typeof(GenericBaseClass<>));
         var testMetadata = CreateTestMetadata<DerivedFromGenericClass>("test1", "Test");
-
-        // Act
+        
         var matches = dependency.Matches(testMetadata);
-
-        // Assert
+        
         await Assert.That(matches).IsTrue();
     }
 
     [Test]
     public async Task TestDependency_FromClassAndMethod_MatchesInheritedMethod()
     {
-        // Arrange
         var dependency = TestDependency.FromClassAndMethod(typeof(BaseTestClass), "BaseMethod");
         var testMetadata = CreateTestMetadata<DerivedTestClass>("test1", "BaseMethod");
-
-        // Act
+        
         var matches = dependency.Matches(testMetadata);
-
-        // Assert
+        
         await Assert.That(matches).IsTrue();
     }
 
-    // Test classes for inheritance scenarios
     public class BaseTestClass
     {
         [Test]
@@ -266,7 +229,6 @@ public class DependsOnTests
 
     public class GenericBaseClass<T>
     {
-        // Not marking with [Test] since it's a generic class
         public void GenericTest() { }
     }
 

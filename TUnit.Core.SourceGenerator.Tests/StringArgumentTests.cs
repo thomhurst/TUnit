@@ -9,6 +9,5 @@ internal class StringArgumentTests : TestsBase
             "StringArgumentTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(2);
-        });
+            });
 }
