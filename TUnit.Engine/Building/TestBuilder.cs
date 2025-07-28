@@ -27,6 +27,7 @@ internal sealed class TestBuilder : ITestBuilder
     public async Task<IEnumerable<ExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata)
     {
         var tests = new List<ExecutableTest>();
+        // Remove debug logging
 
         try
         {
@@ -134,8 +135,9 @@ internal sealed class TestBuilder : ITestBuilder
                         {
                             methodDataLoopIndex++;
 
-                            for (var i = 0; i < metadata.RepeatCount; i++)
+                            for (var i = 0; i < metadata.RepeatCount + 1; i++)
                             {
+                                // Remove debug logging
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
                                 var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
 

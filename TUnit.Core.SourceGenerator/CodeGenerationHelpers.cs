@@ -487,11 +487,11 @@ internal static class CodeGenerationHelpers
     public static int ExtractRepeatCount(IMethodSymbol methodSymbol)
     {
         var repeatAttr = methodSymbol.GetAttributes()
-            .FirstOrDefault(attr => attr.AttributeClass!.GloballyQualified() == "TUnit.Core.RepeatAttribute");
+            .FirstOrDefault(attr => attr.AttributeClass!.Name == "RepeatAttribute");
 
         if (repeatAttr == null || repeatAttr.ConstructorArguments.Length == 0)
         {
-            return 1;
+            return 0;
         }
 
         if (repeatAttr.ConstructorArguments[0].Value is int count and > 0)
@@ -499,7 +499,7 @@ internal static class CodeGenerationHelpers
             return count;
         }
 
-        return 1;
+        return 0;
     }
 
     /// <summary>

@@ -126,6 +126,6 @@ public class TestMethodAnalyzer : ITestAnalyzer
             }
         }
 
-        return 1;
+        return 0;
     }
 }

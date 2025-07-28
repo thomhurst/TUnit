@@ -226,7 +226,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("Categories = global::System.Array.Empty<string>(),");
         writer.AppendLine("TimeoutMs = null,");
         writer.AppendLine("RetryCount = 0,");
-        writer.AppendLine("RepeatCount = 1,");
+        writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(methodSymbol)},");
         writer.AppendLine("CanRunInParallel = true,");
 
         // Generate dependencies
