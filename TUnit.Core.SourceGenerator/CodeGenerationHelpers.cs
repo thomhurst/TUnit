@@ -30,13 +30,13 @@ internal static class CodeGenerationHelpers
                 // Handle type parameters and types containing type parameters
                 var containsTypeParam = ContainsTypeParameter(param.Type);
                 var typeForConstructor = containsTypeParam ? "object" : param.Type.GloballyQualified();
-                
+
                 // Debug: Add comment to show what's happening
                 if (containsTypeParam)
                 {
                     writer.AppendLine($"// Parameter '{param.Name}' contains type parameters, using typeof(object)");
                 }
-                
+
                 using (writer.BeginObjectInitializer($"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))", ","))
                 {
                     writer.AppendLine($"Name = \"{param.Name}\",");
@@ -168,13 +168,13 @@ internal static class CodeGenerationHelpers
 
         return false;
     }
-    
+
     /// <summary>
     /// Gets a safe type name for use in typeof() expressions.
     /// Returns "object" only for actual type parameters or types containing them.
     /// Returns open generic forms (e.g., List<>) for generic type definitions.
     /// </summary>
-    
+
 
     /// <summary>
     /// Generates C# code for PropertyMetadata array from class properties.
@@ -484,10 +484,12 @@ internal static class CodeGenerationHelpers
     /// <summary>
     /// Extracts repeat count from repeat attributes.
     /// </summary>
-    public static int ExtractRepeatCount(IMethodSymbol methodSymbol)
+    public static int ExtractRepeatCount(IMethodSymbol methodSymbol, INamedTypeSymbol testMethodTypeSymbol)
     {
         var repeatAttr = methodSymbol.GetAttributes()
-            .FirstOrDefault(attr => attr.AttributeClass!.Name == "RepeatAttribute");
+                .FirstOrDefault(attr => attr.AttributeClass!.Name == "RepeatAttribute")
+            ?? testMethodTypeSymbol.GetAttributesIncludingBaseTypes().FirstOrDefault(attr => attr.AttributeClass!.Name == "RepeatAttribute")
+            ?? testMethodTypeSymbol.ContainingAssembly.GetAttributes().FirstOrDefault(attr => attr.AttributeClass!.Name == "RepeatAttribute");
 
         if (repeatAttr == null || repeatAttr.ConstructorArguments.Length == 0)
         {

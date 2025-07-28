@@ -176,7 +176,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{className}>");
         }
-        
+
         writer.AppendLine("{");
         writer.Indent();
 
@@ -226,7 +226,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("Categories = global::System.Array.Empty<string>(),");
         writer.AppendLine("TimeoutMs = null,");
         writer.AppendLine("RetryCount = 0,");
-        writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(methodSymbol)},");
+        writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(methodSymbol, testMethod.TypeSymbol)},");
         writer.AppendLine("CanRunInParallel = true,");
 
         // Generate dependencies
@@ -405,7 +405,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // We need to manually construct this to properly add the Factory property
         var attrClass = attr.AttributeClass!;
         var attrTypeName = attrClass.GloballyQualified();
-        
+
         if (attr.ConstructorArguments is
             [
                 { Value: ITypeSymbol typeArg } _, _, ..
@@ -970,7 +970,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("TestInvoker = async (instance, args) =>");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         // Use reflection to invoke the method on the generic type instance
         writer.AppendLine("var instanceType = instance.GetType();");
         writer.AppendLine($"var method = instanceType.GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);");
@@ -981,7 +981,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
-        
+
         // Handle generic method case
         if (testMethod.IsGenericMethod && testMethod.MethodSymbol.TypeParameters.Length > 0)
         {
@@ -1018,20 +1018,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("}");
             writer.AppendLine();
         }
-        
+
         writer.AppendLine("// Prepare method arguments");
         writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationToken ? " + 1" : "") + "];");
         writer.AppendLine("args.CopyTo(methodArgs, 0);");
-        
+
         if (hasCancellationToken)
         {
             writer.AppendLine("methodArgs[args.Length] = global::TUnit.Core.TestContext.Current?.CancellationToken ?? System.Threading.CancellationToken.None;");
         }
-        
+
         writer.AppendLine();
         writer.AppendLine("// Invoke the method");
         writer.AppendLine("var result = method.Invoke(instance, methodArgs);");
-        
+
         if (isAsync)
         {
             writer.AppendLine("if (result is Task task)");
@@ -1041,7 +1041,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
         }
-        
+
         writer.Unindent();
         writer.AppendLine("},");
     }
@@ -1082,11 +1082,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Check if last parameter is params array
             var hasParams = parametersFromArgs.Length > 0 && parametersFromArgs[parametersFromArgs.Length - 1].IsParams;
-            
+
             // For params arrays, we need to handle any number of arguments >= required count
             // Generate a reasonable number of cases plus a default that handles the rest
             var casesToGenerate = hasParams ? 10 : parametersFromArgs.Length - requiredParamCount + 1;
-            
+
             // Generate cases for each valid argument count
             for (var i = 0; i < casesToGenerate && requiredParamCount + i <= parametersFromArgs.Length + 5; i++)
             {
@@ -1174,11 +1174,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Check if last parameter is params array
             var hasParams = parametersFromArgs.Length > 0 && parametersFromArgs[parametersFromArgs.Length - 1].IsParams;
-            
+
             // For params arrays, we need to handle any number of arguments >= required count
             // Generate a reasonable number of cases plus a default that handles the rest
             var casesToGenerate = hasParams ? 10 : parametersFromArgs.Length - requiredParamCount + 1;
-            
+
             // Generate cases for each valid argument count
             for (var i = 0; i < casesToGenerate && requiredParamCount + i <= parametersFromArgs.Length + 5; i++)
             {
