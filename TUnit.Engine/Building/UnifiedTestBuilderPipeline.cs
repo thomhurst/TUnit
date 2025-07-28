@@ -140,7 +140,6 @@ internal sealed class UnifiedTestBuilderPipeline
                 foreach (var test in testsFromMetadata)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    Console.WriteLine($"[DEBUG] Yielding test: {test.Metadata.TestClassType.Name}.{test.Metadata.TestName} (ID: {test.TestId})");
                     yield return test;
                 }
             }

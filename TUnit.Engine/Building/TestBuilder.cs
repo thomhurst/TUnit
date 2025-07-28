@@ -134,7 +134,7 @@ internal sealed class TestBuilder : ITestBuilder
                         {
                             methodDataLoopIndex++;
 
-                            for (var i = 0; i < metadata.RepeatCount + 1; i++)
+                            for (var i = 0; i < metadata.RepeatCount; i++)
                             {
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
                                 var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
