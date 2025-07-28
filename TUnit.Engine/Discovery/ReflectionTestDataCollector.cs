@@ -464,7 +464,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 CanRunInParallel = ReflectionAttributeExtractor.CanRunInParallel(testClass, testMethod),
                 Dependencies = ReflectionAttributeExtractor.ExtractDependencies(testClass, testMethod),
                 DataSources = ReflectionAttributeExtractor.ExtractDataSources(testMethod),
-                ClassDataSources = classData != null 
+                ClassDataSources = classData != null
                     ? [new StaticDataSourceAttribute(new[] { classData })]
                     : ReflectionAttributeExtractor.ExtractDataSources(testClass),
                 PropertyDataSources = ReflectionAttributeExtractor.ExtractPropertyDataSources(testClass),
@@ -600,17 +600,17 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         return type.IsDefined(typeof(CompilerGeneratedAttribute), inherit: false);
     }
-    
+
     private static ParameterInfo[] GetParametersWithoutCancellationToken(MethodInfo method)
     {
         var parameters = method.GetParameters();
-        
+
         // Check if last parameter is CancellationToken and exclude it
         if (parameters.Length > 0 && parameters[^1].ParameterType == typeof(CancellationToken))
         {
             return parameters.Take(parameters.Length - 1).ToArray();
         }
-        
+
         return parameters;
     }
 
@@ -759,12 +759,12 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 // Cast arguments to the expected parameter types
                 var parameters = ctor.GetParameters();
                 var castedArgs = new object?[parameters.Length];
-                
+
                 for (int i = 0; i < parameters.Length && i < args.Length; i++)
                 {
                     castedArgs[i] = CastHelper.Cast(parameters[i].ParameterType, args[i]);
                 }
-                
+
                 return ctor.Invoke(castedArgs) ?? throw new InvalidOperationException("Failed to create instance");
             }
             catch (Exception ex)
@@ -787,7 +787,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 // Get the method to invoke - may need to make it concrete if it's generic
                 var methodToInvoke = testMethod;
-                
+
                 // If the method is a generic method definition, we need to make it concrete
                 if (testMethod.IsGenericMethodDefinition)
                 {
@@ -795,7 +795,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     var genericParams = testMethod.GetGenericArguments();
                     var typeArguments = new Type[genericParams.Length];
                     var methodParams = testMethod.GetParameters();
-                    
+
                     // Map generic parameters to concrete types based on arguments
                     for (int i = 0; i < genericParams.Length; i++)
                     {
@@ -805,27 +805,27 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                             var paramType = methodParams[j].ParameterType;
                             if (paramType == genericParams[i] && args[j] != null)
                             {
-                                typeArguments[i] = args[j].GetType();
+                                typeArguments[i] = args[j]?.GetType() ?? paramType;
                                 break;
                             }
                         }
-                        
+
                         // If we couldn't infer the type, default to object
                         typeArguments[i] ??= typeof(object);
                     }
-                    
+
                     methodToInvoke = testMethod.MakeGenericMethod(typeArguments);
                 }
-                
+
                 // Cast arguments to the expected parameter types
                 var parameters = methodToInvoke.GetParameters();
                 var castedArgs = new object?[parameters.Length];
-                
+
                 for (int i = 0; i < parameters.Length && i < args.Length; i++)
                 {
                     castedArgs[i] = CastHelper.Cast(parameters[i].ParameterType, args[i]);
                 }
-                
+
                 var result = methodToInvoke.Invoke(instance, castedArgs);
                 if (result is Task task)
                 {
