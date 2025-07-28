@@ -43,6 +43,28 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             static (context, tuple) => GenerateInheritedTestSources(context, tuple.Right, tuple.Left));
     }
 
+    private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context)
+    {
+        var classSyntax = (ClassDeclarationSyntax)context.TargetNode;
+
+        if (context.TargetSymbol is not INamedTypeSymbol classSymbol)
+        {
+            return null;
+        }
+
+        // Skip abstract classes
+        if (classSymbol.IsAbstract)
+        {
+            return null;
+        }
+
+        return new InheritsTestsClassMetadata
+        {
+            TypeSymbol = classSymbol,
+            ClassSyntax = classSyntax
+        };
+    }
+
     private static TestMethodMetadata? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context)
     {
         var methodSyntax = (MethodDeclarationSyntax)context.TargetNode;
@@ -78,6 +100,45 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             IsGenericMethod = isGenericMethod,
             MethodAttributes = methodSymbol.GetAttributes()
         };
+    }
+
+    private static void GenerateInheritedTestSources(SourceProductionContext context, Compilation compilation, InheritsTestsClassMetadata? classInfo)
+    {
+        if (classInfo?.TypeSymbol == null)
+        {
+            return;
+        }
+
+        // Find all test methods in base classes
+        var inheritedTestMethods = CollectInheritedTestMethods(classInfo.TypeSymbol);
+
+        // Generate test metadata for each inherited test method
+        foreach (var method in inheritedTestMethods)
+        {
+            var testAttribute = method.GetAttributes().FirstOrDefault(a => a.IsTestAttribute());
+
+            // Skip if no test attribute found
+            if (testAttribute == null)
+            {
+                continue;
+            }
+
+            var testMethodMetadata = new TestMethodMetadata
+            {
+                MethodSymbol = method,
+                TypeSymbol = classInfo.TypeSymbol,
+                FilePath = classInfo.ClassSyntax.SyntaxTree.FilePath,
+                LineNumber = classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+                TestAttribute = testAttribute,
+                Context = null, // No context for inherited tests
+                MethodSyntax = null, // No syntax for inherited methods
+                IsGenericType = classInfo.TypeSymbol.IsGenericType,
+                IsGenericMethod = method.IsGenericMethod,
+                MethodAttributes = method.GetAttributes()
+            };
+
+            GenerateTestMethodSource(context, compilation, testMethodMetadata);
+        }
     }
 
     private static void GenerateTestMethodSource(SourceProductionContext context, Compilation compilation, TestMethodMetadata? testMethod)
@@ -1480,68 +1541,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return defaultValue.ToString();
     }
 
-    private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context)
-    {
-        var classSyntax = (ClassDeclarationSyntax)context.TargetNode;
-        var classSymbol = context.TargetSymbol as INamedTypeSymbol;
-
-        if (classSymbol == null)
-        {
-            return null;
-        }
-
-        // Skip abstract classes
-        if (classSymbol.IsAbstract)
-        {
-            return null;
-        }
-
-
-        return new InheritsTestsClassMetadata
-        {
-            TypeSymbol = classSymbol,
-            ClassSyntax = classSyntax
-        };
-    }
-
-    private static void GenerateInheritedTestSources(SourceProductionContext context, Compilation compilation, InheritsTestsClassMetadata? classInfo)
-    {
-        if (classInfo?.TypeSymbol == null)
-        {
-            return;
-        }
-
-        // Find all test methods in base classes
-        var inheritedTestMethods = CollectInheritedTestMethods(classInfo.TypeSymbol);
-
-        // Generate test metadata for each inherited test method
-        foreach (var method in inheritedTestMethods)
-        {
-            var testAttribute = method.GetAttributes().FirstOrDefault(a => a.IsTestAttribute());
-
-            // Skip if no test attribute found
-            if (testAttribute == null)
-            {
-                continue;
-            }
-
-            var testMethodMetadata = new TestMethodMetadata
-            {
-                MethodSymbol = method,
-                TypeSymbol = classInfo.TypeSymbol,
-                FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? "",
-                LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
-                TestAttribute = testAttribute,
-                Context = null, // No context for inherited tests
-                MethodSyntax = method.DeclaringSyntaxReferences.Select(x => x.GetSyntax()).OfType<MethodDeclarationSyntax>().FirstOrDefault(), // We don't have the syntax for inherited methods
-                IsGenericType = classInfo.TypeSymbol.IsGenericType,
-                IsGenericMethod = method.IsGenericMethod,
-                MethodAttributes = method.GetAttributes()
-            };
-
-            GenerateTestMethodSource(context, compilation, testMethodMetadata);
-        }
-    }
 
     private static List<IMethodSymbol> CollectInheritedTestMethods(INamedTypeSymbol derivedClass)
     {
@@ -1751,3 +1750,4 @@ public class InheritsTestsClassMetadata
     public required INamedTypeSymbol TypeSymbol { get; init; }
     public required ClassDeclarationSyntax ClassSyntax { get; init; }
 }
+

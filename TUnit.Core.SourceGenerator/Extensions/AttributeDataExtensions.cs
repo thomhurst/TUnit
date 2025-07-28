@@ -11,9 +11,7 @@ public static class AttributeDataExtensions
 
     public static bool IsTestAttribute(this AttributeData? attributeData)
     {
-        return attributeData?.AttributeClass?.AllInterfaces.Any(x =>
-                x.GloballyQualified() == WellKnownFullyQualifiedClassNames.TestAttribute.WithGlobalPrefix)
-            == true;
+        return attributeData?.AttributeClass?.GloballyQualified() == WellKnownFullyQualifiedClassNames.TestAttribute.WithGlobalPrefix;
     }
 
     public static bool IsDataSourceAttribute(this AttributeData? attributeData)
