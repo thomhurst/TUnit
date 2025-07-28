@@ -147,33 +147,26 @@ public sealed class PropertyInjectionService
         var dataSource = metadata.CreateDataSource();
 
         // Create metadata for data generation
-        var dataGeneratorMetadata = new DataGeneratorMetadata
+        // Create property metadata
+        var propertyMetadata = new PropertyMetadata
         {
-            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
-            {
-                Events = events,
-                TestMetadata = methodMetadata,
-                DataSourceAttribute = dataSource,
-                ObjectBag = objectBag,
-            }),
-            MembersToGenerate =
-            [
-                new PropertyMetadata
-                {
-                    IsStatic = false,
-                    Name = metadata.PropertyName,
-                    ClassMetadata = GetClassMetadataForType(metadata.ContainingType),
-                    Type = metadata.PropertyType,
-                    ReflectionInfo = GetPropertyInfo(metadata.ContainingType, metadata.PropertyName),
-                    Getter = parent => GetPropertyInfo(metadata.ContainingType, metadata.PropertyName).GetValue(parent!)!,
-                }
-            ],
-            TestInformation = methodMetadata,
-            Type = DataGeneratorType.Property,
-            TestSessionId = TestSessionContext.Current!.Id,
-            TestClassInstance = TestContext.Current?.TestDetails.ClassInstance,
-            ClassInstanceArguments = TestContext.Current?.TestDetails.TestClassArguments
+            IsStatic = false,
+            Name = metadata.PropertyName,
+            ClassMetadata = GetClassMetadataForType(metadata.ContainingType),
+            Type = metadata.PropertyType,
+            ReflectionInfo = GetPropertyInfo(metadata.ContainingType, metadata.PropertyName),
+            Getter = parent => GetPropertyInfo(metadata.ContainingType, metadata.PropertyName).GetValue(parent!)!,
         };
+        
+        // Use centralized factory
+        var dataGeneratorMetadata = DataGeneratorMetadataCreator.CreateForPropertyInjection(
+            propertyMetadata,
+            methodMetadata,
+            dataSource,
+            TestContext.Current,
+            TestContext.Current?.TestDetails.ClassInstance,
+            events,
+            objectBag);
 
         // Get data from the source
         var dataRows = dataSource.GetDataRowsAsync(dataGeneratorMetadata);
@@ -201,33 +194,16 @@ public sealed class PropertyInjectionService
     private static async Task ProcessReflectionPropertyDataSource(object instance, PropertyInfo property, IDataSourceAttribute dataSource, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
     {
         // Create metadata for data generation
-        var dataGeneratorMetadata = new DataGeneratorMetadata
-        {
-            TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
-            {
-                Events = events,
-                TestMetadata = methodMetadata,
-                DataSourceAttribute = dataSource,
-                ObjectBag = objectBag,
-            }),
-            MembersToGenerate =
-            [
-                new PropertyMetadata
-                {
-                    IsStatic = property.GetMethod?.IsStatic ?? false,
-                    Name = property.Name,
-                    ClassMetadata = GetClassMetadataForType(property.DeclaringType!),
-                    Type = property.PropertyType,
-                    ReflectionInfo = property,
-                    Getter = parent => property.GetValue(parent),
-                }
-            ],
-            TestInformation = methodMetadata,
-            Type = DataGeneratorType.Property,
-            TestSessionId = TestSessionContext.Current!.Id,
-            TestClassInstance = instance,
-            ClassInstanceArguments = TestContext.Current?.TestDetails.TestClassArguments ?? []
-        };
+        // Use centralized factory for reflection mode
+        var dataGeneratorMetadata = DataGeneratorMetadataCreator.CreateForPropertyInjection(
+            property,
+            property.DeclaringType!,
+            methodMetadata,
+            dataSource,
+            TestContext.Current,
+            instance,
+            events,
+            objectBag);
 
         // Get data from the source
         var dataRows = dataSource.GetDataRowsAsync(dataGeneratorMetadata);

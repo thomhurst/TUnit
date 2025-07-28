@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
@@ -14,17 +13,6 @@ internal sealed class UnifiedTestBuilderPipeline
     private readonly IContextProvider _contextProvider;
 
     public UnifiedTestBuilderPipeline(
-        ITestDataCollector dataCollector,
-        ITestBuilder testBuilder,
-        IContextProvider contextBuilder)
-    {
-        // For backward compatibility, create a factory that ignores filter types
-        _dataCollectorFactory = _ => dataCollector ?? throw new ArgumentNullException(nameof(dataCollector));
-        _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
-        _contextProvider = contextBuilder;
-    }
-
-    public UnifiedTestBuilderPipeline(
         Func<HashSet<Type>?, ITestDataCollector> dataCollectorFactory,
         ITestBuilder testBuilder,
         IContextProvider contextBuilder)
@@ -32,11 +20,6 @@ internal sealed class UnifiedTestBuilderPipeline
         _dataCollectorFactory = dataCollectorFactory ?? throw new ArgumentNullException(nameof(dataCollectorFactory));
         _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
         _contextProvider = contextBuilder;
-    }
-
-    public async Task<IEnumerable<ExecutableTest>> BuildTestsAsync(string testSessionId)
-    {
-        return await BuildTestsAsync(testSessionId, filterTypes: null);
     }
 
     public async Task<IEnumerable<ExecutableTest>> BuildTestsAsync(string testSessionId, HashSet<Type>? filterTypes)
@@ -82,95 +65,6 @@ internal sealed class UnifiedTestBuilderPipeline
         }
 
         return executableTests;
-    }
-
-    /// Streams executable tests for memory efficiency with large test suites
-    public async IAsyncEnumerable<ExecutableTest> BuildTestsStreamAsync(
-        string testSessionId,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        await foreach (var test in BuildTestsStreamAsync(testSessionId, filterTypes: null, cancellationToken))
-        {
-            yield return test;
-        }
-    }
-
-    public async IAsyncEnumerable<ExecutableTest> BuildTestsStreamAsync(
-        string testSessionId,
-        HashSet<Type>? filterTypes,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        // Stream from collectors
-        await foreach (var metadata in CollectTestsStreamAsync(testSessionId, filterTypes, cancellationToken))
-        {
-            // Resolve generic types for this metadata
-            IEnumerable<TestMetadata> resolvedMetadataList;
-            ExecutableTest? failedTest = null;
-            try
-            {
-                resolvedMetadataList = [metadata];
-            }
-            catch (Exception ex)
-            {
-                // Create a failed test for generic resolution failures
-                failedTest = CreateFailedTestForGenericResolutionError(metadata, ex);
-                resolvedMetadataList = [
-                ];
-            }
-
-            if (failedTest != null)
-            {
-                yield return failedTest;
-                continue;
-            }
-
-            foreach (var resolvedMetadata in resolvedMetadataList)
-            {
-                // Build executable tests
-                IEnumerable<ExecutableTest> testsFromMetadata;
-                try
-                {
-                    testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(resolvedMetadata);
-                }
-                catch (Exception ex)
-                {
-                    testsFromMetadata = [CreateFailedTestForDataGenerationError(resolvedMetadata, ex)];
-                }
-
-                foreach (var test in testsFromMetadata)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    yield return test;
-                }
-            }
-        }
-    }
-
-    private async IAsyncEnumerable<TestMetadata> CollectTestsStreamAsync(
-        string testSessionId,
-        HashSet<Type>? filterTypes,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        var dataCollector = _dataCollectorFactory(filterTypes);
-
-        // Check if collector supports streaming
-        if (dataCollector is IStreamingTestDataCollector streamingCollector)
-        {
-            await foreach (var test in streamingCollector.CollectTestsStreamAsync(testSessionId, cancellationToken))
-            {
-                yield return test;
-            }
-        }
-        else
-        {
-            // Fall back to collection-based for non-streaming collectors
-            var tests = await dataCollector.CollectTestsAsync(testSessionId);
-            foreach (var test in tests)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                yield return test;
-            }
-        }
     }
 
     private ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)

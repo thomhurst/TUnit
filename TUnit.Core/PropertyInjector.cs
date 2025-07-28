@@ -45,26 +45,39 @@ public static class PropertyInjector
                 var containingType = testInformation.Type; // Use compile-time known type from metadata
                 var propertyType = propertyInjection?.PropertyType ?? typeof(object);
                 
-                var dataGeneratorMetadata = new DataGeneratorMetadata
+                // Create property metadata
+                PropertyMetadata? propertyMetadata = null;
+                if (propertyInjection != null)
                 {
-                    TestBuilderContext = new TestBuilderContextAccessor(TestBuilderContext.Current ?? TestBuilderContext.FromTestContext(testContext, propertyDataSource.DataSource)),
-                    MembersToGenerate = propertyInjection != null ? [
-                        new PropertyMetadata
-                        {
-                            IsStatic = false,
-                            Name = propertyDataSource.PropertyName,
-                            ClassMetadata = GetClassMetadataForType(containingType),
-                            Type = propertyType,
-                            ReflectionInfo = GetPropertyInfo(containingType, propertyDataSource.PropertyName),
-                            Getter = parent => GetPropertyInfo(containingType, propertyDataSource.PropertyName).GetValue(parent!)!,
-                        }
-                    ] : [],
-                    TestInformation = testInformation,
-                    Type = DataGeneratorType.Property,
-                    TestSessionId = testSessionId,
-                    TestClassInstance = instance,
-                    ClassInstanceArguments = testContext.TestDetails.TestClassArguments
-                };
+                    propertyMetadata = new PropertyMetadata
+                    {
+                        IsStatic = false,
+                        Name = propertyDataSource.PropertyName,
+                        ClassMetadata = GetClassMetadataForType(containingType),
+                        Type = propertyType,
+                        ReflectionInfo = GetPropertyInfo(containingType, propertyDataSource.PropertyName),
+                        Getter = parent => GetPropertyInfo(containingType, propertyDataSource.PropertyName).GetValue(parent!)!,
+                    };
+                }
+                
+                // Use centralized factory if we have property metadata
+                var dataGeneratorMetadata = propertyMetadata != null
+                    ? DataGeneratorMetadataCreator.CreateForPropertyInjection(
+                        propertyMetadata,
+                        testInformation,
+                        propertyDataSource.DataSource,
+                        testContext,
+                        instance)
+                    : new DataGeneratorMetadata
+                    {
+                        TestBuilderContext = new TestBuilderContextAccessor(TestBuilderContext.Current ?? TestBuilderContext.FromTestContext(testContext, propertyDataSource.DataSource)),
+                        MembersToGenerate = [],
+                        TestInformation = testInformation,
+                        Type = DataGeneratorType.Property,
+                        TestSessionId = testSessionId,
+                        TestClassInstance = instance,
+                        ClassInstanceArguments = testContext.TestDetails.TestClassArguments
+                    };
 
                 var dataRows = propertyDataSource.DataSource.GetDataRowsAsync(dataGeneratorMetadata);
 
