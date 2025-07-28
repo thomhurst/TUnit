@@ -1,3 +1,0 @@
-[
-file static class AssemblyLoader_Guid
-]
