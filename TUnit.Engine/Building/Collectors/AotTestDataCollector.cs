@@ -10,11 +10,9 @@ namespace TUnit.Engine.Building.Collectors;
 /// </summary>
 public sealed class AotTestDataCollector : ITestDataCollector
 {
-    private readonly HashSet<Type>? _filterTypes;
-    
     public AotTestDataCollector(HashSet<Type>? filterTypes = null)
     {
-        _filterTypes = filterTypes;
+        // filterTypes parameter kept for backward compatibility but ignored
     }
     
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
@@ -23,30 +21,9 @@ public sealed class AotTestDataCollector : ITestDataCollector
         var resultsByIndex = new ConcurrentDictionary<int, IEnumerable<TestMetadata>>();
 
         // Collect tests from all registered test sources using true parallel processing
-        var testSourcesList = new List<ITestSource>();
-        
-        if (_filterTypes == null || _filterTypes.Count == 0)
-        {
-            // No filter - get all test sources
-            testSourcesList = Sources.TestSources.SelectMany(kvp => kvp.Value).ToList();
-        }
-        else
-        {
-            // Filter to only requested types
-            foreach (var type in _filterTypes)
-            {
-                if (Sources.TestSources.TryGetValue(type, out var queue))
-                {
-                    testSourcesList.AddRange(queue);
-                }
-            }
-            
-            // Also check the "all types" queue for backward compatibility
-            if (Sources.TestSources.TryGetValue(typeof(object), out var allTypesQueue))
-            {
-                testSourcesList.AddRange(allTypesQueue);
-            }
-        }
+        var testSourcesList = Sources.TestSources
+            .SelectMany(kvp => kvp.Value)
+            .ToList();
         
         var parallelOptions = new ParallelOptions
         {

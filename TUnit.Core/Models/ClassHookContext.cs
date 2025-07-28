@@ -27,6 +27,10 @@ public class ClassHookContext : Context
 
     public void AddTest(TestContext testContext)
     {
+        if (_tests.Contains(testContext))
+        {
+            return; // Prevent duplicates
+        }
         _tests.Add(testContext);
     }
 
