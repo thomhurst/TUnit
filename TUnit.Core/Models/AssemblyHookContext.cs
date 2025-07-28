@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using System.Reflection;
 
 namespace TUnit.Core;
 
+[DebuggerDisplay("{Assembly.GetName().Name}")]
 public class AssemblyHookContext : Context
 {
     private static readonly AsyncLocal<AssemblyHookContext?> Contexts = new();

@@ -1,7 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
 
+[DebuggerDisplay("{ClassType.Name}")]
 public class ClassHookContext : Context
 {
     private static readonly AsyncLocal<ClassHookContext?> Contexts = new();

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Enums;
@@ -11,6 +12,7 @@ namespace TUnit.Core;
 /// <summary>
 /// Simplified test context for the new architecture
 /// </summary>
+[DebuggerDisplay("{TestDetails.ClassType.Name}.{GetDisplayName(),nq}")]
 public class TestContext : Context
 {
     public TestContext(string testName, IServiceProvider serviceProvider, ClassHookContext classContext, TestBuilderContext testBuilderContext, CancellationToken cancellationToken) : base(classContext)
