@@ -10,7 +10,7 @@ namespace TUnit.Core;
 public static class PropertyInjector
 {
     private static readonly BindingFlags BackingFieldFlags =
-        BindingFlags.Instance | BindingFlags.NonPublic;
+        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
 
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
     public static async Task InjectPropertiesAsync(
@@ -124,6 +124,7 @@ public static class PropertyInjector
         await InjectPropertiesWithValuesAsync(testContext, instance, propertyValues, injectionData, 5, 0);
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Reflection mode requires dynamic property access")]
     private static async Task InjectPropertiesWithValuesAsync(
         TestContext testContext,
         object? instance,
@@ -233,7 +234,7 @@ public static class PropertyInjector
             $"is not writable and no backing field was found.");
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Property backing field access requires reflection")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Reflection mode only - backing field access requires reflection")]
     private static FieldInfo? GetBackingField(PropertyInfo property)
     {
         if (property.DeclaringType == null)
@@ -267,7 +268,8 @@ public static class PropertyInjector
         return null;
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Property injection requires reflection access to object type")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Reflection mode only - property injection requires dynamic access")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection mode only - property injection requires dynamic access")]
     private static async Task InjectPropertiesViaReflectionAsync(
         TestContext testContext,
         object instance,
@@ -377,19 +379,17 @@ public static class PropertyInjector
         return true;
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Property injection requires reflection access")]
     private static FieldInfo? GetField([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type, string name, BindingFlags bindingFlags)
     {
         return type.GetField(name, bindingFlags);
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Property injection requires reflection access")]
     private static PropertyInfo? GetProperty([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type, string name)
     {
         return type.GetProperty(name);
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Checking IsInitOnly property requires reflection")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection mode only - IsInitOnly check requires reflection")]
     private static bool IsInitOnlyMethod(MethodInfo setMethod)
     {
         var methodType = setMethod.GetType();
@@ -397,8 +397,8 @@ public static class PropertyInjector
         return isInitOnlyProperty != null && (bool)isInitOnlyProperty.GetValue(setMethod)!;
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Property injection with fallback to reflection")]
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Property injection with fallback to reflection")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Source generation mode uses pre-generated injection data")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Source generation mode uses pre-generated injection data")]
     private static async Task InjectDataSourcePropertiesAsync(
         TestContext testContext,
         object dataSourceInstance,

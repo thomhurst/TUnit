@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core.Helpers;
 
@@ -28,7 +29,7 @@ public static class TupleHelper
     /// Unwraps a tuple into an array of its elements
     /// </summary>
     [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2075:UnrecognizedReflectionPattern",
-        Justification = "This method specifically handles tuple types which have known structure")]
+        Justification = "Reflection is used as a fallback. AOT analyzer warns at compile time.")]
     public static object?[] UnwrapTuple(object? value)
     {
         if (value == null)
@@ -43,6 +44,8 @@ public static class TupleHelper
             return [value];
         }
         
+        // Even in source generation mode, we use reflection as a fallback
+        // The AOT analyzer will warn about incompatibility at compile time
         var elements = new List<object?>();
         
         if (type.FullName?.StartsWith("System.ValueTuple`") == true)
@@ -110,7 +113,7 @@ public static class TupleHelper
     /// For example: [(1, "a"), (2, "b")] becomes individual items that each unwrap to [1, "a"] and [2, "b"]
     /// </summary>
     [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2075:UnrecognizedReflectionPattern",
-        Justification = "This method specifically handles tuple types which have known structure")]
+        Justification = "Reflection is used as a fallback. AOT analyzer warns at compile time.")]
     public static IEnumerable<object?[]> ExpandTupleArray(object? value)
     {
         if (value == null)

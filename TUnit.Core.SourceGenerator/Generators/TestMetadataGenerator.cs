@@ -772,7 +772,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         {
                             // For init-only properties, use UnsafeAccessor on .NET 8+, throw on older frameworks
                             writer.AppendLine("#if NET8_0_OR_GREATER");
-                            writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
+                            // Cast to the property's containing type if needed
+                            var containingTypeName = property.ContainingType.GloballyQualified();
+                            if (containingTypeName != className)
+                            {
+                                writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({containingTypeName})instance) = ({propertyType})value,");
+                            }
+                            else
+                            {
+                                writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
+                            }
                             writer.AppendLine("#else");
                             writer.AppendLine($"Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
                             writer.AppendLine("#endif");
@@ -1571,9 +1580,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 var backingFieldName = $"<{property.Name}>k__BackingField";
                 var propertyType = property.Type.GloballyQualified();
+                // Use the property's containing type for the UnsafeAccessor, not the derived class
+                var containingTypeName = property.ContainingType.GloballyQualified();
 
                 writer.AppendLine($"[global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
-                writer.AppendLine($"private static extern ref {propertyType} Get{property.Name}BackingField({className} instance);");
+                writer.AppendLine($"private static extern ref {propertyType} Get{property.Name}BackingField({containingTypeName} instance);");
                 writer.AppendLine();
             }
             writer.AppendLine("#endif");

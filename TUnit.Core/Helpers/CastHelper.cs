@@ -1,13 +1,14 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core.Helpers;
 
 public static class CastHelper
 {
-    [UnconditionalSuppressMessage("", "IL2072")]
-    [UnconditionalSuppressMessage("", "IL3050")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Conversion operators are preserved through DynamicallyAccessedMembers attribute")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection is used as a fallback. AOT analyzer warns at compile time.")]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] T>(object? value)
     {
         if (value is null)
@@ -113,11 +114,13 @@ public static class CastHelper
             return (T?) value;
         }
 
+        // Even in source generation mode, we use reflection as a fallback for custom conversions
+        // The AOT analyzer will warn about incompatibility at compile time
         return (T?) conversionMethod.Invoke(null, [value]);
     }
 
-    [UnconditionalSuppressMessage("", "IL2072")]
-    [UnconditionalSuppressMessage("", "IL3050")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Conversion operators are preserved through DynamicallyAccessedMembers attribute")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection is used as a fallback. AOT analyzer warns at compile time.")]
     public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type, object? value)
     {
         if (value is null)
@@ -223,6 +226,8 @@ public static class CastHelper
             return value;
         }
 
+        // Even in source generation mode, we use reflection as a fallback for custom conversions
+        // The AOT analyzer will warn about incompatibility at compile time
         return conversionMethod.Invoke(null, [value]);
     }
 

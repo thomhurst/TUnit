@@ -194,9 +194,12 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 var propertyType = propInfo.Property.Type.ToDisplayString();
                 var backingFieldName = $"<{propInfo.Property.Name}>k__BackingField";
 
+                // Use the property's containing type for the UnsafeAccessor, not the derived class
+                var containingType = propInfo.Property.ContainingType.ToDisplayString();
+                
                 sb.AppendLine("#if NET8_0_OR_GREATER");
                 sb.AppendLine($"    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
-                sb.AppendLine($"    private static extern ref {propertyType} Get{propInfo.Property.Name}BackingField({classInfo.ClassSymbol.ToDisplayString()} instance);");
+                sb.AppendLine($"    private static extern ref {propertyType} Get{propInfo.Property.Name}BackingField({containingType} instance);");
                 sb.AppendLine("#endif");
                 sb.AppendLine();
             }
@@ -239,7 +242,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("            SetProperty = (instance, value) =>");
         sb.AppendLine("            {");
         sb.AppendLine($"                var typedInstance = ({classTypeName})instance;");
-        GeneratePropertySetting(sb, propInfo, propertyType, "typedInstance");
+        GeneratePropertySetting(sb, propInfo, propertyType, "typedInstance", classTypeName);
         sb.AppendLine("            }");
 
         sb.AppendLine("        };");
@@ -261,14 +264,23 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("                return dataSource;");
     }
 
-    private static void GeneratePropertySetting(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, string propertyType, string instanceVariableName)
+    private static void GeneratePropertySetting(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, string propertyType, string instanceVariableName, string classTypeName)
     {
         if (propInfo.Property.SetMethod?.IsInitOnly == true)
         {
             var castExpression = GetPropertyCastExpression(propInfo.Property, propertyType);
 
             sb.AppendLine("#if NET8_0_OR_GREATER");
-            sb.AppendLine($"                Get{propInfo.Property.Name}BackingField({instanceVariableName}) = {castExpression};");
+            // Cast to the property's containing type if needed
+            var containingType = propInfo.Property.ContainingType.ToDisplayString();
+            if (containingType != classTypeName)
+            {
+                sb.AppendLine($"                Get{propInfo.Property.Name}BackingField(({containingType}){instanceVariableName}) = {castExpression};");
+            }
+            else
+            {
+                sb.AppendLine($"                Get{propInfo.Property.Name}BackingField({instanceVariableName}) = {castExpression};");
+            }
             sb.AppendLine("#else");
             sb.AppendLine($"                var backingField = typeof({propInfo.Property.ContainingType.ToDisplayString()}).GetField(\"<{propInfo.Property.Name}>k__BackingField\",");
             sb.AppendLine("                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");

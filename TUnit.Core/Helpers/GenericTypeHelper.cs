@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core.Helpers;
 
@@ -18,9 +19,9 @@ public static class GenericTypeHelper
     /// <exception cref="ArgumentNullException">Thrown when genericTypeDefinition is null</exception>
     /// <exception cref="ArgumentException">Thrown when type arguments don't match the generic type definition</exception>
     [UnconditionalSuppressMessage("AOT", "IL2055:UnrecognizedReflectionPattern", 
-        Justification = "This is a fallback for when AOT replacements are not available")]
+        Justification = "MakeGenericType is used as a fallback. AOT analyzer warns at compile time.")]
     [UnconditionalSuppressMessage("AOT", "IL3050:RequiresDynamicCode", 
-        Justification = "This is a fallback for when AOT replacements are not available")]
+        Justification = "MakeGenericType is used as a fallback. AOT analyzer warns at compile time.")]
     public static Type MakeGenericTypeSafe(Type genericTypeDefinition, params Type[] typeArguments)
     {
         if (genericTypeDefinition == null)
@@ -48,9 +49,11 @@ public static class GenericTypeHelper
                 nameof(typeArguments));
         }
 
+        // Even in source generation mode, we attempt to use reflection as a fallback
+        // The AOT analyzer will warn about incompatibility at compile time
         try
         {
-            // Direct MakeGenericType with proper error handling
+            // Reflection mode - use MakeGenericType directly
             return genericTypeDefinition.MakeGenericType(typeArguments);
         }
         catch (ArgumentException ex)

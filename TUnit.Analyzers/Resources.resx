@@ -513,4 +513,31 @@
     <data name="TUnit0200Title" xml:space="preserve">
         <value>Avoid blocking async calls</value>
     </data>
+    <data name="TUnit0300Description" xml:space="preserve">
+        <value>Generic types and methods may not be AOT-compatible when using dynamic type creation. Consider using concrete types or ensure all generic combinations are known at compile time.</value>
+    </data>
+    <data name="TUnit0300MessageFormat" xml:space="preserve">
+        <value>{0} may not be AOT-compatible. All generic type combinations must be known at compile time.</value>
+    </data>
+    <data name="TUnit0300Title" xml:space="preserve">
+        <value>Generic type or method may not be AOT-compatible</value>
+    </data>
+    <data name="TUnit0301Description" xml:space="preserve">
+        <value>Tuple types require reflection for property/field access which is not AOT-compatible. Consider using concrete types or value deconstruction.</value>
+    </data>
+    <data name="TUnit0301MessageFormat" xml:space="preserve">
+        <value>{0} uses reflection which is not AOT-compatible. Consider using concrete types instead of tuples.</value>
+    </data>
+    <data name="TUnit0301Title" xml:space="preserve">
+        <value>Tuple usage may not be AOT-compatible</value>
+    </data>
+    <data name="TUnit0302Description" xml:space="preserve">
+        <value>Custom conversion operators (op_Implicit/op_Explicit) require runtime discovery which is not AOT-compatible. Use explicit casting or standard conversions.</value>
+    </data>
+    <data name="TUnit0302MessageFormat" xml:space="preserve">
+        <value>{0} invocation may not be AOT-compatible. Use explicit casting or standard conversions instead.</value>
+    </data>
+    <data name="TUnit0302Title" xml:space="preserve">
+        <value>Custom conversion operator may not be AOT-compatible</value>
+    </data>
 </root>
