@@ -296,7 +296,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
         public override SynchronizationContext CreateCopy()
         {
-            return this; // Return the same instance to maintain thread affinity
+            return this;
         }
     }
 

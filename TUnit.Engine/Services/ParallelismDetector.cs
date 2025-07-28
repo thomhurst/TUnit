@@ -194,7 +194,6 @@ public static class ParallelismDetector
     /// </summary>
     private static bool IsRunningInContainer()
     {
-        // Check common container environment indicators
         var containerEnvVars = new[] { "DOTNET_RUNNING_IN_CONTAINER", "CONTAINER", "KUBERNETES_SERVICE_HOST" };
         
         foreach (var envVar in containerEnvVars)
@@ -205,7 +204,6 @@ public static class ParallelismDetector
             }
         }
 
-        // Check for container-specific files on Linux
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             try

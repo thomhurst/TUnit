@@ -70,11 +70,9 @@ public static class DiscoveryConfiguration
         // Scale based on CPU count (more cores = potentially more complex projects)
         var cpuScaling = Math.Max(1.0, Environment.ProcessorCount / 4.0);
         
-        // Check if running in CI (CI environments get longer timeouts)
         var isCI = IsRunningInCI();
         var ciScaling = isCI ? 2.0 : 1.0;
         
-        // Check if running in container (containers might be resource-constrained)
         var isContainer = IsRunningInContainer();
         var containerScaling = isContainer ? 1.5 : 1.0;
         

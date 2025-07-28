@@ -93,7 +93,6 @@ public class TestExecutionRegistry : ISourceGeneratedTestRegistry
         _testData.Clear();
     }
 
-    // Additional strongly-typed registration methods
     public void RegisterStronglyTypedClassFactory<T>(string testId, Func<T> factory) where T : class
     {
         var data = GetOrCreateTestData(testId);

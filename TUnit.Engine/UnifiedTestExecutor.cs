@@ -95,7 +95,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
             return;
         }
 
-        // Initialize test counts for first/last event receivers
         var testContexts = testList.Select(t => t.Context);
         eventReceiverOrchestrator.InitializeTestCounts(testContexts);
 
@@ -104,7 +103,6 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
 
     private async Task PrepareHookOrchestrator(HookOrchestrator hookOrchestrator, List<ExecutableTest> testList, CancellationToken cancellationToken)
     {
-        // Initialize static properties with data source attributes before any other session setup
         await InitializeStaticPropertiesAsync(cancellationToken);
 
         var beforeSessionContext = await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);

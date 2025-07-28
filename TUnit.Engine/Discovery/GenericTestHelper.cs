@@ -17,7 +17,6 @@ internal static class GenericTestHelper
     {
         try
         {
-            // Check if the type is abstract
             if (testClass.IsAbstract)
             {
                 return null;
@@ -29,16 +28,13 @@ internal static class GenericTestHelper
                 throw new InvalidOperationException($"Cannot create instance of generic type definition {testClass.Name}. Generic type must be constructed with specific type arguments.");
             }
             
-            // Get class attributes to check for ClassDataSource
             var classAttributes = testClass.GetCustomAttributes().ToArray();
             
             // Find a suitable constructor
             var constructor = ConstructorHelper.FindSuitableConstructor(testClass, classAttributes);
             
-            // Create instance
             var instance = ConstructorHelper.CreateTestClassInstanceWithConstructor(testClass, constructor);
             
-            // Initialize required properties if needed
             if (instance != null && ConstructorHelper.HasRequiredProperties(testClass))
             {
                 ConstructorHelper.InitializeRequiredProperties(instance, testClass);

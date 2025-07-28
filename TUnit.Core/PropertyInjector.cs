@@ -37,12 +37,9 @@ public static class PropertyInjector
 
                 await ObjectInitializer.InitializeAsync(propertyDataSource.DataSource);
 
-                // Create property-specific metadata with the current property's information
                 var propertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
                 
-                // Use metadata-provided types when available (source generation mode), 
-                // fallback to runtime discovery (reflection mode)
-                var containingType = testInformation.Type; // Use compile-time known type from metadata
+                var containingType = testInformation.Type;
                 var propertyType = propertyInjection?.PropertyType ?? typeof(object);
                 
                 // Create property metadata
@@ -60,7 +57,6 @@ public static class PropertyInjector
                     };
                 }
                 
-                // Use centralized factory if we have property metadata
                 var dataGeneratorMetadata = propertyMetadata != null
                     ? DataGeneratorMetadataCreator.CreateForPropertyInjection(
                         propertyMetadata,
@@ -85,14 +81,12 @@ public static class PropertyInjector
                 {
                     var args = await factory();
                     
-                    // For tuple properties, we need to reconstruct the tuple from the unpacked elements
                     var currentPropertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
                     object? value;
                     
                     if (currentPropertyInjection != null && IsTupleType(currentPropertyInjection.PropertyType) && args != null && args.Length > 1)
                     {
-                        // The data source has unpacked the tuple, we need to reconstruct it
-                        #pragma warning disable IL2072 // Target parameter argument does not satisfy requirements
+                        #pragma warning disable IL2072
                         value = CreateTupleFromElements(currentPropertyInjection.PropertyType, args);
                         #pragma warning restore IL2072
                     }
@@ -101,7 +95,6 @@ public static class PropertyInjector
                         value = args?.FirstOrDefault();
                     }
 
-                    // Resolve Func<T> values to their actual values
                     value = await ResolveTestDataValueAsync(value);
 
                     if (value != null && value.GetType().IsClass && value.GetType() != typeof(string))
@@ -417,12 +410,8 @@ public static class PropertyInjector
         var injectionData = DataSourcePropertyInjectionRegistry.GetInjectionData(type);
         var propertyDataSources = DataSourcePropertyInjectionRegistry.GetPropertyDataSources(type);
 
-        // In AOT mode, we must rely entirely on source-generated injection data
-        // If not available, the properties cannot be injected
         if (injectionData == null || propertyDataSources == null)
         {
-            // For AOT compatibility, we cannot fall back to reflection-based discovery
-            // All property injection data must be provided by source generators
             return;
         }
 
@@ -483,35 +472,29 @@ public static class PropertyInjector
 
         var type = value.GetType();
 
-        // Check if it's a Func<T>
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))
         {
             var returnType = type.GetGenericArguments()[0];
 
-            // Invoke the Func to get the result
             var invokeMethod = type.GetMethod("Invoke");
             var result = invokeMethod!.Invoke(value, null);
 
-            // If the result is a Task, await it
             if (result is Task task)
             {
                 await task.ConfigureAwait(false);
 
-                // Get the Result property for Task<T>
                 if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>))
                 {
                     var resultProperty = task.GetType().GetProperty("Result");
                     return resultProperty?.GetValue(task);
                 }
 
-                // For non-generic Task
                 return null;
             }
 
             return result;
         }
 
-        // Check if it's already a Task<T>
         if (value is Task task2)
         {
             await task2.ConfigureAwait(false);
@@ -526,7 +509,6 @@ public static class PropertyInjector
             return null;
         }
 
-        // Handle other delegate types
         if (typeof(Delegate).IsAssignableFrom(type))
         {
             var invokeMethod = type.GetMethod("Invoke");
@@ -562,18 +544,15 @@ public static class PropertyInjector
         var genericArgs = tupleType.GetGenericArguments();
         if (genericArgs.Length != elements.Length)
         {
-            // If lengths don't match, just return the first element
             return elements.FirstOrDefault();
         }
 
-        // Create the tuple using Activator.CreateInstance
         try
         {
             return Activator.CreateInstance(tupleType, elements);
         }
         catch
         {
-            // If creation fails, return the first element
             return elements.FirstOrDefault();
         }
     }
@@ -594,7 +573,6 @@ public static class PropertyInjector
     {
         return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => 
         {
-            // Get constructor parameters for the class
             var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             var constructor = constructors.FirstOrDefault();
             

@@ -25,7 +25,6 @@ internal static class TestInstanceHelper
                 return null;
             }
             
-            // Check if this is an inherited test class
             var inheritsTests = testClass.GetCustomAttribute<InheritsTestsAttribute>() != null;
             if (inheritsTests)
             {
@@ -124,7 +123,6 @@ internal static class TestInstanceHelper
             // we cannot create an instance during discovery.
             // This matches the behavior of the source generator which handles this at compile time.
             
-            // Check if any base type in the hierarchy has required members
             var currentType = testClass;
             while (currentType != null && currentType != typeof(object))
             {
@@ -169,7 +167,6 @@ internal static class TestInstanceHelper
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target method return value does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
     private static void InitializeInheritedRequiredProperties(object instance, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
-        // Initialize properties from the entire inheritance chain
         var currentType = type;
         while (currentType != null && currentType != typeof(object))
         {

@@ -36,7 +36,6 @@ public class DynamicTestInstance<T> : DynamicTest<T> where T : class
 
     public override IEnumerable<DiscoveryResult> GetTests()
     {
-        // Create a discovery result for this dynamic test
         var result = new DynamicDiscoveryResult
         {
             TestMethod = TestMethod,

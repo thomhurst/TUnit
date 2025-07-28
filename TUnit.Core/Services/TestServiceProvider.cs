@@ -46,13 +46,11 @@ public class TestServiceProvider : IServiceProvider
 
     public object? GetService(Type serviceType)
     {
-        // Check for registered instances first
         if (_services.TryGetValue(serviceType, out var service))
         {
             return service;
         }
 
-        // Check for factories
         if (_factories.TryGetValue(serviceType, out var factory))
         {
             return factory();

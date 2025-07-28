@@ -120,7 +120,6 @@ internal static class DataGeneratorMetadataCreator
         IDataSourceAttribute dataSource,
         MethodMetadata? existingMethodMetadata = null)
     {
-        // Create a dummy parameter for discovery purposes
         var dummyParameter = new ParameterMetadata(typeof(object))
         {
             Name = "param0",
@@ -256,7 +255,6 @@ internal static class DataGeneratorMetadataCreator
     {
         return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () =>
         {
-            // Get constructor parameters for the class
             var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             var constructor = constructors.FirstOrDefault();
 

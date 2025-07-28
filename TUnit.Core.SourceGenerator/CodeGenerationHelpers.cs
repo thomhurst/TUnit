@@ -27,15 +27,8 @@ internal static class CodeGenerationHelpers
             foreach (var param in method.Parameters)
             {
                 var parameterIndex = method.Parameters.IndexOf(param);
-                // Handle type parameters and types containing type parameters
                 var containsTypeParam = ContainsTypeParameter(param.Type);
                 var typeForConstructor = containsTypeParam ? "object" : param.Type.GloballyQualified();
-
-                // Debug: Add comment to show what's happening
-                if (containsTypeParam)
-                {
-                    writer.AppendLine($"// Parameter '{param.Name}' contains type parameters, using typeof(object)");
-                }
 
                 using (writer.BeginObjectInitializer($"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))", ","))
                 {
@@ -44,7 +37,6 @@ internal static class CodeGenerationHelpers
                     var paramTypesArray = GenerateParameterTypesArray(method);
                     if (paramTypesArray == "null")
                     {
-                        // For methods with generic parameters, use GetMethods and find by name
                         writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethods(BindingFlags.Public | BindingFlags.Instance).FirstOrDefault(m => m.Name == \"{method.Name}\" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]");
                     }
                     else
@@ -67,7 +59,6 @@ internal static class CodeGenerationHelpers
         writer.SetIndentLevel(1);
         writer.Append($"new {typeName}(");
 
-        // Add constructor arguments
         if (attr.ConstructorArguments.Length > 0)
         {
             var argStrings = new List<string>();
@@ -79,16 +70,13 @@ internal static class CodeGenerationHelpers
                 // Check if this is a params array parameter
                 if (i == attr.ConstructorArguments.Length - 1 && IsParamsArrayArgument(attr, i))
                 {
-                    // For params arrays, expand the array elements
                     if (arg.Kind == TypedConstantKind.Array)
                     {
-                        // Check if the array is initialized before accessing it
                         if (!arg.Values.IsDefault)
                         {
                             var elements = arg.Values.Select(TypedConstantParser.GetRawTypedConstantValue);
                             argStrings.AddRange(elements);
                         }
-                        // If Values is default/uninitialized, don't add any arguments for the params array
                     }
                     else
                     {
@@ -106,7 +94,6 @@ internal static class CodeGenerationHelpers
 
         writer.Append(")");
 
-        // Add named arguments
         if (attr.NamedArguments.Length > 0)
         {
             writer.Append(" { ");
@@ -123,18 +110,14 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static bool IsParamsArrayArgument(AttributeData attr, int argumentIndex)
     {
-        // For known TUnit attributes with params, handle them explicitly
         var typeName = attr.AttributeClass!.GloballyQualified();
 
-        // ArgumentsAttribute and InlineDataAttribute use params object[]
         if (typeName == "global::TUnit.Core.ArgumentsAttribute" ||
             typeName == "global::TUnit.Core.InlineDataAttribute")
         {
             return true;
         }
 
-        // For other attributes, we'd need to check the constructor's parameter attributes
-        // but that's more complex and not needed for TUnit's current attributes
         return false;
     }
 
@@ -364,10 +347,8 @@ internal static class CodeGenerationHelpers
             return "System.Type.EmptyTypes";
         }
 
-        // Check if any parameter contains type parameters
         if (method.Parameters.Any(p => ContainsTypeParameter(p.Type)))
         {
-            // Return null to indicate that parameter type matching should be done at runtime
             return "null";
         }
 
@@ -615,7 +596,6 @@ internal static class CodeGenerationHelpers
         // Build assembly qualified name
         var typeName = typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
 
-        // For well-known types, use simplified names
         if (typeSymbol.ContainingAssembly.Name == "System.Private.CoreLib" ||
             typeSymbol.ContainingAssembly.Name == "mscorlib")
         {
@@ -642,8 +622,6 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static bool ShouldUseAotOptimizedDataSource(IMethodSymbol method)
     {
-        // For now, we'll use a conservative approach and only optimize static methods
-        // with simple return types that are clearly data sources
         if (!method.IsStatic)
         {
             return false;
@@ -655,12 +633,10 @@ internal static class CodeGenerationHelpers
 
         var returnType = method.ReturnType;
 
-        // Check for common data source return types
         if (returnType is INamedTypeSymbol namedType)
         {
             var typeString = namedType.ToDisplayString();
 
-            // Look for IEnumerable patterns that are commonly used for test data
             return typeString.Contains("IEnumerable<") ||
                    typeString.Contains("ICollection<") ||
                    typeString.Contains("List<") ||
@@ -676,8 +652,6 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static string GenerateAotOptimizedDataSource(string methodName, INamedTypeSymbol containingType, bool isShared)
     {
-        // For AOT compatibility, we'll use a compile-time generated data source
-        // that calls the method directly without reflection
         return $"new global::TUnit.Core.AotFriendlyTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ " +
                $"MethodInvoker = () => {containingType.GloballyQualified()}.{methodName}(), " +
                $"SourceType = typeof({containingType.GloballyQualified()}), " +
@@ -689,7 +663,6 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static string GenerateAotOptimizedClassDataSource(string methodName, INamedTypeSymbol containingType, bool isShared)
     {
-        // For class data sources, instantiate the class and call the method
         return $"new global::TUnit.Core.AotFriendlyTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ " +
                $"MethodInvoker = () => new {containingType.GloballyQualified()}().{methodName}(), " +
                $"SourceType = typeof({containingType.GloballyQualified()}), " +
@@ -701,7 +674,6 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static string GenerateAotOptimizedPropertyDataSource(string propertyName, INamedTypeSymbol containingType, bool isShared)
     {
-        // For property data sources, instantiate the class and access the property
         return $"new global::TUnit.Core.AotFriendlyTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ " +
                $"MethodInvoker = () => new {containingType.GloballyQualified()}().{propertyName}, " +
                $"SourceType = typeof({containingType.GloballyQualified()}), " +
@@ -713,10 +685,8 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static bool ShouldUseAotOptimizedPropertyDataSource(IPropertySymbol property)
     {
-        // For properties, check if they are static and have suitable return types
         if (!property.IsStatic)
         {
-            // For instance properties, check if the containing type has a parameterless constructor
             var containingType = property.ContainingType;
             var hasParameterlessConstructor = containingType.Constructors.Any(c => c.Parameters.Length == 0);
             if (!hasParameterlessConstructor)
@@ -731,7 +701,6 @@ internal static class CodeGenerationHelpers
         {
             var typeString = namedType.ToDisplayString();
 
-            // Look for common data source return types
             return typeString.Contains("IEnumerable<") ||
                    typeString.Contains("ICollection<") ||
                    typeString.Contains("List<") ||

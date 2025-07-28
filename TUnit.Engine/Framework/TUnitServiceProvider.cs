@@ -58,10 +58,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var outputDevice = frameworkServiceProvider.GetOutputDevice();
         CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
 
-        // Create core services
         VerbosityService = Register(new VerbosityService(CommandLineOptions));
-
-        // Initialize DiscoveryDiagnostics with VerbosityService
         DiscoveryDiagnostics.Initialize(VerbosityService);
 
         Logger = Register(new TUnitFrameworkLogger(
@@ -80,7 +77,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         CancellationToken = Register(new EngineCancellationToken());
 
-        // Create test services using unified architecture
         Register<ITestInvoker>(new TestInvoker());
 
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
@@ -140,7 +136,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         singleTestExecutor.SetSessionId(sessionUid);
         TestExecutor.SetSessionId(sessionUid);
 
-        // Initialize console interceptors
         InitializeConsoleInterceptors();
     }
 

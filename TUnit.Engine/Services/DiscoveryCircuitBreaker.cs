@@ -38,13 +38,11 @@ public sealed class DiscoveryCircuitBreaker
     /// <returns>True if generation should continue, false if circuit breaker trips</returns>
     public bool ShouldContinue(int currentTestCount = 0)
     {
-        // Check time limit
         if (_stopwatch.Elapsed > _maxGenerationTime)
         {
             return false;
         }
 
-        // Check memory usage
         var currentMemoryUsage = GC.GetTotalMemory(false);
         var memoryGrowth = currentMemoryUsage - _initialMemoryUsage;
         

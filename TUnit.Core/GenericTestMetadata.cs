@@ -17,7 +17,6 @@ public sealed class GenericTestMetadata : TestMetadata
         {
             return (context, metadata) =>
             {
-                // Create instance delegate that uses context
                 Func<TestContext, Task<object>> createInstance = async (testContext) =>
                 {
                     if (InstanceFactory == null)
@@ -25,7 +24,6 @@ public sealed class GenericTestMetadata : TestMetadata
                         throw new InvalidOperationException($"No instance factory for {TestClassType.Name}");
                     }
 
-                    // Get type arguments from test context if generic
                     Type[] typeArgs;
                     
                     // First, check if we have resolved class generic arguments from the context
@@ -81,7 +79,6 @@ public sealed class GenericTestMetadata : TestMetadata
                     return instance;
                 };
 
-                // Create test invoker with CancellationToken support
                 Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
                 {
                     if (TestInvoker == null)

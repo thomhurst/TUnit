@@ -143,11 +143,7 @@ public sealed class PropertyInjectionService
     private static async Task ProcessPropertyMetadata(object instance, PropertyInjectionMetadata metadata, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata,
         TestContextEvents events)
     {
-        // Create the data source using the generated factory
         var dataSource = metadata.CreateDataSource();
-
-        // Create metadata for data generation
-        // Create property metadata
         var propertyMetadata = new PropertyMetadata
         {
             IsStatic = false,
@@ -168,7 +164,6 @@ public sealed class PropertyInjectionService
             events,
             objectBag);
 
-        // Get data from the source
         var dataRows = dataSource.GetDataRowsAsync(dataGeneratorMetadata);
 
         await foreach (var factory in dataRows)
@@ -193,7 +188,6 @@ public sealed class PropertyInjectionService
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
     private static async Task ProcessReflectionPropertyDataSource(object instance, PropertyInfo property, IDataSourceAttribute dataSource, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
     {
-        // Create metadata for data generation
         // Use centralized factory for reflection mode
         var dataGeneratorMetadata = DataGeneratorMetadataCreator.CreateForPropertyInjection(
             property,
@@ -205,7 +199,6 @@ public sealed class PropertyInjectionService
             events,
             objectBag);
 
-        // Get data from the source
         var dataRows = dataSource.GetDataRowsAsync(dataGeneratorMetadata);
 
         await foreach (var factory in dataRows)
@@ -256,7 +249,6 @@ public sealed class PropertyInjectionService
             return new ValueTask<object?>(result: null);
         }
 
-        // Check if value is a delegate (includes all Func<T> types)
         if (value is Delegate del)
         {
             // Use DynamicInvoke which is AOT-safe for parameterless delegates
@@ -283,7 +275,6 @@ public sealed class PropertyInjectionService
     {
         return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => 
         {
-            // Get constructor parameters for the class
             var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             var constructor = constructors.FirstOrDefault();
             

@@ -34,14 +34,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     private static void ConfigureDebugListeners()
     {
-        // Remove default listeners that can show UI dialogs
         Trace.Listeners.Clear();
-
-        // Add our custom listener that converts assertions to exceptions
         var assertionListener = new TUnitAssertionListener();
         Trace.Listeners.Add(assertionListener);
 
-        // Configure to not show assert UI dialogs
         Trace.AutoFlush = true;
     }
 

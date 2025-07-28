@@ -27,11 +27,9 @@ internal sealed class TestBuilder : ITestBuilder
     public async Task<IEnumerable<ExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata)
     {
         var tests = new List<ExecutableTest>();
-        // Remove debug logging
 
         try
         {
-            // Create a context accessor for data generation
             var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
             {
                 TestMetadata = metadata.MethodMetadata
@@ -65,7 +63,6 @@ internal sealed class TestBuilder : ITestBuilder
 
                     var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
 
-                    // Check if we need to create an instance early for method data sources
                     var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
                     
                     object? instanceForMethodDataSources = null;
@@ -109,7 +106,6 @@ internal sealed class TestBuilder : ITestBuilder
                         }
                         catch (Exception ex)
                         {
-                            // If we can't create instance for method data sources, fail the test
                             var failedTest = await CreateFailedTestForInstanceDataSourceError(metadata, ex);
                             tests.Add(failedTest);
                             continue;
@@ -137,11 +133,9 @@ internal sealed class TestBuilder : ITestBuilder
 
                             for (var i = 0; i < metadata.RepeatCount + 1; i++)
                             {
-                                // Remove debug logging
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
                                 var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
 
-                                // Create a temporary test data for generic type resolution
                                 var tempTestData = new TestData
                                 {
                                     TestClassInstance = null!, // Temporary placeholder
@@ -154,7 +148,6 @@ internal sealed class TestBuilder : ITestBuilder
                                     RepeatIndex = i
                                 };
 
-                                // Resolve generic types for both class and method
                                 Type[] resolvedClassGenericArgs;
                                 Type[] resolvedMethodGenericArgs;
 
@@ -193,7 +186,6 @@ internal sealed class TestBuilder : ITestBuilder
                                     continue;
                                 }
 
-                                // Now create the instance with resolved generic arguments
                                 if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
                                 {
                                     throw new InvalidOperationException($"Cannot create instance of generic type {metadata.TestClassType.Name} with empty type arguments");
@@ -204,7 +196,6 @@ internal sealed class TestBuilder : ITestBuilder
                                     throw new InvalidOperationException($"Error creating test class instance for {metadata.TestClassType.FullName}.");
                                 }
 
-                                // Create the final test data with the actual instance
                                 var testData = new TestData
                                 {
                                     TestClassInstance = instance,
@@ -234,7 +225,6 @@ internal sealed class TestBuilder : ITestBuilder
         }
         catch (Exception ex)
         {
-            // If data combination generation fails, create a failed test
             var failedTest = await CreateFailedTestForDataGenerationError(metadata, ex);
             tests.Add(failedTest);
             return tests;
@@ -281,7 +271,6 @@ internal sealed class TestBuilder : ITestBuilder
             }
         }
 
-        // Build the resolved types array
         var resolvedTypes = new Type[genericParameters.Length];
         for (var i = 0; i < genericParameters.Length; i++)
         {
@@ -305,7 +294,6 @@ internal sealed class TestBuilder : ITestBuilder
         var genericParameters = genericClassType.GetGenericArguments();
         var typeMapping = new Dictionary<Type, Type>();
 
-        // First, try to infer from data sources that access instance data
         if (metadata.DataSources.Any(ds => ds is IAccessesInstanceData))
         {
             // Look at the test method parameters to find attributes that can help with generic type inference
@@ -405,7 +393,6 @@ internal sealed class TestBuilder : ITestBuilder
             }
         }
 
-        // Build the resolved types array
         var resolvedTypes = new Type[genericParameters.Length];
         for (var i = 0; i < genericParameters.Length; i++)
         {
@@ -433,22 +420,16 @@ internal sealed class TestBuilder : ITestBuilder
 
     public async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
-        // Generate unique test ID
         var testId = TestIdentifierService.GenerateTestId(metadata, testData);
 
-        // Create test context with the provided arguments
         var context = await CreateTestContextAsync(testId, metadata, testData, testBuilderContext);
 
-        // Set the test class instance that was already created
         context.TestDetails.ClassInstance = testData.TestClassInstance;
 
-        // Track all objects from data sources
         TrackDataSourceObjects(context, testData.ClassData, testData.MethodData);
 
-        // Invoke discovery event receivers
         await InvokeDiscoveryEventReceiversAsync(context);
 
-        // Create the executable test (hooks are now collected lazily at execution time)
         var creationContext = new ExecutableTestCreationContext
         {
             TestId = testId,

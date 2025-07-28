@@ -43,7 +43,6 @@ public static class TupleHelper
             return [value];
         }
         
-        // Get tuple elements
         var elements = new List<object?>();
         
         if (type.FullName?.StartsWith("System.ValueTuple`") == true)

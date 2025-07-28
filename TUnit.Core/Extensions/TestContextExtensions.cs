@@ -18,7 +18,6 @@ public static class TestContextExtensions
     [RequiresDynamicCode("Uses MakeGenericMethod for dynamic test registration")]
     public static async Task AddDynamicTest<T>(this TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
     {
-        // Try to use the test registry if available
         try
         {
             var registryType = Type.GetType("TUnit.Engine.Services.TestRegistry, TUnit.Engine");
@@ -40,14 +39,12 @@ public static class TestContextExtensions
         catch
         {
             // If registry is not available, we can't add dynamic tests
-            // Log this for debugging if needed
         }
     }
 
     [RequiresDynamicCode("Uses MakeGenericMethod for dynamic test registration")]
     public static void AddTest<T>(this TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
     {
-        // Fire and forget - don't wait for completion
         _ = AddDynamicTest(context, dynamicTest);
     }
 }

@@ -203,7 +203,6 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
     {
         var properties = new List<IProperty>();
 
-        // Add categories
         foreach (var category in test.Metadata.Categories)
         {
             properties.Add(new TestMetadataProperty(category));

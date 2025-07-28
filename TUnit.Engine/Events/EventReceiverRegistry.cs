@@ -165,7 +165,6 @@ internal sealed class EventReceiverRegistry
     
     private void UpdateEventFlags(object receiver)
     {
-        // Set flags based on implemented interfaces
         if (receiver is ITestStartEventReceiver)
         {
             _registeredEvents |= EventTypes.TestStart;

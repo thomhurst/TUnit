@@ -173,10 +173,8 @@ internal sealed class HookOrchestrator
         _assemblyTestCounts.AddOrUpdate(assemblyName, 1, (_, count) => count + 1);
         _classTestCounts.AddOrUpdate(testClassType, 1, (_, count) => count + 1);
 
-        // Get or create the BeforeAssembly task - this ensures it only runs once
         await GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken);
 
-        // Get or create the BeforeClass task - this ensures it only runs once (and includes assembly context)
         var classContext = await GetOrCreateBeforeClassTask(testClassType, testClassType.Assembly, cancellationToken);
 
 #if NET
@@ -184,7 +182,6 @@ internal sealed class HookOrchestrator
         ExecutionContext.Restore(classContext);
 #endif
 
-        // Get the class context (test should already be added during creation in ContextProvider)
         var classContextObject = _contextProvider.GetOrCreateClassContext(testClassType);
 
         // Execute BeforeEveryTest hooks in the accumulated context

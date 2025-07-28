@@ -14,18 +14,15 @@ internal static class ReflectionAttributeExtractor
     /// </summary>
     public static T? GetAttribute<T>(Type testClass, MethodInfo? testMethod = null) where T : Attribute
     {
-        // Method level (highest priority)
         if (testMethod != null)
         {
             var methodAttr = testMethod.GetCustomAttribute<T>();
             if (methodAttr != null) return methodAttr;
         }
 
-        // Class level
         var classAttr = testClass.GetCustomAttribute<T>();
         if (classAttr != null) return classAttr;
 
-        // Assembly level (lowest priority)
         return testClass.Assembly.GetCustomAttribute<T>();
     }
 
@@ -36,13 +33,9 @@ internal static class ReflectionAttributeExtractor
     {
         var attributes = new List<T>();
 
-        // Assembly level (added first, lowest priority)
         attributes.AddRange(testClass.Assembly.GetCustomAttributes<T>());
-
-        // Class level
         attributes.AddRange(testClass.GetCustomAttributes<T>());
 
-        // Method level (added last, highest priority)
         if (testMethod != null)
         {
             attributes.AddRange(testMethod.GetCustomAttributes<T>());
@@ -124,13 +117,8 @@ internal static class ReflectionAttributeExtractor
     {
         var attributes = new List<Attribute>();
         
-        // Assembly attributes
         attributes.AddRange(testClass.Assembly.GetCustomAttributes());
-        
-        // Class attributes
         attributes.AddRange(testClass.GetCustomAttributes());
-        
-        // Method attributes
         attributes.AddRange(testMethod.GetCustomAttributes());
         
         return attributes.ToArray();
@@ -148,7 +136,6 @@ internal static class ReflectionAttributeExtractor
 
         foreach (var property in properties)
         {
-            // Simply check for IDataSourceAttribute interface
             foreach (var attr in property.GetCustomAttributes())
             {
                 if (attr is IDataSourceAttribute dataSourceAttr)
