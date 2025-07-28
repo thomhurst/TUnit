@@ -12,6 +12,10 @@ internal class Tests1899 : TestsBase
             "DerivedTest.cs"),
         new RunTestOptions
         {
+            AdditionalFiles =
+            [
+                Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject.Library", "Bugs", "1899", "BaseClass.cs")
+            ],
             VerifyConfigurator = settingsTask => settingsTask.ScrubLinesContaining("TestFilePath = ")
         },
         async generatedFiles =>
