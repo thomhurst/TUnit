@@ -614,7 +614,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                         methodCall += "()";
                     }
 
-                    writer.AppendLine($"await AsyncConvert.Convert(() => {methodCall});");
+                    writer.AppendLine($"await AsyncConvert.ConvertObject(() => {methodCall});");
                 }
                 else
                 {
@@ -684,7 +684,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                         writer.AppendLine($"var parameters = new object[0];");
                     }
                     
-                    writer.AppendLine($"await AsyncConvert.Convert(() => method!.Invoke(null, parameters));");
+                    writer.AppendLine($"await AsyncConvert.ConvertObject(() => method!.Invoke(null, parameters));");
                 }
                 else
                 {

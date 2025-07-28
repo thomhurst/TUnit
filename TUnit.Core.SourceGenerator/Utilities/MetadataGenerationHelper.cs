@@ -72,7 +72,7 @@ internal static class MetadataGenerationHelper
     /// </summary>
     public static string GenerateMethodMetadata(IMethodSymbol methodSymbol, string classMetadataExpression)
     {
-        var writer = new CodeWriter();
+        var writer = new CodeWriter("", includeHeader: false);
         writer.AppendLine("new global::TUnit.Core.MethodMetadata");
         writer.AppendLine("{");
         writer.Indent();
@@ -101,7 +101,7 @@ internal static class MetadataGenerationHelper
     public static string GenerateClassMetadataGetOrAdd(INamedTypeSymbol typeSymbol, string? parentExpression = null)
     {
         var qualifiedName = $"{typeSymbol.ContainingAssembly.Name}:{typeSymbol.GloballyQualified()}";
-        var writer = new CodeWriter();
+        var writer = new CodeWriter("", includeHeader: false);
         writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", () => ");
         writer.AppendLine("{");
         writer.Indent();
@@ -165,7 +165,7 @@ internal static class MetadataGenerationHelper
     public static string GenerateParameterMetadataGeneric(IParameterSymbol parameter, IMethodSymbol? containingMethod = null)
     {
         // For type parameters in generic context, we still can't use T directly
-        var safeType = parameter.Type is ITypeParameterSymbol ? "object" : parameter.Type.GloballyQualified();
+        var safeType = CodeGenerationHelpers.ContainsTypeParameter(parameter.Type) ? "object" : parameter.Type.GloballyQualified();
         var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
         
         return $@"new global::TUnit.Core.ParameterMetadata<{safeType}>
@@ -182,7 +182,7 @@ internal static class MetadataGenerationHelper
     public static string GenerateParameterMetadata(IParameterSymbol parameter, IMethodSymbol? containingMethod = null)
     {
         // For type parameters, we need to use typeof(object) instead of typeof(T)
-        var typeForConstructor = parameter.Type is ITypeParameterSymbol ? "object" : parameter.Type.GloballyQualified();
+        var typeForConstructor = CodeGenerationHelpers.ContainsTypeParameter(parameter.Type) ? "object" : parameter.Type.GloballyQualified();
         var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
         
         return $@"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))
@@ -274,7 +274,7 @@ internal static class MetadataGenerationHelper
     {
         var safeTypeNameForReflection = containingType.GloballyQualified();
         // For type parameters, we need to use typeof(object) instead of typeof(T)
-        var safePropertyTypeName = property.Type is ITypeParameterSymbol ? "object" : property.Type.GloballyQualified();
+        var safePropertyTypeName = CodeGenerationHelpers.ContainsTypeParameter(property.Type) ? "object" : property.Type.GloballyQualified();
         
         return $@"new global::TUnit.Core.PropertyMetadata
 {{
@@ -320,7 +320,7 @@ internal static class MetadataGenerationHelper
             return "global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>()";
         }
 
-        var writer = new CodeWriter();
+        var writer = new CodeWriter("", includeHeader: false);
         writer.AppendLine("new global::TUnit.Core.ParameterMetadata[]");
         writer.AppendLine("{");
         writer.Indent();
@@ -346,7 +346,7 @@ internal static class MetadataGenerationHelper
             return "global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>()";
         }
 
-        var writer = new CodeWriter();
+        var writer = new CodeWriter("", includeHeader: false);
         writer.AppendLine("new global::TUnit.Core.ParameterMetadata[]");
         writer.AppendLine("{");
         writer.Indent();
@@ -372,7 +372,7 @@ internal static class MetadataGenerationHelper
             return "global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>()";
         }
 
-        var writer = new CodeWriter();
+        var writer = new CodeWriter("", includeHeader: false);
         writer.AppendLine("new global::TUnit.Core.ParameterMetadata[]");
         writer.AppendLine("{");
         writer.Indent();
@@ -403,7 +403,7 @@ internal static class MetadataGenerationHelper
             return "global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>()";
         }
 
-        var writer = new CodeWriter();
+        var writer = new CodeWriter("", includeHeader: false);
         writer.AppendLine("new global::TUnit.Core.PropertyMetadata[]");
         writer.AppendLine("{");
         writer.Indent();

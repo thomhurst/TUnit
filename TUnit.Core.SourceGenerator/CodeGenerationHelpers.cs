@@ -28,7 +28,15 @@ internal static class CodeGenerationHelpers
             {
                 var parameterIndex = method.Parameters.IndexOf(param);
                 // Handle type parameters and types containing type parameters
-                var typeForConstructor = ContainsTypeParameter(param.Type) ? "object" : param.Type.GloballyQualified();
+                var containsTypeParam = ContainsTypeParameter(param.Type);
+                var typeForConstructor = containsTypeParam ? "object" : param.Type.GloballyQualified();
+                
+                // Debug: Add comment to show what's happening
+                if (containsTypeParam)
+                {
+                    writer.AppendLine($"// Parameter '{param.Name}' contains type parameters, using typeof(object)");
+                }
+                
                 using (writer.BeginObjectInitializer($"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))", ","))
                 {
                     writer.AppendLine($"Name = \"{param.Name}\",");
@@ -167,40 +175,6 @@ internal static class CodeGenerationHelpers
     /// Returns open generic forms (e.g., List<>) for generic type definitions.
     /// </summary>
     
-    /// <summary>
-    /// Gets a string representation of a type suitable for display purposes.
-    /// This is used for TestMethodParameterTypes which needs simple string representations.
-    /// </summary>
-    public static string GetTypeDisplayString(ITypeSymbol type)
-    {
-        // For type parameters, just return the parameter name
-        if (type is ITypeParameterSymbol typeParam)
-        {
-            return typeParam.Name;
-        }
-        
-        // For named types with type parameters, we need special handling
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
-        {
-            // If any type arguments contain type parameters, create an open generic form string
-            if (namedType.TypeArguments.Any(ContainsTypeParameter))
-            {
-                var genericTypeDefinition = namedType.OriginalDefinition;
-                var commas = new string(',', genericTypeDefinition.TypeParameters.Length - 1);
-                return $"{genericTypeDefinition.ToDisplayString(DisplayFormats.FullyQualifiedGenericTypeOnly)}<{commas}>";
-            }
-        }
-        
-        // For arrays with type parameters
-        if (type is IArrayTypeSymbol arrayType && ContainsTypeParameter(arrayType.ElementType))
-        {
-            var elementDisplay = GetTypeDisplayString(arrayType.ElementType);
-            return $"{elementDisplay}[]";
-        }
-        
-        // For everything else, use the fully qualified name
-        return type.GloballyQualified();
-    }
 
     /// <summary>
     /// Generates C# code for PropertyMetadata array from class properties.
