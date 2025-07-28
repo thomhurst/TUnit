@@ -461,6 +461,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 SkipReason = skipReason,
                 TimeoutMs = ReflectionAttributeExtractor.ExtractTimeout(testClass, testMethod),
                 RetryCount = ReflectionAttributeExtractor.ExtractRetryCount(testClass, testMethod),
+                RepeatCount = ReflectionAttributeExtractor.ExtractRepeatCount(testClass, testMethod),
                 CanRunInParallel = ReflectionAttributeExtractor.CanRunInParallel(testClass, testMethod),
                 Dependencies = ReflectionAttributeExtractor.ExtractDependencies(testClass, testMethod),
                 DataSources = ReflectionAttributeExtractor.ExtractDataSources(testMethod),

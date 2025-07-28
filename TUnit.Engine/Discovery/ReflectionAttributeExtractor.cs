@@ -82,6 +82,12 @@ internal static class ReflectionAttributeExtractor
         return retryAttr?.Times ?? 0;
     }
 
+    public static int ExtractRepeatCount(Type testClass, MethodInfo testMethod)
+    {
+        var repeatAttr = GetAttribute<RepeatAttribute>(testClass, testMethod);
+        return repeatAttr?.Times ?? 0;
+    }
+
     public static bool CanRunInParallel(Type testClass, MethodInfo testMethod)
     {
         return GetAttribute<NotInParallelAttribute>(testClass, testMethod) == null;
