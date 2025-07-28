@@ -583,36 +583,73 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             // Instance hooks - match InstanceHookMethod.Body signature
             using (writer.BeginBlock($"private static async ValueTask {delegateKey}_Body(object instance, {contextType} context, CancellationToken cancellationToken)"))
             {
-                writer.AppendLine($"var typedInstance = ({className})instance;");
+                // Check if we're dealing with an open generic type
+                var isOpenGeneric = hook.TypeSymbol.IsGenericType && hook.TypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
 
-                // Build method call
-                var methodCall = isStatic
-                    ? $"{className}.{methodName}"
-                    : $"typedInstance.{methodName}";
+                if (isOpenGeneric)
+                {
+                    // For open generic types, use dynamic to avoid invalid cast
+                    writer.AppendLine($"// Instance method on open generic type - using dynamic");
+                    writer.AppendLine($"dynamic dynamicInstance = instance;");
+                    
+                    // Build method call
+                    var methodCall = isStatic
+                        ? $"{className}.{methodName}"
+                        : $"dynamicInstance.{methodName}";
 
-                if (hasCancellationTokenOnly)
-                {
-                    // Pass only the cancellation token
-                    methodCall += "(cancellationToken)";
-                }
-                else if (hasContextOnly)
-                {
-                    // Pass only the context
-                    methodCall += "(context)";
-                }
-                else if (hasContextAndCancellationToken)
-                {
-                    // Pass both context and cancellation token
-                    methodCall += "(context, cancellationToken)";
+                    if (hasCancellationTokenOnly)
+                    {
+                        methodCall += "(cancellationToken)";
+                    }
+                    else if (hasContextOnly)
+                    {
+                        methodCall += "(context)";
+                    }
+                    else if (hasContextAndCancellationToken)
+                    {
+                        methodCall += "(context, cancellationToken)";
+                    }
+                    else
+                    {
+                        methodCall += "()";
+                    }
+
+                    writer.AppendLine($"await AsyncConvert.Convert(() => {methodCall});");
                 }
                 else
                 {
-                    // No parameters
-                    methodCall += "()";
-                }
+                    // For concrete types, use normal cast
+                    writer.AppendLine($"var typedInstance = ({className})instance;");
+                    
+                    // Build method call
+                    var methodCall = isStatic
+                        ? $"{className}.{methodName}"
+                        : $"typedInstance.{methodName}";
 
-                // Use AsyncConvert to handle all return types
-                writer.AppendLine($"await AsyncConvert.Convert(() => {methodCall});");
+                    if (hasCancellationTokenOnly)
+                    {
+                        // Pass only the cancellation token
+                        methodCall += "(cancellationToken)";
+                    }
+                    else if (hasContextOnly)
+                    {
+                        // Pass only the context
+                        methodCall += "(context)";
+                    }
+                    else if (hasContextAndCancellationToken)
+                    {
+                        // Pass both context and cancellation token
+                        methodCall += "(context, cancellationToken)";
+                    }
+                    else
+                    {
+                        // No parameters
+                        methodCall += "()";
+                    }
+
+                    // Use AsyncConvert to handle all return types
+                    writer.AppendLine($"await AsyncConvert.Convert(() => {methodCall});");
+                }
             }
         }
         else
@@ -620,32 +657,64 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             // Static hooks - match StaticHookMethod<T>.Body signature
             using (writer.BeginBlock($"private static async ValueTask {delegateKey}_Body({contextType} context, CancellationToken cancellationToken)"))
             {
-                // Build method call
-                var methodCall = $"{className}.{methodName}";
+                // Check if we're dealing with an open generic type
+                var isOpenGeneric = hook.TypeSymbol.IsGenericType && hook.TypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
 
-                if (hasCancellationTokenOnly)
+                if (isOpenGeneric && isStatic)
                 {
-                    // Pass only the cancellation token
-                    methodCall += "(cancellationToken)";
-                }
-                else if (hasContextOnly)
-                {
-                    // Pass only the context
-                    methodCall += "(context)";
-                }
-                else if (hasContextAndCancellationToken)
-                {
-                    // Pass both context and cancellation token
-                    methodCall += "(context, cancellationToken)";
+                    // For static methods on open generic types, we need to use reflection
+                    writer.AppendLine($"// Static method on open generic type - using reflection");
+                    writer.AppendLine($"var method = typeof({hook.TypeSymbol.GloballyQualifiedNonGeneric()}).GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);");
+                    
+                    // Build parameters array based on what the method expects
+                    if (hasCancellationTokenOnly)
+                    {
+                        writer.AppendLine($"var parameters = new object[] {{ cancellationToken }};");
+                    }
+                    else if (hasContextOnly)
+                    {
+                        writer.AppendLine($"var parameters = new object[] {{ context }};");
+                    }
+                    else if (hasContextAndCancellationToken)
+                    {
+                        writer.AppendLine($"var parameters = new object[] {{ context, cancellationToken }};");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"var parameters = new object[0];");
+                    }
+                    
+                    writer.AppendLine($"await AsyncConvert.Convert(() => method!.Invoke(null, parameters));");
                 }
                 else
                 {
-                    // No parameters
-                    methodCall += "()";
-                }
+                    // For non-generic types or instance methods, use direct invocation
+                    var methodCall = $"{className}.{methodName}";
 
-                // Use AsyncConvert to handle all return types
-                writer.AppendLine($"await AsyncConvert.Convert(() => {methodCall});");
+                    if (hasCancellationTokenOnly)
+                    {
+                        // Pass only the cancellation token
+                        methodCall += "(cancellationToken)";
+                    }
+                    else if (hasContextOnly)
+                    {
+                        // Pass only the context
+                        methodCall += "(context)";
+                    }
+                    else if (hasContextAndCancellationToken)
+                    {
+                        // Pass both context and cancellation token
+                        methodCall += "(context, cancellationToken)";
+                    }
+                    else
+                    {
+                        // No parameters
+                        methodCall += "()";
+                    }
+
+                    // Use AsyncConvert to handle all return types
+                    writer.AppendLine($"await AsyncConvert.Convert(() => {methodCall});");
+                }
             }
         }
 

@@ -208,7 +208,10 @@ public static class TypeExtensions
 
     public static string GloballyQualified(this ISymbol typeSymbol)
     {
-        if(typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && namedTypeSymbol.IsGenericDefinition())
+        // Only generate open generic form for types with unresolved type parameters
+        // This ensures we get BaseClass<> for generic definitions but List<int> for constructed types
+        if(typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && 
+           namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
         {
             var typeBuilder = new StringBuilder(typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix));
             typeBuilder.Append('<');

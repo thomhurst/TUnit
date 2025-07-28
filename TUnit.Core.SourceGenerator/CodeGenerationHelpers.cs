@@ -27,7 +27,8 @@ internal static class CodeGenerationHelpers
             foreach (var param in method.Parameters)
             {
                 var parameterIndex = method.Parameters.IndexOf(param);
-                var typeForConstructor = param.Type.GloballyQualified();
+                // Handle type parameters and types containing type parameters
+                var typeForConstructor = ContainsTypeParameter(param.Type) ? "object" : param.Type.GloballyQualified();
                 using (writer.BeginObjectInitializer($"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))", ","))
                 {
                     writer.AppendLine($"Name = \"{param.Name}\",");

@@ -164,7 +164,8 @@ internal static class MetadataGenerationHelper
     /// </summary>
     public static string GenerateParameterMetadataGeneric(IParameterSymbol parameter, IMethodSymbol? containingMethod = null)
     {
-        var safeType = parameter.Type.GloballyQualified();
+        // For type parameters in generic context, we still can't use T directly
+        var safeType = parameter.Type is ITypeParameterSymbol ? "object" : parameter.Type.GloballyQualified();
         var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
         
         return $@"new global::TUnit.Core.ParameterMetadata<{safeType}>
@@ -180,10 +181,11 @@ internal static class MetadataGenerationHelper
     /// </summary>
     public static string GenerateParameterMetadata(IParameterSymbol parameter, IMethodSymbol? containingMethod = null)
     {
-        var safeType = parameter.Type.GloballyQualified();
+        // For type parameters, we need to use typeof(object) instead of typeof(T)
+        var typeForConstructor = parameter.Type is ITypeParameterSymbol ? "object" : parameter.Type.GloballyQualified();
         var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
         
-        return $@"new global::TUnit.Core.ParameterMetadata(typeof({safeType}))
+        return $@"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))
 {{
     Name = ""{parameter.Name}"",
     TypeReference = {CodeGenerationHelpers.GenerateTypeReference(parameter.Type)},
@@ -271,7 +273,8 @@ internal static class MetadataGenerationHelper
     public static string GeneratePropertyMetadata(IPropertySymbol property, INamedTypeSymbol containingType)
     {
         var safeTypeNameForReflection = containingType.GloballyQualified();
-        var safePropertyTypeName = property.Type.GloballyQualified();
+        // For type parameters, we need to use typeof(object) instead of typeof(T)
+        var safePropertyTypeName = property.Type is ITypeParameterSymbol ? "object" : property.Type.GloballyQualified();
         
         return $@"new global::TUnit.Core.PropertyMetadata
 {{
@@ -289,6 +292,17 @@ internal static class MetadataGenerationHelper
     /// </summary>
     private static string GetPropertyAccessor(INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
     {
+        // For generic types with unresolved type parameters, we can't cast to the open generic type
+        // We need to use dynamic or reflection
+        var hasUnresolvedTypeParameters = namedTypeSymbol.IsGenericType && 
+                                         namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
+        
+        if (hasUnresolvedTypeParameters && !property.IsStatic)
+        {
+            // Use dynamic to avoid invalid cast to open generic type
+            return $"o => ((dynamic)o).{property.Name}";
+        }
+        
         var safeTypeName = namedTypeSymbol.GloballyQualified();
         return property.IsStatic
             ? $"_ => {safeTypeName}.{property.Name}"
