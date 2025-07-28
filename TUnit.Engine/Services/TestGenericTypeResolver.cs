@@ -430,9 +430,11 @@ internal sealed class TestGenericTypeResolver
         return true;
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method's parameter does not have matching annotations",
+        Justification = "The argumentType may come from runtime GetType() calls, but we only access interfaces when needed for generic interface matching")]
     private static void InferTypeMapping(
         Type parameterType,
-        Type argumentType,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argumentType,
         Dictionary<Type, Type> typeMapping,
         int[] genericParameterPositions)
     {
@@ -443,7 +445,12 @@ internal sealed class TestGenericTypeResolver
         }
     }
 
-    private static bool TryInferTypeMapping(Type parameterType, Type argumentType, Dictionary<Type, Type> typeMapping)
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method's parameter does not have matching annotations",
+        Justification = "The argumentType may come from runtime GetType() calls, but we only access interfaces when needed for generic interface matching")]
+    private static bool TryInferTypeMapping(
+        Type parameterType, 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argumentType, 
+        Dictionary<Type, Type> typeMapping)
     {
         // Direct generic parameter
         if (parameterType.IsGenericParameter)
