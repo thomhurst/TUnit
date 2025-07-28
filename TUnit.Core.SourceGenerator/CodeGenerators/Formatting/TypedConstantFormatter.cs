@@ -176,7 +176,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
 
     private string FormatEnumForCode(TypedConstant constant, ITypeSymbol? targetType)
     {
-        var enumType = (targetType as INamedTypeSymbol) ?? (constant.Type as INamedTypeSymbol);
+        var enumType = targetType as INamedTypeSymbol ?? constant.Type as INamedTypeSymbol;
         if (enumType == null)
         {
             return FormatPrimitive(constant.Value);

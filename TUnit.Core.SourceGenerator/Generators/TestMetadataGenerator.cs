@@ -288,16 +288,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Append("MethodMetadata = ");
         SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
 
-        // Empty hooks for now
-        writer.AppendLine("Hooks = new global::TUnit.Core.TestHooks");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("BeforeClass = global::System.Array.Empty<global::TUnit.Core.HookMetadata>(),");
-        writer.AppendLine("AfterClass = global::System.Array.Empty<global::TUnit.Core.HookMetadata>(),");
-        writer.AppendLine("BeforeTest = global::System.Array.Empty<global::TUnit.Core.HookMetadata>(),");
-        writer.AppendLine("AfterTest = global::System.Array.Empty<global::TUnit.Core.HookMetadata>()");
-        writer.Unindent();
-        writer.AppendLine("},");
     }
 
 
@@ -1657,13 +1647,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static string GenerateTypeReference(INamedTypeSymbol typeSymbol, bool isGeneric)
     {
-        if (isGeneric)
-        {
-            // For generic types, use the open generic form (e.g., typeof(List<>)) instead of typeof(object)
-            var safeTypeName = CodeGenerationHelpers.GetSafeTypeName(typeSymbol);
-            return $"typeof({safeTypeName})";
-        }
-
         var fullyQualifiedName = typeSymbol.GloballyQualified();
         return $"typeof({fullyQualifiedName})";
     }

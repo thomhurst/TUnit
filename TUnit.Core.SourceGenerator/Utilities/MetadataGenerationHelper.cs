@@ -77,8 +77,8 @@ internal static class MetadataGenerationHelper
         writer.AppendLine("{");
         writer.Indent();
         
-        var safeTypeDisplay = CodeGenerationHelpers.GetSafeTypeName(methodSymbol.ContainingType);
-        var safeReturnTypeDisplay = CodeGenerationHelpers.GetSafeTypeName(methodSymbol.ReturnType);
+        var safeTypeDisplay = methodSymbol.ContainingType.GloballyQualified();
+        var safeReturnTypeDisplay = methodSymbol.ReturnType.GloballyQualified();
         
         writer.AppendLine($"Type = typeof({safeTypeDisplay}),");
         writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ContainingType)},");
@@ -101,8 +101,6 @@ internal static class MetadataGenerationHelper
     public static string GenerateClassMetadataGetOrAdd(INamedTypeSymbol typeSymbol, string? parentExpression = null)
     {
         var qualifiedName = $"{typeSymbol.ContainingAssembly.Name}:{typeSymbol.GloballyQualified()}";
-        var safeTypeName = CodeGenerationHelpers.GetSafeTypeName(typeSymbol);
-        
         var writer = new CodeWriter();
         writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", () => ");
         writer.AppendLine("{");
@@ -113,7 +111,7 @@ internal static class MetadataGenerationHelper
         writer.AppendLine("{");
         writer.Indent();
         
-        writer.AppendLine($"Type = typeof({safeTypeName}),");
+        writer.AppendLine($"Type = typeof({typeSymbol.GloballyQualified()}),");
         writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(typeSymbol)},");
         writer.AppendLine($"Name = \"{typeSymbol.Name}\",");
         writer.AppendLine($"Namespace = \"{typeSymbol.ContainingNamespace?.ToDisplayString() ?? ""}\",");
@@ -166,7 +164,7 @@ internal static class MetadataGenerationHelper
     /// </summary>
     public static string GenerateParameterMetadataGeneric(IParameterSymbol parameter, IMethodSymbol? containingMethod = null)
     {
-        var safeType = CodeGenerationHelpers.GetSafeTypeName(parameter.Type);
+        var safeType = parameter.Type.GloballyQualified();
         var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
         
         return $@"new global::TUnit.Core.ParameterMetadata<{safeType}>
@@ -182,7 +180,7 @@ internal static class MetadataGenerationHelper
     /// </summary>
     public static string GenerateParameterMetadata(IParameterSymbol parameter, IMethodSymbol? containingMethod = null)
     {
-        var safeType = CodeGenerationHelpers.GetSafeTypeName(parameter.Type);
+        var safeType = parameter.Type.GloballyQualified();
         var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
         
         return $@"new global::TUnit.Core.ParameterMetadata(typeof({safeType}))
@@ -260,7 +258,7 @@ internal static class MetadataGenerationHelper
         
         var paramTypes = method.Parameters.Select(p => 
         {
-            var safeTypeName = CodeGenerationHelpers.GetSafeTypeName(p.Type);
+            var safeTypeName = p.Type.GloballyQualified();
             return $"typeof({safeTypeName})";
         });
         
@@ -272,8 +270,8 @@ internal static class MetadataGenerationHelper
     /// </summary>
     public static string GeneratePropertyMetadata(IPropertySymbol property, INamedTypeSymbol containingType)
     {
-        var safeTypeNameForReflection = CodeGenerationHelpers.GetSafeTypeName(containingType);
-        var safePropertyTypeName = CodeGenerationHelpers.GetSafeTypeName(property.Type);
+        var safeTypeNameForReflection = containingType.GloballyQualified();
+        var safePropertyTypeName = property.Type.GloballyQualified();
         
         return $@"new global::TUnit.Core.PropertyMetadata
 {{
@@ -291,7 +289,7 @@ internal static class MetadataGenerationHelper
     /// </summary>
     private static string GetPropertyAccessor(INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
     {
-        var safeTypeName = CodeGenerationHelpers.GetSafeTypeName(namedTypeSymbol);
+        var safeTypeName = namedTypeSymbol.GloballyQualified();
         return property.IsStatic
             ? $"_ => {safeTypeName}.{property.Name}"
             : $"o => (({safeTypeName})o).{property.Name}";

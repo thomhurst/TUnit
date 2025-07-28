@@ -32,6 +32,21 @@ internal sealed class HookCollectionService : IHookCollectionService
                         allHooks.Add((hook.Order, hookFunc));
                     }
                 }
+
+                // Also check the open generic type definition for generic types
+                if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition)
+                {
+                    var openGenericType = currentType.GetGenericTypeDefinition();
+                    if (Sources.BeforeTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
+                    {
+                        foreach (var hook in openTypeHooks)
+                        {
+                            var hookFunc = CreateInstanceHookDelegate(hook);
+                            allHooks.Add((hook.Order, hookFunc));
+                        }
+                    }
+                }
+
                 currentType = currentType.BaseType;
             }
 
@@ -61,6 +76,21 @@ internal sealed class HookCollectionService : IHookCollectionService
                         allHooks.Add((hook.Order, hookFunc));
                     }
                 }
+
+                // Also check the open generic type definition for generic types
+                if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition)
+                {
+                    var openGenericType = currentType.GetGenericTypeDefinition();
+                    if (Sources.AfterTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
+                    {
+                        foreach (var hook in openTypeHooks)
+                        {
+                            var hookFunc = CreateInstanceHookDelegate(hook);
+                            allHooks.Add((hook.Order, hookFunc));
+                        }
+                    }
+                }
+
                 currentType = currentType.BaseType;
             }
 
@@ -90,6 +120,21 @@ internal sealed class HookCollectionService : IHookCollectionService
                         allHooks.Add((hook.Order, hookFunc));
                     }
                 }
+
+                // Also check the open generic type definition for generic types
+                if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition)
+                {
+                    var openGenericType = currentType.GetGenericTypeDefinition();
+                    if (Sources.BeforeEveryTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
+                    {
+                        foreach (var hook in openTypeHooks)
+                        {
+                            var hookFunc = CreateStaticHookDelegate(hook);
+                            allHooks.Add((hook.Order, hookFunc));
+                        }
+                    }
+                }
+
                 currentType = currentType.BaseType;
             }
 
@@ -119,6 +164,21 @@ internal sealed class HookCollectionService : IHookCollectionService
                         allHooks.Add((hook.Order, hookFunc));
                     }
                 }
+
+                // Also check the open generic type definition for generic types
+                if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition)
+                {
+                    var openGenericType = currentType.GetGenericTypeDefinition();
+                    if (Sources.AfterEveryTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
+                    {
+                        foreach (var hook in openTypeHooks)
+                        {
+                            var hookFunc = CreateStaticHookDelegate(hook);
+                            allHooks.Add((hook.Order, hookFunc));
+                        }
+                    }
+                }
+
                 currentType = currentType.BaseType;
             }
 
@@ -148,6 +208,21 @@ internal sealed class HookCollectionService : IHookCollectionService
                         allHooks.Add((hook.Order, hookFunc));
                     }
                 }
+
+                // Also check the open generic type definition for generic types
+                if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition)
+                {
+                    var openGenericType = currentType.GetGenericTypeDefinition();
+                    if (Sources.BeforeClassHooks.TryGetValue(openGenericType, out var openTypeHooks))
+                    {
+                        foreach (var hook in openTypeHooks)
+                        {
+                            var hookFunc = CreateClassHookDelegate(hook);
+                            allHooks.Add((hook.Order, hookFunc));
+                        }
+                    }
+                }
+
                 currentType = currentType.BaseType;
             }
 
@@ -177,6 +252,21 @@ internal sealed class HookCollectionService : IHookCollectionService
                         allHooks.Add((hook.Order, hookFunc));
                     }
                 }
+
+                // Also check the open generic type definition for generic types
+                if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition)
+                {
+                    var openGenericType = currentType.GetGenericTypeDefinition();
+                    if (Sources.AfterClassHooks.TryGetValue(openGenericType, out var openTypeHooks))
+                    {
+                        foreach (var hook in openTypeHooks)
+                        {
+                            var hookFunc = CreateClassHookDelegate(hook);
+                            allHooks.Add((hook.Order, hookFunc));
+                        }
+                    }
+                }
+
                 currentType = currentType.BaseType;
             }
 

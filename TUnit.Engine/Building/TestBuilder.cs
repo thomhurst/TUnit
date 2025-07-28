@@ -309,30 +309,30 @@ internal sealed class TestBuilder : ITestBuilder
             // Look at the test method parameters to find attributes that can help with generic type inference
             foreach (var param in metadata.MethodMetadata.Parameters)
             {
-                Console.WriteLine($"DEBUG: Param {param.Name}, Type: {param.Type}, IsGenericParameter: {param.Type.IsGenericParameter}, ReflectionInfo: {param.ReflectionInfo != null}");
-                
-                // Check if the parameter type is a generic parameter of the class
-                if (param.Type.IsGenericParameter && 
-                    genericParameters.Contains(param.Type) &&
-                    param.ReflectionInfo != null)
+                if (param.ReflectionInfo != null)
                 {
-                    // Check for Matrix attributes using reflection
-                    var attrs = param.ReflectionInfo.GetCustomAttributes(false);
-                    Console.WriteLine($"DEBUG: Found {attrs.Length} attributes on parameter {param.Name}");
+                    // Get the actual parameter type from reflection
+                    var actualParamType = param.ReflectionInfo.ParameterType;
                     
-                    foreach (var attr in attrs)
+                    // Check if the actual parameter type is a generic parameter of the class
+                    if (actualParamType.IsGenericParameter && 
+                        genericParameters.Contains(actualParamType))
                     {
-                        var attrType = attr.GetType();
-                        Console.WriteLine($"DEBUG: Attribute type: {attrType.Name}, IsGenericType: {attrType.IsGenericType}");
+                        // Check for Matrix attributes using reflection
+                        var attrs = param.ReflectionInfo.GetCustomAttributes(false);
                         
-                        // Check if it's a generic Matrix attribute
-                        if (attrType.IsGenericType && 
-                            attrType.GetGenericTypeDefinition().Name.StartsWith("Matrix"))
+                        foreach (var attr in attrs)
                         {
-                            var matrixTypeArg = attrType.GetGenericArguments()[0];
-                            Console.WriteLine($"DEBUG: Found Matrix<{matrixTypeArg.Name}>, mapping {param.Type.Name} -> {matrixTypeArg.Name}");
-                            typeMapping[param.Type] = matrixTypeArg;
-                            break;
+                            var attrType = attr.GetType();
+                            
+                            // Check if it's a generic Matrix attribute
+                            if (attrType.IsGenericType && 
+                                attrType.GetGenericTypeDefinition().Name.StartsWith("Matrix"))
+                            {
+                                var matrixTypeArg = attrType.GetGenericArguments()[0];
+                                typeMapping[actualParamType] = matrixTypeArg;
+                                break;
+                            }
                         }
                     }
                 }
@@ -404,25 +404,16 @@ internal sealed class TestBuilder : ITestBuilder
         }
 
         // Build the resolved types array
-        Console.WriteLine($"DEBUG: TypeMapping has {typeMapping.Count} entries");
-        foreach (var kvp in typeMapping)
-        {
-            Console.WriteLine($"DEBUG: TypeMapping: {kvp.Key.Name} -> {kvp.Value.Name}");
-        }
-        
         var resolvedTypes = new Type[genericParameters.Length];
         for (var i = 0; i < genericParameters.Length; i++)
         {
             var genericParam = genericParameters[i];
-            Console.WriteLine($"DEBUG: Trying to resolve generic parameter: {genericParam.Name}");
             if (!typeMapping.TryGetValue(genericParam, out var resolvedType))
             {
-                Console.WriteLine($"DEBUG: Failed to resolve {genericParam.Name} from typeMapping");
                 throw new InvalidOperationException(
                     $"Could not resolve type for generic parameter '{genericParam.Name}' of type '{genericClassType.Name}' from data sources");
             }
             resolvedTypes[i] = resolvedType;
-            Console.WriteLine($"DEBUG: Resolved {genericParam.Name} to {resolvedType.Name}");
         }
 
         return resolvedTypes;

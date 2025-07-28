@@ -170,7 +170,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static void GeneratePropertySource(StringBuilder sb, ClassWithDataSourceProperties classInfo)
     {
         var sourceClassName = GetPropertySourceClassName(classInfo.ClassSymbol);
-        var classTypeName = classInfo.ClassSymbol.ToDisplayString();
+        var classTypeName = classInfo.ClassSymbol.GloballyQualified();
 
         sb.AppendLine($"internal sealed class {sourceClassName} : IPropertySource");
         sb.AppendLine("{");
@@ -229,20 +229,20 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine($"            PropertyName = \"{propertyName}\",");
         sb.AppendLine($"            PropertyType = typeof({propertyTypeForTypeof}),");
         sb.AppendLine($"            ContainingType = typeof({classSymbol.ToDisplayString()}),");
-        
+
         // Generate CreateDataSource delegate
         sb.AppendLine("            CreateDataSource = () =>");
         sb.AppendLine("            {");
         GenerateDataSourceCreation(sb, propInfo.DataSourceAttribute, attributeTypeName);
         sb.AppendLine("            },");
-        
+
         // Generate SetProperty delegate
         sb.AppendLine("            SetProperty = (instance, value) =>");
         sb.AppendLine("            {");
         sb.AppendLine($"                var typedInstance = ({classTypeName})instance;");
         GeneratePropertySetting(sb, propInfo, propertyType, "typedInstance");
         sb.AppendLine("            }");
-        
+
         sb.AppendLine("        };");
         sb.AppendLine();
     }
@@ -258,7 +258,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             var value = FormatTypedConstant(namedArg.Value);
             sb.AppendLine($"                dataSource.{namedArg.Key} = {value};");
         }
-        
+
         sb.AppendLine("                return dataSource;");
     }
 
@@ -267,7 +267,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         if (propInfo.Property.SetMethod?.IsInitOnly == true)
         {
             var castExpression = GetPropertyCastExpression(propInfo.Property, propertyType);
-            
+
             sb.AppendLine("#if NET8_0_OR_GREATER");
             sb.AppendLine($"                Get{propInfo.Property.Name}BackingField({instanceVariableName}) = {castExpression};");
             sb.AppendLine("#else");
@@ -291,15 +291,15 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static string GetPropertyCastExpression(IPropertySymbol property, string propertyType)
     {
-        var isNullableValueType = property.Type is INamedTypeSymbol namedType && 
-                                  namedType.IsGenericType && 
+        var isNullableValueType = property.Type is INamedTypeSymbol namedType &&
+                                  namedType.IsGenericType &&
                                   namedType.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T;
-        
+
         if (property.Type.IsValueType && !isNullableValueType)
         {
             return $"({propertyType})value!";
         }
-        
+
         return $"({propertyType})value";
     }
 

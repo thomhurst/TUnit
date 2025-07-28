@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using TUnit.Analyzers.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
@@ -209,11 +210,12 @@ public static class TypeExtensions
     {
         if(typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && namedTypeSymbol.IsGenericDefinition())
         {
-            var genericTypeArguments = namedTypeSymbol.TypeArguments.Length;
+            var typeBuilder = new StringBuilder(typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix));
+            typeBuilder.Append('<');
+            typeBuilder.Append(new string(',', namedTypeSymbol.TypeArguments.Length - 1));
+            typeBuilder.Append('>');
 
-            var commas = new string(',', genericTypeArguments - 1);
-
-            return $"{namedTypeSymbol.OriginalDefinition.ToDisplayString(DisplayFormats.FullyQualifiedGenericTypeOnly)}<{commas}>";
+            return typeBuilder.ToString();
         }
 
         return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
@@ -237,6 +239,11 @@ public static class TypeExtensions
         if (namedTypeSymbol.IsUnboundGenericType)
         {
             return true;
+        }
+
+        if (!namedTypeSymbol.IsGenericType)
+        {
+            return false;
         }
 
         return namedTypeSymbol.TypeArguments.Any(IsGenericDefinition);
