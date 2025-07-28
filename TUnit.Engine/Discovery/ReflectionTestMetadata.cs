@@ -611,15 +611,40 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             TypeReference = new TypeReference { AssemblyQualifiedName = (_testMethod.DeclaringType ?? _testClass).AssemblyQualifiedName }
         };
 
+        // Filter out CancellationToken parameters for consistency with source generation mode
+        var membersToGenerate = type == Core.Enums.DataGeneratorType.TestParameters
+            ? methodMetadata.Parameters
+            : [];
+
+        // Debug: Log the method and its parameters
+        System.Diagnostics.Debug.WriteLine($"[ReflectionTestMetadata] Method: {_testMethod.Name}, Type: {type}, Parameters: {membersToGenerate.Length}");
+        for (int i = 0; i < membersToGenerate.Length; i++)
+        {
+            System.Diagnostics.Debug.WriteLine($"  Param[{i}]: {membersToGenerate[i].Name} : {membersToGenerate[i].Type}");
+        }
+
+        // Filter out CancellationToken if it's the last parameter (handled by the engine)
+        if (type == Core.Enums.DataGeneratorType.TestParameters && membersToGenerate.Length > 0)
+        {
+            var lastParam = membersToGenerate[membersToGenerate.Length - 1];
+            if (lastParam.Type == typeof(System.Threading.CancellationToken))
+            {
+                System.Diagnostics.Debug.WriteLine($"[ReflectionTestMetadata] Filtering out CancellationToken parameter from {_testMethod.Name}");
+                var newArray = new ParameterMetadata[membersToGenerate.Length - 1];
+                Array.Copy(membersToGenerate, 0, newArray, 0, membersToGenerate.Length - 1);
+                membersToGenerate = newArray;
+            }
+        }
+
+        System.Diagnostics.Debug.WriteLine($"[ReflectionTestMetadata] Final members count for {_testMethod.Name}: {membersToGenerate.Length}");
+
         return new DataGeneratorMetadata
         {
             TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
             {
                 TestMetadata = null! // TODO
             }),
-            MembersToGenerate = type == Core.Enums.DataGeneratorType.TestParameters
-                ? [..methodMetadata.Parameters]
-                : [],
+            MembersToGenerate = [..membersToGenerate],
             TestInformation = methodMetadata,
             Type = type,
             TestSessionId = "reflection-discovery",

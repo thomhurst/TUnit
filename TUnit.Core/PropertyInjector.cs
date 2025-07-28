@@ -12,6 +12,7 @@ public static class PropertyInjector
     private static readonly BindingFlags BackingFieldFlags =
         BindingFlags.Instance | BindingFlags.NonPublic;
 
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
     public static async Task InjectPropertiesAsync(
         TestContext testContext,
         object instance,
@@ -25,18 +26,6 @@ public static class PropertyInjector
             throw new ArgumentNullException(nameof(instance), "Test instance cannot be null");
         }
 
-        var dataGeneratorMetadata = new DataGeneratorMetadata
-        {
-            TestBuilderContext = new TestBuilderContextAccessor(TestBuilderContext.Current ?? TestBuilderContext.FromTestContext(testContext, propertyDataSources.ElementAtOrDefault(0)?.DataSource)),
-            MembersToGenerate = [
-            ],
-            TestInformation = testInformation,
-            Type = DataGeneratorType.Property,
-            TestSessionId = testSessionId,
-            TestClassInstance = instance,
-            ClassInstanceArguments = testContext.TestDetails.TestClassArguments
-        };
-
         var propertyValues = new Dictionary<string, object?>();
 
         foreach (var propertyDataSource in propertyDataSources)
@@ -48,6 +37,35 @@ public static class PropertyInjector
 
                 await ObjectInitializer.InitializeAsync(propertyDataSource.DataSource);
 
+                // Create property-specific metadata with the current property's information
+                var propertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
+                
+                // Use metadata-provided types when available (source generation mode), 
+                // fallback to runtime discovery (reflection mode)
+                var containingType = testInformation.Type; // Use compile-time known type from metadata
+                var propertyType = propertyInjection?.PropertyType ?? typeof(object);
+                
+                var dataGeneratorMetadata = new DataGeneratorMetadata
+                {
+                    TestBuilderContext = new TestBuilderContextAccessor(TestBuilderContext.Current ?? TestBuilderContext.FromTestContext(testContext, propertyDataSource.DataSource)),
+                    MembersToGenerate = propertyInjection != null ? [
+                        new PropertyMetadata
+                        {
+                            IsStatic = false,
+                            Name = propertyDataSource.PropertyName,
+                            ClassMetadata = GetClassMetadataForType(containingType),
+                            Type = propertyType,
+                            ReflectionInfo = GetPropertyInfo(containingType, propertyDataSource.PropertyName),
+                            Getter = parent => GetPropertyInfo(containingType, propertyDataSource.PropertyName).GetValue(parent!)!,
+                        }
+                    ] : [],
+                    TestInformation = testInformation,
+                    Type = DataGeneratorType.Property,
+                    TestSessionId = testSessionId,
+                    TestClassInstance = instance,
+                    ClassInstanceArguments = testContext.TestDetails.TestClassArguments
+                };
+
                 var dataRows = propertyDataSource.DataSource.GetDataRowsAsync(dataGeneratorMetadata);
 
                 await foreach (var factory in dataRows)
@@ -55,14 +73,14 @@ public static class PropertyInjector
                     var args = await factory();
                     
                     // For tuple properties, we need to reconstruct the tuple from the unpacked elements
-                    var propertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
+                    var currentPropertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
                     object? value;
                     
-                    if (propertyInjection != null && IsTupleType(propertyInjection.PropertyType) && args != null && args.Length > 1)
+                    if (currentPropertyInjection != null && IsTupleType(currentPropertyInjection.PropertyType) && args != null && args.Length > 1)
                     {
                         // The data source has unpacked the tuple, we need to reconstruct it
                         #pragma warning disable IL2072 // Target parameter argument does not satisfy requirements
-                        value = CreateTupleFromElements(propertyInjection.PropertyType, args);
+                        value = CreateTupleFromElements(currentPropertyInjection.PropertyType, args);
                         #pragma warning restore IL2072
                     }
                     else
@@ -547,6 +565,36 @@ public static class PropertyInjector
             // If creation fails, return the first element
             return elements.FirstOrDefault();
         }
+    }
+
+    /// <summary>
+    /// Gets PropertyInfo in an AOT-safe manner.
+    /// </summary>
+    private static PropertyInfo GetPropertyInfo([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type containingType, string propertyName)
+    {
+        return containingType.GetProperty(propertyName)!;
+    }
+
+    /// <summary>
+    /// Gets or creates ClassMetadata for the specified type.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
+    private static ClassMetadata GetClassMetadataForType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
+    {
+        return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => new ClassMetadata
+        {
+            Type = type,
+            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
+            Name = type.Name,
+            Namespace = type.Namespace ?? string.Empty,
+            Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().Name ?? type.Assembly.FullName ?? "Unknown", () => new AssemblyMetadata 
+            { 
+                Name = type.Assembly.GetName().Name ?? type.Assembly.FullName ?? "Unknown" 
+            }),
+            Properties = [],
+            Parameters = [],
+            Parent = type.DeclaringType != null ? GetClassMetadataForType(type.DeclaringType) : null
+        });
     }
 
 }
