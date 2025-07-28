@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Data;
 using TUnit.Core.Services;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Interfaces;
@@ -17,8 +18,8 @@ internal sealed class HookOrchestrator
     private readonly IContextProvider _contextProvider;
 
     // Cache initialization tasks for assemblies/classes
-    private readonly ConcurrentDictionary<string, Task<ExecutionContext>> _beforeAssemblyTasks = new();
-    private readonly ConcurrentDictionary<Type, Task<ExecutionContext>> _beforeClassTasks = new();
+    private readonly GetOnlyDictionary<string, Task<ExecutionContext>> _beforeAssemblyTasks = new();
+    private readonly GetOnlyDictionary<Type, Task<ExecutionContext>> _beforeClassTasks = new();
 
     // Track active test counts for cleanup
     private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
@@ -40,7 +41,7 @@ internal sealed class HookOrchestrator
     /// </summary>
     private Task<ExecutionContext> GetOrCreateBeforeAssemblyTask(string assemblyName, Assembly assembly, CancellationToken cancellationToken)
     {
-        return _beforeAssemblyTasks.GetOrAdd(assemblyName, _ =>
+        return _beforeAssemblyTasks.GetOrAdd(assemblyName, _ => 
             ExecuteBeforeAssemblyHooksAsync(assembly, cancellationToken));
     }
 
@@ -54,10 +55,9 @@ internal sealed class HookOrchestrator
     {
         return _beforeClassTasks.GetOrAdd(testClassType, async _ =>
         {
-            // First ensure assembly hooks have run and restore their context
+#if NET
             var assemblyName = assembly.GetName().Name ?? "Unknown";
             var assemblyContext = await GetOrCreateBeforeAssemblyTask(assemblyName, assembly, cancellationToken);
-#if NET
             ExecutionContext.Restore(assemblyContext);
 #endif
             // Now run class hooks in the assembly context
