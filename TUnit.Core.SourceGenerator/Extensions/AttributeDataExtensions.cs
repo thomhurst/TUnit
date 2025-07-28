@@ -9,6 +9,13 @@ public static class AttributeDataExtensions
         return attributeData?.AttributeClass?.GloballyQualifiedNonGeneric();
     }
 
+    public static bool IsTestAttribute(this AttributeData? attributeData)
+    {
+        return attributeData?.AttributeClass?.AllInterfaces.Any(x =>
+                x.GloballyQualified() == WellKnownFullyQualifiedClassNames.TestAttribute.WithGlobalPrefix)
+            == true;
+    }
+
     public static bool IsDataSourceAttribute(this AttributeData? attributeData)
     {
         return attributeData?.AttributeClass?.AllInterfaces.Any(x =>

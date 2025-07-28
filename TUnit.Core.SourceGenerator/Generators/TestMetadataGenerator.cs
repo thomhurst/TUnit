@@ -84,7 +84,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         try
         {
-            if (testMethod?.MethodSymbol == null || testMethod.TypeSymbol == null)
+            if (testMethod?.MethodSymbol == null)
             {
                 return;
             }
@@ -1496,11 +1496,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        // Skip generic types without explicit instantiation
-        if (classSymbol is { IsGenericType: true, TypeParameters.Length: > 0 })
-        {
-            return null;
-        }
 
         return new InheritsTestsClassMetadata
         {
@@ -1517,23 +1512,28 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Find all test methods in base classes
-        var inheritedTestMethods = new List<IMethodSymbol>();
-        CollectInheritedTestMethods(classInfo.TypeSymbol, inheritedTestMethods);
+        var inheritedTestMethods = CollectInheritedTestMethods(classInfo.TypeSymbol);
 
         // Generate test metadata for each inherited test method
         foreach (var method in inheritedTestMethods)
         {
-            var testAttribute = method.GetAttributes().FirstOrDefault(a => a.AttributeClass?.Name == "TestAttribute");
+            var testAttribute = method.GetAttributes().FirstOrDefault(a => a.IsTestAttribute());
+
+            // Skip if no test attribute found
+            if (testAttribute == null)
+            {
+                continue;
+            }
 
             var testMethodMetadata = new TestMethodMetadata
             {
                 MethodSymbol = method,
                 TypeSymbol = classInfo.TypeSymbol,
-                FilePath = "inherited", // No file path for inherited methods
-                LineNumber = 0, // No line number for inherited methods
-                TestAttribute = testAttribute!,
+                FilePath = testAttribute.ConstructorArguments[0].Value?.ToString() ?? "",
+                LineNumber = testAttribute.ConstructorArguments[1].Value as int? ?? 0,
+                TestAttribute = testAttribute,
                 Context = null, // No context for inherited tests
-                MethodSyntax = null!, // We don't have the syntax for inherited methods
+                MethodSyntax = method.DeclaringSyntaxReferences.Select(x => x.GetSyntax()).OfType<MethodDeclarationSyntax>().FirstOrDefault(), // We don't have the syntax for inherited methods
                 IsGenericType = classInfo.TypeSymbol.IsGenericType,
                 IsGenericMethod = method.IsGenericMethod,
                 MethodAttributes = method.GetAttributes()
@@ -1543,46 +1543,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static void CollectInheritedTestMethods(INamedTypeSymbol derivedClass, List<IMethodSymbol> testMethods)
+    private static List<IMethodSymbol> CollectInheritedTestMethods(INamedTypeSymbol derivedClass)
     {
-        var currentType = derivedClass.BaseType;
-
-        while (currentType != null && currentType.SpecialType != SpecialType.System_Object)
-        {
-            // Skip if base type is an open generic type
-            if (currentType.IsUnboundGenericType ||
-                (currentType.IsGenericType && currentType.TypeArguments.Any(arg => arg.TypeKind == TypeKind.TypeParameter)))
-            {
-                currentType = currentType.BaseType;
-                continue;
-            }
-
-            // Get all methods from the base class
-            var methods = currentType.GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where(m => !m.IsStatic && m.MethodKind == MethodKind.Ordinary);
-
-            foreach (var method in methods)
-            {
-                // Skip generic methods - they can't be instantiated without concrete type arguments
-                if (method.IsGenericMethod)
-                {
-                    continue;
-                }
-
-                // Check if method has Test attribute
-                var hasTestAttribute = method.GetAttributes()
-                    .Any(attr => attr.AttributeClass?.Name == "TestAttribute" &&
-                                attr.AttributeClass.ContainingNamespace?.ToDisplayString() == "TUnit.Core");
-
-                if (hasTestAttribute)
-                {
-                    testMethods.Add(method);
-                }
-            }
-
-            currentType = currentType.BaseType;
-        }
+        return derivedClass.GetMembersIncludingBase().OfType<IMethodSymbol>()
+            .Where(m => m.GetAttributes().Any(attr => attr.IsTestAttribute()))
+            .ToList();
     }
 
     private static void GenerateReflectionFieldAccessors(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)
