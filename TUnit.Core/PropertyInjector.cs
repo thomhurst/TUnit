@@ -446,10 +446,8 @@ public static class PropertyInjector
         {
             if (property.CanWrite || GetBackingField(property) != null)
             {
-                var dataSourceAttr = property.GetCustomAttributes()
-                    .FirstOrDefault(attr => attr is IDataSourceAttribute) as IDataSourceAttribute;
-
-                if (dataSourceAttr != null)
+                if (property.GetCustomAttributes()
+                        .FirstOrDefault(attr => attr is IDataSourceAttribute) is IDataSourceAttribute dataSourceAttr)
                 {
                     properties.Add(new PropertyDataSource
                     {

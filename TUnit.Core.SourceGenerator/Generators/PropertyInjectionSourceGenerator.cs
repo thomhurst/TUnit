@@ -41,8 +41,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         var typeDecl = (TypeDeclarationSyntax)context.Node;
         var semanticModel = context.SemanticModel;
 
-        var typeSymbol = semanticModel.GetDeclaredSymbol(typeDecl) as INamedTypeSymbol;
-        if (typeSymbol == null || typeSymbol.IsAbstract)
+        if (semanticModel.GetDeclaredSymbol(typeDecl) is not INamedTypeSymbol typeSymbol || typeSymbol.IsAbstract)
         {
             return null;
         }

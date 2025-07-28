@@ -134,7 +134,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 MethodSyntax = null, // No syntax for inherited methods
                 IsGenericType = classInfo.TypeSymbol.IsGenericType,
                 IsGenericMethod = method.IsGenericMethod,
-                MethodAttributes = method.GetAttributes()
+                MethodAttributes = method.GetAttributes(),
             };
 
             GenerateTestMethodSource(context, compilation, testMethodMetadata);
@@ -152,7 +152,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             var writer = new CodeWriter();
             GenerateFileHeader(writer);
-            GenerateSimplifiedTestMetadata(writer, compilation, testMethod);
+            GenerateTestMetadata(writer, compilation, testMethod);
 
             var fileName = $"{testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_{Guid.NewGuid():N}.g.cs";
             context.AddSource(fileName, SourceText.From(writer.ToString(), Encoding.UTF8));
@@ -189,7 +189,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
 
-    private static void GenerateSimplifiedTestMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    private static void GenerateTestMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
     {
         var className = testMethod.TypeSymbol.GloballyQualified();
         var methodName = testMethod.MethodSymbol.Name;
@@ -1316,21 +1316,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static bool IsAsyncMethod(IMethodSymbol method)
     {
         var returnType = method.ReturnType;
-        if (returnType == null)
-        {
-            return false;
-        }
 
         var returnTypeName = returnType.ToDisplayString();
         return returnTypeName.StartsWith("System.Threading.Tasks.Task") ||
                returnTypeName.StartsWith("System.Threading.Tasks.ValueTask") ||
                returnTypeName.StartsWith("Task<") ||
                returnTypeName.StartsWith("ValueTask<");
-    }
-
-    private static bool IsNullableValueType(ITypeSymbol type)
-    {
-        return type is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.SpecialType: SpecialType.System_Nullable_T };
     }
 
     private static void GenerateDependencies(CodeWriter writer, Compilation compilation, IMethodSymbol methodSymbol)
@@ -1353,7 +1344,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         for (var i = 0; i < dependsOnAttributes.Count; i++)
         {
             var attr = dependsOnAttributes[i];
-            GenerateTestDependency(writer, compilation, attr);
+            GenerateTestDependency(writer, attr);
 
             if (i < dependsOnAttributes.Count - 1)
             {
@@ -1365,7 +1356,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
     }
 
-    private static void GenerateTestDependency(CodeWriter writer, Compilation compilation, AttributeData attributeData)
+    private static void GenerateTestDependency(CodeWriter writer, AttributeData attributeData)
     {
         var constructorArgs = attributeData.ConstructorArguments;
 
@@ -1382,8 +1373,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             else if (arg.Type?.TypeKind == TypeKind.Class || arg.Type?.Name == "Type")
             {
                 // DependsOnAttribute(Type testClass) - dependency on all tests in a class
-                var classType = arg.Value as ITypeSymbol;
-                if (classType != null)
+                if (arg.Value is ITypeSymbol classType)
                 {
                     var className = classType.GloballyQualified();
                     var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType

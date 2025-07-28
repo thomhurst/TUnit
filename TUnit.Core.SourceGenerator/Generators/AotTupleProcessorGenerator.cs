@@ -125,8 +125,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         var method = (MethodDeclarationSyntax)context.Node;
         var semanticModel = context.SemanticModel;
 
-        var methodSymbol = semanticModel.GetDeclaredSymbol(method) as IMethodSymbol;
-        if (methodSymbol == null)
+        if (semanticModel.GetDeclaredSymbol(method) is not IMethodSymbol methodSymbol)
         {
             return null;
         }

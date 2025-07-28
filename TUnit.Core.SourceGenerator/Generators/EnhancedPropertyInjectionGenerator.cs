@@ -76,8 +76,7 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
         var classDecl = (ClassDeclarationSyntax)context.Node;
         var semanticModel = context.SemanticModel;
 
-        var classSymbol = semanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
-        if (classSymbol == null)
+        if (semanticModel.GetDeclaredSymbol(classDecl) is not INamedTypeSymbol classSymbol)
         {
             return null;
         }
@@ -113,8 +112,7 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
         var classDecl = (ClassDeclarationSyntax)context.Node;
         var semanticModel = context.SemanticModel;
 
-        var classSymbol = semanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
-        if (classSymbol == null)
+        if (semanticModel.GetDeclaredSymbol(classDecl) is not INamedTypeSymbol classSymbol)
         {
             return null;
         }

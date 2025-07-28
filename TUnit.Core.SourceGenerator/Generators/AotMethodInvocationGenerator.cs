@@ -102,8 +102,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         var invocation = (InvocationExpressionSyntax)context.Node;
         var semanticModel = context.SemanticModel;
 
-        var memberAccess = invocation.Expression as MemberAccessExpressionSyntax;
-        if (memberAccess == null)
+        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
         {
             return null;
         }
@@ -191,8 +190,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
 
     private static MethodDataSourceInfo? ExtractFromMethod(MethodDeclarationSyntax method, SemanticModel semanticModel)
     {
-        var methodSymbol = semanticModel.GetDeclaredSymbol(method) as IMethodSymbol;
-        if (methodSymbol == null)
+        if (semanticModel.GetDeclaredSymbol(method) is not IMethodSymbol methodSymbol)
         {
             return null;
         }
