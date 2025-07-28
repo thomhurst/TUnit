@@ -762,7 +762,20 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 for (int i = 0; i < parameters.Length && i < args.Length; i++)
                 {
-                    castedArgs[i] = CastHelper.Cast(parameters[i].ParameterType, args[i]);
+                    var paramType = parameters[i].ParameterType;
+                    var arg = args[i];
+                    
+                    // If the argument is already assignable to the parameter type, use it directly
+                    // This handles delegates and other non-convertible types
+                    if (arg != null && paramType.IsAssignableFrom(arg.GetType()))
+                    {
+                        castedArgs[i] = arg;
+                    }
+                    else
+                    {
+                        // Otherwise use CastHelper for conversions
+                        castedArgs[i] = CastHelper.Cast(paramType, arg);
+                    }
                 }
 
                 return ctor.Invoke(castedArgs) ?? throw new InvalidOperationException("Failed to create instance");
@@ -823,7 +836,20 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 for (int i = 0; i < parameters.Length && i < args.Length; i++)
                 {
-                    castedArgs[i] = CastHelper.Cast(parameters[i].ParameterType, args[i]);
+                    var paramType = parameters[i].ParameterType;
+                    var arg = args[i];
+                    
+                    // If the argument is already assignable to the parameter type, use it directly
+                    // This handles delegates and other non-convertible types
+                    if (arg != null && paramType.IsAssignableFrom(arg.GetType()))
+                    {
+                        castedArgs[i] = arg;
+                    }
+                    else
+                    {
+                        // Otherwise use CastHelper for conversions
+                        castedArgs[i] = CastHelper.Cast(paramType, arg);
+                    }
                 }
 
                 var result = methodToInvoke.Invoke(instance, castedArgs);
