@@ -907,8 +907,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             typeof(IEnumerable<>), 
             typeof(IReadOnlyList<>),
             typeof(IReadOnlyCollection<>),
-            typeof(IEnumerator<>),
-            typeof(IReadOnlySet<>)
+            typeof(IEnumerator<>)
         };
         
         if (!covariantInterfaces.Contains(paramGenericDef))
@@ -964,10 +963,11 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     // Build type mapping from method parameters and actual arguments
                     for (int j = 0; j < methodParams.Length && j < args.Length; j++)
                     {
-                        if (args[j] != null)
+                        var arg = args[j];
+                        if (arg != null)
                         {
                             var paramType = methodParams[j].ParameterType;
-                            var argType = args[j].GetType();
+                            var argType = arg.GetType();
                             InferGenericTypeMapping(paramType, argType, typeMapping);
                         }
                     }
