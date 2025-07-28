@@ -246,7 +246,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
 
         // Add basic metadata
-        GenerateBasicMetadata(writer, compilation, testMethod);
+        GenerateMetadata(writer, compilation, testMethod);
 
         // Generate generic type info if needed
         if (testMethod.IsGenericType)
@@ -280,7 +280,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("tests.Add(metadata);");
     }
 
-    private static void GenerateBasicMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    private static void GenerateMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
     {
         var methodSymbol = testMethod.MethodSymbol;
 
@@ -298,7 +298,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Indent();
 
         var attributes = methodSymbol.GetAttributes()
-            .Concat(testMethod.TypeSymbol.GetAttributes())
+            .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
             .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
             .ToImmutableArray();
 
@@ -363,7 +363,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .ToList();
 
         // Extract data source attributes from class
-        var classDataSources = typeSymbol.GetAttributes()
+        var classDataSources = typeSymbol.GetAttributesIncludingBaseTypes()
             .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
             .ToList();
 
