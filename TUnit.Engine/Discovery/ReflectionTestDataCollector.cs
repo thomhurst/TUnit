@@ -778,14 +778,47 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     /// Creates a reflection-based test invoker with proper AOT attribution
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "Reflection mode cannot support AOT")]
     private static Func<object, object?[], Task> CreateReflectionTestInvoker(Type testClass, MethodInfo testMethod)
     {
         return (instance, args) =>
         {
             try
             {
+                // Get the method to invoke - may need to make it concrete if it's generic
+                var methodToInvoke = testMethod;
+                
+                // If the method is a generic method definition, we need to make it concrete
+                if (testMethod.IsGenericMethodDefinition)
+                {
+                    // Try to infer type arguments from the actual arguments
+                    var genericParams = testMethod.GetGenericArguments();
+                    var typeArguments = new Type[genericParams.Length];
+                    var methodParams = testMethod.GetParameters();
+                    
+                    // Map generic parameters to concrete types based on arguments
+                    for (int i = 0; i < genericParams.Length; i++)
+                    {
+                        // Find a parameter that uses this generic type
+                        for (int j = 0; j < methodParams.Length && j < args.Length; j++)
+                        {
+                            var paramType = methodParams[j].ParameterType;
+                            if (paramType == genericParams[i] && args[j] != null)
+                            {
+                                typeArguments[i] = args[j].GetType();
+                                break;
+                            }
+                        }
+                        
+                        // If we couldn't infer the type, default to object
+                        typeArguments[i] ??= typeof(object);
+                    }
+                    
+                    methodToInvoke = testMethod.MakeGenericMethod(typeArguments);
+                }
+                
                 // Cast arguments to the expected parameter types
-                var parameters = testMethod.GetParameters();
+                var parameters = methodToInvoke.GetParameters();
                 var castedArgs = new object?[parameters.Length];
                 
                 for (int i = 0; i < parameters.Length && i < args.Length; i++)
@@ -793,7 +826,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     castedArgs[i] = CastHelper.Cast(parameters[i].ParameterType, args[i]);
                 }
                 
-                var result = testMethod.Invoke(instance, castedArgs);
+                var result = methodToInvoke.Invoke(instance, castedArgs);
                 if (result is Task task)
                 {
                     return task;

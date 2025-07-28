@@ -84,10 +84,11 @@ public class MethodDataSourceAttribute : TestDataAttribute
             targetType = dataGeneratorMetadata.TestClassInstance.GetType();
         }
 
-        var methodInfo = targetType.GetMethods(BindingFlags).SingleOrDefault(x => x.Name == MethodNameProvidingDataSource)
-            ?? targetType.GetMethods(BindingFlags).SingleOrDefault(x => x.Name == MethodNameProvidingDataSource
+        var methodInfo = targetType.GetMethods(BindingFlags).SingleOrDefault(x => x.Name == MethodNameProvidingDataSource
                 && x.GetParameters().Select(p => p.ParameterType).SequenceEqual(Arguments.Select(a => a?.GetType())))
-            ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
+            ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags)
+            ?? throw new InvalidOperationException(
+                $"Method '{MethodNameProvidingDataSource}' not found in class '{targetType.Name}' with the specified arguments.");
 
         if (methodInfo is null)
         {

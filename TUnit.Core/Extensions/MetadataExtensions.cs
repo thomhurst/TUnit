@@ -38,8 +38,8 @@ public static class MetadataExtensions
     {
         return type
                 .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-                .SingleOrDefault(x => x.Name == name)
-            ?? type.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.FlattenHierarchy, null, parameters, null)
+                .SingleOrDefault(x => x.Name == name && x.GetParameters().Select(p => p.ParameterType).SequenceEqual(parameters))
+            ?? type.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.FlattenHierarchy)
             ?? throw new InvalidOperationException($"Method '{name}' with parameters {string.Join(", ", parameters.Select(p => p.Name))} not found in type '{type.FullName}'.");
     }
 }
