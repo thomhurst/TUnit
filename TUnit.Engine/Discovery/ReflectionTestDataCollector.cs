@@ -765,9 +765,22 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     var paramType = parameters[i].ParameterType;
                     var arg = args[i];
                     
+                    if (arg == null)
+                    {
+                        castedArgs[i] = null;
+                        continue;
+                    }
+                    
+                    var argType = arg.GetType();
+                    
                     // If the argument is already assignable to the parameter type, use it directly
                     // This handles delegates and other non-convertible types
-                    if (arg != null && paramType.IsAssignableFrom(arg.GetType()))
+                    if (paramType.IsAssignableFrom(argType))
+                    {
+                        castedArgs[i] = arg;
+                    }
+                    // Special handling for covariant interfaces like IEnumerable<T>
+                    else if (IsCovariantCompatible(paramType, argType))
                     {
                         castedArgs[i] = arg;
                     }
@@ -785,6 +798,52 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 throw new InvalidOperationException($"Failed to create instance of {ctor.DeclaringType?.Name}", ex);
             }
         };
+    }
+
+    /// <summary>
+    /// Checks if the argument type is compatible with the parameter type through covariance
+    /// </summary>
+    private static bool IsCovariantCompatible(Type paramType, Type argType)
+    {
+        // Only check for generic interface covariance
+        if (!paramType.IsInterface || !paramType.IsGenericType)
+        {
+            return false;
+        }
+        
+        var paramGenericDef = paramType.GetGenericTypeDefinition();
+        
+        // List of known covariant interfaces
+        var covariantInterfaces = new[] 
+        { 
+            typeof(IEnumerable<>), 
+            typeof(IReadOnlyList<>),
+            typeof(IReadOnlyCollection<>)
+        };
+        
+        if (!covariantInterfaces.Contains(paramGenericDef))
+        {
+            return false;
+        }
+        
+        // Check all interfaces implemented by the argument type (including itself if it's an interface)
+        var interfacesToCheck = argType.IsInterface ? new[] { argType } : Type.EmptyTypes;
+        interfacesToCheck = interfacesToCheck.Concat(argType.GetInterfaces()).ToArray();
+        
+        foreach (var iface in interfacesToCheck)
+        {
+            if (iface.IsGenericType && iface.GetGenericTypeDefinition() == paramGenericDef)
+            {
+                var paramElementType = paramType.GetGenericArguments()[0];
+                var argElementType = iface.GetGenericArguments()[0];
+                
+                // Check if we can assign from the argument element type to parameter element type
+                // This allows IEnumerable<int> to be passed where IEnumerable<object> is expected
+                return paramElementType.IsAssignableFrom(argElementType);
+            }
+        }
+        
+        return false;
     }
 
     /// <summary>
@@ -839,9 +898,22 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     var paramType = parameters[i].ParameterType;
                     var arg = args[i];
                     
+                    if (arg == null)
+                    {
+                        castedArgs[i] = null;
+                        continue;
+                    }
+                    
+                    var argType = arg.GetType();
+                    
                     // If the argument is already assignable to the parameter type, use it directly
                     // This handles delegates and other non-convertible types
-                    if (arg != null && paramType.IsAssignableFrom(arg.GetType()))
+                    if (paramType.IsAssignableFrom(argType))
+                    {
+                        castedArgs[i] = arg;
+                    }
+                    // Special handling for covariant interfaces like IEnumerable<T>
+                    else if (IsCovariantCompatible(paramType, argType))
                     {
                         castedArgs[i] = arg;
                     }
