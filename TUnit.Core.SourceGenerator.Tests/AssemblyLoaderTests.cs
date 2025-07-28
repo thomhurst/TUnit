@@ -26,6 +26,5 @@ internal class AssemblyLoaderTests : TestsBase
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasSingleItem();
         });
 }

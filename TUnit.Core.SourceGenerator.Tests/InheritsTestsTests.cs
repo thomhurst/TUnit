@@ -1,3 +1,5 @@
+using TUnit.Core.SourceGenerator.Tests.Options;
+
 namespace TUnit.Core.SourceGenerator.Tests;
 
 internal class InheritsTestsTests : TestsBase
@@ -9,6 +11,13 @@ internal class InheritsTestsTests : TestsBase
             "1924",
             "None",
             "Tests.cs"),
+        new RunTestOptions
+        {
+            AdditionalFiles =
+            [
+                Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject", "Bugs", "1924", "DataClass.cs")
+            ]
+        },
         async generatedFiles =>
         {
             // BaseClass has 1 test method with [Repeat(10)] and 3 [Arguments]

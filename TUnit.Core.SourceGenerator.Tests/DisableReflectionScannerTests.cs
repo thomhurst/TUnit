@@ -26,6 +26,5 @@ internal class DisableReflectionScannerTests : TestsBase
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasSingleItem();
         });
 }

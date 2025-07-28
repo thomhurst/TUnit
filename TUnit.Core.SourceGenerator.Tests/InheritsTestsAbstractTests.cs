@@ -1,3 +1,5 @@
+using TUnit.Core.SourceGenerator.Tests.Options;
+
 namespace TUnit.Core.SourceGenerator.Tests;
 
 internal class InheritsTestsAbstractTests : TestsBase
@@ -5,7 +7,16 @@ internal class InheritsTestsAbstractTests : TestsBase
     [Test]
     public Task Test() => TestMetadataGenerator.RunTest(Path.Combine(Git.RootDirectory.FullName,
             "TUnit.TestProject",
-            "AbstractTests"),
+            "AbstractTests",
+            "ConcreteClass2.cs"),
+        new RunTestOptions
+        {
+            AdditionalFiles =
+            [
+                Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject", "AbstractTests", "AbstractBaseClass.cs"),
+                Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject", "AbstractTests", "ConcreteClass1.cs")
+            ]
+        },
         async generatedFiles =>
         {
             // Check multiple files since we have AbstractBaseClass.cs, ConcreteClass1.cs, ConcreteClass2.cs
