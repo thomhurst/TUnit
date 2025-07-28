@@ -818,7 +818,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         { 
             typeof(IEnumerable<>), 
             typeof(IReadOnlyList<>),
-            typeof(IReadOnlyCollection<>)
+            typeof(IReadOnlyCollection<>),
+            typeof(IEnumerator<>),
+            typeof(IReadOnlySet<>)
         };
         
         if (!covariantInterfaces.Contains(paramGenericDef))
@@ -826,18 +828,21 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
         
-        // Check all interfaces implemented by the argument type (including itself if it's an interface)
-        var interfacesToCheck = argType.IsInterface ? new[] { argType } : Type.EmptyTypes;
-        interfacesToCheck = interfacesToCheck.Concat(argType.GetInterfaces()).ToArray();
+        // Get all interfaces from the argument type
+        var argInterfaces = argType.GetInterfaces();
+        if (argType.IsInterface)
+        {
+            argInterfaces = argInterfaces.Concat(new[] { argType }).ToArray();
+        }
         
-        foreach (var iface in interfacesToCheck)
+        foreach (var iface in argInterfaces)
         {
             if (iface.IsGenericType && iface.GetGenericTypeDefinition() == paramGenericDef)
             {
                 var paramElementType = paramType.GetGenericArguments()[0];
                 var argElementType = iface.GetGenericArguments()[0];
                 
-                // Check if we can assign from the argument element type to parameter element type
+                // For covariance to work, the parameter element type must be assignable from the argument element type
                 // This allows IEnumerable<int> to be passed where IEnumerable<object> is expected
                 return paramElementType.IsAssignableFrom(argElementType);
             }
