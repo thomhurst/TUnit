@@ -158,7 +158,9 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
 
         await assertions(generatedFiles);
 
-        var verifyTask = Verify(generatedFiles);
+        // Scrub GUIDs from generated files before verification
+        var scrubbedFiles = generatedFiles.Select(file => Scrub(file)).ToArray();
+        var verifyTask = Verify(scrubbedFiles);
 
         if (runTestOptions.VerifyConfigurator != null)
         {

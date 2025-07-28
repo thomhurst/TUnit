@@ -17,7 +17,11 @@ internal class InheritedTestsFromDifferentProjectTests : TestsBase
                     "BaseTests.cs"),
                 Path.Combine(Git.RootDirectory.FullName,
                     "TUnit.TestProject",
-                    "TestData.cs")
+                    "TestData.cs"),
+                Path.Combine(Git.RootDirectory.FullName,
+                    "TUnit.TestProject",
+                    "Attributes",
+                    "ExpectedPassEngineTest.cs")
             ]
         },
         async generatedFiles =>
