@@ -4,13 +4,13 @@ using System.Reflection;
 
 namespace TUnit.Core;
 
-[DebuggerDisplay("{Type} {Name})")]
+[DebuggerDisplay("{Type} {Name}")]
 public record ParameterMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties)]
 T>() : ParameterMetadata(typeof(T));
 
-[DebuggerDisplay("{Type} {Name})")]
+[DebuggerDisplay("{Type} {Name}")]
 public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods
     | DynamicallyAccessedMemberTypes.PublicProperties)] Type Type) : MemberMetadata

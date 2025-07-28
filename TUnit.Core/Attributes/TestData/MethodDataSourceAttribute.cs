@@ -84,7 +84,10 @@ public class MethodDataSourceAttribute : TestDataAttribute
             targetType = dataGeneratorMetadata.TestClassInstance.GetType();
         }
 
-        var methodInfo = targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
+        var methodInfo = targetType.GetMethods(BindingFlags).SingleOrDefault(x => x.Name == MethodNameProvidingDataSource)
+            ?? targetType.GetMethods(BindingFlags).SingleOrDefault(x => x.Name == MethodNameProvidingDataSource
+                && x.GetParameters().Select(p => p.ParameterType).SequenceEqual(Arguments.Select(a => a?.GetType())))
+            ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
 
         if (methodInfo is null)
         {

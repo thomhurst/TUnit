@@ -75,13 +75,13 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
                     $"are needed to create the instance. Consider using static methods for matrix data sources in generic classes, " +
                     $"or provide the generic type arguments explicitly using [Arguments] or other data source attributes.");
             }
-            
+
             throw new InvalidOperationException(
                 $"Instance is required for MatrixInstanceMethod but no instance is available. " +
                 $"This typically happens when the test class requires data that hasn't been expanded yet.");
         }
 
-        var objects = matrixAttribute?.GetObjects(dataGeneratorMetadata.TestClassInstance);
+        var objects = matrixAttribute?.GetObjects(dataGeneratorMetadata);
 
         if (matrixAttribute is not null && objects is { Length: > 0 })
         {

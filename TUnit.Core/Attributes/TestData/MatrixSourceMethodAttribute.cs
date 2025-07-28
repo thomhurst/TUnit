@@ -9,14 +9,17 @@ public class MatrixMethodAttribute<[DynamicallyAccessedMembers(DynamicallyAccess
 {
     private static readonly BindingFlags BindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Static;
 
-    public override object?[] GetObjects(object? instance)
+    public override object?[] GetObjects(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        return GetMethodValue(methodName, instance as TClass);
+        return GetMethodValue(methodName, dataGeneratorMetadata);
     }
 
-    private static object?[] GetMethodValue(string methodName, TClass? instance)
+    private static object?[] GetMethodValue(string methodName, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        var methodInfo = typeof(TClass).GetMethod(methodName, BindingFlags);
+        var instance = dataGeneratorMetadata.TestClassInstance as TClass;
+
+        var methodInfo = typeof(TClass).GetMethods(BindingFlags).SingleOrDefault(x => x.Name == methodName)
+            ?? typeof(TClass).GetMethod(methodName, BindingFlags);
 
         if (methodInfo == null)
         {

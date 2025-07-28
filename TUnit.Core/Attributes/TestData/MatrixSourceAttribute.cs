@@ -7,7 +7,7 @@ public class MatrixAttribute(params object?[]? objects) : TUnitAttribute
     {
     }
 
-    public virtual object?[] GetObjects(object? instance) => objects ?? [null];
+    public virtual object?[] GetObjects(DataGeneratorMetadata dataGeneratorMetadata) => objects ?? [null];
 
     public object?[]? Excluding { get; init; }
 }
