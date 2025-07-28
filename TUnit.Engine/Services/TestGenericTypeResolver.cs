@@ -499,6 +499,42 @@ internal sealed class TestGenericTypeResolver
             }
         }
 
+        // Handle case where parameter is a generic interface and argument implements it
+        if (parameterType.IsGenericType && parameterType.IsInterface)
+        {
+            // Check if argument type implements the parameter interface
+            var implementedInterfaces = argumentType.GetInterfaces();
+            foreach (var implementedInterface in implementedInterfaces)
+            {
+                if (implementedInterface.IsGenericType)
+                {
+                    var interfaceGenericDef = implementedInterface.GetGenericTypeDefinition();
+                    var paramGenericDef = parameterType.GetGenericTypeDefinition();
+
+                    if (interfaceGenericDef == paramGenericDef)
+                    {
+                        // Found matching interface, now map generic arguments
+                        var paramGenericArgs = parameterType.GetGenericArguments();
+                        var implGenericArgs = implementedInterface.GetGenericArguments();
+
+                        if (paramGenericArgs.Length == implGenericArgs.Length)
+                        {
+                            var allMapped = true;
+                            for (var i = 0; i < paramGenericArgs.Length; i++)
+                            {
+                                if (!TryInferTypeMapping(paramGenericArgs[i], implGenericArgs[i], typeMapping))
+                                {
+                                    allMapped = false;
+                                    break;
+                                }
+                            }
+                            if (allMapped) return true;
+                        }
+                    }
+                }
+            }
+        }
+
         // Non-generic types must match exactly or be assignable
         return parameterType.IsAssignableFrom(argumentType);
     }
