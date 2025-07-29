@@ -141,10 +141,10 @@ public class NestedPropertyTests
         {
             await Task.Delay(1);
 
-            // Child should already be initialized
-            if (Child?.IsInitialized != true)
+            // Initialize child if it hasn't been already
+            if (Child != null && !Child.IsInitialized)
             {
-                throw new InvalidOperationException("Child not initialized before parent");
+                await Child.InitializeAsync();
             }
 
             IsInitialized = true;

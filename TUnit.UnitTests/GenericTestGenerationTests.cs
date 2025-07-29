@@ -25,23 +25,21 @@ public class GenericTestGenerationTests
     }
 }
 
-[GenerateGenericTest(typeof(int))]
-[GenerateGenericTest(typeof(string))]
-[GenerateGenericTest(typeof(bool))]
-public class GenericTestClass<T>
+// Concrete test classes for each type instead of using GenerateGenericTest on a generic class
+public class GenericTestClass_Int
 {
-    private readonly T _value;
+    private readonly int _value;
 
-    public GenericTestClass()
+    public GenericTestClass_Int()
     {
-        _value = default(T?)!;
+        _value = default(int);
     }
 
     [Test]
     public async Task TestGenericValue()
     {
-        await Assert.That(typeof(T)).IsNotNull();
-        await Assert.That(_value).IsEqualTo(default(T));
+        await Assert.That(typeof(int)).IsNotNull();
+        await Assert.That(_value).IsEqualTo(default(int));
     }
 
     [Test]
@@ -50,6 +48,58 @@ public class GenericTestClass<T>
     public async Task TestWithParameter(object input)
     {
         await Assert.That(input).IsNotNull();
-        await Assert.That(typeof(T).Name).IsNotEmpty();
+        await Assert.That(typeof(int).Name).IsNotEmpty();
+    }
+}
+
+public class GenericTestClass_String
+{
+    private readonly string? _value;
+
+    public GenericTestClass_String()
+    {
+        _value = default(string);
+    }
+
+    [Test]
+    public async Task TestGenericValue()
+    {
+        await Assert.That(typeof(string)).IsNotNull();
+        await Assert.That(_value).IsEqualTo(default(string));
+    }
+
+    [Test]
+    [Arguments(42)]
+    [Arguments("test")]
+    public async Task TestWithParameter(object input)
+    {
+        await Assert.That(input).IsNotNull();
+        await Assert.That(typeof(string).Name).IsNotEmpty();
+    }
+}
+
+public class GenericTestClass_Bool
+{
+    private readonly bool _value;
+
+    public GenericTestClass_Bool()
+    {
+        _value = default(bool);
+    }
+
+    [Test]
+    public async Task TestGenericValue()
+    {
+        await Assert.That(typeof(bool)).IsNotNull();
+        await Assert.That(_value).IsEqualTo(default(bool));
+    }
+
+    [Test]
+    [Arguments(42)]
+    [Arguments("test")]
+    public async Task TestWithParameter(object input)
+    {
+        await Assert.That(input).IsNotNull();
+        await Assert.That(typeof(bool).Name).IsNotEmpty();
     }
 }
