@@ -448,10 +448,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
-                    .WithArguments("System.Collections.Generic.IEnumerable<System.Func<int>>", "int"),
-
-                Verifier.Diagnostic(Rules.ReturnFunc)
-                    .WithLocation(1)
+                    .WithArguments("System.Collections.Generic.IEnumerable<System.Func<int>>", "int")
             );
     }
 

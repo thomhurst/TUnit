@@ -484,11 +484,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 }
                 
                 // Check if return type is Func<T> where T matches the property type
-                if (returnType is INamedTypeSymbol { IsGenericType: true } funcType &&
-                    SymbolEqualityComparer.Default.Equals(
-                        context.Compilation.GetTypeByMetadataName("System.Func`1"),
-                        funcType.OriginalDefinition) &&
-                    funcType.TypeArguments.Length == 1)
+                if (returnType is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } funcType &&
+                    funcType.ToDisplayString().StartsWith("System.Func<"))
                 {
                     var funcReturnType = funcType.TypeArguments[0];
                     if (funcReturnType.ToDisplayString() == propertyType.ToDisplayString() ||
@@ -506,17 +503,31 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 }
                 
                 // For property injection, we don't support IEnumerable - properties need single values
-                // Report the actual type mismatch
+                // If the return type is Func<T>, report T instead since that's what will be injected
+                var reportedType = returnType;
+                if (returnType is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } funcTypeForError &&
+                    funcTypeForError.ToDisplayString().StartsWith("System.Func<"))
+                {
+                    reportedType = funcTypeForError.TypeArguments[0];
+                }
+                
                 context.ReportDiagnostic(
                     Diagnostic.Create(
                         Rules.WrongArgumentTypeTestData,
                         attribute.GetLocation(),
-                        returnType.ToDisplayString(),
+                        reportedType.ToDisplayString(),
                         propertyType.ToDisplayString())
                 );
                 return; // Don't continue with further checks - we've already reported the error
             }
 
+            // If we already handled property injection, don't continue
+            // This should never happen due to the early return above, but let's be safe
+            if (propertySymbol != null)
+            {
+                return;
+            }
+            
             var unwrappedTypes = UnwrapTypes(context,
                 dataSourceMethod,
                 testParameterTypes,
@@ -722,10 +733,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return ImmutableArray.Create(type);
         }
 
-        if (type is INamedTypeSymbol { IsGenericType: true } genericType
-            && SymbolEqualityComparer.Default.Equals(
-                context.Compilation.GetTypeByMetadataName("System.Func`1"),
-                genericType.OriginalDefinition))
+        if (type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } genericType
+            && genericType.ToDisplayString().StartsWith("System.Func<"))
         {
             isFunc = true;
             type = genericType.TypeArguments[0];

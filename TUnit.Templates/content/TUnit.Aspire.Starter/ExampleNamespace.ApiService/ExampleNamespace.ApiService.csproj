@@ -10,4 +10,8 @@
     <ProjectReference Include="..\ExampleNamespace.ServiceDefaults\ExampleNamespace.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.6.0" />
+  </ItemGroup>
+
 </Project>

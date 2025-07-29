@@ -139,12 +139,11 @@ public static class AnalyzerTestHelpers
         {
             TestCode = inputSource,
             ReferenceAssemblies = new ReferenceAssemblies(
-                $"net{currentVersion}.0",
+                "net8.0",
                 new PackageIdentity(
                     "Microsoft.NETCore.App.Ref",
-                    $"{currentVersion}.0.0"),
-                Path.Combine("ref", $"net{currentVersion}.0")
-            )
+                    "8.0.0"),
+                Path.Combine("ref", "net8.0")),
         };
 
         test.TestState.AdditionalReferences
