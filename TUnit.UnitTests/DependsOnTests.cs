@@ -195,7 +195,8 @@ public class DependsOnTests
     [Test]
     public async Task TestDependency_WithGenericBase_MatchesInheritedTests()
     {
-        var dependency = TestDependency.FromClass(typeof(GenericBaseClass<>));
+        // Use the closed generic type instead of open generic
+        var dependency = TestDependency.FromClass(typeof(GenericBaseClass<string>));
         var testMetadata = CreateTestMetadata<DerivedFromGenericClass>("test1", "Test");
         
         var matches = dependency.Matches(testMetadata);

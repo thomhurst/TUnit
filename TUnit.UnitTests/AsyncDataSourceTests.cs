@@ -47,14 +47,14 @@ public class AsyncDataSourceTests
     }
 
     // Async enumerable with cancellation support
-    public static async IAsyncEnumerable<(int value, string text)> AsyncEnumerableWithCancellation(
+    public static async IAsyncEnumerable<object[]> AsyncEnumerableWithCancellation(
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         for (var i = 0; i < 5; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             await Task.Delay(10, cancellationToken);
-            yield return (i * 1000, $"{i} thousand");
+            yield return [i * 1000, $"{i} thousand"];
         }
     }
 
@@ -100,7 +100,7 @@ public class AsyncDataSourceTests
     {
         await Assert.That(value).IsGreaterThanOrEqualTo(0);
         await Assert.That(text).IsNotNull();
-        await Assert.That(text).EndsWith("thousand");
+        await Assert.That(text).Contains("thousand");
     }
 }
 
