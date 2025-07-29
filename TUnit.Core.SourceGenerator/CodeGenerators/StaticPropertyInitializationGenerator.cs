@@ -218,17 +218,18 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         if (attr.ConstructorArguments.Length > 0)
         {
             var value = attr.ConstructorArguments[0];
-            var formattedValue = _formatter.FormatForCode(value);
-            // For static properties, we want the raw value, not wrapped in an array
-            if (formattedValue.StartsWith("ImmutableArray.Create<object>(") && formattedValue.EndsWith(")"))
+            
+            // ArgumentsAttribute constructor takes params object?[], so the argument is always an array
+            if (value.Kind == TypedConstantKind.Array && value.Values.Length > 0)
             {
-                // Extract the inner value from the array wrapper
-                var innerValue = formattedValue.Substring("ImmutableArray.Create<object>(".Length, formattedValue.Length - "ImmutableArray.Create<object>(".Length - ")".Length);
-                writer.AppendLine($"return {innerValue};");
+                // For static property injection, we only use the first value from the array
+                var firstValue = value.Values[0];
+                var formattedValue = _formatter.FormatForCode(firstValue);
+                writer.AppendLine($"return {formattedValue};");
             }
             else
             {
-                writer.AppendLine($"return {formattedValue};");
+                writer.AppendLine("return null;");
             }
         }
         else
