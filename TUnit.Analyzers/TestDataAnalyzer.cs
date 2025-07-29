@@ -471,13 +471,28 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            // Special check for property injection - the method should return exactly the property type
+            // Special check for property injection - the method should return exactly the property type or Func<PropertyType>
             if (propertySymbol != null)
             {
                 // For property injection, if the return type exactly matches the property type, it's valid
                 if (dataSourceMethod.ReturnType.ToDisplayString() == propertySymbol.Type.ToDisplayString())
                 {
                     return; // Valid property injection
+                }
+                
+                // Check if return type is Func<T> where T matches the property type
+                if (dataSourceMethod.ReturnType is INamedTypeSymbol { IsGenericType: true } funcType &&
+                    SymbolEqualityComparer.Default.Equals(
+                        context.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName()),
+                        funcType.OriginalDefinition) &&
+                    funcType.TypeArguments.Length == 1)
+                {
+                    var funcReturnType = funcType.TypeArguments[0];
+                    if (funcReturnType.ToDisplayString() == propertySymbol.Type.ToDisplayString() ||
+                        context.Compilation.HasImplicitConversion(funcReturnType, propertySymbol.Type))
+                    {
+                        return; // Valid - Func<T> where T matches property type
+                    }
                 }
                 
                 // Check if types are compatible with implicit conversion
@@ -487,23 +502,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     return; // Valid property injection with implicit conversion
                 }
                 
-                // If property expects IEnumerable<T> but method returns IEnumerable<T>, allow it
-                if (dataSourceMethod.ReturnType.IsIEnumerable(context.Compilation, out var returnInnerType) &&
-                    propertySymbol.Type.IsIEnumerable(context.Compilation, out var propertyInnerType))
+                // For property injection, we don't support IEnumerable - properties need single values
+                if (dataSourceMethod.ReturnType.IsIEnumerable(context.Compilation, out _))
                 {
-                    // Check if the inner types match
-                    if (SymbolEqualityComparer.Default.Equals(returnInnerType, propertyInnerType) ||
-                        returnInnerType?.ToDisplayString() == propertyInnerType?.ToDisplayString())
-                    {
-                        return; // Valid - both are IEnumerable with matching inner types
-                    }
-                }
-                
-                // If method returns IEnumerable but property doesn't expect it, report error
-                if (dataSourceMethod.ReturnType.IsIEnumerable(context.Compilation, out _) &&
-                    !propertySymbol.Type.IsIEnumerable(context.Compilation, out _))
-                {
-                    // Report type mismatch first (the full IEnumerable type doesn't match the property type)
+                    // Report type mismatch
                     context.ReportDiagnostic(
                         Diagnostic.Create(
                             Rules.WrongArgumentTypeTestData,
@@ -511,10 +513,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                             dataSourceMethod.ReturnType.ToDisplayString(),
                             propertySymbol.Type.ToDisplayString())
                     );
-                    
-                    // Then report the ReturnFunc diagnostic
-                    context.ReportDiagnostic(Diagnostic.Create(Rules.ReturnFunc,
-                        dataSourceMethod.Locations.FirstOrDefault()));
                     return; // Don't continue with further checks
                 }
             }
@@ -675,13 +673,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         if (context.Symbol is IPropertySymbol)
         {
-            // First, unwrap IEnumerable if present (for property injection data sources)
-            if (type.IsIEnumerable(context.Compilation, out var propertyEnumerableInnerType))
-            {
-                type = propertyEnumerableInnerType;
-            }
-            
-            // Then unwrap Func<T> if present
+            // For property injection, we expect a single value, not a collection
+            // Only unwrap Func<T> if present, NOT IEnumerable
             if (type is INamedTypeSymbol { IsGenericType: true } propertyFuncType
                 && SymbolEqualityComparer.Default.Equals(
                     context.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName()),
