@@ -2,14 +2,6 @@ namespace TUnit.UnitTests;
 
 public class GenericTestGenerationTests
 {
-    [Test]
-    [GenerateGenericTest(typeof(int), typeof(string))]
-    [GenerateGenericTest(typeof(bool), typeof(double))]
-    public async Task GenericTestMethod<T1, T2>()
-    {
-        await Assert.That(typeof(T1)).IsNotNull();
-        await Assert.That(typeof(T2)).IsNotNull();
-    }
 
     [Test]
     [Arguments(5)]

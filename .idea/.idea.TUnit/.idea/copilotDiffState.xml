@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/SourceGenerationDebug.props">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/SourceGenerationDebug.props" />
+              <option name="originalContent" value="&lt;Project&gt;&#10;    &lt;Target Name=&quot;CleanGenerated&quot; BeforeTargets=&quot;PreBuildEvent&quot; Condition=&quot;Exists('$(ProjectDir)SourceGeneratedViewer')&quot;&gt;&#10;        &lt;Message Text=&quot;Removing SourceGeneratedViewer directory...&quot; Importance=&quot;high&quot; /&gt;&#10;        &lt;RemoveDir Directories=&quot;$(ProjectDir)SourceGeneratedViewer&quot;&gt;&#10;            &lt;OnError ExecuteTargets=&quot;&quot; /&gt;&#10;        &lt;/RemoveDir&gt;&#10;    &lt;/Target&gt;&#10;&#10;    &lt;!-- &lt;PropertyGroup&gt;&#10;        &lt;EmitCompilerGeneratedFiles&gt;true&lt;/EmitCompilerGeneratedFiles&gt;&#10;        &lt;CompilerGeneratedFilesOutputPath&gt;SourceGeneratedViewer&lt;/CompilerGeneratedFilesOutputPath&gt;&#10;    &lt;/PropertyGroup&gt; --&gt;&#10;&#10;    &lt;ItemGroup&gt;&#10;        &lt;Compile Remove=&quot;SourceGeneratedViewer\**&quot; /&gt;&#10;        &lt;None Include=&quot;SourceGeneratedViewer\**&quot; /&gt;&#10;    &lt;/ItemGroup&gt;&#10;&lt;/Project&gt;&#10;" />
+              <option name="updatedContent" value="&lt;Project&gt;&#10;    &lt;Target Name=&quot;CleanGenerated&quot; BeforeTargets=&quot;PreBuildEvent&quot; Condition=&quot;Exists('$(ProjectDir)SourceGeneratedViewer')&quot;&gt;&#10;        &lt;Message Text=&quot;Removing SourceGeneratedViewer directory...&quot; Importance=&quot;high&quot; /&gt;&#10;        &lt;RemoveDir Directories=&quot;$(ProjectDir)SourceGeneratedViewer&quot; ContinueOnError=&quot;Warn&quot; /&gt;&#10;    &lt;/Target&gt;&#10;&#10;    &lt;!-- &lt;PropertyGroup&gt;&#10;        &lt;EmitCompilerGeneratedFiles&gt;true&lt;/EmitCompilerGeneratedFiles&gt;&#10;        &lt;CompilerGeneratedFilesOutputPath&gt;SourceGeneratedViewer&lt;/CompilerGeneratedFilesOutputPath&gt;&#10;    &lt;/PropertyGroup&gt; --&gt;&#10;&#10;    &lt;ItemGroup&gt;&#10;        &lt;Compile Remove=&quot;SourceGeneratedViewer\**&quot; /&gt;&#10;        &lt;None Include=&quot;SourceGeneratedViewer\**&quot; /&gt;&#10;    &lt;/ItemGroup&gt;&#10;&lt;/Project&gt;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

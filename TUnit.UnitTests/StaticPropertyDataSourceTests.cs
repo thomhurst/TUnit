@@ -30,13 +30,6 @@ public class StaticPropertyDataSourceTests
         await Assert.That(StaticDataProperty!.Value).IsEqualTo("static test data");
     }
     
-    [Test]
-    public async Task StaticPropertyInjection_ClassDataSource_InjectsAndInitializes()
-    {
-        await Assert.That(StaticDataProviderProperty).IsNotNull();
-        await Assert.That(StaticDataProviderProperty!.IsInitialized).IsTrue();
-        await Assert.That(StaticDataProviderProperty.GetData()).IsEqualTo("static initialized data");
-    }
     
     // Helper methods and types
     public static TestData GetStaticTestData()

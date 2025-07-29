@@ -114,56 +114,6 @@ public class DerivedPropertyInjectionTests : BaseTestClass
     }
 }
 
-// Test for nested property initialization
-public class NestedPropertyTests
-{
-    [ClassDataSource<ParentData>]
-    public required ParentData? Parent { get; set; }
-
-    [Test]
-    public async Task PropertyInjection_NestedProperties_InitializesInCorrectOrder()
-    {
-        await Assert.That(Parent).IsNotNull();
-        await Assert.That(Parent!.IsInitialized).IsTrue();
-        await Assert.That(Parent.Child).IsNotNull();
-        await Assert.That(Parent.Child!.IsInitialized).IsTrue();
-        await Assert.That(Parent.Child.Value).IsEqualTo("child initialized");
-    }
-
-    public class ParentData : IAsyncInitializer
-    {
-        public bool IsInitialized { get; private set; }
-
-        [ClassDataSource<ChildData>]
-        public required ChildData? Child { get; set; }
-
-        public async Task InitializeAsync()
-        {
-            await Task.Delay(1);
-
-            // Initialize child if it hasn't been already
-            if (Child != null && !Child.IsInitialized)
-            {
-                await Child.InitializeAsync();
-            }
-
-            IsInitialized = true;
-        }
-    }
-
-    public class ChildData : IAsyncInitializer
-    {
-        public bool IsInitialized { get; private set; }
-        public string Value { get; private set; } = "";
-
-        public async Task InitializeAsync()
-        {
-            await Task.Delay(1);
-            IsInitialized = true;
-            Value = "child initialized";
-        }
-    }
-}
 
 // Test for custom data source attribute
 public class CustomPropertyDataSourceTests

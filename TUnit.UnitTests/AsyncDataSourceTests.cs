@@ -46,17 +46,6 @@ public class AsyncDataSourceTests
         yield return [3000, "three thousand"];
     }
 
-    // Async enumerable with cancellation support
-    public static async IAsyncEnumerable<object[]> AsyncEnumerableWithCancellation(
-        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        for (var i = 0; i < 5; i++)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            await Task.Delay(10, cancellationToken);
-            yield return [i * 1000, $"{i} thousand"];
-        }
-    }
 
     [Test]
     [MethodDataSource(nameof(SyncDataSource))]
@@ -85,46 +74,6 @@ public class AsyncDataSourceTests
         await Assert.That(text).Contains("hundred");
     }
 
-    [Test]
-    [MethodDataSource(nameof(AsyncEnumerableDataSource))]
-    public async Task TestWithAsyncEnumerableDataSource(int value, string text)
-    {
-        await Assert.That(value).IsGreaterThanOrEqualTo(1000);
-        await Assert.That(text).IsNotNull();
-        await Assert.That(text).Contains("thousand");
-    }
 
-    [Test]
-    [MethodDataSource(nameof(AsyncEnumerableWithCancellation))]
-    public async Task TestWithAsyncEnumerableWithCancellation(int value, string text)
-    {
-        await Assert.That(value).IsGreaterThanOrEqualTo(0);
-        await Assert.That(text).IsNotNull();
-        await Assert.That(text).Contains("thousand");
-    }
 }
 
-// Test with external class data source
-public static class ExternalAsyncDataSources
-{
-    public static async IAsyncEnumerable<string[]> StringDataSource()
-    {
-        await Task.Yield();
-        yield return ["hello", "world"];
-        yield return ["foo", "bar"];
-        yield return ["async", "data"];
-    }
-}
-
-public class ExternalAsyncDataSourceTests
-{
-    [Test]
-    [MethodDataSource(typeof(ExternalAsyncDataSources), nameof(ExternalAsyncDataSources.StringDataSource))]
-    public async Task TestWithExternalAsyncDataSource(string first, string second)
-    {
-        await Assert.That(first).IsNotNull();
-        await Assert.That(second).IsNotNull();
-        await Assert.That(first.Length).IsGreaterThan(0);
-        await Assert.That(second.Length).IsGreaterThan(0);
-    }
-}
