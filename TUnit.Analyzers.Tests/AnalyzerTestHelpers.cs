@@ -135,15 +135,12 @@ public static class AnalyzerTestHelpers
         where TSuppressor : DiagnosticSuppressor, new()
     {
         var currentVersion = Environment.Version.Major;
+        var referenceAssemblies = GetReferenceAssembliesForCurrentVersion(currentVersion);
+
         var test = new CSharpSuppressorTest<TSuppressor, DefaultVerifier>
         {
             TestCode = inputSource,
-            ReferenceAssemblies = new ReferenceAssemblies(
-                "net8.0",
-                new PackageIdentity(
-                    "Microsoft.NETCore.App.Ref",
-                    "8.0.0"),
-                Path.Combine("ref", "net8.0")),
+            ReferenceAssemblies = referenceAssemblies
         };
 
         test.TestState.AdditionalReferences
@@ -154,6 +151,25 @@ public static class AnalyzerTestHelpers
             ]);
 
         return test;
+    }
+
+    private static ReferenceAssemblies GetReferenceAssembliesForCurrentVersion(int currentVersion)
+    {
+        if (currentVersion == 4)
+        {
+            return new ReferenceAssemblies(
+                "net48",
+                new PackageIdentity("Microsoft.NETFramework.ReferenceAssemblies.net48", "1.0.3"),
+                Path.Combine("ref", "net48"));
+        }
+
+        return new ReferenceAssemblies(
+            $"net{currentVersion}.0",
+            new PackageIdentity(
+                "Microsoft.NETCore.App.Ref",
+                $"{currentVersion}.0.0"),
+            Path.Combine("ref", $"net{currentVersion}.0")
+        );
     }
 
     public static CSharpSuppressorTest<TSuppressor, DefaultVerifier> CreateSuppressorTest<TSuppressor, TAnalyzer>(
