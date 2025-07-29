@@ -474,47 +474,47 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             // Special check for property injection - the method should return exactly the property type or Func<PropertyType>
             if (propertySymbol != null)
             {
+                var returnType = dataSourceMethod.ReturnType;
+                var propertyType = propertySymbol.Type;
+                
                 // For property injection, if the return type exactly matches the property type, it's valid
-                if (dataSourceMethod.ReturnType.ToDisplayString() == propertySymbol.Type.ToDisplayString())
+                if (returnType.ToDisplayString() == propertyType.ToDisplayString())
                 {
                     return; // Valid property injection
                 }
                 
                 // Check if return type is Func<T> where T matches the property type
-                if (dataSourceMethod.ReturnType is INamedTypeSymbol { IsGenericType: true } funcType &&
+                if (returnType is INamedTypeSymbol { IsGenericType: true } funcType &&
                     SymbolEqualityComparer.Default.Equals(
-                        context.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName()),
+                        context.Compilation.GetTypeByMetadataName("System.Func`1"),
                         funcType.OriginalDefinition) &&
                     funcType.TypeArguments.Length == 1)
                 {
                     var funcReturnType = funcType.TypeArguments[0];
-                    if (funcReturnType.ToDisplayString() == propertySymbol.Type.ToDisplayString() ||
-                        context.Compilation.HasImplicitConversion(funcReturnType, propertySymbol.Type))
+                    if (funcReturnType.ToDisplayString() == propertyType.ToDisplayString() ||
+                        context.Compilation.HasImplicitConversion(funcReturnType, propertyType))
                     {
                         return; // Valid - Func<T> where T matches property type
                     }
                 }
                 
                 // Check if types are compatible with implicit conversion
-                var conversion = context.Compilation.ClassifyConversion(dataSourceMethod.ReturnType, propertySymbol.Type);
+                var conversion = context.Compilation.ClassifyConversion(returnType, propertyType);
                 if (conversion.IsImplicit || conversion.IsIdentity)
                 {
                     return; // Valid property injection with implicit conversion
                 }
                 
                 // For property injection, we don't support IEnumerable - properties need single values
-                if (dataSourceMethod.ReturnType.IsIEnumerable(context.Compilation, out _))
-                {
-                    // Report type mismatch
-                    context.ReportDiagnostic(
-                        Diagnostic.Create(
-                            Rules.WrongArgumentTypeTestData,
-                            attribute.GetLocation(),
-                            dataSourceMethod.ReturnType.ToDisplayString(),
-                            propertySymbol.Type.ToDisplayString())
-                    );
-                    return; // Don't continue with further checks
-                }
+                // Report the actual type mismatch
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.WrongArgumentTypeTestData,
+                        attribute.GetLocation(),
+                        returnType.ToDisplayString(),
+                        propertyType.ToDisplayString())
+                );
+                return; // Don't continue with further checks - we've already reported the error
             }
 
             var unwrappedTypes = UnwrapTypes(context,
@@ -677,8 +677,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             // Only unwrap Func<T> if present, NOT IEnumerable
             if (type is INamedTypeSymbol { IsGenericType: true } propertyFuncType
                 && SymbolEqualityComparer.Default.Equals(
-                    context.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName()),
-                    type.OriginalDefinition))
+                    context.Compilation.GetTypeByMetadataName("System.Func`1"),
+                    propertyFuncType.OriginalDefinition))
             {
                 isFunc = true;
                 type = propertyFuncType.TypeArguments[0];
@@ -724,8 +724,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         if (type is INamedTypeSymbol { IsGenericType: true } genericType
             && SymbolEqualityComparer.Default.Equals(
-                context.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName()),
-                type.OriginalDefinition))
+                context.Compilation.GetTypeByMetadataName("System.Func`1"),
+                genericType.OriginalDefinition))
         {
             isFunc = true;
             type = genericType.TypeArguments[0];

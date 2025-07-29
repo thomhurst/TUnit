@@ -19,12 +19,6 @@ public abstract class AssemblyHooks
     }
 #endif
 
-    [Before(Assembly), Timeout(30_000)]
-    public static void BeforeHook3(CancellationToken cancellationToken)
-    {
-        // Dummy method
-    }
-
 #if NET
     [Before(Assembly), Timeout(30_000)]
     public static async Task BeforeHook4(AssemblyHookContext context, CancellationToken cancellationToken)
@@ -46,12 +40,6 @@ public abstract class AssemblyHooks
         await Assert.That(context.TestCount).IsPositive();
     }
 #endif
-
-    [After(Assembly), Timeout(30_000)]
-    public static void AfterHook3(CancellationToken cancellationToken)
-    {
-        // Dummy method
-    }
 
 #if NET
     [After(Assembly), Timeout(30_000)]

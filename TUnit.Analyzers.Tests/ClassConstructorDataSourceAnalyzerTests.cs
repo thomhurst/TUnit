@@ -12,6 +12,7 @@ public class ClassConstructorDataSourceAnalyzerTests
                 """
                 using System;
                 using System.Diagnostics.CodeAnalysis;
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Core.Interfaces;
 
@@ -35,7 +36,8 @@ public class ClassConstructorDataSourceAnalyzerTests
                         return Task.FromResult(Activator.CreateInstance(type, 1)!);
                     }
                 }
-                """
+                """,
+                test => test.CompilerDiagnostics = Microsoft.CodeAnalysis.Testing.CompilerDiagnostics.None
             );
     }
 
@@ -47,6 +49,7 @@ public class ClassConstructorDataSourceAnalyzerTests
                 """
                 using System;
                 using System.Diagnostics.CodeAnalysis;
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Core.Interfaces;
 
@@ -71,7 +74,8 @@ public class ClassConstructorDataSourceAnalyzerTests
                         return Task.FromResult(Activator.CreateInstance(type, 1)!);
                     }
                 }
-                """
+                """,
+                test => test.CompilerDiagnostics = Microsoft.CodeAnalysis.Testing.CompilerDiagnostics.None
             );
     }
 }

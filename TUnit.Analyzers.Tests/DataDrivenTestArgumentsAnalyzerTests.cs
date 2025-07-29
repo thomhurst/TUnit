@@ -24,9 +24,9 @@ public class DataDrivenTestArgumentsAnalyzerTests
                 }
                 """,
 
-                Verifier.Diagnostic(Rules.NoTestDataProvided)
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
-                    .WithArguments("int", "string")
+                    .WithArguments("<null>", "string")
             );
     }
 

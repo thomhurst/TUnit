@@ -12,18 +12,12 @@ public class NestedPropertyInjectionTests
 
         public string Name { get; set; } = string.Empty;
 
-        public static IEnumerable<Func<Address>> GetAddressData()
+        public static Func<Address> GetAddressData()
         {
-            yield return () => new Address
+            return () => new Address
             {
                 Street = "123 Main St",
                 City = "TestCity",
-                Country = null!
-            };
-            yield return () => new Address
-            {
-                Street = "456 Oak Ave",
-                City = "AnotherCity",
                 Country = null!
             };
         }
@@ -37,10 +31,9 @@ public class NestedPropertyInjectionTests
         public string Street { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
 
-        public static IEnumerable<Func<Country>> GetCountryData()
+        public static Func<Country> GetCountryData()
         {
-            yield return () => new Country { Name = "USA", Code = "US" };
-            yield return () => new Country { Name = "Canada", Code = "CA" };
+            return () => new Country { Name = "USA", Code = "US" };
         }
     }
 

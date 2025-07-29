@@ -35,7 +35,7 @@ public class AotCompatibilityAnalyzerTests
             {
                 [Test]
                 [Arguments(1, "test")]
-                public void TupleTest({|TUnit0301:(int, string) tuple|})
+                public void TupleTest((int, string) {|TUnit0301:tuple|})
                 {
                 }
             }
@@ -136,7 +136,7 @@ public class AotCompatibilityAnalyzerTests
             {
                 [Test]
                 [Arguments(5, 10)]
-                public void TestMethod({|TUnit0301:ValueTuple<int, int> values|})
+                public void TestMethod(ValueTuple<int, int> {|TUnit0301:values|})
                 {
                 }
             }
@@ -156,7 +156,7 @@ public class AotCompatibilityAnalyzerTests
             {
                 [Test]
                 [Arguments(1, "a", 2, "b")]
-                public void TestMethod({|TUnit0301:(int, string) first|}, {|TUnit0301:(int, string) second|})
+                public void TestMethod((int, string) {|TUnit0301:first|}, (int, string) {|TUnit0301:second|})
                 {
                 }
             }

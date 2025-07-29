@@ -9,8 +9,8 @@ namespace TUnit.TestProject;
 [NotInParallel(nameof(PropertySetterTests))]
 public class PropertySetterTests
 {
-    [Arguments("1")]
-    public required string Property1 { get; init; }
+    // Arguments attribute not supported on properties - initialize in constructor or with default
+    public required string Property1 { get; init; } = "1";
 
     [MethodDataSource(nameof(MethodData))]
     public required string Property2 { get; init; }

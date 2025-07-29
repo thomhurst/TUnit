@@ -44,12 +44,24 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
 
         // Check for tuple operations (GetFields, GetProperties on tuple types)
         if ((methodSymbol.Name == "GetFields" || methodSymbol.Name == "GetProperties") && 
-            IsCalledOnTupleType(invocation, context))
+            IsInTestContext(invocation, context))
         {
-            context.ReportDiagnostic(Diagnostic.Create(
-                Rules.TupleNotAotCompatible,
-                invocation.GetLocation(),
-                "Tuple reflection"));
+            // Check if called directly on a tuple type
+            if (IsCalledOnTupleType(invocation, context))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    Rules.TupleNotAotCompatible,
+                    invocation.GetLocation(),
+                    "Tuple reflection"));
+            }
+            // Check if called on a Type object that represents a tuple type
+            else if (IsCalledOnTypeRepresentingTuple(invocation, context))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    Rules.TupleNotAotCompatible,
+                    invocation.GetLocation(),
+                    "Tuple reflection"));
+            }
         }
 
         // Check for custom conversion operators
@@ -150,12 +162,37 @@ public class AotCompatibilityAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private static bool IsTupleType(ITypeSymbol type)
     {
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        // Check if it's a tuple type using the IsTupleType property
+        if (type is INamedTypeSymbol namedType)
         {
-            var fullName = namedType.ConstructedFrom.ToDisplayString();
-            return fullName.StartsWith("System.ValueTuple<") || 
-                   fullName.StartsWith("System.Tuple<");
+            return namedType.IsTupleType;
         }
+        return false;
+    }
+
+    private static bool IsCalledOnTypeRepresentingTuple(InvocationExpressionSyntax invocation, SyntaxNodeAnalysisContext context)
+    {
+        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
+        {
+            return false;
+        }
+
+        // Check if the expression is a variable that holds a Type object
+        var expressionSymbol = context.SemanticModel.GetSymbolInfo(memberAccess.Expression, context.CancellationToken).Symbol;
+        if (expressionSymbol is not ILocalSymbol localSymbol)
+        {
+            return false;
+        }
+
+        // Check if this variable was assigned from typeof() expression
+        var variableDeclarator = localSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as VariableDeclaratorSyntax;
+        if (variableDeclarator?.Initializer?.Value is TypeOfExpressionSyntax typeOfExpression)
+        {
+            // Get the type that typeof() is operating on
+            var typeInfo = context.SemanticModel.GetTypeInfo(typeOfExpression.Type, context.CancellationToken);
+            return typeInfo.Type != null && IsTupleType(typeInfo.Type);
+        }
+
         return false;
     }
 
