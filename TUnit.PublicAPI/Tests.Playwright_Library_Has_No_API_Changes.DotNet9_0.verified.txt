@@ -1,68 +1,16 @@
 [assembly: .(".NETCoreApp,Version=v9.0", FrameworkDisplayName=".NET 9.0")]
-namespace .Helpers
-{
-    public static class ReflectionReplacements
-    {
-        public static bool IsAotMode { get; }
-        public static object?[]? ConvertTupleToArray(object tuple) { }
-        public static .<object?> InvokeMethodAsync(string methodKey, object? instance, params object?[]? parameters) { }
-        public static bool IsTupleType( type) { }
-        public static ? MakeGenericType( genericDefinition, params [] typeArguments) { }
-        public static void RegisterGenericTypeFactory(..GenericTypeFactoryDelegate genericTypeFactory) { }
-        public static void RegisterMethodInvoker(..MethodInvokerDelegate methodInvoker) { }
-        public static void RegisterPropertyInjector<T>(..PropertyInjectorDelegate<T> propertyInjector)
-            where T :  notnull { }
-        public static void RegisterTupleConverter(..TupleConverterDelegate tupleConverter) { }
-        public static void RegisterTupleTypeChecker(..TupleTypeCheckerDelegate tupleTypeChecker) { }
-        public static void RegisterTypeResolver(..TypeResolverDelegate typeResolver) { }
-        public static ? ResolveType(string assemblyQualifiedName) { }
-        public delegate ? GenericTypeFactoryDelegate( genericDefinition, [] typeArguments);
-        public delegate .<object?> MethodInvokerDelegate(string methodKey, object? instance, object?[]? parameters);
-        public delegate . PropertyInjectorDelegate<T>(T instance, .<string, object?> propertyValues, .TestContext testContext);
-        public delegate object?[]? TupleConverterDelegate(object tuple);
-        public delegate bool TupleTypeCheckerDelegate( type);
-        public delegate ? TypeResolverDelegate(string assemblyQualifiedName);
-    }
-}
-namespace 
-{
-    public static class PropertyInjectionRegistry
-    {
-        public static void Clear() { }
-        public static .<T>? GetInjector<T>()
-            where T :  notnull { }
-        public static .<> GetRegisteredTypes() { }
-        public static bool HasInjector( type) { }
-        public static bool HasInjector<T>()
-            where T :  notnull { }
-        public static void RegisterInjector<T>(.<T> injector)
-            where T :  notnull { }
-        public delegate . PropertyInjectorDelegate<T>(T instance, .<string, object?> propertyValues, .TestContext testContext);
-    }
-}
-namespace 
-{
-    public static class AotMethodInvokers
-    {
-        public static string GetMethodKey(string typeName, string methodName, int parameterCount = 0) { }
-        public static .<object?> InvokeMethodAsync(string methodKey, object? instance, params object?[]? parameters) { }
-    }
-    public static class AotReplacementRegistry
-    {
-        [.]
-        public static void Initialize() { }
-    }
-    public static class AotTypeResolver
-    {
-        public static ? MakeGenericType( genericTypeDefinition, params [] typeArguments) { }
-        public static ? ResolveType(string assemblyQualifiedName) { }
-    }
-}
 namespace .Hooks
 {
-    public sealed class GeneratedHookRegistry
+    public sealed class GeneratedHookSource : ..ITestHookSource, ..ITestSessionHookSource
     {
-        public GeneratedHookRegistry() { }
+        public GeneratedHookSource() { }
+        public .<.<.TestContext>> CollectAfterEveryTestHooks(string sessionId) { }
+        public .<.> CollectAfterTestHooks(string sessionId) { }
+        public .<.<.TestSessionContext>> CollectAfterTestSessionHooks(string sessionId) { }
+        public .<.<.TestContext>> CollectBeforeEveryTestHooks(string sessionId) { }
+        public .<.> CollectBeforeTestHooks(string sessionId) { }
+        public .<.<.TestSessionContext>> CollectBeforeTestSessionHooks(string sessionId) { }
+        public .<.> GetInstanceHooksForClass( classType, .HookType hookType) { }
     }
 }
 namespace 

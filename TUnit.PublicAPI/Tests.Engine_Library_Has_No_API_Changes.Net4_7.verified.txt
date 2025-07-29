@@ -58,14 +58,14 @@ namespace ...Examples
     public class GenericTests<T>
     {
         public GenericTests() { }
-        [.Test("D:\\git\\TUnit\\\\Discovery\\", 120)]
+        [.Test("/home/thomh/dev/TUnit/", 120)]
         public void GenericTest() { }
     }
     public class SimpleTests
     {
         public SimpleTests() { }
         [.Category("Integration")]
-        [.Test("D:\\git\\TUnit\\\\Discovery\\", 66)]
+        [.Test("/home/thomh/dev/TUnit/", 66)]
         [.Timeout(5000)]
         public . AsyncTestWithAttributes() { }
         [.Arguments(new object[] {
@@ -76,24 +76,24 @@ namespace ...Examples
                 4,
                 5,
                 6})]
-        [.Test("D:\\git\\TUnit\\\\Discovery\\", 75)]
+        [.Test("/home/thomh/dev/TUnit/", 75)]
         public void ParameterizedTest(int a, int b, int c) { }
-        [.Test("D:\\git\\TUnit\\\\Discovery\\", 60)]
+        [.Test("/home/thomh/dev/TUnit/", 60)]
         public void SimpleTest() { }
         [.Skip("Example of skipped test")]
-        [.Test("D:\\git\\TUnit\\\\Discovery\\", 83)]
+        [.Test("/home/thomh/dev/TUnit/", 83)]
         public void SkippedTest() { }
     }
     public class TestsWithHooks
     {
         public TestsWithHooks() { }
-        [.After(., "D:\\git\\TUnit\\\\Discovery\\", 111)]
+        [.After(., "/home/thomh/dev/TUnit/", 111)]
         public void AfterEachTest() { }
-        [.Before(., "D:\\git\\TUnit\\\\Discovery\\", 99)]
+        [.Before(., "/home/thomh/dev/TUnit/", 99)]
         public void BeforeEachTest() { }
-        [.Test("D:\\git\\TUnit\\\\Discovery\\", 105)]
+        [.Test("/home/thomh/dev/TUnit/", 105)]
         public void TestWithHooks() { }
-        [.Before(., "D:\\git\\TUnit\\\\Discovery\\", 93)]
+        [.Before(., "/home/thomh/dev/TUnit/", 93)]
         public static void BeforeClass() { }
     }
 }

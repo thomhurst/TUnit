@@ -308,19 +308,13 @@ namespace .
     public class Member<TActualRootType, TPropertyType>
     {
         public Member(..IValueSource<TActualRootType> valueSource, .<<TActualRootType, TPropertyType>> selector) { }
-        [.("Expression compilation requires dynamic code generation")]
-        [.("Expression compilation requires unreferenced code")]
         public .<TActualRootType> EqualTo(TPropertyType expected, [.("expected")] string? doNotPopulateThisValue = null) { }
-        [.("Expression compilation requires dynamic code generation")]
-        [.("Expression compilation requires unreferenced code")]
         public .<TActualRootType> NotEqualTo(TPropertyType expected, [.("expected")] string? doNotPopulateThisValue = null) { }
     }
     public class PropertyEqualsExpectedValueAssertCondition<TRootObjectType, TPropertyType> : .<TRootObjectType, TPropertyType>
     {
         public PropertyEqualsExpectedValueAssertCondition(.<<TRootObjectType, TPropertyType>> propertySelector, TPropertyType expected, bool isEqual) { }
         protected override string GetExpectation() { }
-        [.("Expression compilation requires dynamic code generation")]
-        [.("Expression compilation requires unreferenced code")]
         protected override .<.> GetResult(TRootObjectType? actualValue, TPropertyType? expectedValue) { }
     }
 }
@@ -873,7 +867,7 @@ namespace .
     public class SingleItemAssertionBuilderWrapper<TActual, TInner> : .<TActual>
         where TActual : .<TInner>
     {
-        public new .<TInner> GetAwaiter() { }
+        public new .<TInner?> GetAwaiter() { }
     }
     public class StringContainsAssertionBuilderWrapper : .<string>
     {
@@ -1420,8 +1414,6 @@ namespace .Extensions
         public static .<.<TInner>> HasDistinctItems<TInner>(this ..IValueSource<.<TInner>> valueSource, .<TInner> equalityComparer) { }
         public static .<.<TInner>> HasDistinctItems<TInner>(this ..IValueSource<.<TInner>> valueSource, .<TInner> equalityComparer) { }
         public static . HasLength(this ..IValueSource<string> valueSource) { }
-        [.("Expression compilation requires dynamic code generation")]
-        [.("Expression compilation requires unreferenced code")]
         public static ..Member<TRootObject, TPropertyType> HasMember<TRootObject, TPropertyType>(this ..IValueSource<TRootObject> valueSource, .<<TRootObject, TPropertyType>> selector, [.("selector")] string expression = "") { }
         public static .<TActual> HasMessageContaining<TActual>(this ..IValueSource<TActual> valueSource, string expected, [.("expected")] string doNotPopulateThisValue = null)
             where TActual :  { }
