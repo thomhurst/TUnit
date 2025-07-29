@@ -471,22 +471,32 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            // Special check for property injection with IEnumerable BEFORE unwrapping
-            if (propertySymbol != null && dataSourceMethod.ReturnType.IsIEnumerable(context.Compilation, out _))
+            // Special check for property injection - the method should return exactly the property type
+            if (propertySymbol != null)
             {
-                // Report type mismatch first (the full IEnumerable type doesn't match the property type)
-                context.ReportDiagnostic(
-                    Diagnostic.Create(
-                        Rules.WrongArgumentTypeTestData,
-                        attribute.GetLocation(),
-                        dataSourceMethod.ReturnType.ToDisplayString(),
-                        propertySymbol.Type.ToDisplayString())
-                );
+                // For property injection, if the return type exactly matches the property type, it's valid
+                if (dataSourceMethod.ReturnType.ToDisplayString() == propertySymbol.Type.ToDisplayString())
+                {
+                    return; // Valid property injection
+                }
                 
-                // Then report the ReturnFunc diagnostic
-                context.ReportDiagnostic(Diagnostic.Create(Rules.ReturnFunc,
-                    dataSourceMethod.Locations.FirstOrDefault()));
-                return; // Don't continue with further checks
+                // If it's IEnumerable, report specific error
+                if (dataSourceMethod.ReturnType.IsIEnumerable(context.Compilation, out _))
+                {
+                    // Report type mismatch first (the full IEnumerable type doesn't match the property type)
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(
+                            Rules.WrongArgumentTypeTestData,
+                            attribute.GetLocation(),
+                            dataSourceMethod.ReturnType.ToDisplayString(),
+                            propertySymbol.Type.ToDisplayString())
+                    );
+                    
+                    // Then report the ReturnFunc diagnostic
+                    context.ReportDiagnostic(Diagnostic.Create(Rules.ReturnFunc,
+                        dataSourceMethod.Locations.FirstOrDefault()));
+                    return; // Don't continue with further checks
+                }
             }
 
             var unwrappedTypes = UnwrapTypes(context,
@@ -516,7 +526,18 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
             var conversions = unwrappedTypes.ZipAll(testParameterTypes,
-                (argument, parameter) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter));
+                (argument, parameter) => 
+                {
+                    // Handle exact type matches for property injection where types might have different metadata
+                    if (propertySymbol != null && 
+                        argument != null && 
+                        parameter != null && 
+                        argument.ToDisplayString() == parameter.ToDisplayString())
+                    {
+                        return true;
+                    }
+                    return context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter);
+                });
 
             if (!conversions.All(x => x))
             {
