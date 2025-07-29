@@ -164,6 +164,13 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             return HookParameterStatus.Valid;
         }
         
+        // Single CancellationToken parameter is valid (though context is recommended)
+        if (parameters.Length == 1 && 
+            parameters[0].Type.GloballyQualifiedNonGeneric() == "global::System.Threading.CancellationToken")
+        {
+            return HookParameterStatus.Valid;
+        }
+        
         // Context + CancellationToken is valid
         if (parameters.Length == 2 && 
             parameters[0].Type.GloballyQualifiedNonGeneric() == contextType &&

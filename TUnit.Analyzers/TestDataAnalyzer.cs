@@ -480,8 +480,28 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     return; // Valid property injection
                 }
                 
-                // If it's IEnumerable, report specific error
-                if (dataSourceMethod.ReturnType.IsIEnumerable(context.Compilation, out _))
+                // Check if types are compatible with implicit conversion
+                var conversion = context.Compilation.ClassifyConversion(dataSourceMethod.ReturnType, propertySymbol.Type);
+                if (conversion.IsImplicit || conversion.IsIdentity)
+                {
+                    return; // Valid property injection with implicit conversion
+                }
+                
+                // If property expects IEnumerable<T> but method returns IEnumerable<T>, allow it
+                if (dataSourceMethod.ReturnType.IsIEnumerable(context.Compilation, out var returnInnerType) &&
+                    propertySymbol.Type.IsIEnumerable(context.Compilation, out var propertyInnerType))
+                {
+                    // Check if the inner types match
+                    if (SymbolEqualityComparer.Default.Equals(returnInnerType, propertyInnerType) ||
+                        returnInnerType?.ToDisplayString() == propertyInnerType?.ToDisplayString())
+                    {
+                        return; // Valid - both are IEnumerable with matching inner types
+                    }
+                }
+                
+                // If method returns IEnumerable but property doesn't expect it, report error
+                if (dataSourceMethod.ReturnType.IsIEnumerable(context.Compilation, out _) &&
+                    !propertySymbol.Type.IsIEnumerable(context.Compilation, out _))
                 {
                     // Report type mismatch first (the full IEnumerable type doesn't match the property type)
                     context.ReportDiagnostic(
