@@ -1,7 +1,7 @@
 <Project>
     <Target Name="CleanGenerated" BeforeTargets="PreBuildEvent" Condition="Exists('$(ProjectDir)SourceGeneratedViewer')">
         <Message Text="Removing SourceGeneratedViewer directory..." Importance="high" />
-        <RemoveDir Directories="$(ProjectDir)SourceGeneratedViewer" />
+        <RemoveDir Directories="$(ProjectDir)SourceGeneratedViewer" ContinueOnError="true" />
     </Target>
 
     <!-- <PropertyGroup>
