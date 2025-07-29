@@ -43,6 +43,7 @@ public partial class Tests
 
         await Verify(publicApi)
             .AddScrubber(sb => Scrub(sb))
+            .AddScrubber(sb => new StringBuilder(sb.ToString().Replace("\\r\\n", "\\n")))
             .ScrubLinesWithReplace(x => x.Replace("\r\n", "\n"))
             .ScrubLinesWithReplace(line =>
             {
