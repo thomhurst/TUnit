@@ -111,7 +111,9 @@ public sealed class VerifySettingsTask
         {
             // For string arrays (like generated source files), join them with clear separators
             // instead of JSON serializing which would escape all the newlines
-            serialized = string.Join("\n\n// ===== FILE SEPARATOR =====\n\n", stringArray);
+            // Normalize line endings in each file first
+            var normalizedArray = stringArray.Select(NormalizeNewline).ToArray();
+            serialized = string.Join("\n\n// ===== FILE SEPARATOR =====\n\n", normalizedArray);
         }
         else
         {
@@ -134,10 +136,13 @@ public sealed class VerifySettingsTask
             }
         }
         var final = string.Join("\n", lines);
+        
+        // Always normalize line endings before any file operations
+        final = NormalizeNewline(final);
 
         if (!File.Exists(_verifiedPath))
         {
-            await FilePolyfill.WriteAllTextAsync(_receivedPath, final);
+            await FilePolyfill.WriteAllTextAsync(_receivedPath, NormalizeNewline(final));
             throw new InvalidOperationException($"No verified file found for '{name}'.");
         }
 
@@ -145,7 +150,7 @@ public sealed class VerifySettingsTask
 
         if (!string.Equals(NormalizeNewline(final), NormalizeNewline(approved), StringComparison.Ordinal))
         {
-            await FilePolyfill.WriteAllTextAsync(_receivedPath, final);
+            await FilePolyfill.WriteAllTextAsync(_receivedPath, NormalizeNewline(final));
 
             if (_onVerifyMismatch != null)
             {
