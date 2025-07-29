@@ -504,6 +504,24 @@
     <data name="TUnit0056Title" xml:space="preserve">
         <value>Instance methods used as data sources must use the `InstanceMethodDataSource` attribute</value>
     </data>
+    <data name="TUnit0057Description" xml:space="preserve">
+        <value>Hook methods can accept a context parameter for additional test information. Consider adding a parameter of type {0} to access context details.</value>
+    </data>
+    <data name="TUnit0057MessageFormat" xml:space="preserve">
+        <value>Hook method can accept a {0} parameter for additional context information</value>
+    </data>
+    <data name="TUnit0057Title" xml:space="preserve">
+        <value>Hook context parameter available</value>
+    </data>
+    <data name="TUnit0058Description" xml:space="preserve">
+        <value>Hook methods must have either no parameters, a single context parameter, or a context parameter followed by a CancellationToken.</value>
+    </data>
+    <data name="TUnit0058MessageFormat" xml:space="preserve">
+        <value>Hook method has unknown parameters. Expected: no parameters, {0}, or {0} with CancellationToken</value>
+    </data>
+    <data name="TUnit0058Title" xml:space="preserve">
+        <value>Hook method has unknown parameters</value>
+    </data>
     <data name="TUnit0200Description" xml:space="preserve">
         <value>Blocking on async code with .Result or GetAwaiter().GetResult() can cause deadlocks. Use await instead.</value>
     </data>

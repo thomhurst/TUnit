@@ -132,6 +132,12 @@ public static class Rules
     public static readonly DiagnosticDescriptor InstanceMethodSource =
         CreateDescriptor("TUnit0056", UsageCategory, DiagnosticSeverity.Error);
 
+    public static readonly DiagnosticDescriptor HookContextParameterOptional =
+        CreateDescriptor("TUnit0057", UsageCategory, DiagnosticSeverity.Info);
+
+    public static readonly DiagnosticDescriptor HookUnknownParameters =
+        CreateDescriptor("TUnit0058", UsageCategory, DiagnosticSeverity.Error);
+
     public static readonly DiagnosticDescriptor BlockingAsyncCall =
         CreateDescriptor("TUnit0200", UsageCategory, DiagnosticSeverity.Warning);
 

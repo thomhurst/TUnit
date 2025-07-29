@@ -59,7 +59,7 @@ public class GlobalTestHooksAnalyzerTests
     }
 
     [Test]
-    public async Task BeforeEvery_Test_Error()
+    public async Task BeforeEvery_Test_NoParameters_Info()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -75,13 +75,37 @@ public class GlobalTestHooksAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.SingleTestContextParameterRequired)
+                Verifier.Diagnostic(Rules.HookContextParameterOptional)
                     .WithLocation(0)
+                    .WithArguments("TestContext")
             );
     }
 
     [Test]
-    public async Task BeforeEvery_Class_Error()
+    public async Task BeforeEvery_Test_UnknownParameters_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using static TUnit.Core.HookType;
+                     
+                public class Tests
+                {
+                    [BeforeEvery(Test)]
+                    public static void {|#0:SetUp|}(string unknown)
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.HookUnknownParameters)
+                    .WithLocation(0)
+                    .WithArguments("TestContext")
+            );
+    }
+
+    [Test]
+    public async Task BeforeEvery_Class_NoParameters_Info()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -97,13 +121,56 @@ public class GlobalTestHooksAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.SingleClassHookContextParameterRequired)
+                Verifier.Diagnostic(Rules.HookContextParameterOptional)
                     .WithLocation(0)
+                    .WithArguments("ClassHookContext")
             );
     }
 
     [Test]
-    public async Task BeforeEvery_Assembly_Error()
+    public async Task BeforeEvery_Test_WithCancellationToken_NoError()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System.Threading;
+                using static TUnit.Core.HookType;
+                     
+                public class Tests
+                {
+                    [BeforeEvery(Test)]
+                    public static void SetUp(TestContext context, CancellationToken token)
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task BeforeEvery_Class_WithCancellationToken_NoError()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System.Threading;
+                using static TUnit.Core.HookType;
+                     
+                public class Tests
+                {
+                    [BeforeEvery(Class)]
+                    public static void SetUp(ClassHookContext context, CancellationToken token)
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task BeforeEvery_Assembly_NoParameters_Info()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -119,13 +186,14 @@ public class GlobalTestHooksAnalyzerTests
                       }
                   }
                   """,
-                Verifier.Diagnostic(Rules.SingleAssemblyHookContextParameterRequired)
+                Verifier.Diagnostic(Rules.HookContextParameterOptional)
                     .WithLocation(0)
+                    .WithArguments("AssemblyHookContext")
             );
     }
 
     [Test]
-    public async Task AfterEvery_Test_Error()
+    public async Task AfterEvery_Test_NoParameters_Info()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -141,13 +209,14 @@ public class GlobalTestHooksAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.SingleTestContextParameterRequired)
+                Verifier.Diagnostic(Rules.HookContextParameterOptional)
                     .WithLocation(0)
+                    .WithArguments("TestContext")
             );
     }
 
     [Test]
-    public async Task AfterEvery_Class_Error()
+    public async Task AfterEvery_Class_NoParameters_Info()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -163,13 +232,14 @@ public class GlobalTestHooksAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.SingleClassHookContextParameterRequired)
+                Verifier.Diagnostic(Rules.HookContextParameterOptional)
                     .WithLocation(0)
+                    .WithArguments("ClassHookContext")
             );
     }
 
     [Test]
-    public async Task AfterEvery_Assembly_Error()
+    public async Task AfterEvery_Assembly_NoParameters_Info()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -185,8 +255,78 @@ public class GlobalTestHooksAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.SingleAssemblyHookContextParameterRequired)
+                Verifier.Diagnostic(Rules.HookContextParameterOptional)
                     .WithLocation(0)
+                    .WithArguments("AssemblyHookContext")
+            );
+    }
+
+    [Test]
+    public async Task AfterEvery_Test_UnknownParameters_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using static TUnit.Core.HookType;
+                     
+                public class Tests
+                {
+                    [AfterEvery(Test)]
+                    public static void {|#0:CleanUp|}(string unknown)
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.HookUnknownParameters)
+                    .WithLocation(0)
+                    .WithArguments("TestContext")
+            );
+    }
+
+    [Test]
+    public async Task AfterEvery_Class_UnknownParameters_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using static TUnit.Core.HookType;
+                     
+                public class Tests
+                {
+                    [AfterEvery(Class)]
+                    public static void {|#0:CleanUp|}(int unknown1, string unknown2)
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.HookUnknownParameters)
+                    .WithLocation(0)
+                    .WithArguments("ClassHookContext")
+            );
+    }
+
+    [Test]
+    public async Task AfterEvery_Assembly_UnknownParameters_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using static TUnit.Core.HookType;
+                     
+                public class Tests
+                {
+                    [AfterEvery(Assembly)]
+                    public static void {|#0:CleanUp|}(object unknown)
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.HookUnknownParameters)
+                    .WithLocation(0)
+                    .WithArguments("AssemblyHookContext")
             );
     }
 

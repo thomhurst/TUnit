@@ -16,9 +16,8 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.MethodMustBeStatic,
             Rules.MethodMustBePublic,
             Rules.GlobalHooksSeparateClass,
-            Rules.SingleTestContextParameterRequired,
-            Rules.SingleClassHookContextParameterRequired,
-            Rules.SingleAssemblyHookContextParameterRequired
+            Rules.HookContextParameterOptional,
+            Rules.HookUnknownParameters
         );
 
     protected override void InitializeInternal(AnalysisContext context)
@@ -69,22 +68,54 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             IsGlobalHook(context, attributeData, out var hookLevel);
 
-            if (hookLevel == HookLevel.Test
-                && !HasValidHookParameters(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.TestContext.WithGlobalPrefix))
+            var contextType = hookLevel switch
             {
-                context.ReportDiagnostic(Diagnostic.Create(Rules.SingleTestContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
-            }
+                HookLevel.Test => WellKnown.AttributeFullyQualifiedClasses.TestContext.WithGlobalPrefix,
+                HookLevel.Class => WellKnown.AttributeFullyQualifiedClasses.ClassHookContext.WithGlobalPrefix,
+                HookLevel.Assembly => WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext.WithGlobalPrefix,
+                _ => null
+            };
 
-            else if (hookLevel == HookLevel.Class
-                && !HasValidHookParameters(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.ClassHookContext.WithGlobalPrefix))
+            if (contextType != null)
             {
-                context.ReportDiagnostic(Diagnostic.Create(Rules.SingleClassHookContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
-            }
-
-            else if (hookLevel == HookLevel.Assembly
-                && !HasValidHookParameters(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext.WithGlobalPrefix))
-            {
-                context.ReportDiagnostic(Diagnostic.Create(Rules.SingleAssemblyHookContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
+                var parameterStatus = CheckHookParameters(methodSymbol, contextType);
+                
+                switch (parameterStatus)
+                {
+                    case HookParameterStatus.NoParameters:
+                        // Informational diagnostic - suggest adding context parameter
+                        var contextTypeName = hookLevel switch
+                        {
+                            HookLevel.Test => "TestContext",
+                            HookLevel.Class => "ClassHookContext",
+                            HookLevel.Assembly => "AssemblyHookContext",
+                            _ => "context"
+                        };
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            Rules.HookContextParameterOptional, 
+                            methodSymbol.Locations.FirstOrDefault(),
+                            contextTypeName));
+                        break;
+                        
+                    case HookParameterStatus.Valid:
+                        // No diagnostic needed - parameters are correct
+                        break;
+                        
+                    case HookParameterStatus.UnknownParameters:
+                        // Error diagnostic - unknown parameters
+                        var expectedContextTypeName = hookLevel switch
+                        {
+                            HookLevel.Test => "TestContext",
+                            HookLevel.Class => "ClassHookContext",
+                            HookLevel.Assembly => "AssemblyHookContext",
+                            _ => "context"
+                        };
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            Rules.HookUnknownParameters, 
+                            methodSymbol.Locations.FirstOrDefault(),
+                            expectedContextTypeName));
+                        break;
+                }
             }
         }
 
@@ -109,20 +140,28 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         return x.IsEveryHook(context.Compilation, out _, out hookLevel, out _);
     }
 
-    private static bool HasValidHookParameters(IMethodSymbol methodSymbol, string contextType)
+    private enum HookParameterStatus
+    {
+        NoParameters,
+        Valid,
+        UnknownParameters
+    }
+
+    private static HookParameterStatus CheckHookParameters(IMethodSymbol methodSymbol, string contextType)
     {
         var parameters = methodSymbol.Parameters;
         
-        // For Test, Class, and Assembly level hooks, a context parameter is REQUIRED
-        // Valid options are:
-        // 1. Single context parameter
-        // 2. Context parameter + CancellationToken
+        // No parameters - valid but we'll suggest adding context
+        if (parameters.Length == 0)
+        {
+            return HookParameterStatus.NoParameters;
+        }
         
         // Single context parameter is valid
         if (parameters.Length == 1 && 
             parameters[0].Type.GloballyQualifiedNonGeneric() == contextType)
         {
-            return true;
+            return HookParameterStatus.Valid;
         }
         
         // Context + CancellationToken is valid
@@ -130,9 +169,10 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             parameters[0].Type.GloballyQualifiedNonGeneric() == contextType &&
             parameters[1].Type.GloballyQualifiedNonGeneric() == "global::System.Threading.CancellationToken")
         {
-            return true;
+            return HookParameterStatus.Valid;
         }
         
-        return false;
+        // Anything else is unknown/invalid
+        return HookParameterStatus.UnknownParameters;
     }
 }
