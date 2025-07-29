@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace TUnit.Core.Extensions;
@@ -171,6 +172,7 @@ public static class ReflectionExtensions
     }
 
     [UnconditionalSuppressMessage("AOT", "IL2072:Target type's member does not satisfy requirements", Justification = "Attribute types are preserved by the runtime")]
+    [UnconditionalSuppressMessage("AOT", "IL2075:Target parameter does not satisfy requirements", Justification = "Attribute types are preserved by the runtime")]
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "Attribute instantiation is required for .NET Framework compatibility")]
     private static Attribute? CreateAttributeInstance(CustomAttributeData attributeData)
     {
@@ -182,7 +184,7 @@ public static class ReflectionExtensions
         }
 
         var constructorArgs = attributeData.ConstructorArguments
-            .Select(arg => arg.Value)
+            .Select(arg => ExtractArgumentValue(arg))
             .ToArray();
 
         Attribute? attribute;
@@ -193,7 +195,27 @@ public static class ReflectionExtensions
         }
         else
         {
-            attribute = Activator.CreateInstance(attributeType, constructorArgs) as Attribute;
+            // Check if constructor expects params array
+            var constructor = attributeType.GetConstructors()
+                .FirstOrDefault(c => c.GetParameters().Length == constructorArgs.Length);
+            
+            if (constructor != null && constructor.GetParameters().Length == 1)
+            {
+                var param = constructor.GetParameters()[0];
+                if (param.GetCustomAttribute(typeof(ParamArrayAttribute)) != null && constructorArgs[0] is object[] array)
+                {
+                    // Expand params array
+                    attribute = Activator.CreateInstance(attributeType, array) as Attribute;
+                }
+                else
+                {
+                    attribute = Activator.CreateInstance(attributeType, constructorArgs) as Attribute;
+                }
+            }
+            else
+            {
+                attribute = Activator.CreateInstance(attributeType, constructorArgs) as Attribute;
+            }
         }
 
         if (attribute == null)
@@ -205,14 +227,47 @@ public static class ReflectionExtensions
         {
             if (namedArg.MemberInfo is PropertyInfo property)
             {
-                property.SetValue(attribute, namedArg.TypedValue.Value);
+                property.SetValue(attribute, ExtractArgumentValue(namedArg.TypedValue));
             }
             else if (namedArg.MemberInfo is FieldInfo field)
             {
-                field.SetValue(attribute, namedArg.TypedValue.Value);
+                field.SetValue(attribute, ExtractArgumentValue(namedArg.TypedValue));
             }
         }
 
         return attribute;
+    }
+
+    private static object? ExtractArgumentValue(CustomAttributeTypedArgument arg)
+    {
+        var value = arg.Value;
+        
+        // In .NET Framework, params arrays come as ReadOnlyCollection<CustomAttributeTypedArgument>
+        if (value != null && value.GetType().FullName?.Contains("CustomAttributeTypedArgument") == true)
+        {
+            // Handle ReadOnlyCollection<CustomAttributeTypedArgument>
+            if (value is IEnumerable enumerable)
+            {
+                var items = new List<object?>();
+                foreach (var item in enumerable)
+                {
+                    // Use reflection to get the Value property
+                    #pragma warning disable IL2075 // Suppress trimming warning for GetProperty
+                    var valueProperty = item.GetType().GetProperty("Value");
+                    #pragma warning restore IL2075
+                    if (valueProperty != null)
+                    {
+                        items.Add(valueProperty.GetValue(item));
+                    }
+                    else
+                    {
+                        items.Add(item);
+                    }
+                }
+                return items.ToArray();
+            }
+        }
+        
+        return value;
     }
 }

@@ -90,7 +90,20 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (!namedTypeSymbol.IsTestClass(context.Compilation))
+        // Check if it's a test class or has data source attributes
+        var hasDataSourceAttribute = namedTypeSymbol.GetAttributes().Any(a => 
+        {
+            var currentType = a.AttributeClass;
+            while (currentType != null)
+            {
+                if (currentType.Name.Contains("DataSource") || currentType.Name == "ArgumentsAttribute")
+                    return true;
+                currentType = currentType.BaseType;
+            }
+            return false;
+        });
+        
+        if (!namedTypeSymbol.IsTestClass(context.Compilation) && !hasDataSourceAttribute)
         {
             return;
         }
@@ -111,11 +124,51 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         var types = GetTypes(parameters, propertySymbol);
 
+        var dataSourceInterface = context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithoutGlobalPrefix);
+        
         var dataAttributes = attributes.Where(x =>
-                x.AttributeClass?.AllInterfaces.Contains(
-                    context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute
-                        .WithoutGlobalPrefix)!, SymbolEqualityComparer.Default
-                ) == true)
+            {
+                if (x.AttributeClass == null) return false;
+                
+                var attributeClass = x.AttributeClass;
+                
+                // Check if this is a known data source attribute by inheritance chain
+                var currentType = attributeClass;
+                while (currentType != null)
+                {
+                    var typeName = currentType.Name;
+                    
+                    // Check for known data source base classes
+                    if (typeName == "TestDataAttribute" ||
+                        typeName == "ArgumentsAttribute")
+                    {
+                        return true;
+                    }
+                    
+                    // For generic types, check the type name without arity
+                    if (currentType.IsGenericType)
+                    {
+                        var genericTypeName = currentType.OriginalDefinition?.Name ?? typeName;
+                        if (genericTypeName.StartsWith("DataSourceGeneratorAttribute") ||
+                            genericTypeName.StartsWith("AsyncDataSourceGeneratorAttribute") ||
+                            genericTypeName.StartsWith("ClassDataSourceAttribute"))
+                        {
+                            return true;
+                        }
+                    }
+                    
+                    // Also check if we have IDataSourceAttribute interface
+                    if (dataSourceInterface != null && 
+                        currentType.Interfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, dataSourceInterface)))
+                    {
+                        return true;
+                    }
+                    
+                    currentType = currentType.BaseType;
+                }
+                
+                return false;
+            })
             .ToImmutableArray();
 
         if (dataAttributes.IsDefaultOrEmpty)
@@ -140,7 +193,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 var typesToValidate = propertySymbol != null 
                     ? ImmutableArray.Create(propertySymbol.Type)
                     : parameters.Select(p => p.Type).ToImmutableArray().WithoutCancellationTokenParameter();
-                CheckMethodDataSource(context, attribute, testClassType, typesToValidate);
+                CheckMethodDataSource(context, attribute, testClassType, typesToValidate, propertySymbol);
             }
 
             if (attribute.AttributeClass?.IsGenericType is true
@@ -151,18 +204,51 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 var typesToValidate = propertySymbol != null 
                     ? ImmutableArray.Create(propertySymbol.Type)
                     : parameters.Select(p => p.Type).ToImmutableArray().WithoutCancellationTokenParameter();
-                CheckMethodDataSource(context, attribute, testClassType, typesToValidate);
+                CheckMethodDataSource(context, attribute, testClassType, typesToValidate, propertySymbol);
             }
-
-            if (attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithoutGlobalPrefix))) == true
-                && attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IAsyncUntypedDataSourceGeneratorAttribute.WithoutGlobalPrefix))) != true)
+            
+            // Check for ClassDataSourceAttribute<T> by fully qualified name
+            if (attribute.AttributeClass?.ToDisplayString()?.StartsWith("TUnit.Core.ClassDataSourceAttribute<") == true)
             {
-                // For property injection, only validate against the property type, not method parameters
                 var typesToValidate = propertySymbol != null 
                     ? ImmutableArray.Create(propertySymbol.Type)
                     : types;
                 CheckDataGenerator(context, attribute, typesToValidate);
             }
+            
+            // Check for any custom data source generators that inherit from known base classes
+            // (excluding ClassDataSourceAttribute which is handled above)
+            if (attribute.AttributeClass != null && 
+                !attribute.AttributeClass.ToDisplayString()?.StartsWith("TUnit.Core.ClassDataSourceAttribute<") == true)
+            {
+                var isDataSourceGenerator = false;
+                var selfAndBaseTypes = attribute.AttributeClass.GetSelfAndBaseTypes();
+                
+                foreach (var type in selfAndBaseTypes)
+                {
+                    if (type.IsGenericType && type.TypeArguments.Length > 0)
+                    {
+                        var originalDef = type.OriginalDefinition;
+                        var metadataName = originalDef?.ToDisplayString();
+                        
+                        if (metadataName?.Contains("DataSourceGeneratorAttribute") == true ||
+                            metadataName?.Contains("AsyncDataSourceGeneratorAttribute") == true)
+                        {
+                            isDataSourceGenerator = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (isDataSourceGenerator)
+                {
+                    var typesToValidate = propertySymbol != null 
+                        ? ImmutableArray.Create(propertySymbol.Type)
+                        : types;
+                    CheckDataGenerator(context, attribute, typesToValidate);
+                }
+            }
+
         }
     }
 
@@ -259,7 +345,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                         argumentsAttribute.GetLocation(),
-                        "null",
+                        "<null>",
                         typeSymbol.ToDisplayString())
                 );
                 return;
@@ -295,7 +381,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     private void CheckMethodDataSource(SymbolAnalysisContext context,
         AttributeData attribute,
         INamedTypeSymbol testClassType,
-        ImmutableArray<ITypeSymbol> testParameterTypes)
+        ImmutableArray<ITypeSymbol> testParameterTypes,
+        IPropertySymbol? propertySymbol = null)
     {
         {
             var type = attribute.AttributeClass?.IsGenericType == true
@@ -382,6 +469,24 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                         attribute.GetLocation())
                 );
                 return;
+            }
+
+            // Special check for property injection with IEnumerable BEFORE unwrapping
+            if (propertySymbol != null && dataSourceMethod.ReturnType.IsIEnumerable(context.Compilation, out _))
+            {
+                // Report type mismatch first (the full IEnumerable type doesn't match the property type)
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.WrongArgumentTypeTestData,
+                        attribute.GetLocation(),
+                        dataSourceMethod.ReturnType.ToDisplayString(),
+                        propertySymbol.Type.ToDisplayString())
+                );
+                
+                // Then report the ReturnFunc diagnostic
+                context.ReportDiagnostic(Diagnostic.Create(Rules.ReturnFunc,
+                    dataSourceMethod.Locations.FirstOrDefault()));
+                return; // Don't continue with further checks
             }
 
             var unwrappedTypes = UnwrapTypes(context,
@@ -626,11 +731,29 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }.AsReadOnly();
 
         var baseGeneratorAttribute = selfAndBaseTypes
-            .FirstOrDefault(x => x.Interfaces.Any(i => i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithGlobalPrefix));
+            .FirstOrDefault(x => x.AllInterfaces.Any(i => i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithGlobalPrefix));
 
+        // If interface check fails, use name-based detection as fallback
         if (baseGeneratorAttribute is null)
         {
-            return;
+            // Check if this is a known data source generator by name
+            var isDataSourceGenerator = selfAndBaseTypes.Any(type =>
+            {
+                var typeName = type.Name;
+                if (type.IsGenericType)
+                {
+                    var genericTypeName = type.OriginalDefinition?.Name ?? typeName;
+                    return genericTypeName.StartsWith("DataSourceGeneratorAttribute") ||
+                           genericTypeName.StartsWith("AsyncDataSourceGeneratorAttribute") ||
+                           genericTypeName.StartsWith("ClassDataSourceAttribute");
+                }
+                return typeName == "TestDataAttribute" || typeName == "ArgumentsAttribute";
+            });
+            
+            if (!isDataSourceGenerator)
+            {
+                return;
+            }
         }
 
         if (testDataTypes.Any(x => x.IsGenericDefinition()))
@@ -638,14 +761,46 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        // If the base generator attribute has no type arguments (like ArgumentsAttribute which returns object?[]?),
+        // Get type arguments from the attribute or its base types
+        var typeArguments = ImmutableArray<ITypeSymbol>.Empty;
+        
+        // First check if the attribute itself has type arguments
+        if (attribute.AttributeClass?.TypeArguments.IsEmpty == false)
+        {
+            typeArguments = attribute.AttributeClass.TypeArguments;
+        }
+        else
+        {
+            // Otherwise, look for type arguments in base types (e.g., DataSourceGeneratorAttribute<T>)
+            foreach (var baseType in selfAndBaseTypes)
+            {
+                if (!baseType.TypeArguments.IsEmpty)
+                {
+                    typeArguments = baseType.TypeArguments;
+                    break;
+                }
+            }
+        }
+
+        // If still no type arguments (like ArgumentsAttribute which returns object?[]?),
         // skip compile-time type checking as it will be validated at runtime
-        if (baseGeneratorAttribute.TypeArguments.IsEmpty)
+        if (typeArguments.IsEmpty)
         {
             return;
         }
 
-        var conversions = baseGeneratorAttribute.TypeArguments.ZipAll(testDataTypes,
+        // Check if there's a mismatch in the number of types
+        if (typeArguments.Length != testDataTypes.Length)
+        {
+            // If testDataTypes is empty, show "<none>" instead of empty string
+            var testTypesDisplay = testDataTypes.Length == 0 ? "" : string.Join(", ", testDataTypes);
+            context.ReportDiagnostic(Diagnostic.Create(Rules.WrongArgumentTypeTestData,
+                    attribute.GetLocation() ?? context.Symbol.Locations.FirstOrDefault(),
+                    string.Join(", ", typeArguments), testTypesDisplay));
+            return;
+        }
+
+        var conversions = typeArguments.ZipAll(testDataTypes,
             (returnType, parameterType) => context.Compilation.HasImplicitConversionOrGenericParameter(returnType, parameterType));
 
         if (conversions.All(x => x))
@@ -655,7 +810,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         context.ReportDiagnostic(Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                 attribute.GetLocation() ?? context.Symbol.Locations.FirstOrDefault(),
-                string.Join(", ", baseGeneratorAttribute.TypeArguments), string.Join(", ", testDataTypes)));
+                string.Join(", ", typeArguments), string.Join(", ", testDataTypes)));
     }
 
     private static bool CanConvert(SymbolAnalysisContext context, TypedConstant argument, ITypeSymbol? methodParameterType)

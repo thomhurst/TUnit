@@ -82,8 +82,7 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             }
 
             else if (hookLevel == HookLevel.Assembly
-                && !HasValidHookParameters(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext.WithGlobalPrefix)
-                && attributeData.IsEveryHook(context.Compilation, out _, out _, out _))
+                && !HasValidHookParameters(methodSymbol, WellKnown.AttributeFullyQualifiedClasses.AssemblyHookContext.WithGlobalPrefix))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.SingleAssemblyHookContextParameterRequired, methodSymbol.Locations.FirstOrDefault()));
             }
@@ -99,12 +98,14 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private static bool IsGlobalHook(SymbolAnalysisContext context, AttributeData x, [NotNullWhen(true)] out HookLevel? hookLevel)
     {
+        // For standard hooks (Before/After), only Assembly, TestSession, and TestDiscovery are global
         if (x.IsStandardHook(context.Compilation, out _, out hookLevel, out _)
             && hookLevel is HookLevel.Assembly or HookLevel.TestSession or HookLevel.TestDiscovery)
         {
             return true;
         }
 
+        // For Every hooks (BeforeEvery/AfterEvery), all levels (Test, Class, Assembly) are considered global
         return x.IsEveryHook(context.Compilation, out _, out hookLevel, out _);
     }
 
@@ -112,18 +113,10 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         var parameters = methodSymbol.Parameters;
         
-        // No parameters is valid
-        if (parameters.Length == 0)
-        {
-            return true;
-        }
-        
-        // Single CancellationToken is valid
-        if (parameters.Length == 1 && 
-            parameters[0].Type.GloballyQualifiedNonGeneric() == "global::System.Threading.CancellationToken")
-        {
-            return true;
-        }
+        // For Test, Class, and Assembly level hooks, a context parameter is REQUIRED
+        // Valid options are:
+        // 1. Single context parameter
+        // 2. Context parameter + CancellationToken
         
         // Single context parameter is valid
         if (parameters.Length == 1 && 

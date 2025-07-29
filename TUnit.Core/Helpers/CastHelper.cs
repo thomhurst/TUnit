@@ -33,7 +33,36 @@ public static class CastHelper
             && !value.GetType().IsArray  // Don't unwrap arrays
             && !typeof(IEnumerable).IsAssignableFrom(typeof(T)))
         {
-            value = enumerable.Cast<object>().ElementAtOrDefault(0);
+            // Special handling for CustomAttributeTypedArgument collections in .NET Framework
+            var typeName = value.GetType().FullName;
+            if (typeName != null && typeName.Contains("CustomAttributeTypedArgument"))
+            {
+                // For ReadOnlyCollection<CustomAttributeTypedArgument>, we need to extract the actual values
+                var firstItem = enumerable.Cast<object>().FirstOrDefault();
+                if (firstItem != null)
+                {
+                    // Use reflection to get the Value property
+                    #pragma warning disable IL2075 // Suppress trimming warning for GetProperty
+                    var valueProperty = firstItem.GetType().GetProperty("Value");
+                    #pragma warning restore IL2075
+                    if (valueProperty != null)
+                    {
+                        value = valueProperty.GetValue(firstItem);
+                    }
+                    else
+                    {
+                        value = firstItem;
+                    }
+                }
+                else
+                {
+                    value = null;
+                }
+            }
+            else
+            {
+                value = enumerable.Cast<object>().ElementAtOrDefault(0);
+            }
         }
 
         if (underlyingType.IsEnum)
@@ -145,7 +174,36 @@ public static class CastHelper
             && !value.GetType().IsArray  // Don't unwrap arrays
             && !typeof(IEnumerable).IsAssignableFrom(type))
         {
-            value = enumerable.Cast<object>().ElementAtOrDefault(0);
+            // Special handling for CustomAttributeTypedArgument collections in .NET Framework
+            var typeName = value.GetType().FullName;
+            if (typeName != null && typeName.Contains("CustomAttributeTypedArgument"))
+            {
+                // For ReadOnlyCollection<CustomAttributeTypedArgument>, we need to extract the actual values
+                var firstItem = enumerable.Cast<object>().FirstOrDefault();
+                if (firstItem != null)
+                {
+                    // Use reflection to get the Value property
+                    #pragma warning disable IL2075 // Suppress trimming warning for GetProperty
+                    var valueProperty = firstItem.GetType().GetProperty("Value");
+                    #pragma warning restore IL2075
+                    if (valueProperty != null)
+                    {
+                        value = valueProperty.GetValue(firstItem);
+                    }
+                    else
+                    {
+                        value = firstItem;
+                    }
+                }
+                else
+                {
+                    value = null;
+                }
+            }
+            else
+            {
+                value = enumerable.Cast<object>().ElementAtOrDefault(0);
+            }
         }
 
         if (underlyingType.IsEnum)
