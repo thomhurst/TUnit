@@ -149,7 +149,10 @@
       "Bash(tasklist)",
       "Bash(tail:*)",
       "Bash(del GenericTestExample.cs)",
-      "Bash(pwsh:*)"
+      "Bash(pwsh:*)",
+      "Bash(for dir in *.received)",
+      "Bash(do rm -rf \"$dir%.received.verified\")",
+      "Bash(done)"
     ],
     "deny": []
   },
