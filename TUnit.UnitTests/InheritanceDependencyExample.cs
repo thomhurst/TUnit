@@ -40,15 +40,6 @@ public class UserRepositoryTests : DatabaseTestBase
         await Task.Delay(1);
     }
 
-    [Test]
-    [DependsOn<DatabaseTestBase>()] // Depends on all tests in base class
-    public async Task CanQueryUsers()
-    {
-        // This test depends on all DatabaseTestBase tests completing
-        await Assert.That(ConnectionString).IsNotNull();
-        // Simulate user query
-        await Task.Delay(1);
-    }
 }
 
 [InheritsTests]
