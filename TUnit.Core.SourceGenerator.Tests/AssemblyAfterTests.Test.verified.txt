@@ -555,19 +555,11 @@ return classMetadata;
 {
 Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests),
 TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.AssemblyCleanupTests, TestsBase`1"),
-Name = "AfterAllCleanUp",
+Name = "AfterAllCleanUp2",
 GenericTypeCount = 0,
 ReturnType = typeof(global::System.Threading.Tasks.Task),
 ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-{
-    Name = "cancellationToken",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.CancellationToken, System.Private.CoreLib"),
-    ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).GetMethod("AfterAllCleanUp", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-},
-},
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.AssemblyCleanupTests", () => 
 {
 var classMetadata = new global::TUnit.Core.ClassMetadata
@@ -591,7 +583,7 @@ return classMetadata;
 },
                 HookExecutor = null!,
                 Order = 0,
-                Body = global_TUnit_TestProject_AfterTests_AssemblyCleanupTests_AfterAllCleanUp_1Params_Body,
+                Body = global_TUnit_TestProject_AfterTests_AssemblyCleanupTests_AfterAllCleanUp2_0Params_Body,
                 FilePath = @"",
                 LineNumber = 62
             }
@@ -603,7 +595,7 @@ return classMetadata;
 {
 Type = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests),
 TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.AssemblyCleanupTests, TestsBase`1"),
-Name = "AfterAllCleanUpWithContext",
+Name = "AfterAllCleanUpWithContextAndToken",
 GenericTypeCount = 0,
 ReturnType = typeof(global::System.Threading.Tasks.Task),
 ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
@@ -613,13 +605,13 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.AssemblyHookC
 {
     Name = "context",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.AssemblyHookContext, TUnit.Core"),
-    ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).GetMethod("AfterAllCleanUpWithContext", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.AssemblyHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).GetMethod("AfterAllCleanUpWithContextAndToken", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.AssemblyHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
 {
     Name = "cancellationToken",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.CancellationToken, System.Private.CoreLib"),
-    ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).GetMethod("AfterAllCleanUpWithContext", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.AssemblyHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
+    ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).GetMethod("AfterAllCleanUpWithContextAndToken", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.AssemblyHookContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.AssemblyCleanupTests", () => 
@@ -645,7 +637,7 @@ return classMetadata;
 },
                 HookExecutor = null!,
                 Order = 0,
-                Body = global_TUnit_TestProject_AfterTests_AssemblyCleanupTests_AfterAllCleanUpWithContext_2Params_Body,
+                Body = global_TUnit_TestProject_AfterTests_AssemblyCleanupTests_AfterAllCleanUpWithContextAndToken_2Params_Body,
                 FilePath = @"",
                 LineNumber = 68
             }
@@ -687,13 +679,13 @@ return classMetadata;
     {
         await AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUpWithContext(context));
     }
-    private static async ValueTask global_TUnit_TestProject_AfterTests_AssemblyCleanupTests_AfterAllCleanUp_1Params_Body(AssemblyHookContext context, CancellationToken cancellationToken)
+    private static async ValueTask global_TUnit_TestProject_AfterTests_AssemblyCleanupTests_AfterAllCleanUp2_0Params_Body(AssemblyHookContext context, CancellationToken cancellationToken)
     {
-        await AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUp(cancellationToken));
+        await AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUp2());
     }
-    private static async ValueTask global_TUnit_TestProject_AfterTests_AssemblyCleanupTests_AfterAllCleanUpWithContext_2Params_Body(AssemblyHookContext context, CancellationToken cancellationToken)
+    private static async ValueTask global_TUnit_TestProject_AfterTests_AssemblyCleanupTests_AfterAllCleanUpWithContextAndToken_2Params_Body(AssemblyHookContext context, CancellationToken cancellationToken)
     {
-        await AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUpWithContext(context, cancellationToken));
+        await AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyCleanupTests.AfterAllCleanUpWithContextAndToken(context, cancellationToken));
     }
     private static async ValueTask global_TUnit_TestProject_AfterTests_AssemblyCleanupTests_Cleanup_0Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
     {

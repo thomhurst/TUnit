@@ -260,7 +260,7 @@ TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProje
 Name = "ValueTaskAsynchronousTest",
 GenericTypeCount = 0,
 ReturnType = typeof(global::System.Threading.Tasks.ValueTask),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.ValueTask, System.Private.CoreLib"),
+ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.ValueTask, System.Threading.Tasks.Extensions"),
 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BasicTests", () => 
 {

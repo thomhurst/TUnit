@@ -8,8 +8,6 @@ namespace TUnit.Generated;
 internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     #if NET8_0_OR_GREATER
-    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property1>k__BackingField")]
-    private static extern ref string GetProperty1BackingField(global::TUnit.TestProject.PropertySetterTests instance);
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property2>k__BackingField")]
     private static extern ref string GetProperty2BackingField(global::TUnit.TestProject.PropertySetterTests instance);
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property3>k__BackingField")]
@@ -51,12 +49,6 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
             },
             PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
             {
-                new global::TUnit.Core.PropertyDataSource
-                {
-                    PropertyName = "Property1",
-                    PropertyType = typeof(string),
-                    DataSource = new global::TUnit.Core.ArgumentsAttribute("1"),
-                },
                 new global::TUnit.Core.PropertyDataSource
                 {
                     PropertyName = "Property2",
@@ -107,24 +99,6 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-                new global::TUnit.Core.PropertyInjectionData
-                {
-                    PropertyName = "Property1",
-                    PropertyType = typeof(string),
-                    #if NET8_0_OR_GREATER
-                    Setter = (instance, value) => GetProperty1BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (string)value,
-                    #else
-                    Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
-                    #endif
-                    ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
-                    NestedPropertyValueFactory = obj =>
-                    {
-                        return new global::System.Collections.Generic.Dictionary<string, object?>();
-                    }
-                },
                 new global::TUnit.Core.PropertyInjectionData
                 {
                     PropertyName = "Property2",
@@ -392,8 +366,6 @@ namespace TUnit.Generated;
 internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     #if NET8_0_OR_GREATER
-    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property1>k__BackingField")]
-    private static extern ref string GetProperty1BackingField(global::TUnit.TestProject.PropertySetterTests instance);
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property2>k__BackingField")]
     private static extern ref string GetProperty2BackingField(global::TUnit.TestProject.PropertySetterTests instance);
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property3>k__BackingField")]
@@ -438,12 +410,6 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
             {
                 new global::TUnit.Core.PropertyDataSource
                 {
-                    PropertyName = "Property1",
-                    PropertyType = typeof(string),
-                    DataSource = new global::TUnit.Core.ArgumentsAttribute("1"),
-                },
-                new global::TUnit.Core.PropertyDataSource
-                {
                     PropertyName = "Property2",
                     PropertyType = typeof(string),
                     DataSource = new global::TUnit.Core.MethodDataSourceAttribute("MethodData"),
@@ -481,24 +447,6 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-                new global::TUnit.Core.PropertyInjectionData
-                {
-                    PropertyName = "Property1",
-                    PropertyType = typeof(string),
-                    #if NET8_0_OR_GREATER
-                    Setter = (instance, value) => GetProperty1BackingField((global::TUnit.TestProject.PropertySetterTests)instance) = (string)value,
-                    #else
-                    Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
-                    #endif
-                    ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
-                    NestedPropertyValueFactory = obj =>
-                    {
-                        return new global::System.Collections.Generic.Dictionary<string, object?>();
-                    }
-                },
                 new global::TUnit.Core.PropertyInjectionData
                 {
                     PropertyName = "Property2",

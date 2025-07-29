@@ -555,19 +555,11 @@ return classMetadata;
 {
 Type = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests),
 TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.BeforeTests.AssemblySetupTests, TestsBase`1"),
-Name = "BeforeAllSetUp",
+Name = "BeforeAllSetUp2",
 GenericTypeCount = 0,
 ReturnType = typeof(global::System.Threading.Tasks.Task),
 ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
-{
-    Name = "cancellationToken",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.CancellationToken, System.Private.CoreLib"),
-    ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.AssemblySetupTests).GetMethod("BeforeAllSetUp", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
-},
-},
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.AssemblySetupTests", () => 
 {
 var classMetadata = new global::TUnit.Core.ClassMetadata
@@ -591,7 +583,7 @@ return classMetadata;
 },
                 HookExecutor = null!,
                 Order = 0,
-                Body = global_TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUp_1Params_Body,
+                Body = global_TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUp2_0Params_Body,
                 FilePath = @"",
                 LineNumber = 62
             }
@@ -687,9 +679,9 @@ return classMetadata;
     {
         await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUpWithContext(context));
     }
-    private static async ValueTask global_TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUp_1Params_Body(AssemblyHookContext context, CancellationToken cancellationToken)
+    private static async ValueTask global_TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUp2_0Params_Body(AssemblyHookContext context, CancellationToken cancellationToken)
     {
-        await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUp(cancellationToken));
+        await AsyncConvert.Convert(() => global::TUnit.TestProject.BeforeTests.AssemblySetupTests.BeforeAllSetUp2());
     }
     private static async ValueTask global_TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUpWithContext_2Params_Body(AssemblyHookContext context, CancellationToken cancellationToken)
     {
