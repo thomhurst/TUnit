@@ -103,6 +103,9 @@ public sealed class VerifySettingsTask
             }
         }
         var final = string.Join("\n", lines);
+        
+        // Normalize escaped line endings in string literals
+        final = final.Replace("\\r\\n", "\\n");
 
         if (!File.Exists(_verifiedPath))
         {

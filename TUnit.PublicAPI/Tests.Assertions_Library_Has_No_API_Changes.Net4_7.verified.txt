@@ -1,4 +1,4 @@
-﻿[assembly: .(".NETStandard,Version=v2.0", FrameworkDisplayName=".NET Standard 2.0")]
+[assembly: .(".NETStandard,Version=v2.0", FrameworkDisplayName=".NET Standard 2.0")]
 namespace 
 {
     public static class Assert
