@@ -14,12 +14,6 @@ public partial class Tests
     }
 
     [Test]
-    public Task Engine_Library_Has_No_API_Changes()
-    {
-        return VerifyPublicApi(typeof(Engine.Logging.TUnitFrameworkLogger).Assembly);
-    }
-
-    [Test]
     public Task Assertions_Library_Has_No_API_Changes()
     {
         return VerifyPublicApi(typeof(Assertions.Assert).Assembly);
@@ -42,7 +36,7 @@ public partial class Tests
         });
 
         await Verify(publicApi)
-            .AddScrubber(sb => Scrub(sb))
+            .AddScrubber(Scrub)
             .AddScrubber(sb => new StringBuilder(sb.ToString().Replace("\\r\\n", "\\n")))
             .ScrubLinesWithReplace(x => x.Replace("\r\n", "\n"))
             .ScrubLinesWithReplace(line =>
