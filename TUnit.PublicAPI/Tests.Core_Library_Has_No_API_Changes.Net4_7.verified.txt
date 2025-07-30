@@ -1817,8 +1817,6 @@ namespace .Extensions
     {
         public static . AddDynamicTest<T>(this .TestContext context, .DynamicTestInstance<T> dynamicTest)
             where T :  class { }
-        public static void AddTest<T>(this .TestContext context, .DynamicTestInstance<T> dynamicTest)
-            where T :  class { }
         public static string GetClassTypeName(this .TestContext context) { }
         public static T? GetService<T>(this .TestContext context)
             where T :  class { }
@@ -2214,6 +2212,11 @@ namespace .Interfaces
     public interface ITestRegisteredEventReceiver : .
     {
         . OnTestRegistered(.TestRegisteredContext context);
+    }
+    public interface ITestRegistry
+    {
+        . AddDynamicTest<T>(.TestContext context, .DynamicTestInstance<T> dynamicTest)
+            where T :  class;
     }
     public interface ITestRetryEventReceiver : .
     {
