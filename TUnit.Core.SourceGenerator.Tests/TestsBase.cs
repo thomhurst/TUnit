@@ -199,25 +199,29 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
 
     private StringBuilder Scrub(StringBuilder text)
     {
-        var result = text.Replace("\r\n", "\n");
-        
+        var result = text
+            .Replace("\r\n", "\n")
+            .Replace("\r", "\n")
+            .Replace("\\r\\n", "\\n")
+            .Replace("\\r", "\\n");
+
         // Scrub GUIDs from class names and identifiers
         // Pattern 1: ClassName_[32 hex chars]
         var guidPattern1 = @"([A-Za-z_]\w*)_[a-fA-F0-9]{32}";
         var scrubbedText = System.Text.RegularExpressions.Regex.Replace(result.ToString(), guidPattern1, "$1_GUID", System.Text.RegularExpressions.RegexOptions.None);
-        
+
         // Pattern 2: ClassName_[standard GUID format]
         var guidPattern2 = @"([A-Za-z_]\w*)_[a-fA-F0-9]{8}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{12}";
         scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, guidPattern2, "$1_GUID", System.Text.RegularExpressions.RegexOptions.None);
-        
+
         // Scrub file paths - Windows style (e.g., D:\\git\\TUnit\\)
         var windowsPathPattern = @"[A-Za-z]:\\\\[^""'\s,)]+";
         scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, windowsPathPattern, "PATH_SCRUBBED");
-        
+
         // Scrub file paths - Unix style (e.g., /home/user/...)
         var unixPathPattern = @"/[a-zA-Z0-9_\-./]+/[a-zA-Z0-9_\-./]+";
         scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, unixPathPattern, "PATH_SCRUBBED");
-        
+
         return new StringBuilder(scrubbedText);
     }
 

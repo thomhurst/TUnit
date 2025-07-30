@@ -68,13 +68,18 @@ public partial class Tests
 
     private StringBuilder Scrub(StringBuilder text)
     {
-        var newText = UrlRegex().Replace(text.ToString(), string.Empty);
+        var newText = UrlRegex().Replace(text.ToString(), string.Empty)
+            .Replace("\r\n", "\n")
+            .Replace("\r", "\n")
+            .Replace("\\r\\n", "\\n")
+            .Replace("\\r", "\\n");
+
         return new StringBuilder(newText);
     }
 
     private string Scrub(string text)
     {
-        return Scrub(new StringBuilder(text.Replace("\r\n", "\n"))).ToString();
+        return Scrub(new StringBuilder(text)).ToString();
     }
 
 
