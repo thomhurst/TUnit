@@ -691,7 +691,6 @@ return classMetadata;
             }
         );
     }
-    // Hook delegates for AOT execution
     private static async ValueTask global_TUnit_TestProject_BeforeTests_GlobalBase1_BeforeEach1_0Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
     {
         var typedInstance = (global::TUnit.TestProject.BeforeTests.GlobalBase1)instance;

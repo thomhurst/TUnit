@@ -643,7 +643,6 @@ return classMetadata;
             }
         );
     }
-    // Hook delegates for AOT execution
     private static async ValueTask global_TUnit_TestProject_AfterTests_AssemblyBase1_AfterAll1_0Params_Body(AssemblyHookContext context, CancellationToken cancellationToken)
     {
         await AsyncConvert.Convert(() => global::TUnit.TestProject.AfterTests.AssemblyBase1.AfterAll1());

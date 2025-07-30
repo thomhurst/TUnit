@@ -112,7 +112,6 @@ return classMetadata;
             }
         );
     }
-    // Hook delegates for AOT execution
     private static async ValueTask global_TUnit_TestProject_DisposableFieldTests_Setup_0Params_Body(object instance, TestContext context, CancellationToken cancellationToken)
     {
         var typedInstance = (global::TUnit.TestProject.DisposableFieldTests)instance;
