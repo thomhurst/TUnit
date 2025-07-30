@@ -36,6 +36,8 @@ public abstract class InvokableTestBase(TestMode testMode)
         List<Action<TestRun>> assertions, RunOptions runOptions,
         [CallerArgumentExpression(nameof(assertions))] string assertionExpression = "")
     {
+        Console.WriteLine(@$"Mode: {testMode}");
+
         return testMode switch
         {
             TestMode.SourceGenerated => RunWithoutAot(filter, assertions, runOptions, assertionExpression),
