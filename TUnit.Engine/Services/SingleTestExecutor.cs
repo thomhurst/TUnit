@@ -111,11 +111,13 @@ internal class SingleTestExecutor : ISingleTestExecutor
     private async Task<TestNodeUpdateMessage> HandleSkippedTestAsync(ExecutableTest test, CancellationToken cancellationToken)
     {
         test.State = TestState.Skipped;
+
         test.Result = _resultFactory.CreateSkippedResult(
             test.StartTime!.Value,
-            test.Context?.SkipReason ?? "Test skipped");
+            test.Context.SkipReason ?? "Test skipped");
+
         test.EndTime = DateTimeOffset.Now;
-        await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context!, cancellationToken);
+        await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
 
         return CreateUpdateMessage(test);
     }
@@ -282,7 +284,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 cts.Cancel();
                 await AttemptToCompleteTestTask(testTask);
-                throw new OperationCanceledException($"Test '{test.DisplayName}' exceeded timeout of {test.Metadata.TimeoutMs.Value}ms");
+                throw new OperationCanceledException($"Test '{test.Context.GetDisplayName()}' exceeded timeout of {test.Metadata.TimeoutMs.Value}ms");
             }
 
             await testTask;

@@ -184,7 +184,6 @@ internal sealed class TestBuilderPipeline
         return new FailedExecutableTest(exception)
         {
             TestId = testId,
-            DisplayName = displayName,
             Metadata = metadata,
             Arguments = [],
             ClassArguments = [],
@@ -239,7 +238,6 @@ internal sealed class TestBuilderPipeline
         return new FailedExecutableTest(exception)
         {
             TestId = testId,
-            DisplayName = displayName,
             Metadata = metadata,
             Arguments = [],
             ClassArguments = [],

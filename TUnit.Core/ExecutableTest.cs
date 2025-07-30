@@ -4,11 +4,6 @@ public abstract class ExecutableTest
 {
     public required string TestId { get; init; }
 
-    /// <summary>
-    /// Includes parameter values for data-driven tests
-    /// </summary>
-    public required string DisplayName { get; init; }
-
     public virtual TestMetadata Metadata { get; init; } = null!;
 
     /// <summary>
@@ -25,8 +20,6 @@ public abstract class ExecutableTest
 
     public abstract Task InvokeTestAsync(object instance, CancellationToken cancellationToken);
 
-    public Dictionary<string, object?> PropertyValues { get; init; } = new();
-
     public required TestContext Context
     {
         get;
@@ -41,11 +34,19 @@ public abstract class ExecutableTest
 
     public TestState State { get; set; } = TestState.NotStarted;
 
-    public TestResult? Result { get; set; }
+    public TestResult? Result
+    {
+        get => Context.Result;
+        set => Context.Result = value;
+    }
 
-    public DateTimeOffset? StartTime { get; set; }
+    public DateTimeOffset? StartTime
+    {
+        get => Context.TestStart;
+        set => Context.TestStart = value ?? DateTimeOffset.UtcNow;
+    }
 
-    public DateTimeOffset? EndTime { get; set; }
+    public DateTimeOffset? EndTime { get => Context.TestEnd; set => Context.TestEnd = value; }
 
     public TimeSpan? Duration => StartTime.HasValue && EndTime.HasValue
         ? EndTime.Value - StartTime.Value

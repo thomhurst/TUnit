@@ -256,6 +256,7 @@ public class TestContext : Context
     ];
 
     internal ExecutableTest InternalExecutableTest { get; set; } = null!;
+    public DateTimeOffset? TestEnd { get; set; }
 
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
     {

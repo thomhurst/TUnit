@@ -143,7 +143,6 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         return new UnifiedExecutableTest(createInstance, invokeTest)
         {
             TestId = context.TestId,
-            DisplayName = context.DisplayName,
             Metadata = metadata,
             Arguments = context.Arguments,
             ClassArguments = context.ClassArguments,

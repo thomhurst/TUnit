@@ -25,7 +25,7 @@ public sealed class GenericTestMetadata : TestMetadata
                     }
 
                     Type[] typeArgs;
-                    
+
                     // First, check if we have resolved class generic arguments from the context
                     // This happens when type inference was done in TestBuilder
                     if (context.ResolvedClassGenericArguments.Length > 0)
@@ -38,7 +38,7 @@ public sealed class GenericTestMetadata : TestMetadata
                         // Infer type arguments from the constructor argument values
                         var genericParams = TestClassType.GetGenericArguments();
                         typeArgs = new Type[genericParams.Length];
-                        
+
                         // For single generic parameter, use the first argument's type
                         if (genericParams.Length == 1 && context.ClassArguments.Length >= 1)
                         {
@@ -64,7 +64,7 @@ public sealed class GenericTestMetadata : TestMetadata
                     {
                         typeArgs = testContext.TestDetails.TestClassArguments?.OfType<Type>().ToArray() ?? Type.EmptyTypes;
                     }
-                    
+
                     var instance = InstanceFactory(typeArgs, context.ClassArguments ?? Array.Empty<object?>());
 
                     // Apply property values using unified PropertyInjector
@@ -88,11 +88,11 @@ public sealed class GenericTestMetadata : TestMetadata
 
                     // Determine if the test method has a CancellationToken parameter
                     var hasCancellationToken = ParameterTypes.Any(t => t == typeof(CancellationToken));
-                    
+
                     if (hasCancellationToken)
                     {
                         var cancellationTokenIndex = Array.IndexOf(ParameterTypes, typeof(CancellationToken));
-                        
+
                         // Insert CancellationToken at the correct position
                         var argsWithToken = new object?[args.Length + 1];
                         var argIndex = 0;
@@ -120,7 +120,6 @@ public sealed class GenericTestMetadata : TestMetadata
                 return new UnifiedExecutableTest(createInstance, invokeTest)
                 {
                     TestId = context.TestId,
-                    DisplayName = context.DisplayName,
                     Metadata = metadata,
                     Arguments = context.Arguments,
                     ClassArguments = context.ClassArguments,

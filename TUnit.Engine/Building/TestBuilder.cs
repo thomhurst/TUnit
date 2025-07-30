@@ -514,7 +514,6 @@ internal sealed class TestBuilder : ITestBuilder
         return new FailedExecutableTest(exception)
         {
             TestId = testId,
-            DisplayName = displayName,
             Metadata = metadata,
             Arguments = [],
             ClassArguments = [],

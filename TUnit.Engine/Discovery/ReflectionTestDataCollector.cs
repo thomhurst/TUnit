@@ -743,7 +743,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             get => (context, metadata) => new FailedExecutableTest(_exception)
             {
                 TestId = context.TestId,
-                DisplayName = context.DisplayName,
                 Metadata = metadata,
                 Arguments = context.Arguments,
                 ClassArguments = context.ClassArguments,
@@ -1389,7 +1388,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     async (instance, args, context, ct) => await invokeTest(instance, args))
                 {
                     TestId = modifiedContext.TestId,
-                    DisplayName = modifiedContext.DisplayName,
                     Metadata = metadata,
                     Arguments = modifiedContext.Arguments,
                     ClassArguments = modifiedContext.ClassArguments,

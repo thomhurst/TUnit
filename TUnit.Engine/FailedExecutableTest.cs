@@ -17,14 +17,14 @@ internal sealed class FailedExecutableTest : ExecutableTest
     public override Task<object> CreateInstanceAsync()
     {
         throw new InvalidOperationException(
-            $"Failed to expand data source for test '{DisplayName}': {_exception.Message}",
+            $"Failed to expand data source for test '{Context.GetDisplayName()}': {_exception.Message}",
             _exception);
     }
 
     public override Task InvokeTestAsync(object instance, CancellationToken cancellationToken)
     {
         throw new InvalidOperationException(
-            $"Failed to expand data source for test '{DisplayName}': {_exception.Message}",
+            $"Failed to expand data source for test '{Context.GetDisplayName()}': {_exception.Message}",
             _exception);
     }
 }

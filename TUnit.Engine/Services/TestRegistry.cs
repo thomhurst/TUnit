@@ -260,7 +260,6 @@ internal sealed class TestRegistry : ITestRegistry
                     async (instance, args, context, ct) => await invokeTest(instance, args))
                 {
                     TestId = modifiedContext.TestId,
-                    DisplayName = modifiedContext.DisplayName,
                     Metadata = metadata,
                     Arguments = modifiedContext.Arguments,
                     ClassArguments = modifiedContext.ClassArguments,
