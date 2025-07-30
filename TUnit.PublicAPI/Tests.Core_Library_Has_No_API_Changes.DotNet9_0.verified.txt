@@ -3,6 +3,23 @@
 [assembly: .(".NETCoreApp,Version=v9.0", FrameworkDisplayName=".NET 9.0")]
 namespace 
 {
+    public abstract class AbstractExecutableTest
+    {
+        protected AbstractExecutableTest() { }
+        public required object?[] Arguments { get; init; }
+        public object?[] ClassArguments { get; init; }
+        public required .TestContext Context { get; init; }
+        public .AbstractExecutableTest[] Dependencies { get; set; }
+        public ? Duration { get; }
+        public ? EndTime { get; set; }
+        public virtual .TestMetadata Metadata { get; init; }
+        public .TestResult? Result { get; set; }
+        public ? StartTime { get; set; }
+        public .TestState State { get; set; }
+        public required string TestId { get; init; }
+        public abstract .<object> CreateInstanceAsync();
+        public abstract . InvokeTestAsync(object instance, .CancellationToken cancellationToken);
+    }
     [(.Method)]
     public sealed class AfterAttribute : .HookAttribute
     {
@@ -644,24 +661,11 @@ namespace
         public ExcludeOnAttribute(. OperatingSystem) { }
         public override .<bool> ShouldSkip(.TestRegisteredContext context) { }
     }
-    public abstract class ExecutableTest
+    public sealed class ExecutableTest : .AbstractExecutableTest
     {
-        protected ExecutableTest() { }
-        public required object?[] Arguments { get; init; }
-        public object?[] ClassArguments { get; init; }
-        public required .TestContext Context { get; init; }
-        public .ExecutableTest[] Dependencies { get; set; }
-        public required string DisplayName { get; init; }
-        public ? Duration { get; }
-        public ? EndTime { get; set; }
-        public virtual .TestMetadata Metadata { get; init; }
-        public .<string, object?> PropertyValues { get; init; }
-        public .TestResult? Result { get; set; }
-        public ? StartTime { get; set; }
-        public .TestState State { get; set; }
-        public required string TestId { get; init; }
-        public abstract .<object> CreateInstanceAsync();
-        public abstract . InvokeTestAsync(object instance, .CancellationToken cancellationToken);
+        public ExecutableTest(<.TestContext, .<object>> createInstance, <object, object?[], .TestContext, .CancellationToken, .> invokeTest) { }
+        public override .<object> CreateInstanceAsync() { }
+        public override . InvokeTestAsync(object instance, .CancellationToken cancellationToken) { }
     }
     public sealed class ExecutableTestCreationContext
     {
@@ -760,7 +764,7 @@ namespace
     public sealed class GenericTestMetadata : .TestMetadata
     {
         public GenericTestMetadata() { }
-        public override <.ExecutableTestCreationContext, .TestMetadata, .ExecutableTest> CreateExecutableTestFactory { get; }
+        public override <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
     }
     public sealed class GenericTypeInfo
     {
@@ -1222,6 +1226,7 @@ namespace
         public <.TestContext, , int, .<bool>>? ShouldRetryFunc { get; set; }
         public string? SkipReason { get; set; }
         public .TestDetails TestDetails { get; set; }
+        public ? TestEnd { get; set; }
         public string TestName { get; }
         public  TestStart { get; set; }
         public .<.Timing> Timings { get; }
@@ -1372,7 +1377,7 @@ namespace
         public required <[]> AttributeFactory { get; init; }
         public bool CanRunInParallel { get; init; }
         public required .IDataSourceAttribute[] ClassDataSources { get; init; }
-        public abstract <.ExecutableTestCreationContext, .TestMetadata, .ExecutableTest> CreateExecutableTestFactory { get; }
+        public abstract <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
         public required .IDataSourceAttribute[] DataSources { get; init; }
         public .TestDependency[] Dependencies { get; init; }
         public string? FilePath { get; init; }
@@ -1403,7 +1408,7 @@ namespace
         where T :  class
     {
         public TestMetadata() { }
-        public override <.ExecutableTestCreationContext, .TestMetadata, .ExecutableTest> CreateExecutableTestFactory { get; }
+        public override <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
         public new <[], object?[], T>? InstanceFactory { get; init; }
         public <T, object?[], .CancellationToken, .>? InvokeTypedTest { get; init; }
         public new <T, object?[], .>? TestInvoker { get; init; }
@@ -1530,12 +1535,6 @@ namespace
         public [] ResolveMany(.<.TypeReference> typeReferences) { }
         public static .TypeResolver CreateSimple() { }
         public static .TypeResolver FromTestInstance(object testInstance, .MethodInfo? testMethod = null) { }
-    }
-    public sealed class UnifiedExecutableTest : .ExecutableTest
-    {
-        public UnifiedExecutableTest(<.TestContext, .<object>> createInstance, <object, object?[], .TestContext, .CancellationToken, .> invokeTest) { }
-        public override .<object> CreateInstanceAsync() { }
-        public override . InvokeTestAsync(object instance, .CancellationToken cancellationToken) { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
     [.("UntypedDataSourceGeneratorAttribute requires dynamic code generation for runtime " +
