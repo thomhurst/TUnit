@@ -2,12 +2,15 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
+using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 
@@ -16,7 +19,7 @@ namespace TUnit.Engine.Services;
 /// <summary>
 /// Service for registering and managing dynamically added tests during runtime execution.
 /// </summary>
-internal sealed class TestRegistry : ITestRegistry
+internal sealed class TestRegistry : ITestRegistry, IDataProducer
 {
     private readonly ConcurrentQueue<PendingDynamicTest> _pendingTests = new();
     private readonly TestBuilderPipeline? _testBuilderPipeline;
@@ -24,6 +27,14 @@ internal sealed class TestRegistry : ITestRegistry
     private readonly ISingleTestExecutor? _singleTestExecutor;
     private readonly CancellationToken _sessionCancellationToken;
     private readonly string? _sessionId;
+
+    // IDataProducer implementation
+    public string Uid => "TUnit.DynamicTestRegistry";
+    public string Version => "1.0.0";
+    public string DisplayName => "TUnit Dynamic Test Registry";
+    public string Description => "Registers and manages dynamically added tests during runtime";
+    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage)];
+    public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
     public TestRegistry(TestBuilderPipeline testBuilderPipeline,
         IMessageBus messageBus,
@@ -92,10 +103,22 @@ internal sealed class TestRegistry : ITestRegistry
         // This ensures all the same logic is applied (repeat, retry, context creation, etc.)
         var builtTests = await _testBuilderPipeline!.BuildTestsFromMetadataAsync(testMetadataList);
 
-        // Execute each test through the single test executor
+        // First, publish discovery messages for all dynamically added tests
         foreach (var test in builtTests)
         {
-            // The SingleTestExecutor will handle all message publishing
+            // Publish a discovery message to inform the test platform about the new test
+            await _messageBus!.PublishAsync(
+                this,
+                new TestNodeUpdateMessage(
+                    sessionUid: new SessionUid(_sessionId!),
+                    testNode: test.Context.ToTestNode()
+                        .WithProperty(DiscoveredTestNodeStateProperty.CachedInstance)));
+        }
+
+        // Then execute each test through the single test executor
+        foreach (var test in builtTests)
+        {
+            // The SingleTestExecutor will handle all execution-related message publishing
             await _singleTestExecutor!.ExecuteTestAsync(test, _messageBus!, _sessionCancellationToken);
         }
     }
