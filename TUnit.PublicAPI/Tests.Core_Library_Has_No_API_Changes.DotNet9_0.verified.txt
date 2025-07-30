@@ -38,11 +38,8 @@ namespace
     {
         public ArgumentsAttribute(params object?[]? values) { }
         public object?[] Values { get; }
-    }
-    public class ArgumentsDataProvider : .IDataProvider
-    {
-        public ArgumentsDataProvider(params object?[] arguments) { }
-        public .<.<object?[]>> GetData() { }
+        [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__4))]
+        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     public class Artifact
     {
@@ -51,6 +48,7 @@ namespace
         public required string DisplayName { get; init; }
         public required .FileInfo File { get; init; }
     }
+    [.DebuggerDisplay("{().Name}")]
     public class AssemblyHookContext : .Context
     {
         public .<.TestContext> AllTests { get; }
@@ -81,70 +79,61 @@ namespace
             "ing annotations.")]
         public static bool TryGetAwaitableTask(object awaitable, [.(true)] out .? task) { }
     }
-    public class AsyncDataGeneratorProvider : .IDataProvider
-    {
-        public AsyncDataGeneratorProvider(.IAsyncDataSourceGeneratorAttribute generator, .DataGeneratorMetadata metadata) { }
-        public .<.<object?[]>> GetData() { }
-    }
     [(.Class | .Method | .Property, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<T> : .TestDataAttribute, .IAsyncDataSourceGeneratorAttribute, .IDataAttribute, .IRequiresImmediateInitialization
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..PublicConstructors)]  T> : .TestDataAttribute
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T>.<GenerateAsync>d__1))]
         public .<<.<T>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<T>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
+        [.(typeof(.AsyncDataSourceGeneratorAttribute<T>.<GetDataRowsAsync>d__2))]
+        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<T1, T2> : .TestDataAttribute, .IAsyncDataSourceGeneratorAttribute, .IDataAttribute, .IRequiresImmediateInitialization
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2> : .TestDataAttribute
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2>.<GenerateAsync>d__1))]
         public .<<.<<T1, T2>>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<<T1, T2>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
+        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2>.<GetDataRowsAsync>d__2))]
+        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3> : .TestDataAttribute, .IAsyncDataSourceGeneratorAttribute, .IDataAttribute, .IRequiresImmediateInitialization
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2, [.(..PublicConstructors)]  T3> : .TestDataAttribute
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3>.<GenerateAsync>d__1))]
         public .<<.<<T1, T2, T3>>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<<T1, T2, T3>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
+        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3>.<GetDataRowsAsync>d__2))]
+        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4> : .TestDataAttribute, .IAsyncDataSourceGeneratorAttribute, .IDataAttribute, .IRequiresImmediateInitialization
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2, [.(..PublicConstructors)]  T3, [.(..PublicConstructors)]  T4> : .TestDataAttribute
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>.<GenerateAsync>d__1))]
         public .<<.<<T1, T2, T3, T4>>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<<T1, T2, T3, T4>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
+        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>.<GetDataRowsAsync>d__2))]
+        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : .TestDataAttribute, .IAsyncDataSourceGeneratorAttribute, .IDataAttribute, .IRequiresImmediateInitialization
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2, [.(..PublicConstructors)]  T3, [.(..PublicConstructors)]  T4, [.(..PublicConstructors)]  T5> : .TestDataAttribute
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>.<GenerateAsync>d__1))]
         public .<<.<<T1, T2, T3, T4, T5>>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<<T1, T2, T3, T4, T5>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-    }
-    public sealed class AsyncDelegateDataSource : .AsyncTestDataSource
-    {
-        public AsyncDelegateDataSource(<.CancellationToken, .<object?[]>> asyncFactory, bool isShared = false) { }
-        public override bool IsShared { get; }
-        [.(typeof(.AsyncDelegateDataSource.<GetDataFactoriesAsync>d__6))]
-        public override .<<object?[]>> GetDataFactoriesAsync([.] .CancellationToken cancellationToken = default) { }
-    }
-    [("Use AsyncDelegateDataSource instead")]
-    public sealed class AsyncDynamicTestDataSource : .TestDataSource
-    {
-        public AsyncDynamicTestDataSource(bool isShared = false) { }
-        public required string FactoryKey { get; init; }
-        public override bool IsShared { get; }
-        public override .<<object?[]>> GetDataFactories() { }
+        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>.<GetDataRowsAsync>d__2))]
+        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     public class AsyncEvent<TEventArgs>
     {
         public AsyncEvent() { }
         public int Order { get; set; }
+        public .AsyncEvent<TEventArgs> InsertAtFront(<object, TEventArgs, .> callback) { }
         public static .AsyncEvent<TEventArgs> operator +(.AsyncEvent<TEventArgs>? e, <object, TEventArgs, .> callback) { }
         public class Invocation : .
         {
@@ -153,14 +142,6 @@ namespace
             public . InvokeAsync(object sender, TEventArgs eventArgs) { }
         }
     }
-    public abstract class AsyncTestDataSource : .TestDataSource, .
-    {
-        protected AsyncTestDataSource() { }
-        public .<<object?[]>> GenerateDataFactoriesAsync(.DataSourceContext context, .CancellationToken cancellationToken = default) { }
-        public override .<<object?[]>> GetDataFactories() { }
-        public abstract .<<object?[]>> GetDataFactoriesAsync(.CancellationToken cancellationToken = default);
-        protected virtual .<<object?[]>> GetDataFactoriesSync() { }
-    }
     [(.Class | .Method | .Property, AllowMultiple=true)]
     [.("AsyncUntypedDataSourceGeneratorAttribute requires dynamic code generation for run" +
         "time data source creation. Consider using strongly-typed AsyncDataSourceGenerato" +
@@ -168,14 +149,15 @@ namespace
     [.("AsyncUntypedDataSourceGeneratorAttribute may require unreferenced code for runtim" +
         "e data source creation. Consider using strongly-typed AsyncDataSourceGeneratorAt" +
         "tribute<T> overloads for AOT compatibility.")]
-    public abstract class AsyncUntypedDataSourceGeneratorAttribute : .TestDataAttribute, .IAsyncDataSourceGeneratorAttribute, .IDataAttribute, .IRequiresImmediateInitialization
+    public abstract class AsyncUntypedDataSourceGeneratorAttribute : .TestDataAttribute, .IDataSourceAttribute
     {
         protected AsyncUntypedDataSourceGeneratorAttribute() { }
         [.(typeof(.AsyncUntypedDataSourceGeneratorAttribute.<GenerateAsync>d__1))]
         public .<<.<object?[]?>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<object?[]?>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
+        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
-    public abstract class BaseClassConstructorAttribute : .TUnitAttribute, .IDataAttribute
+    public abstract class BaseClassConstructorAttribute : .TUnitAttribute
     {
         [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]
         public abstract  ClassConstructorType { get; init; }
@@ -230,6 +212,13 @@ namespace
         public ClassConstructorMetadata() { }
         public required .TestBuilderContext TestBuilderContext { get; init; }
         public required string TestSessionId { get; init; }
+    }
+    public sealed class ClassDataCombination
+    {
+        public ClassDataCombination() { }
+        public <.<object?>>[] DataFactories { get; init; }
+        public int DataSourceIndex { get; init; }
+        public int LoopIndex { get; init; }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
     [.("Trimming", "IL2109:Type derives from type with \'RequiresUnreferencedCodeAttribute\' which can " +
@@ -338,9 +327,11 @@ namespace
         public .<string> GetKeys() { }
         public .<.SharedType> GetSharedTypes() { }
     }
+    [.DebuggerDisplay("{}")]
     public class ClassHookContext : .Context
     {
         public .AssemblyHookContext AssemblyContext { get; }
+        [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]
         public required  ClassType { get; init; }
         public int TestCount { get; }
         public .<.TestContext> Tests { get; }
@@ -365,10 +356,6 @@ namespace
         public override int GetHashCode() { }
         public static .ClassMetadata GetOrAdd(string name, <.ClassMetadata> factory) { }
     }
-    public class CompileTimeDataGeneratorMetadata : .DataGeneratorMetadata, <.CompileTimeDataGeneratorMetadata>
-    {
-        public CompileTimeDataGeneratorMetadata() { }
-    }
     public abstract class Context : , .
     {
         public .TextWriter ErrorOutputWriter { get; }
@@ -382,10 +369,41 @@ namespace
         public string GetStandardOutput() { }
         public void RestoreExecutionContext() { }
     }
+    public class ContextProvider : .
+    {
+        public ContextProvider( serviceProvider, string testSessionId, string? testFilter) { }
+        public .BeforeTestDiscoveryContext BeforeTestDiscoveryContext { get; }
+        public .GlobalContext GlobalContext { get; }
+        public .TestDiscoveryContext TestDiscoveryContext { get; }
+        public .TestSessionContext TestSessionContext { get; }
+        public .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
+        public .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly) { }
+        public .ClassHookContext GetOrCreateClassContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType) { }
+    }
     public class CultureExecutor : .DedicatedThreadExecutor
     {
         public CultureExecutor(.CultureInfo cultureInfo) { }
         protected override void ConfigureThread(.Thread thread) { }
+    }
+    public static class DataCombinationBuilder
+    {
+        [.(typeof(.DataCombinationBuilder.<BuildCombinationsAsync>d__0))]
+        public static .<.TestDataCombination> BuildCombinationsAsync(.<.MethodDataCombination> methodCombinations, .<.ClassDataCombination> classCombinations, .<.PropertyDataCombination> propertyCombinations, int repeatCount = 1) { }
+        [.(typeof(.DataCombinationBuilder.<BuildCombinationsWithErrorHandlingAsync>d__1))]
+        public static .<.TestDataCombination> BuildCombinationsWithErrorHandlingAsync(<.<.TestDataCombination>> generator) { }
+    }
+    public class DataGenerationException : 
+    {
+        public DataGenerationException(string message) { }
+        public DataGenerationException(string message,  innerException) { }
+        public DataGenerationException(string message, object? dataSource) { }
+        public DataGenerationException(string message, object? dataSource,  innerException) { }
+        public object? DataSource { get; }
+        public string? DataSourceTypeName { get; }
+        public string? TestClassName { get; }
+        public string? TestMethodName { get; }
+        public override string ToString() { }
+        public .DataGenerationException WithTestContext(string? className, string? methodName) { }
     }
     public class DataGeneratorMetadata : <.DataGeneratorMetadata>
     {
@@ -394,6 +412,7 @@ namespace
         public required .MemberMetadata[] MembersToGenerate { get; init; }
         public required .TestBuilderContextAccessor TestBuilderContext { get; init; }
         public required object? TestClassInstance { get; init; }
+        [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]
         public  TestClassType { get; }
         public required .MethodMetadata TestInformation { get; init; }
         public required string TestSessionId { get; init; }
@@ -416,7 +435,7 @@ namespace
         public string DataSourceName { get; }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<T> : .AsyncDataSourceGeneratorAttribute<T>
+    public abstract class DataSourceGeneratorAttribute<[.(..PublicConstructors)]  T> : .AsyncDataSourceGeneratorAttribute<T>
     {
         protected DataSourceGeneratorAttribute() { }
         protected abstract .<<T>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata);
@@ -424,7 +443,7 @@ namespace
         protected override .<<.<T>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<T1, T2> : .AsyncDataSourceGeneratorAttribute<T1, T2>
+    public abstract class DataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2> : .AsyncDataSourceGeneratorAttribute<T1, T2>
     {
         protected DataSourceGeneratorAttribute() { }
         protected abstract .<<<T1, T2>>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata);
@@ -432,7 +451,7 @@ namespace
         protected override .<<.<<T1, T2>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<T1, T2, T3> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3>
+    public abstract class DataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2, [.(..PublicConstructors)]  T3> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3>
     {
         protected DataSourceGeneratorAttribute() { }
         protected abstract .<<<T1, T2, T3>>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata);
@@ -440,7 +459,7 @@ namespace
         protected override sealed .<<.<<T1, T2, T3>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>
+    public abstract class DataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2, [.(..PublicConstructors)]  T3, [.(..PublicConstructors)]  T4> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>
     {
         protected DataSourceGeneratorAttribute() { }
         protected abstract .<<<T1, T2, T3, T4>>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata);
@@ -448,7 +467,7 @@ namespace
         protected override .<<.<<T1, T2, T3, T4>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
+    public abstract class DataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2, [.(..PublicConstructors)]  T3, [.(..PublicConstructors)]  T4, [.(..PublicConstructors)]  T5> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
     {
         protected DataSourceGeneratorAttribute() { }
         protected abstract .<<<T1, T2, T3, T4, T5>>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata);
@@ -461,6 +480,12 @@ namespace
         Method = 1,
         Property = 2,
         Parameter = 3,
+    }
+    public static class DataSourcePropertyInjectionRegistry
+    {
+        public static .PropertyInjectionData[]? GetInjectionData( dataSourceType) { }
+        public static .PropertyDataSource[]? GetPropertyDataSources( dataSourceType) { }
+        public static void Register( dataSourceType, .PropertyInjectionData[] injectionData, .PropertyDataSource[] propertyDataSources) { }
     }
     public class DedicatedThreadExecutor : .GenericAbstractExecutor, ., .
     {
@@ -475,12 +500,6 @@ namespace
     {
         public static readonly .DefaultExecutor Instance;
         protected override . ExecuteAsync(<.> action) { }
-    }
-    public sealed class DelegateDataSource : .TestDataSource
-    {
-        public DelegateDataSource(<.<object?[]>> factory, bool isShared = false) { }
-        public override bool IsShared { get; }
-        public override .<<object?[]>> GetDataFactories() { }
     }
     [.("DependencyInjectionDataSourceAttribute requires dynamic code generation for depen" +
         "dency injection container access. This attribute is inherently incompatible with" +
@@ -526,10 +545,10 @@ namespace
     }
     public class DiscoveredTestContext
     {
-        public DiscoveredTestContext(string testName, string displayName, .TestDetails testDetails) { }
+        public DiscoveredTestContext(string testName, .TestContext testContext) { }
         public .<<object?, string?>> ArgumentDisplayFormatters { get; }
-        public string DisplayName { get; }
         public bool RunOnTestDiscovery { get; }
+        public .TestContext TestContext { get; }
         public .TestDetails TestDetails { get; }
         public string TestName { get; }
         public void AddArgumentDisplayFormatter(.ArgumentDisplayFormatter formatter) { }
@@ -589,12 +608,6 @@ namespace
         public .? TestMethod { get; set; }
         public object?[]? TestMethodArguments { get; set; }
     }
-    public sealed class DynamicExecutableTest : .ExecutableTest
-    {
-        public DynamicExecutableTest(<.<object>> createInstance, <object, object?[], .> invokeTest) { }
-        public override .<object> CreateInstanceAsync() { }
-        public override . InvokeTestAsync(object instance, .CancellationToken cancellationToken) { }
-    }
     public abstract class DynamicTest
     {
         protected DynamicTest() { }
@@ -612,14 +625,6 @@ namespace
         public int LineNumber { get; }
         public .<.DynamicTest> Tests { get; }
         public void AddTest(.DynamicTest test) { }
-    }
-    [("Use DelegateDataSource instead")]
-    public sealed class DynamicTestDataSource : .TestDataSource
-    {
-        public DynamicTestDataSource(bool isShared = false) { }
-        public required string FactoryKey { get; init; }
-        public override bool IsShared { get; }
-        public override .<<object?[]>> GetDataFactories() { }
     }
     public static class DynamicTestHelper
     {
@@ -640,11 +645,6 @@ namespace
     {
         protected DynamicTest() { }
     }
-    public class EmptyDataProvider : .IDataProvider
-    {
-        public EmptyDataProvider() { }
-        public .<.<object?[]>> GetData() { }
-    }
     public class EngineCancellationToken : 
     {
         public EngineCancellationToken() { }
@@ -659,9 +659,7 @@ namespace
     public abstract class ExecutableTest
     {
         protected ExecutableTest() { }
-        public required <.TestContext, .CancellationToken, .>[] AfterTestHooks { get; init; }
         public required object?[] Arguments { get; init; }
-        public required <.TestContext, .CancellationToken, .>[] BeforeTestHooks { get; init; }
         public object?[] ClassArguments { get; init; }
         public required .TestContext Context { get; init; }
         public .ExecutableTest[] Dependencies { get; set; }
@@ -680,26 +678,13 @@ namespace
     public sealed class ExecutableTestCreationContext
     {
         public ExecutableTestCreationContext() { }
-        public required <.TestContext, .CancellationToken, .>[] AfterTestHooks { get; init; }
         public required object?[] Arguments { get; init; }
-        public required <.TestContext, .CancellationToken, .>[] BeforeTestHooks { get; init; }
         public required object?[] ClassArguments { get; init; }
         public required .TestContext Context { get; init; }
         public required string DisplayName { get; init; }
-        public required .<string, object?> PropertyValues { get; init; }
+        public [] ResolvedClassGenericArguments { get; init; }
+        public [] ResolvedMethodGenericArguments { get; init; }
         public required string TestId { get; init; }
-    }
-    public sealed class ExecutableTest<T> : .ExecutableTest
-        where T :  class
-    {
-        public ExecutableTest() { }
-        public required <.<T>> CreateTypedInstance { get; init; }
-        public required <T, object?[], .CancellationToken, .> InvokeTypedTest { get; init; }
-        public override .TestMetadata Metadata { get; init; }
-        public .TestMetadata<T> TypedMetadata { get; }
-        public .<string, <T, object?>> TypedPropertySetters { get; init; }
-        public override .<object> CreateInstanceAsync() { }
-        public override . InvokeTestAsync(object instance, .CancellationToken cancellationToken) { }
     }
     [(.Assembly | .Class | .Method)]
     public class ExecutionPriorityAttribute : .SingleTUnitAttribute, ., .
@@ -784,6 +769,11 @@ namespace
         public [] InterfaceConstraints { get; init; }
         public required string ParameterName { get; init; }
     }
+    public sealed class GenericTestMetadata : .TestMetadata
+    {
+        public GenericTestMetadata() { }
+        public override <.ExecutableTestCreationContext, .TestMetadata, .ExecutableTest> CreateExecutableTestFactory { get; }
+    }
     public sealed class GenericTypeInfo
     {
         public GenericTypeInfo() { }
@@ -809,25 +799,6 @@ namespace
         public int Line { get; }
         public int Order { get; init; }
     }
-    public enum HookLevel
-    {
-        Assembly = 0,
-        Class = 1,
-        Test = 2,
-    }
-    public sealed class HookMetadata
-    {
-        public HookMetadata() { }
-        public ? DeclaringType { get; init; }
-        public string? DelegateKey { get; init; }
-        public <object, .TestContext, .>? HookInvoker { get; init; }
-        public bool IsAsync { get; init; }
-        public bool IsStatic { get; init; }
-        public required .HookLevel Level { get; init; }
-        public required string Name { get; init; }
-        public int Order { get; init; }
-        public bool ReturnsValueTask { get; init; }
-    }
     public enum HookType
     {
         Test = 0,
@@ -837,18 +808,9 @@ namespace
         TestDiscovery = 4,
     }
     public interface IAccessesInstanceData { }
-    public interface IAsyncDataSourceGeneratorAttribute : .IDataAttribute, .IRequiresImmediateInitialization
+    public interface IDataSourceAttribute
     {
-        .<<.<object?[]?>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-    }
-    public interface IAsyncInitializable
-    {
-        . InitializeAsync();
-    }
-    public interface IDataAttribute { }
-    public interface IDataProvider
-    {
-        .<.<object?[]>> GetData();
+        .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
     }
     public interface IDynamicTestSource
     {
@@ -861,22 +823,8 @@ namespace
     {
         public InheritsTestsAttribute() { }
     }
-    [(.Property)]
-    public sealed class InjectAttribute : 
-    {
-        public InjectAttribute() { }
-        public int Order { get; set; }
-        public bool Required { get; set; }
-        public object? ServiceKey { get; set; }
-    }
     [(.Method, AllowMultiple=true)]
     public class InstanceMethodDataSourceAttribute : .MethodDataSourceAttribute, .IAccessesInstanceData
-    {
-        public InstanceMethodDataSourceAttribute(string methodNameProvidingDataSource) { }
-        public InstanceMethodDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classProvidingDataSource, string methodNameProvidingDataSource) { }
-    }
-    [(.Method, AllowMultiple=true)]
-    public class InstanceMethodDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T> : .MethodDataSourceAttribute<T>, .IAccessesInstanceData
     {
         public InstanceMethodDataSourceAttribute(string methodNameProvidingDataSource) { }
     }
@@ -886,12 +834,12 @@ namespace
         public InvalidTestMetadataException(string message, .TestMetadata metadata,  innerException) { }
     }
     [(.Parameter)]
-    public class MatrixAttribute : .TestDataAttribute
+    public class MatrixAttribute : .TUnitAttribute
     {
         protected MatrixAttribute() { }
         public MatrixAttribute(params object?[]? objects) { }
         public object?[]? Excluding { get; init; }
-        public virtual object?[] GetObjects(object? instance) { }
+        public virtual object?[] GetObjects(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Parameter)]
     public class MatrixAttribute<T> : .MatrixAttribute
@@ -905,7 +853,7 @@ namespace
     [.("MatrixDataSourceAttribute may require unreferenced code for enum reflection and m" +
         "atrix generation. This attribute is inherently incompatible with AOT compilation" +
         ".")]
-    public sealed class MatrixDataSourceAttribute : .UntypedDataSourceGeneratorAttribute
+    public sealed class MatrixDataSourceAttribute : .UntypedDataSourceGeneratorAttribute, .IAccessesInstanceData
     {
         public MatrixDataSourceAttribute() { }
         protected override .<<object?[]?>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata) { }
@@ -927,7 +875,7 @@ namespace
         where TClass :  class
     {
         public MatrixMethodAttribute(string methodName) { }
-        public override object?[] GetObjects(object? instance) { }
+        public override object?[] GetObjects(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Parameter)]
     public class MatrixRangeAttribute<T> : .MatrixAttribute<T>
@@ -946,26 +894,30 @@ namespace
         public override int GetHashCode() { }
         protected virtual bool PrintMembers(.StringBuilder stringBuilder) { }
     }
-    public class MethodDataProvider : .IDataProvider
+    public sealed class MethodDataCombination
     {
-        public MethodDataProvider(<.<object?>> valuesProvider) { }
-        public MethodDataProvider(<.<.<object?>>> valuesProvider) { }
-        public MethodDataProvider(<.<object?>> valueProvider) { }
-        public MethodDataProvider(<object?> valueProvider) { }
-        public .<.<object?[]>> GetData() { }
+        public MethodDataCombination() { }
+        public <.<object?>>[] DataFactories { get; init; }
+        public int DataSourceIndex { get; init; }
+        public int LoopIndex { get; init; }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
     public class MethodDataSourceAttribute : .TestDataAttribute
     {
         public MethodDataSourceAttribute(string methodNameProvidingDataSource) { }
-        public MethodDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classProvidingDataSource, string methodNameProvidingDataSource) { }
+        public MethodDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]  classProvidingDataSource, string methodNameProvidingDataSource) { }
         public object?[] Arguments { get; set; }
-        [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]
+        [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]
         public ? ClassProvidingDataSource { get; }
+        public <.DataGeneratorMetadata, .<<.<object?[]?>>>>? Factory { get; set; }
         public string MethodNameProvidingDataSource { get; }
+        [.("AOT", "IL2072:UnrecognizedReflectionPattern", Justification="Data source methods use dynamic patterns")]
+        [.("AOT", "IL2075:UnrecognizedReflectionPattern", Justification="Data source methods use dynamic patterns")]
+        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__17))]
+        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
-    public class MethodDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T> : .MethodDataSourceAttribute
+    public class MethodDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]  T> : .MethodDataSourceAttribute
     {
         public MethodDataSourceAttribute(string methodNameProvidingDataSource) { }
     }
@@ -974,6 +926,7 @@ namespace
     {
         public MethodMetadata() { }
         public required .ClassMetadata Class { get; init; }
+        public object?[]? ClassArguments { get; init; }
         public required int GenericTypeCount { get; init; }
         public required .ParameterMetadata[] Parameters { get; init; }
         public ? ReturnType { get; init; }
@@ -1034,7 +987,7 @@ namespace
         public int Order { get; }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
-    [.DebuggerDisplay("{Type} {Name})")]
+    [.DebuggerDisplay("{Type} {Name}")]
     public class ParameterMetadata : .MemberMetadata, <.ParameterMetadata>
     {
         public ParameterMetadata([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  Type) { }
@@ -1045,7 +998,7 @@ namespace
         public override  Type { get; init; }
         public required .TypeReference TypeReference { get; init; }
     }
-    [.DebuggerDisplay("{Type} {Name})")]
+    [.DebuggerDisplay("{Type} {Name}")]
     public class ParameterMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T> : .ParameterMetadata, <.ParameterMetadata<T>>
     {
         public ParameterMetadata() { }
@@ -1059,16 +1012,22 @@ namespace
         public string Value { get; }
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
     }
+    public sealed class PropertyDataCombination
+    {
+        public PropertyDataCombination() { }
+    }
     public sealed class PropertyDataSource
     {
         public PropertyDataSource() { }
-        public required .TestDataSource DataSource { get; init; }
+        public required .IDataSourceAttribute DataSource { get; init; }
         public required string PropertyName { get; init; }
         public required  PropertyType { get; init; }
     }
     public sealed class PropertyInjectionData
     {
         public PropertyInjectionData() { }
+        public .PropertyInjectionData[] NestedPropertyInjections { get; init; }
+        public <object?, .<string, object?>>? NestedPropertyValueFactory { get; init; }
         public required string PropertyName { get; init; }
         public required  PropertyType { get; init; }
         public required <object, object?> Setter { get; init; }
@@ -1080,6 +1039,22 @@ namespace
         public string PropertyName { get; }
         public  PropertyType { get; }
     }
+    public sealed class PropertyInjectionService
+    {
+        public PropertyInjectionService() { }
+        public static . InjectPropertiesIntoArgumentsAsync(object?[] arguments, .<string, object?> objectBag, .MethodMetadata methodMetadata, .TestContextEvents events) { }
+        public static . InjectPropertiesIntoObjectAsync(object instance, .<string, object?> objectBag, .MethodMetadata methodMetadata, .TestContextEvents events) { }
+    }
+    public static class PropertyInjector
+    {
+        public static .PropertyInjectionData CreatePropertyInjection(.PropertyInfo property) { }
+        public static <object, object?> CreatePropertySetter(.PropertyInfo property) { }
+        public static .PropertyInjectionData[] DiscoverInjectableProperties([.(..PublicProperties)]  type) { }
+        [.("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttr" +
+            "ibute\' in call to target method. The return value of the source method does not " +
+            "have matching annotations.")]
+        public static . InjectPropertiesAsync(.TestContext testContext, object instance, .PropertyDataSource[] propertyDataSources, .PropertyInjectionData[] injectionData, .MethodMetadata testInformation, string testSessionId) { }
+    }
     [.DebuggerDisplay("{Type} {Name})")]
     public class PropertyMetadata : .MemberMetadata, <.PropertyMetadata>
     {
@@ -1087,11 +1062,14 @@ namespace
         public .ClassMetadata? ClassMetadata { get; set; }
         public required <object?, object?> Getter { get; init; }
         public required bool IsStatic { get; init; }
-        public string? Key { get; init; }
         public required .PropertyInfo ReflectionInfo { get; init; }
-        public .SharedType Shared { get; init; }
         [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]
         public override required  Type { get; init; }
+    }
+    public static class PropertySourceRegistry
+    {
+        public static ..IPropertySource? GetSource( type) { }
+        public static void Register( type, ..IPropertySource source) { }
     }
     [(.Assembly | .Class | .Method)]
     public sealed class RepeatAttribute : .TUnitAttribute
@@ -1103,12 +1081,12 @@ namespace
         where T :  class
     {
         protected readonly string SessionId;
-        protected <T> _factory;
-        public ResettableLazy(<T> factory, string sessionId, .TestBuilderContext testBuilderContext) { }
+        protected <.<T>> _factory;
+        public ResettableLazy(<.<T>> factory, string sessionId, .TestBuilderContext testBuilderContext) { }
         protected ResettableLazy(. classConstructor, string sessionId, .TestBuilderContext testBuilderContext) { }
         public .? ClassConstructor { get; protected set; }
         public .TestBuilderContext TestBuilderContext { get; }
-        public T Value { get; }
+        public .<T> Value { get; }
         public .ResettableLazy<T> Clone() { }
         public . DisposeAsync() { }
         public virtual . ResetLazy() { }
@@ -1184,30 +1162,37 @@ namespace
         public SourceRegistrar() { }
         public static bool IsEnabled { get; set; }
         public static void Register(..ITestSource testSource) { }
+        public static void Register( testClassType, ..ITestSource testSource) { }
         public static void RegisterAssembly(<.Assembly> assemblyLoader) { }
-        public static void RegisterAssemblyHookSource(..IAssemblyHookSource testSource) { }
-        public static void RegisterClassHookSource(..IClassHookSource testSource) { }
         public static void RegisterDynamic(.IDynamicTestSource testSource) { }
         public static void RegisterGlobalInitializer(<.> initializer) { }
         public static void RegisterProperty(..IPropertySource propertySource) { }
-        public static void RegisterTestDiscoveryHookSource(..ITestDiscoveryHookSource testSource) { }
-        public static void RegisterTestHookSource(..ITestHookSource testSource) { }
-        public static void RegisterTestSessionHookSource(..ITestSessionHookSource testSource) { }
     }
-    public sealed class StaticTestDataSource : .TestDataSource
+    public static class Sources
     {
-        public StaticTestDataSource(params object?[][] data) { }
-        public override bool IsShared { get; }
-        public override .<<object?[]>> GetDataFactories() { }
+        public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> AfterAssemblyHooks;
+        public static readonly .<, .<.<.ClassHookContext>>> AfterClassHooks;
+        public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> AfterEveryAssemblyHooks;
+        public static readonly .<, .<.<.ClassHookContext>>> AfterEveryClassHooks;
+        public static readonly .<, .<.<.TestContext>>> AfterEveryTestHooks;
+        public static readonly .<.<.TestDiscoveryContext>> AfterTestDiscoveryHooks;
+        public static readonly .<, .<.>> AfterTestHooks;
+        public static readonly .<.<.TestSessionContext>> AfterTestSessionHooks;
+        public static readonly .<<.Assembly>> AssemblyLoaders;
+        public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> BeforeAssemblyHooks;
+        public static readonly .<, .<.<.ClassHookContext>>> BeforeClassHooks;
+        public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> BeforeEveryAssemblyHooks;
+        public static readonly .<, .<.<.ClassHookContext>>> BeforeEveryClassHooks;
+        public static readonly .<, .<.<.TestContext>>> BeforeEveryTestHooks;
+        public static readonly .<.<.BeforeTestDiscoveryContext>> BeforeTestDiscoveryHooks;
+        public static readonly .<, .<.>> BeforeTestHooks;
+        public static readonly .<.<.TestSessionContext>> BeforeTestSessionHooks;
+        public static readonly .<.IDynamicTestSource> DynamicTestSources;
+        public static readonly .<<.>> GlobalInitializers;
+        public static readonly .<..IPropertySource> PropertySources;
+        public static readonly .<, .<..ITestSource>> TestSources;
     }
     public class TUnitAttribute :  { }
-    public sealed class TaskDelegateDataSource : .AsyncTestDataSource
-    {
-        public TaskDelegateDataSource(<.<.<object?[]>>> taskFactory, bool isShared = false) { }
-        public override bool IsShared { get; }
-        [.(typeof(.TaskDelegateDataSource.<GetDataFactoriesAsync>d__6))]
-        public override .<<object?[]>> GetDataFactoriesAsync([.] .CancellationToken cancellationToken = default) { }
-    }
     [(.Method)]
     public sealed class TestAttribute : .BaseTestAttribute
     {
@@ -1216,13 +1201,11 @@ namespace
     public class TestBuilderContext : <.TestBuilderContext>
     {
         public TestBuilderContext() { }
-        public .ClassMetadata? ClassInformation { get; init; }
-        public .IDataAttribute? DataAttribute { get; set; }
-        public .TestContextEvents Events { get; }
+        public .IDataSourceAttribute? DataSourceAttribute { get; set; }
+        public .TestContextEvents Events { get; set; }
         public  Id { get; }
-        public .MethodMetadata? MethodInformation { get; init; }
-        public .<string, object?> ObjectBag { get; }
-        public string? TestMethodName { get; init; }
+        public .<string, object?> ObjectBag { get; set; }
+        public required .MethodMetadata TestMetadata { get; init; }
         public static .TestBuilderContext? Current { get; }
         public void RegisterForInitialization(object? obj) { }
     }
@@ -1239,16 +1222,15 @@ namespace
         public .<string, object?> Context { get; set; }
         public .TestMetadata? TestMetadata { get; set; }
     }
+    [.DebuggerDisplay("{.Name}.{GetDisplayName(),nq}")]
     public class TestContext : .Context
     {
-        public TestContext(string testName, string displayName) { }
-        public TestContext(string testName, string displayName, .CancellationToken cancellationToken,  serviceProvider) { }
+        public TestContext(string testName,  serviceProvider, .ClassHookContext classContext, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
         public .<<object?, string?>> ArgumentDisplayFormatters { get; }
         public .<string, object?> Artifacts { get; }
         public .CancellationToken CancellationToken { get; set; }
-        public .ClassHookContext? ClassContext { get; set; }
+        public .ClassHookContext ClassContext { get; }
         public .<.TestDetails> Dependencies { get; }
-        public string DisplayName { get; }
         public ? DisplayNameFormatter { get; set; }
         public .TestContextEvents Events { get; }
         public . ExecutionPriority { get; set; }
@@ -1260,7 +1242,6 @@ namespace
         public .TestPhase Phase { get; set; }
         public bool ReportResult { get; set; }
         public .TestResult? Result { get; set; }
-        public  ServiceProvider { get; }
         public <.TestContext, , int, .<bool>>? ShouldRetryFunc { get; set; }
         public string? SkipReason { get; set; }
         public .TestDetails TestDetails { get; set; }
@@ -1275,18 +1256,19 @@ namespace
         public static string WorkingDirectory { get; set; }
         public void AddArtifact(.Artifact artifact) { }
         public void AddArtifact(string name, object? value) { }
-        public new void AddAsyncLocalValues() { }
         public void AddLinkedCancellationToken(.CancellationToken cancellationToken) { }
+        public string GetDisplayName() { }
         public new string GetErrorOutput() { }
         public string GetOutput() { }
         public T? GetService<T>()
             where T :  class { }
-        public string GetTestDisplayName() { }
         public .<.TestContext> GetTests(<.TestContext, bool> predicate) { }
         public .<.TestContext> GetTests(string testName) { }
         public .<.TestContext> GetTests(string testName,  classType) { }
         public void OverrideResult(string reason) { }
-        public void OverrideResult(. status, string reason) { }
+        public void OverrideResult(.TestState state, string reason) { }
+        [("This method is non-functional after the removal of ITestFinder. It will be remove" +
+            "d in a future version.")]
         public . ReregisterTestWithArguments(object?[]? methodArguments = null, .<string, object?>? objectBag = null) { }
         public void SetParallelLimiter(. parallelLimit) { }
         public void WriteError(string message) { }
@@ -1315,14 +1297,10 @@ namespace
         public .AsyncEvent<.TestContext>? OnTestSkipped { get; set; }
         public .AsyncEvent<.TestContext>? OnTestStart { get; set; }
     }
-    public static class TestContextFactory
+    public abstract class TestDataAttribute : .TUnitAttribute, .IDataSourceAttribute
     {
-        public static .TestContext CreateFromDiscovery(.DiscoveredTestContext discoveryContext, .CancellationToken cancellationToken,  serviceProvider) { }
-    }
-    public class TestDataAttribute : .TUnitAttribute, .IDataAttribute
-    {
-        public TestDataAttribute() { }
-        public bool AccessesInstanceData { get; init; }
+        protected TestDataAttribute() { }
+        public abstract .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
     }
     public class TestDataCombination
     {
@@ -1335,16 +1313,8 @@ namespace
         public <.<object?>>[] MethodDataFactories { get; init; }
         public int MethodDataSourceIndex { get; init; }
         public int MethodLoopIndex { get; init; }
-        public .<string, <.<object?>>> PropertyValueFactories { get; init; }
         public int RepeatIndex { get; init; }
-    }
-    public abstract class TestDataSource : .
-    {
-        protected TestDataSource() { }
-        public abstract bool IsShared { get; }
-        public .<<object?[]>> GenerateDataFactories(.DataSourceContext context) { }
-        public abstract .<<object?[]>> GetDataFactories();
-        protected static object?[] CloneArguments(object?[] args) { }
+        public .<string, >? ResolvedGenericTypes { get; init; }
     }
     public class TestDefinition : .ITestDefinition
     {
@@ -1377,12 +1347,12 @@ namespace
         public TestDetails() { }
         public required .<> Attributes { get; init; }
         public .<string> Categories { get; }
-        public required object? ClassInstance { get; set; }
-        public required .ClassMetadata ClassMetadata { get; set; }
+        public [] ClassGenericArguments { get; set; }
+        public required object ClassInstance { get; set; }
         public object?[] ClassMetadataArguments { get; }
         public required  ClassType { get; init; }
         public .<string, .<string>> CustomProperties { get; }
-        public string? DisplayName { get; set; }
+        public [] MethodGenericArguments { get; set; }
         public required .MethodMetadata MethodMetadata { get; set; }
         public required string MethodName { get; init; }
         public int RetryLimit { get; set; }
@@ -1413,14 +1383,6 @@ namespace
         public new static .TestDiscoveryContext? Current { get; }
         public void AddTests(.<.TestContext> tests) { }
     }
-    public sealed class TestHooks
-    {
-        public TestHooks() { }
-        public .HookMetadata[] AfterClass { get; init; }
-        public .HookMetadata[] AfterTest { get; init; }
-        public .HookMetadata[] BeforeClass { get; init; }
-        public .HookMetadata[] BeforeTest { get; init; }
-    }
     public class TestInstantiationException : .TestBuilderException
     {
         public TestInstantiationException( testClassType,  innerException) { }
@@ -1433,47 +1395,43 @@ namespace
         public required <[]> AttributeFactory { get; init; }
         public bool CanRunInParallel { get; init; }
         public string[] Categories { get; init; }
-        public .TestDataSource[] ClassDataSources { get; init; }
+        public required .IDataSourceAttribute[] ClassDataSources { get; init; }
         public abstract <.ExecutableTestCreationContext, .TestMetadata, .ExecutableTest> CreateExecutableTestFactory { get; }
-        public abstract <.<.TestDataCombination>> DataCombinationGenerator { get; }
-        public .TestDataSource[] DataSources { get; init; }
+        public required .IDataSourceAttribute[] DataSources { get; init; }
         public .TestDependency[] Dependencies { get; init; }
         public string? FilePath { get; init; }
         public .GenericMethodInfo? GenericMethodInfo { get; init; }
         public []? GenericMethodTypeArguments { get; init; }
         public .GenericTypeInfo? GenericTypeInfo { get; init; }
-        public .TestHooks Hooks { get; init; }
-        public <object?[], object>? InstanceFactory { get; init; }
+        public <[], object?[], object> InstanceFactory { get; init; }
         public bool IsSkipped { get; init; }
         public int? LineNumber { get; init; }
         public required .MethodMetadata MethodMetadata { get; init; }
         public int ParameterCount { get; init; }
         public [] ParameterTypes { get; init; }
-        public .PropertyDataSource[] PropertyDataSources { get; init; }
+        public required .PropertyDataSource[] PropertyDataSources { get; init; }
         public .PropertyInjectionData[] PropertyInjections { get; init; }
-        public .<string, <object, object?>> PropertySetters { get; init; }
+        public int RepeatCount { get; init; }
         public int RetryCount { get; init; }
         public string? SkipReason { get; init; }
+        [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]
         public required  TestClassType { get; init; }
         public <object, object?[], .>? TestInvoker { get; init; }
         public required string TestMethodName { get; init; }
         public string[] TestMethodParameterTypes { get; init; }
         public required string TestName { get; init; }
+        public string TestSessionId { get; set; }
         public int? TimeoutMs { get; init; }
     }
-    public class TestMetadata<T> : .TestMetadata, .
+    public class TestMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T> : .TestMetadata, .
         where T :  class
     {
         public TestMetadata() { }
-        public <.ExecutableTestCreationContext, .TestMetadata<T>, .ExecutableTest>? CreateExecutableTest { get; init; }
         public override <.ExecutableTestCreationContext, .TestMetadata, .ExecutableTest> CreateExecutableTestFactory { get; }
-        public <.<T>>? CreateTypedInstance { get; init; }
-        public override <.<.TestDataCombination>> DataCombinationGenerator { get; }
-        public new <object?[], T>? InstanceFactory { get; init; }
+        public new <[], object?[], T>? InstanceFactory { get; init; }
         public <T, object?[], .CancellationToken, .>? InvokeTypedTest { get; init; }
-        public new .<string, <T, object?>> PropertySetters { get; init; }
         public new <T, object?[], .>? TestInvoker { get; init; }
-        public void SetDataCombinationGenerator(<.<.TestDataCombination>> generator) { }
+        public void UseRuntimeDataGeneration(string testSessionId) { }
     }
     public enum TestPhase
     {
@@ -1486,8 +1444,8 @@ namespace
     public class TestRegisteredContext
     {
         public TestRegisteredContext(.TestContext testContext) { }
+        public string? CustomDisplayName { get; }
         public .DiscoveredTest DiscoveredTest { get; set; }
-        public string DisplayName { get; }
         public .<string, object?> ObjectBag { get; }
         public .TestContext TestContext { get; }
         public .TestDetails TestDetails { get; }
@@ -1506,7 +1464,7 @@ namespace
         public string? Output { get; }
         public string? OverrideReason { get; set; }
         public required ? Start { get; init; }
-        public required . Status { get; init; }
+        public required .TestState State { get; init; }
     }
     public class TestSessionContext : .Context
     {
@@ -1531,6 +1489,13 @@ namespace
         Skipped = 6,
         Timeout = 7,
         Cancelled = 8,
+    }
+    public static class TestStateExtensions
+    {
+        public static bool IsFailure(this .TestState state) { }
+        public static bool IsFinal(this .TestState state) { }
+        public static bool IsSuccess(this .TestState state) { }
+        public static bool IsTransient(this .TestState state) { }
     }
     [(.Assembly | .Class | .Method)]
     public class TimeoutAttribute : .TUnitAttribute, ., .
@@ -1573,21 +1538,28 @@ namespace
         public static .TypeReference CreateConstructedGeneric(string genericTypeDefinition, params .TypeReference[] genericArguments) { }
         public static .TypeReference CreateGenericParameter(int position, bool isMethodParameter, string? name = null) { }
     }
-    [.("TypeResolver uses dynamic type creation for generics, arrays, and other complex t" +
-        "ypes")]
-    [.("TypeResolver uses  which may require types that aren\'t statically ref" +
-        "erenced")]
+    public static class TypeRegistry
+    {
+        public static .<string, > GetAllRegisteredTypes() { }
+        public static void RegisterArrayType( elementType, int rank,  arrayType) { }
+        public static void RegisterByRefType( elementType,  byRefType) { }
+        public static void RegisterConstructedGenericType( genericDefinition, [] genericArguments,  constructedType) { }
+        public static void RegisterPointerType( elementType,  pointerType) { }
+        public static void RegisterType(string assemblyQualifiedName,  type) { }
+    }
     public sealed class TypeResolver
     {
         public TypeResolver(? declaringType = null, .MethodInfo? declaringMethod = null) { }
-        [.("AOT", "IL2055:MakeGenericType", Justification="TypeResolver is not AOT-compatible by design")]
-        [.("AOT", "IL2057:TypeGetType", Justification="TypeResolver is not AOT-compatible by design")]
-        [.("AOT", "IL2073:ReturnValueMismatch", Justification="TypeResolver is not AOT-compatible by design")]
-        [.("AOT", "IL3050:RequiresDynamicCode", Justification="TypeResolver is not AOT-compatible by design")]
         public  Resolve(.TypeReference typeReference) { }
         public [] ResolveMany(.<.TypeReference> typeReferences) { }
         public static .TypeResolver CreateSimple() { }
         public static .TypeResolver FromTestInstance(object testInstance, .MethodInfo? testMethod = null) { }
+    }
+    public sealed class UnifiedExecutableTest : .ExecutableTest
+    {
+        public UnifiedExecutableTest(<.TestContext, .<object>> createInstance, <object, object?[], .TestContext, .CancellationToken, .> invokeTest) { }
+        public override .<object> CreateInstanceAsync() { }
+        public override . InvokeTestAsync(object instance, .CancellationToken cancellationToken) { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
     [.("UntypedDataSourceGeneratorAttribute requires dynamic code generation for runtime " +
@@ -1619,50 +1591,30 @@ namespace .Data
         public bool TryGetValue(TKey key, [.(true)] out TValue? value) { }
     }
 }
-namespace .DataSourceGenerators
+namespace .DataSources
 {
-    public class ArgumentsDataSourceGenerator : .<.ArgumentsAttribute>
+    public static class DataSourceProcessor
     {
-        public ArgumentsDataSourceGenerator() { }
-        [.(typeof(..<GenerateDataCombinationsAsync>d__0))]
-        public .<.TestDataCombination> GenerateDataCombinationsAsync(.ArgumentsAttribute attribute, . context) { }
+        [.("This method may create types at runtime")]
+        [.("This method uses reflection to process data sources")]
+        public static .<.<object?[]>> ProcessGeneratorItemAsync(object? item) { }
+        [.("This method uses reflection for tuple processing")]
+        public static .<object?[]> ProcessMethodDataSourceResult(object? result) { }
+        public static .<.<object?[]>> ProcessTypedArrayGeneratorItemAsync<T>(<.<T[]>> taskFunc) { }
+        public static .<.<object?[]>> ProcessTypedGeneratorItemAsync<T>(<.<T>> taskFunc) { }
+        public static object? ResolveTypedValue<T>(<T> func) { }
+        public static .<object?> ResolveTypedValueAsync<T>(<.<T>> taskFunc) { }
+        [.("This method may invoke methods dynamically")]
+        [.("This method uses reflection to resolve values")]
+        public static .<object?> ResolveValueAsync(object? value) { }
     }
-    public class AsyncDataSourceGenerator : .
+    public static class TestDataFormatter
     {
-        public AsyncDataSourceGenerator() { }
-        [.(typeof(..<GenerateDataCombinationsAsync>d__0))]
-        public .<.TestDataCombination> GenerateDataCombinationsAsync(.IAsyncDataSourceGeneratorAttribute attribute, . context) { }
-    }
-    [.("Untyped async data sources require dynamic code generation")]
-    public class AsyncUntypedDataSourceGenerator : .
-    {
-        public AsyncUntypedDataSourceGenerator() { }
-        [.(typeof(..<GenerateDataCombinationsAsync>d__0))]
-        public .<.TestDataCombination> GenerateDataCombinationsAsync(.IAsyncDataSourceGeneratorAttribute attribute, . context) { }
-    }
-    public class DataSourceGenerationContext
-    {
-        public DataSourceGenerationContext() { }
-        public required int DataSourceIndex { get; init; }
-        public required [] ParameterTypes { get; init; }
-        [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]
-        public required  TestClassType { get; init; }
-        public required string TestMethodName { get; init; }
-    }
-    public interface IAsyncDataSourceGenerator
-    {
-        .<.TestDataCombination> GenerateDataCombinationsAsync(.IAsyncDataSourceGeneratorAttribute attribute, . context);
-    }
-    public interface IDataSourceGenerator<TAttribute>
-        where TAttribute : .TestDataAttribute
-    {
-        .<.TestDataCombination> GenerateDataCombinationsAsync(TAttribute attribute, . context);
-    }
-    public class MethodDataSourceGenerator : .<.MethodDataSourceAttribute>
-    {
-        public MethodDataSourceGenerator() { }
-        [.(typeof(..<GenerateDataCombinationsAsync>d__0))]
-        public .<.TestDataCombination> GenerateDataCombinationsAsync(.MethodDataSourceAttribute attribute, . context) { }
+        public static string CreateDisplayName(.TestMetadata metadata, object?[] arguments, .TestDataCombination? dataCombination = null) { }
+        public static string CreateGenericDisplayName(.TestMetadata metadata, [] genericTypes, object?[] arguments) { }
+        public static string FormatArguments(.TestContext context) { }
+        public static string FormatArguments(object?[] arguments) { }
+        public static string FormatArguments(object?[] arguments, .<<object?, string?>> formatters) { }
     }
 }
 namespace .Enums
@@ -1698,14 +1650,6 @@ namespace .Enums
         AboveNormal = 3,
         High = 4,
         Critical = 5,
-    }
-    public enum Status
-    {
-        None = 0,
-        Passed = 1,
-        Failed = 2,
-        Skipped = 3,
-        Cancelled = 4,
     }
     public enum TestExecutionMode
     {
@@ -1920,7 +1864,7 @@ namespace .Extensions
 {
     public static class ClassConstructorExtensions
     {
-        public static T Create<[.(..PublicConstructors)]  T>(this . classConstructor, .ClassConstructorMetadata classConstructorMetadata)
+        public static .<T> Create<[.(..PublicConstructors)]  T>(this . classConstructor, .ClassConstructorMetadata classConstructorMetadata)
             where T :  class { }
     }
     public static class MetadataExtensions
@@ -1947,18 +1891,25 @@ namespace .Extensions
         public static void AddTest<T>(this .TestContext context, .DynamicTestInstance<T> dynamicTest)
             where T :  class { }
         public static string GetClassTypeName(this .TestContext context) { }
-        public static string GetDisplayName(this .TestContext context) { }
         public static T? GetService<T>(this .TestContext context)
             where T :  class { }
     }
 }
 namespace .Helpers
 {
+    public static class ArgumentFormatter
+    {
+        public static string Format(object? o, .<<object?, string?>> formatters) { }
+        public static string FormatArguments(.<object?> arguments) { }
+        public static string GetConstantValue(.TestContext testContext, object? o) { }
+    }
     public static class CastHelper
     {
-        [.("", "IL2072")]
+        [.("AOT", "IL3050", Justification="Reflection is used as a fallback. AOT analyzer warns at compile time.")]
+        [.("Trimming", "IL2072", Justification="Conversion operators are preserved through DynamicallyAccessedMembers attribute")]
         public static object? Cast([.(..PublicMethods)]  type, object? value) { }
-        [.("", "IL2072")]
+        [.("AOT", "IL3050", Justification="Reflection is used as a fallback. AOT analyzer warns at compile time.")]
+        [.("Trimming", "IL2072", Justification="Conversion operators are preserved through DynamicallyAccessedMembers attribute")]
         public static T? Cast<[.(..PublicMethods)]  T>(object? value) { }
         public static .MethodInfo? GetConversionMethod([.(..PublicMethods)]  baseType, [.(..PublicMethods)]  targetType) { }
     }
@@ -2001,8 +1952,16 @@ namespace .Helpers
     public static class DataSourceHelpers
     {
         public static <.<object?>>[] HandleTupleValue(object? value, bool shouldUnwrap) { }
+        public static . InitializeDataSourcePropertiesAsync(object? instance, .MethodMetadata testInformation, string testSessionId) { }
         public static object? InvokeIfFunc(object? value) { }
         public static T InvokeIfFunc<T>(object? value) { }
+        public static bool IsTuple(object? obj) { }
+        public static .<object?> ProcessDataSourceResult<T>(T data) { }
+        public static .<object?> ProcessDataSourceResultGeneric<T>(T data) { }
+        public static .<object?> ProcessEnumerableDataSource<T>(.<T> enumerable) { }
+        public static <.<object?>>[] ProcessTestDataSource<T>(T data, int expectedParameterCount = -1) { }
+        public static void RegisterPropertyInitializer<T>(<T, .MethodMetadata, string, .> initializer) { }
+        public static object?[] ToObjectArray(this object? item) { }
         public static object?[] UnwrapTuple<T1>(<T1> tuple) { }
         public static object?[] UnwrapTuple<T1, T2>(<T1, T2> tuple) { }
         public static object?[] UnwrapTuple<T1, T2, T3>(<T1, T2, T3> tuple) { }
@@ -2014,10 +1973,13 @@ namespace .Helpers
             "ute\' in target method or type.", Justification="We handle specific known tuple types without reflection")]
         public static object?[] UnwrapTupleAot(object? value) { }
     }
-    public class DataSourceInitializationException : 
+    public static class GenericTypeHelper
     {
-        public DataSourceInitializationException(string message) { }
-        public DataSourceInitializationException(string message,  innerException) { }
+        public static  GetGenericTypeDefinition( type) { }
+        public static bool IsConstructedGenericType( type) { }
+        [.("AOT", "IL2055:UnrecognizedReflectionPattern", Justification="MakeGenericType is used as a fallback. AOT analyzer warns at compile time.")]
+        [.("AOT", "IL3050:RequiresDynamicCode", Justification="MakeGenericType is used as a fallback. AOT analyzer warns at compile time.")]
+        public static  MakeGenericTypeSafe( genericTypeDefinition, params [] typeArguments) { }
     }
     public class ProcessorCountParallelLimit : .
     {
@@ -2030,14 +1992,19 @@ namespace .Helpers
         public bool Equals(object? x, object? y) { }
         public int GetHashCode(object obj) { }
     }
+    public static class TestNameGenerator
+    {
+        public static string GenerateTestName( testClass, .MethodInfo testMethod) { }
+        public static string GenerateTestName(string className, string methodName) { }
+    }
     public static class TupleHelper
     {
-        [.("ReflectionAnalysis", "IL2075:UnrecognizedReflectionPattern", Justification="This method specifically handles tuple types which have known structure")]
+        [.("ReflectionAnalysis", "IL2075:UnrecognizedReflectionPattern", Justification="Reflection is used as a fallback. AOT analyzer warns at compile time.")]
         public static .<object?[]> ExpandTupleArray(object? value) { }
         public static bool IsTupleArrayType( type) { }
         public static bool IsTupleType( type) { }
         public static bool ShouldUnwrapForMethodArguments(object? value, int expectedParameterCount) { }
-        [.("ReflectionAnalysis", "IL2075:UnrecognizedReflectionPattern", Justification="This method specifically handles tuple types which have known structure")]
+        [.("ReflectionAnalysis", "IL2075:UnrecognizedReflectionPattern", Justification="Reflection is used as a fallback. AOT analyzer warns at compile time.")]
         public static object?[] UnwrapTuple(object? value) { }
     }
 }
@@ -2140,6 +2107,9 @@ namespace .Hooks
         public bool Execute(.AssemblyHookContext context, .CancellationToken cancellationToken) { }
         public . ExecuteAsync(.AssemblyHookContext context, .CancellationToken cancellationToken) { }
     }
+    [.("Trimming", "IL2111:Method with parameters or return value with `DynamicallyAccessedMembersAtt" +
+        "ribute` is accessed via reflection. Trimmer can\'t guarantee availability of the " +
+        "requirements of the method.")]
     public class LastTestInClassAdapter : .<.ClassHookContext>
     {
         public LastTestInClassAdapter(. lastTestInClassEventReceiver, .TestContext testContext) { }
@@ -2180,14 +2150,12 @@ namespace .Interfaces
         public .<object?[]> ClassData { get; init; }
         public .<object?[]> MethodData { get; init; }
         public .<string, object?> PropertyData { get; init; }
-        public int TotalVariations { get; }
-        public .<.IDataAttribute> UnresolvedAttributes { get; init; }
+        public .<.IDataSourceAttribute> UnresolvedAttributes { get; init; }
     }
     public interface IAotCompatibleAsyncDataSource : . { }
     public interface IAotCompatibleDataSource : . { }
     public interface IAsyncDataSource
     {
-        bool IsShared { get; }
         .<<object?[]>> GenerateDataFactoriesAsync(.DataSourceContext context, .CancellationToken cancellationToken = default);
     }
     public interface IAsyncInitializer
@@ -2196,11 +2164,11 @@ namespace .Interfaces
     }
     public interface IClassConstructor
     {
-        object Create([.(..PublicConstructors)]  type, .ClassConstructorMetadata classConstructorMetadata);
+        .<object> Create([.(..PublicConstructors)]  type, .ClassConstructorMetadata classConstructorMetadata);
     }
     public interface ICompileTimeDataResolver
     {
-        bool CanResolveAtCompileTime(.IDataAttribute dataAttribute);
+        bool CanResolveAtCompileTime(.IDataSourceAttribute dataAttribute);
         .<.<object?[]>> ResolveClassDataAsync(.ClassMetadata classMetadata);
         .<.<object?[]>> ResolveMethodDataAsync(.MethodMetadata methodMetadata);
         .<.<string, object?>> ResolvePropertyDataAsync(.ClassMetadata classMetadata);
@@ -2217,7 +2185,6 @@ namespace .Interfaces
     }
     public interface IDataSource
     {
-        bool IsShared { get; }
         .<<object?[]>> GenerateDataFactories(.DataSourceContext context);
     }
     public interface IDataSourceProvider
@@ -2280,13 +2247,6 @@ namespace .Interfaces
     {
         . OnLastTestInTestSession(.TestSessionContext current, .TestContext testContext);
     }
-    public interface IModeDetector
-    {
-        bool IsDynamicCodeSupported { get; }
-        bool IsReflectionModeRequested { get; }
-        bool IsSourceGenerationAvailable { get; }
-        . DetectMode();
-    }
     public interface IParallelConstraint { }
     public interface IParallelLimit
     {
@@ -2297,12 +2257,10 @@ namespace .Interfaces
         <object>? GetClassFactory(string testId);
         <object, object?[], .<object?>>? GetMethodInvoker(string testId);
         <object?[], object>? GetParameterizedClassFactory(string testId);
-        .<string, <object, object?>> GetPropertySetters(string testId);
         .<string> GetRegisteredTestIds();
         void RegisterClassFactory(string testId, <object> factory);
         void RegisterClassFactory(string testId, <object?[], object> factory);
         void RegisterMethodInvoker(string testId, <object, object?[], .<object?>> invoker);
-        void RegisterPropertySetter(string testId, string propertyName, <object, object?> setter);
     }
     public interface ITestDiscoveryEventReceiver : .
     {
@@ -2351,52 +2309,32 @@ namespace .Interfaces
     }
     public interface ITypedTestMetadata
     {
+        [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]
          TestClassType { get; }
     }
 }
 namespace .
 {
-    public interface IAssemblyHookSource
-    {
-        .<.<.AssemblyHookContext>> CollectAfterAssemblyHooks(string sessionId);
-        .<.<.AssemblyHookContext>> CollectAfterEveryAssemblyHooks(string sessionId);
-        .<.<.AssemblyHookContext>> CollectBeforeAssemblyHooks(string sessionId);
-        .<.<.AssemblyHookContext>> CollectBeforeEveryAssemblyHooks(string sessionId);
-    }
-    public interface IClassHookSource
-    {
-        .<.<.ClassHookContext>> CollectAfterClassHooks(string sessionId);
-        .<.<.ClassHookContext>> CollectAfterEveryClassHooks(string sessionId);
-        .<.<.ClassHookContext>> CollectBeforeClassHooks(string sessionId);
-        .<.<.ClassHookContext>> CollectBeforeEveryClassHooks(string sessionId);
-    }
     public interface IPropertySource
     {
-        string PropertyName { get; }
         bool ShouldInitialize { get; }
          Type { get; }
-        . InitializeAsync(object instance);
-    }
-    public interface ITestDiscoveryHookSource
-    {
-        .<.<.TestDiscoveryContext>> CollectAfterTestDiscoveryHooks(string sessionId);
-        .<.<.BeforeTestDiscoveryContext>> CollectBeforeTestDiscoveryHooks(string sessionId);
-    }
-    public interface ITestHookSource
-    {
-        .<.<.TestContext>> CollectAfterEveryTestHooks(string sessionId);
-        .<.> CollectAfterTestHooks(string sessionId);
-        .<.<.TestContext>> CollectBeforeEveryTestHooks(string sessionId);
-        .<.> CollectBeforeTestHooks(string sessionId);
-    }
-    public interface ITestSessionHookSource
-    {
-        .<.<.TestSessionContext>> CollectAfterTestSessionHooks(string sessionId);
-        .<.<.TestSessionContext>> CollectBeforeTestSessionHooks(string sessionId);
+        .<..PropertyInjectionMetadata> GetPropertyMetadata();
     }
     public interface ITestSource
     {
         .<.<.TestMetadata>> GetTestsAsync(string testSessionId);
+    }
+    public sealed class PropertyInjectionMetadata
+    {
+        public PropertyInjectionMetadata() { }
+        [.(..PublicProperties)]
+        public required  ContainingType { get; init; }
+        public required <.IDataSourceAttribute> CreateDataSource { get; init; }
+        public required string PropertyName { get; init; }
+        [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]
+        public required  PropertyType { get; init; }
+        public required <object, object?> SetProperty { get; init; }
     }
 }
 namespace .Logging
@@ -2467,7 +2405,15 @@ namespace .Models
         public bool HasStronglyTypedDelegates { get; }
         public <.<object?[]>>? MethodDataResolver { get; set; }
         public ? MethodInvoker { get; set; }
-        public .<string, <object, object?>> PropertySetters { get; }
+    }
+}
+namespace .ReferenceTracking
+{
+    public static class DataSourceReferenceExtensions
+    {
+        public static void TrackClassArguments(this .TestContext context) { }
+        public static void TrackMethodArguments(this .TestContext context) { }
+        public static void TrackPropertyArguments(this .TestContext context) { }
     }
 }
 namespace .Services
@@ -2490,14 +2436,19 @@ namespace .Services
         public [] ResolveGenericClassArguments([.(..PublicConstructors)]  genericTypeDefinition, object?[] constructorArguments) { }
         public [] ResolveGenericMethodArguments(.MethodInfo genericMethodDefinition, object?[] runtimeArguments) { }
     }
-    public class ModeDetector : .
+    public interface IContextProvider
     {
-        public ModeDetector(bool isReflectionModeRequested = false) { }
-        public bool IsDynamicCodeSupported { get; }
-        public bool IsReflectionModeRequested { get; }
-        public bool IsSourceGenerationAvailable { get; }
+        .BeforeTestDiscoveryContext BeforeTestDiscoveryContext { get; }
+        .TestDiscoveryContext TestDiscoveryContext { get; }
+        .TestSessionContext TestSessionContext { get; }
+        .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken);
+        .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly);
+        .ClassHookContext GetOrCreateClassContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType);
+    }
+    public static class ModeDetector
+    {
+        public static bool IsSourceGenerationAvailable { get; }
         public static . Mode { get; }
-        public . DetectMode() { }
     }
     public class NoOpGenericTypeResolver : .
     {
@@ -2526,7 +2477,6 @@ namespace .Services
         public <object, object?[], .<object?>>? GetMethodInvoker(string testId) { }
         public . GetOrCreateTestData(string testId) { }
         public <object?[], object>? GetParameterizedClassFactory(string testId) { }
-        public .<string, <object, object?>> GetPropertySetters(string testId) { }
         public .<string> GetRegisteredTestIds() { }
         public T? GetStronglyTypedClassFactory<T>(string testId)
             where T :  { }
@@ -2543,7 +2493,6 @@ namespace .Services
         public void RegisterClassFactory(string testId, <object?[], object> factory) { }
         public void RegisterMethodDataResolver(string testId, <.<object?[]>> resolver) { }
         public void RegisterMethodInvoker(string testId, <object, object?[], .<object?>> invoker) { }
-        public void RegisterPropertySetter(string testId, string propertyName, <object, object?> setter) { }
         public void RegisterStronglyTypedClassFactory<T>(string testId,  factory)
             where T :  class { }
         public void RegisterStronglyTypedClassFactory<T>(string testId, <T> factory)
