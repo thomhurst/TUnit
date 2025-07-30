@@ -1,12 +1,10 @@
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
-using TUnit.Engine.Diagnostics;
 
 namespace TUnit.Engine.Framework;
 
@@ -28,43 +26,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         _frameworkServiceProvider = frameworkServiceProvider;
         _capabilities = capabilities;
         _requestHandler = new TestRequestHandler();
-
-        ConfigureDebugListeners();
-    }
-
-    private static void ConfigureDebugListeners()
-    {
-        Trace.Listeners.Clear();
-        var assertionListener = new TUnitAssertionListener();
-        Trace.Listeners.Add(assertionListener);
-
-        Trace.AutoFlush = true;
-    }
-
-    private static void ConfigureGlobalExceptionHandlers(ExecuteRequestContext context)
-    {
-        // Handle unhandled exceptions on any thread
-        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
-        {
-            var exception = args.ExceptionObject as Exception;
-
-            Console.Error.WriteLine($"Unhandled exception in AppDomain: {exception}");
-
-            // Force exit to prevent hanging
-            if (args.IsTerminating)
-            {
-                context.Complete();
-            }
-        };
-
-        // Handle unobserved task exceptions
-        TaskScheduler.UnobservedTaskException += (_, args) =>
-        {
-            Console.Error.WriteLine($"Unobserved task exception: {args.Exception}");
-
-            // Mark as observed to prevent process termination
-            args.SetObserved();
-        };
     }
 
     public string Uid => _extension.Uid;
@@ -84,9 +45,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         try
         {
-            ConfigureGlobalExceptionHandlers(context);
-
             var serviceProvider = GetOrCreateServiceProvider(context);
+
+            serviceProvider.Initializer.Initialize(context);
 
             GlobalContext.Current = serviceProvider.ContextProvider.GlobalContext;
             BeforeTestDiscoveryContext.Current = serviceProvider.ContextProvider.BeforeTestDiscoveryContext;

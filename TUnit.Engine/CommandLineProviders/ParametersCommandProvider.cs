@@ -7,7 +7,7 @@ namespace TUnit.Engine.CommandLineProviders;
 
 internal class ParametersCommandProvider(IExtension extension) : ICommandLineOptionsProvider
 {
-    public const string ParameterMetadata = "test-parameter";
+    public const string TestParameter = "test-parameter";
 
     public Task<bool> IsEnabledAsync()
     {
@@ -28,7 +28,7 @@ internal class ParametersCommandProvider(IExtension extension) : ICommandLineOpt
     {
         return
         [
-            new CommandLineOption(ParameterMetadata, "Custom parameters to pass to TUnit", ArgumentArity.OneOrMore, false)
+            new CommandLineOption(TestParameter, "Custom parameters to pass to TUnit", ArgumentArity.OneOrMore, false)
         ];
     }
 

@@ -42,6 +42,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public HookOrchestrator HookOrchestrator { get; }
     public EventReceiverOrchestrator EventReceiverOrchestrator { get; }
     public ITestFinder TestFinder { get; }
+    public TUnitInitializer Initializer { get; }
 
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
@@ -60,6 +61,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         VerbosityService = Register(new VerbosityService(CommandLineOptions));
         DiscoveryDiagnostics.Initialize(VerbosityService);
+
+        Initializer = new TUnitInitializer(CommandLineOptions);
 
         Logger = Register(new TUnitFrameworkLogger(
             extension,
