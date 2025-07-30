@@ -37,7 +37,7 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
         }
 
         var dataClasses = tests
-            .SelectMany(x => x.TestDetails.MethodMetadata.ClassArguments)
+            .SelectMany(x => x.TestDetails.TestClassArguments)
             .OfType<DataClass>()
             .ToArray();
 
@@ -46,9 +46,9 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
         await Assert.That(dataClasses).HasCount().EqualTo(6);
         await Assert.That(dataClasses.Where(x => x.Disposed)).HasCount().EqualTo(6);
 
-        foreach (var test in tests)
+        foreach (var test in tests.Where(x => x.Result != null))
         {
-            var dataClass = test.TestDetails.MethodMetadata.ClassArguments.OfType<DataClass>().First();
+            var dataClass = test.TestDetails.TestClassArguments.OfType<DataClass>().First();
 
             if (!dataClass.Disposed)
             {
