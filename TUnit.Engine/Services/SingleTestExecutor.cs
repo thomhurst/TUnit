@@ -2,6 +2,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Data;
+using TUnit.Core.Logging;
 using TUnit.Core.ReferenceTracking;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Extensions;
@@ -83,7 +84,15 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 return await HandleSkippedTestAsync(test, cancellationToken);
             }
 
-            await ExecuteTestWithHooksAsync(test, instance, cancellationToken);
+            if(test.Context.RetryFunc != null && test.Context.TestDetails.RetryLimit > 0)
+            {
+
+                await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken);
+            }
+            else
+            {
+                await ExecuteTestWithHooksAsync(test, instance, cancellationToken);
+            }
         }
         catch (Exception ex)
         {
@@ -106,6 +115,30 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
 
         return CreateUpdateMessage(test);
+    }
+
+    private async Task ExecuteTestWithRetries(Func<Task> testDelegate, TestContext testContext, CancellationToken cancellationToken)
+    {
+        var retryLimit = testContext.TestDetails.RetryLimit;
+        var retryFunc = testContext.RetryFunc!;
+
+        for (var i = 1; i <= retryLimit; i++)
+        {
+            try
+            {
+                await testDelegate();
+                return;
+            }
+            catch (Exception ex)
+            {
+                if (i == retryLimit || !await retryFunc(testContext, ex, i))
+                {
+                    throw;
+                }
+
+                await _logger.LogWarningAsync($"Retrying test due to exception: {ex.Message}. Attempt {i} of {retryLimit}.");
+            }
+        }
     }
 
     private async Task<TestNodeUpdateMessage> HandleSkippedTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
@@ -283,7 +316,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
             if (completedTask == timeoutTask)
             {
                 cts.Cancel();
-                await AttemptToCompleteTestTask(testTask);
                 throw new OperationCanceledException($"Test '{test.Context.GetDisplayName()}' exceeded timeout of {test.Metadata.TimeoutMs.Value}ms");
             }
 
@@ -297,17 +329,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             await test.InvokeTestAsync(instance, cancellationToken);
         };
-    }
-
-    private async Task AttemptToCompleteTestTask(Task testTask)
-    {
-        try
-        {
-            await testTask;
-        }
-        catch
-        {
-        }
     }
 
     private async Task InvokeWithTestExecutor(DiscoveredTest? discoveredTest, TestContext context, Func<ValueTask> testAction)

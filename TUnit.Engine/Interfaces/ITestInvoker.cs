@@ -6,5 +6,4 @@ namespace TUnit.Engine.Interfaces;
 public interface ITestInvoker
 {
     Task InvokeTestAsync(object instance, Func<object, object?[], Task> testInvoker, object?[] arguments);
-    Task InvokeTestAsync(string testMethodKey, object instance, object?[] arguments);
 }

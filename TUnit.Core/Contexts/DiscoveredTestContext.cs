@@ -114,7 +114,7 @@ public class DiscoveredTestContext
     public void TransferTo(TestContext testContext)
     {
         testContext.DisplayNameFormatter = _displayNameFormatter;
-        testContext.ShouldRetryFunc = _shouldRetryFunc;
+        testContext.RetryFunc = _shouldRetryFunc;
         testContext.ParallelConstraint = _parallelConstraint;
         testContext.ExecutionPriority = _priority;
         testContext.RunOnTestDiscovery = RunOnTestDiscovery;

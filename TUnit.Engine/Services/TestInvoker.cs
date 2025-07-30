@@ -9,13 +9,4 @@ public class TestInvoker : ITestInvoker
     {
         await testInvoker(instance, arguments);
     }
-    
-    public Task InvokeTestAsync(string testMethodKey, object instance, object?[] arguments)
-    {
-        // This method is now deprecated - all test invocation should use the delegate-based overload
-        // which uses delegates embedded in TestMetadata
-        throw new NotSupportedException(
-            $"String-based test invocation is no longer supported. " +
-            $"Test '{testMethodKey}' should be invoked using the delegate from TestMetadata.TestInvoker.");
-    }
 }

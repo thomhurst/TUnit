@@ -85,7 +85,7 @@ public class TestContext : Context
 
     public Type? DisplayNameFormatter { get; set; }
 
-    public Func<TestContext, Exception, int, Task<bool>>? ShouldRetryFunc { get; set; }
+    public Func<TestContext, Exception, int, Task<bool>>? RetryFunc { get; set; }
 
     public IParallelConstraint? ParallelConstraint { get; set; }
 
