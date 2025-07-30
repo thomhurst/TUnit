@@ -7,6 +7,7 @@ using System.Threading;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
@@ -1368,8 +1369,35 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 // Create a regular ExecutableTest with the modified context
                 // Create instance and test invoker for the dynamic test
-                Func<TestContext, Task<object>> createInstance = (TestContext testContext) =>
+                Func<TestContext, Task<object>> createInstance = async (TestContext testContext) =>
                 {
+                    // Check for ClassConstructor attribute
+                    var attributes = metadata.AttributeFactory();
+                    var classConstructorAttribute = attributes.OfType<BaseClassConstructorAttribute>().FirstOrDefault();
+                    
+                    if (classConstructorAttribute != null)
+                    {
+                        // Use the ClassConstructor to create the instance
+                        var classConstructorType = classConstructorAttribute.ClassConstructorType;
+                        var classConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorType)!;
+                        
+                        var classConstructorMetadata = new ClassConstructorMetadata
+                        {
+                            TestSessionId = metadata.TestSessionId,
+                            TestBuilderContext = new TestBuilderContext
+                            {
+                                Events = testContext.Events,
+                                ObjectBag = testContext.ObjectBag,
+                                TestMetadata = metadata.MethodMetadata
+                            }
+                        };
+                        
+                        [UnconditionalSuppressMessage("Trimming", "IL2077:DynamicallyAccessedMembers")]
+                        async Task<object> CreateInstance() => await classConstructor.Create(_testClass, classConstructorMetadata);
+                        return await CreateInstance();
+                    }
+                    
+                    // Fall back to default instance factory
                     var instance = metadata.InstanceFactory(Type.EmptyTypes, modifiedContext.ClassArguments);
 
                     // Handle property injections
@@ -1379,7 +1407,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                         propertyInjection.Setter(instance, value);
                     }
 
-                    return Task.FromResult(instance);
+                    return instance;
                 };
 
                 var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");

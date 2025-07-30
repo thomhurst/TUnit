@@ -72,11 +72,35 @@ public class TestMetadata<
                     var typedMetadata = (TestMetadata<T>)metadata;
 
                     // Create instance delegate that uses context
-                    Func<TestContext, Task<object>> createInstance = testContext =>
+                    Func<TestContext, Task<object>> createInstance = async testContext =>
                     {
-                        // Get type arguments from test context if generic
+                        // Check for ClassConstructor attribute
+                        var attributes = metadata.AttributeFactory();
+                        var classConstructorAttribute = attributes.OfType<BaseClassConstructorAttribute>().FirstOrDefault();
+                        
+                        if (classConstructorAttribute != null)
+                        {
+                            // Use the ClassConstructor to create the instance
+                            var classConstructorType = classConstructorAttribute.ClassConstructorType;
+                            var classConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorType)!;
+                            
+                            var classConstructorMetadata = new ClassConstructorMetadata
+                            {
+                                TestSessionId = metadata.TestSessionId,
+                                TestBuilderContext = new TestBuilderContext
+                                {
+                                    Events = testContext.Events,
+                                    ObjectBag = testContext.ObjectBag,
+                                    TestMetadata = metadata.MethodMetadata
+                                }
+                            };
+                            
+                            return await classConstructor.Create(typeof(T), classConstructorMetadata);
+                        }
+                        
+                        // Fall back to default instance factory
                         var typeArgs = testContext.TestDetails.MethodMetadata.Class.Parameters.Select(x => x.Type).ToArray();
-                        return Task.FromResult<object>(typedMetadata.InstanceFactory!(typeArgs, context.ClassArguments));
+                        return typedMetadata.InstanceFactory!(typeArgs, context.ClassArguments);
                     };
 
                     // Convert InvokeTypedTest to the expected signature
