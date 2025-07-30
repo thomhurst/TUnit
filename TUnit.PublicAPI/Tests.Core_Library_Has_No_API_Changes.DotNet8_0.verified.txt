@@ -908,7 +908,6 @@ namespace
     {
         public MethodMetadata() { }
         public required .ClassMetadata Class { get; init; }
-        public object?[]? ClassArguments { get; init; }
         public required int GenericTypeCount { get; init; }
         public required .ParameterMetadata[] Parameters { get; init; }
         public ? ReturnType { get; init; }
