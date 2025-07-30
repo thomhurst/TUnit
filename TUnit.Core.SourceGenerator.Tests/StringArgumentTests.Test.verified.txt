@@ -47,7 +47,7 @@ internal sealed class StringArgumentTests_Normal_TestSource_GUID : global::TUnit
                 new global::TUnit.Core.ArgumentsAttribute("\\t"),
                 new global::TUnit.Core.ArgumentsAttribute("\\\t"),
                 new global::TUnit.Core.ArgumentsAttribute("\\\\t"),
-                new global::TUnit.Core.ArgumentsAttribute("Hello\nWorld"),
+                new global::TUnit.Core.ArgumentsAttribute("Hello\r\nWorld"),
             },
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
