@@ -71,55 +71,6 @@ return classMetadata;
                 Body = global_TUnit_TestProject_AfterTests_GlobalBase1_AfterEach1_0Params_Body
             }
         );
-        global::TUnit.Core.Sources.AfterEveryTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.GlobalBase1), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.StaticHookMethod<TestContext>>());
-        global::TUnit.Core.Sources.AfterEveryTestHooks[typeof(global::TUnit.TestProject.AfterTests.GlobalBase1)].Add(
-            new AfterTestHookMethod
-            {
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase1, TestsBase`1"),
-Name = "AfterAll1",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
-{
-    Name = "context",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
-    ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1).GetMethod("AfterAll1", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.GlobalBase1", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase1, TestsBase`1"),
-Name = "GlobalBase1",
-Namespace = "TUnit.TestProject.AfterTests",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata reference on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
-                HookExecutor = null!,
-                Order = 0,
-                Body = global_TUnit_TestProject_AfterTests_GlobalBase1_AfterAll1_1Params_Body,
-                FilePath = @"",
-                LineNumber = 5
-            }
-        );
         global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.GlobalBase2), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.AfterTestHooks[typeof(global::TUnit.TestProject.AfterTests.GlobalBase2)].Add(
             new InstanceHookMethod
@@ -160,55 +111,6 @@ return classMetadata;
                 Body = global_TUnit_TestProject_AfterTests_GlobalBase2_AfterEach2_0Params_Body
             }
         );
-        global::TUnit.Core.Sources.AfterEveryTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.GlobalBase2), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.StaticHookMethod<TestContext>>());
-        global::TUnit.Core.Sources.AfterEveryTestHooks[typeof(global::TUnit.TestProject.AfterTests.GlobalBase2)].Add(
-            new AfterTestHookMethod
-            {
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase2, TestsBase`1"),
-Name = "AfterAll2",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
-{
-    Name = "context",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
-    ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2).GetMethod("AfterAll2", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.GlobalBase2", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase2, TestsBase`1"),
-Name = "GlobalBase2",
-Namespace = "TUnit.TestProject.AfterTests",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata reference on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
-                HookExecutor = null!,
-                Order = 0,
-                Body = global_TUnit_TestProject_AfterTests_GlobalBase2_AfterAll2_1Params_Body,
-                FilePath = @"",
-                LineNumber = 20
-            }
-        );
         global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.GlobalBase3), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.AfterTestHooks[typeof(global::TUnit.TestProject.AfterTests.GlobalBase3)].Add(
             new InstanceHookMethod
@@ -247,55 +149,6 @@ return classMetadata;
                 HookExecutor = null!,
                 Order = 0,
                 Body = global_TUnit_TestProject_AfterTests_GlobalBase3_AfterEach3_0Params_Body
-            }
-        );
-        global::TUnit.Core.Sources.AfterEveryTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.GlobalBase3), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.StaticHookMethod<TestContext>>());
-        global::TUnit.Core.Sources.AfterEveryTestHooks[typeof(global::TUnit.TestProject.AfterTests.GlobalBase3)].Add(
-            new AfterTestHookMethod
-            {
-                MethodInfo = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase3, TestsBase`1"),
-Name = "AfterAll3",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
-{
-    Name = "context",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
-    ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3).GetMethod("AfterAll3", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.GlobalBase3", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase3, TestsBase`1"),
-Name = "GlobalBase3",
-Namespace = "TUnit.TestProject.AfterTests",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata reference on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
-                HookExecutor = null!,
-                Order = 0,
-                Body = global_TUnit_TestProject_AfterTests_GlobalBase3_AfterAll3_1Params_Body,
-                FilePath = @"",
-                LineNumber = 35
             }
         );
         global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
@@ -485,8 +338,151 @@ return classMetadata;
                 Body = global_TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext_2Params_Body
             }
         );
-        global::TUnit.Core.Sources.AfterEveryTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.StaticHookMethod<TestContext>>());
-        global::TUnit.Core.Sources.AfterEveryTestHooks[typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)].Add(
+        global::TUnit.Core.Sources.AfterEveryTestHooks.Add(
+            new AfterTestHookMethod
+            {
+                MethodInfo = new global::TUnit.Core.MethodMetadata
+{
+Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase1, TestsBase`1"),
+Name = "AfterAll1",
+GenericTypeCount = 0,
+ReturnType = typeof(global::System.Threading.Tasks.Task),
+ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+Parameters = new global::TUnit.Core.ParameterMetadata[]
+{
+new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
+{
+    Name = "context",
+    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
+    ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1).GetMethod("AfterAll1", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
+},
+},
+Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.GlobalBase1", () => 
+{
+var classMetadata = new global::TUnit.Core.ClassMetadata
+{
+Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase1, TestsBase`1"),
+Name = "GlobalBase1",
+Namespace = "TUnit.TestProject.AfterTests",
+Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+Parent = null
+};
+// Set ClassMetadata reference on properties to avoid circular dependency
+foreach (var prop in classMetadata.Properties)
+{
+prop.ClassMetadata = classMetadata;
+}
+return classMetadata;
+})
+},
+                HookExecutor = null!,
+                Order = 0,
+                Body = global_TUnit_TestProject_AfterTests_GlobalBase1_AfterAll1_1Params_Body,
+                FilePath = @"",
+                LineNumber = 5
+            }
+        );
+        global::TUnit.Core.Sources.AfterEveryTestHooks.Add(
+            new AfterTestHookMethod
+            {
+                MethodInfo = new global::TUnit.Core.MethodMetadata
+{
+Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase2, TestsBase`1"),
+Name = "AfterAll2",
+GenericTypeCount = 0,
+ReturnType = typeof(global::System.Threading.Tasks.Task),
+ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+Parameters = new global::TUnit.Core.ParameterMetadata[]
+{
+new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
+{
+    Name = "context",
+    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
+    ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2).GetMethod("AfterAll2", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
+},
+},
+Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.GlobalBase2", () => 
+{
+var classMetadata = new global::TUnit.Core.ClassMetadata
+{
+Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase2, TestsBase`1"),
+Name = "GlobalBase2",
+Namespace = "TUnit.TestProject.AfterTests",
+Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+Parent = null
+};
+// Set ClassMetadata reference on properties to avoid circular dependency
+foreach (var prop in classMetadata.Properties)
+{
+prop.ClassMetadata = classMetadata;
+}
+return classMetadata;
+})
+},
+                HookExecutor = null!,
+                Order = 0,
+                Body = global_TUnit_TestProject_AfterTests_GlobalBase2_AfterAll2_1Params_Body,
+                FilePath = @"",
+                LineNumber = 20
+            }
+        );
+        global::TUnit.Core.Sources.AfterEveryTestHooks.Add(
+            new AfterTestHookMethod
+            {
+                MethodInfo = new global::TUnit.Core.MethodMetadata
+{
+Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase3, TestsBase`1"),
+Name = "AfterAll3",
+GenericTypeCount = 0,
+ReturnType = typeof(global::System.Threading.Tasks.Task),
+ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+Parameters = new global::TUnit.Core.ParameterMetadata[]
+{
+new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
+{
+    Name = "context",
+    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
+    ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3).GetMethod("AfterAll3", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
+},
+},
+Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.GlobalBase3", () => 
+{
+var classMetadata = new global::TUnit.Core.ClassMetadata
+{
+Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase3, TestsBase`1"),
+Name = "GlobalBase3",
+Namespace = "TUnit.TestProject.AfterTests",
+Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+Parent = null
+};
+// Set ClassMetadata reference on properties to avoid circular dependency
+foreach (var prop in classMetadata.Properties)
+{
+prop.ClassMetadata = classMetadata;
+}
+return classMetadata;
+})
+},
+                HookExecutor = null!,
+                Order = 0,
+                Body = global_TUnit_TestProject_AfterTests_GlobalBase3_AfterAll3_1Params_Body,
+                FilePath = @"",
+                LineNumber = 35
+            }
+        );
+        global::TUnit.Core.Sources.AfterEveryTestHooks.Add(
             new AfterTestHookMethod
             {
                 MethodInfo = new global::TUnit.Core.MethodMetadata
@@ -534,7 +530,7 @@ return classMetadata;
                 LineNumber = 50
             }
         );
-        global::TUnit.Core.Sources.AfterEveryTestHooks[typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)].Add(
+        global::TUnit.Core.Sources.AfterEveryTestHooks.Add(
             new AfterTestHookMethod
             {
                 MethodInfo = new global::TUnit.Core.MethodMetadata
@@ -588,7 +584,7 @@ return classMetadata;
                 LineNumber = 56
             }
         );
-        global::TUnit.Core.Sources.AfterEveryTestHooks[typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)].Add(
+        global::TUnit.Core.Sources.AfterEveryTestHooks.Add(
             new AfterTestHookMethod
             {
                 MethodInfo = new global::TUnit.Core.MethodMetadata
@@ -636,7 +632,7 @@ return classMetadata;
                 LineNumber = 62
             }
         );
-        global::TUnit.Core.Sources.AfterEveryTestHooks[typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)].Add(
+        global::TUnit.Core.Sources.AfterEveryTestHooks.Add(
             new AfterTestHookMethod
             {
                 MethodInfo = new global::TUnit.Core.MethodMetadata
