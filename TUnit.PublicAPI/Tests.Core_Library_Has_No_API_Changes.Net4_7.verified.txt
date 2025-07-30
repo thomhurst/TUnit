@@ -201,13 +201,6 @@ namespace
         public required .TestBuilderContext TestBuilderContext { get; init; }
         public required string TestSessionId { get; init; }
     }
-    public sealed class ClassDataCombination
-    {
-        public ClassDataCombination() { }
-        public <.<object?>>[] DataFactories { get; init; }
-        public int DataSourceIndex { get; init; }
-        public int LoopIndex { get; init; }
-    }
     [(.Class | .Method | .Property, AllowMultiple=true)]
     public sealed class ClassDataSourceAttribute : .UntypedDataSourceGeneratorAttribute
     {
@@ -343,13 +336,6 @@ namespace
     {
         public CultureExecutor(.CultureInfo cultureInfo) { }
         protected override void ConfigureThread(.Thread thread) { }
-    }
-    public static class DataCombinationBuilder
-    {
-        [.(typeof(.DataCombinationBuilder.<BuildCombinationsAsync>d__0))]
-        public static .<.TestDataCombination> BuildCombinationsAsync(.<.MethodDataCombination> methodCombinations, .<.ClassDataCombination> classCombinations, .<.PropertyDataCombination> propertyCombinations, int repeatCount = 1) { }
-        [.(typeof(.DataCombinationBuilder.<BuildCombinationsWithErrorHandlingAsync>d__1))]
-        public static .<.TestDataCombination> BuildCombinationsWithErrorHandlingAsync(<.<.TestDataCombination>> generator) { }
     }
     public class DataGenerationException : 
     {
@@ -832,13 +818,6 @@ namespace
         public override int GetHashCode() { }
         protected virtual bool PrintMembers(.StringBuilder stringBuilder) { }
     }
-    public sealed class MethodDataCombination
-    {
-        public MethodDataCombination() { }
-        public <.<object?>>[] DataFactories { get; init; }
-        public int DataSourceIndex { get; init; }
-        public int LoopIndex { get; init; }
-    }
     [(.Class | .Method | .Property, AllowMultiple=true)]
     public class MethodDataSourceAttribute : .TestDataAttribute
     {
@@ -945,10 +924,6 @@ namespace
         public int Order { get; }
         public string Value { get; }
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
-    }
-    public sealed class PropertyDataCombination
-    {
-        public PropertyDataCombination() { }
     }
     public sealed class PropertyDataSource
     {
