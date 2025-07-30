@@ -98,6 +98,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
 
+        // Discover dynamic tests from DynamicTestBuilderAttribute methods
+        var dynamicTests = await DiscoverDynamicTests(testSessionId);
+        newTests.AddRange(dynamicTests);
+
         lock (_lock)
         {
             _discoveredTests.AddRange(newTests);
@@ -521,6 +525,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
     [UnconditionalSuppressMessage("Trimming",
         "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicConstructors' in call to 'System.Type.GetConstructors()'",
+        Justification = "Reflection mode requires dynamic access")]
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2067:Target parameter does not satisfy annotation requirements",
         Justification = "Reflection mode requires dynamic access")]
     private static Func<Type[], object?[], object> CreateInstanceFactory([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type testClass)
     {
@@ -1047,6 +1054,326 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 return Task.FromException(ex);
             }
         };
+    }
+
+    private async Task<List<TestMetadata>> DiscoverDynamicTests(string testSessionId)
+    {
+        var dynamicTests = new List<TestMetadata>();
+
+        // First check if there are any registered dynamic test sources from source generation
+        if (Sources.DynamicTestSources.Count > 0)
+        {
+            foreach (var source in Sources.DynamicTestSources)
+            {
+                try
+                {
+                    var tests = source.CollectDynamicTests(testSessionId);
+                    foreach (var dynamicTest in tests)
+                    {
+                        var testMetadataList = await ConvertDynamicTestToMetadata(dynamicTest);
+                        dynamicTests.AddRange(testMetadataList);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Create a failed test metadata for this dynamic test source
+                    var failedTest = CreateFailedTestMetadataForDynamicSource(source, ex);
+                    dynamicTests.Add(failedTest);
+                }
+            }
+        }
+
+        // Also discover dynamic test builder methods via reflection
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(ShouldScanAssembly)
+            .ToList();
+
+        foreach (var assembly in assemblies)
+        {
+            var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
+            {
+                try
+                {
+                    return asm.GetExportedTypes();
+                }
+                catch
+                {
+                    return [];
+                }
+            });
+
+            foreach (var type in types.Where(t => t.IsClass && !IsCompilerGenerated(t)))
+            {
+                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+#pragma warning disable TUnitWIP0001
+                    .Where(m => m.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) && !m.IsAbstract)
+#pragma warning restore TUnitWIP0001
+                    .ToArray();
+
+                foreach (var method in methods)
+                {
+                    try
+                    {
+                        var tests = await ExecuteDynamicTestBuilder(type, method, testSessionId);
+                        dynamicTests.AddRange(tests);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Create a failed test metadata for this dynamic test builder
+                        var failedTest = CreateFailedTestMetadataForDynamicBuilder(type, method, ex);
+                        dynamicTests.Add(failedTest);
+                    }
+                }
+            }
+        }
+
+        return dynamicTests;
+    }
+
+    private async Task<List<TestMetadata>> ExecuteDynamicTestBuilder(Type testClass, MethodInfo builderMethod, string testSessionId)
+    {
+        var dynamicTests = new List<TestMetadata>();
+
+        // Extract file path and line number from the DynamicTestBuilderAttribute if possible
+        var filePath = ExtractFilePath(builderMethod) ?? "Unknown";
+        var lineNumber = ExtractLineNumber(builderMethod) ?? 0;
+
+        // Create context
+        var context = new DynamicTestBuilderContext(filePath, lineNumber);
+
+        // Create instance if needed
+        object? instance = null;
+        if (!builderMethod.IsStatic)
+        {
+            instance = Activator.CreateInstance(testClass);
+        }
+
+        // Execute the builder method
+        builderMethod.Invoke(instance, new object[] { context });
+
+        // Convert the dynamic tests to test metadata
+        foreach (var dynamicTest in context.Tests)
+        {
+            var testMetadataList = await ConvertDynamicTestToMetadata(dynamicTest);
+            dynamicTests.AddRange(testMetadataList);
+        }
+
+        return dynamicTests;
+    }
+
+    private async Task<List<TestMetadata>> ConvertDynamicTestToMetadata(DynamicTest dynamicTest)
+    {
+        var testMetadataList = new List<TestMetadata>();
+
+        foreach (var discoveryResult in dynamicTest.GetTests())
+        {
+            if (discoveryResult is DynamicDiscoveryResult dynamicResult && dynamicResult.TestMethod != null)
+            {
+                var testMetadata = await CreateMetadataFromDynamicDiscoveryResult(dynamicResult);
+                testMetadataList.Add(testMetadata);
+            }
+        }
+
+        return testMetadataList;
+    }
+
+    private Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
+    {
+        if (result.TestClassType == null || result.TestMethod == null)
+        {
+            throw new InvalidOperationException("Dynamic test discovery result must have a test class type and method");
+        }
+
+        // Extract method info from the expression
+        MethodInfo? methodInfo = null;
+        var lambdaExpression = result.TestMethod as System.Linq.Expressions.LambdaExpression;
+        if (lambdaExpression?.Body is System.Linq.Expressions.MethodCallExpression methodCall)
+        {
+            methodInfo = methodCall.Method;
+        }
+        else if (lambdaExpression?.Body is System.Linq.Expressions.UnaryExpression unary && 
+                 unary.Operand is System.Linq.Expressions.MethodCallExpression unaryMethodCall)
+        {
+            methodInfo = unaryMethodCall.Method;
+        }
+
+        if (methodInfo == null)
+        {
+            throw new InvalidOperationException("Could not extract method info from dynamic test expression");
+        }
+
+        var testName = GenerateTestName(result.TestClassType, methodInfo);
+
+        var metadata = new DynamicReflectionTestMetadata(result.TestClassType, methodInfo, result)
+        {
+            TestName = testName,
+            TestClassType = result.TestClassType,
+            TestMethodName = methodInfo.Name,
+            Categories = result.Attributes.OfType<CategoryAttribute>().Select(a => a.Category).ToArray(),
+            IsSkipped = result.Attributes.OfType<SkipAttribute>().Any(),
+            SkipReason = result.Attributes.OfType<SkipAttribute>().FirstOrDefault()?.Reason,
+            TimeoutMs = (int?)result.Attributes.OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout.TotalMilliseconds,
+            RetryCount = result.Attributes.OfType<RetryAttribute>().FirstOrDefault()?.Times ?? 0,
+            RepeatCount = result.Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 1,
+            CanRunInParallel = !result.Attributes.OfType<NotInParallelAttribute>().Any(),
+            Dependencies = result.Attributes.OfType<DependsOnAttribute>().Select(a => a.ToTestDependency()).ToArray(),
+            DataSources = [], // Dynamic tests don't use data sources in the same way
+            ClassDataSources = [],
+            PropertyDataSources = [],
+            InstanceFactory = CreateInstanceFactory(result.TestClassType)!,
+            TestInvoker = CreateDynamicTestInvoker(result),
+            ParameterCount = result.TestMethodArguments?.Length ?? 0,
+            ParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType).ToArray(),
+            TestMethodParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
+            FilePath = null,
+            LineNumber = null,
+            MethodMetadata = MetadataBuilder.CreateMethodMetadata(result.TestClassType, methodInfo),
+            GenericTypeInfo = ReflectionGenericTypeResolver.ExtractGenericTypeInfo(result.TestClassType),
+            GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(methodInfo),
+            GenericMethodTypeArguments = methodInfo.IsGenericMethodDefinition ? null : methodInfo.GetGenericArguments(),
+            AttributeFactory = () => result.Attributes.ToArray(),
+            PropertyInjections = PropertyInjector.DiscoverInjectableProperties(result.TestClassType)
+        };
+        
+        return Task.FromResult<TestMetadata>(metadata);
+    }
+
+    private static Func<object, object?[], Task> CreateDynamicTestInvoker(DynamicDiscoveryResult result)
+    {
+        return async (instance, args) =>
+        {
+            try
+            {
+                if (result.TestMethod == null)
+                {
+                    throw new InvalidOperationException("Dynamic test method expression is null");
+                }
+
+                // Since we're in reflection mode, we can compile and invoke the expression
+                var lambdaExpression = result.TestMethod as System.Linq.Expressions.LambdaExpression;
+                if (lambdaExpression == null)
+                {
+                    throw new InvalidOperationException("Dynamic test method must be a lambda expression");
+                }
+                
+                var compiledExpression = lambdaExpression.Compile();
+                var testInstance = instance ?? throw new InvalidOperationException("Test instance is null");
+
+                // The expression is already bound to the correct method with arguments
+                // so we just need to invoke it with the instance
+                var invokeMethod = compiledExpression.GetType().GetMethod("Invoke")!;
+                var invokeResult = invokeMethod.Invoke(compiledExpression, new[] { testInstance });
+
+                if (invokeResult is Task task)
+                {
+                    await task;
+                }
+                else if (invokeResult is ValueTask valueTask)
+                {
+                    await valueTask;
+                }
+            }
+            catch (TargetInvocationException tie)
+            {
+                ExceptionDispatchInfo.Capture(tie.InnerException ?? tie).Throw();
+                throw;
+            }
+        };
+    }
+
+    private static TestMetadata CreateFailedTestMetadataForDynamicSource(IDynamicTestSource source, Exception ex)
+    {
+        var testName = $"[DYNAMIC SOURCE FAILED] {source.GetType().Name}";
+        var displayName = $"{testName} - {ex.Message}";
+
+        return new FailedTestMetadata(ex, displayName)
+        {
+            TestName = testName,
+            TestClassType = source.GetType(),
+            TestMethodName = "CollectDynamicTests",
+            MethodMetadata = CreateDummyMethodMetadata(source.GetType(), "CollectDynamicTests"),
+            AttributeFactory = () => [],
+            DataSources = [],
+            ClassDataSources = [],
+            PropertyDataSources = []
+        };
+    }
+
+    private static TestMetadata CreateFailedTestMetadataForDynamicBuilder(Type type, MethodInfo method, Exception ex)
+    {
+        var testName = $"[DYNAMIC BUILDER FAILED] {type.FullName}.{method.Name}";
+        var displayName = $"{testName} - {ex.Message}";
+
+        return new FailedTestMetadata(ex, displayName)
+        {
+            TestName = testName,
+            TestClassType = type,
+            TestMethodName = method.Name,
+            MethodMetadata = MetadataBuilder.CreateMethodMetadata(type, method),
+            AttributeFactory = () => method.GetCustomAttributes().ToArray(),
+            DataSources = [],
+            ClassDataSources = [],
+            PropertyDataSources = []
+        };
+    }
+
+    private sealed class DynamicReflectionTestMetadata : TestMetadata
+    {
+        private readonly DynamicDiscoveryResult _dynamicResult;
+        private readonly Type _testClass;
+        private readonly MethodInfo _testMethod;
+
+        public DynamicReflectionTestMetadata(Type testClass, MethodInfo testMethod, DynamicDiscoveryResult dynamicResult)
+        {
+            _testClass = testClass;
+            _testMethod = testMethod;
+            _dynamicResult = dynamicResult;
+        }
+
+        public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
+        {
+            get => (context, metadata) =>
+            {
+                // For dynamic tests, we need to use the specific arguments from the dynamic result
+                var modifiedContext = new ExecutableTestCreationContext
+                {
+                    TestId = context.TestId,
+                    DisplayName = context.DisplayName,
+                    Arguments = _dynamicResult.TestMethodArguments ?? context.Arguments,
+                    ClassArguments = _dynamicResult.TestClassArguments ?? context.ClassArguments,
+                    Context = context.Context
+                };
+                
+                // Create a regular ExecutableTest with the modified context
+                // Create instance and test invoker for the dynamic test
+                Func<TestContext, Task<object>> createInstance = (TestContext testContext) =>
+                {
+                    var instance = metadata.InstanceFactory(Type.EmptyTypes, modifiedContext.ClassArguments);
+                    
+                    // Handle property injections
+                    foreach (var propertyInjection in metadata.PropertyInjections)
+                    {
+                        var value = propertyInjection.ValueFactory();
+                        propertyInjection.Setter(instance, value);
+                    }
+                    
+                    return Task.FromResult(instance);
+                };
+                
+                var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");
+                
+                return new UnifiedExecutableTest(createInstance, 
+                    async (instance, args, context, ct) => await invokeTest(instance, args))
+                {
+                    TestId = modifiedContext.TestId,
+                    DisplayName = modifiedContext.DisplayName,
+                    Metadata = metadata,
+                    Arguments = modifiedContext.Arguments,
+                    ClassArguments = modifiedContext.ClassArguments,
+                    Context = modifiedContext.Context
+                };
+            };
+        }
     }
 
 }
