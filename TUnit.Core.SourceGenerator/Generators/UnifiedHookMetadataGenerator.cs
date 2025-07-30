@@ -483,13 +483,13 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             if (testSessionHooks.Any())
             {
 
-                var beforeTestSessionHooks = testSessionHooks.Where(h => h.HookKind == "Before").ToList();
+                var beforeTestSessionHooks = testSessionHooks.Where(h => h.HookKind == "Before" || h.HookKind == "BeforeEvery").ToList();
                 if (beforeTestSessionHooks.Any())
                 {
                     GenerateGlobalHookListPopulation(writer, "BeforeTestSessionHooks", beforeTestSessionHooks);
                 }
 
-                var afterTestSessionHooks = testSessionHooks.Where(h => h.HookKind == "After").ToList();
+                var afterTestSessionHooks = testSessionHooks.Where(h => h.HookKind == "After" || h.HookKind == "AfterEvery").ToList();
                 if (afterTestSessionHooks.Any())
                 {
                     GenerateGlobalHookListPopulation(writer, "AfterTestSessionHooks", afterTestSessionHooks);
@@ -500,13 +500,13 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
             if (testDiscoveryHooks.Any())
             {
 
-                var beforeTestDiscoveryHooks = testDiscoveryHooks.Where(h => h.HookKind == "Before").ToList();
+                var beforeTestDiscoveryHooks = testDiscoveryHooks.Where(h => h.HookKind == "Before" || h.HookKind == "BeforeEvery").ToList();
                 if (beforeTestDiscoveryHooks.Any())
                 {
                     GenerateGlobalHookListPopulation(writer, "BeforeTestDiscoveryHooks", beforeTestDiscoveryHooks);
                 }
 
-                var afterTestDiscoveryHooks = testDiscoveryHooks.Where(h => h.HookKind == "After").ToList();
+                var afterTestDiscoveryHooks = testDiscoveryHooks.Where(h => h.HookKind == "After" || h.HookKind == "AfterEvery").ToList();
                 if (afterTestDiscoveryHooks.Any())
                 {
                     GenerateGlobalHookListPopulation(writer, "AfterTestDiscoveryHooks", afterTestDiscoveryHooks);
