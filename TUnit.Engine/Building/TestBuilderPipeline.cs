@@ -29,10 +29,10 @@ internal sealed class TestBuilderPipeline
     {
         var dataCollector = _dataCollectorFactory(filterTypes);
         var collectedMetadata = await dataCollector.CollectTestsAsync(testSessionId);
-        
+
         return await BuildTestsFromMetadataAsync(collectedMetadata);
     }
-    
+
     public async Task<IEnumerable<ExecutableTest>> BuildTestsFromMetadataAsync(IEnumerable<TestMetadata> testMetadata)
     {
         var executableTests = new List<ExecutableTest>();
@@ -61,7 +61,7 @@ internal sealed class TestBuilderPipeline
                 {
                     // Dynamic tests need to honor attributes like RepeatCount, RetryCount, etc.
                     // We'll create multiple test instances based on RepeatCount
-                    for (var repeatIndex = 0; repeatIndex < Math.Max(1, metadata.RepeatCount); repeatIndex++)
+                    for (var repeatIndex = 0; repeatIndex < metadata.RepeatCount + 1; repeatIndex++)
                     {
                         // Create a simple TestData for ID generation
                         var testData = new TestBuilder.TestData
@@ -77,12 +77,12 @@ internal sealed class TestBuilderPipeline
                             ResolvedClassGenericArguments = Type.EmptyTypes,
                             ResolvedMethodGenericArguments = Type.EmptyTypes
                         };
-                        
+
                         var testId = TestIdentifierService.GenerateTestId(metadata, testData);
-                        var displayName = metadata.RepeatCount > 1 
+                        var displayName = metadata.RepeatCount > 1
                             ? $"{metadata.TestName} (Repeat {repeatIndex + 1}/{metadata.RepeatCount})"
                             : metadata.TestName;
-                        
+
                         // Create TestDetails for dynamic tests
                         var testDetails = new TestDetails
                         {
@@ -99,24 +99,24 @@ internal sealed class TestBuilderPipeline
                             ReturnType = typeof(Task),
                             MethodMetadata = metadata.MethodMetadata,
                             Attributes = metadata.AttributeFactory?.Invoke() ?? [],
-                            Timeout = metadata.TimeoutMs.HasValue 
-                                ? TimeSpan.FromMilliseconds(metadata.TimeoutMs.Value) 
+                            Timeout = metadata.TimeoutMs.HasValue
+                                ? TimeSpan.FromMilliseconds(metadata.TimeoutMs.Value)
                                 : null,
                             RetryLimit = metadata.RetryCount
                         };
-                        
+
                         var context = _contextProvider.CreateTestContext(
                             metadata.TestName,
                             metadata.TestClassType,
                             new TestBuilderContext { TestMetadata = metadata.MethodMetadata },
                             CancellationToken.None);
-                        
+
                         // Set the TestDetails on the context
                         context.TestDetails = testDetails;
-                        
+
                         // Invoke discovery event receivers to properly handle all attribute behaviors
                         await InvokeDiscoveryEventReceiversAsync(context);
-                        
+
                         var executableTestContext = new ExecutableTestCreationContext
                         {
                             TestId = testId,
@@ -125,7 +125,7 @@ internal sealed class TestBuilderPipeline
                             ClassArguments = [],
                             Context = context
                         };
-                        
+
                         var executableTest = metadata.CreateExecutableTestFactory(executableTestContext, metadata);
                         executableTests.Add(executableTest);
                     }
@@ -265,7 +265,7 @@ internal sealed class TestBuilderPipeline
             context);
 
         await _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
-        
+
         discoveredContext.TransferTo(context);
     }
 

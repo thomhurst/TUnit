@@ -131,7 +131,7 @@ internal sealed class TestRegistry : ITestRegistry
             SkipReason = result.Attributes.OfType<SkipAttribute>().FirstOrDefault()?.Reason,
             TimeoutMs = (int?)result.Attributes.OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout.TotalMilliseconds,
             RetryCount = result.Attributes.OfType<RetryAttribute>().FirstOrDefault()?.Times ?? 0,
-            RepeatCount = result.Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 1,
+            RepeatCount = result.Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0,
             CanRunInParallel = !result.Attributes.OfType<NotInParallelAttribute>().Any(),
             Dependencies = result.Attributes.OfType<DependsOnAttribute>().Select(a => a.ToTestDependency()).ToArray(),
             DataSources = [],
