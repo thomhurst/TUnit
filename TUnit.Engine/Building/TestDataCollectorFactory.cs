@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using TUnit.Core.Enums;
+using TUnit.Core;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Collectors;
 using TUnit.Engine.Building.Interfaces;
@@ -12,16 +12,18 @@ public static class TestDataCollectorFactory
 {
     [UnconditionalSuppressMessage("Trimming", "IL2026:Using member 'TUnit.Engine.Discovery.ReflectionTestDataCollector.ReflectionTestDataCollector()' which has 'RequiresUnreferencedCodeAttribute' can break functionality when trimming application code", Justification = "Reflection mode is explicitly chosen and cannot support trimming")]
     [UnconditionalSuppressMessage("AOT", "IL3050:Using member 'TUnit.Engine.Discovery.ReflectionTestDataCollector.ReflectionTestDataCollector()' which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling", Justification = "Reflection mode is explicitly chosen and cannot support AOT")]
-    public static ITestDataCollector Create(TestExecutionMode? mode = null, Assembly[]? assembliesToScan = null)
+    public static ITestDataCollector Create(bool? useSourceGeneration = null, Assembly[]? assembliesToScan = null)
     {
-        var executionMode = mode ?? ModeDetector.Mode;
+        var isSourceGenerationEnabled = useSourceGeneration ?? SourceRegistrar.IsEnabled;
 
-        return executionMode switch
+        if (isSourceGenerationEnabled)
         {
-            TestExecutionMode.SourceGeneration => new AotTestDataCollector(filterTypes: null),
-            TestExecutionMode.Reflection => new ReflectionTestDataCollector(),
-            _ => throw new NotSupportedException($"Test execution mode '{executionMode}' is not supported")
-        };
+            return new AotTestDataCollector(filterTypes: null);
+        }
+        else
+        {
+            return new ReflectionTestDataCollector();
+        }
     }
 
     /// Attempts AOT mode first, falls back to reflection if no source-generated tests found

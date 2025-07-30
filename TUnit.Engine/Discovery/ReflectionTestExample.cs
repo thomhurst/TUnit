@@ -1,7 +1,6 @@
 #if DEBUG
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
-using TUnit.Core.Enums;
 using TUnit.Engine.Building;
 
 namespace TUnit.Engine.Discovery
@@ -20,7 +19,7 @@ internal static class ReflectionTestExample
         Console.WriteLine("=== ReflectionTestDataCollector Example ===");
 
         // Create a reflection-based test data collector
-        var collector = TestDataCollectorFactory.Create(TestExecutionMode.Reflection);
+        var collector = TestDataCollectorFactory.Create(useSourceGeneration: false);
 
         // Collect all tests using reflection
         var tests = await collector.CollectTestsAsync("123");

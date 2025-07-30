@@ -7,7 +7,6 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
-using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Collectors;
@@ -93,19 +92,21 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
 
         // Detect execution mode from command line or environment
-        var executionMode = GetExecutionMode(CommandLineOptions);
+        var useSourceGeneration = GetUseSourceGeneration(CommandLineOptions);
 
         // Create data collector factory that creates collectors with filter types
 #pragma warning disable IL2026 // Using member which has 'RequiresUnreferencedCodeAttribute'
 #pragma warning disable IL3050 // Using member which has 'RequiresDynamicCodeAttribute'
         Func<HashSet<Type>?, ITestDataCollector> dataCollectorFactory = filterTypes =>
         {
-            return executionMode switch
+            if (useSourceGeneration)
             {
-                TestExecutionMode.SourceGeneration => new AotTestDataCollector(filterTypes),
-                TestExecutionMode.Reflection => new ReflectionTestDataCollector(),
-                _ => throw new NotSupportedException($"Test execution mode '{executionMode}' is not supported")
-            };
+                return new AotTestDataCollector(filterTypes);
+            }
+            else
+            {
+                return new ReflectionTestDataCollector();
+            }
         };
 #pragma warning restore IL3050
 #pragma warning restore IL2026
@@ -191,32 +192,43 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         return service;
     }
 
-    private static TestExecutionMode GetExecutionMode(ICommandLineOptions commandLineOptions)
+    private static bool GetUseSourceGeneration(ICommandLineOptions commandLineOptions)
     {
         if (commandLineOptions.TryGetOptionArgumentList(CommandLineProviders.ReflectionModeCommandProvider.ReflectionMode, out _))
         {
-            return TestExecutionMode.Reflection;
+            return false; // Reflection mode explicitly requested
         }
 
         // Check for command line option
         if (commandLineOptions.TryGetOptionArgumentList("tunit-execution-mode", out var modes) && modes.Length > 0)
         {
-            if (Enum.TryParse<TestExecutionMode>(modes[0], ignoreCase: true, out var mode))
+            var mode = modes[0].ToLowerInvariant();
+            if (mode == "sourcegeneration" || mode == "aot")
             {
-                return mode;
+                return true;
+            }
+            else if (mode == "reflection")
+            {
+                return false;
             }
         }
 
         // Check environment variable
         var envMode = Environment.GetEnvironmentVariable("TUNIT_EXECUTION_MODE");
-        if (!string.IsNullOrEmpty(envMode) &&
-            Enum.TryParse<TestExecutionMode>(envMode, ignoreCase: true, out var envModeEnum))
+        if (!string.IsNullOrEmpty(envMode))
         {
-            return envModeEnum;
+            var mode = envMode.ToLowerInvariant();
+            if (mode == "sourcegeneration" || mode == "aot")
+            {
+                return true;
+            }
+            else if (mode == "reflection")
+            {
+                return false;
+            }
         }
 
-        // Default to auto-detect based on available tests
-        return TestExecutionMode.SourceGeneration;
+        return SourceRegistrar.IsEnabled;
     }
 
     public async ValueTask DisposeAsync()

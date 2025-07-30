@@ -74,18 +74,13 @@ public sealed class PropertyInjectionService
         {
             await _injectionTasks.GetOrAdd(instance, async _ =>
             {
-                var executionMode = ModeDetector.Mode;
-
-                switch (executionMode)
+                if (SourceRegistrar.IsEnabled)
                 {
-                    case TestExecutionMode.SourceGeneration:
-                        await InjectPropertiesUsingSourceGenerationAsync(instance, objectBag, methodMetadata, events);
-                        break;
-                    case TestExecutionMode.Reflection:
-                        await InjectPropertiesUsingReflectionAsync(instance, objectBag, methodMetadata, events);
-                        break;
-                    default:
-                        throw new NotSupportedException($"Test execution mode '{executionMode}' is not supported for property injection");
+                    await InjectPropertiesUsingSourceGenerationAsync(instance, objectBag, methodMetadata, events);
+                }
+                else
+                {
+                    await InjectPropertiesUsingReflectionAsync(instance, objectBag, methodMetadata, events);
                 }
             });
         }

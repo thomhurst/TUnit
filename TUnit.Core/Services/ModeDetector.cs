@@ -1,5 +1,3 @@
-using TUnit.Core.Enums;
-
 namespace TUnit.Core.Services;
 
 /// <summary>
@@ -8,9 +6,4 @@ namespace TUnit.Core.Services;
 public static class ModeDetector
 {
     public static bool IsSourceGenerationAvailable => SourceRegistrar.IsEnabled;
-
-    /// <summary>
-    /// Static helper to get the current execution mode
-    /// </summary>
-    public static TestExecutionMode Mode => SourceRegistrar.IsEnabled ? TestExecutionMode.SourceGeneration : TestExecutionMode.Reflection;
 }
