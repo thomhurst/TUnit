@@ -198,11 +198,11 @@ internal sealed class ReflectionHookDiscoveryService
 
                 if (isBeforeHook)
                 {
-                    Sources.BeforeEveryTestHooks.GetOrAdd(type, _ => new ConcurrentBag<StaticHookMethod<TestContext>>()).Add(hook);
+                    Sources.BeforeEveryTestHooks.Add(hook);
                 }
                 else
                 {
-                    Sources.AfterEveryTestHooks.GetOrAdd(type, _ => new ConcurrentBag<StaticHookMethod<TestContext>>()).Add(hook);
+                    Sources.AfterEveryTestHooks.Add(hook);
                 }
             }
             else
