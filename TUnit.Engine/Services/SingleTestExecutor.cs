@@ -84,7 +84,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 return await HandleSkippedTestAsync(test, cancellationToken);
             }
 
-            if(test.Context.RetryFunc != null && test.Context.TestDetails.RetryLimit > 0)
+            if(test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
             {
 
                 await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken);
@@ -122,16 +122,17 @@ internal class SingleTestExecutor : ISingleTestExecutor
         var retryLimit = testContext.TestDetails.RetryLimit;
         var retryFunc = testContext.RetryFunc!;
 
-        for (var i = 1; i <= retryLimit; i++)
+        for (var i = 0; i < retryLimit + 1; i++)
         {
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 await testDelegate();
                 return;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (i < retryLimit)
             {
-                if (i == retryLimit || !await retryFunc(testContext, ex, i))
+                if (!await retryFunc(testContext, ex, i + 1))
                 {
                     throw;
                 }

@@ -17,6 +17,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
     private readonly ChannelConsumerManager _consumerManager;
     private readonly ExecutionContextManager _executionContextManager;
     private readonly ConcurrentDictionary<string, int> _runningConstraintKeys = new();
+    private int _routedTestCount = 0;
 
     public ProducerConsumerTestScheduler(
         TUnitFrameworkLogger logger,
@@ -54,6 +55,9 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         }
 
         await _logger.LogInformationAsync($"Scheduling {testList.Count} tests for execution");
+        
+        // Reset routed test count for this run
+        _routedTestCount = 0;
 
         // Group tests by constraints
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(testList);
@@ -132,16 +136,28 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             await Task.WhenAll(batch.Select(state => RouteTestAsync(state, cancellationToken)));
         }
         
-        // Signal completion - no more tests will be added
-        _channelRouter.SignalCompletion();
+        // Track total test count
+        var totalTestCount = executionStates.Count;
         
         // Start consumers - they will consume until channels are empty and completed
-        await _consumerManager.StartConsumersAsync(
+        var consumerTask = _consumerManager.StartConsumersAsync(
             executor,
             _runningConstraintKeys,
             async (test, token) => await ExecuteTestWithContextAsync(test, executor, executionStates, token),
             _channelRouter.GetMultiplexer(),
             cancellationToken);
+        
+        // Wait for all tests to be routed before signaling completion
+        while (_routedTestCount < totalTestCount)
+        {
+            await Task.Delay(100, cancellationToken);
+        }
+        
+        // Now signal completion - all tests have been routed
+        _channelRouter.SignalCompletion();
+        
+        // Wait for consumers to finish
+        await consumerTask;
         
         await _logger.LogInformationAsync("Test execution completed");
     }
@@ -160,6 +176,9 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
 
         // Route test to appropriate channel
         await _channelRouter.RouteTestAsync(testData, cancellationToken);
+        
+        // Track that this test has been routed
+        Interlocked.Increment(ref _routedTestCount);
     }
 
     private async Task ExecuteTestWithContextAsync(
@@ -298,6 +317,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         var readyTests = executionStates.Values.Where(s => s.RemainingDependencies == 0).ToList();
         
         await _logger.LogInformationAsync($"Dependency setup: {testsWithDependencies.Count} tests with dependencies, {readyTests.Count} ready tests");
+        
     }
     
     private async Task ProcessTestCompletionAsync(TestExecutionState completedTest, Dictionary<string, TestExecutionState> executionStates, CancellationToken cancellationToken)
@@ -310,7 +330,6 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             if (executionStates.TryGetValue(dependentId, out var dependentState))
             {
                 var remaining = dependentState.DecrementRemainingDependencies();
-                // Dependency count decremented
                 
                 if (remaining == 0 && dependentState.State == TestState.NotStarted)
                 {

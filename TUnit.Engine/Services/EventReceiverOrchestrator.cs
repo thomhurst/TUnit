@@ -1,11 +1,14 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
+using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Events;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Utilities;
 
 namespace TUnit.Engine.Services;
 
@@ -33,6 +36,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     public async ValueTask InitializeAllEligibleObjectsAsync(TestContext context, CancellationToken cancellationToken)
     {
         var eligibleObjects = context.GetEligibleEventObjects().ToArray();
+        
 
         // Register all event receivers for fast lookup
         _registry.RegisterReceivers(eligibleObjects);
@@ -74,23 +78,29 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = _registry.GetReceiversOfType<ITestStartEventReceiver>();
+        var receivers = context.GetEligibleEventObjects()
+            .OfType<ITestStartEventReceiver>()
+            .OrderBy(r => r.Order)
+            .ToList();
+        
+        // Filter scoped attributes
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
 
         // Sort by order once
-        if (receivers.Length > 1)
+        if (filteredReceivers.Count > 1)
         {
-            Array.Sort(receivers, (a, b) => a.Order.CompareTo(b.Order));
+            filteredReceivers.Sort((a, b) => a.Order.CompareTo(b.Order));
         }
 
         // Batch invocation for multiple receivers
-        if (receivers.Length > 3)
+        if (filteredReceivers.Count > 3)
         {
-            await InvokeBatchedAsync(receivers, r => r.OnTestStart(context), cancellationToken);
+            await InvokeBatchedAsync(filteredReceivers.ToArray(), r => r.OnTestStart(context), cancellationToken);
         }
         else
         {
             // Sequential for small counts
-            foreach (var receiver in receivers)
+            foreach (var receiver in filteredReceivers)
             {
                 try
                 {
@@ -117,14 +127,20 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = _registry.GetReceiversOfType<ITestEndEventReceiver>();
+        var receivers = context.GetEligibleEventObjects()
+            .OfType<ITestEndEventReceiver>()
+            .OrderBy(r => r.Order)
+            .ToList();
+        
+        // Filter scoped attributes
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
 
-        if (receivers.Length > 1)
+        if (filteredReceivers.Count > 1)
         {
-            Array.Sort(receivers, (a, b) => a.Order.CompareTo(b.Order));
+            filteredReceivers.Sort((a, b) => a.Order.CompareTo(b.Order));
         }
 
-        foreach (var receiver in receivers)
+        foreach (var receiver in filteredReceivers)
         {
             try
             {
@@ -150,14 +166,20 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestSkippedEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = _registry.GetReceiversOfType<ITestSkippedEventReceiver>();
+        var receivers = context.GetEligibleEventObjects()
+            .OfType<ITestSkippedEventReceiver>()
+            .OrderBy(r => r.Order)
+            .ToList();
+        
+        // Filter scoped attributes
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
 
-        if (receivers.Length > 1)
+        if (filteredReceivers.Count > 1)
         {
-            Array.Sort(receivers, (a, b) => a.Order.CompareTo(b.Order));
+            filteredReceivers.Sort((a, b) => a.Order.CompareTo(b.Order));
         }
 
-        foreach (var receiver in receivers)
+        foreach (var receiver in filteredReceivers)
         {
             try
             {
@@ -183,13 +205,20 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestRegisteredEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = _registry.GetReceiversOfType<ITestRegisteredEventReceiver>();
+        var receivers = context.GetEligibleEventObjects()
+            .OfType<ITestRegisteredEventReceiver>()
+            .OrderBy(r => r.Order)
+            .ToList();
+        
+        // Filter scoped attributes
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
+        
         var registeredContext = new TestRegisteredContext(context)
         {
             DiscoveredTest = context.InternalDiscoveredTest!
         };
 
-        foreach (var receiver in receivers)
+        foreach (var receiver in filteredReceivers)
         {
             try
             {
@@ -209,7 +238,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             .OrderBy(r => r.Order)
             .ToList();
 
-        foreach (var receiver in eventReceivers)
+        // Filter scoped attributes to ensure only the highest priority one of each type is invoked
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);
+
+        foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
         {
             try
             {
@@ -221,6 +253,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             }
         }
     }
+
 
     // First/Last event methods with fast-path checks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -38,7 +38,7 @@ namespace TUnit.Core;
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class RetryAttribute : TUnitAttribute, ITestDiscoveryEventReceiver
+public class RetryAttribute : TUnitAttribute, ITestDiscoveryEventReceiver, IScopedAttribute<RetryAttribute>
 {
     /// <inheritdoc />
     public int Order => 0;

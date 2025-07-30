@@ -3,7 +3,7 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventReceiver
+public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventReceiver, IScopedAttribute<NotInParallelAttribute>
 {
     public string[] ConstraintKeys { get; } = [];
 

@@ -70,7 +70,7 @@ internal sealed class TestRequestHandler : IRequestHandler
             await serviceProvider.MessageBus.Discovered(test.Context);
         }
 
-        // Execute tests (executor will apply the same filter internally)
+        // Execute tests
         await serviceProvider.TestExecutor.ExecuteTests(
             allTests,
             request.Filter,

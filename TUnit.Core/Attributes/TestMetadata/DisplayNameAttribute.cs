@@ -29,7 +29,7 @@ namespace TUnit.Core;
 /// The display name template. Can include parameter placeholders in the format of "$parameterName".
 /// </param>
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormatterAttribute
+public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormatterAttribute, IScopedAttribute<DisplayNameAttribute>
 {
     /// <inheritdoc />
     protected override string FormatDisplayName(DiscoveredTestContext context)

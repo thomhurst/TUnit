@@ -100,7 +100,10 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
         var namespaceName = classMetadata.Namespace ?? "*";
         var classTypeName = classMetadata.Name;
 
-        return $"/{assemblyName}/{namespaceName}/{classTypeName}/{metadata.TestMethodName}";
+        var path = $"/{assemblyName}/{namespaceName}/{classTypeName}/{metadata.TestMethodName}";
+        
+        
+        return path;
     }
 
     private bool CheckTreeNodeFilter(
@@ -114,6 +117,11 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
         var propertyBag = BuildPropertyBag(executableTest);
 
         var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
+
+        if (!matches)
+        {
+            logger.LogTrace($"Test {executableTest.TestId} with path '{path}' did not match treenode filter");
+        }
 
         return matches;
     }

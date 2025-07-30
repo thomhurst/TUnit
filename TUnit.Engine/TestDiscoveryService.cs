@@ -68,6 +68,34 @@ internal sealed class TestDiscoveryService : IDataProducer
             tests.Add(test);
         }
 
+        // Now that all tests are discovered, resolve dependencies
+        foreach (var test in tests)
+        {
+            _dependencyResolver.TryResolveDependencies(test);
+        }
+
+        // Apply filter first to get the tests we want to run
+        var filteredTests = _testFilterService.FilterTests(filter, tests);
+
+        // Now find all dependencies of filtered tests and add them
+        var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
+        var queue = new Queue<AbstractExecutableTest>(filteredTests);
+        
+        
+        while (queue.Count > 0)
+        {
+            var test = queue.Dequeue();
+            foreach (var dependency in test.Dependencies)
+            {
+                if (testsToInclude.Add(dependency))
+                {
+                    queue.Enqueue(dependency);
+                }
+            }
+        }
+
+        filteredTests = testsToInclude.ToList();
+
         // Populate the TestDiscoveryContext with all discovered tests before running AfterTestDiscovery hooks
         var contextProvider = _hookOrchestrator.GetContextProvider();
         contextProvider.TestDiscoveryContext.AddTests(tests.Select(t => t.Context));
@@ -79,8 +107,6 @@ internal sealed class TestDiscoveryService : IDataProducer
             ExecutionContext.Restore(afterDiscoveryContext);
         }
 #endif
-
-        var filteredTests = _testFilterService.FilterTests(filter, tests);
 
         // Register the filtered tests to invoke ITestRegisteredEventReceiver
         await _testFilterService.RegisterTestsAsync(filteredTests);
@@ -106,13 +132,6 @@ internal sealed class TestDiscoveryService : IDataProducer
         await foreach (var test in BuildTestsAsync(testSessionId, filterTypes, cts.Token))
         {
             _dependencyResolver.RegisterTest(test);
-
-            // Try to resolve dependencies immediately
-            if (!_dependencyResolver.TryResolveDependencies(test) && test.Metadata.Dependencies.Length > 0)
-            {
-                // Mark as waiting if dependencies not ready
-                test.State = TestState.WaitingForDependencies;
-            }
 
             // Cache for backward compatibility
             _cachedTests.Add(test);
