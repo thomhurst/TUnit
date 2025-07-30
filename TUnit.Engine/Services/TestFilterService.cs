@@ -96,7 +96,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
         var metadata = test.Metadata;
 
         var classMetadata = test.Context.TestDetails.MethodMetadata.Class;
-        var assemblyName = classMetadata.Assembly?.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
+        var assemblyName = classMetadata.Assembly.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
         var namespaceName = classMetadata.Namespace ?? "*";
         var classTypeName = classMetadata.Name;
 
@@ -128,7 +128,12 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
     {
         var properties = new List<IProperty>();
 
-        foreach (var category in test.Metadata.Categories)
+        if (test.Metadata.TestClassType.Name == "PassFailTests")
+        {
+            Console.WriteLine("TestClassType is PassFailTests, skipping property bag creation.");
+        }
+
+        foreach (var category in test.Context.TestDetails.Categories)
         {
             properties.Add(new TestMetadataProperty(category));
             properties.Add(new KeyValuePairStringProperty("Category", category));

@@ -200,7 +200,6 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             TestClassType = result.TestClassType,
 #pragma warning restore IL2072
             TestMethodName = methodInfo.Name,
-            Categories = result.Attributes.OfType<CategoryAttribute>().Select(a => a.Category).ToArray(),
             IsSkipped = result.Attributes.OfType<SkipAttribute>().Any(),
             SkipReason = result.Attributes.OfType<SkipAttribute>().FirstOrDefault()?.Reason,
             TimeoutMs = (int?)result.Attributes.OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout.TotalMilliseconds,
@@ -248,7 +247,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     {
         // For dynamic tests, we always use the predefined args (or empty array if null)
         var classArgs = predefinedClassArgs ?? [];
-        
+
         return (typeArgs, args) =>
         {
             // Always use the predefined class args, ignoring the args parameter
@@ -261,7 +260,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 }
                 return Activator.CreateInstance(closedType, classArgs)!;
             }
-            
+
             if (classArgs.Length == 0)
             {
                 return Activator.CreateInstance(testClass)!;
@@ -288,7 +287,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 {
                     throw new InvalidOperationException("Dynamic test method must be a lambda expression");
                 }
-                
+
                 var compiledExpression = lambdaExpression.Compile();
                 var testInstance = instance ?? throw new InvalidOperationException("Test instance is null");
 
@@ -338,7 +337,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         "IL2067:Target parameter does not satisfy annotation requirements",
         Justification = "Dynamic test metadata creation")]
     [UnconditionalSuppressMessage("Trimming",
-        "IL2072:Target method return value does not have matching annotations",  
+        "IL2072:Target method return value does not have matching annotations",
         Justification = "Dynamic test metadata creation")]
     private static MethodMetadata CreateDummyMethodMetadata(Type type, string methodName)
     {
@@ -399,20 +398,20 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 Func<TestContext, Task<object>> createInstance = (TestContext testContext) =>
                 {
                     var instance = metadata.InstanceFactory(Type.EmptyTypes, modifiedContext.ClassArguments);
-                    
+
                     // Handle property injections
                     foreach (var propertyInjection in metadata.PropertyInjections)
                     {
                         var value = propertyInjection.ValueFactory();
                         propertyInjection.Setter(instance, value);
                     }
-                    
+
                     return Task.FromResult(instance);
                 };
-                
+
                 var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");
-                
-                return new UnifiedExecutableTest(createInstance, 
+
+                return new UnifiedExecutableTest(createInstance,
                     async (instance, args, context, ct) => await invokeTest(instance, args))
                 {
                     TestId = modifiedContext.TestId,

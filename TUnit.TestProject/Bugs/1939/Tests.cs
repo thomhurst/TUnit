@@ -31,8 +31,10 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
             .FirstOrDefault(x => x.ClassType == typeof(Tests))
             ?.Tests;
 
-        if (tests is null)
+        if (tests is null || tests.Any(x => x.Result == null))
         {
+            // If the test did not run, we cannot check if the classes were disposed.
+            // This can happen if the test was filtered out or not executed for some reason.
             return;
         }
 

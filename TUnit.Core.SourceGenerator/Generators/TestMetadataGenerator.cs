@@ -284,7 +284,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var methodSymbol = testMethod.MethodSymbol;
 
-        writer.AppendLine("Categories = global::System.Array.Empty<string>(),");
         writer.AppendLine("TimeoutMs = null,");
         writer.AppendLine("RetryCount = 0,");
         writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(methodSymbol, testMethod.TypeSymbol)},");

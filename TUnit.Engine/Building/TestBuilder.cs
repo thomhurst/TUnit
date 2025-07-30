@@ -64,7 +64,7 @@ internal sealed class TestBuilder : ITestBuilder
                     var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
 
                     var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
-                    
+
                     object? instanceForMethodDataSources = null;
 
                     if (needsInstanceForMethodDataSources)
@@ -248,7 +248,7 @@ internal sealed class TestBuilder : ITestBuilder
             if (argValue != null)
             {
                 var argType = argValue.GetType();
-                
+
                 // If the parameter type is object (placeholder for generic parameter in source-gen)
                 // and we have data, we can infer the type
                 if (paramType == typeof(object))
@@ -256,7 +256,7 @@ internal sealed class TestBuilder : ITestBuilder
                     // Check if this corresponds to a class generic parameter
                     // by looking at the method metadata
                     var methodParam = metadata.MethodMetadata.Parameters[i];
-                    
+
                     if (methodParam.TypeReference is { IsGenericParameter: true, IsMethodGenericParameter: false })
                     {
                         var genericParamName = methodParam.TypeReference.GenericParameterName;
@@ -286,7 +286,7 @@ internal sealed class TestBuilder : ITestBuilder
         return resolvedTypes;
     }
 
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", 
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern",
         Justification = "Data sources require reflection to get method and parameter info")]
     private static Type[] TryInferClassGenericsFromDataSources(TestMetadata metadata)
     {
@@ -303,20 +303,20 @@ internal sealed class TestBuilder : ITestBuilder
                 {
                     // Get the actual parameter type from reflection
                     var actualParamType = param.ReflectionInfo.ParameterType;
-                    
+
                     // Check if the actual parameter type is a generic parameter of the class
-                    if (actualParamType.IsGenericParameter && 
+                    if (actualParamType.IsGenericParameter &&
                         genericParameters.Contains(actualParamType))
                     {
                         // Check for Matrix attributes using reflection
                         var attrs = param.ReflectionInfo.GetCustomAttributes(false);
-                        
+
                         foreach (var attr in attrs)
                         {
                             var attrType = attr.GetType();
-                            
+
                             // Check if it's a generic Matrix attribute
-                            if (attrType.IsGenericType && 
+                            if (attrType.IsGenericType &&
                                 attrType.GetGenericTypeDefinition().Name.StartsWith("Matrix"))
                             {
                                 var matrixTypeArg = attrType.GetGenericArguments()[0];
@@ -336,38 +336,38 @@ internal sealed class TestBuilder : ITestBuilder
             {
                 // Get the method info
                 var methodName = instanceMethodDataSource.MethodNameProvidingDataSource;
-                var method = genericClassType.GetMethod(methodName, 
-                    System.Reflection.BindingFlags.Public | 
-                    System.Reflection.BindingFlags.NonPublic | 
+                var method = genericClassType.GetMethod(methodName,
+                    System.Reflection.BindingFlags.Public |
+                    System.Reflection.BindingFlags.NonPublic |
                     System.Reflection.BindingFlags.Instance);
-                
+
                 if (method != null)
                 {
                     var returnType = method.ReturnType;
-                    
+
                     // Check if return type is IEnumerable<T> or similar
                     if (returnType.IsGenericType)
                     {
                         var genericDef = returnType.GetGenericTypeDefinition();
-                        if (genericDef == typeof(IEnumerable<>) || 
+                        if (genericDef == typeof(IEnumerable<>) ||
                             genericDef == typeof(IAsyncEnumerable<>) ||
                             genericDef == typeof(List<>) ||
                             genericDef == typeof(Task<>))
                         {
                             var elementType = returnType.GetGenericArguments()[0];
-                            
+
                             // If Task<T>, unwrap to get the actual type
                             if (genericDef == typeof(Task<>) && elementType.IsGenericType)
                             {
                                 var innerGenericDef = elementType.GetGenericTypeDefinition();
-                                if (innerGenericDef == typeof(IEnumerable<>) || 
+                                if (innerGenericDef == typeof(IEnumerable<>) ||
                                     innerGenericDef == typeof(IAsyncEnumerable<>) ||
                                     innerGenericDef == typeof(List<>))
                                 {
                                     elementType = elementType.GetGenericArguments()[0];
                                 }
                             }
-                            
+
                             // Now try to match this element type with method parameters
                             // that use the class generic parameter
                             for (var i = 0; i < metadata.ParameterTypes.Length; i++)
@@ -465,11 +465,6 @@ internal sealed class TestBuilder : ITestBuilder
             MethodGenericArguments = testData.ResolvedMethodGenericArguments,
             ClassGenericArguments = testData.ResolvedClassGenericArguments
         };
-
-        foreach (var category in metadata.Categories)
-        {
-            testDetails.Categories.Add(category);
-        }
 
         var context = _contextProvider.CreateTestContext(
             metadata.TestName,

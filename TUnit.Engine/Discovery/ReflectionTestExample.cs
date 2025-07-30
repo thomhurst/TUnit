@@ -25,17 +25,12 @@ internal static class ReflectionTestExample
         // Collect all tests using reflection
         var tests = await collector.CollectTestsAsync("123");
 
-        Console.WriteLine($"Found {tests.Count()} tests via reflection:");
-
         foreach (var test in tests.Take(5)) // Show first 5 tests
         {
             Console.WriteLine($"  - {test.TestClassType.Name}.{test.TestMethodName}");
             Console.WriteLine($"    Class: {test.TestClassType.Name}");
             Console.WriteLine($"    Method: {test.TestMethodName}");
-            if (test.Categories.Length > 0)
-            {
-                Console.WriteLine($"    Categories: {string.Join(", ", test.Categories)}");
-            }
+
             if (test.IsSkipped)
             {
                 Console.WriteLine($"    Skipped: {test.SkipReason}");

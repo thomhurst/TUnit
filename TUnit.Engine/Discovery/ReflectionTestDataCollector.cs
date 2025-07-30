@@ -460,7 +460,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 TestName = testName,
                 TestClassType = testClass,
                 TestMethodName = testMethod.Name,
-                Categories = ReflectionAttributeExtractor.ExtractCategories(testClass, testMethod),
                 IsSkipped = ReflectionAttributeExtractor.IsTestSkipped(testClass, testMethod, out var skipReason),
                 SkipReason = skipReason,
                 TimeoutMs = ReflectionAttributeExtractor.ExtractTimeout(testClass, testMethod),
@@ -772,15 +771,15 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     var paramType = parameters[i].ParameterType;
                     var arg = args[i];
-                    
+
                     if (arg == null)
                     {
                         castedArgs[i] = null;
                         continue;
                     }
-                    
+
                     var argType = arg.GetType();
-                    
+
                     // If the argument is already assignable to the parameter type, use it directly
                     // This handles delegates and other non-convertible types
                     if (paramType.IsAssignableFrom(argType))
@@ -837,13 +836,13 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         if (paramType.IsGenericType && argType.IsGenericType)
         {
             var paramGenDef = paramType.GetGenericTypeDefinition();
-            
+
             // Check if argument type directly matches or implements the parameter generic type
             if (argType.GetGenericTypeDefinition() == paramGenDef)
             {
                 var paramGenArgs = paramType.GetGenericArguments();
                 var argGenArgs = argType.GetGenericArguments();
-                
+
                 for (int i = 0; i < paramGenArgs.Length && i < argGenArgs.Length; i++)
                 {
                     InferGenericTypeMapping(paramGenArgs[i], argGenArgs[i], typeMapping);
@@ -858,7 +857,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     {
                         var paramGenArgs = paramType.GetGenericArguments();
                         var ifaceGenArgs = iface.GetGenericArguments();
-                        
+
                         for (int i = 0; i < paramGenArgs.Length && i < ifaceGenArgs.Length; i++)
                         {
                             InferGenericTypeMapping(paramGenArgs[i], ifaceGenArgs[i], typeMapping);
@@ -872,14 +871,14 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             // Handle non-generic types that implement generic interfaces
             var paramGenDef = paramType.GetGenericTypeDefinition();
-            
+
             foreach (var iface in argType.GetInterfaces())
             {
                 if (iface.IsGenericType && iface.GetGenericTypeDefinition() == paramGenDef)
                 {
                     var paramGenArgs = paramType.GetGenericArguments();
                     var ifaceGenArgs = iface.GetGenericArguments();
-                    
+
                     for (int i = 0; i < paramGenArgs.Length && i < ifaceGenArgs.Length; i++)
                     {
                         InferGenericTypeMapping(paramGenArgs[i], ifaceGenArgs[i], typeMapping);
@@ -906,43 +905,43 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             return false;
         }
-        
+
         var paramGenericDef = paramType.GetGenericTypeDefinition();
-        
+
         // List of known covariant interfaces
-        var covariantInterfaces = new[] 
-        { 
-            typeof(IEnumerable<>), 
+        var covariantInterfaces = new[]
+        {
+            typeof(IEnumerable<>),
             typeof(IReadOnlyList<>),
             typeof(IReadOnlyCollection<>),
             typeof(IEnumerator<>)
         };
-        
+
         if (!covariantInterfaces.Contains(paramGenericDef))
         {
             return false;
         }
-        
+
         // Get all interfaces from the argument type
         var argInterfaces = argType.GetInterfaces();
         if (argType.IsInterface)
         {
             argInterfaces = argInterfaces.Concat(new[] { argType }).ToArray();
         }
-        
+
         foreach (var iface in argInterfaces)
         {
             if (iface.IsGenericType && iface.GetGenericTypeDefinition() == paramGenericDef)
             {
                 var paramElementType = paramType.GetGenericArguments()[0];
                 var argElementType = iface.GetGenericArguments()[0];
-                
+
                 // For covariance to work, the parameter element type must be assignable from the argument element type
                 // This allows IEnumerable<int> to be passed where IEnumerable<object> is expected
                 return paramElementType.IsAssignableFrom(argElementType);
             }
         }
-        
+
         return false;
     }
 
@@ -1006,15 +1005,15 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     var paramType = parameters[i].ParameterType;
                     var arg = args[i];
-                    
+
                     if (arg == null)
                     {
                         castedArgs[i] = null;
                         continue;
                     }
-                    
+
                     var argType = arg.GetType();
-                    
+
                     // If the argument is already assignable to the parameter type, use it directly
                     // This handles delegates and other non-convertible types
                     if (paramType.IsAssignableFrom(argType))
@@ -1208,7 +1207,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             TestName = testName,
             TestClassType = result.TestClassType,
             TestMethodName = methodInfo.Name,
-            Categories = result.Attributes.OfType<CategoryAttribute>().Select(a => a.Category).ToArray(),
             IsSkipped = result.Attributes.OfType<SkipAttribute>().Any(),
             SkipReason = result.Attributes.OfType<SkipAttribute>().FirstOrDefault()?.Reason,
             TimeoutMs = (int?)result.Attributes.OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout.TotalMilliseconds,
@@ -1233,7 +1231,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             AttributeFactory = () => result.Attributes.ToArray(),
             PropertyInjections = PropertyInjector.DiscoverInjectableProperties(result.TestClassType)
         };
-        
+
         return Task.FromResult<TestMetadata>(metadata);
     }
 
@@ -1241,7 +1239,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         // For dynamic tests, we always use the predefined args (or empty array if null)
         var classArgs = predefinedClassArgs ?? [];
-        
+
         return (typeArgs, args) =>
         {
             // Always use the predefined class args, ignoring the args parameter
@@ -1254,7 +1252,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
                 return Activator.CreateInstance(closedType, classArgs)!;
             }
-            
+
             if (classArgs.Length == 0)
             {
                 return Activator.CreateInstance(testClass)!;
@@ -1262,7 +1260,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             return Activator.CreateInstance(testClass, classArgs)!;
         };
     }
-    
+
     private static Func<object, object?[], Task> CreateDynamicTestInvoker(DynamicDiscoveryResult result)
     {
         return async (instance, args) =>
@@ -1280,7 +1278,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     throw new InvalidOperationException("Dynamic test method must be a lambda expression");
                 }
-                
+
                 var compiledExpression = lambdaExpression.Compile();
                 var testInstance = instance ?? throw new InvalidOperationException("Test instance is null");
 
@@ -1368,26 +1366,26 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     ClassArguments = _dynamicResult.TestClassArguments ?? context.ClassArguments,
                     Context = context.Context
                 };
-                
+
                 // Create a regular ExecutableTest with the modified context
                 // Create instance and test invoker for the dynamic test
                 Func<TestContext, Task<object>> createInstance = (TestContext testContext) =>
                 {
                     var instance = metadata.InstanceFactory(Type.EmptyTypes, modifiedContext.ClassArguments);
-                    
+
                     // Handle property injections
                     foreach (var propertyInjection in metadata.PropertyInjections)
                     {
                         var value = propertyInjection.ValueFactory();
                         propertyInjection.Setter(instance, value);
                     }
-                    
+
                     return Task.FromResult(instance);
                 };
-                
+
                 var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");
-                
-                return new UnifiedExecutableTest(createInstance, 
+
+                return new UnifiedExecutableTest(createInstance,
                     async (instance, args, context, ct) => await invokeTest(instance, args))
                 {
                     TestId = modifiedContext.TestId,

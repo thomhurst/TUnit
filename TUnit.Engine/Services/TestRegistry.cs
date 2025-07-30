@@ -126,7 +126,6 @@ internal sealed class TestRegistry : ITestRegistry
             TestName = testName,
             TestClassType = result.TestClassType,
             TestMethodName = methodInfo.Name,
-            Categories = result.Attributes.OfType<CategoryAttribute>().Select(a => a.Category).ToArray(),
             IsSkipped = result.Attributes.OfType<SkipAttribute>().Any(),
             SkipReason = result.Attributes.OfType<SkipAttribute>().FirstOrDefault()?.Reason,
             TimeoutMs = (int?)result.Attributes.OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout.TotalMilliseconds,

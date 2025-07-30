@@ -14,8 +14,6 @@ public abstract class TestMetadata
 
     public required string TestMethodName { get; init; }
 
-    public string[] Categories { get; init; } = [];
-
     public bool IsSkipped { get; init; }
 
     public string? SkipReason { get; init; }

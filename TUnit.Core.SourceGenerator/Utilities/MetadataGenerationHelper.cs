@@ -18,11 +18,10 @@ internal static class MetadataGenerationHelper
         writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{metadataTypeParameter}>");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine($"TestName = \"{args.TestName}\",");
         writer.AppendLine($"TestClassType = {args.TestClassTypeReference},");
         writer.AppendLine($"TestMethodName = \"{args.TestMethodName}\",");
-        writer.AppendLine($"Categories = {GenerateStringArray(args.Categories)},");
         writer.AppendLine($"IsSkipped = {args.IsSkipped.ToString().ToLower()},");
         writer.AppendLine($"SkipReason = {(args.SkipReason != null ? $"\"{args.SkipReason}\"" : "null")},");
         writer.AppendLine($"TimeoutMs = {args.TimeoutMs?.ToString() ?? "null"},");
@@ -48,7 +47,7 @@ internal static class MetadataGenerationHelper
         writer.AppendLine($"AttributeFactory = {args.AttributeFactory},");
         writer.AppendLine($"PropertyInjections = {args.PropertyInjections ?? "global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>()"},");
         writer.AppendLine($"TestSessionId = \"{args.TestSessionId}\",");
-        
+
         // Additional properties specific to TestMetadata<T>
         if (args.CreateInstance != null)
         {
@@ -62,7 +61,7 @@ internal static class MetadataGenerationHelper
         {
             writer.AppendLine($"InvokeTypedTest = {args.InvokeTypedTest},");
         }
-        
+
         writer.Unindent();
         writer.AppendLine("};");
     }
@@ -76,10 +75,10 @@ internal static class MetadataGenerationHelper
         writer.AppendLine("new global::TUnit.Core.MethodMetadata");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         var safeTypeDisplay = methodSymbol.ContainingType.GloballyQualified();
         var safeReturnTypeDisplay = methodSymbol.ReturnType.GloballyQualified();
-        
+
         writer.AppendLine($"Type = typeof({safeTypeDisplay}),");
         writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ContainingType)},");
         writer.AppendLine($"Name = \"{methodSymbol.Name}\",");
@@ -88,10 +87,10 @@ internal static class MetadataGenerationHelper
         writer.AppendLine($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ReturnType)},");
         writer.AppendLine($"Parameters = {GenerateParameterMetadataArrayForMethod(methodSymbol)},");
         writer.AppendLine($"Class = {classMetadataExpression}");
-        
+
         writer.Unindent();
         writer.Append("}");
-        
+
         return writer.ToString();
     }
 
@@ -105,12 +104,12 @@ internal static class MetadataGenerationHelper
         writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", () => ");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         // Create the ClassMetadata instance
         writer.AppendLine("var classMetadata = new global::TUnit.Core.ClassMetadata");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         writer.AppendLine($"Type = typeof({typeSymbol.GloballyQualified()}),");
         writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(typeSymbol)},");
         writer.AppendLine($"Name = \"{typeSymbol.Name}\",");
@@ -128,11 +127,11 @@ internal static class MetadataGenerationHelper
         }
         writer.AppendLine($"Properties = {GeneratePropertyMetadataArray(typeSymbol)},");
         writer.AppendLine($"Parent = {parentExpression ?? "null"}");
-        
+
         writer.Unindent();
         writer.AppendLine("};");
         writer.AppendLine();
-        
+
         // Set ClassMetadata reference on each property
         writer.AppendLine("// Set ClassMetadata reference on properties to avoid circular dependency");
         writer.AppendLine("foreach (var prop in classMetadata.Properties)");
@@ -142,12 +141,12 @@ internal static class MetadataGenerationHelper
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
-        
+
         writer.AppendLine("return classMetadata;");
-        
+
         writer.Unindent();
         writer.Append("})");
-        
+
         return writer.ToString();
     }
 
@@ -167,7 +166,7 @@ internal static class MetadataGenerationHelper
         // For type parameters in generic context, we still can't use T directly
         var safeType = CodeGenerationHelpers.ContainsTypeParameter(parameter.Type) ? "object" : parameter.Type.GloballyQualified();
         var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
-        
+
         return $@"new global::TUnit.Core.ParameterMetadata<{safeType}>
 {{
     Name = ""{parameter.Name}"",
@@ -184,7 +183,7 @@ internal static class MetadataGenerationHelper
         // For type parameters, we need to use typeof(object) instead of typeof(T)
         var typeForConstructor = CodeGenerationHelpers.ContainsTypeParameter(parameter.Type) ? "object" : parameter.Type.GloballyQualified();
         var reflectionInfo = GenerateReflectionInfoForParameter(parameter, containingMethod);
-        
+
         return $@"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))
 {{
     Name = ""{parameter.Name}"",
@@ -192,7 +191,7 @@ internal static class MetadataGenerationHelper
     ReflectionInfo = {reflectionInfo}
 }}";
     }
-    
+
     /// <summary>
     /// Generates reflection info code for a parameter
     /// </summary>
@@ -200,13 +199,13 @@ internal static class MetadataGenerationHelper
     {
         // Use provided method or try to get it from the parameter's containing symbol
         var method = providedMethod ?? parameter.ContainingSymbol as IMethodSymbol;
-        
+
         if (method == null)
         {
             // If we can't determine the method, fall back to null
             return "null!";
         }
-        
+
         // Find the parameter index
         var parameterIndex = method.Parameters.IndexOf(parameter);
         if (parameterIndex == -1)
@@ -214,9 +213,9 @@ internal static class MetadataGenerationHelper
             // Fallback if we can't find the parameter (shouldn't happen)
             return "null!";
         }
-        
+
         var containingType = method.ContainingType.GloballyQualified();
-        
+
         // Check if it's a constructor
         if (method.MethodKind == MethodKind.Constructor)
         {
@@ -249,21 +248,21 @@ internal static class MetadataGenerationHelper
             }
         }
     }
-    
-    
+
+
     private static string GenerateParameterTypesArrayForReflection(IMethodSymbol method)
     {
         if (method.Parameters.Length == 0)
         {
             return "global::System.Type.EmptyTypes";
         }
-        
-        var paramTypes = method.Parameters.Select(p => 
+
+        var paramTypes = method.Parameters.Select(p =>
         {
             var safeTypeName = p.Type.GloballyQualified();
             return $"typeof({safeTypeName})";
         });
-        
+
         return $"new global::System.Type[] {{ {string.Join(", ", paramTypes)} }}";
     }
 
@@ -275,7 +274,7 @@ internal static class MetadataGenerationHelper
         var safeTypeNameForReflection = containingType.GloballyQualified();
         // For type parameters, we need to use typeof(object) instead of typeof(T)
         var safePropertyTypeName = CodeGenerationHelpers.ContainsTypeParameter(property.Type) ? "object" : property.Type.GloballyQualified();
-        
+
         return $@"new global::TUnit.Core.PropertyMetadata
 {{
     ReflectionInfo = typeof({safeTypeNameForReflection}).GetProperty(""{property.Name}""),
@@ -294,15 +293,15 @@ internal static class MetadataGenerationHelper
     {
         // For generic types with unresolved type parameters, we can't cast to the open generic type
         // We need to use dynamic or reflection
-        var hasUnresolvedTypeParameters = namedTypeSymbol.IsGenericType && 
+        var hasUnresolvedTypeParameters = namedTypeSymbol.IsGenericType &&
                                          namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
-        
+
         if (hasUnresolvedTypeParameters && !property.IsStatic)
         {
             // Use dynamic to avoid invalid cast to open generic type
             return $"o => ((dynamic)o).{property.Name}";
         }
-        
+
         var safeTypeName = namedTypeSymbol.GloballyQualified();
         return property.IsStatic
             ? $"_ => {safeTypeName}.{property.Name}"
@@ -332,10 +331,10 @@ internal static class MetadataGenerationHelper
 
         writer.Unindent();
         writer.Append("}");
-        
+
         return writer.ToString();
     }
-    
+
     /// <summary>
     /// Generates an array of ParameterMetadata objects for method parameters with proper reflection info
     /// </summary>
@@ -358,7 +357,7 @@ internal static class MetadataGenerationHelper
 
         writer.Unindent();
         writer.Append("}");
-        
+
         return writer.ToString();
     }
 
@@ -384,7 +383,7 @@ internal static class MetadataGenerationHelper
 
         writer.Unindent();
         writer.Append("}");
-        
+
         return writer.ToString();
     }
 
@@ -415,7 +414,7 @@ internal static class MetadataGenerationHelper
 
         writer.Unindent();
         writer.Append("}");
-        
+
         return writer.ToString();
     }
 
@@ -468,7 +467,7 @@ internal class TestMetadataGenerationArgs
     public required string AttributeFactory { get; init; }
     public string? PropertyInjections { get; init; }
     public required string TestSessionId { get; init; }
-    
+
     // Additional properties specific to TestMetadata<T>
     public string? CreateInstance { get; init; }
     public string? InvokeTest { get; init; }
