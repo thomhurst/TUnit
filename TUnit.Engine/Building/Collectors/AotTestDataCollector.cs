@@ -157,7 +157,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
         foreach (var discoveryResult in dynamicTest.GetTests())
         {
-            if (discoveryResult is DynamicDiscoveryResult dynamicResult && dynamicResult.TestMethod != null)
+            if (discoveryResult is DynamicDiscoveryResult { TestMethod: not null } dynamicResult)
             {
                 var testMetadata = await CreateMetadataFromDynamicDiscoveryResult(dynamicResult);
                 testMetadataList.Add(testMetadata);
@@ -181,8 +181,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         {
             methodInfo = methodCall.Method;
         }
-        else if (lambdaExpression?.Body is UnaryExpression unary && 
-                 unary.Operand is MethodCallExpression unaryMethodCall)
+        else if (lambdaExpression?.Body is UnaryExpression { Operand: MethodCallExpression unaryMethodCall })
         {
             methodInfo = unaryMethodCall.Method;
         }

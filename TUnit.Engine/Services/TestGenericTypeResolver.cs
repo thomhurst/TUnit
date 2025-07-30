@@ -36,7 +36,7 @@ internal sealed class TestGenericTypeResolver
         if (metadata.GenericMethodInfo != null)
         {
             // Check if generic method type arguments are already resolved
-            if (metadata.GenericMethodTypeArguments != null && metadata.GenericMethodTypeArguments.Length > 0)
+            if (metadata.GenericMethodTypeArguments is { Length: > 0 })
             {
                 result.ResolvedMethodGenericArguments = metadata.GenericMethodTypeArguments;
             }
@@ -503,7 +503,7 @@ internal sealed class TestGenericTypeResolver
         }
 
         // Handle case where parameter is a generic interface and argument implements it
-        if (parameterType.IsGenericType && parameterType.IsInterface)
+        if (parameterType is { IsGenericType: true, IsInterface: true })
         {
             // Check if argument type implements the parameter interface
             #pragma warning disable IL2070 // Type.GetInterfaces() requires preserved interfaces

@@ -222,9 +222,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         // - typeof(Class).GetMethod("MethodName")
         // - instance.GetType().GetMethod("MethodName")
         
-        if (methodInfoExpression is InvocationExpressionSyntax invocation &&
-            invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-            memberAccess.Name.Identifier.ValueText == "GetMethod")
+        if (methodInfoExpression is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Name.Identifier.ValueText: "GetMethod" } memberAccess } invocation)
         {
             // Extract method name from GetMethod call
             if (invocation.ArgumentList.Arguments.Count > 0 &&
@@ -235,8 +233,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
                 // Try to resolve the type
                 ITypeSymbol? targetType = null;
                 
-                if (memberAccess.Expression is InvocationExpressionSyntax typeofInvocation &&
-                    typeofInvocation.Expression is IdentifierNameSyntax { Identifier.ValueText: "typeof" })
+                if (memberAccess.Expression is InvocationExpressionSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: "typeof" } } typeofInvocation)
                 {
                     // typeof(Class).GetMethod pattern
                     if (typeofInvocation.ArgumentList.Arguments.Count > 0)
@@ -248,8 +245,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
                 {
                     // instance.GetType().GetMethod pattern
                     var getTypeInvocation = memberAccess.Expression as InvocationExpressionSyntax;
-                    if (getTypeInvocation?.Expression is MemberAccessExpressionSyntax getTypeMember &&
-                        getTypeMember.Name.Identifier.ValueText == "GetType")
+                    if (getTypeInvocation?.Expression is MemberAccessExpressionSyntax { Name.Identifier.ValueText: "GetType" } getTypeMember)
                     {
                         targetType = semanticModel.GetTypeInfo(getTypeMember.Expression).Type;
                     }
@@ -525,9 +521,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         {
             writer.AppendLine("return null;");
         }
-        else if (isAsync && returnType is INamedTypeSymbol namedReturnType && 
-                 namedReturnType.IsGenericType && 
-                 namedReturnType.ConstructedFrom.Name == "Task")
+        else if (isAsync && returnType is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.Name: "Task" } namedReturnType)
         {
             if (namedReturnType.TypeArguments.Length > 0)
             {
@@ -658,7 +652,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
             return true;
         }
         
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
         {
             foreach (var typeArg in namedType.TypeArguments)
             {
@@ -700,10 +694,8 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         var returnType = method.ReturnType;
         return returnType.Name == "Task" || 
                returnType.Name == "ValueTask" ||
-               (returnType is INamedTypeSymbol namedType && 
-                namedType.ConstructedFrom?.Name == "Task") ||
-               (returnType is INamedTypeSymbol namedValueTask && 
-                namedValueTask.ConstructedFrom?.Name == "ValueTask");
+               returnType is INamedTypeSymbol { ConstructedFrom.Name: "Task" } ||
+               returnType is INamedTypeSymbol { ConstructedFrom.Name: "ValueTask" };
     }
 
     private sealed class MethodDataSourceInfo

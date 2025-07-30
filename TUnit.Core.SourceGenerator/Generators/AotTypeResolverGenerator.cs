@@ -473,7 +473,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
             return true;
         }
         
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
         {
             foreach (var typeArg in namedType.TypeArguments)
             {
@@ -600,7 +600,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         }
         
         // Check if this is a generic type with type parameters
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
         {
             foreach (var typeArg in namedType.TypeArguments)
             {

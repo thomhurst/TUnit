@@ -257,7 +257,7 @@ internal sealed class TestBuilder : ITestBuilder
                     // by looking at the method metadata
                     var methodParam = metadata.MethodMetadata.Parameters[i];
                     
-                    if (methodParam.TypeReference.IsGenericParameter && !methodParam.TypeReference.IsMethodGenericParameter)
+                    if (methodParam.TypeReference is { IsGenericParameter: true, IsMethodGenericParameter: false })
                     {
                         var genericParamName = methodParam.TypeReference.GenericParameterName;
                         // Find the matching generic parameter in the class
@@ -376,7 +376,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 if (paramType == typeof(object)) // Placeholder for generic parameter
                                 {
                                     var methodParam = metadata.MethodMetadata.Parameters[i];
-                                    if (methodParam.TypeReference.IsGenericParameter && !methodParam.TypeReference.IsMethodGenericParameter)
+                                    if (methodParam.TypeReference is { IsGenericParameter: true, IsMethodGenericParameter: false })
                                     {
                                         var genericParamName = methodParam.TypeReference.GenericParameterName;
                                         var matchingClassParam = genericParameters.FirstOrDefault(p => p.Name == genericParamName);

@@ -33,7 +33,7 @@ public sealed class GenericTestMetadata : TestMetadata
                         typeArgs = context.ResolvedClassGenericArguments;
                     }
                     // Fall back to inferring from constructor arguments if available
-                    else if (TestClassType.IsGenericTypeDefinition && context.ClassArguments != null && context.ClassArguments.Length > 0)
+                    else if (TestClassType.IsGenericTypeDefinition && context.ClassArguments is { Length: > 0 })
                     {
                         // Infer type arguments from the constructor argument values
                         var genericParams = TestClassType.GetGenericArguments();

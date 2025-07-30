@@ -85,7 +85,7 @@ public static class PropertyInjector
                     var currentPropertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
                     object? value;
                     
-                    if (currentPropertyInjection != null && TupleFactory.IsTupleType(currentPropertyInjection.PropertyType) && args != null && args.Length > 1)
+                    if (currentPropertyInjection != null && TupleFactory.IsTupleType(currentPropertyInjection.PropertyType) && args is { Length: > 1 })
                     {
                         value = TupleFactory.CreateTuple(currentPropertyInjection.PropertyType, args);
                     }

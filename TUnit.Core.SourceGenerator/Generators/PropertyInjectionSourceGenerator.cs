@@ -302,9 +302,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static string GetPropertyCastExpression(IPropertySymbol property, string propertyType)
     {
-        var isNullableValueType = property.Type is INamedTypeSymbol namedType &&
-                                  namedType.IsGenericType &&
-                                  namedType.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T;
+        var isNullableValueType = property.Type is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.SpecialType: SpecialType.System_Nullable_T };
 
         if (property.Type.IsValueType && !isNullableValueType)
         {
@@ -337,7 +335,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static string FormatEnumConstant(TypedConstant constant)
     {
-        if (constant.Type != null && constant.Value != null)
+        if (constant is { Type: not null, Value: not null })
         {
             var enumTypeName = constant.Type.ToDisplayString();
             return $"({enumTypeName}){constant.Value}";
@@ -366,9 +364,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             }
         }
 
-        if (typeSymbol is INamedTypeSymbol namedType &&
-            namedType.IsGenericType &&
-            namedType.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T)
+        if (typeSymbol is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.SpecialType: SpecialType.System_Nullable_T } namedType)
         {
             return namedType.TypeArguments[0].ToDisplayString();
         }

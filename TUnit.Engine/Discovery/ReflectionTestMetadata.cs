@@ -53,7 +53,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             // Get type arguments for generic types
             // For generic types, we need to infer the type arguments from the actual argument values
             Type[] typeArgs;
-            if (_testClass.IsGenericTypeDefinition && context.ClassArguments != null && context.ClassArguments.Length > 0)
+            if (_testClass.IsGenericTypeDefinition && context.ClassArguments is { Length: > 0 })
             {
                 // Infer type arguments from the constructor argument values
                 var genericParams = _testClass.GetGenericArguments();

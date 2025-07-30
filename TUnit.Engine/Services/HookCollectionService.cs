@@ -34,7 +34,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 }
 
                 // Also check the open generic type definition for generic types
-                if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition)
+                if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
                 {
                     var openGenericType = currentType.GetGenericTypeDefinition();
                     if (Sources.BeforeTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
@@ -78,7 +78,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 }
 
                 // Also check the open generic type definition for generic types
-                if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition)
+                if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
                 {
                     var openGenericType = currentType.GetGenericTypeDefinition();
                     if (Sources.AfterTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
@@ -166,7 +166,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 }
 
                 // Also check the open generic type definition for generic types
-                if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition)
+                if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
                 {
                     var openGenericType = currentType.GetGenericTypeDefinition();
                     if (Sources.BeforeClassHooks.TryGetValue(openGenericType, out var openTypeHooks))
@@ -210,7 +210,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 }
 
                 // Also check the open generic type definition for generic types
-                if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition)
+                if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
                 {
                     var openGenericType = currentType.GetGenericTypeDefinition();
                     if (Sources.AfterClassHooks.TryGetValue(openGenericType, out var openTypeHooks))

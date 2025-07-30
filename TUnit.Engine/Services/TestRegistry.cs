@@ -109,8 +109,7 @@ internal sealed class TestRegistry : ITestRegistry
         {
             methodInfo = methodCall.Method;
         }
-        else if (lambdaExpression?.Body is UnaryExpression unary &&
-                 unary.Operand is MethodCallExpression unaryMethodCall)
+        else if (lambdaExpression?.Body is UnaryExpression { Operand: MethodCallExpression unaryMethodCall })
         {
             methodInfo = unaryMethodCall.Method;
         }

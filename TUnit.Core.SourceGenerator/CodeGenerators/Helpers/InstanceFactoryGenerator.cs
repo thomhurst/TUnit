@@ -10,7 +10,7 @@ public static class InstanceFactoryGenerator
         var className = typeSymbol.GloballyQualified();
 
         // Check if this is a generic type definition
-        if (typeSymbol is INamedTypeSymbol namedType && namedType.IsGenericType && namedType.TypeArguments.Any(ta => ta is ITypeParameterSymbol))
+        if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments.Any(ta => ta is ITypeParameterSymbol))
         {
             // Generate factory that uses MakeGenericType
             GenerateGenericInstanceFactory(writer, namedType);
@@ -146,7 +146,7 @@ public static class InstanceFactoryGenerator
         
         // Check for constructor parameters
         var constructor = GetPrimaryConstructor(genericType);
-        if (constructor != null && constructor.Parameters.Length > 0)
+        if (constructor is { Parameters.Length: > 0 })
         {
             writer.AppendLine("// Create instance with constructor arguments");
             writer.AppendLine("return global::System.Activator.CreateInstance(closedGenericType, args);");

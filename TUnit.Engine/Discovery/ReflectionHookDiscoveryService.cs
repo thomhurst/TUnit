@@ -50,7 +50,7 @@ internal sealed class ReflectionHookDiscoveryService
         try
         {
             var types = assembly.GetExportedTypes()
-                .Where(t => t.IsClass && !t.IsAbstract && !IsCompilerGenerated(t));
+                .Where(t => t is { IsClass: true, IsAbstract: false } && !IsCompilerGenerated(t));
 
             foreach (var type in types)
             {

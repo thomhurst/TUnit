@@ -72,7 +72,7 @@ public static class GenericTypeHelper
     /// </summary>
     public static bool IsConstructedGenericType(Type type)
     {
-        return type.IsGenericType && !type.IsGenericTypeDefinition;
+        return type is { IsGenericType: true, IsGenericTypeDefinition: false };
     }
 
     /// <summary>

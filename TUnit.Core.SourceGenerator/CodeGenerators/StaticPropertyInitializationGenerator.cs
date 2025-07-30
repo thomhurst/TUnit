@@ -220,7 +220,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             var value = attr.ConstructorArguments[0];
             
             // ArgumentsAttribute constructor takes params object?[], so the argument is always an array
-            if (value.Kind == TypedConstantKind.Array && value.Values.Length > 0)
+            if (value is { Kind: TypedConstantKind.Array, Values.Length: > 0 })
             {
                 // For static property injection, we only use the first value from the array
                 var firstValue = value.Values[0];

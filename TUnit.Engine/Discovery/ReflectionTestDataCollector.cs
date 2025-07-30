@@ -1167,7 +1167,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
         foreach (var discoveryResult in dynamicTest.GetTests())
         {
-            if (discoveryResult is DynamicDiscoveryResult dynamicResult && dynamicResult.TestMethod != null)
+            if (discoveryResult is DynamicDiscoveryResult { TestMethod: not null } dynamicResult)
             {
                 var testMetadata = await CreateMetadataFromDynamicDiscoveryResult(dynamicResult);
                 testMetadataList.Add(testMetadata);
@@ -1191,8 +1191,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             methodInfo = methodCall.Method;
         }
-        else if (lambdaExpression?.Body is System.Linq.Expressions.UnaryExpression unary && 
-                 unary.Operand is System.Linq.Expressions.MethodCallExpression unaryMethodCall)
+        else if (lambdaExpression?.Body is System.Linq.Expressions.UnaryExpression { Operand: System.Linq.Expressions.MethodCallExpression unaryMethodCall })
         {
             methodInfo = unaryMethodCall.Method;
         }

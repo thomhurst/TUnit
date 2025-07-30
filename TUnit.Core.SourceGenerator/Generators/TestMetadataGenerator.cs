@@ -267,7 +267,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("};");
 
         // Set the test to use runtime data generation
-        if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
+        if (testMethod is { IsGenericType: false, IsGenericMethod: false })
         {
             writer.AppendLine("metadata.UseRuntimeDataGeneration(testSessionId);");
         }
@@ -1053,7 +1053,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
 
         // Handle generic method case
-        if (testMethod.IsGenericMethod && testMethod.MethodSymbol.TypeParameters.Length > 0)
+        if (testMethod is { IsGenericMethod: true, MethodSymbol.TypeParameters.Length: > 0 })
         {
             writer.AppendLine("// Make the method generic if it has type parameters");
             writer.AppendLine("if (method.IsGenericMethodDefinition)");

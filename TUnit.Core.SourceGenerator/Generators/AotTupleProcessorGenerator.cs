@@ -68,13 +68,9 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         {
             return true;
         }
-        else if (node is GenericNameSyntax generic)
+        else if (node is GenericNameSyntax { Identifier.ValueText: "ValueTuple" or "Tuple" })
         {
-            var name = generic.Identifier.ValueText;
-            if (name is "ValueTuple" or "Tuple")
-            {
-                return true;
-            }
+            return true;
         }
 
         return false;
@@ -233,7 +229,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
             // Check implemented interfaces for IEnumerable<TupleType>
             foreach (var iface in namedType.AllInterfaces)
             {
-                if (iface.Name == "IEnumerable" && iface.IsGenericType && iface.TypeArguments.Length > 0)
+                if (iface.Name == "IEnumerable" && iface is { IsGenericType: true, TypeArguments.Length: > 0 })
                 {
                     var elementType = iface.TypeArguments[0];
                     if (IsTupleType(elementType))
@@ -501,7 +497,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         }
         
         // Check if this is a generic type with type parameters
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
         {
             foreach (var typeArg in namedType.TypeArguments)
             {
