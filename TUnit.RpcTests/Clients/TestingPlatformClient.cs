@@ -133,13 +133,13 @@ public sealed class TestingPlatformClient : IDisposable
                 return discoveryListener;
             }, @checked);
 
-    public async Task<ResponseListener> RunTestsAsync(Guid requestId, Func<TestNodeUpdate[], Task> action)
+    public async Task<ResponseListener> RunTestsAsync(Guid requestId, Func<TestNodeUpdate[], Task> action, TestNode[]? testNodes = null)
         => await CheckedInvokeAsync(async () =>
         {
             using CancellationTokenSource cancellationTokenSource = new(TimeSpan.FromMinutes(3));
             var runListener = new TestNodeUpdatesResponseListener(requestId, action);
             _targetHandler.RegisterResponseListener(runListener);
-            await JsonRpcClient.InvokeWithParameterObjectAsync("testing/runTests", new DiscoveryRequest(RunId: requestId), cancellationToken: cancellationTokenSource.Token);
+            await JsonRpcClient.InvokeWithParameterObjectAsync("testing/runTests", new RunTestsRequest(RunId: requestId, TestCases: testNodes), cancellationToken: cancellationTokenSource.Token);
             return runListener;
         });
 
