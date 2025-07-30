@@ -11,18 +11,16 @@ namespace TUnit.Engine.Services;
 
 internal class TestFilterService(TUnitFrameworkLogger logger)
 {
-    private readonly TUnitFrameworkLogger _logger = logger;
-    
     public IReadOnlyCollection<ExecutableTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IReadOnlyCollection<ExecutableTest> testNodes)
     {
         if (testExecutionFilter is null or NopFilter)
         {
-            _logger.LogTrace("No test filter found.");
+            logger.LogTrace("No test filter found.");
 
             return testNodes;
         }
 
-        _logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
+        logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
 
         var filteredTests = new List<ExecutableTest>();
         foreach (var test in testNodes)
@@ -62,7 +60,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
                 }
                 catch (Exception ex)
                 {
-                    await _logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
+                    await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
                 }
             }
         }
@@ -122,7 +120,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
 
     private bool UnhandledFilter(ITestExecutionFilter testExecutionFilter)
     {
-        _logger.LogWarning($"Filter is Unhandled Type: {testExecutionFilter.GetType().FullName}");
+        logger.LogWarning($"Filter is Unhandled Type: {testExecutionFilter.GetType().FullName}");
         return true;
     }
 
