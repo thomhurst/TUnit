@@ -341,12 +341,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 continue;
             }
 
-            if (UnifiedObjectTracker.TryGetReference(obj, out var counter))
+            if (ObjectTracker.TryGetReference(obj, out var counter))
             {
                 var count = counter!.Decrement();
                 if (count == 0)
                 {
-                    UnifiedObjectTracker.RemoveObject(obj);
+                    ObjectTracker.RemoveObject(obj);
 
                     if (obj is IAsyncDisposable asyncDisposable)
                     {

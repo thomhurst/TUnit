@@ -12,7 +12,7 @@ namespace TUnit.Engine.Execution;
 /// Executes tests as they are discovered via streaming with dependency resolution
 internal sealed class StreamingTestExecutor
 {
-    private readonly UnifiedTestExecutor _executor;
+    private readonly TestExecutor _executor;
     private readonly TestDependencyResolver _dependencyResolver;
 #if !NETSTANDARD2_0
     private readonly Channel<ExecutableTest> _readyTests;
@@ -22,7 +22,7 @@ internal sealed class StreamingTestExecutor
 #endif
     
     public StreamingTestExecutor(
-        UnifiedTestExecutor executor,
+        TestExecutor executor,
         TestDependencyResolver dependencyResolver)
     {
         _executor = executor;

@@ -5,14 +5,13 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building;
 
-/// Orchestrates unified test building with streaming support and error handling
-internal sealed class UnifiedTestBuilderPipeline
+internal sealed class TestBuilderPipeline
 {
     private readonly Func<HashSet<Type>?, ITestDataCollector> _dataCollectorFactory;
     private readonly ITestBuilder _testBuilder;
     private readonly IContextProvider _contextProvider;
 
-    public UnifiedTestBuilderPipeline(
+    public TestBuilderPipeline(
         Func<HashSet<Type>?, ITestDataCollector> dataCollectorFactory,
         ITestBuilder testBuilder,
         IContextProvider contextBuilder)
@@ -24,13 +23,11 @@ internal sealed class UnifiedTestBuilderPipeline
 
     public async Task<IEnumerable<ExecutableTest>> BuildTestsAsync(string testSessionId, HashSet<Type>? filterTypes)
     {
-        // Stage 1: Collect test metadata
         var dataCollector = _dataCollectorFactory(filterTypes);
         var collectedMetadata = await dataCollector.CollectTestsAsync(testSessionId);
 
         var executableTests = new List<ExecutableTest>();
 
-        // Stage 2: Resolve generic types
         var resolvedMetadata = new List<TestMetadata>();
         foreach (var metadata in collectedMetadata)
         {
@@ -40,25 +37,21 @@ internal sealed class UnifiedTestBuilderPipeline
             }
             catch (Exception ex)
             {
-                // Create a failed test for generic resolution failures
                 var failedTest = CreateFailedTestForGenericResolutionError(metadata, ex);
                 executableTests.Add(failedTest);
                 continue;
             }
         }
 
-        // Stage 3: Generate data combinations and build tests using the simplified approach
         foreach (var metadata in resolvedMetadata)
         {
             try
             {
-                // Use TestBuilder's BuildTestsFromMetadataAsync which handles DataCombinationGenerator delegation
                 var testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(metadata);
                 executableTests.AddRange(testsFromMetadata);
             }
             catch (Exception ex)
             {
-                // Create a failed test for data generation failures
                 var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
                 executableTests.Add(failedTest);
             }
@@ -72,7 +65,6 @@ internal sealed class UnifiedTestBuilderPipeline
         var testId = TestIdentifierService.GenerateFailedTestId(metadata);
         var displayName = $"{metadata.TestClassType.Name}.{metadata.TestName}";
 
-        // Create a minimal test context for failed test
         var testDetails = new TestDetails
         {
             TestId = testId,
@@ -129,7 +121,6 @@ internal sealed class UnifiedTestBuilderPipeline
         var testId = TestIdentifierService.GenerateFailedTestId(metadata);
         var displayName = $"{metadata.TestName} [GENERIC RESOLUTION ERROR]";
 
-        // Create a minimal test context for failed test
         var testDetails = new TestDetails
         {
             TestId = testId,

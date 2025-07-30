@@ -158,7 +158,7 @@ public static class PropertyInjector
                     await ObjectInitializer.InitializeAsync(value);
                 });
 
-                UnifiedObjectTracker.TrackObject(testContext.Events, value);
+                ObjectTracker.TrackObject(testContext.Events, value);
 
                 injection.Setter(instance, value);
 
@@ -295,7 +295,7 @@ public static class PropertyInjector
             try
             {
                 var propertyValue = kvp.Value;
-                UnifiedObjectTracker.TrackObject(testContext.Events, propertyValue);
+                ObjectTracker.TrackObject(testContext.Events, propertyValue);
 
                 var setter = CreatePropertySetter(property);
                 setter(instance, propertyValue);

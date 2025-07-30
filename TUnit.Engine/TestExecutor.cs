@@ -15,8 +15,7 @@ using ITestExecutor = TUnit.Engine.Interfaces.ITestExecutor;
 
 namespace TUnit.Engine;
 
-/// Simplified test executor with parallelization, dependency handling, and fail-fast support
-internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDisposable, IAsyncDisposable
+internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, IAsyncDisposable
 {
     private readonly ISingleTestExecutor _singleTestExecutor;
     private readonly ICommandLineOptions _commandLineOptions;
@@ -27,7 +26,7 @@ internal sealed class UnifiedTestExecutor : ITestExecutor, IDataProducer, IDispo
     private readonly CancellationTokenSource _failFastCancellationSource = new();
     private readonly TUnitServiceProvider _serviceProvider;
 
-    public UnifiedTestExecutor(
+    public TestExecutor(
         ISingleTestExecutor singleTestExecutor,
         ICommandLineOptions commandLineOptions,
         TUnitFrameworkLogger logger,

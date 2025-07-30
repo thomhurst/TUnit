@@ -12,7 +12,7 @@ public static class DataSourceReferenceExtensions
     {
         foreach (var arg in context.TestDetails.TestMethodArguments)
         {
-            UnifiedObjectTracker.TrackObject(context.Events, arg);
+            ObjectTracker.TrackObject(context.Events, arg);
         }
     }
 
@@ -20,7 +20,7 @@ public static class DataSourceReferenceExtensions
     {
         foreach (var arg in context.TestDetails.TestClassArguments)
         {
-            UnifiedObjectTracker.TrackObject(context.Events, arg);
+            ObjectTracker.TrackObject(context.Events, arg);
         }
     }
 
@@ -28,7 +28,7 @@ public static class DataSourceReferenceExtensions
     {
         foreach (var kvp in context.TestDetails.TestClassInjectedPropertyArguments)
         {
-            UnifiedObjectTracker.TrackObject(context.Events, kvp.Value);
+            ObjectTracker.TrackObject(context.Events, kvp.Value);
         }
     }
 }

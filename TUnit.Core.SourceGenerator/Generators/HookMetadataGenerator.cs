@@ -10,7 +10,7 @@ namespace TUnit.Core.SourceGenerator.Generators;
 /// Source generator that emits unified hook metadata for AOT support
 /// </summary>
 [Generator]
-public class UnifiedHookMetadataGenerator : IIncrementalGenerator
+public class HookMetadataGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -591,7 +591,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                     // For open generic types, use dynamic to avoid invalid cast
                     writer.AppendLine($"// Instance method on open generic type - using dynamic");
                     writer.AppendLine($"dynamic dynamicInstance = instance;");
-                    
+
                     // Build method call
                     var methodCall = isStatic
                         ? $"{className}.{methodName}"
@@ -628,7 +628,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                 {
                     // For concrete types, use normal cast
                     writer.AppendLine($"var typedInstance = ({className})instance;");
-                    
+
                     // Build method call
                     var methodCall = isStatic
                         ? $"{className}.{methodName}"
@@ -673,7 +673,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                     // For static methods on open generic types, we need to use reflection
                     writer.AppendLine($"// Static method on open generic type - using reflection");
                     writer.AppendLine($"var method = typeof({hook.TypeSymbol.GloballyQualifiedNonGeneric()}).GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);");
-                    
+
                     // Build parameters array based on what the method expects
                     if (hasCancellationTokenOnly)
                     {
@@ -691,7 +691,7 @@ public class UnifiedHookMetadataGenerator : IIncrementalGenerator
                     {
                         writer.AppendLine($"var parameters = new object[0];");
                     }
-                    
+
                     // Check if method returns void
                     if (hook.MethodSymbol.ReturnsVoid)
                     {

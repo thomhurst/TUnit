@@ -26,7 +26,7 @@ internal sealed class TestDiscoveryService : IDataProducer
 {
     private const int DiscoveryTimeoutSeconds = 60;
     private readonly HookOrchestrator _hookOrchestrator;
-    private readonly UnifiedTestBuilderPipeline _testBuilderPipeline;
+    private readonly TestBuilderPipeline _testBuilderPipeline;
     private readonly TestFilterService _testFilterService;
     private readonly ConcurrentBag<ExecutableTest> _cachedTests =
     [
@@ -41,7 +41,7 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
-    public TestDiscoveryService(HookOrchestrator hookOrchestrator, UnifiedTestBuilderPipeline testBuilderPipeline, TestFilterService testFilterService)
+    public TestDiscoveryService(HookOrchestrator hookOrchestrator, TestBuilderPipeline testBuilderPipeline, TestFilterService testFilterService)
     {
         _hookOrchestrator = hookOrchestrator;
         _testBuilderPipeline = testBuilderPipeline ?? throw new ArgumentNullException(nameof(testBuilderPipeline));

@@ -33,8 +33,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public ICommandLineOptions CommandLineOptions { get; }
     public VerbosityService VerbosityService { get; }
     public TestDiscoveryService DiscoveryService { get; }
-    public UnifiedTestBuilderPipeline TestBuilderPipeline { get; }
-    public UnifiedTestExecutor TestExecutor { get; }
+    public TestBuilderPipeline TestBuilderPipeline { get; }
+    public TestExecutor TestExecutor { get; }
     public TUnitMessageBus MessageBus { get; }
     public EngineCancellationToken CancellationToken { get; }
     public TestFilterService TestFilterService { get; }
@@ -112,7 +112,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create pipeline with all dependencies
         TestBuilderPipeline = Register(
-            new UnifiedTestBuilderPipeline(
+            new TestBuilderPipeline(
                 dataCollectorFactory,
                 testBuilder,
                 ContextProvider));
@@ -126,7 +126,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var singleTestExecutor = Register<ISingleTestExecutor>(
             new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService));
 
-        TestExecutor = Register(new UnifiedTestExecutor(
+        TestExecutor = Register(new TestExecutor(
             singleTestExecutor,
             CommandLineOptions,
             Logger,

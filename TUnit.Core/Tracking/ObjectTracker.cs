@@ -7,7 +7,7 @@ namespace TUnit.Core.Tracking;
 /// Unified static object tracker that combines reference counting with lifecycle management.
 /// Consolidates the functionality of both DataSourceReferenceTracker and ActiveObjectTracker.
 /// </summary>
-internal static class UnifiedObjectTracker
+internal static class ObjectTracker
 {
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
 

@@ -567,12 +567,12 @@ internal sealed class TestBuilder : ITestBuilder
     {
         foreach (var arg in classArguments)
         {
-            UnifiedObjectTracker.TrackObject(context.Events, arg);
+            ObjectTracker.TrackObject(context.Events, arg);
         }
 
         foreach (var arg in methodArguments)
         {
-            UnifiedObjectTracker.TrackObject(context.Events, arg);
+            ObjectTracker.TrackObject(context.Events, arg);
         }
     }
 

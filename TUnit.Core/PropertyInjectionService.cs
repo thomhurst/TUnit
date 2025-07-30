@@ -227,7 +227,7 @@ public sealed class PropertyInjectionService
             return;
         }
 
-        UnifiedObjectTracker.TrackObject(events, propertyValue);
+        ObjectTracker.TrackObject(events, propertyValue);
 
         if (ShouldInjectProperties(propertyValue))
         {
