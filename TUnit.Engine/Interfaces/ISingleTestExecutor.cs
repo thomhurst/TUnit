@@ -1,5 +1,4 @@
 using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 
@@ -11,5 +10,5 @@ namespace TUnit.Engine.Interfaces;
 public interface ISingleTestExecutor
 {
     void SetSessionId(SessionUid sessionUid);
-    Task<TestNodeUpdateMessage> ExecuteTestAsync(ExecutableTest test, IMessageBus messageBus, CancellationToken cancellationToken);
+    Task<TestNodeUpdateMessage> ExecuteTestAsync(ExecutableTest test, CancellationToken cancellationToken);
 }

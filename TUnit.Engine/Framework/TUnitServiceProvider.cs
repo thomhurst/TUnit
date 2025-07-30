@@ -12,10 +12,12 @@ using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Collectors;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Discovery;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
@@ -43,6 +45,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public EventReceiverOrchestrator EventReceiverOrchestrator { get; }
     public ITestFinder TestFinder { get; }
     public TUnitInitializer Initializer { get; }
+    public CancellationTokenSource FailFastCancellationSource { get; }
 
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
@@ -127,20 +130,36 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var singleTestExecutor = Register<ISingleTestExecutor>(
             new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService));
 
+        // Create the HookOrchestratingTestExecutorAdapter
+        // Note: We'll need to update this to handle dynamic dependencies properly
+        var sessionUid = context.Request.Session.SessionUid;
+        var isFailFastEnabled = CommandLineOptions.TryGetOptionArgumentList(FailFastCommandProvider.FailFast, out _);
+        FailFastCancellationSource = Register(new CancellationTokenSource());
+
+        var hookOrchestratingTestExecutorAdapter = Register(
+            new HookOrchestratingTestExecutorAdapter(
+                singleTestExecutor,
+                messageBus,
+                sessionUid,
+                isFailFastEnabled,
+                FailFastCancellationSource,
+                Logger,
+                HookOrchestrator));
+
         TestExecutor = Register(new TestExecutor(
             singleTestExecutor,
             CommandLineOptions,
             Logger,
             loggerFactory,
             testScheduler: null,
-            serviceProvider: this));
+            serviceProvider: this,
+            hookOrchestratingTestExecutorAdapter));
 
         // Set session IDs for proper test reporting
-        var sessionUid = context.Request.Session.SessionUid;
         singleTestExecutor.SetSessionId(sessionUid);
         TestExecutor.SetSessionId(sessionUid);
 
-        Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, messageBus, singleTestExecutor, TestSessionId, CancellationToken.Token));
+        Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, hookOrchestratingTestExecutorAdapter, TestSessionId, CancellationToken.Token));
 
         InitializeConsoleInterceptors();
     }

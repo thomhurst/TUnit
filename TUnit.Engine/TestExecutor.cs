@@ -23,8 +23,8 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
     private readonly ITestScheduler _testScheduler;
     private readonly ILoggerFactory _loggerFactory;
     private SessionUid? _sessionUid;
-    private readonly CancellationTokenSource _failFastCancellationSource = new();
     private readonly TUnitServiceProvider _serviceProvider;
+    private readonly HookOrchestratingTestExecutorAdapter _hookOrchestratingTestExecutorAdapter;
 
     public TestExecutor(
         ISingleTestExecutor singleTestExecutor,
@@ -32,13 +32,15 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         TUnitFrameworkLogger logger,
         ILoggerFactory? loggerFactory,
         ITestScheduler? testScheduler,
-        TUnitServiceProvider serviceProvider)
+        TUnitServiceProvider serviceProvider,
+        HookOrchestratingTestExecutorAdapter hookOrchestratingTestExecutorAdapter)
     {
         _singleTestExecutor = singleTestExecutor;
         _commandLineOptions = commandLineOptions;
         _logger = logger;
         _loggerFactory = loggerFactory ?? new NullLoggerFactory();
         _serviceProvider = serviceProvider;
+        _hookOrchestratingTestExecutorAdapter = hookOrchestratingTestExecutorAdapter;
 
         // Use provided scheduler or create default
         _testScheduler = testScheduler ?? CreateDefaultScheduler();
@@ -72,8 +74,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         try
         {
             await PrepareHookOrchestrator(hookOrchestrator, testList, cancellationToken);
-            var executorAdapter = CreateExecutorAdapter(hookOrchestrator, messageBus);
-            await ExecuteTestsCore(testList, executorAdapter, cancellationToken);
+            await ExecuteTestsCore(testList, _hookOrchestratingTestExecutorAdapter, cancellationToken);
         }
         finally
         {
@@ -131,38 +132,18 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         }
     }
 
-    private Scheduling.ITestExecutor CreateExecutorAdapter(HookOrchestrator hookOrchestrator, IMessageBus messageBus)
-    {
-        var isFailFastEnabled = IsFailFastEnabled();
-        var sessionUid = _sessionUid ?? new SessionUid(Guid.NewGuid().ToString());
-
-        return new HookOrchestratingTestExecutorAdapter(
-            _singleTestExecutor,
-            messageBus,
-            sessionUid,
-            isFailFastEnabled,
-            _failFastCancellationSource,
-            _logger,
-            hookOrchestrator);
-    }
 
     private async Task ExecuteTestsCore(List<ExecutableTest> testList, Scheduling.ITestExecutor executorAdapter, CancellationToken cancellationToken)
     {
         // Combine cancellation tokens
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken,
-            _failFastCancellationSource.Token);
+            _serviceProvider.FailFastCancellationSource.Token);
 
         // Schedule and execute tests (batch approach to preserve ExecutionContext)
         await _testScheduler.ScheduleAndExecuteAsync(testList, executorAdapter, linkedCts.Token);
     }
 
-    private bool IsFailFastEnabled()
-    {
-        return _commandLineOptions.TryGetOptionArgumentList(
-            FailFastCommandProvider.FailFast,
-            out _);
-    }
 
     private ITestScheduler CreateDefaultScheduler()
     {
@@ -191,7 +172,6 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
             return;
         }
 
-        _failFastCancellationSource.Dispose();
         _disposed = true;
     }
 
@@ -202,7 +182,6 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
             return default(ValueTask);
         }
 
-        _failFastCancellationSource.Dispose();
         _disposed = true;
 
         return default(ValueTask);

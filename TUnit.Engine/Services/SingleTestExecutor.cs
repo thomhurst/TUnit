@@ -1,5 +1,4 @@
 using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Data;
@@ -36,7 +35,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
     public async Task<TestNodeUpdateMessage> ExecuteTestAsync(
         ExecutableTest test,
-        IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
         // If test is already failed (e.g., from data source expansion error),

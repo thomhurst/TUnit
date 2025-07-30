@@ -67,7 +67,7 @@ internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDat
 #endif
 
             // Execute the test and get the result message
-            var updateMessage = await _innerExecutor.ExecuteTestAsync(test, _messageBus, cancellationToken);
+            var updateMessage = await _innerExecutor.ExecuteTestAsync(test, cancellationToken);
 
             // Publish the result
             await _messageBus.PublishAsync(this, updateMessage);
