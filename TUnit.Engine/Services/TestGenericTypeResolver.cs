@@ -507,6 +507,7 @@ internal sealed class TestGenericTypeResolver
         {
             // Check if argument type implements the parameter interface
             #pragma warning disable IL2070 // Type.GetInterfaces() requires preserved interfaces
+            // Note: Interface discovery for generic type resolution. AOT scenarios should use concrete types or source-generated type mappings.
             var implementedInterfaces = argumentType.GetInterfaces();
             #pragma warning restore IL2070
             foreach (var implementedInterface in implementedInterfaces)

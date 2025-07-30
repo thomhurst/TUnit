@@ -1,0 +1,111 @@
+using System.Diagnostics.CodeAnalysis;
+
+namespace TUnit.Core.Helpers;
+
+/// <summary>
+/// Provides AOT-safe tuple creation without reflection for common tuple types.
+/// </summary>
+public static class TupleFactory
+{
+    private static readonly Dictionary<Type, Func<object?[], object?>> TypedFactories = new();
+    
+    static TupleFactory()
+    {
+        // Register factories for common tuple types with object elements
+        RegisterFactory<ValueTuple<object?, object?>>((args) => 
+            new ValueTuple<object?, object?>(args[0], args[1]));
+        RegisterFactory<ValueTuple<object?, object?, object?>>((args) => 
+            new ValueTuple<object?, object?, object?>(args[0], args[1], args[2]));
+        RegisterFactory<ValueTuple<object?, object?, object?, object?>>((args) => 
+            new ValueTuple<object?, object?, object?, object?>(args[0], args[1], args[2], args[3]));
+        RegisterFactory<ValueTuple<object?, object?, object?, object?, object?>>((args) => 
+            new ValueTuple<object?, object?, object?, object?, object?>(args[0], args[1], args[2], args[3], args[4]));
+        RegisterFactory<ValueTuple<object?, object?, object?, object?, object?, object?>>((args) => 
+            new ValueTuple<object?, object?, object?, object?, object?, object?>(args[0], args[1], args[2], args[3], args[4], args[5]));
+        RegisterFactory<ValueTuple<object?, object?, object?, object?, object?, object?, object?>>((args) => 
+            new ValueTuple<object?, object?, object?, object?, object?, object?, object?>(args[0], args[1], args[2], args[3], args[4], args[5], args[6]));
+    }
+    
+    private static void RegisterFactory<T>(Func<object?[], T> factory) where T : struct
+    {
+        TypedFactories[typeof(T)] = args => factory(args);
+    }
+    
+    /// <summary>
+    /// Creates a tuple from the given elements in an AOT-safe manner when possible.
+    /// </summary>
+    /// <param name="tupleType">The type of tuple to create</param>
+    /// <param name="elements">The elements to include in the tuple</param>
+    /// <returns>The created tuple, or the first element if creation fails</returns>
+    public static object? CreateTuple(Type tupleType, object?[] elements)
+    {
+        if (elements == null || elements.Length == 0)
+        {
+            return null;
+        }
+        
+        // Try typed factory first (for object tuples)
+        if (TypedFactories.TryGetValue(tupleType, out var factory))
+        {
+            try
+            {
+                return factory(elements);
+            }
+            catch
+            {
+                // Fall through to other approaches
+            }
+        }
+        
+        // Try generic factory based on element count
+        if (IsTupleType(tupleType))
+        {
+            try
+            {
+                return elements.Length switch
+                {
+                    1 => new ValueTuple<object?>(elements[0]),
+                    2 => (elements[0], elements[1]),
+                    3 => (elements[0], elements[1], elements[2]),
+                    4 => (elements[0], elements[1], elements[2], elements[3]),
+                    5 => (elements[0], elements[1], elements[2], elements[3], elements[4]),
+                    6 => (elements[0], elements[1], elements[2], elements[3], elements[4], elements[5]),
+                    7 => (elements[0], elements[1], elements[2], elements[3], elements[4], elements[5], elements[6]),
+                    _ => CreateTupleWithReflection(tupleType, elements)
+                };
+            }
+            catch
+            {
+                return CreateTupleWithReflection(tupleType, elements);
+            }
+        }
+        
+        return CreateTupleWithReflection(tupleType, elements);
+    }
+    
+    /// <summary>
+    /// Checks if a type is a ValueTuple type.
+    /// </summary>
+    public static bool IsTupleType(Type type)
+    {
+        return type.IsGenericType && type.GetGenericTypeDefinition().FullName?.StartsWith("System.ValueTuple") == true;
+    }
+    
+    /// <summary>
+    /// Creates a tuple using reflection as a fallback. This method is not AOT-compatible.
+    /// </summary>
+    [RequiresUnreferencedCode("Dynamic tuple creation is not AOT-compatible. Use source-generated data or known tuple types for AOT scenarios.")]
+    [RequiresDynamicCode("Dynamic tuple creation requires runtime code generation.")]
+    private static object? CreateTupleWithReflection(Type tupleType, object?[] elements)
+    {
+        try
+        {
+            return Activator.CreateInstance(tupleType, elements);
+        }
+        catch
+        {
+            // If all else fails, return the first element
+            return elements.FirstOrDefault();
+        }
+    }
+}

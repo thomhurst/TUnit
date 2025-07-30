@@ -1,5 +1,6 @@
-﻿#pragma warning disable IL2072
-#pragma warning disable IL2075
+﻿#pragma warning disable IL2072 // Target type's member does not satisfy requirements
+#pragma warning disable IL2075 // Target method return value does not satisfy requirements
+// Note: Comparison logic uses reflection for deep object comparison. For AOT scenarios, use explicit comparison methods.
 
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;

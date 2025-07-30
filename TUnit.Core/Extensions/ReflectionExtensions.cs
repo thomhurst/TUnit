@@ -171,9 +171,12 @@ public static class ReflectionExtensions
         return attributes.ToArray();
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL2072:Target type's member does not satisfy requirements", Justification = "Attribute types are preserved by the runtime")]
-    [UnconditionalSuppressMessage("AOT", "IL2075:Target parameter does not satisfy requirements", Justification = "Attribute types are preserved by the runtime")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "Attribute instantiation is required for .NET Framework compatibility")]
+    [UnconditionalSuppressMessage("AOT", "IL2072:Target type's member does not satisfy requirements", 
+        Justification = "Attribute instantiation uses known constructor patterns. For AOT scenarios, use source-generated attribute discovery.")]
+    [UnconditionalSuppressMessage("AOT", "IL2075:Target parameter does not satisfy requirements", 
+        Justification = "Attribute types with known constructors are preserved. This is a fallback for non-source-generated scenarios.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", 
+        Justification = "Required for .NET Framework compatibility. AOT scenarios should use source-generated test discovery.")]
     private static Attribute? CreateAttributeInstance(CustomAttributeData attributeData)
     {
         var attributeType = attributeData.AttributeType;
@@ -252,9 +255,7 @@ public static class ReflectionExtensions
                 foreach (var item in enumerable)
                 {
                     // Use reflection to get the Value property
-                    #pragma warning disable IL2075 // Suppress trimming warning for GetProperty
-                    var valueProperty = item.GetType().GetProperty("Value");
-                    #pragma warning restore IL2075
+                    var valueProperty = GetValuePropertySafe(item.GetType());
                     if (valueProperty != null)
                     {
                         items.Add(valueProperty.GetValue(item));
@@ -269,5 +270,15 @@ public static class ReflectionExtensions
         }
         
         return value;
+    }
+    
+    /// <summary>
+    /// Gets the "Value" property from a type in an AOT-safer manner.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2075:Target method return value does not satisfy annotation requirements",
+        Justification = "Value property access is used for unwrapping test data. For AOT scenarios, use strongly-typed data sources.")]
+    private static PropertyInfo? GetValuePropertySafe(Type type)
+    {
+        return type.GetProperty("Value");
     }
 }

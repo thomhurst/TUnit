@@ -7,8 +7,10 @@ namespace TUnit.Core.Helpers;
 
 public static class CastHelper
 {
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Conversion operators are preserved through DynamicallyAccessedMembers attribute")]
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection is used as a fallback. AOT analyzer warns at compile time.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", 
+        Justification = "Type conversion uses DynamicallyAccessedMembers for known conversion patterns. For AOT scenarios, use explicit type conversions.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", 
+        Justification = "Reflection-based conversion is a fallback for runtime scenarios. AOT applications should use explicit conversions.")]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] T>(object? value)
     {
         if (value is null)
@@ -42,9 +44,7 @@ public static class CastHelper
                 if (firstItem != null)
                 {
                     // Use reflection to get the Value property
-                    #pragma warning disable IL2075 // Suppress trimming warning for GetProperty
-                    var valueProperty = firstItem.GetType().GetProperty("Value");
-                    #pragma warning restore IL2075
+                    var valueProperty = GetValuePropertySafe(firstItem.GetType());
                     if (valueProperty != null)
                     {
                         value = valueProperty.GetValue(firstItem);
@@ -148,8 +148,10 @@ public static class CastHelper
         return (T?) conversionMethod.Invoke(null, [value]);
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Conversion operators are preserved through DynamicallyAccessedMembers attribute")]
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection is used as a fallback. AOT analyzer warns at compile time.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", 
+        Justification = "Type conversion uses DynamicallyAccessedMembers for known conversion patterns. For AOT scenarios, use explicit type conversions.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", 
+        Justification = "Reflection-based conversion is a fallback for runtime scenarios. AOT applications should use explicit conversions.")]
     public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type, object? value)
     {
         if (value is null)
@@ -183,9 +185,7 @@ public static class CastHelper
                 if (firstItem != null)
                 {
                     // Use reflection to get the Value property
-                    #pragma warning disable IL2075 // Suppress trimming warning for GetProperty
-                    var valueProperty = firstItem.GetType().GetProperty("Value");
-                    #pragma warning restore IL2075
+                    var valueProperty = GetValuePropertySafe(firstItem.GetType());
                     if (valueProperty != null)
                     {
                         value = valueProperty.GetValue(firstItem);
@@ -307,5 +307,15 @@ public static class CastHelper
     {
         var pi = mi.GetParameters().FirstOrDefault();
         return pi != null && pi.ParameterType == baseType;
+    }
+    
+    /// <summary>
+    /// Gets the "Value" property from a type in an AOT-safer manner.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2075:Target method return value does not satisfy annotation requirements",
+        Justification = "Value property access is used for unwrapping CustomAttributeTypedArgument. For AOT scenarios, use source-generated attribute discovery.")]
+    private static PropertyInfo? GetValuePropertySafe(Type type)
+    {
+        return type.GetProperty("Value");
     }
 }

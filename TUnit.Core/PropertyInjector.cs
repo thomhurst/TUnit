@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using TUnit.Core.Enums;
+using TUnit.Core.Helpers;
 using TUnit.Core.ReferenceTracking;
 using TUnit.Core.Tracking;
 
@@ -84,11 +85,9 @@ public static class PropertyInjector
                     var currentPropertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
                     object? value;
                     
-                    if (currentPropertyInjection != null && IsTupleType(currentPropertyInjection.PropertyType) && args != null && args.Length > 1)
+                    if (currentPropertyInjection != null && TupleFactory.IsTupleType(currentPropertyInjection.PropertyType) && args != null && args.Length > 1)
                     {
-                        #pragma warning disable IL2072
-                        value = CreateTupleFromElements(currentPropertyInjection.PropertyType, args);
-                        #pragma warning restore IL2072
+                        value = TupleFactory.CreateTuple(currentPropertyInjection.PropertyType, args);
                     }
                     else
                     {
@@ -525,37 +524,6 @@ public static class PropertyInjector
         return value;
     }
 
-    private static bool IsTupleType(Type type)
-    {
-        return type.IsGenericType && type.GetGenericTypeDefinition().FullName?.StartsWith("System.ValueTuple") == true;
-    }
-
-    [UnconditionalSuppressMessage("AOT", "IL2067:UnrecognizedReflectionPattern", 
-        Justification = "Tuple types have public constructors and are safe for AOT")]
-    private static object? CreateTupleFromElements(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type tupleType, 
-        object?[] elements)
-    {
-        if (!tupleType.IsGenericType)
-        {
-            return elements.FirstOrDefault();
-        }
-
-        var genericArgs = tupleType.GetGenericArguments();
-        if (genericArgs.Length != elements.Length)
-        {
-            return elements.FirstOrDefault();
-        }
-
-        try
-        {
-            return Activator.CreateInstance(tupleType, elements);
-        }
-        catch
-        {
-            return elements.FirstOrDefault();
-        }
-    }
 
     /// <summary>
     /// Gets PropertyInfo in an AOT-safe manner.
