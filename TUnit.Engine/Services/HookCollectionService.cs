@@ -109,33 +109,11 @@ internal sealed class HookCollectionService : IHookCollectionService
         {
             var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
 
-            var currentType = type;
-            while (currentType != null)
+            // Collect all global BeforeEvery hooks
+            foreach (var hook in Sources.BeforeEveryTestHooks)
             {
-                if (Sources.BeforeEveryTestHooks.TryGetValue(currentType, out var typeHooks))
-                {
-                    foreach (var hook in typeHooks)
-                    {
-                        var hookFunc = CreateStaticHookDelegate(hook);
-                        allHooks.Add((hook.Order, hookFunc));
-                    }
-                }
-
-                // Also check the open generic type definition for generic types
-                if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition)
-                {
-                    var openGenericType = currentType.GetGenericTypeDefinition();
-                    if (Sources.BeforeEveryTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
-                    {
-                        foreach (var hook in openTypeHooks)
-                        {
-                            var hookFunc = CreateStaticHookDelegate(hook);
-                            allHooks.Add((hook.Order, hookFunc));
-                        }
-                    }
-                }
-
-                currentType = currentType.BaseType;
+                var hookFunc = CreateStaticHookDelegate(hook);
+                allHooks.Add((hook.Order, hookFunc));
             }
 
             return allHooks
@@ -153,33 +131,11 @@ internal sealed class HookCollectionService : IHookCollectionService
         {
             var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
 
-            var currentType = type;
-            while (currentType != null)
+            // Collect all global AfterEvery hooks
+            foreach (var hook in Sources.AfterEveryTestHooks)
             {
-                if (Sources.AfterEveryTestHooks.TryGetValue(currentType, out var typeHooks))
-                {
-                    foreach (var hook in typeHooks)
-                    {
-                        var hookFunc = CreateStaticHookDelegate(hook);
-                        allHooks.Add((hook.Order, hookFunc));
-                    }
-                }
-
-                // Also check the open generic type definition for generic types
-                if (currentType.IsGenericType && !currentType.IsGenericTypeDefinition)
-                {
-                    var openGenericType = currentType.GetGenericTypeDefinition();
-                    if (Sources.AfterEveryTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
-                    {
-                        foreach (var hook in openTypeHooks)
-                        {
-                            var hookFunc = CreateStaticHookDelegate(hook);
-                            allHooks.Add((hook.Order, hookFunc));
-                        }
-                    }
-                }
-
-                currentType = currentType.BaseType;
+                var hookFunc = CreateStaticHookDelegate(hook);
+                allHooks.Add((hook.Order, hookFunc));
             }
 
             return allHooks
@@ -391,6 +347,78 @@ internal sealed class HookCollectionService : IHookCollectionService
             .ToList();
 
         return new ValueTask<IReadOnlyList<Func<TestDiscoveryContext, CancellationToken, Task>>>(hooks);
+    }
+
+    public ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> CollectBeforeEveryClassHooksAsync()
+    {
+        var allHooks = new List<(int order, Func<ClassHookContext, CancellationToken, Task> hook)>();
+
+        foreach (var hook in Sources.BeforeEveryClassHooks)
+        {
+            var hookFunc = CreateClassHookDelegate(hook);
+            allHooks.Add((hook.Order, hookFunc));
+        }
+
+        var hooks = allHooks
+            .OrderBy(h => h.order)
+            .Select(h => h.hook)
+            .ToList();
+
+        return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
+    }
+
+    public ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> CollectAfterEveryClassHooksAsync()
+    {
+        var allHooks = new List<(int order, Func<ClassHookContext, CancellationToken, Task> hook)>();
+
+        foreach (var hook in Sources.AfterEveryClassHooks)
+        {
+            var hookFunc = CreateClassHookDelegate(hook);
+            allHooks.Add((hook.Order, hookFunc));
+        }
+
+        var hooks = allHooks
+            .OrderBy(h => h.order)
+            .Select(h => h.hook)
+            .ToList();
+
+        return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
+    }
+
+    public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectBeforeEveryAssemblyHooksAsync()
+    {
+        var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>();
+
+        foreach (var hook in Sources.BeforeEveryAssemblyHooks)
+        {
+            var hookFunc = CreateAssemblyHookDelegate(hook);
+            allHooks.Add((hook.Order, hookFunc));
+        }
+
+        var hooks = allHooks
+            .OrderBy(h => h.order)
+            .Select(h => h.hook)
+            .ToList();
+
+        return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
+    }
+
+    public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectAfterEveryAssemblyHooksAsync()
+    {
+        var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>();
+
+        foreach (var hook in Sources.AfterEveryAssemblyHooks)
+        {
+            var hookFunc = CreateAssemblyHookDelegate(hook);
+            allHooks.Add((hook.Order, hookFunc));
+        }
+
+        var hooks = allHooks
+            .OrderBy(h => h.order)
+            .Select(h => h.hook)
+            .ToList();
+
+        return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
     }
 
     private static Func<TestContext, CancellationToken, Task> CreateInstanceHookDelegate(InstanceHookMethod hook)

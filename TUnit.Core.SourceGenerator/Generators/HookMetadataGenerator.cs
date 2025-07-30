@@ -354,17 +354,6 @@ public class HookMetadataGenerator : IIncrementalGenerator
                         GenerateHookListPopulation(writer, "AfterTestHooks", typeDisplay, afterTestHooks, isInstance: true);
                     }
 
-                    var beforeEveryTestHooks = testHooks.Where(h => h.HookKind == "BeforeEvery").ToList();
-                    if (beforeEveryTestHooks.Any())
-                    {
-                        GenerateHookListPopulation(writer, "BeforeEveryTestHooks", typeDisplay, beforeEveryTestHooks, isInstance: false);
-                    }
-
-                    var afterEveryTestHooks = testHooks.Where(h => h.HookKind == "AfterEvery").ToList();
-                    if (afterEveryTestHooks.Any())
-                    {
-                        GenerateHookListPopulation(writer, "AfterEveryTestHooks", typeDisplay, afterEveryTestHooks, isInstance: false);
-                    }
                 }
 
                 if (classHooks.Any())
@@ -382,6 +371,32 @@ public class HookMetadataGenerator : IIncrementalGenerator
                         GenerateHookListPopulation(writer, "AfterClassHooks", typeDisplay, afterClassHooks, isInstance: false);
                     }
                 }
+            }
+
+            // Handle global "Every" hooks for tests
+            var globalBeforeEveryTestHooks = hooks.Where(h => h.HookType == "Test" && h.HookKind == "BeforeEvery").ToList();
+            if (globalBeforeEveryTestHooks.Any())
+            {
+                GenerateGlobalHookListPopulation(writer, "BeforeEveryTestHooks", globalBeforeEveryTestHooks);
+            }
+
+            var globalAfterEveryTestHooks = hooks.Where(h => h.HookType == "Test" && h.HookKind == "AfterEvery").ToList();
+            if (globalAfterEveryTestHooks.Any())
+            {
+                GenerateGlobalHookListPopulation(writer, "AfterEveryTestHooks", globalAfterEveryTestHooks);
+            }
+
+            // Handle global "Every" hooks for classes
+            var globalBeforeEveryClassHooks = hooks.Where(h => h.HookType == "Class" && h.HookKind == "BeforeEvery").ToList();
+            if (globalBeforeEveryClassHooks.Any())
+            {
+                GenerateGlobalHookListPopulation(writer, "BeforeEveryClassHooks", globalBeforeEveryClassHooks);
+            }
+
+            var globalAfterEveryClassHooks = hooks.Where(h => h.HookType == "Class" && h.HookKind == "AfterEvery").ToList();
+            if (globalAfterEveryClassHooks.Any())
+            {
+                GenerateGlobalHookListPopulation(writer, "AfterEveryClassHooks", globalAfterEveryClassHooks);
             }
 
             var assemblyHookGroups = hooks.Where(h => h.HookType == "Assembly")
@@ -405,6 +420,19 @@ public class HookMetadataGenerator : IIncrementalGenerator
                 {
                     GenerateAssemblyHookListPopulation(writer, "AfterAssemblyHooks", assemblyName, afterAssemblyHooks);
                 }
+            }
+
+            // Handle global "Every" hooks for assemblies
+            var globalBeforeEveryAssemblyHooks = hooks.Where(h => h.HookType == "Assembly" && h.HookKind == "BeforeEvery").ToList();
+            if (globalBeforeEveryAssemblyHooks.Any())
+            {
+                GenerateGlobalHookListPopulation(writer, "BeforeEveryAssemblyHooks", globalBeforeEveryAssemblyHooks);
+            }
+
+            var globalAfterEveryAssemblyHooks = hooks.Where(h => h.HookType == "Assembly" && h.HookKind == "AfterEvery").ToList();
+            if (globalAfterEveryAssemblyHooks.Any())
+            {
+                GenerateGlobalHookListPopulation(writer, "AfterEveryAssemblyHooks", globalAfterEveryAssemblyHooks);
             }
 
             var testSessionHooks = hooks.Where(h => h.HookType == "TestSession").ToList();

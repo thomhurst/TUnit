@@ -237,6 +237,22 @@ internal sealed class HookOrchestrator
             }
         }
 
+        // Execute global BeforeEveryAssembly hooks
+        var everyHooks = await _hookCollectionService.CollectBeforeEveryAssemblyHooksAsync();
+        foreach (var hook in everyHooks)
+        {
+            try
+            {
+                assemblyContext.RestoreExecutionContext();
+                await hook(assemblyContext, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"BeforeEveryAssembly hook failed for {assembly}: {ex.Message}");
+                throw;
+            }
+        }
+
         return ExecutionContext.Capture()!;
     }
 
@@ -245,6 +261,21 @@ internal sealed class HookOrchestrator
         var hooks = await _hookCollectionService.CollectAfterAssemblyHooksAsync(assembly);
 
         var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
+
+        // Execute global AfterEveryAssembly hooks first
+        var everyHooks = await _hookCollectionService.CollectAfterEveryAssemblyHooksAsync();
+        foreach (var hook in everyHooks)
+        {
+            try
+            {
+                assemblyContext.RestoreExecutionContext();
+                await hook(assemblyContext, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"AfterEveryAssembly hook failed for {assembly.GetName().Name}: {ex.Message}");
+            }
+        }
 
         foreach (var hook in hooks)
         {
@@ -284,6 +315,22 @@ internal sealed class HookOrchestrator
             }
         }
 
+        // Execute global BeforeEveryClass hooks
+        var everyHooks = await _hookCollectionService.CollectBeforeEveryClassHooksAsync();
+        foreach (var hook in everyHooks)
+        {
+            try
+            {
+                classContext.RestoreExecutionContext();
+                await hook(classContext, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"BeforeEveryClass hook failed for {testClassType.Name}: {ex.Message}");
+                throw;
+            }
+        }
+
         return ExecutionContext.Capture()!;
     }
 
@@ -294,6 +341,21 @@ internal sealed class HookOrchestrator
         var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClassType);
 
         var classContext = _contextProvider.GetOrCreateClassContext(testClassType);
+
+        // Execute global AfterEveryClass hooks first
+        var everyHooks = await _hookCollectionService.CollectAfterEveryClassHooksAsync();
+        foreach (var hook in everyHooks)
+        {
+            try
+            {
+                classContext.RestoreExecutionContext();
+                await hook(classContext, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"AfterEveryClass hook failed for {testClassType.Name}: {ex.Message}");
+            }
+        }
 
         foreach (var hook in hooks)
         {

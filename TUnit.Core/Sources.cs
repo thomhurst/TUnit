@@ -15,18 +15,18 @@ public static class Sources
 
     public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.InstanceHookMethod>> BeforeTestHooks = new();
     public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.InstanceHookMethod>> AfterTestHooks = new();
-    public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.StaticHookMethod<TestContext>>> BeforeEveryTestHooks = new();
-    public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.StaticHookMethod<TestContext>>> AfterEveryTestHooks = new();
+    public static readonly ConcurrentBag<Hooks.StaticHookMethod<TestContext>> BeforeEveryTestHooks = new();
+    public static readonly ConcurrentBag<Hooks.StaticHookMethod<TestContext>> AfterEveryTestHooks = new();
     
     public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.StaticHookMethod<ClassHookContext>>> BeforeClassHooks = new();
     public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.StaticHookMethod<ClassHookContext>>> AfterClassHooks = new();
-    public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.StaticHookMethod<ClassHookContext>>> BeforeEveryClassHooks = new();
-    public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.StaticHookMethod<ClassHookContext>>> AfterEveryClassHooks = new();
+    public static readonly ConcurrentBag<Hooks.StaticHookMethod<ClassHookContext>> BeforeEveryClassHooks = new();
+    public static readonly ConcurrentBag<Hooks.StaticHookMethod<ClassHookContext>> AfterEveryClassHooks = new();
     
     public static readonly ConcurrentDictionary<Assembly, ConcurrentBag<Hooks.StaticHookMethod<AssemblyHookContext>>> BeforeAssemblyHooks = new();
     public static readonly ConcurrentDictionary<Assembly, ConcurrentBag<Hooks.StaticHookMethod<AssemblyHookContext>>> AfterAssemblyHooks = new();
-    public static readonly ConcurrentDictionary<Assembly, ConcurrentBag<Hooks.StaticHookMethod<AssemblyHookContext>>> BeforeEveryAssemblyHooks = new();
-    public static readonly ConcurrentDictionary<Assembly, ConcurrentBag<Hooks.StaticHookMethod<AssemblyHookContext>>> AfterEveryAssemblyHooks = new();
+    public static readonly ConcurrentBag<Hooks.StaticHookMethod<AssemblyHookContext>> BeforeEveryAssemblyHooks = new();
+    public static readonly ConcurrentBag<Hooks.StaticHookMethod<AssemblyHookContext>> AfterEveryAssemblyHooks = new();
     
     public static readonly ConcurrentBag<Hooks.StaticHookMethod<TestSessionContext>> BeforeTestSessionHooks = [];
     public static readonly ConcurrentBag<Hooks.StaticHookMethod<TestSessionContext>> AfterTestSessionHooks = [];
