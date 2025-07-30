@@ -17,11 +17,17 @@ internal static class ReflectionAttributeExtractor
         if (testMethod != null)
         {
             var methodAttr = testMethod.GetCustomAttribute<T>();
-            if (methodAttr != null) return methodAttr;
+            if (methodAttr != null)
+            {
+                return methodAttr;
+            }
         }
 
         var classAttr = testClass.GetCustomAttribute<T>();
-        if (classAttr != null) return classAttr;
+        if (classAttr != null)
+        {
+            return classAttr;
+        }
 
         return testClass.Assembly.GetCustomAttribute<T>();
     }

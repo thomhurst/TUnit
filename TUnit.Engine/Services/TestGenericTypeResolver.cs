@@ -534,7 +534,10 @@ internal sealed class TestGenericTypeResolver
                                     break;
                                 }
                             }
-                            if (allMapped) return true;
+                            if (allMapped)
+                            {
+                                return true;
+                            }
                         }
                     }
                 }

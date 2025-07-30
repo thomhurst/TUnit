@@ -16,7 +16,9 @@ public class ScopedEventReceiverTests
         lock (_lock)
         {
             if (!_testStartEvents.ContainsKey(testName))
+            {
                 _testStartEvents[testName] = new List<string>();
+            }
             _testStartEvents[testName].Add(source);
         }
     }
@@ -26,7 +28,9 @@ public class ScopedEventReceiverTests
         lock (_lock)
         {
             if (!_testEndEvents.ContainsKey(testName))
+            {
                 _testEndEvents[testName] = new List<string>();
+            }
             _testEndEvents[testName].Add(source);
         }
     }
@@ -95,9 +99,13 @@ public class ScopedEventReceiverTests2
         lock (ScopedEventReceiverTests._lock)
         {
             if (ScopedEventReceiverTests._testStartEvents.ContainsKey(methodName))
+            {
                 startEvents = ScopedEventReceiverTests._testStartEvents[methodName];
+            }
             if (ScopedEventReceiverTests._testEndEvents.ContainsKey(methodName))
+            {
                 endEvents = ScopedEventReceiverTests._testEndEvents[methodName];
+            }
         }
         
         

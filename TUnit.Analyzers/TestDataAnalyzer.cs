@@ -97,7 +97,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             while (currentType != null)
             {
                 if (currentType.Name.Contains("DataSource") || currentType.Name == "ArgumentsAttribute")
+                {
                     return true;
+                }
                 currentType = currentType.BaseType;
             }
             return false;
@@ -128,8 +130,11 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         
         var dataAttributes = attributes.Where(x =>
             {
-                if (x.AttributeClass == null) return false;
-                
+                if (x.AttributeClass == null)
+                {
+                    return false;
+                }
+
                 var attributeClass = x.AttributeClass;
                 
                 // Check if this is a known data source attribute by inheritance chain

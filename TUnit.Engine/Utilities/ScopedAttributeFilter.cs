@@ -25,20 +25,22 @@ internal static class ScopedAttributeFilter
         foreach (var item in items)
         {
             if (item == null)
+            {
                 continue;
-                
+            }
+
             var itemType = item.GetType();
-            
+
             // Check if this implements IScopedAttribute<T>
             var scopedInterface = itemType.GetInterfaces()
                 .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IScopedAttribute<>));
-            
+
             if (scopedInterface != null)
             {
                 // Get the generic type argument (e.g., RetryAttribute from IScopedAttribute<RetryAttribute>)
                 var scopedType = scopedInterface.GetGenericArguments()[0];
-                
-                
+
+
                 // Keep the first occurrence (which should be the most specific - method > class > assembly)
                 if (!scopedAttributesByType.ContainsKey(scopedType))
                 {
@@ -57,7 +59,7 @@ internal static class ScopedAttributeFilter
 
         return result;
     }
-    
+
     /// <summary>
     /// Checks if a type implements IScopedAttribute<T>
     /// </summary>
@@ -70,21 +72,23 @@ internal static class ScopedAttributeFilter
         return type.GetInterfaces()
             .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IScopedAttribute<>));
     }
-    
+
     /// <summary>
     /// Gets the scoped attribute type from an object that implements IScopedAttribute<T>
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2075:UnrecognizedReflectionPattern",
         Justification = "IScopedAttribute types are preserved by the source generator")]
-    public static Type? GetScopedAttributeType(object obj)
+    public static Type? GetScopedAttributeType(object? obj)
     {
         if (obj == null)
+        {
             return null;
-            
+        }
+
         var objType = obj.GetType();
         var scopedInterface = objType.GetInterfaces()
             .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IScopedAttribute<>));
-            
+
         return scopedInterface?.GetGenericArguments()[0];
     }
 }
