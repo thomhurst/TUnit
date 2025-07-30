@@ -280,9 +280,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         }
 
         // Generate CreateAndInitialize method
-        sb.AppendLine($"    /// <summary>");
+        sb.AppendLine("    /// <summary>");
         sb.AppendLine($"    /// Creates and initializes an instance of {typeSymbol.Name} with data source properties");
-        sb.AppendLine($"    /// </summary>");
+        sb.AppendLine("    /// </summary>");
         sb.AppendLine($"    public static async Task<{fullyQualifiedTypeName}> CreateAndInitializeAsync_{safeName}(global::TUnit.Core.MethodMetadata testInformation, string testSessionId)");
         sb.AppendLine("    {");
         
@@ -400,9 +400,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         sb.AppendLine();
 
         // Generate InitializeProperties method for instance properties
-        sb.AppendLine($"    /// <summary>");
+        sb.AppendLine("    /// <summary>");
         sb.AppendLine($"    /// Initializes data source properties on an existing instance of {typeSymbol.Name}");
-        sb.AppendLine($"    /// </summary>");
+        sb.AppendLine("    /// </summary>");
         sb.AppendLine($"    public static async Task InitializePropertiesAsync_{safeName}({fullyQualifiedTypeName} instance, global::TUnit.Core.MethodMetadata testInformation, string testSessionId)");
         sb.AppendLine("    {");
 
@@ -417,9 +417,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         // Generate InitializeStaticProperties method if needed
         if (staticProperties.Any())
         {
-            sb.AppendLine($"    /// <summary>");
+            sb.AppendLine("    /// <summary>");
             sb.AppendLine($"    /// Initializes static data source properties for {typeSymbol.Name}");
-            sb.AppendLine($"    /// </summary>");
+            sb.AppendLine("    /// </summary>");
             sb.AppendLine($"    public static async Task InitializeStaticPropertiesAsync_{safeName}(global::TUnit.Core.MethodMetadata testInformation, string testSessionId)");
             sb.AppendLine("    {");
 

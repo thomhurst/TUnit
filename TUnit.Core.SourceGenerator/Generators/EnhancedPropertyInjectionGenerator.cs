@@ -337,7 +337,7 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
 
             writer.AppendLine($"// Register injector for {classInfo.ClassSymbol.Name}");
             writer.AppendLine($"// Register injector for {classInfo.ClassSymbol.Name}");
-            writer.AppendLine($"// Note: Actual registration will be handled by module initializer in the future");
+            writer.AppendLine("// Note: Actual registration will be handled by module initializer in the future");
             writer.AppendLine($"System.Diagnostics.Debug.WriteLine(\"Property injector for {classInfo.ClassSymbol.Name} initialized\");");
         }
 
@@ -376,9 +376,9 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
         var fullyQualifiedTypeName = classInfo.ClassSymbol.GloballyQualified();
         var injectorMethodName = GetInjectorMethodName(classInfo.ClassSymbol);
 
-        writer.AppendLine($"/// <summary>");
+        writer.AppendLine("/// <summary>");
         writer.AppendLine($"/// Strongly-typed property injector for {className}");
-        writer.AppendLine($"/// </summary>");
+        writer.AppendLine("/// </summary>");
         writer.AppendLine($"private static async Task {injectorMethodName}({fullyQualifiedTypeName} instance, Dictionary<string, object?> propertyValues, TestContext testContext)");
         writer.AppendLine("{");
         writer.Indent();
@@ -464,7 +464,7 @@ public sealed class EnhancedPropertyInjectionGenerator : IIncrementalGenerator
             writer.AppendLine($"if (typedValue{propertyName} != null)");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine($"// TODO: Implement nested property injection when available");
+            writer.AppendLine("// TODO: Implement nested property injection when available");
             writer.AppendLine($"System.Diagnostics.Debug.WriteLine($\"Nested property injection needed for {{typedValue{propertyName}?.GetType().Name ?? \"null\"}}\");");
             writer.Unindent();
             writer.AppendLine("}");

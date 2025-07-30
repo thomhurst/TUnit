@@ -112,8 +112,7 @@ internal static class CodeGenerationHelpers
     {
         var typeName = attr.AttributeClass!.GloballyQualified();
 
-        if (typeName == "global::TUnit.Core.ArgumentsAttribute" ||
-            typeName == "global::TUnit.Core.InlineDataAttribute")
+        if (typeName is "global::TUnit.Core.ArgumentsAttribute" or "global::TUnit.Core.InlineDataAttribute")
         {
             return true;
         }
@@ -546,24 +545,21 @@ internal static class CodeGenerationHelpers
             return $@"new global::TUnit.Core.TypeReference {{ IsPointer = true, ElementType = {elementTypeRef} }}";
         }
 
-        if (typeSymbol is INamedTypeSymbol namedType)
+        if (typeSymbol is INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } namedType)
         {
-            if (namedType is { IsGenericType: true, IsUnboundGenericType: false })
-            {
-                // This is a constructed generic type (e.g., List<int>, Dictionary<string, T>)
-                var genericDef = GetGenericTypeDefinitionName(namedType);
-                var genericArgs = namedType.TypeArguments.Select(GenerateTypeReference).ToArray();
+            // This is a constructed generic type (e.g., List<int>, Dictionary<string, T>)
+            var genericDef = GetGenericTypeDefinitionName(namedType);
+            var genericArgs = namedType.TypeArguments.Select(GenerateTypeReference).ToArray();
 
-                using var writer = new CodeWriter("", includeHeader: false);
-                writer.SetIndentLevel(1);
-                writer.Append($@"global::TUnit.Core.TypeReference.CreateConstructedGeneric(""{genericDef}""");
-                foreach (var arg in genericArgs)
-                {
-                    writer.Append($", {arg}");
-                }
-                writer.Append(")");
-                return writer.ToString().Trim();
+            using var writer = new CodeWriter("", includeHeader: false);
+            writer.SetIndentLevel(1);
+            writer.Append($@"global::TUnit.Core.TypeReference.CreateConstructedGeneric(""{genericDef}""");
+            foreach (var arg in genericArgs)
+            {
+                writer.Append($", {arg}");
             }
+            writer.Append(")");
+            return writer.ToString().Trim();
         }
 
         // Regular concrete type
@@ -596,8 +592,7 @@ internal static class CodeGenerationHelpers
         // Build assembly qualified name
         var typeName = typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
 
-        if (typeSymbol.ContainingAssembly.Name == "System.Private.CoreLib" ||
-            typeSymbol.ContainingAssembly.Name == "mscorlib")
+        if (typeSymbol.ContainingAssembly.Name is "System.Private.CoreLib" or "mscorlib")
         {
             return $"{typeName}, System.Private.CoreLib";
         }

@@ -16,10 +16,7 @@ internal static class DataSourceAttributeHelper
         var fullyQualifiedName = attributeClass.GloballyQualified();
         
         // Check by simple name first (more flexible)
-        if (name == "ArgumentsAttribute" ||
-            name == "MethodDataSourceAttribute" ||
-            name == "InstanceMethodDataSourceAttribute" ||
-            name == "ClassDataSourceAttribute")
+        if (name is "ArgumentsAttribute" or "MethodDataSourceAttribute" or "InstanceMethodDataSourceAttribute" or "ClassDataSourceAttribute")
         {
             return true;
         }

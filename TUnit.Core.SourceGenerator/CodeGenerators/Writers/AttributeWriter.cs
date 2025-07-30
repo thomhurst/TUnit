@@ -172,7 +172,7 @@ public class AttributeWriter
             
             if (propertySymbol.Type.IsReferenceType && !isNullable)
             {
-                sourceCodeWriter.Append($"null!,");
+                sourceCodeWriter.Append("null!,");
             }
             else if (propertySymbol.Type.IsValueType && !isNullable)
             {

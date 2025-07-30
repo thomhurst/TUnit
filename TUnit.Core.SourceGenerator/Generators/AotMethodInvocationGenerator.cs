@@ -447,9 +447,9 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         var isAsync = IsAsyncMethod(method);
         var isVoid = returnType.SpecialType == SpecialType.System_Void;
 
-        writer.AppendLine($"/// <summary>");
+        writer.AppendLine("/// <summary>");
         writer.AppendLine($"/// Strongly-typed invoker for {method.ContainingType.Name}.{method.Name}");
-        writer.AppendLine($"/// </summary>");
+        writer.AppendLine("/// </summary>");
         writer.AppendLine($"private static async Task<object?> {invokerName}(object? instance, object?[]? parameters)");
         writer.AppendLine("{");
         writer.Indent();
@@ -482,7 +482,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         // Generate method invocation
         if (method.IsStatic)
         {
-            writer.Append($"var result = ");
+            writer.Append("var result = ");
             if (isAsync)
             {
                 writer.Append("await ");
@@ -504,7 +504,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
             writer.AppendLine($"    throw new InvalidOperationException($\"Expected instance of type {{typeof({method.ContainingType.GloballyQualified()}).FullName}}, got {{instance?.GetType().FullName ?? \"null\"}}\");");
             writer.AppendLine();
 
-            writer.Append($"var result = ");
+            writer.Append("var result = ");
             if (isAsync)
             {
                 writer.Append("await ");

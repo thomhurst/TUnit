@@ -226,7 +226,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         var propertyTypeForTypeof = GetNonNullableTypeString(propInfo.Property.Type);
         var attributeTypeName = propInfo.DataSourceAttribute.AttributeClass!.ToDisplayString();
 
-        sb.AppendLine($"        yield return new PropertyInjectionMetadata");
+        sb.AppendLine("        yield return new PropertyInjectionMetadata");
         sb.AppendLine("        {");
         sb.AppendLine($"            PropertyName = \"{propertyName}\",");
         sb.AppendLine($"            PropertyType = typeof({propertyTypeForTypeof}),");

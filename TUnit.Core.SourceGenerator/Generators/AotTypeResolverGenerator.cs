@@ -76,8 +76,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
 
     private static bool IsTestClassOrMethod(SyntaxNode node)
     {
-        return node is ClassDeclarationSyntax { TypeParameterList: not null } ||
-               node is MethodDeclarationSyntax { TypeParameterList: not null };
+        return node is ClassDeclarationSyntax { TypeParameterList: not null } or MethodDeclarationSyntax { TypeParameterList: not null };
     }
 
     private static TypeReferenceInfo? ExtractTypeReferenceInfo(GeneratorSyntaxContext context)
@@ -447,9 +446,9 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         var safeName = GetSafeTypeName(genericType);
         var fullyQualifiedName = genericType.GloballyQualified();
         
-        writer.AppendLine($"/// <summary>");
+        writer.AppendLine("/// <summary>");
         writer.AppendLine($"/// Factory for creating instances of {genericType.Name}");
-        writer.AppendLine($"/// </summary>");
+        writer.AppendLine("/// </summary>");
         writer.AppendLine($"public static Type Create{safeName}Type(params Type[] typeArguments)");
         writer.AppendLine("{");
         writer.Indent();
@@ -459,7 +458,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         writer.AppendLine();
         
         // Generate specific combinations if we can infer them
-        writer.AppendLine($"// Return constructed generic type");
+        writer.AppendLine("// Return constructed generic type");
         writer.AppendLine($"return typeof({fullyQualifiedName}).MakeGenericType(typeArguments);");
         
         writer.Unindent();
@@ -589,8 +588,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
     private static bool HasTestAttribute(IMethodSymbol method)
     {
         return method.GetAttributes().Any(a =>
-            a.AttributeClass?.Name == "TestAttribute" ||
-            a.AttributeClass?.Name == "Test");
+            a.AttributeClass?.Name is "TestAttribute" or "Test");
     }
 
     private static bool IsConcreteType(ITypeSymbol type)

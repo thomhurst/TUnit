@@ -124,7 +124,7 @@ internal static class MetadataGenerationHelper
         }
         else
         {
-            writer.AppendLine($"Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
+            writer.AppendLine("Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
         }
         writer.AppendLine($"Properties = {GeneratePropertyMetadataArray(typeSymbol)},");
         writer.AppendLine($"Parent = {parentExpression ?? "null"}");

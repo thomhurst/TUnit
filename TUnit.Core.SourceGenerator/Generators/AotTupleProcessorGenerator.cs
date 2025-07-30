@@ -478,9 +478,9 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
             return;
         }
 
-        writer.AppendLine($"/// <summary>");
+        writer.AppendLine("/// <summary>");
         writer.AppendLine($"/// Strongly-typed processor for {namedTupleType.Name} with {elementTypes.Length} elements");
-        writer.AppendLine($"/// </summary>");
+        writer.AppendLine("/// </summary>");
         writer.AppendLine($"private static object?[]? {processorName}({fullyQualifiedName} tuple)");
         writer.AppendLine("{");
         writer.Indent();

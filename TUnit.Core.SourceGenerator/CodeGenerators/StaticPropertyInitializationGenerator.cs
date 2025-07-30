@@ -146,12 +146,12 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         var propertyName = propertyData.Property.Name;
         var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyName}";
         
-        writer.AppendLine($"try");
+        writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
         
         writer.AppendLine($"var value = await {methodName}();");
-        writer.AppendLine($"if (value != null)");
+        writer.AppendLine("if (value != null)");
         writer.AppendLine("{");
         writer.Indent();
         
@@ -162,7 +162,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         
         writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine($"catch (global::System.Exception ex)");
+        writer.AppendLine("catch (global::System.Exception ex)");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine($"throw new global::System.InvalidOperationException($\"Failed to initialize static property {typeName}.{propertyName}: {{ex.Message}}\", ex);");

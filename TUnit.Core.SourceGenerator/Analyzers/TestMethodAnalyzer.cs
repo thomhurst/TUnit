@@ -77,7 +77,7 @@ public class TestMethodAnalyzer : ITestAnalyzer
     private static bool IsAsyncMethod(IMethodSymbol methodSymbol)
     {
         var returnType = methodSymbol.ReturnType;
-        return returnType.Name == "Task" || returnType.Name == "ValueTask";
+        return returnType.Name is "Task" or "ValueTask";
     }
 
     private static (bool isSkipped, string? skipReason) ExtractSkipInfo(IMethodSymbol methodSymbol)

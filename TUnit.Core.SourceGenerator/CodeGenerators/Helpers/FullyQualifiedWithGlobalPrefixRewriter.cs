@@ -103,11 +103,11 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             bool boolValue => boolValue ? SyntaxFactory.LiteralExpression(SyntaxKind.TrueLiteralExpression)
                 : SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression),
             int intValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(intValue)),
-            double doubleValue when double.IsNaN(doubleValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("double.NaN", double.NaN)),
+            double and Double.NaN => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("double.NaN", double.NaN)),
             double doubleValue when double.IsPositiveInfinity(doubleValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("double.PositiveInfinity", double.PositiveInfinity)),
             double doubleValue when double.IsNegativeInfinity(doubleValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("double.NegativeInfinity", double.NegativeInfinity)),
             double doubleValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(doubleValue)),
-            float floatValue when float.IsNaN(floatValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("float.NaN", float.NaN)),
+            float and Single.NaN => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("float.NaN", float.NaN)),
             float floatValue when float.IsPositiveInfinity(floatValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("float.PositiveInfinity", float.PositiveInfinity)),
             float floatValue when float.IsNegativeInfinity(floatValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("float.NegativeInfinity", float.NegativeInfinity)),
             float floatValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(floatValue)),

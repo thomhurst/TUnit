@@ -269,12 +269,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Set the test to use runtime data generation
         if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
         {
-            writer.AppendLine($"metadata.UseRuntimeDataGeneration(testSessionId);");
+            writer.AppendLine("metadata.UseRuntimeDataGeneration(testSessionId);");
         }
         else
         {
             // For generic types/methods, set TestSessionId directly
-            writer.AppendLine($"metadata.TestSessionId = testSessionId;");
+            writer.AppendLine("metadata.TestSessionId = testSessionId;");
         }
 
         writer.AppendLine("tests.Add(metadata);");
@@ -783,7 +783,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                                 writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
                             }
                             writer.AppendLine("#else");
-                            writer.AppendLine($"Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
+                            writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
                             writer.AppendLine("#endif");
                         }
                         else
@@ -952,7 +952,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             writer.AppendLine("#if NET8_0_OR_GREATER");
                             writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingFieldNested(({className})instance) = ({propertyType})value,");
                             writer.AppendLine("#else");
-                            writer.AppendLine($"Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
+                            writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
                             writer.AppendLine("#endif");
                         }
                         else
@@ -1212,7 +1212,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
 
         // Also generate InvokeTypedTest which is required by CreateExecutableTestFactory
-        writer.AppendLine($"InvokeTypedTest = async (instance, args, cancellationToken) =>");
+        writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
 

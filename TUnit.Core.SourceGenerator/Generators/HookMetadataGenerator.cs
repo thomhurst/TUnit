@@ -49,7 +49,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
             .Combine(beforeEveryHooksCollected)
             .Combine(afterEveryHooksCollected);
 
-        context.RegisterSourceOutput(allHooks, (context, data) =>
+        context.RegisterSourceOutput(allHooks, (sourceProductionContext, data) =>
         {
             var (((beforeHooksList, afterHooksList), beforeEveryHooksList), afterEveryHooksList) = data;
             var directHooks = beforeHooksList
@@ -61,7 +61,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
                 .ToList();
 
             var validHooks = ProcessHooks(directHooks);
-            GenerateHookRegistry(context, validHooks.ToImmutableArray());
+            GenerateHookRegistry(sourceProductionContext, validHooks.ToImmutableArray());
         });
     }
 
@@ -73,27 +73,6 @@ public class HookMetadataGenerator : IIncrementalGenerator
             .GroupBy(h => h, new HookEqualityComparer())
             .Select(g => g.First())
             .ToList();
-    }
-
-    private static AttributeData? GetHookAttribute(IMethodSymbol method)
-    {
-        return method.GetAttributes().FirstOrDefault(a =>
-            a.AttributeClass?.Name == "BeforeAttribute" ||
-            a.AttributeClass?.Name == "AfterAttribute" ||
-            a.AttributeClass?.Name == "BeforeEveryAttribute" ||
-            a.AttributeClass?.Name == "AfterEveryAttribute");
-    }
-
-    private static string GetHookKindFromAttribute(AttributeData attribute)
-    {
-        return attribute.AttributeClass?.Name switch
-        {
-            "BeforeAttribute" => "Before",
-            "AfterAttribute" => "After",
-            "BeforeEveryAttribute" => "BeforeEvery",
-            "AfterEveryAttribute" => "AfterEvery",
-            _ => "Before"
-        };
     }
 
     private class HookEqualityComparer : IEqualityComparer<HookMethodMetadata>
@@ -109,7 +88,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
                    SymbolEqualityComparer.Default.Equals(x.MethodSymbol, y.MethodSymbol);
         }
 
-        public int GetHashCode(HookMethodMetadata obj)
+        public int GetHashCode(HookMethodMetadata? obj)
         {
             if (obj == null)
             {
@@ -164,7 +143,6 @@ public class HookMetadataGenerator : IIncrementalGenerator
             TypeSymbol = typeSymbol,
             FilePath = filePath,
             LineNumber = lineNumber,
-            HookAttribute = hookAttribute,
             HookKind = hookKind,
             HookType = hookType,
             Order = order,
@@ -296,8 +274,6 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
             using (writer.BeginBlock("public sealed class GeneratedHookRegistry"))
             {
-                GenerateStorageFields(writer, validHooks);
-
                 GenerateStaticConstructor(writer, validHooks);
 
                 GenerateHookDelegates(writer, validHooks);
@@ -328,10 +304,6 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
             context.ReportDiagnostic(Diagnostic.Create(descriptor, Location.None, ex.ToString()));
         }
-    }
-
-    private static void GenerateStorageFields(CodeWriter writer, List<HookMethodMetadata> hooks)
-    {
     }
 
     private static void GenerateStaticConstructor(CodeWriter writer, List<HookMethodMetadata> hooks)
@@ -439,13 +411,13 @@ public class HookMetadataGenerator : IIncrementalGenerator
             if (testSessionHooks.Any())
             {
 
-                var beforeTestSessionHooks = testSessionHooks.Where(h => h.HookKind == "Before" || h.HookKind == "BeforeEvery").ToList();
+                var beforeTestSessionHooks = testSessionHooks.Where(h => h.HookKind is "Before" or "BeforeEvery").ToList();
                 if (beforeTestSessionHooks.Any())
                 {
                     GenerateGlobalHookListPopulation(writer, "BeforeTestSessionHooks", beforeTestSessionHooks);
                 }
 
-                var afterTestSessionHooks = testSessionHooks.Where(h => h.HookKind == "After" || h.HookKind == "AfterEvery").ToList();
+                var afterTestSessionHooks = testSessionHooks.Where(h => h.HookKind is "After" or "AfterEvery").ToList();
                 if (afterTestSessionHooks.Any())
                 {
                     GenerateGlobalHookListPopulation(writer, "AfterTestSessionHooks", afterTestSessionHooks);
@@ -456,13 +428,13 @@ public class HookMetadataGenerator : IIncrementalGenerator
             if (testDiscoveryHooks.Any())
             {
 
-                var beforeTestDiscoveryHooks = testDiscoveryHooks.Where(h => h.HookKind == "Before" || h.HookKind == "BeforeEvery").ToList();
+                var beforeTestDiscoveryHooks = testDiscoveryHooks.Where(h => h.HookKind is "Before" or "BeforeEvery").ToList();
                 if (beforeTestDiscoveryHooks.Any())
                 {
                     GenerateGlobalHookListPopulation(writer, "BeforeTestDiscoveryHooks", beforeTestDiscoveryHooks);
                 }
 
-                var afterTestDiscoveryHooks = testDiscoveryHooks.Where(h => h.HookKind == "After" || h.HookKind == "AfterEvery").ToList();
+                var afterTestDiscoveryHooks = testDiscoveryHooks.Where(h => h.HookKind is "After" or "AfterEvery").ToList();
                 if (afterTestDiscoveryHooks.Any())
                 {
                     GenerateGlobalHookListPopulation(writer, "AfterTestDiscoveryHooks", afterTestDiscoveryHooks);
@@ -495,7 +467,6 @@ public class HookMetadataGenerator : IIncrementalGenerator
         var className = hook.TypeSymbol.GloballyQualified();
         var methodName = hook.MethodSymbol.Name;
         var isStatic = hook.MethodSymbol.IsStatic;
-        IsAsyncMethod(hook.MethodSymbol);
 
         var paramCount = hook.MethodSymbol.Parameters.Length;
         var hasCancellationTokenOnly = false;
@@ -523,7 +494,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
         var contextType = GetContextTypeForBody(hook.HookType, hook.HookKind);
 
-        var isInstanceHook = (hook.HookKind == "Before" || hook.HookKind == "After") && hook.HookType == "Test";
+        var isInstanceHook = hook.HookKind is "Before" or "After" && hook.HookType == "Test";
 
         if (isInstanceHook)
         {
@@ -533,7 +504,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
                 if (isOpenGeneric)
                 {
-                    writer.AppendLine($"dynamic dynamicInstance = instance;");
+                    writer.AppendLine("dynamic dynamicInstance = instance;");
 
                     var methodCall = isStatic
                         ? $"{className}.{methodName}"
@@ -556,14 +527,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
                         methodCall += "()";
                     }
 
-                    if (hook.MethodSymbol.ReturnsVoid)
-                    {
-                        writer.AppendLine($"{methodCall};");
-                    }
-                    else
-                    {
-                        writer.AppendLine($"await AsyncConvert.ConvertObject(() => {methodCall});");
-                    }
+                    writer.AppendLine(hook.MethodSymbol.ReturnsVoid ? $"{methodCall};" : $"await AsyncConvert.ConvertObject(() => {methodCall});");
                 }
                 else
                 {
@@ -606,29 +570,24 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
                     if (hasCancellationTokenOnly)
                     {
-                        writer.AppendLine($"var parameters = new object[] {{ cancellationToken }};");
+                        writer.AppendLine("var parameters = new object[] { cancellationToken };");
                     }
                     else if (hasContextOnly)
                     {
-                        writer.AppendLine($"var parameters = new object[] {{ context }};");
+                        writer.AppendLine("var parameters = new object[] { context };");
                     }
                     else if (hasContextAndCancellationToken)
                     {
-                        writer.AppendLine($"var parameters = new object[] {{ context, cancellationToken }};");
+                        writer.AppendLine("var parameters = new object[] { context, cancellationToken };");
                     }
                     else
                     {
-                        writer.AppendLine($"var parameters = new object[0];");
+                        writer.AppendLine("var parameters = new object[0];");
                     }
 
-                    if (hook.MethodSymbol.ReturnsVoid)
-                    {
-                        writer.AppendLine($"method!.Invoke(null, parameters);");
-                    }
-                    else
-                    {
-                        writer.AppendLine($"await AsyncConvert.ConvertObject(() => method!.Invoke(null, parameters));");
-                    }
+                    writer.AppendLine(hook.MethodSymbol.ReturnsVoid
+                        ? "method!.Invoke(null, parameters);"
+                        : "await AsyncConvert.ConvertObject(() => method!.Invoke(null, parameters));");
                 }
                 else
                 {
@@ -734,11 +693,6 @@ public class HookMetadataGenerator : IIncrementalGenerator
         writer.Append("}");
     }
 
-    private static string GetFieldName(string hookType, string hookKind)
-    {
-        return $"_{hookKind.ToLower()}{hookType}Hooks";
-    }
-
     private static string GetDelegateKey(HookMethodMetadata hook)
     {
         var declaringType = hook.TypeSymbol;
@@ -766,11 +720,6 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
         var paramCount = hook.MethodSymbol.Parameters.Length;
         return $"{safeClassName}_{hook.MethodSymbol.Name}_{paramCount}Params";
-    }
-
-    private static bool IsStaticHook(string hookType, string hookKind)
-    {
-        return !((hookKind == "Before" || hookKind == "After") && hookType == "Test");
     }
 
     private static string GetHookClass(string hookType, string hookKind, bool isStatic)
@@ -831,14 +780,6 @@ public class HookMetadataGenerator : IIncrementalGenerator
             _ => "TestContext"
         };
     }
-
-    private static bool IsAsyncMethod(IMethodSymbol method)
-    {
-        var returnType = method.ReturnType;
-        return returnType.Name == "Task" || returnType.Name == "ValueTask" ||
-               (returnType is INamedTypeSymbol { IsGenericType: true } namedType &&
-                   (namedType.ConstructedFrom.Name == "Task" || namedType.ConstructedFrom.Name == "ValueTask"));
-    }
 }
 
 public class HookMethodMetadata
@@ -847,7 +788,6 @@ public class HookMethodMetadata
     public required INamedTypeSymbol TypeSymbol { get; init; }
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
-    public required AttributeData HookAttribute { get; init; }
     public required string HookKind { get; init; }
     public required string HookType { get; init; }
     public required int Order { get; init; }

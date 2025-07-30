@@ -198,7 +198,7 @@ public sealed class DataSourcePropertyInjectionGenerator : IIncrementalGenerator
                 writer.AppendLine("#if NET8_0_OR_GREATER");
                 writer.AppendLine($"Setter = (instance, value) => {safeTypeName}_Set{property.Name}(({typeName})instance, value),");
                 writer.AppendLine("#else");
-                writer.AppendLine($"Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
+                writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
                 writer.AppendLine("#endif");
             }
             else
