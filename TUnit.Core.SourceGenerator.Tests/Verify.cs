@@ -66,6 +66,21 @@ public sealed class VerifySettingsTask
         return this;
     }
 
+    public VerifySettingsTask ScrubFilePaths()
+    {
+        // Scrub Windows-style paths (e.g., C:\Users\... or D:\git\TUnit\)
+        ScrubLinesWithReplace(line => System.Text.RegularExpressions.Regex.Replace(line, 
+            @"[A-Za-z]:\\\\[^""\s,)]+", 
+            "PATH_SCRUBBED"));
+        
+        // Scrub Unix-style paths (e.g., /home/user/... or /var/lib/...)
+        ScrubLinesWithReplace(line => System.Text.RegularExpressions.Regex.Replace(line, 
+            @"/[a-zA-Z0-9_\-./]+/[a-zA-Z0-9_\-./]+", 
+            "PATH_SCRUBBED"));
+        
+        return this;
+    }
+
     public async Task ToTask()
     {
         var testContext = TestContext.Current;

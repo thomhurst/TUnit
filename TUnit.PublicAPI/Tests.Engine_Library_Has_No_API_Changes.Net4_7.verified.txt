@@ -58,14 +58,14 @@ namespace ...Examples
     public class GenericTests<T>
     {
         public GenericTests() { }
-        [.Test("/home/thomh/dev/TUnit/", 120)]
+        [.Test("PATH_SCRUBBED", 120)]
         public void GenericTest() { }
     }
     public class SimpleTests
     {
         public SimpleTests() { }
         [.Category("Integration")]
-        [.Test("/home/thomh/dev/TUnit/", 66)]
+        [.Test("PATH_SCRUBBED", 66)]
         [.Timeout(5000)]
         public . AsyncTestWithAttributes() { }
         [.Arguments(new object[] {
@@ -76,24 +76,24 @@ namespace ...Examples
                 4,
                 5,
                 6})]
-        [.Test("/home/thomh/dev/TUnit/", 75)]
+        [.Test("PATH_SCRUBBED", 75)]
         public void ParameterizedTest(int a, int b, int c) { }
-        [.Test("/home/thomh/dev/TUnit/", 60)]
+        [.Test("PATH_SCRUBBED", 60)]
         public void SimpleTest() { }
         [.Skip("Example of skipped test")]
-        [.Test("/home/thomh/dev/TUnit/", 83)]
+        [.Test("PATH_SCRUBBED", 83)]
         public void SkippedTest() { }
     }
     public class TestsWithHooks
     {
         public TestsWithHooks() { }
-        [.After(., "/home/thomh/dev/TUnit/", 111)]
+        [.After(., "PATH_SCRUBBED", 111)]
         public void AfterEachTest() { }
-        [.Before(., "/home/thomh/dev/TUnit/", 99)]
+        [.Before(., "PATH_SCRUBBED", 99)]
         public void BeforeEachTest() { }
-        [.Test("/home/thomh/dev/TUnit/", 105)]
+        [.Test("PATH_SCRUBBED", 105)]
         public void TestWithHooks() { }
-        [.Before(., "/home/thomh/dev/TUnit/", 93)]
+        [.Before(., "PATH_SCRUBBED", 93)]
         public static void BeforeClass() { }
     }
 }

@@ -54,6 +54,7 @@ public partial class Tests
 
                 return line;
             })
+            .ScrubFilePaths()
             .OnVerifyMismatch(async (pair, message, verify) =>
             {
                 var received = await FilePolyfill.ReadAllTextAsync(pair.ReceivedPath);

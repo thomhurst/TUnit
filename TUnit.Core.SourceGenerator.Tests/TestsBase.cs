@@ -160,7 +160,8 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
 
         // Scrub GUIDs from generated files before verification
         var scrubbedFiles = generatedFiles.Select(file => Scrub(file)).ToArray();
-        var verifyTask = Verify(scrubbedFiles);
+        var verifyTask = Verify(scrubbedFiles)
+            .ScrubFilePaths();
 
         if (runTestOptions.VerifyConfigurator != null)
         {
@@ -208,6 +209,14 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
         // Pattern 2: ClassName_[standard GUID format]
         var guidPattern2 = @"([A-Za-z_]\w*)_[a-fA-F0-9]{8}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{12}";
         scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, guidPattern2, "$1_GUID", System.Text.RegularExpressions.RegexOptions.None);
+        
+        // Scrub file paths - Windows style (e.g., D:\\git\\TUnit\\)
+        var windowsPathPattern = @"[A-Za-z]:\\\\[^""'\s,)]+";
+        scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, windowsPathPattern, "PATH_SCRUBBED");
+        
+        // Scrub file paths - Unix style (e.g., /home/user/...)
+        var unixPathPattern = @"/[a-zA-Z0-9_\-./]+/[a-zA-Z0-9_\-./]+";
+        scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, unixPathPattern, "PATH_SCRUBBED");
         
         return new StringBuilder(scrubbedText);
     }
