@@ -123,9 +123,11 @@ internal static class ReflectionAttributeExtractor
     {
         var attributes = new List<Attribute>();
         
-        attributes.AddRange(testClass.Assembly.GetCustomAttributes());
-        attributes.AddRange(testClass.GetCustomAttributes());
+        // Add in reverse order of precedence so method attributes come first
+        // This ensures ScopedAttributeFilter will keep method-level attributes over class/assembly
         attributes.AddRange(testMethod.GetCustomAttributes());
+        attributes.AddRange(testClass.GetCustomAttributes());
+        attributes.AddRange(testClass.Assembly.GetCustomAttributes());
         
         return attributes.ToArray();
     }
