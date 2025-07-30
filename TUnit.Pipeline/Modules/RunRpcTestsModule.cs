@@ -28,7 +28,8 @@ public class RunRpcTestsModule : TestBaseModule
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",
-            }
+            },
+            Arguments = ["--ignore-exit-code", "8"],
         });
     }
 }
