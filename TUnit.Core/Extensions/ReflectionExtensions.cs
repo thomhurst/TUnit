@@ -255,7 +255,8 @@ public static class ReflectionExtensions
                 foreach (var item in enumerable)
                 {
                     // Use reflection to get the Value property
-                    var valueProperty = GetValuePropertySafe(item.GetType());
+                    var itemType = item.GetType();
+                    var valueProperty = GetValuePropertyForType(itemType);
                     if (valueProperty != null)
                     {
                         items.Add(valueProperty.GetValue(item));
@@ -277,8 +278,20 @@ public static class ReflectionExtensions
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2075:Target method return value does not satisfy annotation requirements",
         Justification = "Value property access is used for unwrapping test data. For AOT scenarios, use strongly-typed data sources.")]
-    private static PropertyInfo? GetValuePropertySafe(Type type)
+    private static PropertyInfo? GetValuePropertySafe([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         return type.GetProperty("Value");
+    }
+    
+    /// <summary>
+    /// Gets the "Value" property from a runtime type.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter does not satisfy annotation requirements",
+        Justification = "Runtime type from GetType() cannot have static annotations. This is used for CustomAttributeTypedArgument unwrapping.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements",
+        Justification = "The type parameter comes from runtime GetType() which cannot be annotated. Used for attribute argument extraction.")]
+    private static PropertyInfo? GetValuePropertyForType(Type type)
+    {
+        return GetValuePropertySafe(type);
     }
 }

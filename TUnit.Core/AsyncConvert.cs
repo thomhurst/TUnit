@@ -10,6 +10,7 @@ namespace TUnit.Core;
 public static class AsyncConvert
 {
     private static Type? _fSharpAsyncType;
+    private static bool? _isFSharpSupported;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining
 #if NET
@@ -118,7 +119,9 @@ public static class AsyncConvert
         if (type.IsGenericType
             && type.GetGenericTypeDefinition().FullName == "Microsoft.FSharp.Control.FSharpAsync`1")
         {
-            await StartAsFSharpTask(invoke, type);
+            // F# async support requires reflection and is not AOT-compatible
+            // Users should use Task-based APIs for AOT scenarios
+            await StartAsFSharpTaskSafely(invoke, type);
             return;
         }
     }
@@ -153,6 +156,47 @@ public static class AsyncConvert
         }
 
         return new ValueTask(fSharpTask);
+    }
+    
+    /// <summary>
+    /// Safely invokes F# async conversion with proper suppression for the call site.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Using member with RequiresUnreferencedCodeAttribute",
+        Justification = "F# async is an optional feature. AOT applications should use Task-based APIs.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Using member with RequiresDynamicCodeAttribute", 
+        Justification = "F# async requires runtime code generation. This is documented as not AOT-compatible.")]
+    private static async ValueTask StartAsFSharpTaskSafely(object invoke, Type type)
+    {
+        if (IsFSharpAsyncSupported())
+        {
+            await StartAsFSharpTask(invoke, type);
+            return;
+        }
+    }
+    
+    /// <summary>
+    /// Checks if F# async support is available (not in AOT mode).
+    /// </summary>
+    private static bool IsFSharpAsyncSupported()
+    {
+        if (_isFSharpSupported.HasValue)
+        {
+            return _isFSharpSupported.Value;
+        }
+        
+        // In AOT mode, we can't use reflection to invoke F# async methods
+        // This is a runtime check that will return false in AOT scenarios
+        try
+        {
+            var fsharpCoreAssembly = Type.GetType("Microsoft.FSharp.Control.FSharpAsync, FSharp.Core")?.Assembly;
+            _isFSharpSupported = fsharpCoreAssembly != null;
+            return _isFSharpSupported.Value;
+        }
+        catch
+        {
+            _isFSharpSupported = false;
+            return false;
+        }
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.",

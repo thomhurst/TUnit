@@ -314,7 +314,7 @@ public static class CastHelper
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2075:Target method return value does not satisfy annotation requirements",
         Justification = "Value property access is used for unwrapping CustomAttributeTypedArgument. For AOT scenarios, use source-generated attribute discovery.")]
-    private static PropertyInfo? GetValuePropertySafe(Type type)
+    private static PropertyInfo? GetValuePropertySafe([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         return type.GetProperty("Value");
     }

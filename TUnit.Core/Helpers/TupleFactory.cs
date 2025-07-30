@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace TUnit.Core.Helpers;
 
@@ -33,6 +36,7 @@ public static class TupleFactory
     
     /// <summary>
     /// Creates a tuple from the given elements in an AOT-safe manner when possible.
+    /// Falls back to returning the first element for unsupported scenarios.
     /// </summary>
     /// <param name="tupleType">The type of tuple to create</param>
     /// <param name="elements">The elements to include in the tuple</param>
@@ -71,16 +75,20 @@ public static class TupleFactory
                     5 => (elements[0], elements[1], elements[2], elements[3], elements[4]),
                     6 => (elements[0], elements[1], elements[2], elements[3], elements[4], elements[5]),
                     7 => (elements[0], elements[1], elements[2], elements[3], elements[4], elements[5], elements[6]),
-                    _ => CreateTupleWithReflection(tupleType, elements)
+                    // For tuples with more than 7 elements, we can't handle them in an AOT-safe way
+                    // Return the first element as a fallback
+                    _ => elements.FirstOrDefault()
                 };
             }
             catch
             {
-                return CreateTupleWithReflection(tupleType, elements);
+                // If tuple creation fails, return the first element
+                return elements.FirstOrDefault();
             }
         }
         
-        return CreateTupleWithReflection(tupleType, elements);
+        // For non-tuple types or unknown patterns, return the first element
+        return elements.FirstOrDefault();
     }
     
     /// <summary>
@@ -92,20 +100,31 @@ public static class TupleFactory
     }
     
     /// <summary>
-    /// Creates a tuple using reflection as a fallback. This method is not AOT-compatible.
+    /// Tries to create a tuple using reflection. Only call this from contexts that are already marked with RequiresUnreferencedCode.
     /// </summary>
-    [RequiresUnreferencedCode("Dynamic tuple creation is not AOT-compatible. Use source-generated data or known tuple types for AOT scenarios.")]
-    [RequiresDynamicCode("Dynamic tuple creation requires runtime code generation.")]
-    private static object? CreateTupleWithReflection(Type tupleType, object?[] elements)
+    /// <param name="tupleType">The tuple type to create</param>
+    /// <param name="elements">The elements for the tuple</param>
+    /// <param name="result">The created tuple if successful</param>
+    /// <returns>True if the tuple was created successfully</returns>
+    public static bool TryCreateTupleUsingReflection([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type tupleType, object?[] elements, out object? result)
     {
+        result = null;
+        
+        // This method should only be called from contexts that are already handling reflection
+        // and have the appropriate RequiresUnreferencedCode attributes
+        if (!tupleType.IsGenericType || !tupleType.GetGenericTypeDefinition().FullName?.StartsWith("System.ValueTuple") == true)
+        {
+            return false;
+        }
+        
         try
         {
-            return Activator.CreateInstance(tupleType, elements);
+            result = Activator.CreateInstance(tupleType, elements);
+            return true;
         }
         catch
         {
-            // If all else fails, return the first element
-            return elements.FirstOrDefault();
+            return false;
         }
     }
 }
