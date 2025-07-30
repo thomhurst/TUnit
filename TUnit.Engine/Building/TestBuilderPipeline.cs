@@ -11,15 +11,18 @@ internal sealed class TestBuilderPipeline
     private readonly Func<HashSet<Type>?, ITestDataCollector> _dataCollectorFactory;
     private readonly ITestBuilder _testBuilder;
     private readonly IContextProvider _contextProvider;
+    private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
 
     public TestBuilderPipeline(
         Func<HashSet<Type>?, ITestDataCollector> dataCollectorFactory,
         ITestBuilder testBuilder,
-        IContextProvider contextBuilder)
+        IContextProvider contextBuilder,
+        EventReceiverOrchestrator eventReceiverOrchestrator)
     {
         _dataCollectorFactory = dataCollectorFactory ?? throw new ArgumentNullException(nameof(dataCollectorFactory));
         _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
         _contextProvider = contextBuilder;
+        _eventReceiverOrchestrator = eventReceiverOrchestrator ?? throw new ArgumentNullException(nameof(eventReceiverOrchestrator));
     }
 
     public async Task<IEnumerable<ExecutableTest>> BuildTestsAsync(string testSessionId, HashSet<Type>? filterTypes)
@@ -51,63 +54,76 @@ internal sealed class TestBuilderPipeline
                 // Check if this is a dynamic test metadata that should bypass normal test building
                 if (metadata is IDynamicTestMetadata)
                 {
-                    // Dynamic tests create their executable test directly without data source processing
-                    // Create a simple TestData for ID generation
-                    var testData = new TestBuilder.TestData
+                    // Dynamic tests need to honor attributes like RepeatCount, RetryCount, etc.
+                    // We'll create multiple test instances based on RepeatCount
+                    for (var repeatIndex = 0; repeatIndex < Math.Max(1, metadata.RepeatCount); repeatIndex++)
                     {
-                        TestClassInstance = null!,
-                        ClassDataSourceAttributeIndex = 0,
-                        ClassDataLoopIndex = 0,
-                        ClassData = [],
-                        MethodDataSourceAttributeIndex = 0,
-                        MethodDataLoopIndex = 0,
-                        MethodData = [],
-                        RepeatIndex = 0,
-                        ResolvedClassGenericArguments = Type.EmptyTypes,
-                        ResolvedMethodGenericArguments = Type.EmptyTypes
-                    };
-                    
-                    var testId = TestIdentifierService.GenerateTestId(metadata, testData);
-                    var displayName = metadata.TestName; // Use simple name for dynamic tests
-                    
-                    // Create TestDetails for dynamic tests
-                    var testDetails = new TestDetails
-                    {
-                        TestId = testId,
-                        TestName = metadata.TestName,
-                        ClassType = metadata.TestClassType,
-                        MethodName = metadata.TestMethodName,
-                        ClassInstance = null!,
-                        TestMethodArguments = [],
-                        TestClassArguments = [],
-                        TestFilePath = metadata.FilePath ?? "Unknown",
-                        TestLineNumber = metadata.LineNumber ?? 0,
-                        TestMethodParameterTypes = metadata.ParameterTypes,
-                        ReturnType = typeof(Task),
-                        MethodMetadata = metadata.MethodMetadata,
-                        Attributes = [],
-                    };
-                    
-                    var context = _contextProvider.CreateTestContext(
-                        metadata.TestName,
-                        metadata.TestClassType,
-                        new TestBuilderContext { TestMetadata = metadata.MethodMetadata },
-                        CancellationToken.None);
-                    
-                    // Set the TestDetails on the context
-                    context.TestDetails = testDetails;
-                    
-                    var executableTestContext = new ExecutableTestCreationContext
-                    {
-                        TestId = testId,
-                        DisplayName = displayName,
-                        Arguments = [],
-                        ClassArguments = [],
-                        Context = context
-                    };
-                    
-                    var executableTest = metadata.CreateExecutableTestFactory(executableTestContext, metadata);
-                    executableTests.Add(executableTest);
+                        // Create a simple TestData for ID generation
+                        var testData = new TestBuilder.TestData
+                        {
+                            TestClassInstance = null!,
+                            ClassDataSourceAttributeIndex = 0,
+                            ClassDataLoopIndex = 0,
+                            ClassData = [],
+                            MethodDataSourceAttributeIndex = 0,
+                            MethodDataLoopIndex = 0,
+                            MethodData = [],
+                            RepeatIndex = repeatIndex,
+                            ResolvedClassGenericArguments = Type.EmptyTypes,
+                            ResolvedMethodGenericArguments = Type.EmptyTypes
+                        };
+                        
+                        var testId = TestIdentifierService.GenerateTestId(metadata, testData);
+                        var displayName = metadata.RepeatCount > 1 
+                            ? $"{metadata.TestName} (Repeat {repeatIndex + 1}/{metadata.RepeatCount})"
+                            : metadata.TestName;
+                        
+                        // Create TestDetails for dynamic tests
+                        var testDetails = new TestDetails
+                        {
+                            TestId = testId,
+                            TestName = metadata.TestName,
+                            ClassType = metadata.TestClassType,
+                            MethodName = metadata.TestMethodName,
+                            ClassInstance = null!,
+                            TestMethodArguments = [],
+                            TestClassArguments = [],
+                            TestFilePath = metadata.FilePath ?? "Unknown",
+                            TestLineNumber = metadata.LineNumber ?? 0,
+                            TestMethodParameterTypes = metadata.ParameterTypes,
+                            ReturnType = typeof(Task),
+                            MethodMetadata = metadata.MethodMetadata,
+                            Attributes = metadata.AttributeFactory?.Invoke() ?? [],
+                            Timeout = metadata.TimeoutMs.HasValue 
+                                ? TimeSpan.FromMilliseconds(metadata.TimeoutMs.Value) 
+                                : null,
+                            RetryLimit = metadata.RetryCount
+                        };
+                        
+                        var context = _contextProvider.CreateTestContext(
+                            metadata.TestName,
+                            metadata.TestClassType,
+                            new TestBuilderContext { TestMetadata = metadata.MethodMetadata },
+                            CancellationToken.None);
+                        
+                        // Set the TestDetails on the context
+                        context.TestDetails = testDetails;
+                        
+                        // Invoke discovery event receivers to properly handle all attribute behaviors
+                        await InvokeDiscoveryEventReceiversAsync(context);
+                        
+                        var executableTestContext = new ExecutableTestCreationContext
+                        {
+                            TestId = testId,
+                            DisplayName = displayName,
+                            Arguments = [],
+                            ClassArguments = [],
+                            Context = context
+                        };
+                        
+                        var executableTest = metadata.CreateExecutableTestFactory(executableTestContext, metadata);
+                        executableTests.Add(executableTest);
+                    }
                 }
                 else
                 {
@@ -235,6 +251,17 @@ internal sealed class TestBuilderPipeline
                 TestContext = context
             }
         };
+    }
+
+    private async Task InvokeDiscoveryEventReceiversAsync(TestContext context)
+    {
+        var discoveredContext = new DiscoveredTestContext(
+            context.TestDetails.TestName,
+            context);
+
+        await _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
+        
+        discoveredContext.TransferTo(context);
     }
 
 }

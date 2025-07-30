@@ -115,7 +115,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             new TestBuilderPipeline(
                 dataCollectorFactory,
                 testBuilder,
-                ContextProvider));
+                ContextProvider,
+                EventReceiverOrchestrator));
 
         DiscoveryService = Register(new TestDiscoveryService(HookOrchestrator, TestBuilderPipeline, TestFilterService));
 
