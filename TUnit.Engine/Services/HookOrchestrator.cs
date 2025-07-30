@@ -202,15 +202,15 @@ internal sealed class HookOrchestrator
         var classTestsRemaining = _classTestCounts.AddOrUpdate(testClassType, 0, (_, count) => count - 1);
         var assemblyTestsRemaining = _assemblyTestCounts.AddOrUpdate(assemblyName, 0, (_, count) => count - 1);
 
-        // Execute AfterClass hooks if last test in class
-        if (classTestsRemaining == 0)
+        // Execute AfterClass hooks if last test in class AND BeforeClass hooks were run
+        if (classTestsRemaining == 0 && _beforeClassTasks.TryGetValue(testClassType, out _))
         {
             await ExecuteAfterClassHooksAsync(testClassType, cancellationToken);
             _classTestCounts.TryRemove(testClassType, out _);
         }
 
-        // Execute AfterAssembly hooks if last test in assembly
-        if (assemblyTestsRemaining == 0)
+        // Execute AfterAssembly hooks if last test in assembly AND BeforeAssembly hooks were run
+        if (assemblyTestsRemaining == 0 && _beforeAssemblyTasks.TryGetValue(assemblyName, out _))
         {
             await ExecuteAfterAssemblyHooksAsync(test.Context.ClassContext.AssemblyContext.Assembly, cancellationToken);
             _assemblyTestCounts.TryRemove(assemblyName, out _);
