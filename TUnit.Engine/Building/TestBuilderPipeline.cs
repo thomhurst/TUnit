@@ -69,11 +69,33 @@ internal sealed class TestBuilderPipeline
                     
                     var testId = TestIdentifierService.GenerateTestId(metadata, testData);
                     var displayName = metadata.TestName; // Use simple name for dynamic tests
+                    
+                    // Create TestDetails for dynamic tests
+                    var testDetails = new TestDetails
+                    {
+                        TestId = testId,
+                        TestName = metadata.TestName,
+                        ClassType = metadata.TestClassType,
+                        MethodName = metadata.TestMethodName,
+                        ClassInstance = null!,
+                        TestMethodArguments = [],
+                        TestClassArguments = [],
+                        TestFilePath = metadata.FilePath ?? "Unknown",
+                        TestLineNumber = metadata.LineNumber ?? 0,
+                        TestMethodParameterTypes = metadata.ParameterTypes,
+                        ReturnType = typeof(Task),
+                        MethodMetadata = metadata.MethodMetadata,
+                        Attributes = [],
+                    };
+                    
                     var context = _contextProvider.CreateTestContext(
                         metadata.TestName,
                         metadata.TestClassType,
                         new TestBuilderContext { TestMetadata = metadata.MethodMetadata },
                         CancellationToken.None);
+                    
+                    // Set the TestDetails on the context
+                    context.TestDetails = testDetails;
                     
                     var executableTestContext = new ExecutableTestCreationContext
                     {
