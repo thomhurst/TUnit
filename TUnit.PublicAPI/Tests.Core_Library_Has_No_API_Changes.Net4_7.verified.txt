@@ -1101,6 +1101,11 @@ namespace
         public static readonly .<..IPropertySource> PropertySources;
         public static readonly .<, .<..ITestSource>> TestSources;
     }
+    public static class StaticPropertyReflectionInitializer
+    {
+        public static . InitializeAllStaticPropertiesAsync() { }
+        public static . InitializeStaticPropertiesForType( type) { }
+    }
     public class TUnitAttribute :  { }
     [(.Method)]
     public sealed class TestAttribute : .BaseTestAttribute
@@ -1548,11 +1553,6 @@ namespace .Enums
         AboveNormal = 3,
         High = 4,
         Critical = 5,
-    }
-    public enum TestExecutionMode
-    {
-        SourceGeneration = 0,
-        Reflection = 1,
     }
 }
 namespace .Events
@@ -2329,7 +2329,6 @@ namespace .Services
     public static class ModeDetector
     {
         public static bool IsSourceGenerationAvailable { get; }
-        public static . Mode { get; }
     }
     public class NoOpGenericTypeResolver : .
     {

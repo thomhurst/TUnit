@@ -1176,6 +1176,18 @@ namespace
         public static readonly .<..IPropertySource> PropertySources;
         public static readonly .<, .<..ITestSource>> TestSources;
     }
+    [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
+        " access", Justification="Reflection mode requires dynamic access")]
+    [.("Trimming", "IL2067:Target parameter argument does not satisfy annotation requirements", Justification="Reflection mode requires dynamic access")]
+    [.("Trimming", "IL2070:\'this\' argument does not satisfy \'" +
+        "perties\'", Justification="Reflection mode requires dynamic access")]
+    [.("Trimming", "IL2075:\'this\' argument does not satisfy \'" +
+        "perties\'", Justification="Reflection mode requires dynamic access")]
+    public static class StaticPropertyReflectionInitializer
+    {
+        public static . InitializeAllStaticPropertiesAsync() { }
+        public static . InitializeStaticPropertiesForType( type) { }
+    }
     public class TUnitAttribute :  { }
     [(.Method)]
     public sealed class TestAttribute : .BaseTestAttribute
@@ -1636,11 +1648,6 @@ namespace .Enums
         AboveNormal = 3,
         High = 4,
         Critical = 5,
-    }
-    public enum TestExecutionMode
-    {
-        SourceGeneration = 0,
-        Reflection = 1,
     }
 }
 namespace .Events
@@ -2445,7 +2452,6 @@ namespace .Services
     public static class ModeDetector
     {
         public static bool IsSourceGenerationAvailable { get; }
-        public static . Mode { get; }
     }
     public class NoOpGenericTypeResolver : .
     {
