@@ -1295,7 +1295,6 @@ namespace
         protected TestMetadata() { }
         public required <[]> AttributeFactory { get; init; }
         public bool CanRunInParallel { get; init; }
-        public string[] Categories { get; init; }
         public required .IDataSourceAttribute[] ClassDataSources { get; init; }
         public abstract <.ExecutableTestCreationContext, .TestMetadata, .ExecutableTest> CreateExecutableTestFactory { get; }
         public required .IDataSourceAttribute[] DataSources { get; init; }
