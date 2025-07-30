@@ -16,7 +16,7 @@ public class TestSessionAfterHooksTests
         var test = context.AllTests.FirstOrDefault(x =>
             x.TestDetails.TestName == nameof(TestSessionAfterTests.PepareForAfterSession));
 
-        if (test == null)
+        if (test?.Result == null)
         {
             // This test might not have been executed due to filters, so the below exception would cause problems.
             return;

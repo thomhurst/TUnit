@@ -42,15 +42,22 @@ public class MEDITest(MEDIClass mediClass)
     [After(TestSession)]
     public static async Task CheckDisposed(TestSessionContext testSessionContext)
     {
-        var mediClass = testSessionContext.TestClasses
-                .FirstOrDefault(x => x.ClassType == typeof(MEDITest))
+        var test = testSessionContext.TestClasses
+            .FirstOrDefault(x => x.ClassType == typeof(MEDITest))
             ?.Tests
-            .FirstOrDefault()
+            .FirstOrDefault();
+
+        if (test?.Result == null)
+        {
+            // If the test did not run, we cannot check if the class was disposed.
+            return;
+        }
+
+        var mediClass = test
             ?.TestDetails
             .TestClassArguments
             .OfType<MEDIClass>()
             .First();
-
 
         if (mediClass == null)
         {
