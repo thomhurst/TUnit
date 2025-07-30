@@ -369,7 +369,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         };
     }
 
-    private sealed class AotDynamicTestMetadata : TestMetadata
+    private sealed class AotDynamicTestMetadata : TestMetadata, IDynamicTestMetadata
     {
         private readonly DynamicDiscoveryResult _dynamicResult;
         private readonly Type _testClass;

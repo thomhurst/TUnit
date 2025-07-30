@@ -1,6 +1,7 @@
 using TUnit.Core;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building;
@@ -47,8 +48,51 @@ internal sealed class TestBuilderPipeline
         {
             try
             {
-                var testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(metadata);
-                executableTests.AddRange(testsFromMetadata);
+                // Check if this is a dynamic test metadata that should bypass normal test building
+                if (metadata is IDynamicTestMetadata)
+                {
+                    // Dynamic tests create their executable test directly without data source processing
+                    // Create a simple TestData for ID generation
+                    var testData = new TestBuilder.TestData
+                    {
+                        TestClassInstance = null!,
+                        ClassDataSourceAttributeIndex = 0,
+                        ClassDataLoopIndex = 0,
+                        ClassData = [],
+                        MethodDataSourceAttributeIndex = 0,
+                        MethodDataLoopIndex = 0,
+                        MethodData = [],
+                        RepeatIndex = 0,
+                        ResolvedClassGenericArguments = Type.EmptyTypes,
+                        ResolvedMethodGenericArguments = Type.EmptyTypes
+                    };
+                    
+                    var testId = TestIdentifierService.GenerateTestId(metadata, testData);
+                    var displayName = metadata.TestName; // Use simple name for dynamic tests
+                    var context = _contextProvider.CreateTestContext(
+                        metadata.TestName,
+                        metadata.TestClassType,
+                        new TestBuilderContext { TestMetadata = metadata.MethodMetadata },
+                        CancellationToken.None);
+                    
+                    var executableTestContext = new ExecutableTestCreationContext
+                    {
+                        TestId = testId,
+                        DisplayName = displayName,
+                        Arguments = [],
+                        ClassArguments = [],
+                        Context = context
+                    };
+                    
+                    var executableTest = metadata.CreateExecutableTestFactory(executableTestContext, metadata);
+                    executableTests.Add(executableTest);
+                }
+                else
+                {
+                    // Normal test metadata goes through the standard test builder
+                    var testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(metadata);
+                    executableTests.AddRange(testsFromMetadata);
+                }
             }
             catch (Exception ex)
             {

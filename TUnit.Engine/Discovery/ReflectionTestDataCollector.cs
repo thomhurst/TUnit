@@ -1343,7 +1343,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         };
     }
 
-    private sealed class DynamicReflectionTestMetadata : TestMetadata
+    private sealed class DynamicReflectionTestMetadata : TestMetadata, IDynamicTestMetadata
     {
         private readonly DynamicDiscoveryResult _dynamicResult;
         private readonly Type _testClass;
