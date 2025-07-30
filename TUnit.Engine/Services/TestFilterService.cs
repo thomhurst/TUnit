@@ -128,11 +128,6 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
     {
         var properties = new List<IProperty>();
 
-        if (test.Metadata.TestClassType.Name == "PassFailTests")
-        {
-            Console.WriteLine("TestClassType is PassFailTests, skipping property bag creation.");
-        }
-
         foreach (var category in test.Context.TestDetails.Categories)
         {
             properties.Add(new TestMetadataProperty(category));
