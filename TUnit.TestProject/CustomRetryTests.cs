@@ -1,6 +1,6 @@
 ﻿namespace TUnit.TestProject;
 
-[RetryOperationCancelledException(3), NotInParallel(nameof(CustomRetryTests), Order = 1)]
+[RetryOperationCancelledException(3)]
 public class CustomRetryTests
 {
     public static int ExecutionCount1 { get; private set; }
@@ -38,7 +38,11 @@ public class CustomRetryTests
         throw new NullReferenceException();
     }
 
-    [Test, NotInParallel(nameof(CustomRetryTests), Order = 2)]
+    [Test]
+    [DependsOn(nameof(One))]
+    [DependsOn(nameof(Two))]
+    [DependsOn(nameof(Three))]
+    [DependsOn(nameof(Four))]
     public async Task AssertCounts()
     {
         await Assert.That(ExecutionCount1).IsEqualTo(2);
