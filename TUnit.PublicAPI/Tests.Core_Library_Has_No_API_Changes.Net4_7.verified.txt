@@ -763,6 +763,7 @@ namespace
     {
         .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
     }
+    public interface IDynamicTestMetadata { }
     public interface IDynamicTestSource
     {
         .<.DynamicTest> CollectDynamicTests(string sessionId);
@@ -1495,6 +1496,23 @@ namespace
         protected override sealed .<<.<object?[]?>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
 }
+namespace .Attributes
+{
+    [(.Class | .Constructor | .Method | .Property)]
+    public sealed class AotCompatibleAttribute : 
+    {
+        public AotCompatibleAttribute() { }
+        public string? AlternativeForReflection { get; set; }
+        public string? Notes { get; set; }
+    }
+    [(.Class | .Constructor | .Method | .Property)]
+    public sealed class RequiresReflectionAttribute : 
+    {
+        public RequiresReflectionAttribute(string reason) { }
+        public string? AotAlternative { get; set; }
+        public string Reason { get; }
+    }
+}
 namespace .Data
 {
     public class GetOnlyDictionary<TKey, TValue>
@@ -1898,6 +1916,12 @@ namespace .Helpers
     {
         public static string GenerateTestName( testClass, .MethodInfo testMethod) { }
         public static string GenerateTestName(string className, string methodName) { }
+    }
+    public static class TupleFactory
+    {
+        public static object? CreateTuple( tupleType, object?[] elements) { }
+        public static bool IsTupleType( type) { }
+        public static bool TryCreateTupleUsingReflection( tupleType, object?[] elements, out object? result) { }
     }
     public static class TupleHelper
     {

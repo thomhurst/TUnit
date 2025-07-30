@@ -76,7 +76,8 @@ namespace
         public static . ConvertObject(object? invoke) { }
         [.("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in " +
             "call to target method. The return value of the source method does not have match" +
-            "ing annotations.")]
+            "ing annotations.", Justification="GetAwaiter pattern detection for custom awaitables. For AOT, use standard Task/Va" +
+            "lueTask types or implement IAsyncEnumerable.")]
         public static bool TryGetAwaitableTask(object awaitable, [.(true)] out .? task) { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
@@ -812,6 +813,7 @@ namespace
     {
         .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
     }
+    public interface IDynamicTestMetadata { }
     public interface IDynamicTestSource
     {
         .<.DynamicTest> CollectDynamicTests(string sessionId);
@@ -1576,6 +1578,23 @@ namespace
         protected override sealed .<<.<object?[]?>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
 }
+namespace .Attributes
+{
+    [(.Class | .Constructor | .Method | .Property)]
+    public sealed class AotCompatibleAttribute : 
+    {
+        public AotCompatibleAttribute() { }
+        public string? AlternativeForReflection { get; set; }
+        public string? Notes { get; set; }
+    }
+    [(.Class | .Constructor | .Method | .Property)]
+    public sealed class RequiresReflectionAttribute : 
+    {
+        public RequiresReflectionAttribute(string reason) { }
+        public string? AotAlternative { get; set; }
+        public string Reason { get; }
+    }
+}
 namespace .Data
 {
     public class GetOnlyDictionary<TKey, TValue>
@@ -1905,11 +1924,15 @@ namespace .Helpers
     }
     public static class CastHelper
     {
-        [.("AOT", "IL3050", Justification="Reflection is used as a fallback. AOT analyzer warns at compile time.")]
-        [.("Trimming", "IL2072", Justification="Conversion operators are preserved through DynamicallyAccessedMembers attribute")]
+        [.("AOT", "IL3050", Justification="Reflection-based conversion is a fallback for runtime scenarios. AOT applications" +
+            " should use explicit conversions.")]
+        [.("Trimming", "IL2072", Justification="Type conversion uses DynamicallyAccessedMembers for known conversion patterns. Fo" +
+            "r AOT scenarios, use explicit type conversions.")]
         public static object? Cast([.(..PublicMethods)]  type, object? value) { }
-        [.("AOT", "IL3050", Justification="Reflection is used as a fallback. AOT analyzer warns at compile time.")]
-        [.("Trimming", "IL2072", Justification="Conversion operators are preserved through DynamicallyAccessedMembers attribute")]
+        [.("AOT", "IL3050", Justification="Reflection-based conversion is a fallback for runtime scenarios. AOT applications" +
+            " should use explicit conversions.")]
+        [.("Trimming", "IL2072", Justification="Type conversion uses DynamicallyAccessedMembers for known conversion patterns. Fo" +
+            "r AOT scenarios, use explicit type conversions.")]
         public static T? Cast<[.(..PublicMethods)]  T>(object? value) { }
         public static .MethodInfo? GetConversionMethod([.(..PublicMethods)]  baseType, [.(..PublicMethods)]  targetType) { }
     }
@@ -1996,6 +2019,12 @@ namespace .Helpers
     {
         public static string GenerateTestName( testClass, .MethodInfo testMethod) { }
         public static string GenerateTestName(string className, string methodName) { }
+    }
+    public static class TupleFactory
+    {
+        public static object? CreateTuple( tupleType, object?[] elements) { }
+        public static bool IsTupleType( type) { }
+        public static bool TryCreateTupleUsingReflection([.(..PublicConstructors)]  tupleType, object?[] elements, out object? result) { }
     }
     public static class TupleHelper
     {
