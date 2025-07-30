@@ -64,15 +64,15 @@ public sealed class VerifySettingsTask
     public VerifySettingsTask ScrubFilePaths()
     {
         // Scrub Windows-style paths (e.g., C:\Users\... or D:\git\TUnit\)
-        ScrubLinesWithReplace(line => System.Text.RegularExpressions.Regex.Replace(line, 
-            @"[A-Za-z]:\\\\[^""\s,)]+", 
+        ScrubLinesWithReplace(line => System.Text.RegularExpressions.Regex.Replace(line,
+            @"[A-Za-z]:\\\\[^""\s,)]+",
             "PATH_SCRUBBED"));
-        
+
         // Scrub Unix-style paths (e.g., /home/user/... or /var/lib/...)
-        ScrubLinesWithReplace(line => System.Text.RegularExpressions.Regex.Replace(line, 
-            @"/[a-zA-Z0-9_\-./]+/[a-zA-Z0-9_\-./]+", 
+        ScrubLinesWithReplace(line => System.Text.RegularExpressions.Regex.Replace(line,
+            @"/[a-zA-Z0-9_\-./]+/[a-zA-Z0-9_\-./]+",
             "PATH_SCRUBBED"));
-        
+
         return this;
     }
 
@@ -120,10 +120,10 @@ public sealed class VerifySettingsTask
             }
         }
         var final = string.Join("\n", lines);
-        
+
         // Normalize escaped line endings in string literals
         final = final.Replace("\\r\\n", "\\n");
-        
+
         // Always normalize line endings before any file operations
         final = NormalizeNewline(final);
 
@@ -154,7 +154,11 @@ public sealed class VerifySettingsTask
     private string NormalizeNewline(string input)
     {
         // Normalize newlines to Unix style
-        return input.Replace("\r\n", "\n").Replace("\r", "\n");
+        return input
+            .Replace("\r\n", "\n")
+            .Replace("\r", "\n")
+            .Replace("\\r\\n", "\\n")
+            .Replace("\\r", "\\n");
     }
 
     public TaskAwaiter GetAwaiter() => ToTask().GetAwaiter();
