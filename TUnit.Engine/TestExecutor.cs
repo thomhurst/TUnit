@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Logging;
@@ -118,11 +119,17 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
     {
         try
         {
-            // Execute all registered global initializers (including static property initialization)
+            // Execute all registered global initializers (including static property initialization from source generation)
             while (Sources.GlobalInitializers.TryDequeue(out var initializer))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 await initializer();
+            }
+
+            // For reflection mode, also initialize static properties dynamically
+            if (!SourceRegistrar.IsEnabled)
+            {
+                await StaticPropertyReflectionInitializer.InitializeAllStaticPropertiesAsync();
             }
         }
         catch (Exception ex)

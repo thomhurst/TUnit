@@ -157,6 +157,9 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         
         writer.AppendLine($"{typeName}.{propertyName} = ({propertyData.Property.Type.GloballyQualified()})value;");
         
+        writer.AppendLine("// Initialize the injected value");
+        writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(value);");
+        
         writer.Unindent();
         writer.AppendLine("}");
         
