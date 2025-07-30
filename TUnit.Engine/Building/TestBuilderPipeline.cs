@@ -29,11 +29,16 @@ internal sealed class TestBuilderPipeline
     {
         var dataCollector = _dataCollectorFactory(filterTypes);
         var collectedMetadata = await dataCollector.CollectTestsAsync(testSessionId);
-
+        
+        return await BuildTestsFromMetadataAsync(collectedMetadata);
+    }
+    
+    public async Task<IEnumerable<ExecutableTest>> BuildTestsFromMetadataAsync(IEnumerable<TestMetadata> testMetadata)
+    {
         var executableTests = new List<ExecutableTest>();
 
         var resolvedMetadata = new List<TestMetadata>();
-        foreach (var metadata in collectedMetadata)
+        foreach (var metadata in testMetadata)
         {
             try
             {

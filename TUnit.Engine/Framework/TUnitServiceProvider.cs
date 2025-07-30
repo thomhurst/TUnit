@@ -140,6 +140,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         singleTestExecutor.SetSessionId(sessionUid);
         TestExecutor.SetSessionId(sessionUid);
 
+        Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, messageBus, singleTestExecutor, TestSessionId, CancellationToken.Token));
+
         InitializeConsoleInterceptors();
     }
 

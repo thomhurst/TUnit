@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace TUnit.Core;
@@ -15,6 +16,11 @@ public class DynamicDiscoveryResult : DiscoveryResult
     public List<Attribute> Attributes { get; set; } =
     [
     ];
+
+    [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.PublicProperties
+        | DynamicallyAccessedMemberTypes.PublicMethods)]
     public Type? TestClassType { get; set; }
 }
 
@@ -23,9 +29,15 @@ public abstract class DynamicTest
     public abstract IEnumerable<DiscoveryResult> GetTests();
 }
 
-public abstract class DynamicTest<T> : DynamicTest where T : class;
+public abstract class DynamicTest<[DynamicallyAccessedMembers(
+    DynamicallyAccessedMemberTypes.PublicConstructors
+    | DynamicallyAccessedMemberTypes.PublicProperties
+    | DynamicallyAccessedMemberTypes.PublicMethods)] T> : DynamicTest where T : class;
 
-public class DynamicTestInstance<T> : DynamicTest<T> where T : class
+public class DynamicTestInstance<[DynamicallyAccessedMembers(
+    DynamicallyAccessedMemberTypes.PublicConstructors
+    | DynamicallyAccessedMemberTypes.PublicProperties
+    | DynamicallyAccessedMemberTypes.PublicMethods)]T> : DynamicTest<T> where T : class
 {
     public Expression<Action<T>>? TestMethod { get; set; }
     public object?[]? TestClassArguments { get; set; }
@@ -59,7 +71,10 @@ public interface IDynamicTestSource
     IReadOnlyList<DynamicTest> CollectDynamicTests(string sessionId);
 }
 
-public class FailedDynamicTest<T> : DynamicTest where T : class
+public class FailedDynamicTest<[DynamicallyAccessedMembers(
+    DynamicallyAccessedMemberTypes.PublicConstructors
+    | DynamicallyAccessedMemberTypes.PublicProperties
+    | DynamicallyAccessedMemberTypes.PublicMethods)] T> : DynamicTest where T : class
 {
     public string TestId { get; set; } = string.Empty;
     public string MethodName { get; set; } = string.Empty;
