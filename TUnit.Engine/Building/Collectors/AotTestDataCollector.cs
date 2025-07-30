@@ -212,7 +212,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             DataSources = [], // Dynamic tests don't use data sources in the same way
             ClassDataSources = [],
             PropertyDataSources = [],
-            InstanceFactory = CreateAotInstanceFactory(result.TestClassType)!,
+            InstanceFactory = CreateAotDynamicInstanceFactory(result.TestClassType, result.TestClassArguments)!,
             TestInvoker = CreateAotDynamicTestInvoker(result),
             ParameterCount = result.TestMethodArguments?.Length ?? 0,
             ParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType).ToArray(),
@@ -239,16 +239,35 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     [UnconditionalSuppressMessage("Trimming",
         "IL2072:Target method return value does not have matching annotations",
         Justification = "AOT mode uses source-generated factories")]
-    private static Func<Type[], object?[], object>? CreateAotInstanceFactory(Type testClass)
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2055:Call to 'MakeGenericType' can not be statically analyzed",
+        Justification = "Dynamic tests may use generic types")]
+    [UnconditionalSuppressMessage("AOT",
+        "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling",
+        Justification = "Dynamic tests require dynamic code generation")]
+    private static Func<Type[], object?[], object>? CreateAotDynamicInstanceFactory(Type testClass, object?[]? predefinedClassArgs)
     {
-        // In AOT mode, we still need to create instances but without full reflection
-        return (_, args) =>
+        // For dynamic tests, we always use the predefined args (or empty array if null)
+        var classArgs = predefinedClassArgs ?? [];
+        
+        return (typeArgs, args) =>
         {
-            if (args.Length == 0)
+            // Always use the predefined class args, ignoring the args parameter
+            if (testClass.IsGenericTypeDefinition && typeArgs.Length > 0)
+            {
+                var closedType = testClass.MakeGenericType(typeArgs);
+                if (classArgs.Length == 0)
+                {
+                    return Activator.CreateInstance(closedType)!;
+                }
+                return Activator.CreateInstance(closedType, classArgs)!;
+            }
+            
+            if (classArgs.Length == 0)
             {
                 return Activator.CreateInstance(testClass)!;
             }
-            return Activator.CreateInstance(testClass, args)!;
+            return Activator.CreateInstance(testClass, classArgs)!;
         };
     }
 

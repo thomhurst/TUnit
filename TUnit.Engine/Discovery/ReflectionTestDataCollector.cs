@@ -1220,7 +1220,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             DataSources = [], // Dynamic tests don't use data sources in the same way
             ClassDataSources = [],
             PropertyDataSources = [],
-            InstanceFactory = CreateInstanceFactory(result.TestClassType)!,
+            InstanceFactory = CreateDynamicInstanceFactory(result.TestClassType, result.TestClassArguments)!,
             TestInvoker = CreateDynamicTestInvoker(result),
             ParameterCount = result.TestMethodArguments?.Length ?? 0,
             ParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType).ToArray(),
@@ -1238,6 +1238,32 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return Task.FromResult<TestMetadata>(metadata);
     }
 
+    private static Func<Type[], object?[], object> CreateDynamicInstanceFactory(Type testClass, object?[]? predefinedClassArgs)
+    {
+        // For dynamic tests, we always use the predefined args (or empty array if null)
+        var classArgs = predefinedClassArgs ?? [];
+        
+        return (typeArgs, args) =>
+        {
+            // Always use the predefined class args, ignoring the args parameter
+            if (testClass.IsGenericTypeDefinition && typeArgs.Length > 0)
+            {
+                var closedType = testClass.MakeGenericType(typeArgs);
+                if (classArgs.Length == 0)
+                {
+                    return Activator.CreateInstance(closedType)!;
+                }
+                return Activator.CreateInstance(closedType, classArgs)!;
+            }
+            
+            if (classArgs.Length == 0)
+            {
+                return Activator.CreateInstance(testClass)!;
+            }
+            return Activator.CreateInstance(testClass, classArgs)!;
+        };
+    }
+    
     private static Func<object, object?[], Task> CreateDynamicTestInvoker(DynamicDiscoveryResult result)
     {
         return async (instance, args) =>
