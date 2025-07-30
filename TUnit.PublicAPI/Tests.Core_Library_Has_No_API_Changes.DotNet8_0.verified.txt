@@ -1172,18 +1172,18 @@ namespace
     {
         public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> AfterAssemblyHooks;
         public static readonly .<, .<.<.ClassHookContext>>> AfterClassHooks;
-        public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> AfterEveryAssemblyHooks;
-        public static readonly .<, .<.<.ClassHookContext>>> AfterEveryClassHooks;
-        public static readonly .<, .<.<.TestContext>>> AfterEveryTestHooks;
+        public static readonly .<.<.AssemblyHookContext>> AfterEveryAssemblyHooks;
+        public static readonly .<.<.ClassHookContext>> AfterEveryClassHooks;
+        public static readonly .<.<.TestContext>> AfterEveryTestHooks;
         public static readonly .<.<.TestDiscoveryContext>> AfterTestDiscoveryHooks;
         public static readonly .<, .<.>> AfterTestHooks;
         public static readonly .<.<.TestSessionContext>> AfterTestSessionHooks;
         public static readonly .<<.Assembly>> AssemblyLoaders;
         public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> BeforeAssemblyHooks;
         public static readonly .<, .<.<.ClassHookContext>>> BeforeClassHooks;
-        public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> BeforeEveryAssemblyHooks;
-        public static readonly .<, .<.<.ClassHookContext>>> BeforeEveryClassHooks;
-        public static readonly .<, .<.<.TestContext>>> BeforeEveryTestHooks;
+        public static readonly .<.<.AssemblyHookContext>> BeforeEveryAssemblyHooks;
+        public static readonly .<.<.ClassHookContext>> BeforeEveryClassHooks;
+        public static readonly .<.<.TestContext>> BeforeEveryTestHooks;
         public static readonly .<.<.BeforeTestDiscoveryContext>> BeforeTestDiscoveryHooks;
         public static readonly .<, .<.>> BeforeTestHooks;
         public static readonly .<.<.TestSessionContext>> BeforeTestSessionHooks;
