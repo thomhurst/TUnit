@@ -45,9 +45,9 @@
     <PackageVersion Include="Microsoft.Testing.Platform" Version="1.7.3" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.4.3" />
     <PackageVersion Include="System.Threading.Channels" Version="9.0.6" />
-    <PackageVersion Include="ModularPipelines.DotNet" Version="2.44.45" />
-    <PackageVersion Include="ModularPipelines.Git" Version="2.44.45" />
-    <PackageVersion Include="ModularPipelines.GitHub" Version="2.44.45" />
+    <PackageVersion Include="ModularPipelines.DotNet" Version="2.44.121" />
+    <PackageVersion Include="ModularPipelines.Git" Version="2.44.121" />
+    <PackageVersion Include="ModularPipelines.GitHub" Version="2.44.121" />
     <PackageVersion Include="MSTest.TestAdapter" Version="3.10.0" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.10.0" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
