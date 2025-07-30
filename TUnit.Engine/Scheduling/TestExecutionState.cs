@@ -9,7 +9,7 @@ namespace TUnit.Engine.Scheduling;
 /// </summary>
 public sealed class TestExecutionState
 {
-    public ExecutableTest Test { get; }
+    public AbstractExecutableTest Test { get; }
     public TestState State { get; set; }
     private int _remainingDependencies;
     public int RemainingDependencies
@@ -26,7 +26,7 @@ public sealed class TestExecutionState
     public int Order { get; init; }
     public Priority Priority { get; init; }
 
-    public TestExecutionState(ExecutableTest test)
+    public TestExecutionState(AbstractExecutableTest test)
     {
         Test = test;
         State = TestState.NotStarted;

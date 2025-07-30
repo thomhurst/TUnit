@@ -11,7 +11,7 @@ namespace TUnit.Engine.Services;
 
 internal class TestFilterService(TUnitFrameworkLogger logger)
 {
-    public IReadOnlyCollection<ExecutableTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IReadOnlyCollection<ExecutableTest> testNodes)
+    public IReadOnlyCollection<AbstractExecutableTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IReadOnlyCollection<AbstractExecutableTest> testNodes)
     {
         if (testExecutionFilter is null or NopFilter)
         {
@@ -22,7 +22,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
 
         logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
 
-        var filteredTests = new List<ExecutableTest>();
+        var filteredTests = new List<AbstractExecutableTest>();
         foreach (var test in testNodes)
         {
             if (MatchesTest(testExecutionFilter, test))
@@ -34,7 +34,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
         return filteredTests;
     }
 
-    private async Task RegisterTest(ExecutableTest test)
+    private async Task RegisterTest(AbstractExecutableTest test)
     {
         var discoveredTest = new DiscoveredTest<object>
         {
@@ -67,7 +67,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
 
     }
 
-    public async Task RegisterTestsAsync(IEnumerable<ExecutableTest> tests)
+    public async Task RegisterTestsAsync(IEnumerable<AbstractExecutableTest> tests)
     {
         foreach (var test in tests)
         {
@@ -75,7 +75,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
         }
     }
 
-    public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, ExecutableTest executableTest)
+    public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, AbstractExecutableTest executableTest)
     {
 #pragma warning disable TPEXP
         var shouldRunTest = testExecutionFilter switch
@@ -91,7 +91,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
 #pragma warning restore TPEXP
     }
 
-    private string BuildPath(ExecutableTest test)
+    private string BuildPath(AbstractExecutableTest test)
     {
         var metadata = test.Metadata;
 
@@ -107,7 +107,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
 #pragma warning disable TPEXP
         TreeNodeFilter treeNodeFilter,
 #pragma warning restore TPEXP
-        ExecutableTest executableTest)
+        AbstractExecutableTest executableTest)
     {
         var path = BuildPath(executableTest);
 
@@ -124,7 +124,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
         return true;
     }
 
-    private PropertyBag BuildPropertyBag(ExecutableTest test)
+    private PropertyBag BuildPropertyBag(AbstractExecutableTest test)
     {
         var properties = new List<IProperty>();
 

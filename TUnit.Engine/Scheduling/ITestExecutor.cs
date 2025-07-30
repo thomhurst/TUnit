@@ -10,5 +10,5 @@ public interface ITestExecutor
     /// <summary>
     /// Executes a single test
     /// </summary>
-    Task ExecuteTestAsync(ExecutableTest test, CancellationToken cancellationToken);
+    Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken);
 }

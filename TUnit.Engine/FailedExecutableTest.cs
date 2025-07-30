@@ -5,7 +5,7 @@ namespace TUnit.Engine;
 /// <summary>
 /// Executable test that represents a test that failed during data source expansion
 /// </summary>
-internal sealed class FailedExecutableTest : ExecutableTest
+internal sealed class FailedExecutableTest : AbstractExecutableTest
 {
     private readonly Exception _exception;
 

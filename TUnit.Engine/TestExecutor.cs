@@ -61,7 +61,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
     }
 
     public async Task ExecuteTests(
-        IEnumerable<ExecutableTest> tests,
+        IEnumerable<AbstractExecutableTest> tests,
         ITestExecutionFilter? filter,
         IMessageBus messageBus,
         CancellationToken cancellationToken)
@@ -88,7 +88,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         }
     }
 
-    private void InitializeEventReceivers(List<ExecutableTest> testList, CancellationToken cancellationToken)
+    private void InitializeEventReceivers(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
         if (_serviceProvider.GetService(typeof(EventReceiverOrchestrator)) is not EventReceiverOrchestrator eventReceiverOrchestrator)
         {
@@ -101,7 +101,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         // Test registered event receivers are now invoked during discovery phase
     }
 
-    private async Task PrepareHookOrchestrator(HookOrchestrator hookOrchestrator, List<ExecutableTest> testList, CancellationToken cancellationToken)
+    private async Task PrepareHookOrchestrator(HookOrchestrator hookOrchestrator, List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
         await InitializeStaticPropertiesAsync(cancellationToken);
 
@@ -133,7 +133,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
     }
 
 
-    private async Task ExecuteTestsCore(List<ExecutableTest> testList, Scheduling.ITestExecutor executorAdapter, CancellationToken cancellationToken)
+    private async Task ExecuteTestsCore(List<AbstractExecutableTest> testList, Scheduling.ITestExecutor executorAdapter, CancellationToken cancellationToken)
     {
         // Combine cancellation tokens
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(

@@ -34,7 +34,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
     }
 
     public async Task<TestNodeUpdateMessage> ExecuteTestAsync(
-        ExecutableTest test,
+        AbstractExecutableTest test,
         CancellationToken cancellationToken)
     {
         // If test is already failed (e.g., from data source expansion error),
@@ -108,7 +108,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         return CreateUpdateMessage(test);
     }
 
-    private async Task<TestNodeUpdateMessage> HandleSkippedTestAsync(ExecutableTest test, CancellationToken cancellationToken)
+    private async Task<TestNodeUpdateMessage> HandleSkippedTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         test.State = TestState.Skipped;
 
@@ -122,7 +122,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         return CreateUpdateMessage(test);
     }
 
-    private async Task ExecuteTestWithHooksAsync(ExecutableTest test, object instance, CancellationToken cancellationToken)
+    private async Task ExecuteTestWithHooksAsync(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
     {
         RestoreHookContexts(test.Context);
 
@@ -193,7 +193,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
     }
 
-    private void HandleTestFailure(ExecutableTest test, Exception ex)
+    private void HandleTestFailure(AbstractExecutableTest test, Exception ex)
     {
         if (ex is OperationCanceledException && test.Metadata.TimeoutMs.HasValue)
         {
@@ -212,7 +212,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
     }
 
 
-    private TestNodeUpdateMessage CreateUpdateMessage(ExecutableTest test)
+    private TestNodeUpdateMessage CreateUpdateMessage(AbstractExecutableTest test)
     {
         var testNode = test.Context.ToTestNode()
             .WithProperty(GetTestNodeState(test));
@@ -241,7 +241,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             testNode: testNode);
     }
 
-    private IProperty GetTestNodeState(ExecutableTest test)
+    private IProperty GetTestNodeState(AbstractExecutableTest test)
     {
         return test.State switch
         {
@@ -254,12 +254,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
         };
     }
 
-    private SessionUid CreateSessionUid(ExecutableTest test)
+    private SessionUid CreateSessionUid(AbstractExecutableTest test)
     {
         return _sessionUid ?? new SessionUid(Guid.NewGuid().ToString());
     }
 
-    private async Task InvokeTestWithTimeout(ExecutableTest test, object instance, CancellationToken cancellationToken)
+    private async Task InvokeTestWithTimeout(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
     {
         var discoveredTest = test.Context.InternalDiscoveredTest;
         var testAction = test.Metadata.TimeoutMs.HasValue
@@ -269,7 +269,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         await InvokeWithTestExecutor(discoveredTest, test.Context, testAction);
     }
 
-    private Func<ValueTask> CreateTimeoutTestAction(ExecutableTest test, object instance, CancellationToken cancellationToken)
+    private Func<ValueTask> CreateTimeoutTestAction(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
     {
         return async () =>
         {
@@ -291,7 +291,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         };
     }
 
-    private Func<ValueTask> CreateNormalTestAction(ExecutableTest test, object instance, CancellationToken cancellationToken)
+    private Func<ValueTask> CreateNormalTestAction(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
     {
         return async () =>
         {
@@ -323,7 +323,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
     }
 
 
-    private async Task DecrementAndDisposeTrackedObjectsAsync(ExecutableTest test)
+    private async Task DecrementAndDisposeTrackedObjectsAsync(AbstractExecutableTest test)
     {
         var objectsToCheck = new List<object?>();
         objectsToCheck.AddRange(test.ClassArguments);

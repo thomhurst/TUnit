@@ -8,19 +8,19 @@ namespace TUnit.Engine.Services;
 /// </summary>
 internal interface ITestGroupingService
 {
-    ValueTask<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<ExecutableTest> tests);
+    ValueTask<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<AbstractExecutableTest> tests);
 }
 
 internal sealed class TestGroupingService : ITestGroupingService
 {
-    public ValueTask<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<ExecutableTest> tests)
+    public ValueTask<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<AbstractExecutableTest> tests)
     {
         // Use collection directly if already materialized, otherwise create efficient list
-        var allTests = tests as IReadOnlyList<ExecutableTest> ?? tests.ToList();
-        var notInParallelQueue = new PriorityQueue<ExecutableTest, int>();
-        var keyedNotInParallelQueues = new Dictionary<string, PriorityQueue<ExecutableTest, int>>();
-        var parallelTests = new List<ExecutableTest>();
-        var parallelGroups = new Dictionary<string, SortedDictionary<int, List<ExecutableTest>>>();
+        var allTests = tests as IReadOnlyList<AbstractExecutableTest> ?? tests.ToList();
+        var notInParallelQueue = new PriorityQueue<AbstractExecutableTest, int>();
+        var keyedNotInParallelQueues = new Dictionary<string, PriorityQueue<AbstractExecutableTest, int>>();
+        var parallelTests = new List<AbstractExecutableTest>();
+        var parallelGroups = new Dictionary<string, SortedDictionary<int, List<AbstractExecutableTest>>>();
 
         foreach (var test in allTests)
         {
@@ -54,10 +54,10 @@ internal sealed class TestGroupingService : ITestGroupingService
     }
 
     private static void ProcessNotInParallelConstraint(
-        ExecutableTest test, 
+        AbstractExecutableTest test, 
         NotInParallelConstraint constraint,
-        PriorityQueue<ExecutableTest, int> notInParallelQueue,
-        Dictionary<string, PriorityQueue<ExecutableTest, int>> keyedQueues)
+        PriorityQueue<AbstractExecutableTest, int> notInParallelQueue,
+        Dictionary<string, PriorityQueue<AbstractExecutableTest, int>> keyedQueues)
     {
         var order = constraint.Order;
         
@@ -71,7 +71,7 @@ internal sealed class TestGroupingService : ITestGroupingService
             {
                 if (!keyedQueues.TryGetValue(key, out var queue))
                 {
-                    queue = new PriorityQueue<ExecutableTest, int>();
+                    queue = new PriorityQueue<AbstractExecutableTest, int>();
                     keyedQueues[key] = queue;
                 }
                 queue.Enqueue(test, order);
@@ -80,13 +80,13 @@ internal sealed class TestGroupingService : ITestGroupingService
     }
 
     private static void ProcessParallelGroupConstraint(
-        ExecutableTest test,
+        AbstractExecutableTest test,
         ParallelGroupConstraint constraint,
-        Dictionary<string, SortedDictionary<int, List<ExecutableTest>>> parallelGroups)
+        Dictionary<string, SortedDictionary<int, List<AbstractExecutableTest>>> parallelGroups)
     {
         if (!parallelGroups.TryGetValue(constraint.Group, out var orderGroups))
         {
-            orderGroups = new SortedDictionary<int, List<ExecutableTest>>();
+            orderGroups = new SortedDictionary<int, List<AbstractExecutableTest>>();
             parallelGroups[constraint.Group] = orderGroups;
         }
 

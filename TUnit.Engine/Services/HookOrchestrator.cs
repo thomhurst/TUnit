@@ -41,7 +41,7 @@ internal sealed class HookOrchestrator
     /// </summary>
     private Task<ExecutionContext> GetOrCreateBeforeAssemblyTask(string assemblyName, Assembly assembly, CancellationToken cancellationToken)
     {
-        return _beforeAssemblyTasks.GetOrAdd(assemblyName, _ => 
+        return _beforeAssemblyTasks.GetOrAdd(assemblyName, _ =>
             ExecuteBeforeAssemblyHooksAsync(assembly, cancellationToken));
     }
 
@@ -164,7 +164,7 @@ internal sealed class HookOrchestrator
 #endif
     }
 
-    public async Task<ExecutionContext> OnTestStartingAsync(ExecutableTest test, CancellationToken cancellationToken)
+    public async Task<ExecutionContext> OnTestStartingAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         var testClassType = test.Metadata.TestClassType;
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";
@@ -190,7 +190,7 @@ internal sealed class HookOrchestrator
         return ExecutionContext.Capture()!;
     }
 
-    public async Task OnTestCompletedAsync(ExecutableTest test, CancellationToken cancellationToken)
+    public async Task OnTestCompletedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         var testClassType = test.Metadata.TestClassType;
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";

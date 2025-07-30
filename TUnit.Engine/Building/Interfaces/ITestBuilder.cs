@@ -14,7 +14,7 @@ internal interface ITestBuilder
     /// <param name="testData">The test data</param>
     /// <param name="testBuilderContext"></param>
     /// <returns>An executable test ready for execution</returns>
-    Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestBuilder.TestData testData, TestBuilderContext testBuilderContext);
+    Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestBuilder.TestData testData, TestBuilderContext testBuilderContext);
 
     /// <summary>
     /// Builds all executable tests from a single TestMetadata using its DataCombinationGenerator delegate.
@@ -22,5 +22,5 @@ internal interface ITestBuilder
     /// </summary>
     /// <param name="metadata">The test metadata with DataCombinationGenerator</param>
     /// <returns>Collection of executable tests for all data combinations</returns>
-    Task<IEnumerable<ExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata);
+    Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata);
 }

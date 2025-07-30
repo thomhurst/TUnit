@@ -1,54 +1,37 @@
 namespace TUnit.Core;
 
-public abstract class ExecutableTest
+/// <summary>
+/// Unified executable test implementation that works for both AOT and reflection modes.
+/// Replaces ExecutableTest<T> and DynamicExecutableTest with a single implementation.
+/// All mode-specific logic is handled during delegate creation, not execution.
+/// </summary>
+public sealed class ExecutableTest : AbstractExecutableTest
 {
-    public required string TestId { get; init; }
-
-    public virtual TestMetadata Metadata { get; init; } = null!;
-
-    /// <summary>
-    /// Empty for parameterless tests
-    /// </summary>
-    public required object?[] Arguments { get; init; }
+    private readonly Func<TestContext, Task<object>> _createInstance;
+    private readonly Func<object, object?[], TestContext, CancellationToken, Task> _invokeTest;
 
     /// <summary>
-    /// Empty for parameterless constructors
+    /// Creates a UnifiedExecutableTest where all mode-specific behavior is encapsulated in the delegates.
+    /// Both AOT and reflection modes provide delegates with identical signatures.
     /// </summary>
-    public object?[] ClassArguments { get; init; } = [];
-
-    public abstract Task<object> CreateInstanceAsync();
-
-    public abstract Task InvokeTestAsync(object instance, CancellationToken cancellationToken);
-
-    public required TestContext Context
+    /// <param name="createInstance">Delegate that creates the test instance with all necessary initialization</param>
+    /// <param name="invokeTest">Delegate that invokes the test method with proper parameter handling</param>
+    public ExecutableTest(
+        Func<TestContext, Task<object>> createInstance,
+        Func<object, object?[], TestContext, CancellationToken, Task> invokeTest)
     {
-        get;
-        init
-        {
-            field = value;
-            value.InternalExecutableTest = this;
-        }
+        _createInstance = createInstance ?? throw new ArgumentNullException(nameof(createInstance));
+        _invokeTest = invokeTest ?? throw new ArgumentNullException(nameof(invokeTest));
     }
 
-    public ExecutableTest[] Dependencies { get; set; } = [];
-
-    public TestState State { get; set; } = TestState.NotStarted;
-
-    public TestResult? Result
+    public override async Task<object> CreateInstanceAsync()
     {
-        get => Context.Result;
-        set => Context.Result = value;
+        return await _createInstance(Context);
     }
 
-    public DateTimeOffset? StartTime
+    public override async Task InvokeTestAsync(object instance, CancellationToken cancellationToken)
     {
-        get => Context.TestStart;
-        set => Context.TestStart = value ?? DateTimeOffset.UtcNow;
+        // Simply invoke the delegate - all complexity is handled during delegate creation
+        await _invokeTest(instance, Arguments, Context, cancellationToken);
     }
-
-    public DateTimeOffset? EndTime { get => Context.TestEnd; set => Context.TestEnd = value; }
-
-    public TimeSpan? Duration => StartTime.HasValue && EndTime.HasValue
-        ? EndTime.Value - StartTime.Value
-        : null;
 }

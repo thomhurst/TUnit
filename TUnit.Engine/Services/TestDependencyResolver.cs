@@ -8,10 +8,10 @@ namespace TUnit.Engine.Services;
 /// </summary>
 internal sealed class TestDependencyResolver
 {
-    private readonly ConcurrentDictionary<string, ExecutableTest> _testsByName = new();
+    private readonly ConcurrentDictionary<string, AbstractExecutableTest> _testsByName = new();
     private readonly ConcurrentDictionary<string, List<string>> _pendingDependents = new();
     
-    public void RegisterTest(ExecutableTest test)
+    public void RegisterTest(AbstractExecutableTest test)
     {
         _testsByName[test.TestId] = test;
         
@@ -28,7 +28,7 @@ internal sealed class TestDependencyResolver
         }
     }
     
-    public bool TryResolveDependencies(ExecutableTest test)
+    public bool TryResolveDependencies(AbstractExecutableTest test)
     {
         if (test.Dependencies.Length > 0)
         {
@@ -38,9 +38,9 @@ internal sealed class TestDependencyResolver
         return ResolveDependenciesForTest(test);
     }
     
-    private bool ResolveDependenciesForTest(ExecutableTest test)
+    private bool ResolveDependenciesForTest(AbstractExecutableTest test)
     {
-        var dependencies = new List<ExecutableTest>();
+        var dependencies = new List<AbstractExecutableTest>();
         var allResolved = true;
         
         foreach (var dependency in test.Metadata.Dependencies)
@@ -86,8 +86,8 @@ internal sealed class TestDependencyResolver
         return allResolved;
     }
     
-    private IEnumerable<ExecutableTest> GetAllDependencies(
-        ExecutableTest test, 
+    private IEnumerable<AbstractExecutableTest> GetAllDependencies(
+        AbstractExecutableTest test, 
         HashSet<string> visited)
     {
         foreach (var dep in test.Dependencies)

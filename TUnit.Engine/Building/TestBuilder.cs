@@ -24,9 +24,9 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
 
-    public async Task<IEnumerable<ExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata)
+    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata)
     {
-        var tests = new List<ExecutableTest>();
+        var tests = new List<AbstractExecutableTest>();
 
         try
         {
@@ -418,7 +418,7 @@ internal sealed class TestBuilder : ITestBuilder
         return dataSources;
     }
 
-    public async Task<ExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
+    public async Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
         var testId = TestIdentifierService.GenerateTestId(metadata, testData);
 
@@ -491,17 +491,17 @@ internal sealed class TestBuilder : ITestBuilder
         discoveredContext.TransferTo(context);
     }
 
-    private async Task<ExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
+    private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
         return await CreateFailedTestForDataGenerationError(metadata, exception, null);
     }
 
-    private async Task<ExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, string? customDisplayName)
+    private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, string? customDisplayName)
     {
         return await CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination(), customDisplayName);
     }
 
-    private async Task<ExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination, string? customDisplayName)
+    private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination, string? customDisplayName)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
         var displayName = customDisplayName ?? $"{metadata.TestClassType.Name}.{metadata.TestName}";
@@ -570,13 +570,13 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
-    private async Task<ExecutableTest> CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
+    private async Task<AbstractExecutableTest> CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
     {
         var message = $"Failed to create instance for method data source expansion: {exception.Message}";
         return await CreateFailedTestForDataGenerationError(metadata, exception, message);
     }
 
-    private async Task<ExecutableTest> CreateFailedTestForClassDataSourceCircularDependency(TestMetadata metadata)
+    private async Task<AbstractExecutableTest> CreateFailedTestForClassDataSourceCircularDependency(TestMetadata metadata)
     {
         var instanceClassDataSources = metadata.ClassDataSources
             .Where(ds => ds is IAccessesInstanceData)

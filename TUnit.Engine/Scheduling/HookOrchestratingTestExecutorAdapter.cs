@@ -46,7 +46,7 @@ internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDat
         _hookOrchestrator = hookOrchestrator;
     }
 
-    public async Task ExecuteTestAsync(ExecutableTest test, CancellationToken cancellationToken)
+    public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         test.State = TestState.Running;
         test.StartTime = DateTimeOffset.UtcNow;

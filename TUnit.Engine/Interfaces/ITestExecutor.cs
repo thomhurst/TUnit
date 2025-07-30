@@ -10,7 +10,7 @@ namespace TUnit.Engine.Interfaces;
 public interface ITestExecutor
 {
     Task ExecuteTests(
-        IEnumerable<ExecutableTest> tests,
+        IEnumerable<AbstractExecutableTest> tests,
         ITestExecutionFilter? filter,
         IMessageBus messageBus,
         CancellationToken cancellationToken);

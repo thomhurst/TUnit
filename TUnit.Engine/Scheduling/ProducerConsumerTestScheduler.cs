@@ -33,7 +33,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
     }
 
     public async Task ScheduleAndExecuteAsync(
-        IEnumerable<ExecutableTest> tests,
+        IEnumerable<AbstractExecutableTest> tests,
         ITestExecutor executor,
         CancellationToken cancellationToken)
     {
@@ -331,7 +331,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
 
 internal class TestExecutionData
 {
-    public required ExecutableTest Test { get; init; }
+    public required AbstractExecutableTest Test { get; init; }
     public required ExecutionContext? ExecutionContext { get; init; }
     public required List<string> Constraints { get; init; }
     public required Priority Priority { get; init; }

@@ -380,7 +380,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             _dynamicResult = dynamicResult;
         }
 
-        public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
+        public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
         {
             get => (context, metadata) =>
             {
@@ -411,7 +411,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
                 var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");
 
-                return new UnifiedExecutableTest(createInstance,
+                return new ExecutableTest(createInstance,
                     async (instance, args, context, ct) => await invokeTest(instance, args))
                 {
                     TestId = modifiedContext.TestId,
@@ -435,7 +435,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             _displayName = displayName;
         }
 
-        public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
+        public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
         {
             get => (context, metadata) => new FailedExecutableTest(_exception)
             {

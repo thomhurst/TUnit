@@ -10,7 +10,7 @@ public interface IExecutableTestFactory
     /// <summary>
     /// Creates an executable test with all required parameters
     /// </summary>
-    ExecutableTest CreateExecutableTest(
+    AbstractExecutableTest CreateExecutableTest(
         string testId,
         string displayName,
         object[] arguments,

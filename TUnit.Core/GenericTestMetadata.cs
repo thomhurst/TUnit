@@ -11,7 +11,7 @@ public sealed class GenericTestMetadata : TestMetadata
     /// Factory delegate that creates an ExecutableTest for this metadata.
     /// Uses reflection to handle generic type instantiation and method invocation.
     /// </summary>
-    public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
+    public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
     {
         get
         {
@@ -117,7 +117,7 @@ public sealed class GenericTestMetadata : TestMetadata
                     }
                 };
 
-                return new UnifiedExecutableTest(createInstance, invokeTest)
+                return new ExecutableTest(createInstance, invokeTest)
                 {
                     TestId = context.TestId,
                     Metadata = metadata,

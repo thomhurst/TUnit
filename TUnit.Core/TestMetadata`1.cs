@@ -60,7 +60,7 @@ public class TestMetadata<
     /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.
     /// </summary>
-    public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
+    public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
     {
         get
         {
@@ -85,7 +85,7 @@ public class TestMetadata<
                         await typedMetadata.InvokeTypedTest!((T)instance, args, cancellationToken);
                     };
 
-                    return new UnifiedExecutableTest(createInstance, invokeTest)
+                    return new ExecutableTest(createInstance, invokeTest)
                     {
                         TestId = context.TestId,
                         Metadata = metadata,

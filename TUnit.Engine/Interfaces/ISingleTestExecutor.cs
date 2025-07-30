@@ -10,5 +10,5 @@ namespace TUnit.Engine.Interfaces;
 public interface ISingleTestExecutor
 {
     void SetSessionId(SessionUid sessionUid);
-    Task<TestNodeUpdateMessage> ExecuteTestAsync(ExecutableTest test, CancellationToken cancellationToken);
+    Task<TestNodeUpdateMessage> ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken);
 }

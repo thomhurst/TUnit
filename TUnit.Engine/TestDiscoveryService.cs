@@ -11,10 +11,10 @@ namespace TUnit.Engine;
 
 internal sealed class TestDiscoveryResult
 {
-    public IEnumerable<ExecutableTest> Tests { get; }
+    public IEnumerable<AbstractExecutableTest> Tests { get; }
     public ExecutionContext? ExecutionContext { get; }
 
-    public TestDiscoveryResult(IEnumerable<ExecutableTest> tests, ExecutionContext? executionContext)
+    public TestDiscoveryResult(IEnumerable<AbstractExecutableTest> tests, ExecutionContext? executionContext)
     {
         Tests = tests;
         ExecutionContext = executionContext;
@@ -28,7 +28,7 @@ internal sealed class TestDiscoveryService : IDataProducer
     private readonly HookOrchestrator _hookOrchestrator;
     private readonly TestBuilderPipeline _testBuilderPipeline;
     private readonly TestFilterService _testFilterService;
-    private readonly ConcurrentBag<ExecutableTest> _cachedTests =
+    private readonly ConcurrentBag<AbstractExecutableTest> _cachedTests =
     [
     ];
     private readonly TestDependencyResolver _dependencyResolver = new();
@@ -61,7 +61,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         // Extract types from filter for optimized discovery
         var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
 
-        var tests = new List<ExecutableTest>();
+        var tests = new List<AbstractExecutableTest>();
 
         await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken))
         {
@@ -91,7 +91,7 @@ internal sealed class TestDiscoveryService : IDataProducer
     }
 
     /// Streams test discovery for parallel discovery and execution
-    private async IAsyncEnumerable<ExecutableTest> DiscoverTestsStreamAsync(
+    private async IAsyncEnumerable<AbstractExecutableTest> DiscoverTestsStreamAsync(
         string testSessionId,
         HashSet<Type>? filterTypes,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -122,7 +122,7 @@ internal sealed class TestDiscoveryService : IDataProducer
     }
 
 
-    private async IAsyncEnumerable<ExecutableTest> BuildTestsAsync(string testSessionId,
+    private async IAsyncEnumerable<AbstractExecutableTest> BuildTestsAsync(string testSessionId,
         HashSet<Type>? filterTypes,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {

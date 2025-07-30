@@ -25,7 +25,7 @@ internal sealed class TestBuilderPipeline
         _eventReceiverOrchestrator = eventReceiverOrchestrator ?? throw new ArgumentNullException(nameof(eventReceiverOrchestrator));
     }
 
-    public async Task<IEnumerable<ExecutableTest>> BuildTestsAsync(string testSessionId, HashSet<Type>? filterTypes)
+    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsAsync(string testSessionId, HashSet<Type>? filterTypes)
     {
         var dataCollector = _dataCollectorFactory(filterTypes);
         var collectedMetadata = await dataCollector.CollectTestsAsync(testSessionId);
@@ -33,9 +33,9 @@ internal sealed class TestBuilderPipeline
         return await BuildTestsFromMetadataAsync(collectedMetadata);
     }
 
-    public async Task<IEnumerable<ExecutableTest>> BuildTestsFromMetadataAsync(IEnumerable<TestMetadata> testMetadata)
+    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(IEnumerable<TestMetadata> testMetadata)
     {
-        var executableTests = new List<ExecutableTest>();
+        var executableTests = new List<AbstractExecutableTest>();
 
         var resolvedMetadata = new List<TestMetadata>();
         foreach (var metadata in testMetadata)
@@ -147,7 +147,7 @@ internal sealed class TestBuilderPipeline
         return executableTests;
     }
 
-    private ExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
+    private AbstractExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata);
         var displayName = $"{metadata.TestClassType.Name}.{metadata.TestName}";
@@ -202,7 +202,7 @@ internal sealed class TestBuilderPipeline
         };
     }
 
-    private ExecutableTest CreateFailedTestForGenericResolutionError(TestMetadata metadata, Exception exception)
+    private AbstractExecutableTest CreateFailedTestForGenericResolutionError(TestMetadata metadata, Exception exception)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata);
         var displayName = $"{metadata.TestName} [GENERIC RESOLUTION ERROR]";

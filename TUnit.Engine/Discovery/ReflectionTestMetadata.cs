@@ -30,7 +30,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     }
 
     [field: AllowNull, MaybeNull]
-    public override Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory
+    public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
     {
         get
         {
@@ -38,7 +38,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         }
     }
 
-    private ExecutableTest CreateExecutableTest(ExecutableTestCreationContext context, TestMetadata metadata)
+    private AbstractExecutableTest CreateExecutableTest(ExecutableTestCreationContext context, TestMetadata metadata)
     {
         // Create instance factory that uses reflection
         #pragma warning disable CS1998 // Async method lacks 'await' operators
@@ -140,7 +140,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             }
         };
 
-        return new UnifiedExecutableTest(createInstance, invokeTest)
+        return new ExecutableTest(createInstance, invokeTest)
         {
             TestId = context.TestId,
             Metadata = metadata,

@@ -79,7 +79,7 @@ public abstract class TestMetadata
     /// Both AOT and reflection modes must provide delegates with identical signatures.
     /// The delegates encapsulate all mode-specific behavior.
     /// </summary>
-    public abstract Func<ExecutableTestCreationContext, TestMetadata, ExecutableTest> CreateExecutableTestFactory { get; }
+    public abstract Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory { get; }
 }
 
 public sealed class GenericTypeInfo
