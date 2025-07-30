@@ -590,7 +590,7 @@ namespace
         public static .DiscoveryResult Empty { get; }
     }
     [(.Method, Inherited=false)]
-    public sealed class DisplayNameAttribute : .DisplayNameFormatterAttribute
+    public sealed class DisplayNameAttribute : .DisplayNameFormatterAttribute, .IScopedAttribute, .IScopedAttribute<.DisplayNameAttribute>
     {
         public DisplayNameAttribute(string displayName) { }
         protected override string FormatDisplayName(.DiscoveredTestContext context) { }
@@ -679,7 +679,7 @@ namespace
         public required string TestId { get; init; }
     }
     [(.Assembly | .Class | .Method)]
-    public class ExecutionPriorityAttribute : .SingleTUnitAttribute, ., .
+    public class ExecutionPriorityAttribute : .SingleTUnitAttribute, .IScopedAttribute, .IScopedAttribute<.ExecutionPriorityAttribute>, ., .
     {
         public ExecutionPriorityAttribute(. priority = 2) { }
         public int Order { get; }
@@ -810,6 +810,9 @@ namespace
         .<.DynamicTest> CollectDynamicTests(string sessionId);
     }
     public interface IRequiresImmediateInitialization { }
+    public interface IScopedAttribute { }
+    public interface IScopedAttribute<T> : .IScopedAttribute
+        where T :  { }
     public interface ITestDefinition { }
     [(.Class)]
     public sealed class InheritsTestsAttribute : .TUnitAttribute
@@ -924,7 +927,7 @@ namespace
         protected override bool PrintMembers(.StringBuilder stringBuilder) { }
     }
     [(.Assembly | .Class | .Method)]
-    public class NotInParallelAttribute : .SingleTUnitAttribute, ., .
+    public class NotInParallelAttribute : .SingleTUnitAttribute, .IScopedAttribute, .IScopedAttribute<.NotInParallelAttribute>, ., .
     {
         public NotInParallelAttribute() { }
         public NotInParallelAttribute(string constraintKey) { }
@@ -1053,7 +1056,7 @@ namespace
         public static void Register( type, ..IPropertySource source) { }
     }
     [(.Assembly | .Class | .Method)]
-    public sealed class RepeatAttribute : .TUnitAttribute
+    public sealed class RepeatAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.RepeatAttribute>
     {
         public RepeatAttribute(int times) { }
         public int Times { get; }
@@ -1081,7 +1084,7 @@ namespace
         public override . ResetLazy() { }
     }
     [(.Assembly | .Class | .Method)]
-    public class RetryAttribute : .TUnitAttribute, ., .
+    public class RetryAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.RetryAttribute>, ., .
     {
         public RetryAttribute(int times) { }
         public int Order { get; }
@@ -1223,7 +1226,7 @@ namespace
         public .TestPhase Phase { get; set; }
         public bool ReportResult { get; set; }
         public .TestResult? Result { get; set; }
-        public <.TestContext, , int, .<bool>>? ShouldRetryFunc { get; set; }
+        public <.TestContext, , int, .<bool>>? RetryFunc { get; set; }
         public string? SkipReason { get; set; }
         public .TestDetails TestDetails { get; set; }
         public ? TestEnd { get; set; }
@@ -1255,15 +1258,6 @@ namespace
         public void SetParallelLimiter(. parallelLimit) { }
         public void WriteError(string message) { }
         public void WriteLine(string message) { }
-    }
-    public static class TestContextConfiguration
-    {
-        public static ? GetDisplayNameFormatter(this .TestContext context) { }
-        public static .? GetParallelConstraint(this .TestContext context) { }
-        public static .? GetParallelLimiter(this .TestContext context) { }
-        public static <.TestContext, , int, .<bool>>? GetShouldRetryFunc(this .TestContext context) { }
-        public static string? GetSkipReason(this .TestContext context) { }
-        public static void SetSkipReason(this .TestContext context, string reason) { }
     }
     public class TestContextEvents : <.TestContextEvents>
     {
@@ -1479,7 +1473,7 @@ namespace
         public static bool IsTransient(this .TestState state) { }
     }
     [(.Assembly | .Class | .Method)]
-    public class TimeoutAttribute : .TUnitAttribute, ., .
+    public class TimeoutAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.TimeoutAttribute>, ., .
     {
         public TimeoutAttribute(int timeoutInMilliseconds) { }
         public int Order { get; }
