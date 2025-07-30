@@ -24,7 +24,11 @@ public class AssertionResult
         return new AssertionResult(false, message);
     }
 
-    public static AssertionResult FailIf(bool isFailed, [InterpolatedStringHandlerArgument("isFailed")] InterpolatedStringHandler stringHandler)
+    public static AssertionResult FailIf(bool isFailed,
+        #if NET
+        [InterpolatedStringHandlerArgument("isFailed")]
+        #endif
+        InterpolatedStringHandler stringHandler)
     {
         if (!isFailed)
         {
@@ -111,7 +115,11 @@ public class AssertionResult
         return new AssertionResult(false, message);
     }
 
-    public AssertionResult OrFailIf(bool isFailed, [InterpolatedStringHandlerArgument("isFailed")] InterpolatedStringHandler stringHandler)
+    public AssertionResult OrFailIf(bool isFailed,
+        #if NET
+        [InterpolatedStringHandlerArgument("isFailed")]
+        #endif
+        InterpolatedStringHandler stringHandler)
     {
         if (!IsPassed || !isFailed)
         {
@@ -129,7 +137,9 @@ public class AssertionResult
     public static implicit operator Task<AssertionResult>(AssertionResult result) => Task.FromResult(result);
     public static implicit operator ValueTask<AssertionResult>(AssertionResult result) => new(result);
 
+#if NET
     [InterpolatedStringHandler]
+#endif
     public readonly struct InterpolatedStringHandler
     {
         private readonly StringBuilder _builder;

@@ -58,7 +58,10 @@
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
     <PackageVersion Include="Polly" Version="8.6.2" />
-    <PackageVersion Include="Polyfill" Version="7.33.0" />
+    <PackageVersion Include="Polyfill" Version="8.7.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
     <PackageVersion Include="PublicApiGenerator" Version="11.4.6" />
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.19.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />

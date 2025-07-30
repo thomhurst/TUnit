@@ -15,7 +15,7 @@ public class TrxAsserter
         {
             var trxFile = FileSystemHelpers.FindFile(x => x.Name == trxFilename)?.FullName ?? throw new FileNotFoundException($"Could not find trx file {trxFilename}");
 
-            var trxFileContents = await FilePolyfill.ReadAllTextAsync(trxFile);
+            var trxFileContents = await File.ReadAllTextAsync(trxFile);
 
             var testRun = TrxControl.ReadTrx(new StringReader(trxFileContents));
 
