@@ -50,7 +50,9 @@ internal class PriorityChannel<T> where T : class
                 // Combine priority and order: priority is more significant than order
                 // Priority range: 0-5, we'll multiply by 10000 to give it more weight
                 // Order typically ranges from 0 to small numbers
-                compositePriority = -(int)priority * 10000 - (10000 - Math.Min(testData.State.Order, 9999));
+                // For min heap: higher priority (larger enum value) → more negative composite
+                // For min heap: lower order (smaller value) → more negative composite
+                compositePriority = -(int)priority * 10000 + testData.State.Order;
             }
             else
             {
