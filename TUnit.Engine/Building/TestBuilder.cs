@@ -1,7 +1,6 @@
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
-using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Building.Interfaces;
@@ -493,18 +492,12 @@ internal sealed class TestBuilder : ITestBuilder
 
     private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
-        return await CreateFailedTestForDataGenerationError(metadata, exception, null);
+        return await CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination());
     }
 
-    private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, string? customDisplayName)
-    {
-        return await CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination(), customDisplayName);
-    }
-
-    private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination, string? customDisplayName)
+    private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
-        var displayName = customDisplayName ?? $"{metadata.TestClassType.Name}.{metadata.TestName}";
 
         var testDetails = CreateFailedTestDetails(metadata, testId);
         var context = CreateFailedTestContext(metadata, testDetails);
@@ -573,7 +566,7 @@ internal sealed class TestBuilder : ITestBuilder
     private async Task<AbstractExecutableTest> CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
     {
         var message = $"Failed to create instance for method data source expansion: {exception.Message}";
-        return await CreateFailedTestForDataGenerationError(metadata, exception, message);
+        return await CreateFailedTestForDataGenerationError(metadata, exception);
     }
 
     private async Task<AbstractExecutableTest> CreateFailedTestForClassDataSourceCircularDependency(TestMetadata metadata)
@@ -591,7 +584,7 @@ internal sealed class TestBuilder : ITestBuilder
                       "Consider using static method data sources for class constructor arguments instead.";
 
         var exception = new InvalidOperationException(message);
-        return await CreateFailedTestForDataGenerationError(metadata, exception, message);
+        return await CreateFailedTestForDataGenerationError(metadata, exception);
     }
 
     internal class TestData

@@ -22,7 +22,6 @@ public sealed class ClassConstructorWithEnumerableTest(DummyReferenceTypeClass d
     [MethodDataSource(nameof(GetValues))]
     public void DoSomething(int value)
     {
-        // Just use the dummy object that was injected
         if (dummy is null)
         {
             throw new InvalidOperationException("Dummy object was not injected");

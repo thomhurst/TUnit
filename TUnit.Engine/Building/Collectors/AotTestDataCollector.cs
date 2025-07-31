@@ -193,7 +193,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
         var testName = methodInfo.Name;
 
-        return Task.FromResult<TestMetadata>(new AotDynamicTestMetadata(result.TestClassType, methodInfo, result)
+        return Task.FromResult<TestMetadata>(new AotDynamicTestMetadata(result)
         {
             TestName = testName,
 #pragma warning disable IL2072
@@ -313,17 +313,16 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         };
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.",
+        Justification = "We won't instantiate this since it failed")]
     private static TestMetadata CreateFailedTestMetadataForDynamicSource(IDynamicTestSource source, Exception ex)
     {
         var testName = $"[DYNAMIC SOURCE FAILED] {source.GetType().Name}";
-        var displayName = $"{testName} - {ex.Message}";
 
-        return new FailedDynamicTestMetadata(ex, displayName)
+        return new FailedDynamicTestMetadata(ex)
         {
             TestName = testName,
-#pragma warning disable IL2072
             TestClassType = source.GetType(),
-#pragma warning restore IL2072
             TestMethodName = "CollectDynamicTests",
             MethodMetadata = CreateDummyMethodMetadata(source.GetType(), "CollectDynamicTests"),
             AttributeFactory = () => [],
@@ -367,19 +366,8 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         };
     }
 
-    private sealed class AotDynamicTestMetadata : TestMetadata, IDynamicTestMetadata
+    private sealed class AotDynamicTestMetadata(DynamicDiscoveryResult dynamicResult) : TestMetadata, IDynamicTestMetadata
     {
-        private readonly DynamicDiscoveryResult _dynamicResult;
-        private readonly Type _testClass;
-        private readonly System.Reflection.MethodInfo _testMethod;
-
-        public AotDynamicTestMetadata(Type testClass, System.Reflection.MethodInfo testMethod, DynamicDiscoveryResult dynamicResult)
-        {
-            _testClass = testClass;
-            _testMethod = testMethod;
-            _dynamicResult = dynamicResult;
-        }
-
         public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
         {
             get => (context, metadata) =>
@@ -389,8 +377,8 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 {
                     TestId = context.TestId,
                     DisplayName = context.DisplayName,
-                    Arguments = _dynamicResult.TestMethodArguments ?? context.Arguments,
-                    ClassArguments = _dynamicResult.TestClassArguments ?? context.ClassArguments,
+                    Arguments = dynamicResult.TestMethodArguments ?? context.Arguments,
+                    ClassArguments = dynamicResult.TestClassArguments ?? context.ClassArguments,
                     Context = context.Context
                 };
 
@@ -424,20 +412,11 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
     }
 
-    private sealed class FailedDynamicTestMetadata : TestMetadata
+    private sealed class FailedDynamicTestMetadata(Exception exception) : TestMetadata
     {
-        private readonly Exception _exception;
-        private readonly string _displayName;
-
-        public FailedDynamicTestMetadata(Exception exception, string displayName)
-        {
-            _exception = exception;
-            _displayName = displayName;
-        }
-
         public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
         {
-            get => (context, metadata) => new FailedExecutableTest(_exception)
+            get => (context, metadata) => new FailedExecutableTest(exception)
             {
                 TestId = context.TestId,
                 Metadata = metadata,
