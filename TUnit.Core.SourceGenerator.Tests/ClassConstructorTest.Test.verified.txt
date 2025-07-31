@@ -94,7 +94,8 @@ return classMetadata;
 },
             InstanceFactory = (typeArgs, args) =>
             {
-                return new global::TUnit.TestProject.ClassConstructorTest(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.DummyReferenceTypeClass>(args[0]));
+                // ClassConstructor attribute is present - instance creation handled at runtime
+                throw new global::System.NotSupportedException("Instance creation for classes with ClassConstructor attribute is handled at runtime");
             },
             TestInvoker = async (instance, args) =>
             {
