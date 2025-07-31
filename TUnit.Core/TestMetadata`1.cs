@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -74,28 +75,17 @@ public class TestMetadata<
                     // Create instance delegate that uses context
                     Func<TestContext, Task<object>> createInstance = async testContext =>
                     {
-                        // Check for ClassConstructor attribute
+                        // Try to create instance with ClassConstructor attribute
                         var attributes = metadata.AttributeFactory();
-                        var classConstructorAttribute = attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
+                        var instance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
+                            attributes,
+                            TestClassType,
+                            metadata.TestSessionId,
+                            testContext);
 
-                        if (classConstructorAttribute != null)
+                        if (instance != null)
                         {
-                            // Use the ClassConstructor to create the instance
-                            var classConstructorType = classConstructorAttribute.ClassConstructorType;
-                            var classConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorType)!;
-
-                            var classConstructorMetadata = new ClassConstructorMetadata
-                            {
-                                TestSessionId = metadata.TestSessionId,
-                                TestBuilderContext = new TestBuilderContext
-                                {
-                                    Events = testContext.Events,
-                                    ObjectBag = testContext.ObjectBag,
-                                    TestMetadata = metadata.MethodMetadata
-                                }
-                            };
-
-                            return await classConstructor.Create(TestClassType, classConstructorMetadata);
+                            return instance;
                         }
 
                         // Fall back to default instance factory

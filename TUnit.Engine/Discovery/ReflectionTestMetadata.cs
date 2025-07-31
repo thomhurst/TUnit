@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Discovery;
@@ -44,22 +45,17 @@ internal sealed class ReflectionTestMetadata : TestMetadata
         // Create instance factory that uses reflection
         async Task<object> CreateInstance(TestContext testContext)
         {
-            if (testContext.TestDetails.Attributes.OfType<ClassConstructorAttribute>().FirstOrDefault() is { } classConstructorAttribute)
+            // Try to create instance with ClassConstructor attribute
+            var attributes = testContext.TestDetails.Attributes;
+            var classConstructorInstance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
+                attributes,
+                TestClassType,
+                metadata.TestSessionId,
+                testContext);
+
+            if (classConstructorInstance != null)
             {
-                var classConstructorType = classConstructorAttribute.ClassConstructorType;
-
-                var classConstructor = (IClassConstructor) Activator.CreateInstance(classConstructorType)!;
-
-                var classConstructorMetadata = new ClassConstructorMetadata
-                {
-                    TestSessionId = metadata.TestSessionId,
-                    TestBuilderContext = new TestBuilderContext
-                    {
-                        Events = testContext.Events, ObjectBag = testContext.ObjectBag, TestMetadata = metadata.MethodMetadata
-                    }
-                };
-
-                return await classConstructor.Create(TestClassType, classConstructorMetadata);
+                return classConstructorInstance;
             }
 
             if (InstanceFactory == null)

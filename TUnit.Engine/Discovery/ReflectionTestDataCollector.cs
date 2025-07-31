@@ -18,6 +18,7 @@ namespace TUnit.Engine.Discovery;
 /// Discovers tests at runtime using reflection with assembly scanning and caching
 [RequiresUnreferencedCode("Reflection-based test discovery requires unreferenced code")]
 [RequiresDynamicCode("Expression compilation requires dynamic code generation")]
+[SuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The source field does not have matching annotations.")]
 public sealed class ReflectionTestDataCollector : ITestDataCollector
 {
     private static readonly HashSet<Assembly> _scannedAssemblies =
@@ -1371,30 +1372,17 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 // Create instance and test invoker for the dynamic test
                 Func<TestContext, Task<object>> createInstance = async (TestContext testContext) =>
                 {
-                    // Check for ClassConstructor attribute
+                    // Try to create instance with ClassConstructor attribute
                     var attributes = metadata.AttributeFactory();
-                    var classConstructorAttribute = attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
+                    var classConstructorInstance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
+                        attributes,
+                        _testClass,
+                        metadata.TestSessionId,
+                        testContext);
 
-                    if (classConstructorAttribute != null)
+                    if (classConstructorInstance != null)
                     {
-                        // Use the ClassConstructor to create the instance
-                        var classConstructorType = classConstructorAttribute.ClassConstructorType;
-                        var classConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorType)!;
-
-                        var classConstructorMetadata = new ClassConstructorMetadata
-                        {
-                            TestSessionId = metadata.TestSessionId,
-                            TestBuilderContext = new TestBuilderContext
-                            {
-                                Events = testContext.Events,
-                                ObjectBag = testContext.ObjectBag,
-                                TestMetadata = metadata.MethodMetadata
-                            }
-                        };
-
-                        [UnconditionalSuppressMessage("Trimming", "IL2077:DynamicallyAccessedMembers")]
-                        async Task<object> CreateInstance() => await classConstructor.Create(_testClass, classConstructorMetadata);
-                        return await CreateInstance();
+                        return classConstructorInstance;
                     }
 
                     // Fall back to default instance factory

@@ -1,6 +1,7 @@
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Helpers;
 using TUnit.Core.Services;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Building.Interfaces;
@@ -22,6 +23,49 @@ internal sealed class TestBuilder : ITestBuilder
         _contextProvider = contextProvider;
     }
 
+    private async Task<object> CreateInstance(TestMetadata metadata, Type[] resolvedClassGenericArgs, object?[] classData, TestBuilderContext? builderContext = null)
+    {
+        // First try to create instance with ClassConstructor attribute
+        var attributes = metadata.AttributeFactory();
+        
+        // Use the overload that takes individual parameters instead of TestContext
+        var events = builderContext?.Events ?? new TestContextEvents();
+        var objectBag = builderContext?.ObjectBag ?? new Dictionary<string, object?>();
+        
+        var instance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
+            attributes,
+            metadata.TestClassType,
+            metadata.TestSessionId,
+            events,
+            objectBag,
+            metadata.MethodMetadata);
+
+        if (instance != null)
+        {
+            return instance;
+        }
+
+        // Fall back to InstanceFactory if no ClassConstructor or it returned null
+        if (metadata.InstanceFactory == null)
+        {
+            throw new InvalidOperationException($"No instance factory or class constructor available for {metadata.TestClassType.FullName}.");
+        }
+
+        try
+        {
+            instance = metadata.InstanceFactory(resolvedClassGenericArgs, classData);
+            if (instance is null)
+            {
+                throw new InvalidOperationException($"Error creating test class instance for {metadata.TestClassType.FullName}.");
+            }
+            return instance;
+        }
+        catch (NotSupportedException)
+        {
+            // This is expected when ClassConstructor is present but wasn't found or returned null
+            throw new InvalidOperationException($"ClassConstructor attribute is present on {metadata.TestClassType.FullName} but failed to create instance.");
+        }
+    }
 
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata)
     {
@@ -189,11 +233,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 {
                                     throw new InvalidOperationException($"Cannot create instance of generic type {metadata.TestClassType.Name} with empty type arguments");
                                 }
-                                var instance = metadata.InstanceFactory(resolvedClassGenericArgs, classData);
-                                if (instance is null)
-                                {
-                                    throw new InvalidOperationException($"Error creating test class instance for {metadata.TestClassType.FullName}.");
-                                }
+                                var instance = await CreateInstance(metadata, resolvedClassGenericArgs, classData, contextAccessor.Current);
 
                                 var testData = new TestData
                                 {

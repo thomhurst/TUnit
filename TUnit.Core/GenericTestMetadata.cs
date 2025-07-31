@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -20,29 +21,18 @@ public sealed class GenericTestMetadata : TestMetadata
             {
                 Func<TestContext, Task<object>> createInstance = async (testContext) =>
                 {
-                    // Check for ClassConstructor attribute
+                    // Try to create instance with ClassConstructor attribute
                     var attributes = metadata.AttributeFactory();
-                    var classConstructorAttribute = attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
+                    var classInstance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
+                        attributes,
+                        TestClassType,
+                        metadata.TestSessionId,
+                        testContext.Events,
+                        testContext.ObjectBag,
+                        metadata.MethodMetadata);
 
-                    if (classConstructorAttribute != null)
+                    if (classInstance != null)
                     {
-                        // Use the ClassConstructor to create the instance
-                        var classConstructorType = classConstructorAttribute.ClassConstructorType;
-                        var classConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorType)!;
-
-                        var classConstructorMetadata = new ClassConstructorMetadata
-                        {
-                            TestSessionId = metadata.TestSessionId,
-                            TestBuilderContext = new TestBuilderContext
-                            {
-                                Events = testContext.Events,
-                                ObjectBag = testContext.ObjectBag,
-                                TestMetadata = metadata.MethodMetadata
-                            }
-                        };
-
-                        var classInstance = await classConstructor.Create(TestClassType, classConstructorMetadata);
-
                         // Apply property values using unified PropertyInjector
                         await PropertyInjector.InjectPropertiesAsync(
                             testContext,

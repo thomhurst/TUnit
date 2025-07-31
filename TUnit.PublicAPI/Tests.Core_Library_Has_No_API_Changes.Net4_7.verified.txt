@@ -165,10 +165,6 @@ namespace
         protected abstract .<<.<object?[]?>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
         public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
-    public abstract class BaseClassConstructorAttribute : .TUnitAttribute
-    {
-        public abstract  ClassConstructorType { get; init; }
-    }
     [(.Method)]
     public abstract class BaseTestAttribute : .TUnitAttribute
     {
@@ -200,17 +196,16 @@ namespace
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
     }
     [(.Assembly | .Class)]
-    public class ClassConstructorAttribute : .BaseClassConstructorAttribute
+    public class ClassConstructorAttribute : .TUnitAttribute
     {
         public ClassConstructorAttribute( classConstructorType) { }
-        public override  ClassConstructorType { get; init; }
+        public  ClassConstructorType { get; init; }
     }
     [(.Assembly | .Class)]
     public sealed class ClassConstructorAttribute<T> : .ClassConstructorAttribute
         where T : ., new ()
     {
         public ClassConstructorAttribute() { }
-        public override  ClassConstructorType { get; init; }
     }
     public class ClassConstructorMetadata : <.ClassConstructorMetadata>
     {
@@ -1802,6 +1797,13 @@ namespace .Helpers
         public static T? Cast<T>(object? value) { }
         public static .MethodInfo? GetConversionMethod( baseType,  targetType) { }
     }
+    public static class ClassConstructorHelper
+    {
+        public static .ClassConstructorAttribute? GetClassConstructorAttribute([] attributes) { }
+        public static bool HasClassConstructorAttribute([] attributes) { }
+        public static .<object?> TryCreateInstanceWithClassConstructor(.<> attributes,  testClassType, string testSessionId, .TestContext testContext) { }
+        public static .<object?> TryCreateInstanceWithClassConstructor(.<> attributes,  testClassType, string testSessionId, .TestContextEvents events, .<string, object?> objectBag, .MethodMetadata methodMetadata) { }
+    }
     [.DebuggerDisplay("Count = {CurrentCount}")]
     public class Counter
     {
@@ -2163,12 +2165,6 @@ namespace .Interfaces
         .<.TestContext> GetTests( classType);
         .TestContext[] GetTestsByNameAndParameters(string testName, .<> methodParameterTypes,  classType, .<> classParameterTypes, .<object?> classArguments);
     }
-    public interface ITestInstanceFactory
-    {
-        .<object> CreateInstanceAsync( type, object?[] args);
-        .<object?> InvokeMethodAsync(object instance, .MethodInfo method, object?[] args);
-        . SetPropertyAsync(object instance, .PropertyInfo property, object? value);
-    }
     public interface ITestNameFormatter
     {
         string BuildTestId(string template, int testIndex, int repeatIndex = 0, int classDataIndex = 0, int methodDataIndex = 0);
@@ -2304,13 +2300,6 @@ namespace .ReferenceTracking
 }
 namespace .Services
 {
-    public class AotTestInstanceFactory : .
-    {
-        public AotTestInstanceFactory() { }
-        public .<object> CreateInstanceAsync( type, object?[] args) { }
-        public .<object?> InvokeMethodAsync(object instance, .MethodInfo method, object?[] args) { }
-        public . SetPropertyAsync(object instance, .PropertyInfo property, object? value) { }
-    }
     public class GenericTypeResolver : .
     {
         public GenericTypeResolver() { }

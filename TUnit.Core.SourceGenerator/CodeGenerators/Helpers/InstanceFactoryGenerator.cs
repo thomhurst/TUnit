@@ -9,6 +9,27 @@ public static class InstanceFactoryGenerator
     {
         var className = typeSymbol.GloballyQualified();
 
+        // Check if the class has a ClassConstructor attribute
+        if (typeSymbol is INamedTypeSymbol namedTypeSymbol)
+        {
+            var hasClassConstructor = namedTypeSymbol.GetAttributesIncludingBaseTypes()
+                .Any(a => a.AttributeClass?.GloballyQualifiedNonGeneric() == WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix);
+
+            if (hasClassConstructor)
+            {
+                // If class has ClassConstructor attribute, generate a factory that throws
+                // The actual instance creation will be handled by ClassConstructorHelper at runtime
+                writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("// ClassConstructor attribute is present - instance creation handled at runtime");
+                writer.AppendLine("throw new global::System.NotSupportedException(\"Instance creation for classes with ClassConstructor attribute is handled at runtime\");");
+                writer.Unindent();
+                writer.AppendLine("},");
+                return;
+            }
+        }
+
         // Check if this is a generic type definition
         if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments.Any(ta => ta is ITypeParameterSymbol))
         {
