@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Discovery;
 
@@ -41,10 +42,26 @@ internal sealed class ReflectionTestMetadata : TestMetadata
     private AbstractExecutableTest CreateExecutableTest(ExecutableTestCreationContext context, TestMetadata metadata)
     {
         // Create instance factory that uses reflection
-        #pragma warning disable CS1998 // Async method lacks 'await' operators
-        Func<TestContext, Task<object>> createInstance = async (testContext) =>
+        async Task<object> CreateInstance(TestContext testContext)
         {
-            #pragma warning restore CS1998
+            if (testContext.TestDetails.Attributes.OfType<ClassConstructorAttribute>().FirstOrDefault() is { } classConstructorAttribute)
+            {
+                var classConstructorType = classConstructorAttribute.ClassConstructorType;
+
+                var classConstructor = (IClassConstructor) Activator.CreateInstance(classConstructorType)!;
+
+                var classConstructorMetadata = new ClassConstructorMetadata
+                {
+                    TestSessionId = metadata.TestSessionId,
+                    TestBuilderContext = new TestBuilderContext
+                    {
+                        Events = testContext.Events, ObjectBag = testContext.ObjectBag, TestMetadata = metadata.MethodMetadata
+                    }
+                };
+
+                return await classConstructor.Create(TestClassType, classConstructorMetadata);
+            }
+
             if (InstanceFactory == null)
             {
                 throw new InvalidOperationException($"No instance factory for {_testClass.Name}");
@@ -85,20 +102,15 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 typeArgs = testContext.TestDetails.TestClassArguments?.OfType<Type>().ToArray() ?? Type.EmptyTypes;
             }
 
-            var instance = InstanceFactory(typeArgs, context.ClassArguments ?? [
+            var instance = InstanceFactory(typeArgs, context.ClassArguments ??
+            [
             ]);
 
             // Apply property values using unified PropertyInjector
-            await PropertyInjector.InjectPropertiesAsync(
-                context.Context,
-                instance,
-                metadata.PropertyDataSources,
-                metadata.PropertyInjections,
-                metadata.MethodMetadata,
-                context.Context.TestDetails.TestId);
+            await PropertyInjector.InjectPropertiesAsync(context.Context, instance, metadata.PropertyDataSources, metadata.PropertyInjections, metadata.MethodMetadata, context.Context.TestDetails.TestId);
 
             return instance;
-        };
+        }
 
         // Create test invoker with CancellationToken support
         // Determine if the test method has a CancellationToken parameter
@@ -140,7 +152,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             }
         };
 
-        return new ExecutableTest(createInstance, invokeTest)
+        return new ExecutableTest(CreateInstance, invokeTest)
         {
             TestId = context.TestId,
             Metadata = metadata,

@@ -1,5 +1,6 @@
 using TUnit.Core;
 using TUnit.Core.Interfaces;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -12,12 +13,13 @@ public class TestClassConstructor : IClassConstructor
         {
             return Task.FromResult<object>(new ClassConstructorTest(new DummyReferenceTypeClass()));
         }
-        
+
         // For other types, use default constructor
         return Task.FromResult(Activator.CreateInstance(type)!);
     }
 }
 
+[EngineTest(ExpectedResult.Pass)]
 [ClassConstructor<TestClassConstructor>]
 public class SimpleClassConstructorTest
 {

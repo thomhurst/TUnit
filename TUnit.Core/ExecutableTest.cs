@@ -31,7 +31,6 @@ public sealed class ExecutableTest : AbstractExecutableTest
 
     public override async Task InvokeTestAsync(object instance, CancellationToken cancellationToken)
     {
-        // Simply invoke the delegate - all complexity is handled during delegate creation
         await _invokeTest(instance, Arguments, Context, cancellationToken);
     }
 }

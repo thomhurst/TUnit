@@ -26,7 +26,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     private static readonly List<TestMetadata> _discoveredTests =
     [
     ];
-    private static readonly object _lock = new();
+    private static readonly Lock _lock = new();
     private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
 
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
@@ -1373,14 +1373,14 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     // Check for ClassConstructor attribute
                     var attributes = metadata.AttributeFactory();
-                    var classConstructorAttribute = attributes.OfType<BaseClassConstructorAttribute>().FirstOrDefault();
-                    
+                    var classConstructorAttribute = attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
+
                     if (classConstructorAttribute != null)
                     {
                         // Use the ClassConstructor to create the instance
                         var classConstructorType = classConstructorAttribute.ClassConstructorType;
                         var classConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorType)!;
-                        
+
                         var classConstructorMetadata = new ClassConstructorMetadata
                         {
                             TestSessionId = metadata.TestSessionId,
@@ -1391,12 +1391,12 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                                 TestMetadata = metadata.MethodMetadata
                             }
                         };
-                        
+
                         [UnconditionalSuppressMessage("Trimming", "IL2077:DynamicallyAccessedMembers")]
                         async Task<object> CreateInstance() => await classConstructor.Create(_testClass, classConstructorMetadata);
                         return await CreateInstance();
                     }
-                    
+
                     // Fall back to default instance factory
                     var instance = metadata.InstanceFactory(Type.EmptyTypes, modifiedContext.ClassArguments);
 

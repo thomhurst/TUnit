@@ -76,14 +76,14 @@ public class TestMetadata<
                     {
                         // Check for ClassConstructor attribute
                         var attributes = metadata.AttributeFactory();
-                        var classConstructorAttribute = attributes.OfType<BaseClassConstructorAttribute>().FirstOrDefault();
-                        
+                        var classConstructorAttribute = attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
+
                         if (classConstructorAttribute != null)
                         {
                             // Use the ClassConstructor to create the instance
                             var classConstructorType = classConstructorAttribute.ClassConstructorType;
                             var classConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorType)!;
-                            
+
                             var classConstructorMetadata = new ClassConstructorMetadata
                             {
                                 TestSessionId = metadata.TestSessionId,
@@ -94,10 +94,10 @@ public class TestMetadata<
                                     TestMetadata = metadata.MethodMetadata
                                 }
                             };
-                            
-                            return await classConstructor.Create(typeof(T), classConstructorMetadata);
+
+                            return await classConstructor.Create(TestClassType, classConstructorMetadata);
                         }
-                        
+
                         // Fall back to default instance factory
                         var typeArgs = testContext.TestDetails.MethodMetadata.Class.Parameters.Select(x => x.Type).ToArray();
                         return typedMetadata.InstanceFactory!(typeArgs, context.ClassArguments);

@@ -22,14 +22,14 @@ public sealed class GenericTestMetadata : TestMetadata
                 {
                     // Check for ClassConstructor attribute
                     var attributes = metadata.AttributeFactory();
-                    var classConstructorAttribute = attributes.OfType<BaseClassConstructorAttribute>().FirstOrDefault();
-                    
+                    var classConstructorAttribute = attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
+
                     if (classConstructorAttribute != null)
                     {
                         // Use the ClassConstructor to create the instance
                         var classConstructorType = classConstructorAttribute.ClassConstructorType;
                         var classConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorType)!;
-                        
+
                         var classConstructorMetadata = new ClassConstructorMetadata
                         {
                             TestSessionId = metadata.TestSessionId,
@@ -40,62 +40,9 @@ public sealed class GenericTestMetadata : TestMetadata
                                 TestMetadata = metadata.MethodMetadata
                             }
                         };
-                        
-                        Type targetType = TestClassType;
-                        
-                        // Handle generic type instantiation
-                        if (TestClassType.IsGenericTypeDefinition)
-                        {
-                            Type[] classTypeArgs;
-                            
-                            // First, check if we have resolved class generic arguments from the context
-                            if (context.ResolvedClassGenericArguments.Length > 0)
-                            {
-                                classTypeArgs = context.ResolvedClassGenericArguments;
-                            }
-                            // Fall back to inferring from constructor arguments if available
-                            else if (context.ClassArguments is { Length: > 0 })
-                            {
-                                // Infer type arguments from the constructor argument values
-                                var genericParams = TestClassType.GetGenericArguments();
-                                classTypeArgs = new Type[genericParams.Length];
 
-                                // For single generic parameter, use the first argument's type
-                                if (genericParams.Length == 1 && context.ClassArguments.Length >= 1)
-                                {
-                                    classTypeArgs[0] = context.ClassArguments[0]?.GetType() ?? typeof(object);
-                                }
-                                else
-                                {
-                                    // For multiple generic parameters, try to match one-to-one
-                                    for (var i = 0; i < genericParams.Length; i++)
-                                    {
-                                        if (i < context.ClassArguments.Length && context.ClassArguments[i] != null)
-                                        {
-                                            classTypeArgs[i] = context.ClassArguments[i]!.GetType();
-                                        }
-                                        else
-                                        {
-                                            classTypeArgs[i] = typeof(object);
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                classTypeArgs = testContext.TestDetails.TestClassArguments?.OfType<Type>().ToArray() ?? Type.EmptyTypes;
-                            }
-                            
-                            [UnconditionalSuppressMessage("Trimming", "IL2055:Type.MakeGenericType")]
-                            [UnconditionalSuppressMessage("AOT", "IL3050:RequiresDynamicCode")]
-                            Type MakeGenericType() => TestClassType.MakeGenericType(classTypeArgs);
-                            targetType = MakeGenericType();
-                        }
-                        
-                        [UnconditionalSuppressMessage("Trimming", "IL2072:DynamicallyAccessedMembers")]
-                        async Task<object> CreateInstance() => await classConstructor.Create(targetType, classConstructorMetadata);
-                        var classInstance = await CreateInstance();
-                        
+                        var classInstance = await classConstructor.Create(TestClassType, classConstructorMetadata);
+
                         // Apply property values using unified PropertyInjector
                         await PropertyInjector.InjectPropertiesAsync(
                             testContext,
@@ -104,10 +51,10 @@ public sealed class GenericTestMetadata : TestMetadata
                             PropertyInjections,
                             MethodMetadata,
                             testContext.TestDetails.TestId);
-                        
+
                         return classInstance;
                     }
-                    
+
                     // Fall back to default instance factory
                     if (InstanceFactory == null)
                     {

@@ -433,7 +433,7 @@ internal sealed class TestBuilder : ITestBuilder
         var creationContext = new ExecutableTestCreationContext
         {
             TestId = testId,
-            DisplayName = context.GetDisplayName(), // Use the display name from context which may have been updated by discovery events
+            DisplayName = context.GetDisplayName(),
             Arguments = testData.MethodData,
             ClassArguments = testData.ClassData,
             Context = context,
