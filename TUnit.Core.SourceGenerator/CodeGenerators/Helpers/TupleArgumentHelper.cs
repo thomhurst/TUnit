@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 

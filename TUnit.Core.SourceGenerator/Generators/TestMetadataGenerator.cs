@@ -1022,7 +1022,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             : parameters.ToArray();
 
         // Use centralized instance factory generator for all types (generic and non-generic)
-        InstanceFactoryGenerator.GenerateInstanceFactory(writer, testMethod.TypeSymbol);
+        InstanceFactoryGenerator.GenerateInstanceFactory(writer, testMethod.TypeSymbol, testMethod);
 
         // For generic types or methods, we need to use reflection to invoke the test method
         var isAsync = IsAsyncMethod(testMethod.MethodSymbol);
