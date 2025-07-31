@@ -85,9 +85,36 @@ public static class PropertyInjector
                     var currentPropertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
                     object? value;
                     
-                    if (currentPropertyInjection != null && TupleFactory.IsTupleType(currentPropertyInjection.PropertyType) && args is { Length: > 1 })
+                    if (currentPropertyInjection != null && TupleFactory.IsTupleType(currentPropertyInjection.PropertyType))
                     {
-                        value = TupleFactory.CreateTuple(currentPropertyInjection.PropertyType, args);
+                        if (args is { Length: > 1 })
+                        {
+                            // Multiple arguments - create tuple from them
+                            value = TupleFactory.CreateTuple(currentPropertyInjection.PropertyType, args);
+                        }
+                        else if (args?.Length == 1 && args[0] != null && TupleFactory.IsTupleType(args[0]!.GetType()))
+                        {
+                            // Single tuple argument - check if it needs type conversion
+                            var tupleValue = args[0]!;
+                            var tupleType = tupleValue!.GetType();
+                            
+                            if (tupleType != currentPropertyInjection.PropertyType)
+                            {
+                                // Tuple types don't match - unwrap and recreate with correct types
+                                var elements = DataSourceHelpers.UnwrapTupleAot(tupleValue);
+                                value = TupleFactory.CreateTuple(currentPropertyInjection.PropertyType, elements);
+                            }
+                            else
+                            {
+                                // Types match - use directly
+                                value = tupleValue;
+                            }
+                        }
+                        else
+                        {
+                            // Single non-tuple argument or null
+                            value = args?.FirstOrDefault();
+                        }
                     }
                     else
                     {

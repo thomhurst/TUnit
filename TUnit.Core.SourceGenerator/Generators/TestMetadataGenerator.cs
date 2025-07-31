@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -773,6 +774,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             writer.AppendLine("#if NET8_0_OR_GREATER");
                             // Cast to the property's containing type if needed
                             var containingTypeName = property.ContainingType.GloballyQualified();
+                            
                             if (containingTypeName != className)
                             {
                                 writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({containingTypeName})instance) = ({propertyType})value,");
@@ -788,6 +790,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         else
                         {
                             // For regular properties, use normal property assignment
+                            // For regular properties, use direct assignment (tuple conversion happens at runtime)
                             writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
                         }
 
@@ -956,6 +959,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         }
                         else
                         {
+                            // For regular properties, use direct assignment (tuple conversion happens at runtime)
                             writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
                         }
 

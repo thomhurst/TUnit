@@ -69,13 +69,9 @@ internal class ChannelConsumerManager
                 var foundWork = false;
                 TestExecutionData? testData = null;
 
-                // Priority order: High Priority -> Unconstrained -> Global NotInParallel -> Others
-                if (multiplexer.HighPriorityChannel.Reader.TryRead(out testData))
-                {
-                    foundWork = true;
-                    // Work found in HighPriorityChannel
-                }
-                else if (multiplexer.UnconstrainedChannel.Reader.TryRead(out testData))
+                // Try to read from all channels - priority ordering is handled within each channel
+                // Check unconstrained channel first for better parallelism
+                if (multiplexer.UnconstrainedChannel.Reader.TryRead(out testData))
                 {
                     foundWork = true;
                     // Work found in UnconstrainedChannel
@@ -87,13 +83,12 @@ internal class ChannelConsumerManager
                 }
                 else
                 {
-                    // Try all dynamic channels (get fresh list each time to catch new channels)
-                    foreach (var channel in multiplexer.GetAllChannels())
+                    // Try all channels (get fresh list each time to catch new channels)
+                    foreach (var channelReader in multiplexer.GetAllChannelReaders())
                     {
-                        if (channel != multiplexer.HighPriorityChannel && 
-                            channel != multiplexer.UnconstrainedChannel && 
-                            channel != multiplexer.GlobalNotInParallelChannel &&
-                            channel.Reader.TryRead(out testData))
+                        if (channelReader != multiplexer.UnconstrainedChannel.Reader && 
+                            channelReader != multiplexer.GlobalNotInParallelChannel.Reader &&
+                            channelReader.TryRead(out testData))
                         {
                             foundWork = true;
                             // Work found in dynamic channel
@@ -124,8 +119,8 @@ internal class ChannelConsumerManager
                 else
                 {
                     // No work available, check if all channels are completed
-                    var allChannels = multiplexer.GetAllChannels().Select(c => c.Reader).ToList();
-                    var activeChannels = allChannels.Where(c => !c.Completion.IsCompleted).ToList();
+                    var allChannelReaders = multiplexer.GetAllChannelReaders().ToList();
+                    var activeChannels = allChannelReaders.Where(c => !c.Completion.IsCompleted).ToList();
                     
                     // No work found, checking channel completion
                     

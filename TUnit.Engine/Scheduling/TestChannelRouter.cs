@@ -18,39 +18,33 @@ internal class TestChannelRouter
 
     public async Task RouteTestAsync(TestExecutionData testData, CancellationToken cancellationToken)
     {
-        // Route based on priority first
-        if (testData.Priority == Priority.High)
-        {
-            await _multiplexer.HighPriorityChannel.Writer.WriteAsync(testData, cancellationToken);
-            return;
-        }
-
-        // Route based on constraints
+        // Route based on constraints, but always pass priority for proper ordering
         var constraints = testData.Constraints;
+        var priority = testData.Priority;
         
         if (constraints.Count == 0)
         {
             // Unconstrained test
-            await _multiplexer.UnconstrainedChannel.Writer.WriteAsync(testData, cancellationToken);
+            await _multiplexer.UnconstrainedChannel.TryWriteAsync(testData, priority, cancellationToken);
         }
         else if (constraints.Contains("__global_not_in_parallel__"))
         {
             // Global NotInParallel
-            await _multiplexer.GlobalNotInParallelChannel.Writer.WriteAsync(testData, cancellationToken);
+            await _multiplexer.GlobalNotInParallelChannel.TryWriteAsync(testData, priority, cancellationToken);
         }
         else if (constraints.Any(c => c.StartsWith("__parallel_group_")))
         {
             // ParallelGroup constraint
             var groupKey = constraints.First(c => c.StartsWith("__parallel_group_"));
             var channel = _multiplexer.GetOrCreateParallelGroupChannel(groupKey);
-            await channel.Writer.WriteAsync(testData, cancellationToken);
+            await channel.TryWriteAsync(testData, priority, cancellationToken);
         }
         else
         {
             // Keyed NotInParallel
             var key = constraints.First(); // Use first constraint as channel key
             var channel = _multiplexer.GetOrCreateKeyedNotInParallelChannel(key);
-            await channel.Writer.WriteAsync(testData, cancellationToken);
+            await channel.TryWriteAsync(testData, priority, cancellationToken);
         }
     }
 
@@ -65,102 +59,59 @@ internal class TestChannelRouter
 internal class ChannelMultiplexer
 {
     private readonly TUnitFrameworkLogger _logger;
-    private readonly ConcurrentDictionary<string, Channel<TestExecutionData>> _keyedNotInParallelChannels = new();
-    private readonly ConcurrentDictionary<string, Channel<TestExecutionData>> _parallelGroupChannels = new();
+    private readonly ConcurrentDictionary<string, PriorityChannel<TestExecutionData>> _keyedNotInParallelChannels = new();
+    private readonly ConcurrentDictionary<string, PriorityChannel<TestExecutionData>> _parallelGroupChannels = new();
 
-    public Channel<TestExecutionData> HighPriorityChannel { get; }
-    public Channel<TestExecutionData> UnconstrainedChannel { get; }
-    public Channel<TestExecutionData> GlobalNotInParallelChannel { get; }
+    public PriorityChannel<TestExecutionData> UnconstrainedChannel { get; }
+    public PriorityChannel<TestExecutionData> GlobalNotInParallelChannel { get; }
 
     public ChannelMultiplexer(TUnitFrameworkLogger logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-        // Create channels with appropriate bounds
-        var highPriorityOptions = new UnboundedChannelOptions
-        {
-            SingleReader = false,
-            SingleWriter = false,
-            AllowSynchronousContinuations = false
-        };
-
-        // Larger channel sizes for better throughput
-        var unconstrainedOptions = new BoundedChannelOptions(10000)
-        {
-            FullMode = BoundedChannelFullMode.Wait,
-            SingleReader = false,
-            SingleWriter = false,
-            AllowSynchronousContinuations = true // Allow sync continuations for better performance
-        };
-
-        var constrainedOptions = new BoundedChannelOptions(1000)
-        {
-            FullMode = BoundedChannelFullMode.Wait,
-            SingleReader = false, // Allow multiple readers for better parallelism
-            SingleWriter = false,
-            AllowSynchronousContinuations = true
-        };
-
-        HighPriorityChannel = Channel.CreateUnbounded<TestExecutionData>(highPriorityOptions);
-        UnconstrainedChannel = Channel.CreateBounded<TestExecutionData>(unconstrainedOptions);
-        GlobalNotInParallelChannel = Channel.CreateBounded<TestExecutionData>(constrainedOptions);
+        // Create priority channels with appropriate capacities
+        UnconstrainedChannel = new PriorityChannel<TestExecutionData>(10000);
+        GlobalNotInParallelChannel = new PriorityChannel<TestExecutionData>(1000);
         
         // Register static channels
-        RegisterChannel(HighPriorityChannel);
         RegisterChannel(UnconstrainedChannel);
         RegisterChannel(GlobalNotInParallelChannel);
     }
 
-    public Channel<TestExecutionData> GetOrCreateKeyedNotInParallelChannel(string key)
+    public PriorityChannel<TestExecutionData> GetOrCreateKeyedNotInParallelChannel(string key)
     {
         return _keyedNotInParallelChannels.GetOrAdd(key, k =>
         {
-            // Creating keyed NotInParallel channel
-            var options = new BoundedChannelOptions(1000)
-            {
-                FullMode = BoundedChannelFullMode.Wait,
-                SingleReader = false,
-                SingleWriter = false,
-                AllowSynchronousContinuations = true
-            };
-            var channel = Channel.CreateBounded<TestExecutionData>(options);
+            // Creating keyed NotInParallel priority channel
+            var channel = new PriorityChannel<TestExecutionData>(1000);
             RegisterChannel(channel);
             return channel;
         });
     }
 
-    public Channel<TestExecutionData> GetOrCreateParallelGroupChannel(string groupKey)
+    public PriorityChannel<TestExecutionData> GetOrCreateParallelGroupChannel(string groupKey)
     {
         return _parallelGroupChannels.GetOrAdd(groupKey, k =>
         {
-            // Creating ParallelGroup channel
-            var options = new BoundedChannelOptions(1000)
-            {
-                FullMode = BoundedChannelFullMode.Wait,
-                SingleReader = false, // Multiple consumers allowed within a group
-                SingleWriter = false,
-                AllowSynchronousContinuations = true
-            };
-            var channel = Channel.CreateBounded<TestExecutionData>(options);
+            // Creating ParallelGroup priority channel
+            var channel = new PriorityChannel<TestExecutionData>(1000);
             RegisterChannel(channel);
             return channel;
         });
     }
 
-    private readonly List<Channel<TestExecutionData>> _allChannelsList =
-    [
-    ];
+    private readonly List<PriorityChannel<TestExecutionData>> _allChannelsList = new();
     private readonly object _channelListLock = new object();
     
-    public IEnumerable<Channel<TestExecutionData>> GetAllChannels()
+    public IEnumerable<ChannelReader<TestExecutionData>> GetAllChannelReaders()
     {
         lock (_channelListLock)
         {
-            return _allChannelsList.ToList();
+            return _allChannelsList.Select(pc => pc.Reader).ToList();
         }
     }
     
-    private void RegisterChannel(Channel<TestExecutionData> channel)
+    private void RegisterChannel(PriorityChannel<TestExecutionData> channel)
     {
         lock (_channelListLock)
         {
@@ -170,18 +121,17 @@ internal class ChannelMultiplexer
 
     public void SignalCompletion()
     {
-        HighPriorityChannel.Writer.TryComplete();
-        UnconstrainedChannel.Writer.TryComplete();
-        GlobalNotInParallelChannel.Writer.TryComplete();
+        UnconstrainedChannel.TryComplete();
+        GlobalNotInParallelChannel.TryComplete();
         
         foreach (var channel in _keyedNotInParallelChannels.Values)
         {
-            channel.Writer.TryComplete();
+            channel.TryComplete();
         }
         
         foreach (var channel in _parallelGroupChannels.Values)
         {
-            channel.Writer.TryComplete();
+            channel.TryComplete();
         }
     }
 }

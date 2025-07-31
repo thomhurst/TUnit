@@ -41,7 +41,7 @@ public static class TupleFactory
     /// <param name="tupleType">The type of tuple to create</param>
     /// <param name="elements">The elements to include in the tuple</param>
     /// <returns>The created tuple, or the first element if creation fails</returns>
-    public static object? CreateTuple(Type tupleType, object?[] elements)
+    public static object? CreateTuple([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type tupleType, object?[] elements)
     {
         if (elements == null || elements.Length == 0)
         {
@@ -61,7 +61,27 @@ public static class TupleFactory
             }
         }
         
-        // Try generic factory based on element count
+        // Try to use reflection to create the tuple with proper types
+        // This is necessary because the tuple type has specific generic arguments
+        if (IsTupleType(tupleType) && tupleType.IsGenericType)
+        {
+            try
+            {
+                // For AOT scenarios, we'll try to use Activator.CreateInstance
+                // This requires the tuple type to have DynamicallyAccessedMembers attribute
+                var result = Activator.CreateInstance(tupleType, elements);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+            catch
+            {
+                // Fall through to object tuple creation
+            }
+        }
+        
+        // Try generic factory based on element count - creates object tuples
         if (IsTupleType(tupleType))
         {
             try
