@@ -1479,6 +1479,21 @@ namespace .Attributes
         public string Reason { get; }
     }
 }
+namespace .Converters
+{
+    public static class AotConverterRegistry
+    {
+        public static void Register(. converter) { }
+        public static bool TryConvert( sourceType,  targetType, object? value, out object? result) { }
+        public static bool TryGetConverter( sourceType,  targetType, out .? converter) { }
+    }
+    public interface IAotConverter
+    {
+         SourceType { get; }
+         TargetType { get; }
+        object? Convert(object? value);
+    }
+}
 namespace .Data
 {
     public class GetOnlyDictionary<TKey, TValue>
