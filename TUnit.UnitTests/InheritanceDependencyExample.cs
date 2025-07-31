@@ -5,15 +5,17 @@ namespace TUnit.UnitTests;
 /// </summary>
 public abstract class DatabaseTestBase
 {
-    protected string? ConnectionString { get; set; }
+    // Static dictionary to simulate a "database" that persists across test instances
+    protected static readonly Dictionary<string, object> Database = new();
 
     [Test]
     public async Task InitializeDatabase()
     {
         // Simulating database initialization
-        ConnectionString = "Server=test;Database=test;";
+        Database["initialized"] = true;
+        Database["connectionString"] = "Server=test;Database=test;";
         await Task.Delay(1); // Simulate async work
-        await Assert.That(ConnectionString).IsNotNull();
+        await Assert.That(Database.ContainsKey("initialized")).IsTrue();
     }
 
     [Test]
@@ -21,8 +23,11 @@ public abstract class DatabaseTestBase
     public async Task CreateSchema()
     {
         // This depends on InitializeDatabase
-        await Assert.That(ConnectionString).IsNotNull();
+        await Assert.That(Database.ContainsKey("initialized")).IsTrue();
+        await Assert.That(Database["connectionString"]).IsNotNull();
+        
         // Simulate schema creation
+        Database["schemaCreated"] = true;
         await Task.Delay(1);
     }
 }
@@ -35,11 +40,13 @@ public class UserRepositoryTests : DatabaseTestBase
     public async Task CanCreateUser()
     {
         // This test depends on the schema being created
-        await Assert.That(ConnectionString).IsNotNull();
+        await Assert.That(Database.ContainsKey("schemaCreated")).IsTrue();
+        await Assert.That(Database["connectionString"]).IsNotNull();
+        
         // Simulate user creation
+        Database["userCreated"] = true;
         await Task.Delay(1);
     }
-
 }
 
 [InheritsTests]
@@ -50,8 +57,11 @@ public class ProductRepositoryTests : DatabaseTestBase
     public async Task CanCreateProduct()
     {
         // Only depends on database initialization, not schema
-        await Assert.That(ConnectionString).IsNotNull();
+        await Assert.That(Database.ContainsKey("initialized")).IsTrue();
+        await Assert.That(Database["connectionString"]).IsNotNull();
+        
         // Simulate product creation
+        Database["productCreated"] = true;
         await Task.Delay(1);
     }
 }
@@ -61,13 +71,16 @@ public class ProductRepositoryTests : DatabaseTestBase
 /// </summary>
 public abstract class RepositoryTestBase<T> where T : class, new()
 {
-    protected T? Entity { get; set; }
+    // Static dictionary to store entities by type
+    protected static readonly Dictionary<Type, object> Entities = new();
 
-    // This would be a test in derived classes, but not in the generic base
-    protected async Task InitializeEntity()
+    [Test]
+    public async Task InitializeEntity()
     {
-        Entity = new T();
-        await Assert.That(Entity).IsNotNull();
+        var entity = new T();
+        Entities[typeof(T)] = entity;
+        await Assert.That(Entities.ContainsKey(typeof(T))).IsTrue();
+        await Task.Delay(1); // Simulate async work
     }
 }
 
@@ -75,18 +88,15 @@ public abstract class RepositoryTestBase<T> where T : class, new()
 public class CustomerRepositoryTests : RepositoryTestBase<Customer>
 {
     [Test]
-    public async Task InitializeCustomerEntity()
-    {
-        await InitializeEntity();
-    }
-
-    [Test]
-    [DependsOn(nameof(InitializeCustomerEntity))] // Depends on concrete test
+    [DependsOn(nameof(InitializeEntity))] // Depends on base test
     public async Task CanSetCustomerName()
     {
-        await Assert.That(Entity).IsNotNull();
-        Entity!.Name = "Test Customer";
-        await Assert.That(Entity.Name).IsEqualTo("Test Customer");
+        await Assert.That(Entities.ContainsKey(typeof(Customer))).IsTrue();
+        var entity = (Customer)Entities[typeof(Customer)];
+        await Assert.That(entity).IsNotNull();
+        
+        entity.Name = "Test Customer";
+        await Assert.That(entity.Name).IsEqualTo("Test Customer");
     }
 }
 
