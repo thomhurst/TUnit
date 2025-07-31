@@ -117,10 +117,7 @@ public static class InstanceFactoryGenerator
         {
             writer.Append($"return new {className}(");
 
-            // Check if we have class data sources that might need AOT conversion
-            var classDataSources = GetClassDataSources(testMethod);
-            
-            // Generate constructor arguments with AOT conversion support
+            // Generate constructor arguments
             var parameterTypes = constructor.Parameters.Select(p => p.Type).ToList();
             
             for (var i = 0; i < parameterTypes.Count; i++)
@@ -133,17 +130,8 @@ public static class InstanceFactoryGenerator
                 var parameterType = parameterTypes[i];
                 var argAccess = $"args[{i}]";
                 
-                // Check if this parameter might receive a value from a class data source with conversion operators
-                if (classDataSources.Any() && ShouldUseAotConversion(classDataSources, i, parameterType))
-                {
-                    // Generate AOT-compatible conversion
-                    writer.Append(GenerateAotConstructorArgument(parameterType, argAccess, classDataSources, i));
-                }
-                else
-                {
-                    // Use regular CastHelper
-                    writer.Append($"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argAccess})");
-                }
+                // Use CastHelper which now has AOT converter registry support
+                writer.Append($"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argAccess})");
             }
 
             writer.Append(")");
@@ -216,90 +204,5 @@ public static class InstanceFactoryGenerator
 
         writer.Unindent();
         writer.AppendLine("},");
-    }
-
-    private static List<AttributeData> GetClassDataSources(TestMethodMetadata? testMethod)
-    {
-        if (testMethod == null)
-        {
-            return new List<AttributeData>();
-        }
-
-        // Get class data source attributes from the test type
-        return testMethod.TypeSymbol.GetAttributesIncludingBaseTypes()
-            .Where(a => a.AttributeClass?.Name == "ClassDataSourceAttribute")
-            .ToList();
-    }
-
-    private static bool ShouldUseAotConversion(List<AttributeData> classDataSources, int parameterIndex, ITypeSymbol targetType)
-    {
-        // Check if any class data source at this index has a type with conversion operators
-        foreach (var attr in classDataSources)
-        {
-            if (attr.AttributeClass == null)
-                continue;
-
-            // For non-generic ClassDataSourceAttribute, check the constructor argument
-            if (!attr.AttributeClass.IsGenericType && attr.ConstructorArguments.Length > parameterIndex)
-            {
-                var sourceType = attr.ConstructorArguments[parameterIndex].Value as ITypeSymbol;
-                if (sourceType != null && AotConversionHelper.HasConversionOperators(sourceType))
-                {
-                    return true;
-                }
-            }
-            // For generic ClassDataSourceAttribute<T>, check the type argument
-            else if (attr.AttributeClass.IsGenericType && attr.AttributeClass.TypeArguments.Length > parameterIndex)
-            {
-                var sourceType = attr.AttributeClass.TypeArguments[parameterIndex];
-                if (AotConversionHelper.HasConversionOperators(sourceType))
-                {
-                    return true;
-                }
-            }
-        }
-        
-        return false;
-    }
-
-    private static string GenerateAotConstructorArgument(ITypeSymbol targetType, string argAccess, List<AttributeData> classDataSources, int parameterIndex)
-    {
-        // Try to find the source type from class data sources
-        ITypeSymbol? sourceType = null;
-        
-        foreach (var attr in classDataSources)
-        {
-            if (attr.AttributeClass == null)
-                continue;
-
-            // For non-generic ClassDataSourceAttribute
-            if (!attr.AttributeClass.IsGenericType && attr.ConstructorArguments.Length > parameterIndex)
-            {
-                sourceType = attr.ConstructorArguments[parameterIndex].Value as ITypeSymbol;
-                if (sourceType != null)
-                    break;
-            }
-            // For generic ClassDataSourceAttribute<T>
-            else if (attr.AttributeClass.IsGenericType && attr.AttributeClass.TypeArguments.Length > parameterIndex)
-            {
-                sourceType = attr.AttributeClass.TypeArguments[parameterIndex];
-                if (sourceType != null)
-                    break;
-            }
-        }
-
-        if (sourceType != null)
-        {
-            // Generate AOT-compatible conversion check
-            var conversionExpression = AotConversionHelper.GenerateAotConversion(sourceType, targetType, argAccess);
-            if (conversionExpression != null)
-            {
-                // Wrap in a runtime type check for safety
-                return $"({argAccess} is {sourceType.GloballyQualified()} ? {conversionExpression} : TUnit.Core.Helpers.CastHelper.Cast<{targetType.GloballyQualified()}>({argAccess}))";
-            }
-        }
-
-        // Fallback to CastHelper
-        return $"TUnit.Core.Helpers.CastHelper.Cast<{targetType.GloballyQualified()}>({argAccess})";
     }
 }

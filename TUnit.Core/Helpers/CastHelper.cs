@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.Converters;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core.Helpers;
@@ -28,6 +29,12 @@ public static class CastHelper
         if (value.GetType().IsAssignableTo(underlyingType))
         {
             return (T) value;
+        }
+        
+        // Try AOT converter registry first
+        if (AotConverterRegistry.TryConvert(value.GetType(), underlyingType, value, out var converted))
+        {
+            return (T?) converted;
         }
 
         if (value is not string
@@ -164,6 +171,12 @@ public static class CastHelper
         if (value.GetType().IsAssignableTo(underlyingType))
         {
             return value;
+        }
+
+        // Try AOT converter registry first
+        if (AotConverterRegistry.TryConvert(value.GetType(), underlyingType, value, out var converted))
+        {
+            return converted;
         }
 
         if (type.IsGenericParameter)
