@@ -334,7 +334,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
         
-        GenerateTypedInstanceCreation(writer, testMethod, className);
+        writer.AppendLine($"return new {className}();");
         
         writer.Unindent();
         writer.AppendLine("},");
@@ -378,7 +378,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // Replace type parameters with concrete types
                 if (paramType is ITypeParameterSymbol typeParam)
                 {
-                    var index = testMethod.MethodSymbol.TypeParameters.IndexOf(tp => tp.Name == typeParam.Name);
+                    // Find the index of the type parameter
+                    var index = -1;
+                    for (int j = 0; j < testMethod.MethodSymbol.TypeParameters.Length; j++)
+                    {
+                        if (testMethod.MethodSymbol.TypeParameters[j].Name == typeParam.Name)
+                        {
+                            index = j;
+                            break;
+                        }
+                    }
+                    
                     if (index >= 0 && index < typeArguments.Length)
                     {
                         paramType = typeArguments[index];

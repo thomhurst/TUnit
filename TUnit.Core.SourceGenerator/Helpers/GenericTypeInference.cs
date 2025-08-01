@@ -33,6 +33,20 @@ internal static class GenericTypeInference
             return inferredTypes;
         }
 
+        // Try to infer from Matrix parameter attributes
+        inferredTypes = TryInferFromMatrixParameters(method);
+        if (inferredTypes != null)
+        {
+            return inferredTypes;
+        }
+
+        // Try to infer from MethodDataSource
+        inferredTypes = TryInferFromMethodDataSource(method, attributes);
+        if (inferredTypes != null)
+        {
+            return inferredTypes;
+        }
+
         return null;
     }
 
@@ -129,6 +143,58 @@ internal static class GenericTypeInference
             : null;
     }
 
+    private static ImmutableArray<ITypeSymbol>? TryInferFromMatrixParameters(IMethodSymbol method)
+    {
+        var inferredTypes = new List<ITypeSymbol>();
+
+        // Look at each parameter to see if it has Matrix<T> attributes
+        foreach (var parameter in method.Parameters)
+        {
+            if (parameter.Type is ITypeParameterSymbol typeParam)
+            {
+                // Check if this parameter has a Matrix<T> attribute
+                foreach (var attr in parameter.GetAttributes())
+                {
+                    if (attr.AttributeClass?.Name == "MatrixAttribute" && 
+                        attr.AttributeClass.IsGenericType &&
+                        attr.AttributeClass.TypeArguments.Length > 0)
+                    {
+                        // Get the type argument from Matrix<T>
+                        var matrixType = attr.AttributeClass.TypeArguments[0];
+                        
+                        // Find the index of this type parameter
+                        var typeParamIndex = -1;
+                        for (int i = 0; i < method.TypeParameters.Length; i++)
+                        {
+                            if (method.TypeParameters[i].Name == typeParam.Name)
+                            {
+                                typeParamIndex = i;
+                                break;
+                            }
+                        }
+
+                        if (typeParamIndex >= 0)
+                        {
+                            // Make sure we have enough slots
+                            while (inferredTypes.Count <= typeParamIndex)
+                            {
+                                inferredTypes.Add(null!);
+                            }
+                            inferredTypes[typeParamIndex] = matrixType;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Remove any null entries and check if we have all types
+        inferredTypes.RemoveAll(t => t == null);
+        
+        return inferredTypes.Count == method.TypeParameters.Length 
+            ? inferredTypes.ToImmutableArray() 
+            : null;
+    }
+
     private static ITypeSymbol? InferTypeFromValue(TypedConstant value)
     {
         if (value.IsNull)
@@ -136,6 +202,140 @@ internal static class GenericTypeInference
 
         // The type of the constant value tells us what T should be
         return value.Type;
+    }
+
+    private static ImmutableArray<ITypeSymbol>? TryInferFromMethodDataSource(IMethodSymbol testMethod, ImmutableArray<AttributeData> attributes)
+    {
+        var methodDataSourceAttributes = attributes
+            .Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute")
+            .ToList();
+
+        if (!methodDataSourceAttributes.Any())
+            return null;
+
+        foreach (var attr in methodDataSourceAttributes)
+        {
+            if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is string methodName)
+            {
+                // Find the data source method
+                var dataSourceMethod = testMethod.ContainingType.GetMembers(methodName)
+                    .OfType<IMethodSymbol>()
+                    .FirstOrDefault();
+
+                if (dataSourceMethod != null)
+                {
+                    // Analyze the return type to extract generic types
+                    var returnType = dataSourceMethod.ReturnType;
+                    
+                    // Handle IEnumerable<Func<(...)>>
+                    if (returnType is INamedTypeSymbol namedType && 
+                        namedType.IsGenericType &&
+                        namedType.TypeArguments.Length > 0)
+                    {
+                        var funcType = namedType.TypeArguments[0];
+                        if (funcType is INamedTypeSymbol funcNamedType && 
+                            funcNamedType.Name == "Func" &&
+                            funcNamedType.TypeArguments.Length > 0)
+                        {
+                            var tupleType = funcNamedType.TypeArguments[0];
+                            if (tupleType is INamedTypeSymbol tupleNamedType && tupleNamedType.IsTupleType)
+                            {
+                                // Extract types from tuple elements
+                                var inferredTypes = InferTypesFromTupleElements(testMethod, tupleNamedType);
+                                if (inferredTypes != null)
+                                    return inferredTypes;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static ImmutableArray<ITypeSymbol>? InferTypesFromTupleElements(IMethodSymbol testMethod, INamedTypeSymbol tupleType)
+    {
+        var inferredTypes = new ITypeSymbol[testMethod.TypeParameters.Length];
+        var tupleElements = tupleType.TupleElements;
+
+        // Map tuple elements to method parameters
+        for (int i = 0; i < testMethod.Parameters.Length && i < tupleElements.Length; i++)
+        {
+            var parameter = testMethod.Parameters[i];
+            var tupleElement = tupleElements[i];
+
+            if (parameter.Type is ITypeParameterSymbol typeParam)
+            {
+                // Find the index of this type parameter
+                var typeParamIndex = -1;
+                for (int j = 0; j < testMethod.TypeParameters.Length; j++)
+                {
+                    if (testMethod.TypeParameters[j].Name == typeParam.Name)
+                    {
+                        typeParamIndex = j;
+                        break;
+                    }
+                }
+
+                if (typeParamIndex >= 0)
+                {
+                    // For generic types like IEnumerable<T>, extract T
+                    var elementType = tupleElement.Type;
+                    if (elementType is INamedTypeSymbol namedElementType && 
+                        namedElementType.IsGenericType &&
+                        namedElementType.TypeArguments.Length > 0)
+                    {
+                        // For IEnumerable<int>, we want int
+                        inferredTypes[typeParamIndex] = namedElementType.TypeArguments[0];
+                    }
+                    else
+                    {
+                        // For direct types
+                        inferredTypes[typeParamIndex] = elementType;
+                    }
+                }
+            }
+            else if (parameter.Type is INamedTypeSymbol paramNamedType && paramNamedType.IsGenericType)
+            {
+                // Handle complex generic parameters like Func<TSource, TKey>
+                // This is more complex and would need deeper analysis
+                var tupleElementType = tupleElement.Type;
+                if (tupleElementType is INamedTypeSymbol funcType && funcType.Name == "Func")
+                {
+                    // Match type arguments between parameter type and tuple element type
+                    for (int j = 0; j < funcType.TypeArguments.Length && j < paramNamedType.TypeArguments.Length; j++)
+                    {
+                        var paramTypeArg = paramNamedType.TypeArguments[j];
+                        if (paramTypeArg is ITypeParameterSymbol funcTypeParam)
+                        {
+                            var typeParamIndex = -1;
+                            for (int k = 0; k < testMethod.TypeParameters.Length; k++)
+                            {
+                                if (testMethod.TypeParameters[k].Name == funcTypeParam.Name)
+                                {
+                                    typeParamIndex = k;
+                                    break;
+                                }
+                            }
+
+                            if (typeParamIndex >= 0)
+                            {
+                                inferredTypes[typeParamIndex] = funcType.TypeArguments[j];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Check if we have all required types
+        if (inferredTypes.All(t => t != null))
+        {
+            return inferredTypes.ToImmutableArray();
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -166,6 +366,20 @@ internal static class GenericTypeInference
         if (typedSourceTypes != null && !combinations.Any(c => TypeArraysEqual(c, typedSourceTypes.Value)))
         {
             combinations.Add(typedSourceTypes.Value);
+        }
+
+        // For Matrix parameter attributes
+        var matrixTypes = TryInferFromMatrixParameters(method);
+        if (matrixTypes != null && !combinations.Any(c => TypeArraysEqual(c, matrixTypes.Value)))
+        {
+            combinations.Add(matrixTypes.Value);
+        }
+
+        // For MethodDataSource attributes
+        var methodDataSourceTypes = TryInferFromMethodDataSource(method, attributes);
+        if (methodDataSourceTypes != null && !combinations.Any(c => TypeArraysEqual(c, methodDataSourceTypes.Value)))
+        {
+            combinations.Add(methodDataSourceTypes.Value);
         }
 
         return combinations.ToImmutableArray();
