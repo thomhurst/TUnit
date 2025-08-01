@@ -224,9 +224,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 .Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass) && 
                          InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, a) != null);
             
-            if (hasTypedDataSource || (testMethod.IsGenericMethod && !testMethod.IsGenericType))
+            // Also check if we have Arguments attributes that can provide type information for generic methods
+            var hasArgumentsWithTypes = testMethod.IsGenericMethod && testMethod.MethodAttributes
+                .Any(a => a.AttributeClass?.Name == "ArgumentsAttribute" && 
+                         InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, a, compilation) != null);
+            
+            // Check if we have GenerateGenericTest attributes
+            var hasGenerateGenericTest = testMethod.IsGenericMethod && testMethod.MethodAttributes
+                .Any(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute");
+            
+            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod)
             {
                 // Use concrete types approach for AOT compatibility
+                // For generic methods, we always use this approach to support Arguments attributes
                 GenerateGenericTestWithConcreteTypes(writer, compilation, testMethod, className, combinationGuid);
             }
             else
@@ -2081,7 +2091,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
         
-        // Get all possible type combinations from Arguments attributes and typed data sources
         var argumentsAttributes = testMethod.MethodAttributes
             .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
             .ToList();
@@ -2092,7 +2101,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         foreach (var argAttr in argumentsAttributes)
         {
             // Infer types from this specific Arguments attribute
-            var inferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, argAttr);
+            var inferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, argAttr, compilation);
+            
             if (inferredTypes != null && inferredTypes.Length > 0)
             {
                 var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
@@ -2205,36 +2215,93 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("tests.Add(genericMetadata);");
     }
     
-    private static ITypeSymbol[]? InferTypesFromArgumentsAttribute(IMethodSymbol method, AttributeData argAttr)
+    private static ITypeSymbol[]? InferTypesFromArgumentsAttribute(IMethodSymbol method, AttributeData argAttr, Compilation compilation)
     {
         if (argAttr.ConstructorArguments.Length == 0)
             return null;
             
-        var inferredTypes = new List<ITypeSymbol>();
+        var inferredTypes = new Dictionary<string, ITypeSymbol>();
+        var typeParameters = method.TypeParameters;
         
-        // Match type parameters with method parameters
-        for (int i = 0; i < method.TypeParameters.Length && i < method.Parameters.Length; i++)
-        {
-            var parameter = method.Parameters[i];
+        // Arguments attribute takes params object?[] so the first constructor argument is an array
+        if (argAttr.ConstructorArguments.Length != 1 || argAttr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
+            return null;
             
-            if (parameter.Type is ITypeParameterSymbol typeParam)
+        var argumentValues = argAttr.ConstructorArguments[0].Values;
+        var methodParams = method.Parameters;
+        
+        // For each value in the params array
+        for (int argIndex = 0; argIndex < argumentValues.Length && argIndex < methodParams.Length; argIndex++)
+        {
+            var methodParam = methodParams[argIndex];
+            var argValue = argumentValues[argIndex];
+            
+            // Skip if this is a CancellationToken parameter
+            if (methodParam.Type.Name == "CancellationToken")
+                continue;
+            
+            // Check if the method parameter type is a generic type parameter
+            if (methodParam.Type is ITypeParameterSymbol typeParam)
             {
-                if (i < argAttr.ConstructorArguments.Length)
+                // The argument value's type tells us what the generic type should be
+                // For literal values, we need to infer the type from the value itself
+                ITypeSymbol? argType = null;
+                
+                if (argValue.Type != null)
                 {
-                    var argValue = argAttr.ConstructorArguments[i];
-                    var inferredType = argValue.Type;
+                    argType = argValue.Type;
+                }
+                else if (argValue.Value != null)
+                {
+                    // For literal values, infer type from the value
+                    var value = argValue.Value;
                     
-                    if (inferredType != null)
-                    {
-                        inferredTypes.Add(inferredType);
-                    }
+                    if (value is int)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Int32);
+                    else if (value is string)
+                        argType = compilation?.GetSpecialType(SpecialType.System_String);
+                    else if (value is bool)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Boolean);
+                    else if (value is double)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Double);
+                    else if (value is float)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Single);
+                    else if (value is long)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Int64);
+                    else if (value is char)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Char);
+                    else if (value is byte)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Byte);
+                    else if (value is decimal)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Decimal);
+                }
+                
+                if (argType != null)
+                {
+                    inferredTypes[typeParam.Name] = argType;
                 }
             }
         }
         
-        return inferredTypes.Count == method.TypeParameters.Length 
-            ? inferredTypes.ToArray() 
-            : null;
+        // Build the result array in the correct order
+        if (inferredTypes.Count == typeParameters.Length)
+        {
+            var result = new ITypeSymbol[typeParameters.Length];
+            for (int i = 0; i < typeParameters.Length; i++)
+            {
+                if (inferredTypes.TryGetValue(typeParameters[i].Name, out var type))
+                {
+                    result[i] = type;
+                }
+                else
+                {
+                    return null; // Missing type inference
+                }
+            }
+            return result;
+        }
+        
+        return null;
     }
     
     private static ITypeSymbol[]? InferTypesFromDataSourceAttribute(IMethodSymbol method, AttributeData dataSourceAttr)
