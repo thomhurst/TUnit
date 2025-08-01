@@ -2065,8 +2065,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("},");
         
-        // Generate TestInvoker using reflection for generic methods
-        writer.AppendLine("TestInvoker = null,"); // Will be handled by GenericTestMetadata
+        // Generate TestInvoker for generic methods
+        var isAsync = IsAsyncMethod(testMethod.MethodSymbol);
+        var hasCancellationToken = testMethod.MethodSymbol.Parameters.Any(p => 
+            p.Type.Name == "CancellationToken" && 
+            p.Type.ContainingNamespace?.ToString() == "System.Threading");
+        var parametersFromArgs = testMethod.MethodSymbol.Parameters
+            .Where(p => p.Type.Name != "CancellationToken")
+            .ToArray();
+            
+        GenerateGenericTestInvoker(writer, testMethod, methodName, isAsync, hasCancellationToken, parametersFromArgs);
         
         // Generate concrete instantiations dictionary
         writer.AppendLine("ConcreteInstantiations = new global::System.Collections.Generic.Dictionary<string, global::TUnit.Core.TestMetadata>");
@@ -2132,6 +2140,58 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName"))}] = ");
                 GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
                 writer.AppendLine(",");
+            }
+        }
+        
+        // Process GenerateGenericTest attributes
+        var generateGenericTestAttributes = testMethod.MethodAttributes
+            .Where(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute")
+            .ToList();
+            
+        foreach (var genAttr in generateGenericTestAttributes)
+        {
+            // Extract type arguments from the attribute
+            if (genAttr.ConstructorArguments.Length > 0)
+            {
+                var typeArgs = new List<ITypeSymbol>();
+                foreach (var arg in genAttr.ConstructorArguments)
+                {
+                    if (arg.Kind == TypedConstantKind.Type && arg.Value is ITypeSymbol typeSymbol)
+                    {
+                        typeArgs.Add(typeSymbol);
+                    }
+                    else if (arg.Kind == TypedConstantKind.Array)
+                    {
+                        foreach (var arrayElement in arg.Values)
+                        {
+                            if (arrayElement.Kind == TypedConstantKind.Type && arrayElement.Value is ITypeSymbol arrayTypeSymbol)
+                            {
+                                typeArgs.Add(arrayTypeSymbol);
+                            }
+                        }
+                    }
+                }
+                
+                if (typeArgs.Count > 0)
+                {
+                    var inferredTypes = typeArgs.ToArray();
+                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                    
+                    // Skip if we've already processed this type combination
+                    if (!processedTypeCombinations.Contains(typeKey))
+                    {
+                        processedTypeCombinations.Add(typeKey);
+                        
+                        // Validate constraints
+                        if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
+                        {
+                            // Generate a concrete instantiation for this type combination
+                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName"))}] = ");
+                            GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                            writer.AppendLine(",");
+                        }
+                    }
+                }
             }
         }
         
