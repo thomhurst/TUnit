@@ -15,62 +15,43 @@ Write-Host "  Configuration: $Configuration" -ForegroundColor Cyan
 Write-Host "  Filter: $Filter" -ForegroundColor Cyan
 Write-Host ""
 
-# Get runtime identifier for platform-specific builds
-function Get-RuntimeIdentifier {
-    # For PowerShell 5.x compatibility on Windows
-    if ($PSVersionTable.PSVersion.Major -lt 6) {
-        # Windows PowerShell 5.x
-        return "win-x64"
-    }
-    # PowerShell Core 6+
-    if ($IsWindows) {
-        return "win-x64"
-    } elseif ($IsLinux) {
-        return "linux-x64"
-    } elseif ($IsMacOS) {
-        return "osx-x64"
-    } else {
-        # Default to Windows if platform detection fails
-        return "win-x64"
-    }
-}
+# Track results
+$results = @()
 
-$rid = Get-RuntimeIdentifier
-$isWindowsPlatform = ($PSVersionTable.PSVersion.Major -lt 6) -or ((Get-Variable -Name 'IsWindows' -ErrorAction SilentlyContinue) -and $IsWindows)
-$executableName = if ($isWindowsPlatform) { "TUnit.TestProject.exe" } else { "TUnit.TestProject" }
-
-# Change to test project directory
-$testProjectDir = Join-Path $PSScriptRoot "TUnit.TestProject"
-if (-not (Test-Path $testProjectDir)) {
-    Write-Error "Test project directory not found: $testProjectDir"
-    exit 1
-}
-
-Push-Location $testProjectDir
-try {
-    # Track results
-    $results = @()
-
-function Run-Test {
+function Run-TestScript {
     param(
         [string]$TestName,
-        [string]$Command,
-        [string[]]$Arguments
+        [string]$ScriptPath,
+        [hashtable]$Parameters = @{}
     )
     
     Write-Host "Running $TestName tests..." -ForegroundColor Yellow
     $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
     
     try {
-        & $Command @Arguments 2>&1 | Out-String | Write-Host
-        $success = $LASTEXITCODE -eq 0
+        $scriptArgs = @()
+        foreach ($key in $Parameters.Keys) {
+            $scriptArgs += "-$key"
+            $scriptArgs += $Parameters[$key]
+        }
+        
+        $exitCode = 0
+        if ($scriptArgs.Count -gt 0) {
+            & $ScriptPath @scriptArgs
+            $exitCode = $LASTEXITCODE
+        } else {
+            & $ScriptPath
+            $exitCode = $LASTEXITCODE
+        }
+        
+        $success = $exitCode -eq 0
         $stopwatch.Stop()
         
         $result = [PSCustomObject]@{
             Name = $TestName
             Success = $success
             Duration = $stopwatch.Elapsed
-            ExitCode = $LASTEXITCODE
+            ExitCode = $exitCode
         }
         
         $script:results += $result
@@ -78,7 +59,7 @@ function Run-Test {
         if ($success) {
             Write-Host "$TestName tests PASSED in $($stopwatch.Elapsed)" -ForegroundColor Green
         } else {
-            Write-Host "$TestName tests completed with exit code $LASTEXITCODE in $($stopwatch.Elapsed)" -ForegroundColor Yellow
+            Write-Host "$TestName tests completed with exit code $exitCode in $($stopwatch.Elapsed)" -ForegroundColor Yellow
         }
     } catch {
         $stopwatch.Stop()
@@ -95,94 +76,24 @@ function Run-Test {
     Write-Host ""
 }
 
+# Define common parameters
+$commonParams = @{
+    Framework = $Framework
+    Configuration = $Configuration
+    Filter = $Filter
+}
+
 # 1. Run source generation tests
-Run-Test -TestName "Source Generation" -Command "dotnet" -Arguments @(
-    "run",
-    "-f", $Framework,
-    "--configuration", $Configuration,
-    "--treenode-filter", $Filter,
-    "--no-build"
-)
+Run-TestScript -TestName "Source Generation" -ScriptPath (Join-Path $PSScriptRoot "run-source-generation-tests.ps1") -Parameters $commonParams
 
 # 2. Run reflection tests
-Run-Test -TestName "Reflection" -Command "dotnet" -Arguments @(
-    "run",
-    "-f", $Framework,
-    "--configuration", $Configuration,
-    "--treenode-filter", $Filter,
-    "--reflection",
-    "--no-build"
-)
+Run-TestScript -TestName "Reflection" -ScriptPath (Join-Path $PSScriptRoot "run-reflection-tests.ps1") -Parameters $commonParams
 
-# 3. Build and run AOT tests
-Write-Host "Building AOT version..." -ForegroundColor Yellow
-try {
-    dotnet publish `
-        -f $Framework `
-        -c $Configuration `
-        -r $rid `
-        -p:Aot=true `
-        -o "TESTPROJECT_AOT" 2>&1 | Out-String | Write-Host
-    
-    if ($LASTEXITCODE -eq 0) {
-        Run-Test -TestName "AOT" -Command (Join-Path "TESTPROJECT_AOT" $executableName) -Arguments @(
-            "--treenode-filter", $Filter
-        )
-    } else {
-        Write-Host "AOT build completed with exit code $LASTEXITCODE" -ForegroundColor Yellow
-        $results += [PSCustomObject]@{
-            Name = "AOT"
-            Success = $false
-            Duration = [TimeSpan]::Zero
-            ExitCode = $LASTEXITCODE
-            Error = "Build failed"
-        }
-    }
-} catch {
-    Write-Host "AOT build FAILED with error: $_" -ForegroundColor Red
-    $results += [PSCustomObject]@{
-        Name = "AOT"
-        Success = $false
-        Duration = [TimeSpan]::Zero
-        ExitCode = -1
-        Error = $_.Exception.Message
-    }
-}
+# 3. Run AOT tests
+Run-TestScript -TestName "AOT" -ScriptPath (Join-Path $PSScriptRoot "run-aot-tests.ps1") -Parameters $commonParams
 
-# 4. Build and run SingleFile tests
-Write-Host "Building SingleFile version..." -ForegroundColor Yellow
-try {
-    dotnet publish `
-        -f $Framework `
-        -c $Configuration `
-        -r $rid `
-        -p:SingleFile=true `
-        -o "TESTPROJECT_SINGLEFILE" 2>&1 | Out-String | Write-Host
-    
-    if ($LASTEXITCODE -eq 0) {
-        Run-Test -TestName "SingleFile" -Command (Join-Path "TESTPROJECT_SINGLEFILE" $executableName) -Arguments @(
-            "--treenode-filter", $Filter
-        )
-    } else {
-        Write-Host "SingleFile build completed with exit code $LASTEXITCODE" -ForegroundColor Yellow
-        $results += [PSCustomObject]@{
-            Name = "SingleFile"
-            Success = $false
-            Duration = [TimeSpan]::Zero
-            ExitCode = $LASTEXITCODE
-            Error = "Build failed"
-        }
-    }
-} catch {
-    Write-Host "SingleFile build FAILED with error: $_" -ForegroundColor Red
-    $results += [PSCustomObject]@{
-        Name = "SingleFile"
-        Success = $false
-        Duration = [TimeSpan]::Zero
-        ExitCode = -1
-        Error = $_.Exception.Message
-    }
-}
+# 4. Run SingleFile tests
+Run-TestScript -TestName "SingleFile" -ScriptPath (Join-Path $PSScriptRoot "run-singlefile-tests.ps1") -Parameters $commonParams
 
 # Summary
 Write-Host "`nTest Summary:" -ForegroundColor Cyan
@@ -199,6 +110,3 @@ Write-Host "`nNote: Some tests are marked with [EngineTest(ExpectedResult.Failur
 Write-Host "Check the test output to verify if failures match expected results." -ForegroundColor Yellow
 
 exit 0
-} finally {
-    Pop-Location
-}
