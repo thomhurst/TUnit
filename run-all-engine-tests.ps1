@@ -29,20 +29,19 @@ function Run-TestScript {
     $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
     
     try {
-        $scriptArgs = @()
-        foreach ($key in $Parameters.Keys) {
-            $scriptArgs += "-$key"
-            $scriptArgs += $Parameters[$key]
-        }
-        
+        $output = ""
         $exitCode = 0
-        if ($scriptArgs.Count -gt 0) {
-            & $ScriptPath @scriptArgs
+        
+        if ($Parameters.Count -gt 0) {
+            $output = & $ScriptPath @Parameters 2>&1 | Out-String
             $exitCode = $LASTEXITCODE
         } else {
-            & $ScriptPath
+            $output = & $ScriptPath 2>&1 | Out-String
             $exitCode = $LASTEXITCODE
         }
+        
+        # Display the output from the sub-script
+        Write-Host $output
         
         $success = $exitCode -eq 0
         $stopwatch.Stop()
@@ -52,6 +51,7 @@ function Run-TestScript {
             Success = $success
             Duration = $stopwatch.Elapsed
             ExitCode = $exitCode
+            Output = $output.Trim()
         }
         
         $script:results += $result
