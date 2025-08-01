@@ -17,6 +17,12 @@ Write-Host ""
 
 # Get runtime identifier for platform-specific builds
 function Get-RuntimeIdentifier {
+    # For PowerShell 5.x compatibility on Windows
+    if ($PSVersionTable.PSVersion.Major -lt 6) {
+        # Windows PowerShell 5.x
+        return "win-x64"
+    }
+    # PowerShell Core 6+
     if ($IsWindows) {
         return "win-x64"
     } elseif ($IsLinux) {
@@ -24,12 +30,14 @@ function Get-RuntimeIdentifier {
     } elseif ($IsMacOS) {
         return "osx-x64"
     } else {
-        throw "Unknown platform"
+        # Default to Windows if platform detection fails
+        return "win-x64"
     }
 }
 
 $rid = Get-RuntimeIdentifier
-$executableName = if ($IsWindows) { "TUnit.TestProject.exe" } else { "TUnit.TestProject" }
+$isWindows = ($PSVersionTable.PSVersion.Major -lt 6) -or $IsWindows
+$executableName = if ($isWindows) { "TUnit.TestProject.exe" } else { "TUnit.TestProject" }
 
 # Change to test project directory
 $testProjectDir = Join-Path $PSScriptRoot "TUnit.TestProject"

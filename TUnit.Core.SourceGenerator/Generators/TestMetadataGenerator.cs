@@ -124,9 +124,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 continue;
             }
 
+            // Find the concrete implementation of this method in the derived class
+            var concreteMethod = FindConcreteMethodImplementation(classInfo.TypeSymbol, method);
+            
             var testMethodMetadata = new TestMethodMetadata
             {
-                MethodSymbol = method,
+                MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
                 TypeSymbol = classInfo.TypeSymbol,
                 FilePath = classInfo.ClassSyntax.SyntaxTree.FilePath,
                 LineNumber = classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
@@ -134,8 +137,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 Context = null, // No context for inherited tests
                 MethodSyntax = null, // No syntax for inherited methods
                 IsGenericType = classInfo.TypeSymbol.IsGenericType,
-                IsGenericMethod = method.IsGenericMethod,
-                MethodAttributes = method.GetAttributes(),
+                IsGenericMethod = (concreteMethod ?? method).IsGenericMethod,
+                MethodAttributes = (concreteMethod ?? method).GetAttributes(), // Use concrete method attributes
             };
 
             GenerateTestMethodSource(context, compilation, testMethodMetadata);
@@ -1549,6 +1552,68 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return derivedClass.GetMembersIncludingBase().OfType<IMethodSymbol>()
             .Where(m => m.GetAttributes().Any(attr => attr.IsTestAttribute()))
             .ToList();
+    }
+
+    private static IMethodSymbol? FindConcreteMethodImplementation(INamedTypeSymbol derivedClass, IMethodSymbol baseMethod)
+    {
+        // Look for a method in the derived class that overrides or implements the base method
+        var candidateMethods = derivedClass.GetMembers(baseMethod.Name).OfType<IMethodSymbol>();
+        
+        foreach (var candidate in candidateMethods)
+        {
+            // Check if this method is an override or implementation of the base method
+            if (candidate.IsOverride && SymbolEqualityComparer.Default.Equals(candidate.OverriddenMethod, baseMethod))
+            {
+                return candidate;
+            }
+            
+            // For abstract methods, also check if signatures match (same name and parameters)
+            if (baseMethod.IsAbstract && candidate.Name == baseMethod.Name)
+            {
+                if (ParametersMatch(candidate.Parameters, baseMethod.Parameters))
+                {
+                    return candidate;
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    private static bool ParametersMatch(ImmutableArray<IParameterSymbol> params1, ImmutableArray<IParameterSymbol> params2)
+    {
+        if (params1.Length != params2.Length)
+        {
+            return false;
+        }
+        
+        for (int i = 0; i < params1.Length; i++)
+        {
+            // For generic types, we need to consider that T in base class becomes concrete type in derived class
+            if (!TypesMatchForInheritance(params1[i].Type, params2[i].Type))
+            {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    private static bool TypesMatchForInheritance(ITypeSymbol derivedType, ITypeSymbol baseType)
+    {
+        // If both types are the same, they match
+        if (SymbolEqualityComparer.Default.Equals(derivedType, baseType))
+        {
+            return true;
+        }
+        
+        // If base type is a type parameter, it can match any concrete type in derived class
+        if (baseType.TypeKind == TypeKind.TypeParameter)
+        {
+            return true;
+        }
+        
+        return false;
     }
 
     private static void GenerateReflectionFieldAccessors(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)

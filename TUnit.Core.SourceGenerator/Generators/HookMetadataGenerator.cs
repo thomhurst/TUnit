@@ -532,30 +532,45 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
                 if (isOpenGeneric)
                 {
-                    writer.AppendLine("dynamic dynamicInstance = instance;");
+                    // Use reflection instead of dynamic to avoid AOT issues
+                    writer.AppendLine("var instanceType = instance.GetType();");
+                    writer.AppendLine($"var method = instanceType.GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance{(isStatic ? " | System.Reflection.BindingFlags.Static" : "")});");
+                    writer.AppendLine("if (method != null)");
+                    writer.AppendLine("{");
+                    writer.Indent();
 
-                    var methodCall = isStatic
-                        ? $"{className}.{methodName}"
-                        : $"dynamicInstance.{methodName}";
-
+                    writer.AppendLine("object?[] methodArgs;");
                     if (hasCancellationTokenOnly)
                     {
-                        methodCall += "(cancellationToken)";
+                        writer.AppendLine("methodArgs = new object?[] { cancellationToken };");
                     }
                     else if (hasContextOnly)
                     {
-                        methodCall += "(context)";
+                        writer.AppendLine("methodArgs = new object?[] { context };");
                     }
                     else if (hasContextAndCancellationToken)
                     {
-                        methodCall += "(context, cancellationToken)";
+                        writer.AppendLine("methodArgs = new object?[] { context, cancellationToken };");
                     }
                     else
                     {
-                        methodCall += "()";
+                        writer.AppendLine("methodArgs = System.Array.Empty<object>();");
                     }
 
-                    writer.AppendLine(hook.MethodSymbol.ReturnsVoid ? $"{methodCall};" : $"await AsyncConvert.ConvertObject(() => {methodCall});");
+                    writer.AppendLine($"var result = method.Invoke({(isStatic ? "null" : "instance")}, methodArgs);");
+                    
+                    if (!hook.MethodSymbol.ReturnsVoid)
+                    {
+                        writer.AppendLine("if (result != null)");
+                        writer.AppendLine("{");
+                        writer.Indent();
+                        writer.AppendLine("await AsyncConvert.ConvertObject(() => result);");
+                        writer.Unindent();
+                        writer.AppendLine("}");
+                    }
+
+                    writer.Unindent();
+                    writer.AppendLine("}");
                 }
                 else
                 {
