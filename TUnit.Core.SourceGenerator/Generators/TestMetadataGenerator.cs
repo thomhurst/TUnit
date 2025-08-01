@@ -374,26 +374,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             else
             {
-                var paramType = param.Type;
-                // Replace type parameters with concrete types
-                if (paramType is ITypeParameterSymbol typeParam)
-                {
-                    // Find the index of the type parameter
-                    var index = -1;
-                    for (int j = 0; j < testMethod.MethodSymbol.TypeParameters.Length; j++)
-                    {
-                        if (testMethod.MethodSymbol.TypeParameters[j].Name == typeParam.Name)
-                        {
-                            index = j;
-                            break;
-                        }
-                    }
-                    
-                    if (index >= 0 && index < typeArguments.Length)
-                    {
-                        paramType = typeArguments[index];
-                    }
-                }
+                var paramType = ReplaceTypeParametersWithConcreteTypes(param.Type, testMethod.MethodSymbol.TypeParameters, typeArguments);
                 parameterCasts.Add($"({paramType.GloballyQualified()})methodArgs[{i}]!");
             }
         }
@@ -404,6 +385,44 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("}");
         writer.Unindent();
         writer.AppendLine("},");
+    }
+
+    private static ITypeSymbol ReplaceTypeParametersWithConcreteTypes(
+        ITypeSymbol type,
+        ImmutableArray<ITypeParameterSymbol> typeParameters,
+        ImmutableArray<ITypeSymbol> typeArguments)
+    {
+        if (type is ITypeParameterSymbol typeParam)
+        {
+            // Find the index of this type parameter
+            var index = -1;
+            for (int j = 0; j < typeParameters.Length; j++)
+            {
+                if (typeParameters[j].Name == typeParam.Name)
+                {
+                    index = j;
+                    break;
+                }
+            }
+            
+            if (index >= 0 && index < typeArguments.Length)
+            {
+                return typeArguments[index];
+            }
+            return type;
+        }
+        
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            // Replace type arguments in generic types like IEnumerable<T>, Func<T1, T2>, etc.
+            var newTypeArgs = namedType.TypeArguments
+                .Select(ta => ReplaceTypeParametersWithConcreteTypes(ta, typeParameters, typeArguments))
+                .ToImmutableArray();
+            
+            return namedType.ConstructedFrom.Construct(newTypeArgs.ToArray());
+        }
+        
+        return type;
     }
 
     private static void GenerateTestMetadataInstance(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod, string className, string combinationGuid)
