@@ -10,8 +10,14 @@ namespace TUnit.Core;
 public sealed class GenericTestMetadata : TestMetadata
 {
     /// <summary>
+    /// Dictionary mapping type argument arrays to concrete test metadata instances.
+    /// When populated, this enables AOT-compatible execution by avoiding runtime type resolution.
+    /// </summary>
+    public Dictionary<string, TestMetadata>? ConcreteInstantiations { get; init; }
+
+    /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.
-    /// Uses reflection to handle generic type instantiation and method invocation.
+    /// Uses ConcreteInstantiations when available (AOT-compatible), otherwise falls back to reflection.
     /// </summary>
     public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
     {
@@ -19,6 +25,36 @@ public sealed class GenericTestMetadata : TestMetadata
         {
             return (context, metadata) =>
             {
+                var genericMetadata = (GenericTestMetadata)metadata;
+                
+                // If we have concrete instantiations, try to use them (AOT-compatible path)
+                if (genericMetadata.ConcreteInstantiations?.Count > 0)
+                {
+                    // Determine the concrete types from the test arguments
+                    var inferredTypes = InferTypesFromArguments(context.Arguments, metadata);
+                    
+                    if (inferredTypes != null && inferredTypes.Length > 0)
+                    {
+                        // Create a key from the inferred types
+                        var typeKey = string.Join(",", inferredTypes.Select(t => t.FullName ?? t.Name));
+                        
+                        // Find the matching concrete instantiation
+                        if (genericMetadata.ConcreteInstantiations.TryGetValue(typeKey, out var concreteMetadata))
+                        {
+                            // Use the concrete metadata's factory to create the executable test
+                            return concreteMetadata.CreateExecutableTestFactory(context, concreteMetadata);
+                        }
+                    }
+                    
+                    // If we couldn't find a match but have instantiations, throw an error
+                    var availableKeys = string.Join(", ", genericMetadata.ConcreteInstantiations.Keys);
+                    throw new InvalidOperationException(
+                        $"No concrete instantiation found for generic method {metadata.TestMethodName} " +
+                        $"with type arguments: {(inferredTypes?.Length > 0 ? string.Join(",", inferredTypes.Select(t => t.FullName ?? t.Name)) : "unknown")}. " +
+                        $"Available: {availableKeys}");
+                }
+                
+                // Fall back to runtime resolution (existing logic)
                 Func<TestContext, Task<object>> createInstance = async (testContext) =>
                 {
                     // Try to create instance with ClassConstructor attribute
@@ -154,5 +190,53 @@ public sealed class GenericTestMetadata : TestMetadata
                 };
             };
         }
+    }
+    
+    private static Type[]? InferTypesFromArguments(object?[]? arguments, TestMetadata metadata)
+    {
+        if (arguments == null || arguments.Length == 0)
+            return null;
+            
+        // For methods with generic parameters, infer types from the argument values
+        var inferredTypes = new List<Type>();
+        
+        // Get the method's generic parameters
+        var methodInfo = metadata.TestClassType.GetMethod(metadata.TestMethodName);
+        if (methodInfo == null || !methodInfo.IsGenericMethodDefinition)
+            return null;
+            
+        var genericParams = methodInfo.GetGenericArguments();
+        var methodParams = methodInfo.GetParameters();
+        
+        // Map argument types to generic parameters
+        foreach (var genericParam in genericParams)
+        {
+            Type? inferredType = null;
+            
+            // Find which method parameter uses this generic parameter
+            for (int i = 0; i < methodParams.Length && i < arguments.Length; i++)
+            {
+                var paramType = methodParams[i].ParameterType;
+                
+                // Direct match: parameter type is the generic parameter
+                if (paramType.IsGenericParameter && paramType.Name == genericParam.Name)
+                {
+                    if (arguments[i] != null)
+                    {
+                        inferredType = arguments[i]!.GetType();
+                    }
+                    break;
+                }
+                
+                // TODO: Handle more complex cases like IEnumerable<T>, Func<T>, etc.
+            }
+            
+            if (inferredType != null)
+            {
+                inferredTypes.Add(inferredType);
+            }
+        }
+        
+        return inferredTypes.Count > 0 ? inferredTypes.ToArray() : null;
     }
 }

@@ -218,17 +218,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Check if we have generic types or methods
         if (testMethod.IsGenericType || (testMethod.IsGenericMethod && testMethod.MethodSymbol.TypeParameters.Length > 0))
         {
-            // For generic types, we need to use runtime resolution
-            // For generic methods, we can use our new approach with concrete types
-            if (testMethod.IsGenericType)
+            // Check if we can use the concrete types approach (AOT-compatible)
+            // This is possible when we have typed data sources that can inform the generic type arguments
+            var hasTypedDataSource = testMethod.MethodAttributes
+                .Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass) && 
+                         InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, a) != null);
+            
+            if (hasTypedDataSource || (testMethod.IsGenericMethod && !testMethod.IsGenericType))
             {
-                // Generic class - use runtime resolution
-                GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
+                // Use concrete types approach for AOT compatibility
+                GenerateGenericTestWithConcreteTypes(writer, compilation, testMethod, className, combinationGuid);
             }
             else
             {
-                // Generic method in non-generic class - use concrete types approach
-                GenerateGenericTestWithConcreteTypes(writer, compilation, testMethod, className, combinationGuid);
+                // Fall back to runtime resolution for other cases
+                GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
             }
         }
         else
@@ -1842,7 +1846,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static string GetGenericTypeExpression(INamedTypeSymbol typeSymbol)
+    private static string GetOpenGenericTypeName(INamedTypeSymbol typeSymbol)
     {
         // For generic types, we need to generate the open generic type definition
         // e.g., MyClass<T> becomes MyClass<>
@@ -1863,6 +1867,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static string GenerateTypeReference(INamedTypeSymbol typeSymbol, bool isGeneric)
     {
+        if (isGeneric)
+        {
+            var openGenericTypeName = GetOpenGenericTypeName(typeSymbol);
+            return $"typeof({openGenericTypeName})";
+        }
         var fullyQualifiedName = typeSymbol.GloballyQualified();
         return $"typeof({fullyQualifiedName})";
     }
@@ -2006,13 +2015,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodName = testMethod.MethodSymbol.Name;
         
         writer.AppendLine("// Create generic metadata with concrete type registrations");
-        writer.AppendLine("var genericMetadata = new global::TUnit.Core.GenericTestMetadataWithConcreteTypes");
+        writer.AppendLine("var genericMetadata = new global::TUnit.Core.GenericTestMetadata");
         writer.AppendLine("{");
         writer.Indent();
         
         // Generate basic metadata
         writer.AppendLine($"TestName = \"{methodName}\",");
-        writer.AppendLine($"TestClassType = typeof({className}),");
+        
+        // For generic classes, use the open generic type definition
+        if (testMethod.IsGenericType)
+        {
+            var openGenericTypeName = GetOpenGenericTypeName(testMethod.TypeSymbol);
+            writer.AppendLine($"TestClassType = typeof({openGenericTypeName}),");
+        }
+        else
+        {
+            writer.AppendLine($"TestClassType = typeof({className}),");
+        }
+        
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
         
         // Add basic metadata
@@ -2022,32 +2042,52 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine($"return new {className}();");
+        
+        if (testMethod.IsGenericType)
+        {
+            // For generic classes, we need to use runtime type construction
+            var openGenericTypeName = GetOpenGenericTypeName(testMethod.TypeSymbol);
+            writer.AppendLine($"var genericType = typeof({openGenericTypeName});");
+            writer.AppendLine("if (typeArgs.Length > 0)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("var closedType = genericType.MakeGenericType(typeArgs);");
+            writer.AppendLine("return global::System.Activator.CreateInstance(closedType, args)!;");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("throw new global::System.InvalidOperationException(\"No type arguments provided for generic class\");");
+        }
+        else
+        {
+            writer.AppendLine($"return new {className}();");
+        }
+        
         writer.Unindent();
         writer.AppendLine("},");
         
         // Generate TestInvoker using reflection for generic methods
-        writer.AppendLine("TestInvoker = null,"); // Will be handled by GenericTestMetadataWithConcreteTypes
+        writer.AppendLine("TestInvoker = null,"); // Will be handled by GenericTestMetadata
         
         // Generate concrete instantiations dictionary
         writer.AppendLine("ConcreteInstantiations = new global::System.Collections.Generic.Dictionary<string, global::TUnit.Core.TestMetadata>");
         writer.AppendLine("{");
         writer.Indent();
         
-        // Get all possible type combinations from Arguments attributes
+        // Get all possible type combinations from Arguments attributes and typed data sources
         var argumentsAttributes = testMethod.MethodAttributes
             .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
             .ToList();
             
         var processedTypeCombinations = new HashSet<string>();
         
+        // Process Arguments attributes
         foreach (var argAttr in argumentsAttributes)
         {
             // Infer types from this specific Arguments attribute
             var inferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, argAttr);
             if (inferredTypes != null && inferredTypes.Length > 0)
             {
-                var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+                var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
                 
                 // Skip if we've already processed this type combination
                 if (processedTypeCombinations.Contains(typeKey))
@@ -2060,7 +2100,36 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     continue;
                 
                 // Generate a concrete instantiation for this type combination
-                writer.AppendLine($"[\"{typeKey}\"] = ");
+                writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName"))}] = ");
+                GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                writer.AppendLine(",");
+            }
+        }
+        
+        // Process typed data source attributes
+        var dataSourceAttributes = testMethod.MethodAttributes
+            .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+            .ToList();
+            
+        foreach (var dataSourceAttr in dataSourceAttributes)
+        {
+            var inferredTypes = InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr);
+            if (inferredTypes != null && inferredTypes.Length > 0)
+            {
+                var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                
+                // Skip if we've already processed this type combination
+                if (processedTypeCombinations.Contains(typeKey))
+                    continue;
+                    
+                processedTypeCombinations.Add(typeKey);
+                
+                // Validate constraints
+                if (!ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
+                    continue;
+                
+                // Generate a concrete instantiation for this type combination
+                writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName"))}] = ");
                 GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
                 writer.AppendLine(",");
             }
@@ -2108,14 +2177,81 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             : null;
     }
     
+    private static ITypeSymbol[]? InferTypesFromDataSourceAttribute(IMethodSymbol method, AttributeData dataSourceAttr)
+    {
+        var attrClass = dataSourceAttr.AttributeClass;
+        if (attrClass == null)
+            return null;
+            
+        // Check if it's a typed data source by examining its base types
+        var baseType = attrClass.BaseType;
+        while (baseType != null)
+        {
+            if (baseType.IsGenericType)
+            {
+                var genericDefName = baseType.ToDisplayString();
+                
+                // Check for typed data source base classes
+                if (genericDefName.Contains("DataSourceGeneratorAttribute<") ||
+                    genericDefName.Contains("AsyncDataSourceGeneratorAttribute<"))
+                {
+                    // Get the type arguments from the base class
+                    var typeArgs = baseType.TypeArguments;
+                    
+                    // Check if we need to infer generic class type parameters
+                    var containingType = method.ContainingType;
+                    var totalGenericParams = method.TypeParameters.Length;
+                    if (containingType.IsGenericType)
+                    {
+                        totalGenericParams += containingType.TypeParameters.Length;
+                    }
+                    
+                    // For single type parameter (either method or class), use the first type argument
+                    if (totalGenericParams == 1 && typeArgs.Length >= 1)
+                    {
+                        return new[] { typeArgs[0] };
+                    }
+                    
+                    // For tuple data sources with multiple type parameters
+                    if (totalGenericParams > 1 && typeArgs.Length == totalGenericParams)
+                    {
+                        return typeArgs.ToArray();
+                    }
+                    
+                    // If the data source returns a tuple, extract component types
+                    if (typeArgs.Length == 1 && typeArgs[0] is INamedTypeSymbol tupleType && 
+                        tupleType.IsTupleType && tupleType.TupleElements.Length == totalGenericParams)
+                    {
+                        return tupleType.TupleElements.Select(e => e.Type).ToArray();
+                    }
+                }
+            }
+            baseType = baseType.BaseType;
+        }
+        
+        return null;
+    }
+    
     private static bool ValidateTypeConstraints(IMethodSymbol method, ITypeSymbol[] typeArguments)
     {
-        if (method.TypeParameters.Length != typeArguments.Length)
+        // Get all type parameters (class + method)
+        var allTypeParams = new List<ITypeParameterSymbol>();
+        
+        // Add class type parameters first
+        if (method.ContainingType.IsGenericType)
+        {
+            allTypeParams.AddRange(method.ContainingType.TypeParameters);
+        }
+        
+        // Add method type parameters
+        allTypeParams.AddRange(method.TypeParameters);
+        
+        if (allTypeParams.Count != typeArguments.Length)
             return false;
             
-        for (int i = 0; i < method.TypeParameters.Length; i++)
+        for (int i = 0; i < allTypeParams.Count; i++)
         {
-            var typeParam = method.TypeParameters[i];
+            var typeParam = allTypeParams[i];
             var typeArg = typeArguments[i];
             
             // Check struct constraint
@@ -2172,16 +2308,54 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         ITypeSymbol[] typeArguments)
     {
         var methodName = testMethod.MethodSymbol.Name;
-        var typeArgsString = string.Join(", ", typeArguments.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
         
-        writer.AppendLine($"new global::TUnit.Core.TestMetadata<{className}>");
+        // Separate class type arguments from method type arguments
+        var classTypeArgCount = testMethod.IsGenericType ? testMethod.TypeSymbol.TypeParameters.Length : 0;
+        var methodTypeArgCount = testMethod.IsGenericMethod ? testMethod.MethodSymbol.TypeParameters.Length : 0;
+        
+        var classTypeArgs = classTypeArgCount > 0 ? typeArguments.Take(classTypeArgCount).ToArray() : Array.Empty<ITypeSymbol>();
+        var methodTypeArgs = methodTypeArgCount > 0 ? typeArguments.Skip(classTypeArgCount).ToArray() : Array.Empty<ITypeSymbol>();
+        
+        // Build the concrete class name if it's a generic class
+        string concreteClassName;
+        string openGenericTypeName;
+        if (testMethod.IsGenericType)
+        {
+            openGenericTypeName = GetOpenGenericTypeName(testMethod.TypeSymbol);
+            var baseClassName = className.Contains("<") ? className.Substring(0, className.IndexOf('<')) : className;
+            concreteClassName = $"{baseClassName}<{string.Join(", ", classTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>";
+        }
+        else
+        {
+            openGenericTypeName = className;
+            concreteClassName = className;
+        }
+        
+        // Build the test name
+        string testName;
+        if (methodTypeArgs.Length > 0)
+        {
+            var methodTypeArgsString = string.Join(", ", methodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+            testName = $"{methodName}<{methodTypeArgsString}>";
+        }
+        else
+        {
+            testName = methodName;
+        }
+        
+        writer.AppendLine($"new global::TUnit.Core.TestMetadata<{concreteClassName}>");
         writer.AppendLine("{");
         writer.Indent();
         
-        writer.AppendLine($"TestName = \"{methodName}<{typeArgsString}>\",");
-        writer.AppendLine($"TestClassType = typeof({className}),");
+        writer.AppendLine($"TestName = \"{testName}\",");
+        writer.AppendLine($"TestClassType = typeof({openGenericTypeName}),");
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
-        writer.AppendLine($"GenericMethodTypeArguments = new global::System.Type[] {{ {string.Join(", ", typeArguments.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})"))}}},");
+        
+        // Only set GenericMethodTypeArguments if we have method type arguments
+        if (methodTypeArgs.Length > 0)
+        {
+            writer.AppendLine($"GenericMethodTypeArguments = new global::System.Type[] {{ {string.Join(", ", methodTypeArgs.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})"))}}},");
+        }
         
         // Add basic metadata
         GenerateMetadata(writer, compilation, testMethod);
@@ -2190,7 +2364,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine($"return new {className}();");
+        writer.AppendLine($"return new {concreteClassName}();");
         writer.Unindent();
         writer.AppendLine("},");
         
@@ -2204,7 +2378,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             p.Type.ContainingNamespace?.ToString() == "System.Threading");
             
         // Generate direct method call with specific types
-        writer.AppendLine($"var typedInstance = ({className})instance;");
+        writer.AppendLine($"var typedInstance = ({concreteClassName})instance;");
         
         // Prepare method arguments with proper casting
         var parameterCasts = new List<string>();
@@ -2222,18 +2396,38 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     // Find the index of this type parameter
                     var index = -1;
-                    for (int j = 0; j < testMethod.MethodSymbol.TypeParameters.Length; j++)
+                    
+                    // First check if it's a class type parameter
+                    if (typeParam.ContainingSymbol is INamedTypeSymbol && testMethod.IsGenericType)
                     {
-                        if (testMethod.MethodSymbol.TypeParameters[j].Name == typeParam.Name)
+                        for (int j = 0; j < testMethod.TypeSymbol.TypeParameters.Length; j++)
                         {
-                            index = j;
-                            break;
+                            if (testMethod.TypeSymbol.TypeParameters[j].Name == typeParam.Name)
+                            {
+                                index = j;
+                                break;
+                            }
+                        }
+                        if (index >= 0 && index < classTypeArgs.Length)
+                        {
+                            paramType = classTypeArgs[index];
                         }
                     }
-                    
-                    if (index >= 0 && index < typeArguments.Length)
+                    // Then check if it's a method type parameter
+                    else
                     {
-                        paramType = typeArguments[index];
+                        for (int j = 0; j < testMethod.MethodSymbol.TypeParameters.Length; j++)
+                        {
+                            if (testMethod.MethodSymbol.TypeParameters[j].Name == typeParam.Name)
+                            {
+                                index = j;
+                                break;
+                            }
+                        }
+                        if (index >= 0 && index < methodTypeArgs.Length)
+                        {
+                            paramType = methodTypeArgs[index];
+                        }
                     }
                 }
                 
@@ -2241,7 +2435,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
         
-        writer.AppendLine($"await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{typeArgsString}>({string.Join(", ", parameterCasts)}));");
+        // Generate the method call
+        if (methodTypeArgs.Length > 0)
+        {
+            var methodTypeArgsString = string.Join(", ", methodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+            writer.AppendLine($"await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{methodTypeArgsString}>({string.Join(", ", parameterCasts)}));");
+        }
+        else
+        {
+            writer.AppendLine($"await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}({string.Join(", ", parameterCasts)}));");
+        }
         
         writer.Unindent();
         writer.AppendLine("}");
