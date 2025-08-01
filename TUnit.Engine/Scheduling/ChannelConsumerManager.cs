@@ -61,6 +61,8 @@ internal class ChannelConsumerManager
         CancellationToken cancellationToken)
     {
         // Consumer started
+        ChannelReader<TestExecutionData>? dedicatedChannel = null;
+        string? dedicatedChannelKey = null;
 
         try
         {
@@ -69,30 +71,90 @@ internal class ChannelConsumerManager
                 var foundWork = false;
                 TestExecutionData? testData = null;
 
-                // Try to read from all channels - priority ordering is handled within each channel
-                // Check unconstrained channel first for better parallelism
-                if (multiplexer.UnconstrainedChannel.Reader.TryRead(out testData))
+                // If this consumer is dedicated to a channel, only read from that channel
+                if (dedicatedChannel != null)
                 {
-                    foundWork = true;
-                    // Work found in UnconstrainedChannel
-                }
-                else if (multiplexer.GlobalNotInParallelChannel.Reader.TryRead(out testData))
-                {
-                    foundWork = true;
-                    // Work found in GlobalNotInParallelChannel
+                    if (dedicatedChannel.TryRead(out testData))
+                    {
+                        foundWork = true;
+                    }
+                    else if (dedicatedChannel.Completion.IsCompleted)
+                    {
+                        // Channel completed, release dedication
+                        if (dedicatedChannelKey != null)
+                        {
+                            multiplexer.ReleaseChannelClaim(dedicatedChannelKey);
+                        }
+                        dedicatedChannel = null;
+                        dedicatedChannelKey = null;
+                    }
                 }
                 else
                 {
-                    // Try all channels (get fresh list each time to catch new channels)
-                    foreach (var channelReader in multiplexer.GetAllChannelReaders())
+                    // Try to read from all channels - priority ordering is handled within each channel
+                    // Check unconstrained channel first for better parallelism
+                    if (multiplexer.UnconstrainedChannel.Reader.TryRead(out testData))
                     {
-                        if (channelReader != multiplexer.UnconstrainedChannel.Reader && 
-                            channelReader != multiplexer.GlobalNotInParallelChannel.Reader &&
-                            channelReader.TryRead(out testData))
+                        foundWork = true;
+                        // Work found in UnconstrainedChannel
+                    }
+                    else if (multiplexer.GlobalNotInParallelChannel.Reader.TryRead(out testData))
+                    {
+                        foundWork = true;
+                        // Work found in GlobalNotInParallelChannel
+                        // Try to dedicate this consumer to GlobalNotInParallel channel
+                        if (dedicatedChannel == null && multiplexer.TryClaimChannel("__global_not_in_parallel__"))
                         {
-                            foundWork = true;
-                            // Work found in dynamic channel
-                            break;
+                            dedicatedChannel = multiplexer.GlobalNotInParallelChannel.Reader;
+                            dedicatedChannelKey = "__global_not_in_parallel__";
+                        }
+                    }
+                    else
+                    {
+                        // Try all channels (get fresh list each time to catch new channels)
+                        foreach (var channelReader in multiplexer.GetAllChannelReaders())
+                        {
+                            if (channelReader != multiplexer.UnconstrainedChannel.Reader && 
+                                channelReader != multiplexer.GlobalNotInParallelChannel.Reader)
+                            {
+                                // Check if this is a keyed NotInParallel channel
+                                if (multiplexer.IsKeyedNotInParallelChannel(channelReader, out var channelKey) && channelKey != null)
+                                {
+                                    // Only read from this channel if we've claimed it or can claim it
+                                    if (dedicatedChannelKey != channelKey)
+                                    {
+                                        // Try to claim it
+                                        if (!multiplexer.TryClaimChannel(channelKey))
+                                        {
+                                            // Another consumer has this channel, skip it
+                                            continue;
+                                        }
+                                        dedicatedChannel = channelReader;
+                                        dedicatedChannelKey = channelKey;
+                                        
+                                        if (channelKey.Contains("PriorityTests"))
+                                        {
+                                            Console.WriteLine($"[Consumer] {consumerName} claimed channel {channelKey}");
+                                        }
+                                    }
+                                    
+                                    // Now that we've claimed it, read from it
+                                    if (dedicatedChannel == channelReader && channelReader.TryRead(out testData))
+                                    {
+                                        foundWork = true;
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    // Non-keyed NotInParallel channels can be read by any consumer
+                                    if (channelReader.TryRead(out testData))
+                                    {
+                                        foundWork = true;
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -103,6 +165,10 @@ internal class ChannelConsumerManager
                     {
                         try
                         {
+                            if (testData.Test.Context.TestName.Contains("Priority"))
+                            {
+                                Console.WriteLine($"[Consumer] {consumerName} executing {testData.Test.Context.TestName}");
+                            }
                             await executeTestFunc(testData, cancellationToken);
                         }
                         catch (Exception ex) when (ex is not OperationCanceledException)

@@ -4,27 +4,56 @@ using TUnit.Core.Enums;
 namespace TUnit.Engine.Scheduling;
 
 /// <summary>
+/// Represents the priority of a test for ordering purposes
+/// </summary>
+internal readonly struct TestPriority : IComparable<TestPriority>
+{
+    public Priority Priority { get; }
+    public int Order { get; }
+    
+    public TestPriority(Priority priority, int order)
+    {
+        Priority = priority;
+        Order = order;
+    }
+    
+    public int CompareTo(TestPriority other)
+    {
+        // First compare by Priority (higher priority values should dequeue first)
+        // Since PriorityQueue is a min-heap, we need to invert the comparison
+        // so that higher priority values get smaller comparison results
+        var priorityComparison = ((int)other.Priority).CompareTo((int)Priority);
+        if (priorityComparison != 0)
+            return priorityComparison;
+        
+        // Then compare by Order (lower order values should dequeue first)
+        return Order.CompareTo(other.Order);
+    }
+}
+
+/// <summary>
 /// A channel wrapper that maintains priority ordering of items
 /// </summary>
 internal class PriorityChannel<T> where T : class
 {
     private readonly Channel<T> _outputChannel;
-    private readonly PriorityQueue<T, int> _priorityQueue = new();
+    private readonly PriorityQueue<T, TestPriority> _priorityQueue;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private readonly SemaphoreSlim _itemAvailable = new(0);
     private readonly CancellationTokenSource _completionCts = new();
     private bool _isCompleted;
 
-    public PriorityChannel(int capacity)
+    public PriorityChannel(int capacity, bool singleReader = false)
     {
         var options = new BoundedChannelOptions(capacity)
         {
             FullMode = BoundedChannelFullMode.Wait,
-            SingleReader = false,
+            SingleReader = singleReader,
             SingleWriter = false,
             AllowSynchronousContinuations = true
         };
         _outputChannel = Channel.CreateBounded<T>(options);
+        _priorityQueue = new PriorityQueue<T, TestPriority>();
         _ = ProcessQueueAsync();
     }
 
@@ -41,26 +70,16 @@ internal class PriorityChannel<T> where T : class
             if (_isCompleted)
                 return;
 
-            // Calculate composite priority that considers both execution priority and order
-            // Higher priority = more negative value (for min heap)
-            // Within same priority, lower order = more negative value
-            int compositePriority;
+            // Create TestPriority with both Priority and Order
+            var order = int.MaxValue / 2; // Default order value
             if (item is TestExecutionData testData && testData.State != null)
             {
-                // Combine priority and order: priority is more significant than order
-                // Priority range: 0-5, we'll multiply by 10000 to give it more weight
-                // Order typically ranges from 0 to small numbers
-                // For min heap: higher priority (larger enum value) → more negative composite
-                // For min heap: lower order (smaller value) → more negative composite
-                compositePriority = -(int)priority * 10000 + testData.State.Order;
-            }
-            else
-            {
-                // Fallback for non-test data
-                compositePriority = -(int)priority * 10000;
+                order = testData.State.Order;
             }
             
-            _priorityQueue.Enqueue(item, compositePriority);
+            var testPriority = new TestPriority(priority, order);
+            _priorityQueue.Enqueue(item, testPriority);
+            
         }
         finally
         {
@@ -95,6 +114,8 @@ internal class PriorityChannel<T> where T : class
                     if (_priorityQueue.Count > 0)
                     {
                         var item = _priorityQueue.Dequeue();
+                        
+                        
                         await _outputChannel.Writer.WriteAsync(item, _completionCts.Token);
                     }
                 }

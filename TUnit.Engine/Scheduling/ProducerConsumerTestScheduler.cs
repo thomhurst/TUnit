@@ -64,6 +64,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         
         // Convert to execution states
         var executionStates = new Dictionary<string, TestExecutionState>();
+        var orderedTests = new List<TestExecutionState>(); // Maintain order
         
         // Process parallel tests
         foreach (var test in groupedTests.Parallel)
@@ -73,10 +74,11 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                 Priority = test.Context.ExecutionPriority
             };
             executionStates[test.TestId] = state;
+            orderedTests.Add(state);
         }
         
-        // Process not-in-parallel tests
-        while (groupedTests.NotInParallel.TryDequeue(out var test, out _))
+        // Process not-in-parallel tests - maintain dequeue order
+        while (groupedTests.NotInParallel.TryDequeue(out var test, out var testPriority))
         {
             var state = new TestExecutionState(test)
             {
@@ -84,12 +86,15 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                 Priority = test.Context.ExecutionPriority
             };
             executionStates[test.TestId] = state;
+            orderedTests.Add(state); // Preserve dequeue order
+            
         }
         
         // Process keyed not-in-parallel tests
         foreach (var kvp in groupedTests.KeyedNotInParallel)
         {
-            while (kvp.Value.TryDequeue(out var test, out _))
+            var keyedOrderedTests = new List<TestExecutionState>();
+            while (kvp.Value.TryDequeue(out var test, out var testPriority))
             {
                 var state = new TestExecutionState(test)
                 {
@@ -98,7 +103,9 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                     Priority = test.Context.ExecutionPriority
                 };
                 executionStates[test.TestId] = state;
+                keyedOrderedTests.Add(state); // Preserve dequeue order per key
             }
+            orderedTests.AddRange(keyedOrderedTests);
         }
         
         // Process parallel groups
@@ -115,6 +122,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                         Priority = test.Context.ExecutionPriority
                     };
                     executionStates[test.TestId] = state;
+                    orderedTests.Add(state);
                 }
             }
         }
@@ -125,15 +133,46 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         // Pre-create channels for all constraint keys to avoid dynamic creation during execution
         await PreCreateChannelsForConstraintsAsync(executionStates.Values, cancellationToken);
         
-        // Route all ready tests
-        var readyTests = executionStates.Values.Where(s => s.RemainingDependencies == 0).ToList();
+        // Route tests in the order they were dequeued from priority queues
+        // Only route tests that have no dependencies
+        // For keyed tests with explicit order, we need to ensure they're routed in Order sequence
+        var testsToRoute = new List<TestExecutionState>();
+        var keyedTestsWithOrder = new Dictionary<string, List<TestExecutionState>>();
         
-        // Route all tests to channels in batches
-        const int batchSize = 100;
-        for (var i = 0; i < readyTests.Count; i += batchSize)
+        foreach (var state in orderedTests)
         {
-            var batch = readyTests.Skip(i).Take(batchSize);
-            await Task.WhenAll(batch.Select(state => RouteTestAsync(state, cancellationToken)));
+            if (state.RemainingDependencies == 0)
+            {
+                // Check if this is a keyed test with explicit order
+                if (state.ConstraintKey != null && state.Order != int.MaxValue / 2)
+                {
+                    if (!keyedTestsWithOrder.ContainsKey(state.ConstraintKey))
+                    {
+                        keyedTestsWithOrder[state.ConstraintKey] = new List<TestExecutionState>();
+                    }
+                    keyedTestsWithOrder[state.ConstraintKey].Add(state);
+                }
+                else
+                {
+                    testsToRoute.Add(state);
+                }
+            }
+        }
+        
+        // First route all tests without explicit order (maintain priority dequeue order)
+        foreach (var state in testsToRoute)
+        {
+            await RouteTestAsync(state, cancellationToken);
+        }
+        
+        // Then route keyed tests with explicit order (sorted by Order value)
+        foreach (var kvp in keyedTestsWithOrder)
+        {
+            var sortedTests = kvp.Value.OrderBy(s => s.Order).ToList();
+            foreach (var state in sortedTests)
+            {
+                await RouteTestAsync(state, cancellationToken);
+            }
         }
         
         // Track total test count
@@ -173,6 +212,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             Priority = state.Priority,
             State = state
         };
+
 
         // Route test to appropriate channel
         await _channelRouter.RouteTestAsync(testData, cancellationToken);
@@ -257,6 +297,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
     private Task PreCreateChannelsForConstraintsAsync(IEnumerable<TestExecutionState> states, CancellationToken cancellationToken)
     {
         var allConstraintKeys = new HashSet<string>();
+        var constraintKeyHasExplicitOrder = new Dictionary<string, bool>();
         
         foreach (var state in states)
         {
@@ -264,6 +305,18 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             foreach (var key in keys)
             {
                 allConstraintKeys.Add(key);
+                
+                // Track if this constraint key has any tests with explicit order
+                if (!constraintKeyHasExplicitOrder.ContainsKey(key))
+                {
+                    constraintKeyHasExplicitOrder[key] = false;
+                }
+                
+                // Check if this test has an explicit order (not the default value)
+                if (state.Order != int.MaxValue / 2)
+                {
+                    constraintKeyHasExplicitOrder[key] = true;
+                }
             }
         }
         
@@ -276,7 +329,9 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             }
             else if (key != "__global_not_in_parallel__") // Global channel is already created
             {
-                _channelRouter.GetMultiplexer().GetOrCreateKeyedNotInParallelChannel(key);
+                // Pass hasExplicitOrder based on whether any test with this key has explicit order
+                var hasExplicitOrder = constraintKeyHasExplicitOrder.ContainsKey(key) ? constraintKeyHasExplicitOrder[key] : false;
+                _channelRouter.GetMultiplexer().GetOrCreateKeyedNotInParallelChannel(key, hasExplicitOrder);
             }
         }
         
@@ -324,6 +379,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
     {
         // Process dependents of the completed test
         var newlyReadyTests = new List<TestExecutionState>();
+        var keyedTestsWithOrder = new Dictionary<string, List<TestExecutionState>>();
         
         foreach (var dependentId in completedTest.Dependents)
         {
@@ -334,15 +390,37 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                 if (remaining == 0 && dependentState.State == TestState.NotStarted)
                 {
                     // Test is now ready for execution
-                    newlyReadyTests.Add(dependentState);
+                    // Check if this is a keyed test with explicit order
+                    if (dependentState.ConstraintKey != null && dependentState.Order != int.MaxValue / 2)
+                    {
+                        if (!keyedTestsWithOrder.ContainsKey(dependentState.ConstraintKey))
+                        {
+                            keyedTestsWithOrder[dependentState.ConstraintKey] = new List<TestExecutionState>();
+                        }
+                        keyedTestsWithOrder[dependentState.ConstraintKey].Add(dependentState);
+                    }
+                    else
+                    {
+                        newlyReadyTests.Add(dependentState);
+                    }
                 }
             }
         }
         
-        // Route all newly ready tests
+        // Route non-ordered tests first (maintain dequeue order)
         foreach (var readyTest in newlyReadyTests)
         {
             await RouteTestAsync(readyTest, cancellationToken);
+        }
+        
+        // Then route keyed tests with explicit order in the correct sequence
+        foreach (var kvp in keyedTestsWithOrder)
+        {
+            var sortedTests = kvp.Value.OrderBy(s => s.Order).ToList();
+            foreach (var readyTest in sortedTests)
+            {
+                await RouteTestAsync(readyTest, cancellationToken);
+            }
         }
     }
     

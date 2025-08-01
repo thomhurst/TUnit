@@ -7,7 +7,7 @@ public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventR
 {
     public string[] ConstraintKeys { get; } = [];
 
-    public int Order { get; init; }
+    public int Order { get; init; } = int.MaxValue / 2;
 
     public NotInParallelAttribute()
     {
