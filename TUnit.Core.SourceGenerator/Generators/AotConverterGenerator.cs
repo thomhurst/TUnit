@@ -27,9 +27,11 @@ public class AotConverterGenerator : IIncrementalGenerator
     {
         var operatorDeclaration = (OperatorDeclarationSyntax)context.Node;
         
-        // Only interested in implicit and explicit operators
-        var operatorToken = operatorDeclaration.OperatorToken.ValueText;
-        if (operatorToken != "implicit" && operatorToken != "explicit")
+        // Get the conversion modifier (implicit or explicit)
+        var isImplicit = operatorDeclaration.Modifiers.Any(m => m.ValueText == "implicit");
+        var isExplicit = operatorDeclaration.Modifiers.Any(m => m.ValueText == "explicit");
+        
+        if (!isImplicit && !isExplicit)
         {
             return null;
         }
@@ -50,7 +52,7 @@ public class AotConverterGenerator : IIncrementalGenerator
             ContainingType = containingType,
             SourceType = sourceType,
             TargetType = targetType,
-            IsImplicit = operatorToken == "implicit",
+            IsImplicit = isImplicit,
             MethodSymbol = methodSymbol
         };
     }

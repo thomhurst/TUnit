@@ -8,6 +8,7 @@ using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Generators;
@@ -214,8 +215,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();");
         writer.AppendLine();
 
-        // Generate the TestMetadata<T> with DataCombinationGenerator
-        GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
+        // Check if we can infer generic types for this method
+        if (testMethod.IsGenericMethod && testMethod.MethodSymbol.TypeParameters.Length > 0)
+        {
+            var genericTypeCombinations = GenericTypeInference.GetAllGenericTypeCombinations(
+                testMethod.MethodSymbol, 
+                testMethod.MethodAttributes);
+
+            if (genericTypeCombinations.Length > 0)
+            {
+                // Generate a specific instantiation for each type combination
+                foreach (var typeCombination in genericTypeCombinations)
+                {
+                    GenerateSpecificGenericInstantiation(writer, compilation, testMethod, className, combinationGuid, typeCombination);
+                }
+            }
+            else
+            {
+                // Fallback to runtime generic resolution
+                GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
+            }
+        }
+        else
+        {
+            // Non-generic method or already has concrete types
+            GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
+        }
 
         writer.AppendLine("return tests;");
         writer.Unindent();
@@ -226,6 +251,149 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate module initializer
         GenerateModuleInitializer(writer, testMethod, guid);
+    }
+
+    private static void GenerateSpecificGenericInstantiation(
+        CodeWriter writer, 
+        Compilation compilation, 
+        TestMethodMetadata testMethod, 
+        string className, 
+        string combinationGuid,
+        ImmutableArray<ITypeSymbol> typeArguments)
+    {
+        var methodName = testMethod.MethodSymbol.Name;
+        var typeArgsString = string.Join(", ", typeArguments.Select(t => t.GloballyQualified()));
+        var instantiatedMethodName = $"{methodName}<{typeArgsString}>";
+        
+        // Create a modified test method metadata with concrete types
+        var concreteTestMethod = new TestMethodMetadata
+        {
+            MethodSymbol = testMethod.MethodSymbol,
+            TypeSymbol = testMethod.TypeSymbol,
+            FilePath = testMethod.FilePath,
+            LineNumber = testMethod.LineNumber,
+            TestAttribute = testMethod.TestAttribute,
+            Context = testMethod.Context,
+            MethodSyntax = testMethod.MethodSyntax,
+            IsGenericType = testMethod.IsGenericType,
+            IsGenericMethod = false, // We're creating a concrete instantiation
+            MethodAttributes = testMethod.MethodAttributes
+        };
+
+        writer.AppendLine($"// Generated instantiation for {instantiatedMethodName}");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Generate metadata for this specific instantiation
+        writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{className}>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        writer.AppendLine($"TestName = \"{instantiatedMethodName}\",");
+        writer.AppendLine($"TestClassType = {GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)},");
+        writer.AppendLine($"TestMethodName = \"{methodName}\",");
+        writer.AppendLine($"MethodGenericArguments = new global::System.Type[] {{ {string.Join(", ", typeArguments.Select(t => $"typeof({t.GloballyQualified()})"))}}},");
+        
+        // Add basic metadata
+        GenerateMetadata(writer, compilation, concreteTestMethod);
+        
+        // Generate generic type info if needed
+        if (testMethod.IsGenericType)
+        {
+            GenerateGenericTypeInfo(writer, testMethod.TypeSymbol);
+        }
+        
+        // Generate AOT-friendly invokers that use the specific types
+        GenerateAotFriendlyInvokers(writer, testMethod, className, typeArguments);
+        
+        writer.Unindent();
+        writer.AppendLine("};");
+        
+        writer.AppendLine("metadata.TestSessionId = testSessionId;");
+        writer.AppendLine("tests.Add(metadata);");
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+    }
+
+    private static void GenerateAotFriendlyInvokers(
+        CodeWriter writer, 
+        TestMethodMetadata testMethod, 
+        string className,
+        ImmutableArray<ITypeSymbol> typeArguments)
+    {
+        var methodName = testMethod.MethodSymbol.Name;
+        var typeArgsString = string.Join(", ", typeArguments.Select(t => t.GloballyQualified()));
+        var hasCancellationToken = testMethod.MethodSymbol.Parameters.Any(p => 
+            p.Type.Name == "CancellationToken" && 
+            p.Type.ContainingNamespace?.ToString() == "System.Threading");
+        
+        // Generate the instance factory
+        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        GenerateTypedInstanceCreation(writer, testMethod, className);
+        
+        writer.Unindent();
+        writer.AppendLine("},");
+        
+        // Generate CreateExecutableTest
+        writer.AppendLine("CreateExecutableTestFactory = (metadata, args) => new global::TUnit.Core.ExecutableTest");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("TestMetadata = metadata,");
+        writer.AppendLine($"TestMethodName = \"{methodName}\",");
+        writer.AppendLine("TestClass = metadata.TestClassInstance,");
+        writer.AppendLine("TestMethodArguments = args,");
+        writer.AppendLine("InvokeTestAsync = async (instance, args, cancellationToken) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Generate direct method call with specific types (no MakeGenericMethod)
+        writer.AppendLine($"var typedInstance = ({className})instance;");
+        
+        // Prepare method arguments
+        writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationToken ? " + 1" : "") + "];");
+        writer.AppendLine("global::System.Array.Copy(args, methodArgs, args.Length);");
+        
+        if (hasCancellationToken)
+        {
+            writer.AppendLine("methodArgs[args.Length] = cancellationToken;");
+        }
+        
+        // Direct method invocation with known types
+        var parameterCasts = new List<string>();
+        for (int i = 0; i < testMethod.MethodSymbol.Parameters.Length; i++)
+        {
+            var param = testMethod.MethodSymbol.Parameters[i];
+            if (param.Type.Name == "CancellationToken")
+            {
+                parameterCasts.Add("cancellationToken");
+            }
+            else
+            {
+                var paramType = param.Type;
+                // Replace type parameters with concrete types
+                if (paramType is ITypeParameterSymbol typeParam)
+                {
+                    var index = testMethod.MethodSymbol.TypeParameters.IndexOf(tp => tp.Name == typeParam.Name);
+                    if (index >= 0 && index < typeArguments.Length)
+                    {
+                        paramType = typeArguments[index];
+                    }
+                }
+                parameterCasts.Add($"({paramType.GloballyQualified()})methodArgs[{i}]!");
+            }
+        }
+        
+        writer.AppendLine($"await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{typeArgsString}>({string.Join(", ", parameterCasts)}));");
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("},");
     }
 
     private static void GenerateTestMetadataInstance(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod, string className, string combinationGuid)
