@@ -46,11 +46,38 @@ Push-Location $testProjectDir
 try {
     Write-Host "Building AOT version..." -ForegroundColor Yellow
     
-    dotnet publish `
+    # First restore with runtime identifier
+    Write-Host "Restoring with runtime identifier $rid..." -ForegroundColor Cyan
+    dotnet restore TUnit.TestProject.csproj `
+        -r $rid 2>&1 | Out-String | Write-Host
+        
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Restore failed with exit code $LASTEXITCODE" -ForegroundColor Yellow
+        exit $LASTEXITCODE
+    }
+    
+    # Build the test project
+    Write-Host "Building TUnit.TestProject..." -ForegroundColor Cyan
+    dotnet build TUnit.TestProject.csproj `
+        -f $Framework `
+        -c $Configuration `
+        --no-restore 2>&1 | Out-String | Write-Host
+        
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Build failed with exit code $LASTEXITCODE" -ForegroundColor Yellow
+        exit $LASTEXITCODE
+    }
+    
+    # Now publish with AOT - use the Aot property that's already in the project
+    Write-Host "Publishing with AOT..." -ForegroundColor Cyan
+    dotnet publish TUnit.TestProject.csproj `
         -f $Framework `
         -c $Configuration `
         -r $rid `
         -p:Aot=true `
+        -p:SelfContained=true `
+        -p:IlcGenerateStackTraceData=false `
+        -p:IlcOptimizationPreference=Size `
         -o "TESTPROJECT_AOT" 2>&1 | Out-String | Write-Host
     
     if ($LASTEXITCODE -ne 0) {

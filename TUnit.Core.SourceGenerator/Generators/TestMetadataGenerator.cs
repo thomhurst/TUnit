@@ -485,6 +485,119 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("tests.Add(metadata);");
     }
 
+    private static void GenerateAttributeFactoryWithFilteredClassAttributes(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod, List<AttributeData> filteredClassAttributes)
+    {
+        writer.AppendLine("AttributeFactory = () =>");
+        writer.AppendLine("[");
+        writer.Indent();
+
+        var attributes = testMethod.MethodSymbol.GetAttributes()
+            .Concat(filteredClassAttributes)
+            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
+            .ToImmutableArray();
+
+        AttributeWriter.WriteAttributes(writer, compilation, attributes);
+        
+        writer.Unindent();
+        writer.AppendLine("],");
+    }
+
+    private static void GenerateMetadataWithFilteredClassAttributes(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod, List<AttributeData> filteredClassAttributes)
+    {
+        var methodSymbol = testMethod.MethodSymbol;
+        var typeSymbol = testMethod.TypeSymbol;
+
+        writer.AppendLine("TimeoutMs = null,");
+        writer.AppendLine("RetryCount = 0,");
+        writer.AppendLine("RepeatCount = 0,");
+        writer.AppendLine("CanRunInParallel = true,");
+
+        // Generate dependencies
+        GenerateDependencies(writer, compilation, methodSymbol);
+
+        // Generate attribute factory with filtered class attributes
+        GenerateAttributeFactoryWithFilteredClassAttributes(writer, compilation, testMethod, filteredClassAttributes);
+
+        // Collect data sources from method
+        var methodDataSources = methodSymbol.GetAttributes()
+            .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass) && 
+                       a.AttributeClass?.Name != "ArgumentsAttribute")
+            .ToList();
+        
+        // Filter class data sources to only include the specific Arguments attribute
+        var classDataSources = filteredClassAttributes
+            .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+            .ToList();
+
+        // Generate method data sources
+        writer.AppendLine("DataSources = new global::TUnit.Core.IDataSourceAttribute[]");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        foreach (var attr in methodDataSources)
+        {
+            GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+        }
+
+        writer.Unindent();
+        writer.AppendLine("},");
+
+        // Generate class data sources
+        writer.AppendLine("ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        foreach (var attr in classDataSources)
+        {
+            GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+        }
+
+        writer.Unindent();
+        writer.AppendLine("},");
+
+        // Generate property data sources
+        GeneratePropertyDataSources(writer, compilation, testMethod);
+
+        // Generate property injections
+        GeneratePropertyInjections(writer, typeSymbol, typeSymbol.GloballyQualified());
+
+        // Parameter types
+        writer.AppendLine("ParameterTypes = new global::System.Type[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        foreach (var param in methodSymbol.Parameters)
+        {
+            var paramType = param.Type;
+            if (IsGenericTypeParameter(paramType) || ContainsGenericTypeParameter(paramType))
+            {
+                // Use object as placeholder for generic type parameters
+                writer.AppendLine("typeof(global::System.Object),");
+            }
+            else
+            {
+                writer.AppendLine($"typeof({paramType.GloballyQualified()}),");
+            }
+        }
+        writer.Unindent();
+        writer.AppendLine("},");
+
+        // String parameter types
+        writer.AppendLine("TestMethodParameterTypes = new string[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        foreach (var param in methodSymbol.Parameters)
+        {
+            var paramType = param.Type.GloballyQualified();
+            writer.AppendLine($"\"{paramType}\",");
+        }
+        writer.Unindent();
+        writer.AppendLine("},");
+
+        // Method metadata
+        writer.Append("MethodMetadata = ");
+        SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
+    }
+
     private static void GenerateMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
     {
         var methodSymbol = testMethod.MethodSymbol;
@@ -2632,7 +2745,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         Compilation compilation, 
         TestMethodMetadata testMethod, 
         string className,
-        ITypeSymbol[] typeArguments)
+        ITypeSymbol[] typeArguments,
+        AttributeData? specificArgumentsAttribute = null)
     {
         var methodName = testMethod.MethodSymbol.Name;
         
@@ -2691,7 +2805,36 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine($"return new {concreteClassName}();");
+        
+        // Check if the class has a constructor that requires arguments
+        var hasParameterizedConstructor = false;
+        var constructorParamCount = 0;
+        
+        if (testMethod.IsGenericType)
+        {
+            // Find the primary constructor or first public constructor
+            var constructor = testMethod.TypeSymbol.Constructors
+                .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
+                .OrderByDescending(c => c.Parameters.Length)
+                .FirstOrDefault();
+                
+            if (constructor != null && constructor.Parameters.Length > 0)
+            {
+                hasParameterizedConstructor = true;
+                constructorParamCount = constructor.Parameters.Length;
+            }
+        }
+        
+        if (hasParameterizedConstructor)
+        {
+            // For classes with constructor parameters, use the args
+            writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), args)!;");
+        }
+        else
+        {
+            writer.AppendLine($"return new {concreteClassName}();");
+        }
+        
         writer.Unindent();
         writer.AppendLine("},");
         
