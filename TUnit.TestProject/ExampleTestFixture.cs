@@ -47,7 +47,7 @@ public class DependencyInjectionClassConstructor2 : IClassConstructor, ITestEndE
     private static IServiceProvider CreateServiceProvider()
     {
         return new ServiceCollection()
-            //.AddScoped<Class1>() //Commenting this line out removes the test from the discovery
+            .AddScoped<Class1>() //Commenting this line out removes the test from the discovery
             .BuildServiceProvider();
     }
 

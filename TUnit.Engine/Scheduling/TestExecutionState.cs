@@ -37,6 +37,7 @@ public sealed class TestExecutionState
         EnqueueTime = DateTime.UtcNow;
         
         Constraint = test.Context.ParallelConstraint;
+        // Get Order from constraint, or use default if not set
         Order = Constraint switch
         {
             NotInParallelConstraint nip => nip.Order,

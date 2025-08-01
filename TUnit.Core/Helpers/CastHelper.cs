@@ -147,6 +147,18 @@ public static class CastHelper
 
         if (conversionMethod is null)
         {
+            // Check if we can do unboxing directly for value types
+            if (underlyingType.IsValueType && value.GetType() == typeof(object))
+            {
+                try
+                {
+                    return (T)value;
+                }
+                catch
+                {
+                    // If unboxing fails, continue with the original approach
+                }
+            }
             return (T?) value;
         }
 
@@ -294,6 +306,18 @@ public static class CastHelper
 
         if (conversionMethod is null)
         {
+            // Check if we can do unboxing directly for value types
+            if (underlyingType.IsValueType && value.GetType() == typeof(object))
+            {
+                try
+                {
+                    return value;
+                }
+                catch
+                {
+                    // If unboxing fails, continue with the original approach
+                }
+            }
             return value;
         }
 

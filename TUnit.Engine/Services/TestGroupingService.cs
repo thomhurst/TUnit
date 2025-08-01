@@ -1,5 +1,6 @@
 using TUnit.Core;
 using TUnit.Engine.Models;
+using TUnit.Engine.Scheduling;
 
 namespace TUnit.Engine.Services;
 
@@ -17,8 +18,8 @@ internal sealed class TestGroupingService : ITestGroupingService
     {
         // Use collection directly if already materialized, otherwise create efficient list
         var allTests = tests as IReadOnlyList<AbstractExecutableTest> ?? tests.ToList();
-        var notInParallelQueue = new PriorityQueue<AbstractExecutableTest, int>();
-        var keyedNotInParallelQueues = new Dictionary<string, PriorityQueue<AbstractExecutableTest, int>>();
+        var notInParallelQueue = new PriorityQueue<AbstractExecutableTest, TestPriority>();
+        var keyedNotInParallelQueues = new Dictionary<string, PriorityQueue<AbstractExecutableTest, TestPriority>>();
         var parallelTests = new List<AbstractExecutableTest>();
         var parallelGroups = new Dictionary<string, SortedDictionary<int, List<AbstractExecutableTest>>>();
 
@@ -56,14 +57,17 @@ internal sealed class TestGroupingService : ITestGroupingService
     private static void ProcessNotInParallelConstraint(
         AbstractExecutableTest test, 
         NotInParallelConstraint constraint,
-        PriorityQueue<AbstractExecutableTest, int> notInParallelQueue,
-        Dictionary<string, PriorityQueue<AbstractExecutableTest, int>> keyedQueues)
+        PriorityQueue<AbstractExecutableTest, TestPriority> notInParallelQueue,
+        Dictionary<string, PriorityQueue<AbstractExecutableTest, TestPriority>> keyedQueues)
     {
         var order = constraint.Order;
+        var priority = test.Context.ExecutionPriority;
+        var testPriority = new TestPriority(priority, order);
+        
         
         if (constraint.NotInParallelConstraintKeys.Count == 0)
         {
-            notInParallelQueue.Enqueue(test, order);
+            notInParallelQueue.Enqueue(test, testPriority);
         }
         else
         {
@@ -71,10 +75,10 @@ internal sealed class TestGroupingService : ITestGroupingService
             {
                 if (!keyedQueues.TryGetValue(key, out var queue))
                 {
-                    queue = new PriorityQueue<AbstractExecutableTest, int>();
+                    queue = new PriorityQueue<AbstractExecutableTest, TestPriority>();
                     keyedQueues[key] = queue;
                 }
-                queue.Enqueue(test, order);
+                queue.Enqueue(test, testPriority);
             }
         }
     }

@@ -147,7 +147,31 @@ public static class PropertyInjector
             }
         }
 
-        await InjectPropertiesWithValuesAsync(testContext, instance, propertyValues, injectionData, 5, 0);
+        // First inject all properties
+        var allInjectedObjects = new Dictionary<object, int>(); // object -> depth
+        await InjectPropertiesWithValuesAsync(testContext, instance, propertyValues, injectionData, 5, 0, allInjectedObjects);
+        
+        // Then schedule initialization of all injected objects in the correct order (deepest first)
+        if (allInjectedObjects.Count > 0)
+        {
+            var onTestStart = testContext.Events.OnTestStart ??= new AsyncEvent<TestContext>();
+            var objectsByDepth = allInjectedObjects
+                .OrderByDescending(kvp => kvp.Value) // Sort by depth (deepest first)
+                .Select(kvp => kvp.Key)
+                .Where(obj => obj is Interfaces.IAsyncInitializer)
+                .ToList();
+            
+            if (objectsByDepth.Count > 0)
+            {
+                onTestStart.InsertAtFront(async (o, context) =>
+                {
+                    foreach (var obj in objectsByDepth)
+                    {
+                        await ObjectInitializer.InitializeAsync(obj);
+                    }
+                });
+            }
+        }
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Reflection mode requires dynamic property access")]
@@ -157,7 +181,8 @@ public static class PropertyInjector
         Dictionary<string, object?> propertyValues,
         PropertyInjectionData[] injectionData,
         int maxRecursionDepth = 5,
-        int currentDepth = 0)
+        int currentDepth = 0,
+        Dictionary<object, int>? allInjectedObjects = null)
     {
         if (instance == null)
         {
@@ -178,15 +203,15 @@ public static class PropertyInjector
                     continue;
                 }
 
-                var onTestStart = testContext.Events.OnTestStart ??= new AsyncEvent<TestContext>();
-                onTestStart.InsertAtFront(async (o, context) =>
-                {
-                    await ObjectInitializer.InitializeAsync(value);
-                });
-
                 ObjectTracker.TrackObject(testContext.Events, value);
 
                 injection.Setter(instance, value);
+                
+                // Track this object for initialization ordering
+                if (allInjectedObjects != null && value != null)
+                {
+                    allInjectedObjects.TryAdd(value, currentDepth);
+                }
 
                 if (value != null &&
                     injection.NestedPropertyInjections.Length > 0 &&
@@ -202,7 +227,8 @@ public static class PropertyInjector
                             nestedPropertyValues,
                             injection.NestedPropertyInjections,
                             maxRecursionDepth,
-                            currentDepth + 1);
+                            currentDepth + 1,
+                            allInjectedObjects);
                     }
                     catch (Exception ex)
                     {
@@ -214,7 +240,7 @@ public static class PropertyInjector
         }
         else
         {
-            await InjectPropertiesViaReflectionAsync(testContext, instance, propertyValues, maxRecursionDepth, currentDepth);
+            await InjectPropertiesViaReflectionAsync(testContext, instance, propertyValues, maxRecursionDepth, currentDepth, allInjectedObjects);
         }
     }
 
@@ -301,7 +327,8 @@ public static class PropertyInjector
         object instance,
         Dictionary<string, object?> propertyValues,
         int maxRecursionDepth = 5,
-        int currentDepth = 0)
+        int currentDepth = 0,
+        Dictionary<object, int>? allInjectedObjects = null)
     {
         if (currentDepth >= maxRecursionDepth)
         {
@@ -325,6 +352,12 @@ public static class PropertyInjector
 
                 var setter = CreatePropertySetter(property);
                 setter(instance, propertyValue);
+                
+                // Track this object for initialization ordering
+                if (allInjectedObjects != null && propertyValue != null)
+                {
+                    allInjectedObjects.TryAdd(propertyValue, currentDepth);
+                }
 
                 if (propertyValue != null && ShouldRecurse(propertyValue))
                 {
@@ -339,7 +372,8 @@ public static class PropertyInjector
                             nestedPropertyValues,
                             nestedInjectionData,
                             maxRecursionDepth,
-                            currentDepth + 1);
+                            currentDepth + 1,
+                            allInjectedObjects);
                     }
                 }
             }
@@ -594,5 +628,6 @@ public static class PropertyInjector
             };
         });
     }
+
 
 }
