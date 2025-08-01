@@ -215,30 +215,25 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();");
         writer.AppendLine();
 
-        // Check if we can infer generic types for this method
-        if (testMethod.IsGenericMethod && testMethod.MethodSymbol.TypeParameters.Length > 0)
+        // Check if we have generic types or methods
+        if (testMethod.IsGenericType || (testMethod.IsGenericMethod && testMethod.MethodSymbol.TypeParameters.Length > 0))
         {
-            var genericTypeCombinations = GenericTypeInference.GetAllGenericTypeCombinations(
-                testMethod.MethodSymbol, 
-                testMethod.MethodAttributes);
-
-            if (genericTypeCombinations.Length > 0)
+            // For generic types, we need to use runtime resolution
+            // For generic methods, we can use our new approach with concrete types
+            if (testMethod.IsGenericType)
             {
-                // Generate a specific instantiation for each type combination
-                foreach (var typeCombination in genericTypeCombinations)
-                {
-                    GenerateSpecificGenericInstantiation(writer, compilation, testMethod, className, combinationGuid, typeCombination);
-                }
+                // Generic class - use runtime resolution
+                GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
             }
             else
             {
-                // Fallback to runtime generic resolution
-                GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
+                // Generic method in non-generic class - use concrete types approach
+                GenerateGenericTestWithConcreteTypes(writer, compilation, testMethod, className, combinationGuid);
             }
         }
         else
         {
-            // Non-generic method or already has concrete types
+            // Non-generic method in non-generic class
             GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
         }
 
@@ -292,7 +287,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestName = \"{instantiatedMethodName}\",");
         writer.AppendLine($"TestClassType = {GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)},");
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
-        writer.AppendLine($"MethodGenericArguments = new global::System.Type[] {{ {string.Join(", ", typeArguments.Select(t => $"typeof({t.GloballyQualified()})"))}}},");
+        writer.AppendLine($"GenericMethodTypeArguments = new global::System.Type[] {{ {string.Join(", ", typeArguments.Select(t => $"typeof({t.GloballyQualified()})"))}}},");
         
         // Add basic metadata
         GenerateMetadata(writer, compilation, concreteTestMethod);
@@ -339,15 +334,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("},");
         
-        // Generate CreateExecutableTest
-        writer.AppendLine("CreateExecutableTestFactory = (metadata, args) => new global::TUnit.Core.ExecutableTest");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("TestMetadata = metadata,");
-        writer.AppendLine($"TestMethodName = \"{methodName}\",");
-        writer.AppendLine("TestClass = metadata.TestClassInstance,");
-        writer.AppendLine("TestMethodArguments = args,");
-        writer.AppendLine("InvokeTestAsync = async (instance, args, cancellationToken) =>");
+        // Generate InvokeTypedTest for the specific generic instantiation
+        writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
         
@@ -381,8 +369,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         
         writer.AppendLine($"await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{typeArgsString}>({string.Join(", ", parameterCasts)}));");
         
-        writer.Unindent();
-        writer.AppendLine("}");
         writer.Unindent();
         writer.AppendLine("},");
     }
@@ -2008,6 +1994,260 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return false;
+    }
+    
+    private static void GenerateGenericTestWithConcreteTypes(
+        CodeWriter writer, 
+        Compilation compilation, 
+        TestMethodMetadata testMethod, 
+        string className, 
+        string combinationGuid)
+    {
+        var methodName = testMethod.MethodSymbol.Name;
+        
+        writer.AppendLine("// Create generic metadata with concrete type registrations");
+        writer.AppendLine("var genericMetadata = new global::TUnit.Core.GenericTestMetadataWithConcreteTypes");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Generate basic metadata
+        writer.AppendLine($"TestName = \"{methodName}\",");
+        writer.AppendLine($"TestClassType = typeof({className}),");
+        writer.AppendLine($"TestMethodName = \"{methodName}\",");
+        
+        // Add basic metadata
+        GenerateMetadata(writer, compilation, testMethod);
+        
+        // Generate instance factory that works with generic types
+        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"return new {className}();");
+        writer.Unindent();
+        writer.AppendLine("},");
+        
+        // Generate TestInvoker using reflection for generic methods
+        writer.AppendLine("TestInvoker = null,"); // Will be handled by GenericTestMetadataWithConcreteTypes
+        
+        // Generate concrete instantiations dictionary
+        writer.AppendLine("ConcreteInstantiations = new global::System.Collections.Generic.Dictionary<string, global::TUnit.Core.TestMetadata>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        // Get all possible type combinations from Arguments attributes
+        var argumentsAttributes = testMethod.MethodAttributes
+            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
+            .ToList();
+            
+        var processedTypeCombinations = new HashSet<string>();
+        
+        foreach (var argAttr in argumentsAttributes)
+        {
+            // Infer types from this specific Arguments attribute
+            var inferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, argAttr);
+            if (inferredTypes != null && inferredTypes.Length > 0)
+            {
+                var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+                
+                // Skip if we've already processed this type combination
+                if (processedTypeCombinations.Contains(typeKey))
+                    continue;
+                    
+                processedTypeCombinations.Add(typeKey);
+                
+                // Validate constraints
+                if (!ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
+                    continue;
+                
+                // Generate a concrete instantiation for this type combination
+                writer.AppendLine($"[\"{typeKey}\"] = ");
+                GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                writer.AppendLine(",");
+            }
+        }
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+        
+        writer.Unindent();
+        writer.AppendLine("};");
+        
+        writer.AppendLine("genericMetadata.TestSessionId = testSessionId;");
+        writer.AppendLine("tests.Add(genericMetadata);");
+    }
+    
+    private static ITypeSymbol[]? InferTypesFromArgumentsAttribute(IMethodSymbol method, AttributeData argAttr)
+    {
+        if (argAttr.ConstructorArguments.Length == 0)
+            return null;
+            
+        var inferredTypes = new List<ITypeSymbol>();
+        
+        // Match type parameters with method parameters
+        for (int i = 0; i < method.TypeParameters.Length && i < method.Parameters.Length; i++)
+        {
+            var parameter = method.Parameters[i];
+            
+            if (parameter.Type is ITypeParameterSymbol typeParam)
+            {
+                if (i < argAttr.ConstructorArguments.Length)
+                {
+                    var argValue = argAttr.ConstructorArguments[i];
+                    var inferredType = argValue.Type;
+                    
+                    if (inferredType != null)
+                    {
+                        inferredTypes.Add(inferredType);
+                    }
+                }
+            }
+        }
+        
+        return inferredTypes.Count == method.TypeParameters.Length 
+            ? inferredTypes.ToArray() 
+            : null;
+    }
+    
+    private static bool ValidateTypeConstraints(IMethodSymbol method, ITypeSymbol[] typeArguments)
+    {
+        if (method.TypeParameters.Length != typeArguments.Length)
+            return false;
+            
+        for (int i = 0; i < method.TypeParameters.Length; i++)
+        {
+            var typeParam = method.TypeParameters[i];
+            var typeArg = typeArguments[i];
+            
+            // Check struct constraint
+            if (typeParam.HasValueTypeConstraint)
+            {
+                if (!typeArg.IsValueType || typeArg.IsReferenceType)
+                    return false;
+            }
+            
+            // Check class constraint
+            if (typeParam.HasReferenceTypeConstraint)
+            {
+                if (!typeArg.IsReferenceType)
+                    return false;
+            }
+            
+            // Check interface constraints
+            foreach (var constraintType in typeParam.ConstraintTypes)
+            {
+                if (constraintType.TypeKind == TypeKind.Interface)
+                {
+                    // Check if the type argument implements the interface
+                    if (!typeArg.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, constraintType)))
+                        return false;
+                }
+                else if (constraintType.TypeKind == TypeKind.Class)
+                {
+                    // Check if the type argument derives from the base class
+                    var baseType = typeArg.BaseType;
+                    bool found = false;
+                    while (baseType != null)
+                    {
+                        if (SymbolEqualityComparer.Default.Equals(baseType, constraintType))
+                        {
+                            found = true;
+                            break;
+                        }
+                        baseType = baseType.BaseType;
+                    }
+                    if (!found)
+                        return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    private static void GenerateConcreteTestMetadata(
+        CodeWriter writer, 
+        Compilation compilation, 
+        TestMethodMetadata testMethod, 
+        string className,
+        ITypeSymbol[] typeArguments)
+    {
+        var methodName = testMethod.MethodSymbol.Name;
+        var typeArgsString = string.Join(", ", typeArguments.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+        
+        writer.AppendLine($"new global::TUnit.Core.TestMetadata<{className}>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        writer.AppendLine($"TestName = \"{methodName}<{typeArgsString}>\",");
+        writer.AppendLine($"TestClassType = typeof({className}),");
+        writer.AppendLine($"TestMethodName = \"{methodName}\",");
+        writer.AppendLine($"GenericMethodTypeArguments = new global::System.Type[] {{ {string.Join(", ", typeArguments.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})"))}}},");
+        
+        // Add basic metadata
+        GenerateMetadata(writer, compilation, testMethod);
+        
+        // Generate instance factory
+        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"return new {className}();");
+        writer.Unindent();
+        writer.AppendLine("},");
+        
+        // Generate strongly-typed test invoker
+        writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+        
+        var hasCancellationToken = testMethod.MethodSymbol.Parameters.Any(p => 
+            p.Type.Name == "CancellationToken" && 
+            p.Type.ContainingNamespace?.ToString() == "System.Threading");
+            
+        // Generate direct method call with specific types
+        writer.AppendLine($"var typedInstance = ({className})instance;");
+        
+        // Prepare method arguments with proper casting
+        var parameterCasts = new List<string>();
+        for (int i = 0; i < testMethod.MethodSymbol.Parameters.Length; i++)
+        {
+            var param = testMethod.MethodSymbol.Parameters[i];
+            if (param.Type.Name == "CancellationToken")
+            {
+                parameterCasts.Add("cancellationToken");
+            }
+            else
+            {
+                var paramType = param.Type;
+                if (paramType is ITypeParameterSymbol typeParam)
+                {
+                    // Find the index of this type parameter
+                    var index = -1;
+                    for (int j = 0; j < testMethod.MethodSymbol.TypeParameters.Length; j++)
+                    {
+                        if (testMethod.MethodSymbol.TypeParameters[j].Name == typeParam.Name)
+                        {
+                            index = j;
+                            break;
+                        }
+                    }
+                    
+                    if (index >= 0 && index < typeArguments.Length)
+                    {
+                        paramType = typeArguments[index];
+                    }
+                }
+                
+                parameterCasts.Add($"({paramType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})args[{i}]!");
+            }
+        }
+        
+        writer.AppendLine($"await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{typeArgsString}>({string.Join(", ", parameterCasts)}));");
+        
+        writer.Unindent();
+        writer.AppendLine("}");
+        
+        writer.Unindent();
+        writer.AppendLine("}");
     }
 }
 
