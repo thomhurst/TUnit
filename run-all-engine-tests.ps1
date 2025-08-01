@@ -36,8 +36,8 @@ function Get-RuntimeIdentifier {
 }
 
 $rid = Get-RuntimeIdentifier
-$isWindows = ($PSVersionTable.PSVersion.Major -lt 6) -or $IsWindows
-$executableName = if ($isWindows) { "TUnit.TestProject.exe" } else { "TUnit.TestProject" }
+$isWindowsPlatform = ($PSVersionTable.PSVersion.Major -lt 6) -or ((Get-Variable -Name 'IsWindows' -ErrorAction SilentlyContinue) -and $IsWindows)
+$executableName = if ($isWindowsPlatform) { "TUnit.TestProject.exe" } else { "TUnit.TestProject" }
 
 # Change to test project directory
 $testProjectDir = Join-Path $PSScriptRoot "TUnit.TestProject"
