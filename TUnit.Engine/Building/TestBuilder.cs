@@ -333,6 +333,39 @@ internal sealed class TestBuilder : ITestBuilder
         var genericParameters = genericClassType.GetGenericArguments();
         var typeMapping = new Dictionary<Type, Type>();
 
+        // First, check if we have typed data sources that can help infer the generic type
+        foreach (var dataSource in metadata.DataSources)
+        {
+            var dataSourceType = dataSource.GetType();
+            
+            // Check if this data source inherits from a generic base type
+            var baseType = dataSourceType.BaseType;
+            while (baseType != null)
+            {
+                if (baseType.IsGenericType)
+                {
+                    var genericDef = baseType.GetGenericTypeDefinition();
+                    var genericDefName = genericDef.FullName ?? genericDef.Name;
+                    
+                    // Check if it's a typed data source attribute
+                    if (genericDefName.Contains("DataSourceGeneratorAttribute`") ||
+                        genericDefName.Contains("AsyncDataSourceGeneratorAttribute`"))
+                    {
+                        // Get the type argument (e.g., int from AsyncDataSourceGeneratorAttribute<int>)
+                        var typeArgs = baseType.GetGenericArguments();
+                        if (typeArgs.Length > 0 && genericParameters.Length > 0)
+                        {
+                            // For now, assume the first generic parameter maps to the data source type
+                            // This handles simple cases like GenericClass<T> with IntDataSource
+                            typeMapping[genericParameters[0]] = typeArgs[0];
+                        }
+                        break;
+                    }
+                }
+                baseType = baseType.BaseType;
+            }
+        }
+
         if (metadata.DataSources.Any(ds => ds is IAccessesInstanceData))
         {
             // Look at the test method parameters to find attributes that can help with generic type inference
