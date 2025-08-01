@@ -19,14 +19,10 @@ internal readonly struct TestPriority : IComparable<TestPriority>
     
     public int CompareTo(TestPriority other)
     {
-        // First compare by Priority (higher priority values should dequeue first)
-        // Since PriorityQueue is a min-heap, we need to invert the comparison
-        // so that higher priority values get smaller comparison results
         var priorityComparison = ((int)other.Priority).CompareTo((int)Priority);
         if (priorityComparison != 0)
             return priorityComparison;
         
-        // Then compare by Order (lower order values should dequeue first)
         return Order.CompareTo(other.Order);
     }
 }
@@ -70,8 +66,7 @@ internal class PriorityChannel<T> where T : class
             if (_isCompleted)
                 return;
 
-            // Create TestPriority with both Priority and Order
-            var order = int.MaxValue / 2; // Default order value
+            var order = int.MaxValue / 2;
             if (item is TestExecutionData testData && testData.State != null)
             {
                 order = testData.State.Order;
@@ -84,7 +79,7 @@ internal class PriorityChannel<T> where T : class
         finally
         {
             _semaphore.Release();
-            _itemAvailable.Release(); // Signal that an item is available
+            _itemAvailable.Release();
         }
     }
 
@@ -95,7 +90,7 @@ internal class PriorityChannel<T> where T : class
 
         _isCompleted = true;
         _completionCts.Cancel();
-        _itemAvailable.Release(); // Release any waiting thread
+        _itemAvailable.Release();
         return true;
     }
 
@@ -105,7 +100,6 @@ internal class PriorityChannel<T> where T : class
         {
             while (!_completionCts.Token.IsCancellationRequested)
             {
-                // Wait for an item to be available
                 await _itemAvailable.WaitAsync(_completionCts.Token);
                 
                 await _semaphore.WaitAsync(_completionCts.Token);
@@ -127,11 +121,9 @@ internal class PriorityChannel<T> where T : class
         }
         catch (OperationCanceledException)
         {
-            // Expected when completion is signaled
         }
         finally
         {
-            // Drain any remaining items
             await _semaphore.WaitAsync();
             try
             {

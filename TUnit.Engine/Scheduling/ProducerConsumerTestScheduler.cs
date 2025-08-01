@@ -56,17 +56,13 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
 
         await _logger.LogInformationAsync($"Scheduling {testList.Count} tests for execution");
         
-        // Reset routed test count for this run
         _routedTestCount = 0;
 
-        // Group tests by constraints
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(testList);
         
-        // Convert to execution states
         var executionStates = new Dictionary<string, TestExecutionState>();
-        var orderedTests = new List<TestExecutionState>(); // Maintain order
+        var orderedTests = new List<TestExecutionState>();
         
-        // Process parallel tests
         foreach (var test in groupedTests.Parallel)
         {
             var state = new TestExecutionState(test)
@@ -77,7 +73,6 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             orderedTests.Add(state);
         }
         
-        // Process not-in-parallel tests - maintain dequeue order
         while (groupedTests.NotInParallel.TryDequeue(out var test, out var testPriority))
         {
             var state = new TestExecutionState(test)
@@ -86,11 +81,10 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                 Priority = test.Context.ExecutionPriority
             };
             executionStates[test.TestId] = state;
-            orderedTests.Add(state); // Preserve dequeue order
+            orderedTests.Add(state);
             
         }
         
-        // Process keyed not-in-parallel tests
         foreach (var kvp in groupedTests.KeyedNotInParallel)
         {
             var keyedOrderedTests = new List<TestExecutionState>();
@@ -103,12 +97,11 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                     Priority = test.Context.ExecutionPriority
                 };
                 executionStates[test.TestId] = state;
-                keyedOrderedTests.Add(state); // Preserve dequeue order per key
+                keyedOrderedTests.Add(state);
             }
             orderedTests.AddRange(keyedOrderedTests);
         }
         
-        // Process parallel groups
         foreach (var group in groupedTests.ParallelGroups)
         {
             foreach (var orderGroup in group.Value)
@@ -127,15 +120,10 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             }
         }
         
-        // Set up dependency graph
         await SetupDependencyGraphAsync(executionStates, cancellationToken);
 
-        // Pre-create channels for all constraint keys to avoid dynamic creation during execution
         await PreCreateChannelsForConstraintsAsync(executionStates.Values, cancellationToken);
         
-        // Route tests in the order they were dequeued from priority queues
-        // Only route tests that have no dependencies
-        // For keyed tests with explicit order, we need to ensure they're routed in Order sequence
         var testsToRoute = new List<TestExecutionState>();
         var keyedTestsWithOrder = new Dictionary<string, List<TestExecutionState>>();
         
@@ -143,7 +131,6 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         {
             if (state.RemainingDependencies == 0)
             {
-                // Check if this is a keyed test with explicit order
                 if (state.ConstraintKey != null && state.Order != int.MaxValue / 2)
                 {
                     if (!keyedTestsWithOrder.ContainsKey(state.ConstraintKey))
@@ -159,13 +146,11 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             }
         }
         
-        // First route all tests without explicit order (maintain priority dequeue order)
         foreach (var state in testsToRoute)
         {
             await RouteTestAsync(state, cancellationToken);
         }
         
-        // Then route keyed tests with explicit order (sorted by Order value)
         foreach (var kvp in keyedTestsWithOrder)
         {
             var sortedTests = kvp.Value.OrderBy(s => s.Order).ToList();
@@ -175,10 +160,8 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             }
         }
         
-        // Track total test count
         var totalTestCount = executionStates.Count;
         
-        // Start consumers - they will consume until channels are empty and completed
         var consumerTask = _consumerManager.StartConsumersAsync(
             executor,
             _runningConstraintKeys,
@@ -186,16 +169,13 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             _channelRouter.GetMultiplexer(),
             cancellationToken);
         
-        // Wait for all tests to be routed before signaling completion
         while (_routedTestCount < totalTestCount)
         {
             await Task.Delay(100, cancellationToken);
         }
         
-        // Now signal completion - all tests have been routed
         _channelRouter.SignalCompletion();
         
-        // Wait for consumers to finish
         await consumerTask;
         
         await _logger.LogInformationAsync("Test execution completed");
@@ -203,7 +183,6 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
 
     private async Task RouteTestAsync(TestExecutionState state, CancellationToken cancellationToken)
     {
-        // Capture execution context at routing time
         var testData = new TestExecutionData
         {
             Test = state.Test,
@@ -213,11 +192,8 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             State = state
         };
 
-
-        // Route test to appropriate channel
         await _channelRouter.RouteTestAsync(testData, cancellationToken);
         
-        // Track that this test has been routed
         Interlocked.Increment(ref _routedTestCount);
     }
 
@@ -231,23 +207,19 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         
         try
         {
-            // Set test state
             state.State = TestState.Running;
             
-            // Create timeout cancellation
             using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             if (_configuration.TestTimeout != TimeSpan.Zero)
             {
                 timeoutCts.CancelAfter(_configuration.TestTimeout);
             }
 
-            // Execute test with restored context
             await _executionContextManager.ExecuteWithRestoredContextAsync(
                 testData,
                 async () => await executor.ExecuteTestAsync(state.Test, timeoutCts.Token),
                 timeoutCts.Token);
 
-            // State will be set by the executor based on test result
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -265,7 +237,6 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                 _runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
             }
             
-            // Process dependents and route newly ready tests
             await ProcessTestCompletionAsync(state, executionStates, cancellationToken);
         }
     }
@@ -287,7 +258,6 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         }
         else if (state.Constraint is ParallelGroupConstraint parallelGroup)
         {
-            // Fix: Add support for ParallelGroup constraints
             keys.Add($"__parallel_group_{parallelGroup.Group}__");
         }
         
@@ -306,13 +276,11 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             {
                 allConstraintKeys.Add(key);
                 
-                // Track if this constraint key has any tests with explicit order
                 if (!constraintKeyHasExplicitOrder.ContainsKey(key))
                 {
                     constraintKeyHasExplicitOrder[key] = false;
                 }
                 
-                // Check if this test has an explicit order (not the default value)
                 if (state.Order != int.MaxValue / 2)
                 {
                     constraintKeyHasExplicitOrder[key] = true;
@@ -320,31 +288,26 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             }
         }
         
-        // Pre-create channels for all constraint keys
         foreach (var key in allConstraintKeys)
         {
             if (key.StartsWith("__parallel_group_"))
             {
                 _channelRouter.GetMultiplexer().GetOrCreateParallelGroupChannel(key);
             }
-            else if (key != "__global_not_in_parallel__") // Global channel is already created
+            else if (key != "__global_not_in_parallel__")
             {
-                // Pass hasExplicitOrder based on whether any test with this key has explicit order
                 var hasExplicitOrder = constraintKeyHasExplicitOrder.ContainsKey(key) ? constraintKeyHasExplicitOrder[key] : false;
                 _channelRouter.GetMultiplexer().GetOrCreateKeyedNotInParallelChannel(key, hasExplicitOrder);
             }
         }
         
-        // Pre-created channels for constraint keys
         return Task.CompletedTask;
     }
     
     private async Task SetupDependencyGraphAsync(Dictionary<string, TestExecutionState> executionStates, CancellationToken cancellationToken)
     {
-        // Create a lookup for fast test resolution
         var testLookup = executionStates.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         
-        // Set up dependency relationships
         foreach (var kvp in executionStates)
         {
             var testId = kvp.Key;
@@ -356,9 +319,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             {
                 if (testLookup.TryGetValue(dependency.TestId, out var dependencyState))
                 {
-                    // Add this test as a dependent of the dependency
                     dependencyState.Dependents.Add(testId);
-                    // Dependency relationship established
                 }
                 else
                 {
@@ -367,7 +328,6 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             }
         }
         
-        // Log dependency status
         var testsWithDependencies = executionStates.Values.Where(s => s.RemainingDependencies > 0).ToList();
         var readyTests = executionStates.Values.Where(s => s.RemainingDependencies == 0).ToList();
         
@@ -377,7 +337,6 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
     
     private async Task ProcessTestCompletionAsync(TestExecutionState completedTest, Dictionary<string, TestExecutionState> executionStates, CancellationToken cancellationToken)
     {
-        // Process dependents of the completed test
         var newlyReadyTests = new List<TestExecutionState>();
         var keyedTestsWithOrder = new Dictionary<string, List<TestExecutionState>>();
         
@@ -389,8 +348,6 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                 
                 if (remaining == 0 && dependentState.State == TestState.NotStarted)
                 {
-                    // Test is now ready for execution
-                    // Check if this is a keyed test with explicit order
                     if (dependentState.ConstraintKey != null && dependentState.Order != int.MaxValue / 2)
                     {
                         if (!keyedTestsWithOrder.ContainsKey(dependentState.ConstraintKey))
@@ -407,13 +364,11 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             }
         }
         
-        // Route non-ordered tests first (maintain dequeue order)
         foreach (var readyTest in newlyReadyTests)
         {
             await RouteTestAsync(readyTest, cancellationToken);
         }
         
-        // Then route keyed tests with explicit order in the correct sequence
         foreach (var kvp in keyedTestsWithOrder)
         {
             var sortedTests = kvp.Value.OrderBy(s => s.Order).ToList();

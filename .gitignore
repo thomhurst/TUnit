@@ -416,3 +416,8 @@ TUnit.TestProject/TestSession*.txt
 
 .mcp.json
 requirements
+
+TESTPROJECT_AOT
+TESTPROJECT_SINGLEFILE
+
+nul
