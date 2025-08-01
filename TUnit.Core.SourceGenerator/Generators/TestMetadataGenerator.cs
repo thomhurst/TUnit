@@ -233,7 +233,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var hasGenerateGenericTest = testMethod.IsGenericMethod && testMethod.MethodAttributes
                 .Any(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute");
             
-            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod)
+            // Check if generic class has class-level Arguments attributes
+            var hasClassArgumentsForGenericType = testMethod.IsGenericType && testMethod.TypeSymbol.GetAttributes()
+                .Any(a => a.AttributeClass?.Name == "ArgumentsAttribute");
+            
+            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArgumentsForGenericType)
             {
                 // Use concrete types approach for AOT compatibility
                 // For generic methods, we always use this approach to support Arguments attributes
@@ -2095,13 +2099,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
             .ToList();
             
+        // For generic classes, also check class-level Arguments attributes
+        if (testMethod.IsGenericType)
+        {
+            var classArgumentsAttributes = testMethod.TypeSymbol.GetAttributes()
+                .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
+                .ToList();
+            argumentsAttributes.AddRange(classArgumentsAttributes);
+        }
+            
         var processedTypeCombinations = new HashSet<string>();
         
         // Process Arguments attributes
         foreach (var argAttr in argumentsAttributes)
         {
             // Infer types from this specific Arguments attribute
-            var inferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, argAttr, compilation);
+            ITypeSymbol[]? inferredTypes = null;
+            
+            // Check if this is a class-level attribute on a generic type
+            if (testMethod.IsGenericType && argAttr.ApplicationSyntaxReference?.GetSyntax().Parent?.Parent is Microsoft.CodeAnalysis.CSharp.Syntax.TypeDeclarationSyntax)
+            {
+                inferredTypes = InferTypesFromClassArgumentsAttribute(testMethod.TypeSymbol, argAttr, compilation);
+            }
+            else
+            {
+                inferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, argAttr, compilation);
+            }
             
             if (inferredTypes != null && inferredTypes.Length > 0)
             {
@@ -2114,7 +2137,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 processedTypeCombinations.Add(typeKey);
                 
                 // Validate constraints
-                if (!ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
+                bool constraintsValid = true;
+                if (testMethod.IsGenericType && !testMethod.IsGenericMethod)
+                {
+                    // For generic class only, validate class constraints
+                    constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes);
+                }
+                else if (testMethod.IsGenericMethod)
+                {
+                    // For generic method (with or without generic class), validate method constraints
+                    constraintsValid = ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes);
+                }
+                
+                if (!constraintsValid)
                     continue;
                 
                 // Generate a concrete instantiation for this type combination
@@ -2143,7 +2178,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 processedTypeCombinations.Add(typeKey);
                 
                 // Validate constraints
-                if (!ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
+                bool constraintsValid = true;
+                if (testMethod.IsGenericType && !testMethod.IsGenericMethod)
+                {
+                    // For generic class only, validate class constraints
+                    constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes);
+                }
+                else if (testMethod.IsGenericMethod)
+                {
+                    // For generic method (with or without generic class), validate method constraints
+                    constraintsValid = ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes);
+                }
+                
+                if (!constraintsValid)
                     continue;
                 
                 // Generate a concrete instantiation for this type combination
@@ -2213,6 +2260,159 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         
         writer.AppendLine("genericMetadata.TestSessionId = testSessionId;");
         writer.AppendLine("tests.Add(genericMetadata);");
+    }
+    
+    private static bool ValidateClassTypeConstraints(INamedTypeSymbol classSymbol, ITypeSymbol[] typeArguments)
+    {
+        var typeParams = classSymbol.TypeParameters;
+        
+        if (typeParams.Length != typeArguments.Length)
+            return false;
+            
+        for (int i = 0; i < typeParams.Length; i++)
+        {
+            var typeParam = typeParams[i];
+            var typeArg = typeArguments[i];
+            
+            // Check struct constraint
+            if (typeParam.HasValueTypeConstraint)
+            {
+                if (!typeArg.IsValueType || typeArg.IsReferenceType)
+                    return false;
+            }
+            
+            // Check class constraint
+            if (typeParam.HasReferenceTypeConstraint)
+            {
+                if (!typeArg.IsReferenceType)
+                    return false;
+            }
+            
+            // Check specific type constraints
+            foreach (var constraintType in typeParam.ConstraintTypes)
+            {
+                // For interface constraints, check if the type implements the interface
+                if (constraintType.TypeKind == TypeKind.Interface)
+                {
+                    if (!typeArg.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, constraintType)))
+                        return false;
+                }
+                // For base class constraints, check if the type derives from the class
+                else if (constraintType.TypeKind == TypeKind.Class)
+                {
+                    var baseType = typeArg.BaseType;
+                    bool found = false;
+                    while (baseType != null)
+                    {
+                        if (SymbolEqualityComparer.Default.Equals(baseType, constraintType))
+                        {
+                            found = true;
+                            break;
+                        }
+                        baseType = baseType.BaseType;
+                    }
+                    if (!found && !SymbolEqualityComparer.Default.Equals(typeArg, constraintType))
+                        return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    private static ITypeSymbol[]? InferTypesFromClassArgumentsAttribute(INamedTypeSymbol classSymbol, AttributeData argAttr, Compilation compilation)
+    {
+        if (argAttr.ConstructorArguments.Length == 0)
+            return null;
+            
+        var inferredTypes = new Dictionary<string, ITypeSymbol>();
+        var typeParameters = classSymbol.TypeParameters;
+        
+        // Arguments attribute takes params object?[] so the first constructor argument is an array
+        if (argAttr.ConstructorArguments.Length != 1 || argAttr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
+            return null;
+            
+        var argumentValues = argAttr.ConstructorArguments[0].Values;
+        
+        // Find the primary constructor
+        var primaryConstructor = classSymbol.Constructors
+            .FirstOrDefault(c => c.DeclaringSyntaxReferences.Any(sr => 
+                sr.GetSyntax() is Microsoft.CodeAnalysis.CSharp.Syntax.ConstructorDeclarationSyntax cds && 
+                cds.Modifiers.Any(m => m.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PublicKeyword)))) 
+            ?? classSymbol.Constructors.FirstOrDefault();
+            
+        if (primaryConstructor == null)
+            return null;
+            
+        var constructorParams = primaryConstructor.Parameters;
+        
+        // For each value in the params array
+        for (int argIndex = 0; argIndex < argumentValues.Length && argIndex < constructorParams.Length; argIndex++)
+        {
+            var constructorParam = constructorParams[argIndex];
+            var argValue = argumentValues[argIndex];
+            
+            // Check if the constructor parameter type is a generic type parameter
+            if (constructorParam.Type is ITypeParameterSymbol typeParam)
+            {
+                // The argument value's type tells us what the generic type should be
+                ITypeSymbol? argType = null;
+                
+                if (argValue.Type != null)
+                {
+                    argType = argValue.Type;
+                }
+                else if (argValue.Value != null)
+                {
+                    // For literal values, infer type from the value
+                    var value = argValue.Value;
+                    
+                    if (value is int)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Int32);
+                    else if (value is string)
+                        argType = compilation?.GetSpecialType(SpecialType.System_String);
+                    else if (value is bool)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Boolean);
+                    else if (value is double)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Double);
+                    else if (value is float)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Single);
+                    else if (value is long)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Int64);
+                    else if (value is char)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Char);
+                    else if (value is byte)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Byte);
+                    else if (value is decimal)
+                        argType = compilation?.GetSpecialType(SpecialType.System_Decimal);
+                }
+                
+                if (argType != null)
+                {
+                    inferredTypes[typeParam.Name] = argType;
+                }
+            }
+        }
+        
+        // Build the result array in the correct order
+        if (inferredTypes.Count == typeParameters.Length)
+        {
+            var result = new ITypeSymbol[typeParameters.Length];
+            for (int i = 0; i < typeParameters.Length; i++)
+            {
+                if (inferredTypes.TryGetValue(typeParameters[i].Name, out var type))
+                {
+                    result[i] = type;
+                }
+                else
+                {
+                    return null; // Missing type inference
+                }
+            }
+            return result;
+        }
+        
+        return null;
     }
     
     private static ITypeSymbol[]? InferTypesFromArgumentsAttribute(IMethodSymbol method, AttributeData argAttr, Compilation compilation)
