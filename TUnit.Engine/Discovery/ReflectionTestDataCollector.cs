@@ -267,7 +267,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 // Some types might fail to load, but we can still use the ones that loaded successfully
                 Console.WriteLine($"Warning: Some types failed to load from assembly {asm.FullName}: {rtle.Message}");
-                return rtle.Types?.Where(t => t != null).ToArray()! ?? [];
+                return rtle.Types?.Where(t => t != null).Cast<Type>().ToArray() ?? [];
             }
             catch (Exception ex)
             {
