@@ -159,6 +159,13 @@ public static class CastHelper
                     // If unboxing fails, continue with the original approach
                 }
             }
+            
+            // Log diagnostic information for debugging single file mode issues
+            if (Environment.GetEnvironmentVariable("TUNIT_DIAGNOSTIC_CAST") == "true")
+            {
+                Console.WriteLine($"[CastHelper] No conversion found from {value.GetType().FullName} to {underlyingType.FullName}");
+            }
+            
             return (T?) value;
         }
 
@@ -328,16 +335,31 @@ public static class CastHelper
 
     public static MethodInfo? GetConversionMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type baseType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type targetType)
     {
-        var methods = baseType.GetMethods(BindingFlags.Public | BindingFlags.Static)
-            .Concat(targetType.GetMethods(BindingFlags.Public | BindingFlags.Static))
-            .ToArray();
+        // In single file mode, we might need to look harder for conversion methods
+        // First try the base type methods (including inherited and declared only)
+        var baseMethods = baseType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
+            .Concat(baseType.GetMethods(BindingFlags.Public | BindingFlags.Static));
+        
+        // Then try the target type methods
+        var targetMethods = targetType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
+            .Concat(targetType.GetMethods(BindingFlags.Public | BindingFlags.Static));
+        
+        var methods = baseMethods.Concat(targetMethods).Distinct().ToArray();
 
+        // Look for implicit conversion first
+        var implicitMethod = methods
+            .FirstOrDefault(mi =>
+                mi.Name == "op_Implicit" && mi.ReturnType == targetType && HasCorrectInputType(baseType, mi));
+        
+        if (implicitMethod != null)
+        {
+            return implicitMethod;
+        }
+
+        // Then look for explicit conversion
         return methods
-                   .FirstOrDefault(mi =>
-                       mi.Name == "op_Implicit" && mi.ReturnType == targetType && HasCorrectInputType(baseType, mi))
-               ?? methods
-                   .FirstOrDefault(mi =>
-                       mi.Name == "op_Explicit" && mi.ReturnType == targetType && HasCorrectInputType(baseType, mi));
+            .FirstOrDefault(mi =>
+                mi.Name == "op_Explicit" && mi.ReturnType == targetType && HasCorrectInputType(baseType, mi));
     }
 
     private static bool HasCorrectInputType(Type baseType, MethodInfo mi)

@@ -49,7 +49,10 @@ internal sealed class ReflectionHookDiscoveryService
     {
         try
         {
-            var types = assembly.GetExportedTypes()
+            // In single file mode, GetExportedTypes might miss some types
+            // Use GetTypes() instead which gets all types including nested ones
+            var allTypes = assembly.GetTypes();
+            var types = allTypes
                 .Where(t => t is { IsClass: true, IsAbstract: false } && !IsCompilerGenerated(t));
 
             foreach (var type in types)
