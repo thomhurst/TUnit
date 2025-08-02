@@ -73,6 +73,9 @@ internal sealed class TestDiscoveryService : IDataProducer
         {
             _dependencyResolver.TryResolveDependencies(test);
         }
+        
+        // Check for circular dependencies after all dependencies are resolved
+        _dependencyResolver.CheckForCircularDependencies();
 
         // Apply filter first to get the tests we want to run
         var filteredTests = _testFilterService.FilterTests(filter, tests);

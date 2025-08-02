@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
 using TUnit.Core;
+using TUnit.Core.Enums;
+using TUnit.Core.Exceptions;
 
 namespace TUnit.Engine.Services;
 
@@ -10,10 +12,12 @@ internal sealed class TestDependencyResolver
 {
     private readonly ConcurrentDictionary<string, AbstractExecutableTest> _testsByName = new();
     private readonly ConcurrentDictionary<string, List<string>> _pendingDependents = new();
+    private readonly List<AbstractExecutableTest> _allTests = new();
     
     public void RegisterTest(AbstractExecutableTest test)
     {
         _testsByName[test.TestId] = test;
+        _allTests.Add(test);
         
         // Process any tests waiting for this one
         if (_pendingDependents.TryRemove(test.TestId, out var dependents))
@@ -101,5 +105,113 @@ internal sealed class TestDependencyResolver
                 }
             }
         }
+    }
+    
+    public void CheckForCircularDependencies()
+    {
+        var circularDependencies = DetectCircularDependencies();
+        if (circularDependencies.Count > 0)
+        {
+            // Mark all tests involved in circular dependencies as failed
+            foreach (var cycle in circularDependencies)
+            {
+                Console.WriteLine($"[DEBUG] Found circular dependency cycle: {string.Join(" -> ", cycle)}");
+                foreach (var testId in cycle)
+                {
+                    if (_testsByName.TryGetValue(testId, out var test))
+                    {
+                        var testChain = BuildTestChain(cycle);
+                        var exception = new DependencyConflictException(testChain);
+                        
+                        // Create a failed test result
+                        test.Result = new TestResult
+                        {
+                            State = TestState.Failed,
+                            Start = DateTimeOffset.UtcNow,
+                            End = DateTimeOffset.UtcNow,
+                            Duration = TimeSpan.Zero,
+                            Exception = exception,
+                            ComputerName = Environment.MachineName,
+                            TestContext = test.Context
+                        };
+                        
+                        test.State = TestState.Failed;
+                    }
+                }
+            }
+        }
+    }
+    
+    private List<List<string>> DetectCircularDependencies()
+    {
+        var visited = new HashSet<string>();
+        var recursionStack = new HashSet<string>();
+        var cycles = new List<List<string>>();
+        var currentPath = new List<string>();
+        
+        foreach (var test in _allTests)
+        {
+            if (!visited.Contains(test.TestId))
+            {
+                DetectCyclesRecursive(test.TestId, visited, recursionStack, currentPath, cycles);
+            }
+        }
+        
+        return cycles;
+    }
+    
+    private bool DetectCyclesRecursive(
+        string testId,
+        HashSet<string> visited,
+        HashSet<string> recursionStack,
+        List<string> currentPath,
+        List<List<string>> cycles)
+    {
+        visited.Add(testId);
+        recursionStack.Add(testId);
+        currentPath.Add(testId);
+        
+        if (_testsByName.TryGetValue(testId, out var test))
+        {
+            foreach (var dependency in test.Dependencies)
+            {
+                if (!visited.Contains(dependency.TestId))
+                {
+                    if (DetectCyclesRecursive(dependency.TestId, visited, recursionStack, currentPath, cycles))
+                    {
+                        return true;
+                    }
+                }
+                else if (recursionStack.Contains(dependency.TestId))
+                {
+                    // Found a cycle - extract the cycle from currentPath
+                    var cycleStartIndex = currentPath.IndexOf(dependency.TestId);
+                    var cycle = new List<string>();
+                    for (int i = cycleStartIndex; i < currentPath.Count; i++)
+                    {
+                        cycle.Add(currentPath[i]);
+                    }
+                    cycle.Add(dependency.TestId); // Complete the cycle
+                    cycles.Add(cycle);
+                }
+            }
+        }
+        
+        recursionStack.Remove(testId);
+        currentPath.RemoveAt(currentPath.Count - 1);
+        return false;
+    }
+    
+    private List<TestDetails> BuildTestChain(List<string> cycle)
+    {
+        var testChain = new List<TestDetails>();
+        foreach (var testId in cycle)
+        {
+            if (_testsByName.TryGetValue(testId, out var test))
+            {
+                testChain.Add(test.Context.TestDetails);
+            }
+        }
+        return testChain;
     }
 }

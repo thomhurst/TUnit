@@ -65,21 +65,14 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         
         foreach (var test in groupedTests.Parallel)
         {
-            var state = new TestExecutionState(test)
-            {
-                Priority = test.Context.ExecutionPriority
-            };
+            var state = new TestExecutionState(test);
             executionStates[test.TestId] = state;
             orderedTests.Add(state);
         }
         
         while (groupedTests.NotInParallel.TryDequeue(out var test, out var testPriority))
         {
-            var state = new TestExecutionState(test)
-            {
-                Constraint = test.Context.ParallelConstraint,
-                Priority = test.Context.ExecutionPriority
-            };
+            var state = new TestExecutionState(test);
             executionStates[test.TestId] = state;
             orderedTests.Add(state);
             
@@ -90,12 +83,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             var keyedOrderedTests = new List<TestExecutionState>();
             while (kvp.Value.TryDequeue(out var test, out var testPriority))
             {
-                var state = new TestExecutionState(test)
-                {
-                    Constraint = test.Context.ParallelConstraint,
-                    ConstraintKey = kvp.Key,
-                    Priority = test.Context.ExecutionPriority
-                };
+                var state = new TestExecutionState(test);
                 executionStates[test.TestId] = state;
                 keyedOrderedTests.Add(state);
             }
@@ -108,12 +96,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             {
                 foreach (var test in orderGroup.Value)
                 {
-                    var state = new TestExecutionState(test)
-                    {
-                        Constraint = test.Context.ParallelConstraint,
-                        ConstraintKey = group.Key,
-                        Priority = test.Context.ExecutionPriority
-                    };
+                    var state = new TestExecutionState(test);
                     executionStates[test.TestId] = state;
                     orderedTests.Add(state);
                 }
@@ -204,6 +187,13 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         CancellationToken cancellationToken)
     {
         var state = testData.State;
+        
+        // If test is already failed (e.g., due to circular dependencies), skip execution
+        if (state.State == TestState.Failed)
+        {
+            await ProcessTestCompletionAsync(state, executionStates, cancellationToken);
+            return;
+        }
         
         try
         {
@@ -313,6 +303,12 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             var testId = kvp.Key;
             var state = kvp.Value;
             var test = state.Test;
+            
+            // Skip if already marked as failed due to circular dependency
+            if (state.State == TestState.Failed)
+            {
+                continue;
+            }
             
             // Process dependencies for this test
             foreach (var dependency in test.Dependencies)

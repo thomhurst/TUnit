@@ -5,12 +5,20 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Engine.Scheduling;
 
 /// <summary>
-/// Tracks the execution state of a test
+/// Tracks the execution state of a test, delegating to the test context for shared state
 /// </summary>
 public sealed class TestExecutionState
 {
     public AbstractExecutableTest Test { get; }
-    public TestState State { get; set; }
+    
+    // Delegate State to the actual test to ensure consistency
+    public TestState State 
+    { 
+        get => Test.State;
+        set => Test.State = value;
+    }
+    
+    // These are scheduling-specific fields not in the test context
     private int _remainingDependencies;
     public int RemainingDependencies
     {
@@ -21,23 +29,22 @@ public sealed class TestExecutionState
     public DateTime EnqueueTime { get; set; }
     public CancellationTokenSource? TimeoutCts { get; set; }
     
-    public IParallelConstraint? Constraint { get; init; }
+    // Delegate to test context for these properties
+    public IParallelConstraint? Constraint => Test.Context.ParallelConstraint;
+    public Priority Priority => Test.Context.ExecutionPriority;
+    
+    // These are derived from the constraint and cached for performance
     public string? ConstraintKey { get; init; }
     public int Order { get; init; }
-    public Priority Priority { get; init; }
 
     public TestExecutionState(AbstractExecutableTest test)
     {
         Test = test;
-        State = TestState.NotStarted;
         RemainingDependencies = test.Dependencies.Length;
-        Dependents =
-        [
-        ];
+        Dependents = new HashSet<string>();
         EnqueueTime = DateTime.UtcNow;
         
-        Constraint = test.Context.ParallelConstraint;
-        // Get Order from constraint, or use default if not set
+        // Cache derived values
         Order = Constraint switch
         {
             NotInParallelConstraint nip => nip.Order,
@@ -52,8 +59,6 @@ public sealed class TestExecutionState
             ParallelGroupConstraint pg => pg.Group,
             _ => null
         };
-        
-        Priority = test.Context.ExecutionPriority;
     }
 
     /// <summary>
