@@ -78,13 +78,8 @@ internal sealed class TestDependencyResolver
                 .Where(d => d.TestId != test.TestId)
                 .ToArray();
                 
-            // Update TestContext.Dependencies
-            test.Context.Dependencies.Clear();
-            foreach (var dep in GetAllDependencies(test, [
-                     ]))
-            {
-                test.Context.Dependencies.Add(dep.Context.TestDetails);
-            }
+            // Skip updating TestContext.Dependencies for now - will be done after circular dependency check
+            // to avoid infinite loops
         }
         
         return allResolved;
@@ -137,6 +132,19 @@ internal sealed class TestDependencyResolver
                         
                         test.State = TestState.Failed;
                     }
+                }
+            }
+        }
+        else
+        {
+            // No circular dependencies, safe to update TestContext.Dependencies
+            foreach (var test in _allTests)
+            {
+                test.Context.Dependencies.Clear();
+                var visited = new HashSet<string>();
+                foreach (var dep in GetAllDependencies(test, visited))
+                {
+                    test.Context.Dependencies.Add(dep.Context.TestDetails);
                 }
             }
         }
