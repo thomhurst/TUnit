@@ -3512,16 +3512,36 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
 
-        // Generate attribute factory with all attributes
-        var attributes = methodSymbol.GetAttributes()
-            .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
-            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
-            .ToImmutableArray();
+        // Generate attribute factory with filtered attributes
+        var filteredAttributes = new List<AttributeData>();
+        
+        // Filter method attributes - exclude Arguments attributes that don't match the specific one
+        foreach (var attr in methodSymbol.GetAttributes())
+        {
+            if (attr.AttributeClass?.Name == "ArgumentsAttribute")
+            {
+                // Only include the specific Arguments attribute if provided
+                if (specificArgumentsAttribute != null && AreSameAttribute(attr, specificArgumentsAttribute))
+                {
+                    filteredAttributes.Add(attr);
+                }
+                // Skip other Arguments attributes
+            }
+            else
+            {
+                // Include all non-Arguments attributes
+                filteredAttributes.Add(attr);
+            }
+        }
+        
+        // Add all class and assembly attributes (they don't have Arguments attributes)
+        filteredAttributes.AddRange(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes());
+        filteredAttributes.AddRange(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
 
         writer.AppendLine("AttributeFactory = () =>");
         writer.AppendLine("[");
         writer.Indent();
-        AttributeWriter.WriteAttributes(writer, compilation, attributes);
+        AttributeWriter.WriteAttributes(writer, compilation, filteredAttributes.ToImmutableArray());
         writer.Unindent();
         writer.AppendLine("],");
 
