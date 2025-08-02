@@ -35,7 +35,7 @@ public sealed class GenericTestMetadata : TestMetadata
                     
                     if (inferredTypes is { Length: > 0 })
                     {
-                        // Create a key from the inferred types
+                        // Create a key from the inferred types - must match source generator format
                         var typeKey = string.Join(",", inferredTypes.Select(t => t.FullName ?? t.Name));
                         
                         // Find the matching concrete instantiation

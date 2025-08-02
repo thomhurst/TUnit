@@ -224,9 +224,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 .Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass) &&
                          InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, a) != null);
 
-            // Check if we have GenerateGenericTest attributes
-            var hasGenerateGenericTest = testMethod.IsGenericMethod && testMethod.MethodAttributes
-                .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
+            // Check if we have GenerateGenericTest attributes on methods or classes
+            var hasGenerateGenericTest = (testMethod.IsGenericMethod && testMethod.MethodAttributes
+                .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)) ||
+                (testMethod.IsGenericType && testMethod.TypeSymbol.GetAttributes()
+                .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true));
 
             // Check if generic class has class-level Arguments attributes
             var hasClassArgumentsForGenericType = testMethod.IsGenericType && testMethod.TypeSymbol.GetAttributes()
@@ -2568,10 +2570,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        // Process GenerateGenericTest attributes
+        // Process GenerateGenericTest attributes from both methods and classes
         var generateGenericTestAttributes = testMethod.MethodAttributes
             .Where(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute")
             .ToList();
+        
+        // For generic classes, also check class-level GenerateGenericTest attributes
+        if (testMethod.IsGenericType)
+        {
+            var classLevelAttributes = testMethod.TypeSymbol.GetAttributes()
+                .Where(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute")
+                .ToList();
+            generateGenericTestAttributes.AddRange(classLevelAttributes);
+        }
 
         foreach (var genAttr in generateGenericTestAttributes)
         {
@@ -2611,7 +2622,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
                         {
                             // Generate a concrete instantiation for this type combination
-                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName"))}] = ");
+                            // Use the same key format as runtime: FullName ?? Name
+                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
                             GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
                             writer.AppendLine(",");
                         }

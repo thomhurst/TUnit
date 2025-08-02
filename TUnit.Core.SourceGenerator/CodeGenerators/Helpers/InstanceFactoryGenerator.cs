@@ -15,7 +15,7 @@ public static class InstanceFactoryGenerator
     {
         var className = typeSymbol.GloballyQualified();
 
-        // Check if the class has a ClassConstructor attribute
+        // Check if the class has a ClassConstructor attribute first, before any other checks
         if (typeSymbol is INamedTypeSymbol namedTypeSymbol)
         {
             var hasClassConstructor = namedTypeSymbol.GetAttributesIncludingBaseTypes()
@@ -25,6 +25,7 @@ public static class InstanceFactoryGenerator
             {
                 // If class has ClassConstructor attribute, generate a factory that throws
                 // The actual instance creation will be handled by ClassConstructorHelper at runtime
+                // This applies to both generic and non-generic classes
                 writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
                 writer.AppendLine("{");
                 writer.Indent();
