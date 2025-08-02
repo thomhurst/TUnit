@@ -232,7 +232,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
         catch
         {
-            return false;
+            // In single-file mode, assembly.Location might throw - but we should still scan the assembly
+            // Don't return false here, continue with other checks
         }
 
         if (!assembly.GetReferencedAssemblies().Any(a =>
@@ -258,11 +259,19 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             try
             {
-                return asm.GetExportedTypes();
+                // In single file mode, GetExportedTypes might miss some types
+                // Use GetTypes() instead which gets all types including nested ones
+                return asm.GetTypes();
+            }
+            catch (ReflectionTypeLoadException rtle)
+            {
+                // Some types might fail to load, but we can still use the ones that loaded successfully
+                Console.WriteLine($"Warning: Some types failed to load from assembly {asm.FullName}: {rtle.Message}");
+                return rtle.Types?.Where(t => t != null).Cast<Type>().ToArray() ?? [];
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Warning: Failed to get exported types from assembly {asm.FullName}: {ex.Message}");
+                Console.WriteLine($"Warning: Failed to get types from assembly {asm.FullName}: {ex.Message}");
                 return [];
             }
         });

@@ -4,7 +4,7 @@ namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
 public abstract class DataSourceGeneratorAttribute<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T> : AsyncDataSourceGeneratorAttribute<T>
 {
     protected abstract IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
@@ -22,9 +22,9 @@ public abstract class DataSourceGeneratorAttribute<
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 public abstract class DataSourceGeneratorAttribute<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T1,
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T2> : AsyncDataSourceGeneratorAttribute<T1, T2>
 {
     protected abstract IEnumerable<Func<(T1, T2)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
@@ -42,11 +42,11 @@ public abstract class DataSourceGeneratorAttribute<
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 public abstract class DataSourceGeneratorAttribute<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T1,
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T2,
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T3> : AsyncDataSourceGeneratorAttribute<T1, T2, T3>
 {
     protected abstract IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
@@ -64,13 +64,13 @@ public abstract class DataSourceGeneratorAttribute<
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 public abstract class DataSourceGeneratorAttribute<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T1,
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T2,
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T3,
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T4> : AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>
 {
     protected abstract IEnumerable<Func<(T1, T2, T3, T4)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
@@ -88,15 +88,15 @@ public abstract class DataSourceGeneratorAttribute<
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 public abstract class DataSourceGeneratorAttribute<
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T1,
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T2,
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T3,
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T4,
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T5> : AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
 {
     protected abstract IEnumerable<Func<(T1, T2, T3, T4, T5)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
