@@ -228,7 +228,16 @@ public sealed class GenericTestMetadata : TestMetadata
                     break;
                 }
                 
-                // TODO: Handle more complex cases like IEnumerable<T>, Func<T>, etc.
+                // Handle generic types like IEnumerable<T>, Func<T>, etc.
+                if (paramType.IsGenericType && arguments[i] != null)
+                {
+                    var inferredFromGeneric = InferTypeFromGenericParameter(paramType, arguments[i]!.GetType(), genericParam);
+                    if (inferredFromGeneric != null)
+                    {
+                        inferredType = inferredFromGeneric;
+                        break;
+                    }
+                }
             }
             
             if (inferredType != null)
@@ -238,5 +247,83 @@ public sealed class GenericTestMetadata : TestMetadata
         }
         
         return inferredTypes.Count > 0 ? inferredTypes.ToArray() : null;
+    }
+    
+    private static Type? InferTypeFromGenericParameter(Type paramType, Type argumentType, Type genericParam)
+    {
+        // Handle IEnumerable<T>
+        if (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+        {
+            var typeArg = paramType.GetGenericArguments()[0];
+            if (typeArg.IsGenericParameter && typeArg.Name == genericParam.Name)
+            {
+                // Try to find IEnumerable<T> in the argument type
+                if (argumentType.IsGenericType && argumentType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                {
+                    return argumentType.GetGenericArguments()[0];
+                }
+                
+                // For types that implement IEnumerable<T> but aren't directly IEnumerable<T>
+                // we can't easily determine the type parameter at runtime in an AOT-compatible way
+                // The source generator should handle this at compile time instead
+                return null;
+            }
+        }
+        
+        // Handle Func<T1, T2, ...>
+        if (paramType.IsGenericType && paramType.Name.StartsWith("Func`"))
+        {
+            var paramTypeArgs = paramType.GetGenericArguments();
+            Type? actualFuncType = argumentType;
+            
+            // If the argument is not directly a Func, check if it implements one
+            if (!argumentType.IsGenericType || !argumentType.Name.StartsWith("Func`"))
+            {
+                // Could be a lambda or method group - can't easily determine types at runtime
+                return null;
+            }
+            
+            var actualTypeArgs = actualFuncType.GetGenericArguments();
+            
+            // Find which position contains our generic parameter
+            for (int i = 0; i < paramTypeArgs.Length && i < actualTypeArgs.Length; i++)
+            {
+                if (paramTypeArgs[i].IsGenericParameter && paramTypeArgs[i].Name == genericParam.Name)
+                {
+                    return actualTypeArgs[i];
+                }
+            }
+        }
+        
+        // Handle other generic types recursively
+        if (paramType.IsGenericType && argumentType.IsGenericType)
+        {
+            var paramGenericDef = paramType.GetGenericTypeDefinition();
+            var argGenericDef = argumentType.IsGenericTypeDefinition ? argumentType : argumentType.GetGenericTypeDefinition();
+            
+            if (paramGenericDef == argGenericDef)
+            {
+                var paramTypeArgs = paramType.GetGenericArguments();
+                var actualTypeArgs = argumentType.GetGenericArguments();
+                
+                for (int i = 0; i < paramTypeArgs.Length && i < actualTypeArgs.Length; i++)
+                {
+                    if (paramTypeArgs[i].IsGenericParameter && paramTypeArgs[i].Name == genericParam.Name)
+                    {
+                        return actualTypeArgs[i];
+                    }
+                    
+                    // Recursive check for nested generics
+                    if (paramTypeArgs[i].IsGenericType)
+                    {
+                        var result = InferTypeFromGenericParameter(paramTypeArgs[i], actualTypeArgs[i], genericParam);
+                        if (result != null)
+                            return result;
+                    }
+                }
+            }
+        }
+        
+        return null;
     }
 }

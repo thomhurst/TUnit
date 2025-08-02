@@ -364,11 +364,8 @@ public static class DataSourceHelpers
             return UnwrapTupleAot(item);
         }
 
-        if (item is IEnumerable enumerable)
-        {
-            return enumerable.Cast<object?>().Select(InvokeIfFunc).ToArray();
-        }
-
+        // Don't expand IEnumerable - test methods expect the IEnumerable itself as a parameter
+        // Only arrays and tuples are expanded (handled above)
         return [item];
     }
 
