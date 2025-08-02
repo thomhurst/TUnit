@@ -708,6 +708,7 @@ namespace
     public sealed class GenericTestMetadata : .TestMetadata
     {
         public GenericTestMetadata() { }
+        public .<string, .TestMetadata>? ConcreteInstantiations { get; init; }
         public override <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
     }
     public sealed class GenericTypeInfo

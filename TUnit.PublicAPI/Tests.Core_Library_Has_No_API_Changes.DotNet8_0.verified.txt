@@ -757,6 +757,7 @@ namespace
     public sealed class GenericTestMetadata : .TestMetadata
     {
         public GenericTestMetadata() { }
+        public .<string, .TestMetadata>? ConcreteInstantiations { get; init; }
         public override <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
     }
     public sealed class GenericTypeInfo
@@ -836,12 +837,9 @@ namespace
         public MatrixAttribute(params T?[]? objects) { }
     }
     [(.Class | .Method)]
-    [.("MatrixDataSourceAttribute requires dynamic code generation for runtime matrix gen" +
-        "eration and enum reflection. This attribute is inherently incompatible with AOT " +
-        "compilation.")]
-    [.("MatrixDataSourceAttribute may require unreferenced code for enum reflection and m" +
-        "atrix generation. This attribute is inherently incompatible with AOT compilation" +
-        ".")]
+    [.("AOT", "IL2109:Type \'MatrixDataSourceAttribute\' derives from base class with RequiresUnre" +
+        "ferencedCodeAttribute", Justification="Matrix data source implementation is AOT-compatible with proper enum field preser" +
+        "vation")]
     public sealed class MatrixDataSourceAttribute : .UntypedDataSourceGeneratorAttribute, .IAccessesInstanceData
     {
         public MatrixDataSourceAttribute() { }

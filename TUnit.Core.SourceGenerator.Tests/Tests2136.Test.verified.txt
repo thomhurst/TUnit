@@ -10,7 +10,8 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
     public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
     {
         var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
-        var metadata = new global::TUnit.Core.GenericTestMetadata
+        // Create generic metadata with concrete type registrations
+        var genericMetadata = new global::TUnit.Core.GenericTestMetadata
         {
             TestName = "GenericArgumentsTest",
             TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
@@ -23,39 +24,23 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(true, "True"),
-                new global::TUnit.Core.ArgumentsAttribute(1, "1"),
-                new global::TUnit.Core.ArgumentsAttribute(1.1, "1.1"),
-                new global::TUnit.Core.ArgumentsAttribute("hello", "hello"),
-                new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-                new global::TUnit.Core.ArgumentsAttribute(true, "True"),
-                new global::TUnit.Core.ArgumentsAttribute(1, "1"),
-                new global::TUnit.Core.ArgumentsAttribute(1.1, "1.1"),
-                new global::TUnit.Core.ArgumentsAttribute("hello", "hello"),
-                new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item"),
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
             ParameterTypes = new global::System.Type[]
             {
                 typeof(global::System.Object),
-                typeof(string),
+                typeof(global::System.Object),
             },
             TestMethodParameterTypes = new string[]
             {
-                "T",
-                "string",
+                "global::System.Object",
+                "global::System.Object",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
 {
@@ -101,28 +86,10 @@ prop.ClassMetadata = classMetadata;
 return classMetadata;
 })
 },
-            GenericMethodInfo = new global::TUnit.Core.GenericMethodInfo
+            InstanceFactory = (typeArgs, args) =>
             {
-                ParameterNames = new string[]
-                {
-                    "T",
-                },
-                Constraints = new global::TUnit.Core.GenericParameterConstraints[]
-                {
-                    new global::TUnit.Core.GenericParameterConstraints
-                    {
-                        ParameterName = "T",
-                        HasDefaultConstructorConstraint = false,
-                        InterfaceConstraints = new global::System.Type[]
-                        {
-                        }
-                    },
-                },
-                ParameterPositions = new int[]
-                {
-                }
+                return new global::TUnit.TestProject.Bugs._2136.Tests();
             },
-            InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2136.Tests(),
             TestInvoker = async (instance, args) =>
             {
                 var instanceType = instance.GetType();
@@ -163,9 +130,472 @@ return classMetadata;
                     await task;
                 }
             },
+            ConcreteInstantiations = new global::System.Collections.Generic.Dictionary<string, global::TUnit.Core.TestMetadata>
+            {
+                [(typeof(bool).FullName ?? typeof(bool).Name)] = 
+                new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._2136.Tests>
+                {
+                    TestName = "GenericArgumentsTest<bool>",
+                    TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+                    TestMethodName = "GenericArgumentsTest",
+                    GenericMethodTypeArguments = new global::System.Type[] { typeof(bool)},
+                    TimeoutMs = null,
+                    RetryCount = 0,
+                    RepeatCount = 0,
+                    CanRunInParallel = true,
+                    Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
+                    AttributeFactory = () =>
+                    [
+                        new global::TUnit.Core.TestAttribute(),
+                        new global::TUnit.Core.ArgumentsAttribute(true, "True"),
+                        new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+                    ],
+                    DataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                        new global::TUnit.Core.ArgumentsAttribute(true, "True"),
+                    },
+                    ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                    },
+                    PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+                    PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
+                    {
+                    },
+                    ParameterTypes = new global::System.Type[]
+                    {
+                        typeof(global::System.Object),
+                        typeof(global::System.Object),
+                    },
+                    FilePath = @"",
+                    LineNumber = 8,
+                    TestSessionId = testSessionId,
+                    MethodMetadata = new global::TUnit.Core.MethodMetadata
+{
+Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+Name = "GenericArgumentsTest",
+GenericTypeCount = 1,
+ReturnType = typeof(global::System.Threading.Tasks.Task),
+ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+Parameters = new global::TUnit.Core.ParameterMetadata[]
+{
+new global::TUnit.Core.ParameterMetadata(typeof(object))
+{
+    Name = "value",
+    TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
+},
+new global::TUnit.Core.ParameterMetadata(typeof(string))
+{
+    Name = "expected",
+    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
+},
+},
+Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
+{
+var classMetadata = new global::TUnit.Core.ClassMetadata
+{
+Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+Name = "Tests",
+Namespace = "TUnit.TestProject.Bugs._2136",
+Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+Parent = null
+};
+// Set ClassMetadata reference on properties to avoid circular dependency
+foreach (var prop in classMetadata.Properties)
+{
+prop.ClassMetadata = classMetadata;
+}
+return classMetadata;
+})
+},
+                    InstanceFactory = (typeArgs, args) =>
+                    {
+                        return new global::TUnit.TestProject.Bugs._2136.Tests();
+                    },
+                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    {
+                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<bool>((bool)args[0]!, (string)args[1]!));
+                    }
+                }
+                ,
+                [(typeof(int).FullName ?? typeof(int).Name)] = 
+                new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._2136.Tests>
+                {
+                    TestName = "GenericArgumentsTest<int>",
+                    TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+                    TestMethodName = "GenericArgumentsTest",
+                    GenericMethodTypeArguments = new global::System.Type[] { typeof(int)},
+                    TimeoutMs = null,
+                    RetryCount = 0,
+                    RepeatCount = 0,
+                    CanRunInParallel = true,
+                    Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
+                    AttributeFactory = () =>
+                    [
+                        new global::TUnit.Core.TestAttribute(),
+                        new global::TUnit.Core.ArgumentsAttribute(1, "1"),
+                        new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+                    ],
+                    DataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                        new global::TUnit.Core.ArgumentsAttribute(1, "1"),
+                    },
+                    ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                    },
+                    PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+                    PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
+                    {
+                    },
+                    ParameterTypes = new global::System.Type[]
+                    {
+                        typeof(global::System.Object),
+                        typeof(global::System.Object),
+                    },
+                    FilePath = @"",
+                    LineNumber = 8,
+                    TestSessionId = testSessionId,
+                    MethodMetadata = new global::TUnit.Core.MethodMetadata
+{
+Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+Name = "GenericArgumentsTest",
+GenericTypeCount = 1,
+ReturnType = typeof(global::System.Threading.Tasks.Task),
+ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+Parameters = new global::TUnit.Core.ParameterMetadata[]
+{
+new global::TUnit.Core.ParameterMetadata(typeof(object))
+{
+    Name = "value",
+    TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
+},
+new global::TUnit.Core.ParameterMetadata(typeof(string))
+{
+    Name = "expected",
+    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
+},
+},
+Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
+{
+var classMetadata = new global::TUnit.Core.ClassMetadata
+{
+Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+Name = "Tests",
+Namespace = "TUnit.TestProject.Bugs._2136",
+Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+Parent = null
+};
+// Set ClassMetadata reference on properties to avoid circular dependency
+foreach (var prop in classMetadata.Properties)
+{
+prop.ClassMetadata = classMetadata;
+}
+return classMetadata;
+})
+},
+                    InstanceFactory = (typeArgs, args) =>
+                    {
+                        return new global::TUnit.TestProject.Bugs._2136.Tests();
+                    },
+                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    {
+                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<int>((int)args[0]!, (string)args[1]!));
+                    }
+                }
+                ,
+                [(typeof(double).FullName ?? typeof(double).Name)] = 
+                new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._2136.Tests>
+                {
+                    TestName = "GenericArgumentsTest<double>",
+                    TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+                    TestMethodName = "GenericArgumentsTest",
+                    GenericMethodTypeArguments = new global::System.Type[] { typeof(double)},
+                    TimeoutMs = null,
+                    RetryCount = 0,
+                    RepeatCount = 0,
+                    CanRunInParallel = true,
+                    Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
+                    AttributeFactory = () =>
+                    [
+                        new global::TUnit.Core.TestAttribute(),
+                        new global::TUnit.Core.ArgumentsAttribute(1.1, "1.1"),
+                        new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+                    ],
+                    DataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                        new global::TUnit.Core.ArgumentsAttribute(1.1, "1.1"),
+                    },
+                    ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                    },
+                    PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+                    PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
+                    {
+                    },
+                    ParameterTypes = new global::System.Type[]
+                    {
+                        typeof(global::System.Object),
+                        typeof(global::System.Object),
+                    },
+                    FilePath = @"",
+                    LineNumber = 8,
+                    TestSessionId = testSessionId,
+                    MethodMetadata = new global::TUnit.Core.MethodMetadata
+{
+Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+Name = "GenericArgumentsTest",
+GenericTypeCount = 1,
+ReturnType = typeof(global::System.Threading.Tasks.Task),
+ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+Parameters = new global::TUnit.Core.ParameterMetadata[]
+{
+new global::TUnit.Core.ParameterMetadata(typeof(object))
+{
+    Name = "value",
+    TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
+},
+new global::TUnit.Core.ParameterMetadata(typeof(string))
+{
+    Name = "expected",
+    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
+},
+},
+Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
+{
+var classMetadata = new global::TUnit.Core.ClassMetadata
+{
+Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+Name = "Tests",
+Namespace = "TUnit.TestProject.Bugs._2136",
+Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+Parent = null
+};
+// Set ClassMetadata reference on properties to avoid circular dependency
+foreach (var prop in classMetadata.Properties)
+{
+prop.ClassMetadata = classMetadata;
+}
+return classMetadata;
+})
+},
+                    InstanceFactory = (typeArgs, args) =>
+                    {
+                        return new global::TUnit.TestProject.Bugs._2136.Tests();
+                    },
+                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    {
+                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<double>((double)args[0]!, (string)args[1]!));
+                    }
+                }
+                ,
+                [(typeof(string).FullName ?? typeof(string).Name)] = 
+                new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._2136.Tests>
+                {
+                    TestName = "GenericArgumentsTest<string>",
+                    TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+                    TestMethodName = "GenericArgumentsTest",
+                    GenericMethodTypeArguments = new global::System.Type[] { typeof(string)},
+                    TimeoutMs = null,
+                    RetryCount = 0,
+                    RepeatCount = 0,
+                    CanRunInParallel = true,
+                    Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
+                    AttributeFactory = () =>
+                    [
+                        new global::TUnit.Core.TestAttribute(),
+                        new global::TUnit.Core.ArgumentsAttribute("hello", "hello"),
+                        new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+                    ],
+                    DataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                        new global::TUnit.Core.ArgumentsAttribute("hello", "hello"),
+                    },
+                    ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                    },
+                    PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+                    PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
+                    {
+                    },
+                    ParameterTypes = new global::System.Type[]
+                    {
+                        typeof(global::System.Object),
+                        typeof(global::System.Object),
+                    },
+                    FilePath = @"",
+                    LineNumber = 8,
+                    TestSessionId = testSessionId,
+                    MethodMetadata = new global::TUnit.Core.MethodMetadata
+{
+Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+Name = "GenericArgumentsTest",
+GenericTypeCount = 1,
+ReturnType = typeof(global::System.Threading.Tasks.Task),
+ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+Parameters = new global::TUnit.Core.ParameterMetadata[]
+{
+new global::TUnit.Core.ParameterMetadata(typeof(object))
+{
+    Name = "value",
+    TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
+},
+new global::TUnit.Core.ParameterMetadata(typeof(string))
+{
+    Name = "expected",
+    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
+},
+},
+Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
+{
+var classMetadata = new global::TUnit.Core.ClassMetadata
+{
+Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+Name = "Tests",
+Namespace = "TUnit.TestProject.Bugs._2136",
+Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+Parent = null
+};
+// Set ClassMetadata reference on properties to avoid circular dependency
+foreach (var prop in classMetadata.Properties)
+{
+prop.ClassMetadata = classMetadata;
+}
+return classMetadata;
+})
+},
+                    InstanceFactory = (typeArgs, args) =>
+                    {
+                        return new global::TUnit.TestProject.Bugs._2136.Tests();
+                    },
+                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    {
+                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<string>((string)args[0]!, (string)args[1]!));
+                    }
+                }
+                ,
+                [(typeof(global::TUnit.TestProject.Bugs._2136.MyEnum).FullName ?? typeof(global::TUnit.TestProject.Bugs._2136.MyEnum).Name)] = 
+                new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._2136.Tests>
+                {
+                    TestName = "GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>",
+                    TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+                    TestMethodName = "GenericArgumentsTest",
+                    GenericMethodTypeArguments = new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._2136.MyEnum)},
+                    TimeoutMs = null,
+                    RetryCount = 0,
+                    RepeatCount = 0,
+                    CanRunInParallel = true,
+                    Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
+                    AttributeFactory = () =>
+                    [
+                        new global::TUnit.Core.TestAttribute(),
+                        new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item"),
+                        new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+                    ],
+                    DataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                        new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item"),
+                    },
+                    ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                    },
+                    PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+                    PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
+                    {
+                    },
+                    ParameterTypes = new global::System.Type[]
+                    {
+                        typeof(global::System.Object),
+                        typeof(global::System.Object),
+                    },
+                    FilePath = @"",
+                    LineNumber = 8,
+                    TestSessionId = testSessionId,
+                    MethodMetadata = new global::TUnit.Core.MethodMetadata
+{
+Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+Name = "GenericArgumentsTest",
+GenericTypeCount = 1,
+ReturnType = typeof(global::System.Threading.Tasks.Task),
+ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+Parameters = new global::TUnit.Core.ParameterMetadata[]
+{
+new global::TUnit.Core.ParameterMetadata(typeof(object))
+{
+    Name = "value",
+    TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
+},
+new global::TUnit.Core.ParameterMetadata(typeof(string))
+{
+    Name = "expected",
+    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
+},
+},
+Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
+{
+var classMetadata = new global::TUnit.Core.ClassMetadata
+{
+Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
+TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+Name = "Tests",
+Namespace = "TUnit.TestProject.Bugs._2136",
+Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+Parent = null
+};
+// Set ClassMetadata reference on properties to avoid circular dependency
+foreach (var prop in classMetadata.Properties)
+{
+prop.ClassMetadata = classMetadata;
+}
+return classMetadata;
+})
+},
+                    InstanceFactory = (typeArgs, args) =>
+                    {
+                        return new global::TUnit.TestProject.Bugs._2136.Tests();
+                    },
+                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    {
+                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>((global::TUnit.TestProject.Bugs._2136.MyEnum)args[0]!, (string)args[1]!));
+                    }
+                }
+                ,
+            }
         };
-        metadata.TestSessionId = testSessionId;
-        tests.Add(metadata);
+        genericMetadata.TestSessionId = testSessionId;
+        tests.Add(genericMetadata);
         return tests;
     }
 }

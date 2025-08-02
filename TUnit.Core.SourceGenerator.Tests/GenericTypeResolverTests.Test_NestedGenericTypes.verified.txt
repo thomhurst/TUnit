@@ -10,7 +10,8 @@ internal sealed class NestedGenericTestClass_TestMethod_TestSource_GUID : global
     public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
     {
         var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
-        var metadata = new global::TUnit.Core.GenericTestMetadata
+        // Create generic metadata with concrete type registrations
+        var genericMetadata = new global::TUnit.Core.GenericTestMetadata
         {
             TestName = "TestMethod",
             TestClassType = typeof(global::TUnit.TestProject.NestedGenericTestClass<>),
@@ -26,15 +27,9 @@ internal sealed class NestedGenericTestClass_TestMethod_TestSource_GUID : global
                 new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.Collections.Generic.List<int>)),
                 new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.Collections.Generic.Dictionary<string, int>))
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
@@ -74,31 +69,15 @@ prop.ClassMetadata = classMetadata;
 return classMetadata;
 })
 },
-            GenericTypeInfo = new global::TUnit.Core.GenericTypeInfo
-            {
-                ParameterNames = new string[]
-                {
-                    "T",
-                },
-                Constraints = new global::TUnit.Core.GenericParameterConstraints[]
-                {
-                    new global::TUnit.Core.GenericParameterConstraints
-                    {
-                        ParameterName = "T",
-                        HasDefaultConstructorConstraint = false,
-                        InterfaceConstraints = new global::System.Type[]
-                        {
-                        }
-                    },
-                }
-            },
             InstanceFactory = (typeArgs, args) =>
             {
-                var openGenericType = typeof(global::TUnit.TestProject.NestedGenericTestClass<>);
-                var closedGenericType = global::TUnit.Core.Helpers.GenericTypeHelper.MakeGenericTypeSafe(openGenericType, typeArgs);
-                // Create instance with parameterless constructor
-                var instance = global::System.Activator.CreateInstance(closedGenericType);
-                return instance!;
+                var genericType = typeof(global::TUnit.TestProject.NestedGenericTestClass<>);
+                if (typeArgs.Length > 0)
+                {
+                    var closedType = genericType.MakeGenericType(typeArgs);
+                    return global::System.Activator.CreateInstance(closedType, args)!;
+                }
+                throw new global::System.InvalidOperationException("No type arguments provided for generic class");
             },
             TestInvoker = async (instance, args) =>
             {
@@ -114,9 +93,160 @@ return classMetadata;
                 // Invoke the method
                 var result = method.Invoke(instance, methodArgs);
             },
+            ConcreteInstantiations = new global::System.Collections.Generic.Dictionary<string, global::TUnit.Core.TestMetadata>
+            {
+                [(typeof(global::System.Collections.Generic.List<int>).FullName ?? typeof(global::System.Collections.Generic.List<int>).Name)] = 
+                new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.List<int>>>
+                {
+                    TestName = "TestMethod",
+                    TestClassType = typeof(global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.List<int>>),
+                    TestMethodName = "TestMethod",
+                    TimeoutMs = null,
+                    RetryCount = 0,
+                    RepeatCount = 0,
+                    CanRunInParallel = true,
+                    Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
+                    AttributeFactory = () =>
+                    [
+                        new global::TUnit.Core.TestAttribute(),
+                        new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.Collections.Generic.List<int>)),
+                        new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.Collections.Generic.Dictionary<string, int>))
+                    ],
+                    DataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                    },
+                    ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                    },
+                    PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+                    PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
+                    {
+                    },
+                    ParameterTypes = new global::System.Type[]
+                    {
+                    },
+                    FilePath = @"",
+                    LineNumber = 10,
+                    TestSessionId = testSessionId,
+                    MethodMetadata = new global::TUnit.Core.MethodMetadata
+{
+Type = typeof(global::TUnit.TestProject.NestedGenericTestClass<>),
+TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("TUnit.TestProject.NestedGenericTestClass<>, GenericTypeResolverTests", global::TUnit.Core.TypeReference.CreateGenericParameter(0, false, "T")),
+Name = "TestMethod",
+GenericTypeCount = 0,
+ReturnType = typeof(void),
+ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.NestedGenericTestClass<>", () => 
+{
+var classMetadata = new global::TUnit.Core.ClassMetadata
+{
+Type = typeof(global::TUnit.TestProject.NestedGenericTestClass<>),
+TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("TUnit.TestProject.NestedGenericTestClass<>, GenericTypeResolverTests", global::TUnit.Core.TypeReference.CreateGenericParameter(0, false, "T")),
+Name = "NestedGenericTestClass",
+Namespace = "TUnit.TestProject",
+Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+Parent = null
+};
+// Set ClassMetadata reference on properties to avoid circular dependency
+foreach (var prop in classMetadata.Properties)
+{
+prop.ClassMetadata = classMetadata;
+}
+return classMetadata;
+})
+},
+                    InstanceFactory = (typeArgs, args) =>
+                    {
+                        return new global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.List<int>>();
+                    },
+                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    {
+                        var typedInstance = (global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.List<int>>)instance;
+                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
+                    }
+                }
+                ,
+                [(typeof(global::System.Collections.Generic.Dictionary<string, int>).FullName ?? typeof(global::System.Collections.Generic.Dictionary<string, int>).Name)] = 
+                new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.Dictionary<string, int>>>
+                {
+                    TestName = "TestMethod",
+                    TestClassType = typeof(global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.Dictionary<string, int>>),
+                    TestMethodName = "TestMethod",
+                    TimeoutMs = null,
+                    RetryCount = 0,
+                    RepeatCount = 0,
+                    CanRunInParallel = true,
+                    Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
+                    AttributeFactory = () =>
+                    [
+                        new global::TUnit.Core.TestAttribute(),
+                        new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.Collections.Generic.List<int>)),
+                        new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.Collections.Generic.Dictionary<string, int>))
+                    ],
+                    DataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                    },
+                    ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+                    {
+                    },
+                    PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+                    PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
+                    {
+                    },
+                    ParameterTypes = new global::System.Type[]
+                    {
+                    },
+                    FilePath = @"",
+                    LineNumber = 10,
+                    TestSessionId = testSessionId,
+                    MethodMetadata = new global::TUnit.Core.MethodMetadata
+{
+Type = typeof(global::TUnit.TestProject.NestedGenericTestClass<>),
+TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("TUnit.TestProject.NestedGenericTestClass<>, GenericTypeResolverTests", global::TUnit.Core.TypeReference.CreateGenericParameter(0, false, "T")),
+Name = "TestMethod",
+GenericTypeCount = 0,
+ReturnType = typeof(void),
+ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.NestedGenericTestClass<>", () => 
+{
+var classMetadata = new global::TUnit.Core.ClassMetadata
+{
+Type = typeof(global::TUnit.TestProject.NestedGenericTestClass<>),
+TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("TUnit.TestProject.NestedGenericTestClass<>, GenericTypeResolverTests", global::TUnit.Core.TypeReference.CreateGenericParameter(0, false, "T")),
+Name = "NestedGenericTestClass",
+Namespace = "TUnit.TestProject",
+Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
+Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+Parent = null
+};
+// Set ClassMetadata reference on properties to avoid circular dependency
+foreach (var prop in classMetadata.Properties)
+{
+prop.ClassMetadata = classMetadata;
+}
+return classMetadata;
+})
+},
+                    InstanceFactory = (typeArgs, args) =>
+                    {
+                        return new global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.Dictionary<string, int>>();
+                    },
+                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    {
+                        var typedInstance = (global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.Dictionary<string, int>>)instance;
+                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
+                    }
+                }
+                ,
+            }
         };
-        metadata.TestSessionId = testSessionId;
-        tests.Add(metadata);
+        genericMetadata.TestSessionId = testSessionId;
+        tests.Add(genericMetadata);
         return tests;
     }
 }
