@@ -2397,7 +2397,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // Handle class-only or method-only Arguments attributes
             var allArgumentsAttributes = new List<AttributeData>();
-            allArgumentsAttributes.AddRange(methodArgumentsAttributes);
+            
+            // For generic classes with non-generic methods, don't include method Arguments here
+            // They will be processed separately with InferClassTypesFromMethodArguments
+            if (!(testMethod.IsGenericType && !testMethod.IsGenericMethod))
+            {
+                allArgumentsAttributes.AddRange(methodArgumentsAttributes);
+            }
             allArgumentsAttributes.AddRange(classArgumentsAttributes);
 
             // Process Arguments attributes individually
@@ -2601,7 +2607,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         {
                             // Generate a concrete instantiation for this type combination
                             writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                            GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                            GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes, argAttr);
                             writer.AppendLine(",");
                         }
                     }
