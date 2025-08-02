@@ -244,7 +244,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var hasMethodArgumentsForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
                 .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") is true);
 
-            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArgumentsForGenericType || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType)
+            // Check if generic class has MethodDataSource that can provide type information
+            var hasMethodDataSourceForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
+                .Any(a => a.AttributeClass?.Name == "MethodDataSourceAttribute" &&
+                          InferClassTypesFromMethodDataSource(compilation, testMethod, a) != null);
+
+            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArgumentsForGenericType || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType || hasMethodDataSourceForGenericType)
             {
                 // Use concrete types approach for AOT compatibility
                 // For generic methods, we always use this approach to support Arguments attributes
@@ -2522,6 +2527,39 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
+        // Process MethodDataSource attributes for generic classes (non-generic methods)
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false })
+        {
+            var methodDataSourceAttributes = testMethod.MethodAttributes
+                .Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute")
+                .ToList();
+
+            foreach (var mdsAttr in methodDataSourceAttributes)
+            {
+                // Try to infer types from the method data source
+                var inferredTypes = InferClassTypesFromMethodDataSource(compilation, testMethod, mdsAttr);
+                if (inferredTypes is { Length: > 0 })
+                {
+                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+
+                    // Skip if we've already processed this type combination
+                    if (!processedTypeCombinations.Contains(typeKey))
+                    {
+                        processedTypeCombinations.Add(typeKey);
+
+                        // Validate constraints for the generic class
+                        if (ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes))
+                        {
+                            // Generate a concrete instantiation for this type combination
+                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                            GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                            writer.AppendLine(",");
+                        }
+                    }
+                }
+            }
+        }
+
         // Process typed data source attributes for generic classes (non-generic methods)
         if (testMethod is { IsGenericType: true, IsGenericMethod: false })
         {
@@ -3087,42 +3125,86 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             if (baseType.IsGenericType)
             {
-                var genericDefName = baseType.ToDisplayString();
+                var baseTypeDef = baseType.OriginalDefinition;
+                var baseTypeName = baseTypeDef.Name;
+                var baseTypeNamespace = baseTypeDef.ContainingNamespace?.ToDisplayString();
 
-                // Check for typed data source base classes
-                if (genericDefName.Contains("DataSourceGeneratorAttribute<") ||
-                    genericDefName.Contains("AsyncDataSourceGeneratorAttribute<"))
+                // Check for typed data source base classes more precisely
+                if ((baseTypeName == "DataSourceGeneratorAttribute" || baseTypeName == "AsyncDataSourceGeneratorAttribute") &&
+                    baseTypeNamespace?.Contains("TUnit.Core") == true)
                 {
                     // Get the type arguments from the base class
                     var typeArgs = baseType.TypeArguments;
 
-                    // Check if we need to infer generic class type parameters
-                    var containingType = method.ContainingType;
-                    var totalGenericParams = method.TypeParameters.Length;
-                    if (containingType.IsGenericType)
+                    // For generic method inference
+                    if (method.IsGenericMethod && !method.ContainingType.IsGenericType)
                     {
-                        totalGenericParams += containingType.TypeParameters.Length;
-                    }
+                        // Single type parameter method
+                        if (method.TypeParameters.Length == 1 && typeArgs.Length >= 1)
+                        {
+                            return new[] { typeArgs[0] };
+                        }
 
-                    // For single type parameter (either method or class), use the first type argument
-                    if (totalGenericParams == 1 && typeArgs.Length >= 1)
-                    {
-                        return new[] { typeArgs[0] };
-                    }
+                        // Multiple type parameters - check for tuple
+                        if (typeArgs.Length == 1 && typeArgs[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+                        {
+                            if (tupleType.TupleElements.Length == method.TypeParameters.Length)
+                            {
+                                return tupleType.TupleElements.Select(e => e.Type).ToArray();
+                            }
+                        }
 
-                    // For tuple data sources with multiple type parameters
-                    if (totalGenericParams > 1 && typeArgs.Length == totalGenericParams)
-                    {
-                        return typeArgs.ToArray();
+                        // Direct match for multiple type args
+                        if (typeArgs.Length == method.TypeParameters.Length)
+                        {
+                            return typeArgs.ToArray();
+                        }
                     }
-
-                    // If the data source returns a tuple, extract component types
-                    if (typeArgs is
-                        [
-                            INamedTypeSymbol { IsTupleType: true } tupleType
-                        ] && tupleType.TupleElements.Length == totalGenericParams)
+                    // For generic class inference (non-generic method)
+                    else if (!method.IsGenericMethod && method.ContainingType.IsGenericType)
                     {
-                        return tupleType.TupleElements.Select(e => e.Type).ToArray();
+                        var classTypeParams = method.ContainingType.TypeParameters;
+                        
+                        // Single type parameter class
+                        if (classTypeParams.Length == 1 && typeArgs.Length >= 1)
+                        {
+                            return new[] { typeArgs[0] };
+                        }
+
+                        // Multiple type parameters - check for tuple
+                        if (typeArgs.Length == 1 && typeArgs[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+                        {
+                            if (tupleType.TupleElements.Length == classTypeParams.Length)
+                            {
+                                return tupleType.TupleElements.Select(e => e.Type).ToArray();
+                            }
+                        }
+
+                        // Direct match for multiple type args
+                        if (typeArgs.Length == classTypeParams.Length)
+                        {
+                            return typeArgs.ToArray();
+                        }
+                    }
+                    // For combined generic class and method
+                    else if (method.IsGenericMethod && method.ContainingType.IsGenericType)
+                    {
+                        var totalGenericParams = method.TypeParameters.Length + method.ContainingType.TypeParameters.Length;
+                        
+                        // Check if the data source provides types for all parameters
+                        if (typeArgs.Length == 1 && typeArgs[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+                        {
+                            if (tupleType.TupleElements.Length == totalGenericParams)
+                            {
+                                return tupleType.TupleElements.Select(e => e.Type).ToArray();
+                            }
+                        }
+                        
+                        // Direct match for multiple type args
+                        if (typeArgs.Length == totalGenericParams)
+                        {
+                            return typeArgs.ToArray();
+                        }
                     }
                 }
             }
@@ -3188,6 +3270,88 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         for (int i = 0; i < genericParams.Length; i++)
         {
             if (!genericParamMap.TryGetValue(genericParams[i].Name, out var inferredType))
+                return null;
+            inferredTypes[i] = inferredType;
+        }
+
+        return inferredTypes;
+    }
+
+    private static ITypeSymbol[]? InferClassTypesFromMethodDataSource(Compilation compilation, TestMethodMetadata testMethod, AttributeData mdsAttr)
+    {
+        if (mdsAttr.ConstructorArguments.Length == 0)
+            return null;
+
+        // Get the method name from the attribute
+        if (mdsAttr.ConstructorArguments[0].Value is not string methodName)
+            return null;
+
+        // Find the method in the test class
+        var testClass = testMethod.TypeSymbol;
+        var dataMethod = testClass.GetMembers(methodName)
+            .OfType<IMethodSymbol>()
+            .FirstOrDefault(m => m.IsStatic && m.Parameters.Length == 0);
+
+        if (dataMethod == null)
+            return null;
+
+        // Check if the method returns IEnumerable<Func<T>> where T is a tuple or a single type
+        var returnType = dataMethod.ReturnType;
+        if (returnType is not INamedTypeSymbol namedReturnType)
+            return null;
+
+        // Navigate through IEnumerable<Func<...>> or IEnumerable<...>
+        if (!namedReturnType.IsGenericType || namedReturnType.Name != "IEnumerable")
+            return null;
+
+        var innerType = namedReturnType.TypeArguments[0];
+        INamedTypeSymbol? dataType = null;
+
+        // Check if it's IEnumerable<Func<T>>
+        if (innerType is INamedTypeSymbol { Name: "Func", TypeArguments.Length: 1 } funcType)
+        {
+            dataType = funcType.TypeArguments[0] as INamedTypeSymbol;
+        }
+        // Or direct IEnumerable<T>
+        else if (innerType is INamedTypeSymbol directType)
+        {
+            dataType = directType;
+        }
+
+        if (dataType == null)
+            return null;
+
+        // Get class type parameters
+        var classTypeParams = testMethod.TypeSymbol.TypeParameters;
+        var genericParamMap = new Dictionary<string, ITypeSymbol>();
+
+        // If it's a tuple, map tuple elements to method parameters
+        if (dataType.IsTupleType)
+        {
+            var tupleElements = dataType.TupleElements;
+            var testMethodParams = testMethod.MethodSymbol.Parameters;
+
+            for (int i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
+            {
+                var paramType = testMethodParams[i].Type;
+                var tupleElementType = tupleElements[i].Type;
+
+                // Process the parameter type to find class generic references
+                ProcessTypeForGenerics(paramType, tupleElementType, classTypeParams, genericParamMap);
+            }
+        }
+        // If it's a single type that matches a class type parameter
+        else if (testMethod.MethodSymbol.Parameters.Length == 1)
+        {
+            var paramType = testMethod.MethodSymbol.Parameters[0].Type;
+            ProcessTypeForGenerics(paramType, dataType, classTypeParams, genericParamMap);
+        }
+
+        // Build the result array in the correct order
+        var inferredTypes = new ITypeSymbol[classTypeParams.Length];
+        for (int i = 0; i < classTypeParams.Length; i++)
+        {
+            if (!genericParamMap.TryGetValue(classTypeParams[i].Name, out var inferredType))
                 return null;
             inferredTypes[i] = inferredType;
         }
@@ -3778,11 +3942,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var current = attributeClass.BaseType;
         while (current != null)
         {
-            var name = current.Name;
-            if (name.Contains("DataSourceGeneratorAttribute") ||
-                name.Contains("AsyncDataSourceGeneratorAttribute"))
+            if (current.IsGenericType)
             {
-                return current;
+                var name = current.Name;
+                var namespaceName = current.ContainingNamespace?.ToDisplayString();
+                
+                // Check for exact match of the typed base classes
+                if ((name == "DataSourceGeneratorAttribute" || name == "AsyncDataSourceGeneratorAttribute") &&
+                    namespaceName?.Contains("TUnit.Core") == true)
+                {
+                    return current;
+                }
             }
             current = current.BaseType;
         }
