@@ -43,6 +43,7 @@
     <ItemGroup>
         <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
         <ProjectReference Include="..\TUnit\TUnit.csproj" />
+        <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>

@@ -63,7 +63,7 @@ public class GenericConstraintValidationTests
     public async Task GenericMethodWithClassConstraint_ValidType<T>(T value) where T : class
     {
         // This should pass - string satisfies class constraint
-        await Assert.That(value).IsNotNull();
+        await Assert.That(value).IsNotEqualTo(default(T));
         await Assert.That(typeof(T)).IsEqualTo(typeof(string));
     }
 
@@ -111,5 +111,66 @@ public class GenericConstraintValidationTests
     {
         // This should fail during constraint validation - string is not a value type
         await Task.CompletedTask;
+    }
+}
+
+// Generic class with IComparable constraint
+[EngineTest(ExpectedResult.Pass)]
+public class GenericClassWithComparableConstraint<T> where T : IComparable<T>
+{
+    [Test]
+    [Arguments(42)]        // int implements IComparable<int> - should work
+    [Arguments("hello")]   // string implements IComparable<string> - should work
+    public async Task TestComparable(T value)
+    {
+        await Assert.That(value).IsNotEqualTo(default(T));
+        // This should compile because T has IComparable<T> constraint
+        var comparison = value.CompareTo(value);
+        await Assert.That(comparison).IsEqualTo(0);
+    }
+}
+
+// Generic class with struct constraint
+[EngineTest(ExpectedResult.Pass)]
+public class GenericClassWithStructConstraint<T> where T : struct
+{
+    [Test]
+    [Arguments(42)]        // int is a struct - should work
+    [Arguments(3.14)]      // double is a struct - should work
+    public async Task TestStruct(T value)
+    {
+        await Assert.That(value).IsNotEqualTo(default(T));
+        // This should compile because T has struct constraint
+        T defaultValue = default;
+        await Assert.That(value).IsNotEqualTo(defaultValue);
+    }
+}
+
+// Generic class with class constraint
+[EngineTest(ExpectedResult.Pass)]
+public class GenericClassWithClassConstraint<T> where T : class
+{
+    [Test]
+    [Arguments("hello")]     // string is a class - should work
+    public async Task TestClass(T? value)
+    {
+        // This should compile because T has class constraint
+        if (value != null)
+        {
+            await Assert.That(value).IsNotEqualTo(default(T));
+        }
+    }
+}
+
+// Generic class with interface constraint
+[EngineTest(ExpectedResult.Pass)]
+public class GenericClassWithInterfaceConstraint<T> where T : ITestInterface
+{
+    [Test]
+    [TestClassDataSource]  // TestClass implements ITestInterface - should work
+    public async Task TestInterface(T value)
+    {
+        await Assert.That(value).IsNotEqualTo(default(T));
+        value.TestMethod(); // This should compile because T has ITestInterface constraint
     }
 }

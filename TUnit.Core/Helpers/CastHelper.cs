@@ -36,7 +36,6 @@ public static class CastHelper
         {
             return (T?) converted;
         }
-        
 
         if (value is not string
             && value is IEnumerable enumerable

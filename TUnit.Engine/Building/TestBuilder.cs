@@ -60,10 +60,16 @@ internal sealed class TestBuilder : ITestBuilder
             }
             return instance;
         }
-        catch (NotSupportedException)
+        catch (NotSupportedException ex)
         {
-            // This is expected when ClassConstructor is present but wasn't found or returned null
-            throw new InvalidOperationException($"ClassConstructor attribute is present on {metadata.TestClassType.FullName} but failed to create instance.");
+            // This can happen when:
+            // 1. ClassConstructor is present but wasn't found or returned null
+            // 2. AOT scenarios where generic type instantiation fails
+            if (ex.Message.Contains("missing native code or metadata"))
+            {
+                throw new InvalidOperationException($"Failed to create instance of {metadata.TestClassType.FullName} in AOT scenario. Ensure types are properly annotated for AOT compatibility.", ex);
+            }
+            throw new InvalidOperationException($"Failed to create instance of {metadata.TestClassType.FullName}. This may be due to a ClassConstructor attribute issue or AOT incompatibility.", ex);
         }
     }
 

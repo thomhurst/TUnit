@@ -2570,6 +2570,39 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
+        // Process Arguments attributes for generic classes (not generic methods)
+        if (testMethod.IsGenericType && !testMethod.IsGenericMethod)
+        {
+            var argumentsAttributes = testMethod.MethodAttributes
+                .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
+                .ToList();
+
+            foreach (var argAttr in argumentsAttributes)
+            {
+                // Try to infer types from the arguments
+                var inferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, argAttr, compilation);
+                if (inferredTypes is { Length: > 0 })
+                {
+                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+
+                    // Skip if we've already processed this type combination
+                    if (!processedTypeCombinations.Contains(typeKey))
+                    {
+                        processedTypeCombinations.Add(typeKey);
+
+                        // Validate constraints for the generic class type parameters
+                        if (ValidateTypeConstraints(testMethod.TypeSymbol, inferredTypes))
+                        {
+                            // Generate a concrete instantiation for this type combination
+                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                            GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                            writer.AppendLine(",");
+                        }
+                    }
+                }
+            }
+        }
+
         // Process GenerateGenericTest attributes from both methods and classes
         var generateGenericTestAttributes = testMethod.MethodAttributes
             .Where(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute")
@@ -3026,6 +3059,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
+    private static bool ValidateTypeConstraints(INamedTypeSymbol classType, ITypeSymbol[] typeArguments)
+    {
+        // Validate constraints for a generic class
+        if (!classType.IsGenericType)
+            return true;
+
+        var typeParams = classType.TypeParameters;
+        if (typeParams.Length != typeArguments.Length)
+            return false;
+
+        return ValidateTypeParameterConstraints(typeParams, typeArguments);
+    }
+
     private static bool ValidateTypeConstraints(IMethodSymbol method, ITypeSymbol[] typeArguments)
     {
         // Get all type parameters (class + method)
@@ -3043,9 +3089,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (allTypeParams.Count != typeArguments.Length)
             return false;
 
-        for (int i = 0; i < allTypeParams.Count; i++)
+        return ValidateTypeParameterConstraints(allTypeParams, typeArguments);
+    }
+
+    private static bool ValidateTypeParameterConstraints(IEnumerable<ITypeParameterSymbol> typeParams, ITypeSymbol[] typeArguments)
+    {
+        var typeParamsList = typeParams.ToList();
+        
+        for (int i = 0; i < typeParamsList.Count; i++)
         {
-            var typeParam = allTypeParams[i];
+            var typeParam = typeParamsList[i];
             var typeArg = typeArguments[i];
 
             // Check struct constraint
