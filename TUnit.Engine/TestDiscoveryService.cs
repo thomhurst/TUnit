@@ -76,9 +76,22 @@ internal sealed class TestDiscoveryService : IDataProducer
         
         // Check for circular dependencies after all dependencies are resolved
         _dependencyResolver.CheckForCircularDependencies();
+        
+        // Log how many tests are failed after circular dependency check
+        var failedTests = tests.Where(t => t.State == TestState.Failed).ToList();
+        if (failedTests.Any())
+        {
+            Console.WriteLine($"[DEBUG] {failedTests.Count} tests marked as failed after circular dependency check");
+            foreach (var test in failedTests.Take(5))
+            {
+                Console.WriteLine($"[DEBUG] Failed test: {test.Context.TestName}");
+            }
+        }
 
         // Apply filter first to get the tests we want to run
         var filteredTests = _testFilterService.FilterTests(filter, tests);
+        
+        Console.WriteLine($"[DEBUG] After filtering: {filteredTests.Count} tests selected");
 
         // Now find all dependencies of filtered tests and add them
         var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
@@ -98,6 +111,13 @@ internal sealed class TestDiscoveryService : IDataProducer
         }
 
         filteredTests = testsToInclude.ToList();
+        
+        Console.WriteLine($"[DEBUG] After dependency resolution: {filteredTests.Count} tests to run");
+        var failedInFiltered = filteredTests.Where(t => t.State == TestState.Failed).ToList();
+        if (failedInFiltered.Any())
+        {
+            Console.WriteLine($"[DEBUG] {failedInFiltered.Count} failed tests in filtered set");
+        }
 
         // Populate the TestDiscoveryContext with all discovered tests before running AfterTestDiscovery hooks
         var contextProvider = _hookOrchestrator.GetContextProvider();

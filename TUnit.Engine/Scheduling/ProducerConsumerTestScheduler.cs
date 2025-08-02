@@ -105,6 +105,17 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         
         await SetupDependencyGraphAsync(executionStates, cancellationToken);
 
+        // Log failed tests
+        var failedTests = executionStates.Values.Where(s => s.State == TestState.Failed).ToList();
+        if (failedTests.Any())
+        {
+            await _logger.LogInformationAsync($"Found {failedTests.Count} failed tests before execution (likely circular dependencies)");
+            foreach (var failed in failedTests)
+            {
+                await _logger.LogDebugAsync($"Failed test: {failed.Test.TestId} - {failed.Test.Context.TestName}");
+            }
+        }
+
         await PreCreateChannelsForConstraintsAsync(executionStates.Values, cancellationToken);
         
         var testsToRoute = new List<TestExecutionState>();
@@ -131,7 +142,16 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         
         foreach (var state in testsToRoute)
         {
-            await RouteTestAsync(state, cancellationToken);
+            // Skip routing tests that are already failed (e.g., circular dependencies)
+            if (state.State != TestState.Failed)
+            {
+                await RouteTestAsync(state, cancellationToken);
+            }
+            else
+            {
+                // Still increment routed count for failed tests
+                Interlocked.Increment(ref _routedTestCount);
+            }
         }
         
         foreach (var kvp in keyedTestsWithOrder)
@@ -139,7 +159,16 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             var sortedTests = kvp.Value.OrderBy(s => s.Order).ToList();
             foreach (var state in sortedTests)
             {
-                await RouteTestAsync(state, cancellationToken);
+                // Skip routing tests that are already failed (e.g., circular dependencies)
+                if (state.State != TestState.Failed)
+                {
+                    await RouteTestAsync(state, cancellationToken);
+                }
+                else
+                {
+                    // Still increment routed count for failed tests
+                    Interlocked.Increment(ref _routedTestCount);
+                }
             }
         }
         
@@ -362,7 +391,16 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         
         foreach (var readyTest in newlyReadyTests)
         {
-            await RouteTestAsync(readyTest, cancellationToken);
+            // Skip routing tests that are already failed (e.g., circular dependencies)
+            if (readyTest.State != TestState.Failed)
+            {
+                await RouteTestAsync(readyTest, cancellationToken);
+            }
+            else
+            {
+                // Still increment routed count for failed tests
+                Interlocked.Increment(ref _routedTestCount);
+            }
         }
         
         foreach (var kvp in keyedTestsWithOrder)
@@ -370,7 +408,16 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             var sortedTests = kvp.Value.OrderBy(s => s.Order).ToList();
             foreach (var readyTest in sortedTests)
             {
-                await RouteTestAsync(readyTest, cancellationToken);
+                // Skip routing tests that are already failed (e.g., circular dependencies)
+                if (readyTest.State != TestState.Failed)
+                {
+                    await RouteTestAsync(readyTest, cancellationToken);
+                }
+                else
+                {
+                    // Still increment routed count for failed tests
+                    Interlocked.Increment(ref _routedTestCount);
+                }
             }
         }
     }
