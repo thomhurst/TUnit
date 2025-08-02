@@ -36,6 +36,7 @@ public static class CastHelper
         {
             return (T?) converted;
         }
+        
 
         if (value is not string
             && value is IEnumerable enumerable
@@ -164,7 +165,24 @@ public static class CastHelper
 
         // Even in source generation mode, we use reflection as a fallback for custom conversions
         // The AOT analyzer will warn about incompatibility at compile time
-        return (T?) conversionMethod.Invoke(null, [value]);
+        try
+        {
+            return (T?) conversionMethod.Invoke(null, [value]);
+        }
+        catch (Exception ex) when (ex is NotSupportedException || ex is InvalidOperationException)
+        {
+            // In AOT scenarios, reflection invoke might fail
+            // Try a direct cast as a last resort
+            try
+            {
+                return (T)value;
+            }
+            catch
+            {
+                // If all else fails, return the value as-is and let the runtime handle it
+                return (T?)value;
+            }
+        }
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2072", 
@@ -355,4 +373,5 @@ public static class CastHelper
     {
         return type.GetProperty("Value");
     }
+    
 }

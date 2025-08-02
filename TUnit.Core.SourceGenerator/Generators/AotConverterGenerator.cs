@@ -100,7 +100,13 @@ public class AotConverterGenerator : IIncrementalGenerator
             writer.Indent();
             
             writer.AppendLine("if (value == null) return null;");
-            writer.AppendLine($"return ({targetTypeName})(({sourceTypeName})value);");
+            writer.AppendLine($"if (value is {sourceTypeName} typedValue)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"return ({targetTypeName})typedValue;");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("return value; // Return original value if type doesn't match");
             
             writer.Unindent();
             writer.AppendLine("}");
@@ -118,6 +124,8 @@ public class AotConverterGenerator : IIncrementalGenerator
         writer.Indent();
         
         writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
+        writer.AppendLine("[System.Diagnostics.CodeAnalysis.SuppressMessage(\"Performance\", \"CA2255:The 'ModuleInitializer' attribute should not be used in libraries\",");
+        writer.AppendLine("    Justification = \"Test framework needs to register AOT converters for conversion operators\")]");
         writer.AppendLine("public static void Initialize()");
         writer.AppendLine("{");
         writer.Indent();
