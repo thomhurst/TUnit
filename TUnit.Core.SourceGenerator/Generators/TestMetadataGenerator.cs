@@ -240,7 +240,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     a.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") &&
                     InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol) != null);
 
-            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArgumentsForGenericType || hasTypedDataSourceForGenericType)
+            // Check if generic class has method-level Arguments attributes that can provide type information
+            var hasMethodArgumentsForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
+                .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") is true);
+
+            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArgumentsForGenericType || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType)
             {
                 // Use concrete types approach for AOT compatibility
                 // For generic methods, we always use this approach to support Arguments attributes
@@ -2577,10 +2581,29 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
                 .ToList();
 
+            // Debug: Check if we found any Arguments attributes
+            if (argumentsAttributes.Any())
+            {
+                var debugComment = $"// Found {argumentsAttributes.Count} Arguments attributes for {testMethod.TypeSymbol.Name}.{testMethod.MethodSymbol.Name}";
+                writer.AppendLine(debugComment);
+            }
+
             foreach (var argAttr in argumentsAttributes)
             {
                 // Try to infer types from the arguments
-                var inferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, argAttr, compilation);
+                // For generic classes with non-generic methods, we need to infer class type parameters from method arguments
+                var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, argAttr, compilation);
+                
+                // Debug: Check what types were inferred
+                if (inferredTypes == null || inferredTypes.Length == 0)
+                {
+                    writer.AppendLine($"// No types inferred from Arguments attribute");
+                }
+                else
+                {
+                    writer.AppendLine($"// Inferred types: {string.Join(", ", inferredTypes.Select(t => t.ToDisplayString()))}");
+                }
+                
                 if (inferredTypes is { Length: > 0 })
                 {
                     var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
@@ -2591,7 +2614,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         processedTypeCombinations.Add(typeKey);
 
                         // Validate constraints for the generic class type parameters
-                        if (ValidateTypeConstraints(testMethod.TypeSymbol, inferredTypes))
+                        if (ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes))
                         {
                             // Generate a concrete instantiation for this type combination
                             writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
@@ -2731,6 +2754,156 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return true;
+    }
+
+    private static ITypeSymbol[]? InferClassTypesFromMethodArguments(INamedTypeSymbol classSymbol, IMethodSymbol methodSymbol, AttributeData argAttr, Compilation compilation)
+    {
+        if (argAttr.ConstructorArguments.Length == 0)
+            return null;
+
+        var inferredTypes = new Dictionary<string, ITypeSymbol>();
+        var classTypeParameters = classSymbol.TypeParameters;
+        
+        // Debug: Log method parameters
+        var paramTypes = string.Join(", ", methodSymbol.Parameters.Select(p => p.Type.ToString()));
+        System.Diagnostics.Debug.WriteLine($"InferClassTypesFromMethodArguments: Method {methodSymbol.Name} has parameters: {paramTypes}");
+
+        // Arguments attribute takes params object?[] so the first constructor argument is an array
+        if (argAttr.ConstructorArguments.Length != 1 || argAttr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
+            return null;
+
+        var argumentValues = argAttr.ConstructorArguments[0].Values;
+        var methodParams = methodSymbol.Parameters;
+
+        // For each value in the params array
+        for (int argIndex = 0; argIndex < argumentValues.Length && argIndex < methodParams.Length; argIndex++)
+        {
+            var methodParam = methodParams[argIndex];
+            var argValue = argumentValues[argIndex];
+
+            // Skip if this is a CancellationToken parameter
+            if (methodParam.Type.Name == "CancellationToken")
+                continue;
+
+            // Check if the method parameter type is a class generic type parameter
+            if (methodParam.Type is ITypeParameterSymbol typeParam && typeParam.DeclaringMethod == null)
+            {
+                // This is a class type parameter
+                var paramName = typeParam.Name;
+                
+                // The argument value's type tells us what the generic type should be
+                ITypeSymbol? argType = null;
+
+                if (argValue.Type != null)
+                {
+                    argType = argValue.Type;
+                }
+                else if (argValue.Value != null)
+                {
+                    // For literal values, infer type from the value
+                    var value = argValue.Value;
+                    argType = InferTypeFromValue(value, compilation);
+                }
+
+                if (argType != null && !inferredTypes.ContainsKey(paramName))
+                {
+                    inferredTypes[paramName] = argType;
+                }
+            }
+            // Also handle generic types that contain class type parameters (e.g., List<T> where T is a class type parameter)
+            else if (ContainsClassTypeParameter(methodParam.Type, classSymbol))
+            {
+                // Extract the concrete type and map it to the type parameter
+                if (argValue.Type != null)
+                {
+                    MapGenericTypeArguments(methodParam.Type, argValue.Type, classSymbol, inferredTypes);
+                }
+            }
+        }
+
+        // Check if we've inferred all required type parameters
+        if (inferredTypes.Count == 0)
+            return null;
+
+        // Build the result array in the correct order
+        var result = new ITypeSymbol[classTypeParameters.Length];
+        for (int i = 0; i < classTypeParameters.Length; i++)
+        {
+            var paramName = classTypeParameters[i].Name;
+            if (inferredTypes.TryGetValue(paramName, out var inferredType))
+            {
+                result[i] = inferredType;
+            }
+            else
+            {
+                // Could not infer this type parameter
+                return null;
+            }
+        }
+
+        return result;
+    }
+
+    private static bool ContainsClassTypeParameter(ITypeSymbol type, INamedTypeSymbol classSymbol)
+    {
+        if (type is ITypeParameterSymbol typeParam && typeParam.DeclaringMethod == null)
+        {
+            return true;
+        }
+
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            return namedType.TypeArguments.Any(ta => ContainsClassTypeParameter(ta, classSymbol));
+        }
+
+        return false;
+    }
+
+    private static void MapGenericTypeArguments(ITypeSymbol paramType, ITypeSymbol argType, INamedTypeSymbol classSymbol, Dictionary<string, ITypeSymbol> inferredTypes)
+    {
+        if (paramType is ITypeParameterSymbol typeParam && typeParam.DeclaringMethod == null)
+        {
+            if (!inferredTypes.ContainsKey(typeParam.Name))
+            {
+                inferredTypes[typeParam.Name] = argType;
+            }
+        }
+        else if (paramType is INamedTypeSymbol paramNamedType && argType is INamedTypeSymbol argNamedType &&
+                 paramNamedType.IsGenericType && argNamedType.IsGenericType &&
+                 paramNamedType.OriginalDefinition.Equals(argNamedType.OriginalDefinition, SymbolEqualityComparer.Default))
+        {
+            // Map type arguments recursively
+            for (int i = 0; i < paramNamedType.TypeArguments.Length && i < argNamedType.TypeArguments.Length; i++)
+            {
+                MapGenericTypeArguments(paramNamedType.TypeArguments[i], argNamedType.TypeArguments[i], classSymbol, inferredTypes);
+            }
+        }
+    }
+
+    private static ITypeSymbol? InferTypeFromValue(object value, Compilation compilation)
+    {
+        if (value is int)
+            return compilation?.GetSpecialType(SpecialType.System_Int32);
+        else if (value is string)
+            return compilation?.GetSpecialType(SpecialType.System_String);
+        else if (value is bool)
+            return compilation?.GetSpecialType(SpecialType.System_Boolean);
+        else if (value is double)
+            return compilation?.GetSpecialType(SpecialType.System_Double);
+        else if (value is float)
+            return compilation?.GetSpecialType(SpecialType.System_Single);
+        else if (value is long)
+            return compilation?.GetSpecialType(SpecialType.System_Int64);
+        else if (value is byte)
+            return compilation?.GetSpecialType(SpecialType.System_Byte);
+        else if (value is char)
+            return compilation?.GetSpecialType(SpecialType.System_Char);
+        else if (value is decimal)
+            return compilation?.GetSpecialType(SpecialType.System_Decimal);
+        else if (value is ITypeSymbol typeSymbol)
+            return compilation?.GetTypeByMetadataName("System.Type");
+        else
+            return null;
     }
 
     private static ITypeSymbol[]? InferTypesFromClassArgumentsAttribute(INamedTypeSymbol classSymbol, AttributeData argAttr, Compilation compilation)
