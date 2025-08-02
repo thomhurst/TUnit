@@ -2581,29 +2581,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
                 .ToList();
 
-            // Debug: Check if we found any Arguments attributes
-            if (argumentsAttributes.Any())
-            {
-                var debugComment = $"// Found {argumentsAttributes.Count} Arguments attributes for {testMethod.TypeSymbol.Name}.{testMethod.MethodSymbol.Name}";
-                writer.AppendLine(debugComment);
-            }
 
             foreach (var argAttr in argumentsAttributes)
             {
                 // Try to infer types from the arguments
                 // For generic classes with non-generic methods, we need to infer class type parameters from method arguments
                 var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, argAttr, compilation);
-                
-                // Debug: Check what types were inferred
-                if (inferredTypes == null || inferredTypes.Length == 0)
-                {
-                    writer.AppendLine($"// No types inferred from Arguments attribute");
-                }
-                else
-                {
-                    writer.AppendLine($"// Inferred types: {string.Join(", ", inferredTypes.Select(t => t.ToDisplayString()))}");
-                }
-                
                 if (inferredTypes is { Length: > 0 })
                 {
                     var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
@@ -2763,10 +2746,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var inferredTypes = new Dictionary<string, ITypeSymbol>();
         var classTypeParameters = classSymbol.TypeParameters;
-        
-        // Debug: Log method parameters
-        var paramTypes = string.Join(", ", methodSymbol.Parameters.Select(p => p.Type.ToString()));
-        System.Diagnostics.Debug.WriteLine($"InferClassTypesFromMethodArguments: Method {methodSymbol.Name} has parameters: {paramTypes}");
 
         // Arguments attribute takes params object?[] so the first constructor argument is an array
         if (argAttr.ConstructorArguments.Length != 1 || argAttr.ConstructorArguments[0].Kind != TypedConstantKind.Array)

@@ -691,8 +691,15 @@ internal sealed class TestBuilder : ITestBuilder
 
     private static bool IsDataCompatibleWithExpectedTypes(TestMetadata metadata, object?[] methodData)
     {
-        // Get the expected generic types
+        // Get the expected generic types - check both method and class type arguments
         var expectedTypes = metadata.GenericMethodTypeArguments;
+        
+        // For concrete instantiations of generic classes, check the class type arguments
+        if ((expectedTypes == null || expectedTypes.Length == 0) && metadata.TestClassType.IsConstructedGenericType)
+        {
+            expectedTypes = metadata.TestClassType.GetGenericArguments();
+        }
+        
         if (expectedTypes == null || expectedTypes.Length == 0)
             return true; // No specific types expected, allow all data
 
@@ -720,6 +727,13 @@ internal sealed class TestBuilder : ITestBuilder
         if (expectedTypes.Length > 0)
         {
             var expectedElementType = expectedTypes[0];
+            
+            // For simple value types from Arguments attributes, check direct type compatibility
+            if (methodData.Length == 1 && sampleData != null)
+            {
+                // Direct type check for the argument value
+                return actualDataType == expectedElementType;
+            }
 
             // Check various data source types
             if (actualDataType.Name == "RangeIterator")
