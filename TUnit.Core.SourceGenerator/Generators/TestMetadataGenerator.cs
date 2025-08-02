@@ -3515,21 +3515,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate attribute factory with filtered attributes
         var filteredAttributes = new List<AttributeData>();
         
-        // Filter method attributes - exclude Arguments attributes that don't match the specific one
+        // Filter method attributes - only filter Arguments attributes when we have a specific one to match
         foreach (var attr in methodSymbol.GetAttributes())
         {
-            if (attr.AttributeClass?.Name == "ArgumentsAttribute")
+            if (attr.AttributeClass?.Name == "ArgumentsAttribute" && specificArgumentsAttribute != null)
             {
-                // Only include the specific Arguments attribute if provided
-                if (specificArgumentsAttribute != null && AreSameAttribute(attr, specificArgumentsAttribute))
+                // We have a specific Arguments attribute to match against
+                if (AreSameAttribute(attr, specificArgumentsAttribute))
                 {
                     filteredAttributes.Add(attr);
                 }
-                // Skip other Arguments attributes
+                // Skip other Arguments attributes since we're looking for a specific one
             }
             else
             {
-                // Include all non-Arguments attributes
+                // Include all other attributes (including Arguments when no specific one is provided)
                 filteredAttributes.Add(attr);
             }
         }
