@@ -23,6 +23,7 @@
     </PropertyGroup>
 
     <Target Name="CleanSourceGeneratedViewer" BeforeTargets="BeforeBuild">
+        <Message Text="Removing SourceGeneratedViewer directory..." Importance="high" />
         <ItemGroup>
             <FilesToDelete Include="$(ProjectDir)SourceGeneratedViewer\**\*" />
         </ItemGroup>
