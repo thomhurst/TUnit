@@ -174,6 +174,14 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         
         var totalTestCount = executionStates.Count;
         
+        // If all tests are already failed (e.g., all have circular dependencies), skip execution
+        var nonFailedCount = executionStates.Values.Count(s => s.State != TestState.Failed);
+        if (nonFailedCount == 0)
+        {
+            await _logger.LogInformationAsync("All tests are already failed. Skipping execution.");
+            return;
+        }
+        
         var consumerTask = _consumerManager.StartConsumersAsync(
             executor,
             _runningConstraintKeys,
