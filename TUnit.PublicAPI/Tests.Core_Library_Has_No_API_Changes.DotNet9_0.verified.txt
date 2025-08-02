@@ -98,7 +98,7 @@ namespace
         public static bool TryGetAwaitableTask(object awaitable, [.(true)] out .? task) { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<[.(..PublicConstructors)]  T> : .TestDataAttribute
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T> : .TestDataAttribute
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T>.<GenerateAsync>d__1))]
@@ -108,7 +108,7 @@ namespace
         public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2> : .TestDataAttribute
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2> : .TestDataAttribute
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2>.<GenerateAsync>d__1))]
@@ -118,7 +118,7 @@ namespace
         public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2, [.(..PublicConstructors)]  T3> : .TestDataAttribute
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3> : .TestDataAttribute
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3>.<GenerateAsync>d__1))]
@@ -128,7 +128,7 @@ namespace
         public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2, [.(..PublicConstructors)]  T3, [.(..PublicConstructors)]  T4> : .TestDataAttribute
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T4> : .TestDataAttribute
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>.<GenerateAsync>d__1))]
@@ -138,7 +138,7 @@ namespace
         public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2, [.(..PublicConstructors)]  T3, [.(..PublicConstructors)]  T4, [.(..PublicConstructors)]  T5> : .TestDataAttribute
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T4, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T5> : .TestDataAttribute
     {
         protected AsyncDataSourceGeneratorAttribute() { }
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>.<GenerateAsync>d__1))]
@@ -234,7 +234,7 @@ namespace
             "nctionality when AOT compiling.")]
         [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
             " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
-        public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type) { }
+        public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type) { }
         [.("Reflection")]
         [.("Reflection")]
         public ClassDataSourceAttribute(params [] types) { }
@@ -242,22 +242,22 @@ namespace
             "nctionality when AOT compiling.")]
         [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
             " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
-        public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type2) { }
+        public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type2) { }
         [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
             "nctionality when AOT compiling.")]
         [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
             " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
-        public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type3) { }
+        public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type3) { }
         [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
             "nctionality when AOT compiling.")]
         [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
             " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
-        public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type4) { }
+        public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type4) { }
         [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
             "nctionality when AOT compiling.")]
         [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
             " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
-        public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type4, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  type5) { }
+        public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type4, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type5) { }
         public string[] Keys { get; set; }
         public .SharedType[] Shared { get; set; }
         [.("Trimming", "IL2062:The parameter of method has a DynamicallyAccessedMembersAttribute, but the" +
@@ -267,7 +267,7 @@ namespace
         public .<.SharedType> GetSharedTypes() { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T> : .DataSourceGeneratorAttribute<T>
+    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T> : .DataSourceGeneratorAttribute<T>
     {
         public ClassDataSourceAttribute() { }
         public  ClassType { get; }
@@ -278,7 +278,7 @@ namespace
         public .<.SharedType> GetSharedTypes() { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T2> : .DataSourceGeneratorAttribute<T1, T2>
+    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T2> : .DataSourceGeneratorAttribute<T1, T2>
         where T1 : new()
         where T2 : new()
     {
@@ -290,7 +290,7 @@ namespace
         public .<.SharedType> GetSharedTypes() { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T3> : .DataSourceGeneratorAttribute<T1, T2, T3>
+    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T3> : .DataSourceGeneratorAttribute<T1, T2, T3>
         where T1 : new()
         where T2 : new()
         where T3 : new()
@@ -303,7 +303,7 @@ namespace
         public .<.SharedType> GetSharedTypes() { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T4> : .DataSourceGeneratorAttribute<T1, T2, T3, T4>
+    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T4> : .DataSourceGeneratorAttribute<T1, T2, T3, T4>
         where T1 : new()
         where T2 : new()
         where T3 : new()
@@ -317,7 +317,7 @@ namespace
         public .<.SharedType> GetSharedTypes() { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T4, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicProperties)]  T5> : .DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
+    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T4, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T5> : .DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
         where T1 : new()
         where T2 : new()
         where T3 : new()
@@ -432,7 +432,7 @@ namespace
         public string DataSourceName { get; }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<[.(..PublicConstructors)]  T> : .AsyncDataSourceGeneratorAttribute<T>
+    public abstract class DataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T> : .AsyncDataSourceGeneratorAttribute<T>
     {
         protected DataSourceGeneratorAttribute() { }
         protected abstract .<<T>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata);
@@ -440,7 +440,7 @@ namespace
         protected override .<<.<T>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2> : .AsyncDataSourceGeneratorAttribute<T1, T2>
+    public abstract class DataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2> : .AsyncDataSourceGeneratorAttribute<T1, T2>
     {
         protected DataSourceGeneratorAttribute() { }
         protected abstract .<<<T1, T2>>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata);
@@ -448,7 +448,7 @@ namespace
         protected override .<<.<<T1, T2>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2, [.(..PublicConstructors)]  T3> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3>
+    public abstract class DataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3>
     {
         protected DataSourceGeneratorAttribute() { }
         protected abstract .<<<T1, T2, T3>>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata);
@@ -456,7 +456,7 @@ namespace
         protected override sealed .<<.<<T1, T2, T3>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2, [.(..PublicConstructors)]  T3, [.(..PublicConstructors)]  T4> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>
+    public abstract class DataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T4> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>
     {
         protected DataSourceGeneratorAttribute() { }
         protected abstract .<<<T1, T2, T3, T4>>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata);
@@ -464,7 +464,7 @@ namespace
         protected override .<<.<<T1, T2, T3, T4>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class DataSourceGeneratorAttribute<[.(..PublicConstructors)]  T1, [.(..PublicConstructors)]  T2, [.(..PublicConstructors)]  T3, [.(..PublicConstructors)]  T4, [.(..PublicConstructors)]  T5> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
+    public abstract class DataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T4, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T5> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
     {
         protected DataSourceGeneratorAttribute() { }
         protected abstract .<<<T1, T2, T3, T4, T5>>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata);
@@ -1904,13 +1904,13 @@ namespace .Helpers
             " should use explicit conversions.")]
         [.("Trimming", "IL2072", Justification="Type conversion uses DynamicallyAccessedMembers for known conversion patterns. Fo" +
             "r AOT scenarios, use explicit type conversions.")]
-        public static object? Cast([.(..PublicMethods)]  type, object? value) { }
+        public static object? Cast([.(..None | ..PublicMethods | ..NonPublicMethods)]  type, object? value) { }
         [.("AOT", "IL3050", Justification="Reflection-based conversion is a fallback for runtime scenarios. AOT applications" +
             " should use explicit conversions.")]
         [.("Trimming", "IL2072", Justification="Type conversion uses DynamicallyAccessedMembers for known conversion patterns. Fo" +
             "r AOT scenarios, use explicit type conversions.")]
-        public static T? Cast<[.(..PublicMethods)]  T>(object? value) { }
-        public static .MethodInfo? GetConversionMethod([.(..PublicMethods)]  baseType, [.(..PublicMethods)]  targetType) { }
+        public static T? Cast<[.(..None | ..PublicMethods | ..NonPublicMethods)]  T>(object? value) { }
+        public static .MethodInfo? GetConversionMethod([.(..None | ..PublicMethods | ..NonPublicMethods)]  baseType, [.(..None | ..PublicMethods | ..NonPublicMethods)]  targetType) { }
     }
     public static class ClassConstructorHelper
     {
