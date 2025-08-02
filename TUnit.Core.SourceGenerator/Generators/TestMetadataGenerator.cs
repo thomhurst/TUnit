@@ -2393,7 +2393,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     // Generate a concrete instantiation for this type combination
                     writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                    GenerateConcreteTestMetadata(writer, compilation, testMethod, className, combinedTypes, methodAttr);
+                    GenerateConcreteTestMetadata(writer, compilation, testMethod, className, combinedTypes, classAttr);
                     writer.AppendLine(",");
                 }
             }
@@ -2456,6 +2456,35 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // Generate a concrete instantiation for this type combination
                     writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
                     GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes, argAttr);
+                    writer.AppendLine(",");
+                }
+            }
+        }
+
+        // Handle generic classes with non-generic methods that have method-level Arguments
+        // These were skipped in the main loop and need special processing
+        if (testMethod.IsGenericType && !testMethod.IsGenericMethod && methodArgumentsAttributes.Count > 0)
+        {
+            foreach (var methodArgAttr in methodArgumentsAttributes)
+            {
+                var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation);
+                if (inferredTypes is { Length: > 0 })
+                {
+                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+
+                    // Skip if we've already processed this type combination
+                    if (processedTypeCombinations.Contains(typeKey))
+                        continue;
+
+                    processedTypeCombinations.Add(typeKey);
+
+                    // Validate class type constraints
+                    if (!ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes))
+                        continue;
+
+                    // Generate a concrete instantiation for this type combination
+                    writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                    GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes, methodArgAttr);
                     writer.AppendLine(",");
                 }
             }
@@ -2618,35 +2647,73 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        // Process Arguments attributes for generic classes (not generic methods)
-        if (testMethod.IsGenericType && !testMethod.IsGenericMethod)
+        // Process class-level Arguments attributes for generic classes (combined with generic methods)
+        if (testMethod.IsGenericType)
         {
-            var argumentsAttributes = testMethod.MethodAttributes
+            var argumentsAttributes = testMethod.TypeSymbol.GetAttributes()
                 .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
                 .ToList();
 
 
             foreach (var argAttr in argumentsAttributes)
             {
-                // Try to infer types from the arguments
-                // For generic classes with non-generic methods, we need to infer class type parameters from method arguments
-                var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, argAttr, compilation);
-                if (inferredTypes is { Length: > 0 })
+                // Try to infer types from the class-level arguments
+                var classInferredTypes = InferTypesFromClassArgumentsAttribute(testMethod.TypeSymbol, argAttr, compilation);
+                if (classInferredTypes is { Length: > 0 })
                 {
-                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
-
-                    // Skip if we've already processed this type combination
-                    if (!processedTypeCombinations.Contains(typeKey))
+                    // If the method is also generic, we need to combine class and method type arguments
+                    if (testMethod.IsGenericMethod)
                     {
-                        processedTypeCombinations.Add(typeKey);
+                        // Get method-level Arguments attributes to infer method type parameters
+                        var methodLevelArgumentsAttributes = testMethod.MethodAttributes
+                            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
+                            .ToList();
 
-                        // Validate constraints for the generic class type parameters
-                        if (ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes))
+                        foreach (var methodArgAttr in methodLevelArgumentsAttributes)
                         {
-                            // Generate a concrete instantiation for this type combination
-                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                            GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes, argAttr);
-                            writer.AppendLine(",");
+                            var methodInferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodArgAttr, compilation);
+                            if (methodInferredTypes is { Length: > 0 })
+                            {
+                                // Combine class types and method types
+                                var combinedTypes = classInferredTypes.Concat(methodInferredTypes).ToArray();
+                                var typeKey = string.Join(",", combinedTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+
+                                // Skip if we've already processed this type combination
+                                if (!processedTypeCombinations.Contains(typeKey))
+                                {
+                                    processedTypeCombinations.Add(typeKey);
+
+                                    // Validate constraints for both class and method type parameters
+                                    if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classInferredTypes) &&
+                                        ValidateTypeConstraints(testMethod.MethodSymbol, methodInferredTypes))
+                                    {
+                                        // Generate a concrete instantiation for this type combination
+                                        writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                                        GenerateConcreteTestMetadata(writer, compilation, testMethod, className, combinedTypes, argAttr);
+                                        writer.AppendLine(",");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // For non-generic methods, just use class types
+                        var typeKey = string.Join(",", classInferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+
+                        // Skip if we've already processed this type combination
+                        if (!processedTypeCombinations.Contains(typeKey))
+                        {
+                            processedTypeCombinations.Add(typeKey);
+
+                            // Validate constraints for the generic class type parameters
+                            if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classInferredTypes))
+                            {
+                                // Generate a concrete instantiation for this type combination
+                                writer.AppendLine($"[{string.Join(" + \",\" + ", classInferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                                GenerateConcreteTestMetadata(writer, compilation, testMethod, className, classInferredTypes, argAttr);
+                                writer.AppendLine(",");
+                            }
                         }
                     }
                 }
@@ -3556,8 +3623,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (hasParameterizedConstructor)
         {
-            // For classes with constructor parameters, use the args
-            writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), args)!;");
+            // For classes with constructor parameters, use the specific constructor arguments from the Arguments attribute
+            if (specificArgumentsAttribute != null && specificArgumentsAttribute.ConstructorArguments.Length > 0 &&
+                specificArgumentsAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
+            {
+                var argumentValues = specificArgumentsAttribute.ConstructorArguments[0].Values;
+                var constructorArgs = string.Join(", ", argumentValues.Select(arg =>
+                {
+                    if (arg.Value is string str)
+                        return $"\"{str}\"";
+                    else if (arg.Value is char chr)
+                        return $"'{chr}'";
+                    else if (arg.Value is bool b)
+                        return b.ToString().ToLower();
+                    else if (arg.Value is null)
+                        return "null";
+                    else
+                        return arg.Value.ToString();
+                }));
+                
+                writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), new object[] {{ {constructorArgs} }})!;");
+            }
+            else
+            {
+                // Fallback to using args if no specific Arguments attribute
+                writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), args)!;");
+            }
         }
         else
         {
