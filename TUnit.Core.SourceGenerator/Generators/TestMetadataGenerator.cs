@@ -3812,10 +3812,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (specificArgumentsAttribute != null)
         {
-            // For specific data source attributes, only include the specific one that matches
+            // For specific data source attributes, include the specific one that matches
             methodDataSources = methodSymbol.GetAttributes()
                 .Where(a => AreSameAttribute(a, specificArgumentsAttribute))
                 .ToList();
+
+            // For combined generic class + generic method scenarios, also include method-level Arguments
+            // that provide method parameters (different from the class-level specificArgumentsAttribute)
+            if (testMethod.IsGenericType && testMethod.IsGenericMethod)
+            {
+                var additionalMethodDataSources = methodSymbol.GetAttributes()
+                    .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute" && !AreSameAttribute(a, specificArgumentsAttribute))
+                    .ToList();
+                methodDataSources.AddRange(additionalMethodDataSources);
+            }
 
             classDataSources = typeSymbol.GetAttributesIncludingBaseTypes()
                 .Where(a => AreSameAttribute(a, specificArgumentsAttribute))
