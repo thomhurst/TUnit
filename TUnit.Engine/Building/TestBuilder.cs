@@ -27,11 +27,11 @@ internal sealed class TestBuilder : ITestBuilder
     {
         // First try to create instance with ClassConstructor attribute
         var attributes = metadata.AttributeFactory();
-        
+
         // Use the overload that takes individual parameters instead of TestContext
         var events = builderContext?.Events ?? new TestContextEvents();
         var objectBag = builderContext?.ObjectBag ?? new Dictionary<string, object?>();
-        
+
         var instance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
             attributes,
             metadata.TestClassType,
@@ -74,7 +74,7 @@ internal sealed class TestBuilder : ITestBuilder
         try
         {
             // Handle GenericTestMetadata with ConcreteInstantiations
-            if (metadata is GenericTestMetadata genericMetadata && genericMetadata.ConcreteInstantiations?.Count > 0)
+            if (metadata is GenericTestMetadata { ConcreteInstantiations.Count: > 0 } genericMetadata)
             {
                 // Build tests from each concrete instantiation
                 foreach (var concreteMetadata in genericMetadata.ConcreteInstantiations.Values)
@@ -192,9 +192,9 @@ internal sealed class TestBuilder : ITestBuilder
                                 var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
 
                                 // For concrete generic instantiations, check if the data is compatible with the expected types
-                                if (metadata.GenericMethodTypeArguments != null && metadata.GenericMethodTypeArguments.Length > 0)
+                                if (metadata.GenericMethodTypeArguments is { Length: > 0 })
                                 {
-                                    
+
                                     if (!IsDataCompatibleWithExpectedTypes(metadata, methodData))
                                     {
                                         // Skip this data source as it's not compatible with the expected types
@@ -360,7 +360,7 @@ internal sealed class TestBuilder : ITestBuilder
         foreach (var dataSource in metadata.DataSources)
         {
             var dataSourceType = dataSource.GetType();
-            
+
             // Check if this data source inherits from a generic base type
             var baseType = dataSourceType.BaseType;
             while (baseType != null)
@@ -369,7 +369,7 @@ internal sealed class TestBuilder : ITestBuilder
                 {
                     var genericDef = baseType.GetGenericTypeDefinition();
                     var genericDefName = genericDef.FullName ?? genericDef.Name;
-                    
+
                     // Check if it's a typed data source attribute
                     if (genericDefName.Contains("DataSourceGeneratorAttribute`") ||
                         genericDefName.Contains("AsyncDataSourceGeneratorAttribute`"))
@@ -692,11 +692,11 @@ internal sealed class TestBuilder : ITestBuilder
 
         // For generic methods, we need to check if the data types match the expected types
         // The key is to determine what type of data this data source produces
-        
+
         // Look for any non-null data in the methodData array to determine the actual types
         Type? actualDataType = null;
         object? sampleData = null;
-        
+
         foreach (var data in methodData)
         {
             if (data != null)
@@ -706,22 +706,22 @@ internal sealed class TestBuilder : ITestBuilder
                 break;
             }
         }
-        
+
         if (actualDataType == null || sampleData == null)
             return true; // Can't determine type, allow it
-        
+
         // For AggregateBy test, the first generic type parameter is TSource
         if (expectedTypes.Length > 0)
         {
             var expectedElementType = expectedTypes[0];
-            
+
             // Check various data source types
             if (actualDataType.Name == "RangeIterator")
             {
                 // RangeIterator produces integers
                 return expectedElementType == typeof(int);
             }
-            
+
             // For compiler-generated array types like <>z__ReadOnlyArray`1
             if (actualDataType.Name.Contains("ReadOnlyArray") || actualDataType.Name.Contains("__Array"))
             {
@@ -736,11 +736,11 @@ internal sealed class TestBuilder : ITestBuilder
                         return elementType == expectedElementType;
                     }
                 }
-                
+
                 // If we can't determine the generic type, reject it
                 return false;
             }
-            
+
             // Check regular arrays
             if (actualDataType.IsArray)
             {
@@ -749,9 +749,9 @@ internal sealed class TestBuilder : ITestBuilder
                 {
                     return elementType == expectedElementType;
                 }
-                
+
                 // For arrays where we can't get element type, check actual content
-                if (sampleData is Array arr && arr.Length > 0)
+                if (sampleData is Array { Length: > 0 } arr)
                 {
                     var firstElement = arr.GetValue(0);
                     if (firstElement != null)
@@ -760,7 +760,7 @@ internal sealed class TestBuilder : ITestBuilder
                     }
                 }
             }
-            
+
             // For other enumerable types, check if the actual data type matches expected
             if (actualDataType.IsGenericType)
             {
@@ -771,16 +771,16 @@ internal sealed class TestBuilder : ITestBuilder
                 }
             }
         }
-        
+
         // Default to false - if we can't determine compatibility, reject it
         return false;
     }
-    
+
     private static Type? GetExpectedTypeForParameter(ParameterMetadata param, Type[] genericTypeArgs)
     {
         if (param.TypeReference == null)
             return null;
-            
+
         // If it's a direct generic parameter (e.g., T)
         if (param.TypeReference.IsGenericParameter)
         {
@@ -788,7 +788,7 @@ internal sealed class TestBuilder : ITestBuilder
             if (position < genericTypeArgs.Length)
                 return genericTypeArgs[position];
         }
-        
+
         // For constructed generic types, we'll just return the element type for now
         // and let IsTypeCompatible handle the full type checking
         if (param.TypeReference.GenericArguments?.Count > 0)
@@ -805,10 +805,10 @@ internal sealed class TestBuilder : ITestBuilder
                 }
             }
         }
-        
+
         return null;
     }
-    
+
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL2070:UnrecognizedReflectionPattern",
         Justification = "Type checking at runtime is required for data source filtering")]
     private static bool IsTypeCompatible(Type actualType, Type expectedType)
@@ -816,17 +816,17 @@ internal sealed class TestBuilder : ITestBuilder
         // Direct match
         if (actualType == expectedType)
             return true;
-            
+
         // For the data source filtering, we're mainly concerned with checking if the
         // data types match the expected generic type parameters.
         // For IEnumerable<T>, we need to check if the actual data is IEnumerable<int> vs IEnumerable<string> etc.
-        
+
         // If we're expecting a specific element type (from generic parameter resolution),
         // check if the actual type is an enumerable of that element type
         if (actualType.IsGenericType)
         {
             var actualGenericDef = actualType.GetGenericTypeDefinition();
-            
+
             // Check common collection types
             if (actualGenericDef == typeof(IEnumerable<>) ||
                 actualGenericDef == typeof(List<>) ||
@@ -839,7 +839,7 @@ internal sealed class TestBuilder : ITestBuilder
                 // Check if the element types match
                 return actualElementType == expectedType;
             }
-            
+
             // For arrays that come from Range operations
             if (actualType.IsArray)
             {
@@ -847,7 +847,7 @@ internal sealed class TestBuilder : ITestBuilder
                 return actualElementType == expectedType;
             }
         }
-        
+
         // For non-generic types, just check direct compatibility
         return expectedType.IsAssignableFrom(actualType);
     }

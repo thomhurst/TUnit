@@ -59,7 +59,7 @@ internal static class GenericTypeInference
 
             // Check if this is a typed data source (inherits from AsyncDataSourceGeneratorAttribute<T> or DataSourceGeneratorAttribute<T>)
             var baseType = GetTypedDataSourceBase(attribute.AttributeClass);
-            if (baseType != null && baseType.TypeArguments.Length > 0)
+            if (baseType is { TypeArguments.Length: > 0 })
             {
                 // For single type parameter methods, use the first type argument
                 if (method.TypeParameters.Length == 1)
@@ -155,9 +155,7 @@ internal static class GenericTypeInference
                 // Check if this parameter has a Matrix<T> attribute
                 foreach (var attr in parameter.GetAttributes())
                 {
-                    if (attr.AttributeClass?.Name == "MatrixAttribute" && 
-                        attr.AttributeClass.IsGenericType &&
-                        attr.AttributeClass.TypeArguments.Length > 0)
+                    if (attr.AttributeClass is { Name: "MatrixAttribute", IsGenericType: true, TypeArguments.Length: > 0 })
                     {
                         // Get the type argument from Matrix<T>
                         var matrixType = attr.AttributeClass.TypeArguments[0];
@@ -222,29 +220,20 @@ internal static class GenericTypeInference
                     .OfType<IMethodSymbol>()
                     .FirstOrDefault();
 
-                if (dataSourceMethod != null)
-                {
+                if (dataSourceMethod is { ReturnType: INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: > 0 } namedType })
                     // Analyze the return type to extract generic types
-                    var returnType = dataSourceMethod.ReturnType;
-                    
                     // Handle IEnumerable<Func<(...)>>
-                    if (returnType is INamedTypeSymbol namedType && 
-                        namedType.IsGenericType &&
-                        namedType.TypeArguments.Length > 0)
+                {
+                    var funcType = namedType.TypeArguments[0];
+                    if (funcType is INamedTypeSymbol { Name: "Func", TypeArguments.Length: > 0 } funcNamedType)
                     {
-                        var funcType = namedType.TypeArguments[0];
-                        if (funcType is INamedTypeSymbol funcNamedType && 
-                            funcNamedType.Name == "Func" &&
-                            funcNamedType.TypeArguments.Length > 0)
+                        var tupleType = funcNamedType.TypeArguments[0];
+                        if (tupleType is INamedTypeSymbol { IsTupleType: true } tupleNamedType)
                         {
-                            var tupleType = funcNamedType.TypeArguments[0];
-                            if (tupleType is INamedTypeSymbol tupleNamedType && tupleNamedType.IsTupleType)
-                            {
-                                // Extract types from tuple elements
-                                var inferredTypes = InferTypesFromTupleElements(testMethod, tupleNamedType);
-                                if (inferredTypes != null)
-                                    return inferredTypes;
-                            }
+                            // Extract types from tuple elements
+                            var inferredTypes = InferTypesFromTupleElements(testMethod, tupleNamedType);
+                            if (inferredTypes != null)
+                                return inferredTypes;
                         }
                     }
                 }
@@ -282,9 +271,7 @@ internal static class GenericTypeInference
                 {
                     // For generic types like IEnumerable<T>, extract T
                     var elementType = tupleElement.Type;
-                    if (elementType is INamedTypeSymbol namedElementType && 
-                        namedElementType.IsGenericType &&
-                        namedElementType.TypeArguments.Length > 0)
+                    if (elementType is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: > 0 } namedElementType)
                     {
                         // For IEnumerable<int>, we want int
                         inferredTypes[typeParamIndex] = namedElementType.TypeArguments[0];
@@ -296,12 +283,12 @@ internal static class GenericTypeInference
                     }
                 }
             }
-            else if (parameter.Type is INamedTypeSymbol paramNamedType && paramNamedType.IsGenericType)
+            else if (parameter.Type is INamedTypeSymbol { IsGenericType: true } paramNamedType)
             {
                 // Handle complex generic parameters like Func<TSource, TKey>
                 // This is more complex and would need deeper analysis
                 var tupleElementType = tupleElement.Type;
-                if (tupleElementType is INamedTypeSymbol funcType && funcType.Name == "Func")
+                if (tupleElementType is INamedTypeSymbol { Name: "Func" } funcType)
                 {
                     // Match type arguments between parameter type and tuple element type
                     for (int j = 0; j < funcType.TypeArguments.Length && j < paramNamedType.TypeArguments.Length; j++)

@@ -92,7 +92,10 @@ public static class PropertyInjector
                             // Multiple arguments - create tuple from them
                             value = TupleFactory.CreateTuple(currentPropertyInjection.PropertyType, args);
                         }
-                        else if (args?.Length == 1 && args[0] != null && TupleFactory.IsTupleType(args[0]!.GetType()))
+                        else if (args is
+                                 [
+                                     not null
+                                 ] && TupleFactory.IsTupleType(args[0]!.GetType()))
                         {
                             // Single tuple argument - check if it needs type conversion
                             var tupleValue = args[0]!;

@@ -33,7 +33,7 @@ public sealed class GenericTestMetadata : TestMetadata
                     // Determine the concrete types from the test arguments
                     var inferredTypes = InferTypesFromArguments(context.Arguments, metadata);
                     
-                    if (inferredTypes != null && inferredTypes.Length > 0)
+                    if (inferredTypes is { Length: > 0 })
                     {
                         // Create a key from the inferred types
                         var typeKey = string.Join(",", inferredTypes.Select(t => t.FullName ?? t.Name));

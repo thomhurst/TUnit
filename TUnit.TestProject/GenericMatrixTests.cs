@@ -55,6 +55,7 @@ public class GenericMatrixTests
 
 // Generic class with Matrix tests
 [EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
 public class GenericClassMatrixTests<T> where T : struct
 {
     [Test]

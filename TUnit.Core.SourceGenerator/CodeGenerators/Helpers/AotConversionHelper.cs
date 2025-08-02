@@ -64,8 +64,7 @@ public static class AotConversionHelper
         {
             if (member is IMethodSymbol method && 
                 (method.Name == "op_Implicit" || method.Name == "op_Explicit") &&
-                method.IsStatic &&
-                method.Parameters.Length == 1)
+                method is { IsStatic: true, Parameters.Length: 1 })
             {
                 yield return (method, method.ReturnType);
             }

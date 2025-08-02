@@ -34,7 +34,7 @@ public static class StaticPropertyReflectionInitializer
             try
             {
                 var types = assembly.GetExportedTypes()
-                    .Where(t => t.IsClass && !t.IsAbstract);
+                    .Where(t => t is { IsClass: true, IsAbstract: false });
 
                 foreach (var type in types)
                 {

@@ -216,7 +216,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
 
         // Check if we have generic types or methods
-        if (testMethod.IsGenericType || (testMethod.IsGenericMethod && testMethod.MethodSymbol.TypeParameters.Length > 0))
+        if (testMethod.IsGenericType || testMethod is { IsGenericMethod: true, MethodSymbol.TypeParameters.Length: > 0 })
         {
             // Check if we can use the concrete types approach (AOT-compatible)
             // This is possible when we have typed data sources that can inform the generic type arguments
@@ -224,20 +224,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 .Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass) &&
                          InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, a) != null);
 
-            // Also check if we have Arguments attributes that can provide type information for generic methods
-            var hasArgumentsWithTypes = testMethod.IsGenericMethod && testMethod.MethodAttributes
-                .Any(a => a.AttributeClass?.Name == "ArgumentsAttribute" &&
-                         InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, a, compilation) != null);
-
             // Check if we have GenerateGenericTest attributes
             var hasGenerateGenericTest = testMethod.IsGenericMethod && testMethod.MethodAttributes
-                .Any(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute");
+                .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
 
             // Check if generic class has class-level Arguments attributes
             var hasClassArgumentsForGenericType = testMethod.IsGenericType && testMethod.TypeSymbol.GetAttributes()
-                .Any(a => a.AttributeClass?.Name == "ArgumentsAttribute");
+                .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") is true);
 
-            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArgumentsForGenericType)
+            // Check if generic class has method-level typed data source attributes that can provide type information
+            var hasTypedDataSourceForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
+                .Any(a => a.AttributeClass != null &&
+                    a.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") &&
+                    InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol) != null);
+
+            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArgumentsForGenericType || hasTypedDataSourceForGenericType)
             {
                 // Use concrete types approach for AOT compatibility
                 // For generic methods, we always use this approach to support Arguments attributes
@@ -416,7 +417,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return type;
         }
 
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
         {
             // Replace type arguments in generic types like IEnumerable<T>, Func<T1, T2>, etc.
             var newTypeArgs = namedType.TypeArguments
@@ -2330,7 +2331,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .ToList();
 
         var classArgumentsAttributes = new List<AttributeData>();
-        
+
         // For generic classes, collect class-level Arguments attributes separately
         if (testMethod.IsGenericType)
         {
@@ -2343,7 +2344,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
 
         // Handle the combination of class and method Arguments attributes
-        if (testMethod.IsGenericType && testMethod.IsGenericMethod && classArgumentsAttributes.Any() && methodArgumentsAttributes.Any())
+        if (testMethod is { IsGenericType: true, IsGenericMethod: true } && classArgumentsAttributes.Any() && methodArgumentsAttributes.Any())
         {
             // Generate combinations of class and method Arguments
             foreach (var classAttr in classArgumentsAttributes)
@@ -2409,7 +2410,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     inferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, argAttr, compilation);
                 }
 
-                if (inferredTypes != null && inferredTypes.Length > 0)
+                if (inferredTypes is { Length: > 0 })
                 {
                     var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
@@ -2421,7 +2422,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     // Validate constraints
                     bool constraintsValid = true;
-                    if (testMethod.IsGenericType && !testMethod.IsGenericMethod)
+                    if (testMethod is { IsGenericType: true, IsGenericMethod: false })
                     {
                         // For generic class only, validate class constraints
                         constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes);
@@ -2451,7 +2452,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         foreach (var dataSourceAttr in dataSourceAttributes)
         {
             var inferredTypes = InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr);
-            if (inferredTypes != null && inferredTypes.Length > 0)
+            if (inferredTypes is { Length: > 0 })
             {
                 var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
@@ -2463,7 +2464,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                 // Validate constraints
                 bool constraintsValid = true;
-                if (testMethod.IsGenericType && !testMethod.IsGenericMethod)
+                if (testMethod is { IsGenericType: true, IsGenericMethod: false })
                 {
                     // For generic class only, validate class constraints
                     constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes);
@@ -2488,7 +2489,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (testMethod.IsGenericMethod)
         {
             var matrixInferredTypes = InferTypesFromMatrixAttributes(testMethod.MethodSymbol);
-            if (matrixInferredTypes != null && matrixInferredTypes.Length > 0)
+            if (matrixInferredTypes is { Length: > 0 })
             {
                 var typeKey = string.Join(",", matrixInferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
@@ -2509,6 +2510,31 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
+        // Process typed data source attributes for generic classes (non-generic methods)
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false })
+        {
+            var typedDataSourceInferredTypes = InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol);
+            if (typedDataSourceInferredTypes is { Length: > 0 })
+            {
+                var typeKey = string.Join(",", typedDataSourceInferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+
+                // Skip if we've already processed this type combination
+                if (!processedTypeCombinations.Contains(typeKey))
+                {
+                    processedTypeCombinations.Add(typeKey);
+
+                    // Validate constraints for the generic class
+                    if (ValidateClassTypeConstraints(testMethod.TypeSymbol, typedDataSourceInferredTypes))
+                    {
+                        // Generate a concrete instantiation for this type combination
+                        writer.AppendLine($"[{string.Join(" + \",\" + ", typedDataSourceInferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                        GenerateConcreteTestMetadata(writer, compilation, testMethod, className, typedDataSourceInferredTypes);
+                        writer.AppendLine(",");
+                    }
+                }
+            }
+        }
+
         // Process MethodDataSource attributes for generic methods
         if (testMethod.IsGenericMethod)
         {
@@ -2520,7 +2546,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 // Try to infer types from the method data source
                 var inferredTypes = InferTypesFromMethodDataSource(compilation, testMethod, mdsAttr);
-                if (inferredTypes != null && inferredTypes.Length > 0)
+                if (inferredTypes is { Length: > 0 })
                 {
                     var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
@@ -2555,7 +2581,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var typeArgs = new List<ITypeSymbol>();
                 foreach (var arg in genAttr.ConstructorArguments)
                 {
-                    if (arg.Kind == TypedConstantKind.Type && arg.Value is ITypeSymbol typeSymbol)
+                    if (arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol })
                     {
                         typeArgs.Add(typeSymbol);
                     }
@@ -2563,7 +2589,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     {
                         foreach (var arrayElement in arg.Values)
                         {
-                            if (arrayElement.Kind == TypedConstantKind.Type && arrayElement.Value is ITypeSymbol arrayTypeSymbol)
+                            if (arrayElement is { Kind: TypedConstantKind.Type, Value: ITypeSymbol arrayTypeSymbol })
                             {
                                 typeArgs.Add(arrayTypeSymbol);
                             }
@@ -2888,8 +2914,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
 
                     // If the data source returns a tuple, extract component types
-                    if (typeArgs.Length == 1 && typeArgs[0] is INamedTypeSymbol tupleType &&
-                        tupleType.IsTupleType && tupleType.TupleElements.Length == totalGenericParams)
+                    if (typeArgs is
+                        [
+                            INamedTypeSymbol { IsTupleType: true } tupleType
+                        ] && tupleType.TupleElements.Length == totalGenericParams)
                     {
                         return tupleType.TupleElements.Select(e => e.Type).ToArray();
                     }
@@ -2974,8 +3002,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Check for generic types like IEnumerable<T>, Func<T1, T2>, etc.
-        if (paramType is INamedTypeSymbol namedParamType && namedParamType.IsGenericType &&
-            actualType is INamedTypeSymbol namedActualType && namedActualType.IsGenericType &&
+        if (paramType is INamedTypeSymbol { IsGenericType: true } namedParamType &&
+            actualType is INamedTypeSymbol { IsGenericType: true } namedActualType &&
             namedParamType.OriginalDefinition.Equals(namedActualType.OriginalDefinition, SymbolEqualityComparer.Default))
         {
             // Recursively process type arguments
@@ -3132,7 +3160,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 .OrderByDescending(c => c.Parameters.Length)
                 .FirstOrDefault();
 
-            if (constructor != null && constructor.Parameters.Length > 0)
+            if (constructor is { Parameters.Length: > 0 })
             {
                 hasParameterizedConstructor = true;
                 constructorParamCount = constructor.Parameters.Length;
@@ -3236,7 +3264,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Handle generic types like IEnumerable<T>, Dictionary<TKey, TValue>, etc.
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
         {
             var substitutedTypeArgs = namedType.TypeArguments
                 .Select(arg => SubstituteTypeParameters(arg, testMethod, classTypeArgs, methodTypeArgs))
@@ -3413,13 +3441,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // Check if this parameter has a Matrix<T> attribute
                 foreach (var attr in parameter.GetAttributes())
                 {
-                    if (attr.AttributeClass?.Name == "MatrixAttribute" && 
-                        attr.AttributeClass.IsGenericType &&
-                        attr.AttributeClass.TypeArguments.Length > 0)
+                    if (attr.AttributeClass is { Name: "MatrixAttribute", IsGenericType: true, TypeArguments.Length: > 0 })
                     {
                         // Get the type argument from Matrix<T>
                         var matrixType = attr.AttributeClass.TypeArguments[0];
-                        
+
                         // Map this to the method's type parameter
                         inferredTypes[typeParam.Name] = matrixType;
                         break;
@@ -3442,6 +3468,82 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return result;
+    }
+
+    private static ITypeSymbol[]? InferTypesFromTypedDataSourceForClass(INamedTypeSymbol classSymbol, IMethodSymbol method)
+    {
+        var inferredTypes = new Dictionary<string, ITypeSymbol>();
+        var classTypeParameters = classSymbol.TypeParameters;
+
+        // Look at each parameter to see if it has typed data source attributes
+        foreach (var parameter in method.Parameters)
+        {
+            if (parameter.Type is ITypeParameterSymbol typeParam)
+            {
+                // Check if this is a class type parameter
+                var isClassTypeParam = classTypeParameters.Any(ctp => ctp.Name == typeParam.Name);
+                if (isClassTypeParam)
+                {
+                    // Check if this parameter has a typed data source attribute
+                    foreach (var attr in parameter.GetAttributes())
+                    {
+                        if (attr.AttributeClass != null &&
+                            attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncDataSourceGeneratorAttribute"))
+                        {
+                            // For Matrix<T> attributes, get the type argument
+                            if (attr.AttributeClass.Name == "MatrixAttribute" &&
+                                attr.AttributeClass.IsGenericType &&
+                                attr.AttributeClass.TypeArguments.Length > 0)
+                            {
+                                var matrixType = attr.AttributeClass.TypeArguments[0];
+                                inferredTypes[typeParam.Name] = matrixType;
+                                break;
+                            }
+
+                            // For other typed data sources, try to infer from the base type
+                            var baseType = GetTypedDataSourceBase(attr.AttributeClass);
+                            if (baseType is { TypeArguments.Length: > 0 })
+                            {
+                                var dataSourceType = baseType.TypeArguments[0];
+                                inferredTypes[typeParam.Name] = dataSourceType;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Return null if we didn't infer all class type parameters
+        if (inferredTypes.Count != classTypeParameters.Length)
+            return null;
+
+        // Build the result array in the correct order
+        var result = new ITypeSymbol[classTypeParameters.Length];
+        for (int i = 0; i < classTypeParameters.Length; i++)
+        {
+            if (!inferredTypes.TryGetValue(classTypeParameters[i].Name, out var inferredType))
+                return null;
+            result[i] = inferredType;
+        }
+
+        return result;
+    }
+
+    private static INamedTypeSymbol? GetTypedDataSourceBase(INamedTypeSymbol attributeClass)
+    {
+        var current = attributeClass.BaseType;
+        while (current != null)
+        {
+            var name = current.Name;
+            if (name.Contains("DataSourceGeneratorAttribute") ||
+                name.Contains("AsyncDataSourceGeneratorAttribute"))
+            {
+                return current;
+            }
+            current = current.BaseType;
+        }
+        return null;
     }
 }
 

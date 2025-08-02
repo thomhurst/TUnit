@@ -67,7 +67,7 @@ internal class PriorityChannel<T> where T : class
                 return;
 
             var order = int.MaxValue / 2;
-            if (item is TestExecutionData testData && testData.State != null)
+            if (item is TestExecutionData { State: not null } testData)
             {
                 order = testData.State.Order;
             }
