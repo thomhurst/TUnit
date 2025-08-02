@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Hooks;
@@ -12,33 +13,27 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
     public required Type ClassType { get; init; }
     public Assembly Assembly => ClassType.Assembly;
-    public required SourceGeneratedMethodInformation MethodInfo { get; init; }
-    
-    [field: AllowNull, MaybeNull]
-    public string Name =>  field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})";
+    public required MethodMetadata MethodInfo { get; init; }
 
-    public Attribute[] MethodAttributes => MethodInfo.Attributes;
-    public Attribute[] ClassAttributes => MethodInfo.Class.Attributes;
-    public Attribute[] AssemblyAttributes => MethodInfo.Class.Assembly.Attributes;
-    
     [field: AllowNull, MaybeNull]
-    public IEnumerable<Attribute> Attributes => field ??=
-        [..MethodAttributes, ..ClassAttributes, ..AssemblyAttributes];
+    public string Name => field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})";
+
+    [field: AllowNull, MaybeNull] public IEnumerable<Attribute> Attributes => field ??= MethodInfo.GetCustomAttributes();
 
     public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => Attributes.OfType<TAttribute>().FirstOrDefault();
 
     public TimeSpan? Timeout => GetAttribute<TimeoutAttribute>()?.Timeout;
-    
+
     public required IHookExecutor HookExecutor { get; init; }
-    
+
     public required int Order { get; init; }
-    
+
     public Func<object, TestContext, CancellationToken, ValueTask>? Body { get; init; }
 
     public ValueTask ExecuteAsync(TestContext context, CancellationToken cancellationToken)
     {
         return HookExecutor.ExecuteBeforeTestHook(MethodInfo, context,
-            () => Body!.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
+            () => Body!.Invoke(context.TestDetails.ClassInstance ?? throw new InvalidOperationException("ClassInstance is null"), context, cancellationToken)
         );
     }
 }

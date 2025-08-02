@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Core;
 
-public class TestDataAttribute : TUnitAttribute, IDataAttribute
+public abstract class TestDataAttribute : TUnitAttribute, IDataSourceAttribute
 {
-    public bool AccessesInstanceData { get; init; }
+    public abstract IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata);
 }

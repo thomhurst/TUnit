@@ -13,7 +13,7 @@ namespace TUnit.Assertions.AssertionBuilders;
 public abstract class AssertionBuilder : ISource
 {
     protected IInvokableAssertionBuilder? OtherTypeAssertionBuilder;
-    
+
     protected AssertionData? AwaitedAssertionData;
 
     public AssertionBuilder(ISource source)
@@ -23,7 +23,7 @@ public abstract class AssertionBuilder : ISource
         _expressionBuilder = source.ExpressionBuilder;
         _assertions = source.Assertions;
     }
-    
+
     public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string actualExpression, StringBuilder expressionBuilder, Stack<BaseAssertCondition> assertions)
     {
         _assertionDataTask = assertionDataTask;
@@ -31,12 +31,12 @@ public abstract class AssertionBuilder : ISource
         _expressionBuilder = expressionBuilder;
         _assertions = assertions;
     }
-    
+
     public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string? actualExpression)
     {
         _assertionDataTask = assertionDataTask;
         _actualExpression = actualExpression;
-        
+
         if (string.IsNullOrEmpty(actualExpression))
         {
             _actualExpression = null;
@@ -82,10 +82,10 @@ public abstract class AssertionBuilder : ISource
         {
             return this;
         }
-        
-        return (AssertionBuilder)((ISource)this).AppendExpression(chainType.ToString());
+
+        return (AssertionBuilder) ((ISource) this).AppendExpression(chainType.ToString());
     }
-    
+
     internal protected void AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
     {
         if (string.IsNullOrEmpty(methodName))
@@ -125,18 +125,18 @@ public abstract class AssertionBuilder : ISource
 
         return this;
     }
-    
+
     internal async Task<AssertionData> ProcessAssertionsAsync()
     {
         if (OtherTypeAssertionBuilder is not null)
         {
             await OtherTypeAssertionBuilder;
         }
-        
+
         AwaitedAssertionData ??= await GetAssertionData();
 
         var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
-        
+
         foreach (var assertion in _assertions.Reverse())
         {
             var result = await assertion.GetAssertionResult(AwaitedAssertionData.Value.Result, AwaitedAssertionData.Value.Exception, new AssertionMetadata
@@ -144,9 +144,9 @@ public abstract class AssertionBuilder : ISource
                 StartTime = AwaitedAssertionData.Value.Start,
                 EndTime = AwaitedAssertionData.Value.End
             }, AwaitedAssertionData.Value.ActualExpression);
-            
+
             Results.Add(result);
-            
+
             if (!result.IsPassed)
             {
                 if (assertion.Subject is null)
@@ -160,38 +160,38 @@ public abstract class AssertionBuilder : ISource
                      
                      but {result.Message}
                      
-                     at {((IInvokableAssertionBuilder)this).GetExpression()}
+                     at {((IInvokableAssertionBuilder) this).GetExpression()}
                      """
                 );
-                
+
                 if (currentAssertionScope != null)
                 {
                     currentAssertionScope.AddException(exception);
                     continue;
                 }
-                
+
                 throw exception;
             }
         }
-        
+
         return AwaitedAssertionData.Value;
     }
 
     private async Task<AssertionData> GetAssertionData()
     {
         var minimumWait = _assertions.Select(x => x.WaitFor).Min();
-        
-        if(minimumWait is null)
+
+        if (minimumWait is null)
         {
             return await _assertionDataTask;
         }
-        
+
         using var cts = new CancellationTokenSource();
 
         var completedTask = await Task.WhenAny(_assertionDataTask.AsTask(), GetMinimumWaitTask(minimumWait.Value, cts.Token));
 
         await cts.CancelAsync();
-        
+
         return await completedTask;
     }
 
@@ -200,7 +200,7 @@ public abstract class AssertionBuilder : ISource
         var start = DateTimeOffset.Now;
 
         await Task.Delay(wait, token);
-        
+
         return new AssertionData(null, new CompleteWithinException($"The assertion did not complete within {wait.PrettyPrint()}"), _actualExpression, start, DateTimeOffset.Now);
     }
 

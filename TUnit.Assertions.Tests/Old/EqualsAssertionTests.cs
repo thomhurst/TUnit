@@ -15,35 +15,35 @@ public class EqualsAssertionTests
             .And
             .HasMessageContaining("Assert.That(one).IsEqualTo(\"2\", StringComparison.Ordinal).And.IsNotEqualTo(\"1\", StringComparison.Ord...");
     }
-    
+
     [Test]
     public async Task Long()
     {
         long zero = 0;
         await TUnitAssert.That(zero).IsEqualTo(0);
     }
-    
+
     [Test]
     public async Task Short()
     {
         short zero = 0;
         await TUnitAssert.That<long>(zero).IsEqualTo(0);
     }
-    
+
     [Test]
     public async Task Int_Bad()
     {
-        int zero = 1;
+        var zero = 1;
         await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That<long>(zero).IsEqualTo(0));
     }
-    
+
     [Test]
     public async Task Long_Bad()
     {
         long zero = 1;
         await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(zero).IsEqualTo(0));
     }
-    
+
     [Test]
     public async Task Short_Bad()
     {

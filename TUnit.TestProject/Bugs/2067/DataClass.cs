@@ -2,7 +2,7 @@
 
 namespace TUnit.TestProject.Bugs._2067;
 
-public class DataClass : 
+public class DataClass :
     IAsyncInitializer,
     ITestRegisteredEventReceiver,
     ITestStartEventReceiver,
@@ -24,27 +24,27 @@ public class DataClass :
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         IsRegistered = true;
-        return default;
+        return default(ValueTask);
     }
 
 
-    public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
+    public ValueTask OnTestStart(TestContext beforeTestContext)
     {
         IsStarted = true;
-        return default;
+        return default(ValueTask);
     }
 
 
-    public ValueTask OnTestEnd(AfterTestContext testContext)
+    public ValueTask OnTestEnd(TestContext testContext)
     {
         IsEnded = true;
-        return default;
+        return default(ValueTask);
     }
 
     public ValueTask DisposeAsync()
     {
         IsDisposed = true;
-        return default;
+        return default(ValueTask);
     }
 
     public int Order => 0;

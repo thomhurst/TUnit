@@ -10,11 +10,11 @@ public class CastableResultAssertionBuilder<TActual, TExpected> : MappableResult
     {
         try
         {
-            return (TExpected?)(object?)actual;
+            return (TExpected?) (object?) actual;
         }
         catch
         {
-            return default;
+            return default(TExpected?);
         }
     }
 }
@@ -29,11 +29,11 @@ public class CastedAssertionBuilder<TActual, TExpected> : InvokableValueAssertio
     {
         try
         {
-            return (TExpected?)(object?)actual;
+            return (TExpected?) (object?) actual;
         }
         catch
         {
-            return default;
+            return default(TExpected?);
         }
     }
 }

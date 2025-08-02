@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
@@ -7,6 +6,9 @@ using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Enums;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 
 namespace TUnit.Engine.Capabilities;
 
@@ -40,7 +42,7 @@ internal class BannerCapability(IPlatformInformation platformInformation, IComma
              """
         );
 
-        #if NET
+#if NET
         if (!RuntimeFeature.IsDynamicCodeSupported)
         {
             stringBuilder.Append(
@@ -51,7 +53,7 @@ internal class BannerCapability(IPlatformInformation platformInformation, IComma
                 """
             );
         }
-        #endif
+#endif
 
         return Task.FromResult<string?>(
             stringBuilder.ToString()
@@ -60,7 +62,7 @@ internal class BannerCapability(IPlatformInformation platformInformation, IComma
 
     private EngineMode GetMode()
     {
-        if (commandLineOptions.IsOptionSet(ReflectionScannerCommandProvider.ReflectionScanner)
+        if (commandLineOptions.IsOptionSet(ReflectionModeCommandProvider.ReflectionMode)
             || Assembly.GetEntryAssembly()?.GetCustomAttributes<AssemblyMetadataAttribute>()
                 .Any(x => x is { Key: "TUnitReflectionScanner", Value: "true" }) is true)
         {

@@ -30,18 +30,18 @@ public class PublishAOTModule : Module<CommandResult>
         }, cancellationToken);
     }
 
-    private string? GetRuntimeIdentifier()
+    private string GetRuntimeIdentifier()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             return "linux-x64";
         }
-        
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             return "win-x64";
         }
-        
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             return "osx-x64";

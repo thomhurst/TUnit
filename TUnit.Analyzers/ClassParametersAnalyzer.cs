@@ -9,18 +9,15 @@ namespace TUnit.Analyzers;
 public class ClassParametersAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create
-        (
-            Rules.NoDataSourceProvided
-        );
+        ImmutableArray.Create(Rules.NoDataSourceProvided);
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return;
@@ -41,12 +38,15 @@ public class ClassParametersAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-        
-        if (!namedTypeSymbol
+
+        var hasDataSourceOrClassConstructor = namedTypeSymbol
                 .GetSelfAndBaseTypes()
                 .SelectMany(x => x.GetAttributes())
                 .Concat(namedTypeSymbol.ContainingAssembly.GetAttributes())
-                .Any(x => x.IsDataSourceAttribute(context.Compilation)))
+                .Any(x => x.IsDataSourceAttribute(context.Compilation) || 
+                          x.IsClassConstructorAttribute(context.Compilation));
+                          
+        if (!hasDataSourceOrClassConstructor)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.NoDataSourceProvided, namedTypeSymbol.Locations.FirstOrDefault()));
         }

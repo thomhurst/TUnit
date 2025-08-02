@@ -7,7 +7,7 @@ namespace TUnit.TestProject;
 public class LongFailures
 {
     private static int _counter;
-    
+
     [Repeat(100)]
     [Test]
     public async Task LongFailure()

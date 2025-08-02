@@ -6,6 +6,6 @@ public record NuGetOptions
 {
     [SecretValue]
     public string? ApiKey { get; set; }
-    
+
     public bool ShouldPublish { get; set; }
 }

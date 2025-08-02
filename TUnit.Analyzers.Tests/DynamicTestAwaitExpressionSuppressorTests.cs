@@ -6,7 +6,7 @@ namespace TUnit.Analyzers.Tests;
 public class DynamicTestAwaitExpressionSuppressorTests
 {
     private static readonly DiagnosticResult CS4014 = new("CS4014", DiagnosticSeverity.Warning);
-    
+
     [Test]
     public async Task WarningsInTUnitAreSuppressed() =>
         await AnalyzerTestHelpers
@@ -63,49 +63,49 @@ public class DynamicTestAwaitExpressionSuppressorTests
                     {
                         await Task.Delay(TimeSpan.FromSeconds(0.5));
                         
-                        context.AddTest(new DynamicTest<Basic>
+                        context.AddTest(new DynamicTestInstance<Basic>
                         {
                             TestMethod = @class => @class.SomeMethod(),
                             TestMethodArguments = [],
                             Attributes = [new RepeatAttribute(5)]
                         });
                         
-                        context.AddTest(new DynamicTest<Basic>
+                        context.AddTest(new DynamicTestInstance<Basic>
                         {
                             TestMethod = @class => {|#0:@class.SomeMethod_Task()|},
                             TestMethodArguments = [],
                             Attributes = [new RepeatAttribute(5)]
                         });
                         
-                        context.AddTest(new DynamicTest<Basic>
+                        context.AddTest(new DynamicTestInstance<Basic>
                         {
                             TestMethod = @class => {|#1:@class.SomeMethod_ValueTask()|},
                             TestMethodArguments = [],
                             Attributes = [new RepeatAttribute(5)]
                         });
                         
-                        context.AddTest(new DynamicTest<Basic>
+                        context.AddTest(new DynamicTestInstance<Basic>
                         {
                             TestMethod = @class => @class.SomeMethod_Args(1, "test", true),
                             TestMethodArguments = [2, "test", false],
                             Attributes = [new RepeatAttribute(5)]
                         });
                         
-                        context.AddTest(new DynamicTest<Basic>
+                        context.AddTest(new DynamicTestInstance<Basic>
                         {
                             TestMethod = @class => {|#2:@class.SomeMethod_Task_Args(1, "test", true)|},
                             TestMethodArguments = [2, "test", false],
                             Attributes = [new RepeatAttribute(5)]
                         });
                         
-                        context.AddTest(new DynamicTest<Basic>
+                        context.AddTest(new DynamicTestInstance<Basic>
                         {
                             TestMethod = @class => {|#3:@class.SomeMethod_ValueTask_Args(1, "test", true)|},
                             TestMethodArguments = [2, "test", false],
                             Attributes = [new RepeatAttribute(5)]
                         });
                         
-                        context.AddTest(new DynamicTest<Basic>
+                        context.AddTest(new DynamicTestInstance<Basic>
                         {
                             TestMethod = @class => {|#4:@class.SomeMethod_ValueTask_Args(1, "test", true)|},
                             TestMethodArguments = [2, "test", false],

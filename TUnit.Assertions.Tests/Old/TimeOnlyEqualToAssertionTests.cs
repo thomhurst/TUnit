@@ -5,7 +5,7 @@ namespace TUnit.Assertions.UnitTests;
 
 public class TimeOnlyEqualToAssertionTests
 {
-    private static readonly TimeOnly TestTime = new TimeOnly(13, 14, 15);
+    private static readonly TimeOnly TestTime = new(13, 14, 15);
     
     [Test]
     public async Task EqualsTo_Success()

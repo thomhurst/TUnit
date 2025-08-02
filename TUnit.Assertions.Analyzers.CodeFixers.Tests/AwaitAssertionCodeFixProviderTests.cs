@@ -42,7 +42,7 @@ public class AwaitAssertionCodeFixProviderTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Async_Task_Just_Awaits()
     {

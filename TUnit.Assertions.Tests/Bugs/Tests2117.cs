@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using TUnit.Assertions.AssertConditions.Throws;
+﻿using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.Enums;
 
 namespace TUnit.Assertions.Tests.Bugs;
@@ -52,7 +51,7 @@ public class Tests2117
             ).Throws<AssertionException>()
             .WithMessage(expectedError);
     }
-    
+
     [Test]
     [Arguments(new[] { 1, 2, 3 }, new[] { 3, 2, 1 }, CollectionOrdering.Any,
         """

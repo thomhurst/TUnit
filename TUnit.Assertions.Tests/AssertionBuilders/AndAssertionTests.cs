@@ -7,7 +7,7 @@ public sealed class AndAssertionTests
     [Test]
     public async Task Throws_When_Mixed_With_Or()
     {
-        char[] sut = "ABCD".ToCharArray();
+        var sut = "ABCD".ToCharArray();
 #pragma warning disable TUnitAssertions0001
         var action = async () => await Assert.That(sut)
             .Contains('A').Or
@@ -22,7 +22,7 @@ public sealed class AndAssertionTests
     [Test]
     public async Task Does_Not_Throw_For_Multiple_And()
     {
-        char[] sut = "ABCD".ToCharArray();
+        var sut = "ABCD".ToCharArray();
 #pragma warning disable TUnitAssertions0001
         var action = async () => await Assert.That(sut)
             .Contains('A').And

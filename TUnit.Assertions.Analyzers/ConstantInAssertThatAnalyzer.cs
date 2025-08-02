@@ -19,7 +19,7 @@ public class ConstantInAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         context.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation);
     }
-    
+
     private void AnalyzeOperation(OperationAnalysisContext context)
     {
         if (context.Operation is not IInvocationOperation invocationOperation)
@@ -28,13 +28,13 @@ public class ConstantInAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         var targetMethod = invocationOperation.TargetMethod;
-        
+
         if (targetMethod.Name != "That"
             || !SymbolEqualityComparer.Default.Equals(targetMethod.ContainingType, context.Compilation.GetTypeByMetadataName("TUnit.Assertions.Assert")))
         {
             return;
         }
-        
+
         // True if constant
         var firstArgument = invocationOperation.Arguments[0];
         if (firstArgument.ConstantValue.HasValue || firstArgument.Value.ConstantValue.HasValue)

@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
-using TUnit.Engine.Extensions;
 
 namespace TUnit.TestProject;
 
@@ -22,28 +20,26 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    public override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () => new Random().Next();
     }
 
-    public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
+    public ValueTask OnTestStart(TestContext testContext)
     {
-        if (!IsReregisteredTest(beforeTestContext.TestContext))
+        if (!IsReregisteredTest(testContext))
         {
-            beforeTestContext.AddLinkedCancellationToken(_cancellationTokenSource.Token);
+            testContext.AddLinkedCancellationToken(_cancellationTokenSource.Token);
         }
 
-        return default;
+        return default(ValueTask);
     }
 
     [Experimental("WIP")]
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Dynamic Code Only attribute on test")]
-    public async ValueTask OnTestEnd(AfterTestContext afterTestContext)
+    public async ValueTask OnTestEnd(TestContext testContext)
     {
-        var testContext = afterTestContext.TestContext;
-        
-        if (testContext.Result?.Status == Status.Failed)
+        if (testContext.Result?.State == TestState.Failed)
         {
             await _cancellationTokenSource.CancelAsync();
 

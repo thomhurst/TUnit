@@ -1,4 +1,4 @@
-﻿using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.CommandLine;
 
@@ -20,12 +20,12 @@ internal class MaximumParallelTestsCommandProvider(IExtension extension) : IComm
     public string DisplayName => extension.DisplayName;
 
     public string Description => extension.Description;
-    
+
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     {
         return
         [
-            new CommandLineOption(MaximumParallelTests, "Maximum Parallel Tests", ArgumentArity.ExactlyOne, false)
+            new CommandLineOption(MaximumParallelTests, "Override maximum parallel tests (defaults to auto-detected optimal value)", ArgumentArity.ExactlyOne, false)
         ];
     }
 
@@ -35,12 +35,12 @@ internal class MaximumParallelTestsCommandProvider(IExtension extension) : IComm
         {
             return ValidationResult.InvalidTask("A single number must be provided for maximum parallel tests");
         }
-        
+
         if (commandOption.Name == MaximumParallelTests && (!int.TryParse(arguments[0], out var maximumParallelTests) || maximumParallelTests < 1))
         {
             return ValidationResult.InvalidTask("Maximum parallel tests value was not a positive integer");
         }
-        
+
         return ValidationResult.ValidTask;
     }
 

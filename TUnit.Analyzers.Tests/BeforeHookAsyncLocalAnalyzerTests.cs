@@ -31,7 +31,7 @@ public class BeforeHookAsyncLocalAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task AddAsyncLocalValues_No_Error()
     {

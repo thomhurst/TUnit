@@ -9,17 +9,17 @@ namespace TUnit.Core.Interfaces;
 /// test configuration, and custom test behavior.
 /// </remarks>
 public interface IEventReceiver
-{   
+{
     /// <summary>
-     /// Gets the execution order of this event receiver.
-     /// </summary>
-     /// <remarks>
-     /// Lower values run earlier in the event processing sequence. This allows prioritizing
-     /// certain event receivers over others.
-     /// </remarks>
-     /// <value>
-     /// The order value as an integer. Default is 0.
-     /// </value>
+    /// Gets the execution order of this event receiver.
+    /// </summary>
+    /// <remarks>
+    /// Lower values run earlier in the event processing sequence. This allows prioritizing
+    /// certain event receivers over others.
+    /// </remarks>
+    /// <value>
+    /// The order value as an integer. Default is 0.
+    /// </value>
 #if NET
     public int Order => 0;
 #else

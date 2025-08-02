@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.Core.Logging;
+﻿using TUnit.Core.Logging;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;

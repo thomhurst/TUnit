@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace TUnit;
+namespace TUnit.Engine;
 
 static class Verify
 {

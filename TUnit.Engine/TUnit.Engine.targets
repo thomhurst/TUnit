@@ -10,7 +10,7 @@
     </ItemGroup>
 
     <PropertyGroup Condition="'$(TUnitReflectionScanner)' == 'true'">
-        <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --reflection-scanner</TestingPlatformCommandLineArguments>
+        <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --reflection</TestingPlatformCommandLineArguments>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TUnitReflectionScanner)' == 'true'">

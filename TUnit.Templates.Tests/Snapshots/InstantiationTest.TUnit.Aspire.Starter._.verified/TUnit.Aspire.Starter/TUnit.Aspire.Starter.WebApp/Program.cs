@@ -1,4 +1,4 @@
-using TUnit.Aspire.Starter.ServiceDefaults;
+﻿using TUnit.Aspire.Starter.ServiceDefaults;
 using TUnit.Aspire.Starter.WebApp;
 using TUnit.Aspire.Starter.WebApp.Components;
 

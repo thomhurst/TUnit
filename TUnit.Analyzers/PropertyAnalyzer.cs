@@ -12,12 +12,12 @@ public class PropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         ImmutableArray.Create(Rules.TooManyDataAttributes);
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Property);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IPropertySymbol propertySymbol)
         {
             return;
@@ -27,7 +27,7 @@ public class PropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.TooManyDataAttributes,
                 propertySymbol.Locations.FirstOrDefault())
-            );   
+            );
         }
     }
 }

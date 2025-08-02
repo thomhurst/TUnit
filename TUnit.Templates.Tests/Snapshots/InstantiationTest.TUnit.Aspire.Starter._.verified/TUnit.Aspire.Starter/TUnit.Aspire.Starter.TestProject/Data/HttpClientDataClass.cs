@@ -2,7 +2,7 @@
 
 namespace TUnit.Aspire.Starter.TestProject.Data
 {
-    public class HttpClientDataClass: IAsyncInitializer, IAsyncDisposable
+    public class HttpClientDataClass : IAsyncInitializer, IAsyncDisposable
     {
         public HttpClient HttpClient { get; private set; } = new();
         public async Task InitializeAsync()

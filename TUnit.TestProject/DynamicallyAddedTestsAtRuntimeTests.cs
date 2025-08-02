@@ -15,6 +15,15 @@ public class DynamicallyAddedTestsAtRuntimeTests
     [After(Test)]
     public void CreateRepeatTestIfFailure(TestContext context)
     {
-        // TODO
+        // Implementation pending - intended to demonstrate dynamic test repetition on failure
+        // See DynamicallyRegisteredTests.cs for a working example using ReregisterTestWithArguments
+        // Note: ReregisterTestWithArguments is currently marked as Obsolete and non-functional
+        
+        // Example implementation (currently non-functional):
+        // if (context.Result?.State == TestState.Failed && _testRepeatLimit < 3)
+        // {
+        //     _testRepeatLimit++;
+        //     await context.ReregisterTestWithArguments(methodArguments: [_testRepeatLimit]);
+        // }
     }
 }

@@ -7,19 +7,19 @@ public class SingleItemAssertionBuilderWrapper<TActual, TInner> : InvokableValue
     internal SingleItemAssertionBuilderWrapper(InvokableAssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
-    
-    public new TaskAwaiter<TInner?> GetAwaiter()
+
+    public new TaskAwaiter<TInner> GetAwaiter()
     {
         var task = ProcessAssertionsAsync(d =>
         {
             if (d.Result is IEnumerable<TInner> enumerable)
             {
-                return Task.FromResult(enumerable.SingleOrDefault());
+                return Task.FromResult(enumerable.SingleOrDefault()!);
             }
 
-            return Task.FromResult<TInner?>(default)!;
+            return Task.FromResult<TInner>(default(TInner)!);
         });
-        
-        return task.GetAwaiter()!;
+
+        return task.GetAwaiter();
     }
 }

@@ -1,155 +1,132 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
 
 /// <summary>
-/// Represents the metadata for a test.
+/// Unified metadata for a test, fully AOT-compatible with no reflection dependencies
 /// </summary>
-/// <typeparam name="TClassType">The type of the test class.</typeparam>
-public record TestMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TClassType> : TestMetadata where TClassType : class
+public abstract class TestMetadata
 {
-    /// <summary>
-    /// Gets or sets the resettable class factory.
-    /// </summary>
-    public required ResettableLazy<TClassType> ResettableClassFactory { get; init; }
+    public required string TestName { get; init; }
+
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+    public required Type TestClassType { get; init; }
+
+    public required string TestMethodName { get; init; }
+
+    public bool IsSkipped { get; init; }
+
+    public string? SkipReason { get; init; }
+
+    public int? TimeoutMs { get; init; }
+
+    public int RetryCount { get; init; }
+
+    public int RepeatCount { get; init; }
+
+    public bool CanRunInParallel { get; init; } = true;
+
+    public TestDependency[] Dependencies { get; init; } = [];
+
+    public required IDataSourceAttribute[] DataSources { get; init; } = [];
+
+    public required IDataSourceAttribute[] ClassDataSources { get; init; } = [];
+
+    public required PropertyDataSource[] PropertyDataSources { get; init; } = [];
 
     /// <summary>
-    /// Gets or sets the test method factory.
+    /// AOT-safe factory to create test class instance
+    /// Accepts type arguments for generic types and constructor arguments array
+    /// For non-generic types, typeArgs will be Type.EmptyTypes
     /// </summary>
-    public required Func<TClassType, CancellationToken, ValueTask> TestMethodFactory { get; init; }
+    public Func<Type[], object?[], object> InstanceFactory { get; init; } = null!;
 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-    public override Type TestClassType => typeof(TClassType);
+    /// <summary>
+    /// AOT-safe test method invoker
+    /// Returns Task for all test methods (sync methods wrapped in Task.CompletedTask)
+    /// </summary>
+    public Func<object, object?[], Task>? TestInvoker { get; init; }
 
-    /// <inheritdoc />
-    public override TestDetails BuildTestDetails()
-    {
-		var testId = TestId;
-		
-		var testDetails = new TestDetails<TClassType>
-		{
-			TestId = testId,
-			LazyClassInstance = ResettableClassFactory,
-			TestClassArguments = TestClassArguments,
-			TestMethodArguments = TestMethodArguments,
-			TestClassInjectedPropertyArguments = TestClassProperties,
-			CurrentRepeatAttempt = CurrentRepeatAttempt,
-			RepeatLimit = RepeatLimit,
-			TestMethod = TestMethod,
-			TestName = TestMethod.Name,
-			ReturnType = TestMethod.ReturnType,
-			TestFilePath = TestFilePath,
-			TestLineNumber = TestLineNumber,
-			DynamicAttributes = DynamicAttributes,
-			DataAttributes = TestBuilderContext.DataAttributes.OfType<Attribute>().ToArray()
-		};
+    public int ParameterCount { get; init; }
 
-		return testDetails;
-    }
+    public Type[] ParameterTypes { get; init; } = [];
 
-    /// <inheritdoc />
-    internal override DiscoveredTest BuildDiscoveredTest(TestContext testContext)
-    {
-	    return new DiscoveredTest<TClassType>(ResettableClassFactory)
-	    {
-		    TestContext = testContext,
-		    TestBody = (classInstance, cancellationToken) => TestMethodFactory(classInstance, cancellationToken),
-	    };
-    }
+    public string[] TestMethodParameterTypes { get; init; } = [];
 
-    /// <inheritdoc />
-    public override TestMetadata CloneWithNewMethodFactory(Func<object, CancellationToken, ValueTask> testMethodFactory)
-    {
-	    return this with
-	    {
-		    TestMethodFactory = testMethodFactory.Invoke,
-		    ResettableClassFactory = ResettableClassFactory.Clone()
-	    };
-    }
+    public string? FilePath { get; init; }
+
+    public int? LineNumber { get; init; }
+
+    public required MethodMetadata MethodMetadata { get; init; }
+
+    public GenericTypeInfo? GenericTypeInfo { get; init; }
+
+    public GenericMethodInfo? GenericMethodInfo { get; init; }
+
+    public Type[]? GenericMethodTypeArguments { get; init; }
+
+    public required Func<Attribute[]> AttributeFactory { get; init; }
+
+    public PropertyInjectionData[] PropertyInjections { get; init; } = [];
+
+    /// <summary>
+    /// Test session ID used for data generation
+    /// </summary>
+    public string TestSessionId { get; set; } = Guid.NewGuid().ToString();
+
+    /// <summary>
+    /// Factory delegate that creates an ExecutableTest for this metadata.
+    /// Both AOT and reflection modes must provide delegates with identical signatures.
+    /// The delegates encapsulate all mode-specific behavior.
+    /// </summary>
+    public abstract Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory { get; }
 }
 
-/// <summary>
-/// Represents the base metadata for a test.
-/// </summary>
-public abstract record TestMetadata
+public sealed class GenericTypeInfo
 {
-    /// <summary>
-    /// Gets or sets the test ID.
-    /// </summary>
-    public required string TestId { get; init; }
-    
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-    public abstract Type TestClassType { get; }
-    
-    /// <summary>
-    /// Gets or sets the test method information.
-    /// </summary>
-    public required SourceGeneratedMethodInformation TestMethod { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the repeat limit for the test.
-    /// </summary>
-    public required int RepeatLimit { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the current repeat attempt for the test.
-    /// </summary>
-    public required int CurrentRepeatAttempt { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the file path of the test.
-    /// </summary>
-    public required string TestFilePath { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the line number of the test.
-    /// </summary>
-    public required int TestLineNumber { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the arguments for the test class.
-    /// </summary>
-    public required object?[] TestClassArguments { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the arguments for the test method.
-    /// </summary>
-    public required object?[] TestMethodArguments { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the properties for the test class.
-    /// </summary>
-    public required IDictionary<string, object?> TestClassProperties { get; init; }
-    
-    public Attribute[] DynamicAttributes { get; init; } = [];
-    
-    /// <summary>
-    /// Gets or sets the test builder context.
-    /// </summary>
-    public required TestBuilderContext TestBuilderContext { get; init; }
-    
-    /// <summary>
-    /// Gets or sets the discovery exception, if any.
-    /// </summary>
-    public Exception? DiscoveryException { get; init; }
-    
-    /// <summary>
-    /// Builds the test details.
-    /// </summary>
-    /// <returns>The test details.</returns>
-    public abstract TestDetails BuildTestDetails();
-    
-    /// <summary>
-    /// Builds the discovered test.
-    /// </summary>
-    /// <param name="testContext">The test context.</param>
-    /// <returns>The discovered test.</returns>
-    internal abstract DiscoveredTest BuildDiscoveredTest(TestContext testContext);
+    public string[] ParameterNames { get; init; } = [];
+
+    public GenericParameterConstraints[] Constraints { get; init; } = [];
+}
+
+public sealed class GenericMethodInfo
+{
+    public string[] ParameterNames { get; init; } = [];
+
+    public GenericParameterConstraints[] Constraints { get; init; } = [];
+
+    public int[] ParameterPositions { get; init; } = [];
+}
+
+public sealed class GenericParameterConstraints
+{
+    public required string ParameterName { get; init; }
+
+    public Type? BaseTypeConstraint { get; init; }
+
+    public Type[] InterfaceConstraints { get; init; } = [];
+
+    public bool HasDefaultConstructorConstraint { get; init; }
+
+    public bool HasReferenceTypeConstraint { get; init; }
+
+    public bool HasValueTypeConstraint { get; init; }
+
+    public bool HasNotNullConstraint { get; init; }
+}
+
+public sealed class PropertyInjectionData
+{
+    public required string PropertyName { get; init; }
+    public required Type PropertyType { get; init; }
+    public required Action<object, object?> Setter { get; init; }
+    public required Func<object?> ValueFactory { get; init; }
+    public PropertyInjectionData[] NestedPropertyInjections { get; init; } = [
+    ];
 
     /// <summary>
-    /// Clones the test metadata with a new method factory.
+    /// Factory to extract nested property values from the parent object.
+    /// Returns a dictionary mapping property names to their values for nested injection.
     /// </summary>
-    /// <param name="testMethodFactory">The new test method factory.</param>
-    /// <returns>The cloned test metadata.</returns>
-    public abstract TestMetadata CloneWithNewMethodFactory(Func<object, CancellationToken, ValueTask> testMethodFactory);
+    public Func<object?, Dictionary<string, object?>>? NestedPropertyValueFactory { get; init; }
 }

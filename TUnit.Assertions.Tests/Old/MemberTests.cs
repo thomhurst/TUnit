@@ -15,7 +15,7 @@ public class MemberTests
 
         await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(123);
     }
-    
+
     [Test]
     public async Task Number_Falsey()
     {
@@ -37,7 +37,7 @@ public class MemberTests
             """
             );
     }
-    
+
     [Test]
     public async Task Number_Nested_Falsey()
     {
@@ -59,7 +59,7 @@ public class MemberTests
             """
         );
     }
-    
+
     [Test]
     public async Task Number_Null()
     {

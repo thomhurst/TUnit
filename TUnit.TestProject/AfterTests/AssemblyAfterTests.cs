@@ -60,13 +60,13 @@ public class AssemblyCleanupTests : AssemblyBase3
     }
 
     [After(Assembly)]
-    public static async Task AfterAllCleanUp(CancellationToken cancellationToken)
+    public static async Task AfterAllCleanUp2()
     {
         await Task.CompletedTask;
     }
 
     [After(Assembly)]
-    public static async Task AfterAllCleanUpWithContext(AssemblyHookContext context, CancellationToken cancellationToken)
+    public static async Task AfterAllCleanUpWithContextAndToken(AssemblyHookContext context, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }

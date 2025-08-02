@@ -17,7 +17,7 @@ public class NotSameReferenceExpectedValueAssertCondition<TActual, TExpected>(TE
                 .FailIf(ReferenceEquals(unTypedEnumerableWrapper.Enumerable, expectedValue),
                     "they did");
         }
-        
+
         return AssertionResult
             .FailIf(ReferenceEquals(actualValue, expectedValue),
                 "they did");

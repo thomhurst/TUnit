@@ -46,7 +46,7 @@ public static class NumberIsNotExtensions
         this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, self) =>
                 {
                     if (value is null)
                     {
@@ -63,7 +63,7 @@ public static class NumberIsNotExtensions
     
     public static InvokableValueAssertionBuilder<TActual> IsNotGreaterThan<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null) where TActual : INumber<TActual>
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, self) =>
             {
                 if (value is null)
                 {
@@ -81,7 +81,7 @@ public static class NumberIsNotExtensions
     public static InvokableValueAssertionBuilder<TActual> IsNotGreaterThanOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null) 
         where TActual : INumber<TActual>
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, self) =>
             {
                 if (value is null)
                 {
@@ -99,7 +99,7 @@ public static class NumberIsNotExtensions
     public static InvokableValueAssertionBuilder<TActual> IsNotLessThan<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null) 
         where TActual : INumber<TActual>
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, self) =>
             {
                 if (value is null)
                 {
@@ -117,7 +117,7 @@ public static class NumberIsNotExtensions
     public static InvokableValueAssertionBuilder<TActual> IsNotLessThanOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null) 
         where TActual : INumber<TActual>
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, self) =>
             {
                 if (value is null)
                 {
@@ -135,7 +135,7 @@ public static class NumberIsNotExtensions
     public static InvokableValueAssertionBuilder<TActual> IsNotEven<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, self) =>
             {
                 if (value is null)
                 {
@@ -153,7 +153,7 @@ public static class NumberIsNotExtensions
     public static InvokableValueAssertionBuilder<TActual> IsNotOdd<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : INumber<TActual>, IModulusOperators<TActual, int, int>
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, self) =>
             {
                 if (value is null)
                 {
@@ -171,7 +171,7 @@ public static class NumberIsNotExtensions
     public static InvokableValueAssertionBuilder<TActual> IsNotNegative<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : INumber<TActual>
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, self) =>
             {
                 if (value is null)
                 {
@@ -189,7 +189,7 @@ public static class NumberIsNotExtensions
     public static InvokableValueAssertionBuilder<TActual> IsNotPositive<TActual>(this IValueSource<TActual> valueSource) 
         where TActual : INumber<TActual>
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default, (value, _, self) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, self) =>
             {
                 if (value is null)
                 {

@@ -1,7 +1,5 @@
 ﻿#pragma warning disable
 
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
@@ -48,7 +46,7 @@ public class Tests(Context ctx)
     {
         await AssertUniqueContext(ctx.Id);
     }
-    
+
     [Test]
     [Arguments(1)]
     [Arguments(2)]
@@ -56,7 +54,7 @@ public class Tests(Context ctx)
     {
         await AssertUniqueContext(ctx.Id);
     }
-    
+
     [Test]
     [MethodDataSource(nameof(Contexts))]
     public async Task Test3(Context ctx2)

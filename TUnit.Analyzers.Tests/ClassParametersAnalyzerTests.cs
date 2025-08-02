@@ -8,8 +8,8 @@ public class ClassParametersAnalyzerTests
     public async Task Class_No_Error()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using TUnit.Core;
 
                 public class MyClass
@@ -20,15 +20,15 @@ public class ClassParametersAnalyzerTests
                     }
                 }
                 """
-			);
+            );
     }
-    
+
     [Test]
     public async Task Class_Missing_Parameter_Error()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using TUnit.Core;
                             
                 public class {|#0:MyClass|}
@@ -47,13 +47,13 @@ public class ClassParametersAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task Abstract_Class_Missing_Parameter__NoError()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using TUnit.Core;
 
                 public abstract class MyClass
@@ -68,6 +68,6 @@ public class ClassParametersAnalyzerTests
                     }
                 }
                 """
-			);
+            );
     }
 }

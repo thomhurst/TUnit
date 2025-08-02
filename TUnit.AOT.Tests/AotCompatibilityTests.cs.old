@@ -1,0 +1,195 @@
+using TUnit.Core;
+using TUnit.Assertions;
+
+namespace TUnit.AOT.Tests;
+
+/// <summary>
+/// Tests to validate AOT compatibility of TUnit framework
+/// This project should compile and publish with PublishAot=true without warnings
+/// </summary>
+public class AotCompatibilityTests
+{
+    [Test]
+    public void BasicTest_ShouldWork()
+    {
+        // Basic test to verify AOT compatibility
+        Assert.That(true).IsTrue();
+    }
+
+    [Test]
+    [Arguments(1)]
+    [Arguments(2)]
+    [Arguments(3)]
+    public void ParameterizedTest_ShouldWork(int value)
+    {
+        // Test parameterized tests work in AOT
+        Assert.That(value).IsGreaterThan(0);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(GetTestData))]
+    public void MethodDataSourceTest_ShouldWork(string data)
+    {
+        // Test method data sources work in AOT (using source-generated invocation)
+        Assert.That(data).IsNotNull();
+    }
+
+    public static IEnumerable<string> GetTestData()
+    {
+        yield return "test1";
+        yield return "test2";
+        yield return "test3";
+    }
+
+    [Test]
+    [ClassDataSource<TestDataClass>]
+    public void ClassDataSourceTest_ShouldWork(string data)
+    {
+        // Test class data sources work in AOT (using source-generated factories)
+        Assert.That(data).IsNotNull();
+    }
+
+    public class TestDataClass : IEnumerable<object[]>
+    {
+        public IEnumerator<object[]> GetEnumerator()
+        {
+            yield return new object[] { "data1" };
+            yield return new object[] { "data2" };
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            => GetEnumerator();
+    }
+
+    [Test]
+    public void GenericTypeTest_ShouldWork()
+    {
+        // Test generic type handling works in AOT (using source-generated type resolution)
+        var list = new List<string> { "test" };
+        Assert.That(list).HasCount(1);
+    }
+
+    [Test]
+    public void ObjectComparisonTest_ShouldWork()
+    {
+        // Test object comparison works in AOT (using proper DynamicallyAccessedMembers attribution)
+        var obj1 = new TestObject { Name = "Test", Value = 42 };
+        var obj2 = new TestObject { Name = "Test", Value = 42 };
+        
+        Assert.That(obj1).IsEquivalentTo(obj2);
+    }
+
+    public class TestObject
+    {
+        public string Name { get; set; } = "";
+        public int Value { get; set; }
+    }
+
+    [Test]
+    public void TupleTest_ShouldWork()
+    {
+        // Test tuple processing works in AOT (using source-generated tuple unwrapping)
+        var tuple = (Name: "Test", Value: 42);
+        Assert.That(tuple.Name).IsEqualTo("Test");
+        Assert.That(tuple.Value).IsEqualTo(42);
+    }
+
+    [Test]
+    [MatrixDataSource]
+    public void MatrixTest_ShouldWork(
+        [Matrix(1, 2, 3)] int number, 
+        [Matrix("a", "b", "c")] string letter)
+    {
+        // Test matrix data sources work in AOT
+        Assert.That(number).IsGreaterThan(0);
+        Assert.That(letter).IsNotNull();
+    }
+
+    [Test]
+    public async Task AsyncTest_ShouldWork()
+    {
+        // Test async tests work in AOT
+        await Task.Delay(10);
+        Assert.That(true).IsTrue();
+    }
+
+    [Test]
+    public void ExceptionTest_ShouldWork()
+    {
+        // Test exception assertions work in AOT
+        var action = () => throw new InvalidOperationException("Test error");
+        Assert.That(action).Throws<InvalidOperationException>()
+            .WithMessage("Test error");
+    }
+}
+
+/// <summary>
+/// Tests for property injection in AOT scenarios
+/// </summary>
+public class PropertyInjectionTests
+{
+    [Test]
+    public void PropertyInjection_ShouldWork()
+    {
+        // This test validates that property injection works without reflection fallbacks
+        Assert.That(TestContext.Current).IsNotNull();
+    }
+}
+
+/// <summary>
+/// Tests for hook execution in AOT scenarios
+/// </summary>
+public class HookTests
+{
+    private static bool _beforeAllExecuted;
+    private bool _beforeEachExecuted;
+
+    [Before(HookType.Class)]
+    public static async Task BeforeAll()
+    {
+        await Task.Delay(1);
+        _beforeAllExecuted = true;
+    }
+
+    [Before(HookType.Test)]
+    public async Task BeforeEach()
+    {
+        await Task.Delay(1);
+        _beforeEachExecuted = true;
+    }
+
+    [Test]
+    public void HookExecution_ShouldWork()
+    {
+        // Test that hooks execute properly in AOT (using source-generated invocation)
+        Assert.That(_beforeAllExecuted).IsTrue();
+        Assert.That(_beforeEachExecuted).IsTrue();
+    }
+}
+
+/// <summary>
+/// Tests for generic scenarios in AOT
+/// </summary>
+public class GenericTests<T> where T : class, new()
+{
+    [Test]
+    public void GenericTest_ShouldWork()
+    {
+        // Test generic test classes work in AOT
+        var instance = new T();
+        Assert.That(instance).IsNotNull();
+    }
+}
+
+/// <summary>
+/// Concrete generic test instantiation
+/// </summary>
+public class TestClass
+{
+    public string Name { get; set; } = "Default";
+}
+
+public class ConcreteGenericTests : GenericTests<TestClass>
+{
+    // This will test generic type resolution in AOT scenarios
+}

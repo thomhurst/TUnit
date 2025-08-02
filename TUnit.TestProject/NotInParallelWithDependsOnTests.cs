@@ -31,13 +31,13 @@ public class NotInParallelWithDependsOnTests : NotInParallelWithDependsOnTestsBa
 
 public class NotInParallelWithDependsOnTestsDummyClassConstructor : IClassConstructor
 {
-    public object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
+    public Task<object> Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
     {
         if (type != typeof(NotInParallelWithDependsOnTests))
         {
             throw new Exception("Unhandled.");
         }
 
-        return new NotInParallelWithDependsOnTests();
+        return Task.FromResult((object)new NotInParallelWithDependsOnTests());
     }
 }

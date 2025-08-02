@@ -21,22 +21,22 @@ public class TestTemplatePackageModule : Module<CommandResult>
             Arguments = ["TUnit.Templates"],
             ThrowOnNonZeroExitCode = false
         }, cancellationToken);
-        
+
         await context.DotNet().New(new DotNetNewOptions("install")
         {
             Arguments = [$"TUnit.Templates::{version.Value!.SemVer}"]
         }, cancellationToken);
-        
+
         await context.DotNet().New(new DotNetNewOptions("TUnit")
         {
             Name = "MyTestProject"
         }, cancellationToken);
-        
+
         await context.DotNet().New(new DotNetNewOptions("TUnit.AspNet")
         {
             Name = "MyTestProject2"
         }, cancellationToken);
-        
+
         return await context.DotNet().New(new DotNetNewOptions("TUnit.Playwright")
         {
             Name = "MyTestProject3"

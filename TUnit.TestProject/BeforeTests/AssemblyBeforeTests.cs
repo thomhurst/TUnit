@@ -60,7 +60,7 @@ public class AssemblySetupTests : AssemblyBase3
     }
 
     [Before(Assembly)]
-    public static async Task BeforeAllSetUp(CancellationToken cancellationToken)
+    public static async Task BeforeAllSetUp2()
     {
         await Task.CompletedTask;
     }

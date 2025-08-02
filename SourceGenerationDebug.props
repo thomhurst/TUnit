@@ -1,0 +1,16 @@
+<Project>
+    <Target Name="CleanGenerated" BeforeTargets="PreBuildEvent" Condition="Exists('$(ProjectDir)SourceGeneratedViewer')">
+        <Message Text="Removing SourceGeneratedViewer directory..." Importance="high" />
+        <RemoveDir Directories="$(ProjectDir)SourceGeneratedViewer" ContinueOnError="true" />
+    </Target>
+
+    <!-- <PropertyGroup>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup> -->
+
+    <ItemGroup>
+        <Compile Remove="SourceGeneratedViewer\**" />
+        <None Include="SourceGeneratedViewer\**" />
+    </ItemGroup>
+</Project>

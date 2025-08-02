@@ -35,7 +35,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         var methods = namedTypeSymbol.GetSelfAndBaseTypes().SelectMany(x => x.GetMembers()).OfType<IMethodSymbol>().ToArray();
-        
+
         CheckMethods(context, methods, true);
         CheckMethods(context, methods, false);
     }
@@ -45,7 +45,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         var createdObjects = new ConcurrentDictionary<ISymbol, HookLevel?>(SymbolEqualityComparer.Default);
 
         var methodSymbols = methods.Where(x => x.IsStatic == isStaticMethod).ToArray();
-        
+
         foreach (var methodSymbol in methodSymbols)
         {
             CheckSetUps(context, methodSymbol, createdObjects);
@@ -55,11 +55,11 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             CheckTeardowns(context, methodSymbol, createdObjects);
         }
-        
+
         foreach (var kvp in createdObjects)
         {
             var createdObject = kvp.Key;
-            
+
             context.ReportDiagnostic(Diagnostic.Create(Rules.Dispose_Member_In_Cleanup,
                 createdObject.Locations.FirstOrDefault(), createdObject.Name));
         }
@@ -71,7 +71,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf()).ToArray();
 
         var isHookMethod = methodSymbol.IsHookMethod(context.Compilation, out _, out var level, out _);
-        
+
         if (!isHookMethod && methodSymbol.MethodKind != MethodKind.Constructor)
         {
             return;
@@ -81,7 +81,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             level = HookLevel.Test;
         }
-        
+
         foreach (var assignment in syntaxNodes
                      .Where(x => x.IsKind(SyntaxKind.SimpleAssignmentExpression)))
         {
@@ -91,7 +91,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 continue;
             }
-            
+
             if (assignmentOperation
                .Descendants()
                .OfType<IObjectCreationOperation>()
@@ -116,7 +116,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         var syntaxNodes = methodSymbol.DeclaringSyntaxReferences
             .SelectMany(x => x.GetSyntax().DescendantNodesAndSelf()).ToArray();
-        
+
         foreach (var assignment in syntaxNodes
                      .Where(x => x.IsKind(SyntaxKind.InvocationExpression)))
         {
@@ -124,19 +124,19 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 continue;
             }
-            
+
             if (!IsDisposeInvocation(context, invocationOperation) || !IsValidTearDownMethod(context, methodSymbol, out var level))
             {
                 continue;
             }
 
             var fieldOrPropertyOperation = GetFieldOrPropertyOperation(invocationOperation);
-            
+
             if (fieldOrPropertyOperation is IFieldReferenceOperation fieldReferenceOperation && createdObjects.TryGetValue(fieldReferenceOperation.Field, out var createdObjectLevel) && createdObjectLevel == level)
             {
                 createdObjects.TryRemove(fieldReferenceOperation.Field, out _);
             }
-                
+
             if (fieldOrPropertyOperation is IPropertyReferenceOperation propertyReferenceOperation && createdObjects.TryGetValue(propertyReferenceOperation.Property, out createdObjectLevel) && createdObjectLevel == level)
             {
                 createdObjects.TryRemove(propertyReferenceOperation.Property, out _);
@@ -176,7 +176,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             return methodSymbol.ContainingType.Interfaces.Any(x =>
                 SymbolEqualityComparer.Default.Equals(x, asyncDisposable));
         }
-            
+
         if (methodSymbol.IsHookMethod(context.Compilation, out var type, out var level, out _)
             && type.Name.StartsWith("After") && level == HookLevel.Test)
         {
@@ -201,10 +201,10 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 return operation;
             }
-            
+
             operation = operation.Parent;
         }
-        
+
         return null;
     }
 

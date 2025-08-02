@@ -11,7 +11,7 @@ namespace ExampleNamespace.TestProject;
 
 public class GlobalSetup
 {
-    public static DistributedApplication? App{ get; private set; }
+    public static DistributedApplication? App { get; private set; }
     public static ResourceNotificationService? NotificationService { get; private set; }
 
     [Before(TestSession)]

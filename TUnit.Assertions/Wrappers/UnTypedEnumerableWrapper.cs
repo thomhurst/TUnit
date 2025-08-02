@@ -2,9 +2,9 @@
 
 namespace TUnit.Assertions.Wrappers;
 
-internal class UnTypedEnumerableWrapper(IEnumerable enumerable) 
-    : IEnumerable<object>, 
-        IEquatable<UnTypedEnumerableWrapper>, 
+internal class UnTypedEnumerableWrapper(IEnumerable enumerable)
+    : IEnumerable<object>,
+        IEquatable<UnTypedEnumerableWrapper>,
         IEquatable<IEnumerable>
 {
     public IEnumerable Enumerable { get; } = enumerable;

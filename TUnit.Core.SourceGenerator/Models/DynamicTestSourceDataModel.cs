@@ -1,6 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.Extensions;
-using TUnit.Core.SourceGenerator.Models.Arguments;
 
 namespace TUnit.Core.SourceGenerator.Models;
 
@@ -32,10 +30,10 @@ public record DynamicTestSourceDataModel
             return hash;
         }
     }
-    
+
     public required INamedTypeSymbol Class { get; init; }
     public required IMethodSymbol Method { get; init; }
-    
+
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
 }

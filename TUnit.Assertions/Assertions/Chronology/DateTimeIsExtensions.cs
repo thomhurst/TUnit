@@ -19,43 +19,46 @@ public static class DateTimeIsExtensions
                 [doNotPopulateThisValue1])
         );
     }
-    
+
     public static InvokableValueAssertionBuilder<DateTime> IsAfter(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default, (value, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default(DateTime), (value, _, _) =>
             {
                 return value > expected;
             },
             (value, _, _) => $"{Formatter.Format(value)} was not greater than {Formatter.Format(expected)}",
             $"to be after {expected}")
-            , [doNotPopulateThisValue]); }
-    
-    public static InvokableValueAssertionBuilder<DateTime> IsAfterOrEqualTo(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null) 
+            , [doNotPopulateThisValue]);
+    }
+
+    public static InvokableValueAssertionBuilder<DateTime> IsAfterOrEqualTo(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default, (value, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default(DateTime), (value, _, _) =>
             {
                 return value >= expected;
             },
             (value, _, _) => $"{Formatter.Format(value)} was not greater than or equal to {Formatter.Format(expected)}",
             $"to be after or equal to {expected}")
-            , [doNotPopulateThisValue]); }
-    
-    public static InvokableValueAssertionBuilder<DateTime> IsBefore(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null) 
+            , [doNotPopulateThisValue]);
+    }
+
+    public static InvokableValueAssertionBuilder<DateTime> IsBefore(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default, (value, _, _) =>
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default(DateTime), (value, _, _) =>
             {
                 return value < expected;
             },
             (value, _, _) => $"{Formatter.Format(value)} was not less than {Formatter.Format(expected)}",
             $"to be before {expected}")
-            , [doNotPopulateThisValue]); }
+            , [doNotPopulateThisValue]);
+    }
 
     public static InvokableValueAssertionBuilder<DateTime> IsBeforeOrEqualTo(this IValueSource<DateTime> valueSource,
         DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
-        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default,
+        return valueSource.RegisterAssertion(new FuncValueAssertCondition<DateTime, DateTime>(default(DateTime),
                 (value, _, _) => { return value <= expected; },
-                (value, _, _) =>  $"{Formatter.Format(value)} was not less than or equal to {Formatter.Format(expected)}",
+                (value, _, _) => $"{Formatter.Format(value)} was not less than or equal to {Formatter.Format(expected)}",
                     $"to be before or equal to {expected}")
             , [doNotPopulateThisValue]);
     }

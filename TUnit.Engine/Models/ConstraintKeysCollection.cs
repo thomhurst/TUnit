@@ -3,9 +3,9 @@
 namespace TUnit.Engine.Models;
 
 internal class ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
-    : IReadOnlyList<string>, 
-        IEquatable<ConstraintKeysCollection>, 
-        IComparable<ConstraintKeysCollection>, 
+    : IReadOnlyList<string>,
+        IEquatable<ConstraintKeysCollection>,
+        IComparable<ConstraintKeysCollection>,
         IComparable
 {
     private readonly IReadOnlyList<string> _constraintKeys = constraintKeys;
@@ -26,7 +26,7 @@ internal class ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
         {
             return false;
         }
-        
+
         return _constraintKeys.Intersect(other._constraintKeys).Any();
     }
 
@@ -57,7 +57,7 @@ internal class ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
             return false;
         }
 
-        return Equals((ConstraintKeysCollection)obj);
+        return Equals((ConstraintKeysCollection) obj);
     }
 
     public override int GetHashCode()
@@ -97,12 +97,12 @@ internal class ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
             {
                 return false;
             }
-            
+
             if (y == null)
             {
                 return false;
             }
-            
+
             return x._constraintKeys.Intersect(y._constraintKeys).Any();
         }
 

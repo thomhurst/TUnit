@@ -51,8 +51,8 @@ public class PublicMethodMissingTestAttributeAnalyzerTests
                     }
                 }
                 """,
-				expected
-			);
+                expected
+            );
     }
 
     [Test]

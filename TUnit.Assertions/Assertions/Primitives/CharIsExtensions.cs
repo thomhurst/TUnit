@@ -13,13 +13,13 @@ public static class CharIsExtensions
         return valueSource.RegisterAssertion(new EqualsExpectedValueAssertCondition<char>(expected)
             , []);
     }
-    
+
     public static InvokableValueAssertionBuilder<char?> IsEqualTo(this IValueSource<char?> valueSource, char expected)
     {
         return valueSource.RegisterAssertion(new EqualsExpectedValueAssertCondition<char?>(expected)
             , []);
     }
-    
+
     public static InvokableValueAssertionBuilder<char?> IsEqualTo(this IValueSource<char?> valueSource, char? expected)
     {
         return valueSource.RegisterAssertion(new EqualsExpectedValueAssertCondition<char?>(expected)

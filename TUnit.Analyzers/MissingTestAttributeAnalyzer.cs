@@ -12,12 +12,12 @@ public class MissingTestAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
         ImmutableArray.Create(Rules.MissingTestAttribute);
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return;

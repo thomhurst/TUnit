@@ -37,7 +37,7 @@ public class DependsOnAttribute<T> : DependsOnAttribute
     public DependsOnAttribute(string testName) : base(typeof(T), testName)
     {
     }
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DependsOnAttribute{T}"/> class.
     /// Specifies a dependency on a specific test method with parameter types in the specified class.
@@ -152,7 +152,7 @@ public class DependsOnAttribute : TUnitAttribute
     public DependsOnAttribute(Type testClass, string testName) : this(testClass, testName, null!)
     {
     }
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DependsOnAttribute"/> class.
     /// Specifies a dependency on a specific overloaded test method in a specific class.
@@ -162,24 +162,24 @@ public class DependsOnAttribute : TUnitAttribute
     /// <param name="parameterTypes">The parameter types of the test method, used to disambiguate overloaded methods.</param>
     public DependsOnAttribute(Type testClass, string testName, Type[] parameterTypes)
     {
-        TestClass = testClass;
+        ClassMetadata = testClass;
         TestName = testName;
         ParameterTypes = parameterTypes;
     }
-    
+
     /// <summary>
     /// Gets the class containing the test method this test depends on.
     /// </summary>
     /// <remarks>
     /// If null, the dependency is assumed to be on a test in the same class.
     /// </remarks>
-    public Type? TestClass { get; }
+    public Type? ClassMetadata { get; }
 
     /// <summary>
     /// Gets the name of the test method this test depends on.
     /// </summary>
     /// <remarks>
-    /// If null, the dependency is assumed to be on all tests in the <see cref="TestClass"/>.
+    /// If null, the dependency is assumed to be on all tests in the <see cref="ClassMetadata"/>.
     /// </remarks>
     public string? TestName { get; }
 
@@ -202,14 +202,52 @@ public class DependsOnAttribute : TUnitAttribute
     public bool ProceedOnFailure { get; set; }
 
     /// <summary>
+    /// Creates a TestDependency object from this attribute's data
+    /// </summary>
+    public TestDependency ToTestDependency()
+    {
+        // If only test name is specified, it's a dependency on a test in the same class
+        if (ClassMetadata == null && !string.IsNullOrEmpty(TestName))
+        {
+            return new TestDependency 
+            { 
+                MethodName = TestName,
+                MethodParameters = ParameterTypes
+            };
+        }
+        
+        // If only class is specified, it's a dependency on all tests in that class
+        if (ClassMetadata != null && string.IsNullOrEmpty(TestName))
+        {
+            return TestDependency.FromClass(ClassMetadata);
+        }
+        
+        // If both class and method are specified
+        if (ClassMetadata != null && !string.IsNullOrEmpty(TestName))
+        {
+            return new TestDependency
+            {
+                ClassType = ClassMetadata,
+                ClassGenericArity = ClassMetadata.IsGenericTypeDefinition 
+                    ? ClassMetadata.GetGenericArguments().Length 
+                    : 0,
+                MethodName = TestName,
+                MethodParameters = ParameterTypes
+            };
+        }
+        
+        throw new InvalidOperationException("DependsOnAttribute must specify either a test name, a class type, or both.");
+    }
+
+    /// <summary>
     /// Returns a string representation of the dependency.
     /// </summary>
     /// <returns>A string that represents the dependency.</returns>
     public override string ToString()
     {
-        if (TestClass != null && TestName == null)
+        if (ClassMetadata != null && TestName == null)
         {
-            return TestClass.Name;
+            return ClassMetadata.Name;
         }
 
         if (ParameterTypes is { Length: > 0 })

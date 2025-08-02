@@ -14,7 +14,7 @@ public class EnumTests
         Four = 8,
         Five = 16,
     }
-    
+
     [Flags]
     public enum MyEnum2
     {
@@ -24,7 +24,7 @@ public class EnumTests
         Four = 3,
         Five = 4,
     }
-    
+
     [Test]
     public async Task Flags_Good()
     {
@@ -41,7 +41,7 @@ public class EnumTests
             .And
             .DoesNotHaveFlag(MyEnum.Five);
     }
-    
+
     [Test]
     public async Task Flags_Bad()
     {
@@ -59,7 +59,7 @@ public class EnumTests
 
         await Assert.That(value).IsDefined();
     }
-    
+
     [Test]
     public async Task IsNotDefined_Good()
     {
@@ -82,7 +82,7 @@ public class EnumTests
     [Test]
     public async Task IsNotDefined_Bad()
     {
-        var value = (MyEnum)99;
+        var value = (MyEnum) 99;
 
         await Assert.That(async () =>
             await Assert.That(value).IsDefined()
@@ -108,7 +108,7 @@ public class EnumTests
             await Assert.That(value).HasSameNameAs(value2)
         ).Throws<AssertionException>();
     }
-    
+
     [Test]
     public async Task HasSameValueAs_Good()
     {
@@ -128,7 +128,7 @@ public class EnumTests
             await Assert.That(value).HasSameValueAs(value2)
         ).Throws<AssertionException>();
     }
-    
+
     [Test]
     public async Task DoesNotHaveSameNameAs_Good()
     {
@@ -148,7 +148,7 @@ public class EnumTests
             await Assert.That(value).DoesNotHaveSameNameAs(value2)
         ).Throws<AssertionException>();
     }
-    
+
     [Test]
     public async Task DoesNotHaveSameValueAs_Good()
     {

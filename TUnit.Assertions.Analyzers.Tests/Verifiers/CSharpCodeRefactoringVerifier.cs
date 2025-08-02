@@ -28,9 +28,7 @@ public static partial class CSharpCodeRefactoringVerifier<TCodeRefactoring>
                     return solution;
                 }
 
-                var parseOptions = project.ParseOptions as CSharpParseOptions;
-
-                if (parseOptions is null)
+                if (project.ParseOptions is not CSharpParseOptions parseOptions)
                 {
                     return solution;
                 }

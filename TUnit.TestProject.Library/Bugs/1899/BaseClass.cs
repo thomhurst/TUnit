@@ -3,7 +3,7 @@
 public abstract class BaseClass<T>
 {
     private int _value;
-    
+
     [Before(HookType.Test)]
     public void Setup()
     {

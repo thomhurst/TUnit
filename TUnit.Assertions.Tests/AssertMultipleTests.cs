@@ -25,7 +25,7 @@ public class AssertMultipleTests
             }
         }).Throws<Exception>().And.HasMessageContaining("Hello World");
     }
-    
+
     [Test]
     public async Task Caught_Exception_In_Scope_Is_Not_Captured()
     {
@@ -64,13 +64,13 @@ public class AssertMultipleTests
             await Assert.That(
                 static () => throw new InvalidOperationException()
             ).ThrowsExactly<InvalidOperationException>();
-            
+
             await Assert.That(
                 static () => throw new InvalidOperationException()
             ).ThrowsExactly<InvalidOperationException>();
         }
     }
-    
+
     [Test]
     public async Task Assert_Fail_Doesnt_Throw_Immediately_Within_AssertMultiple()
     {
@@ -90,7 +90,7 @@ public class AssertMultipleTests
             .WithMessageContaining("Error 1")
             .And
             .HasMessageContaining("Error 2");
-        
+
         await Assert.That(endReached).IsTrue();
     }
 }

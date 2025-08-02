@@ -30,7 +30,7 @@ internal sealed class TestAnalyzerConfigOptionsProvider(
         {
             return new SimpleAnalyzerConfigOptions(options);
         }
-        
+
         return new SimpleAnalyzerConfigOptions(_globalOptions);
     }
 }

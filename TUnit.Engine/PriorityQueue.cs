@@ -1,6 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#if !NET
 
-#if !NET
+using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Engine
 {
@@ -37,13 +37,13 @@ namespace TUnit.Engine
 
             return element.Value;
         }
-        
+
         public bool TryDequeue([NotNullWhen(true)] out TElement? value, [NotNullWhen(true)] out TPriority? priority)
         {
             if (_elements.Count == 0)
             {
-                value = default;
-                priority = default;
+                value = default(TElement);
+                priority = default(TPriority);
                 return false;
             }
 

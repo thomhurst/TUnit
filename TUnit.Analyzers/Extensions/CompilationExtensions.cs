@@ -8,17 +8,24 @@ public static class CompilationExtensions
     public static bool HasImplicitConversionOrGenericParameter(this Compilation compilation, ITypeSymbol? argumentType,
         ITypeSymbol? parameterType)
     {
+        // Handle exact type matches (including when metadata differs)
+        if (argumentType != null && parameterType != null && 
+            argumentType.ToDisplayString() == parameterType.ToDisplayString())
+        {
+            return true;
+        }
+
         if (parameterType?.IsGenericDefinition() == false)
         {
             if (argumentType is null)
             {
                 return false;
             }
-            
+
             var conversion = compilation.ClassifyConversion(argumentType, parameterType);
             return conversion.IsImplicit || conversion.IsNumeric;
         }
-        
+
         if (parameterType is INamedTypeSymbol { IsGenericType: true, TypeArguments: [{ TypeKind: TypeKind.TypeParameter }] } namedType)
         {
             // `IEnumerable<>`
@@ -34,7 +41,7 @@ public static class CompilationExtensions
                 return compilation.HasImplicitConversion(argumentType, specializedSuper);
             }
         }
-        
+
         return compilation.HasImplicitConversion(argumentType?.OriginalDefinition, parameterType?.OriginalDefinition);
     }
 }

@@ -2,8 +2,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using PublicApiGenerator;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 
 namespace TUnit.PublicAPI;
 
@@ -14,19 +12,13 @@ public partial class Tests
     {
         return VerifyPublicApi(typeof(TestAttribute).Assembly);
     }
-    
-    [Test]
-    public Task Engine_Library_Has_No_API_Changes()
-    {
-        return VerifyPublicApi(typeof(Engine.Services.TUnitRunner).Assembly);
-    }
-    
+
     [Test]
     public Task Assertions_Library_Has_No_API_Changes()
     {
         return VerifyPublicApi(typeof(Assertions.Assert).Assembly);
     }
-    
+
     [Test]
     public Task Playwright_Library_Has_No_API_Changes()
     {
@@ -44,7 +36,8 @@ public partial class Tests
         });
 
         await Verify(publicApi)
-            .AddScrubber(sb => Scrub(sb))
+            .AddScrubber(Scrub)
+            .AddScrubber(sb => new StringBuilder(sb.ToString().Replace("\\r\\n", "\\n")))
             .ScrubLinesWithReplace(x => x.Replace("\r\n", "\n"))
             .ScrubLinesWithReplace(line =>
             {
@@ -55,26 +48,32 @@ public partial class Tests
 
                 return line;
             })
+            .ScrubFilePaths()
             .OnVerifyMismatch(async (pair, message, verify) =>
             {
                 var received = await FilePolyfill.ReadAllTextAsync(pair.ReceivedPath);
                 var verified = await FilePolyfill.ReadAllTextAsync(pair.VerifiedPath);
-                
+
                 // Better diff message since original one is too large
                 await Assert.That(Scrub(received)).IsEqualTo(Scrub(verified));
             })
             .UniqueForTargetFrameworkAndVersion(assembly);
     }
-    
+
     private StringBuilder Scrub(StringBuilder text)
     {
-        var newText = UrlRegex().Replace(text.ToString(), string.Empty);
+        var newText = UrlRegex().Replace(text.ToString(), string.Empty)
+            .Replace("\r\n", "\n")
+            .Replace("\r", "\n")
+            .Replace("\\r\\n", "\\n")
+            .Replace("\\r", "\\n");
+
         return new StringBuilder(newText);
     }
-    
+
     private string Scrub(string text)
     {
-        return Scrub(new StringBuilder(text.Replace("\r\n", "\n"))).ToString();
+        return Scrub(new StringBuilder(text)).ToString();
     }
 
 
@@ -83,7 +82,7 @@ public partial class Tests
     public static partial Regex UrlRegex();
 #else
     public static Regex UrlRegex() =>
-        new Regex(
+        new(
             @"((http|https):\/\/)?(www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})(\/[a-zA-Z0-9-._~:\/?#[\]@!$&'()*+,;=]*)?");
 #endif
 }

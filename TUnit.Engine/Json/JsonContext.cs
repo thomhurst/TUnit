@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using TUnit.Core.Enums;
+using TUnit.Core;
 
 namespace TUnit.Engine.Json;
 
@@ -7,7 +7,7 @@ namespace TUnit.Engine.Json;
     WriteIndented = true,
     IgnoreReadOnlyProperties = true,
     IgnoreReadOnlyFields = true,
-    Converters = [ typeof(JsonStringEnumConverter<Status>) ],
+    Converters = [typeof(JsonStringEnumConverter<TestState>)],
     GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(TestSessionJson))]
 [JsonSerializable(typeof(TestJson))]

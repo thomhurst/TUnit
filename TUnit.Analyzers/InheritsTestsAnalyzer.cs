@@ -13,12 +13,12 @@ public class InheritsTestsAnalyzer : ConcurrentDiagnosticAnalyzer
         ImmutableArray.Create(Rules.DoesNotInheritTestsWarning);
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return;

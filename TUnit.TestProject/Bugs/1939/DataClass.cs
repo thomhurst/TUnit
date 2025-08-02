@@ -14,7 +14,7 @@ public class DataClass : IAsyncInitializer, IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         Disposed = true;
-        return default;
+        return default(ValueTask);
     }
 
     public ValueTask CalledOnTestClassDisposal()
@@ -26,6 +26,6 @@ public class DataClass : IAsyncInitializer, IAsyncDisposable
 
         Console.WriteLine(@"This method is called when the test class is disposed");
 
-        return default;
+        return default(ValueTask);
     }
 }

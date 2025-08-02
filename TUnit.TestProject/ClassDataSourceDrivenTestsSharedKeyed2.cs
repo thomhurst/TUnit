@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 using TUnit.TestProject.Attributes;
 using TUnit.TestProject.Library.Models;
 
@@ -42,7 +40,7 @@ public class ClassDataSourceDrivenTestsSharedKeyed2
     [After(Assembly)]
     public static async Task AssertAfter(AssemblyHookContext assemblyHookContext)
     {
-        if(assemblyHookContext.TestClasses.Any(x => x.ClassType != typeof(ClassDataSourceDrivenTestsSharedKeyed3)))
+        if (assemblyHookContext.TestClasses.Any(x => x.ClassType != typeof(ClassDataSourceDrivenTestsSharedKeyed3)))
         {
             return; // Skip if this class is not executed
         }

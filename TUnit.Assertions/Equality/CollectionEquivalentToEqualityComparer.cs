@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 
 namespace TUnit.Assertions.Equality;
 
@@ -10,9 +9,9 @@ public class CollectionEquivalentToEqualityComparer<[DynamicallyAccessedMembers(
     public CollectionEquivalentToEqualityComparer() : this(new CompareOptions())
     {
     }
-    
+
     public override int? EnumerableIndex { get; protected set; } = 0;
-    
+
     public override bool Equals(T? x, T? y)
     {
         try

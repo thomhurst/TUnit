@@ -11,21 +11,21 @@ public class DelegateAnd<TActual>(AssertionBuilder assertionBuilder) : IDelegate
         return new DelegateAnd<TActual>(assertionBuilder);
     }
 
-    string? ISource.ActualExpression => ((ISource)assertionBuilder).ActualExpression;
-    
-    Stack<BaseAssertCondition> ISource.Assertions => ((ISource)assertionBuilder).Assertions;
-    ValueTask<AssertionData> ISource.AssertionDataTask => ((ISource)assertionBuilder).AssertionDataTask;
-    StringBuilder ISource.ExpressionBuilder => ((ISource)assertionBuilder).ExpressionBuilder;
+    string? ISource.ActualExpression => ((ISource) assertionBuilder).ActualExpression;
+
+    Stack<BaseAssertCondition> ISource.Assertions => ((ISource) assertionBuilder).Assertions;
+    ValueTask<AssertionData> ISource.AssertionDataTask => ((ISource) assertionBuilder).AssertionDataTask;
+    StringBuilder ISource.ExpressionBuilder => ((ISource) assertionBuilder).ExpressionBuilder;
 
     ISource ISource.AppendExpression(string expression)
     {
-        ((ISource)assertionBuilder).AppendExpression(expression);
+        ((ISource) assertionBuilder).AppendExpression(expression);
         return this;
     }
 
     ISource ISource.WithAssertion(BaseAssertCondition assertCondition)
     {
-        ((ISource)assertionBuilder).WithAssertion(assertCondition);
+        ((ISource) assertionBuilder).WithAssertion(assertCondition);
         return this;
     }
 }

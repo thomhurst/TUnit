@@ -30,9 +30,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
                     return solution;
                 }
 
-                var parseOptions = project.ParseOptions as CSharpParseOptions;
-
-                if (parseOptions is null)
+                if (project.ParseOptions is not CSharpParseOptions parseOptions)
                 {
                     return solution;
                 }

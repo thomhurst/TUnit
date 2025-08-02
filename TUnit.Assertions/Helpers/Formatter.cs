@@ -14,7 +14,7 @@ public abstract class Formatter
 
         public override string FormatValue(object? value)
         {
-            return formatValue.Invoke((T)value!);
+            return formatValue.Invoke((T) value!);
         }
     }
 
@@ -43,7 +43,7 @@ public abstract class Formatter
         }
 
         var formatter = Formatters.FirstOrDefault(f => f.CanHandle(value));
-        
+
         if (formatter != null)
         {
             return formatter.FormatValue(value);

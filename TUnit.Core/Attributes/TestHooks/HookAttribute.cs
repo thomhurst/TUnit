@@ -12,11 +12,11 @@ public class HookAttribute : TUnitAttribute
         {
             throw new ArgumentOutOfRangeException(nameof(hookType), hookType, null);
         }
-        
+
         HookType = hookType;
         File = file;
         Line = line;
-    }   
-    
+    }
+
     public int Order { get; init; }
 }

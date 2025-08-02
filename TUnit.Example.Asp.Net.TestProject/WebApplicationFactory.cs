@@ -9,6 +9,12 @@ public class WebApplicationFactory : WebApplicationFactory<Program>, IAsyncIniti
 {
     private int _configuredWebHostCalled;
 
+    [ClassDataSource<InMemoryRedis>(Shared = SharedType.PerTestSession)]
+    public required InMemoryRedis Redis { get; init; }
+
+    [ClassDataSource<InMemoryPostgreSqlDatabase>(Shared = SharedType.PerTestSession)]
+    public required InMemoryPostgreSqlDatabase PostgreSql { get; init; }
+
     public int ConfiguredWebHostCalled => _configuredWebHostCalled;
 
     public Task InitializeAsync()
@@ -21,16 +27,13 @@ public class WebApplicationFactory : WebApplicationFactory<Program>, IAsyncIniti
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         Interlocked.Increment(ref _configuredWebHostCalled);
-        
+
         builder.ConfigureAppConfiguration((context, configBuilder) =>
         {
-            var testName = TestContext.Current!.TestDetails.TestName;
-            
-            var connectionString = testName + "-DummyConnectionString";
-            
             configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                { "ConnectionStrings:DefaultConnection", connectionString }
+                { "Redis:ConnectionString", Redis.PostgreSqlContainer.GetConnectionString() },
+                { "PostgreSql:ConnectionString", PostgreSql.PostgreSqlContainer.GetConnectionString() }
             });
         });
     }

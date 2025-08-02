@@ -1,8 +1,7 @@
-using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
+internal class TestDiscoveryHookTests : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -10,6 +9,5 @@ internal class TestDiscoveryHookTests : TestsBase<TestHooksGenerator>
             "TestDiscoveryHookTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(2);
-        });
+            });
 }

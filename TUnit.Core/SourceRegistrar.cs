@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces.SourceGenerator;
@@ -39,7 +39,20 @@ public class SourceRegistrar
     /// <param name="testSource">The test source to register.</param>
     public static void Register(ITestSource testSource)
     {
-        Sources.TestSources.Enqueue(testSource);
+        // For backward compatibility, add to all types queue if no type specified
+        var allTypesQueue = Sources.TestSources.GetOrAdd(typeof(object), _ => new ConcurrentQueue<ITestSource>());
+        allTypesQueue.Enqueue(testSource);
+    }
+    
+    /// <summary>
+    /// Registers a test source for a specific test class type.
+    /// </summary>
+    /// <param name="testClassType">The test class type.</param>
+    /// <param name="testSource">The test source to register.</param>
+    public static void Register(Type testClassType, ITestSource testSource)
+    {
+        var queue = Sources.TestSources.GetOrAdd(testClassType, _ => new ConcurrentQueue<ITestSource>());
+        queue.Enqueue(testSource);
     }
 
     /// <summary>
@@ -51,66 +64,22 @@ public class SourceRegistrar
         Sources.DynamicTestSources.Enqueue(testSource);
     }
 
+
     /// <summary>
-    /// Registers a test hook source.
+    /// Registers a global initializer.
     /// </summary>
-    /// <param name="testSource">The test hook source to register.</param>
-    public static void RegisterTestHookSource(ITestHookSource testSource)
+    /// <param name="initializer">The initializer to register.</param>
+    public static void RegisterGlobalInitializer(Func<Task> initializer)
     {
-        Sources.TestHookSources.Enqueue(testSource);
+        Sources.GlobalInitializers.Enqueue(initializer);
     }
 
     /// <summary>
-    /// Registers a class hook source.
+    /// Registers a property source (for property injection).
     /// </summary>
-    /// <param name="testSource">The class hook source to register.</param>
-    public static void RegisterClassHookSource(IClassHookSource testSource)
+    /// <param name="propertySource">The property source to register.</param>
+    public static void RegisterProperty(IPropertySource propertySource)
     {
-        Sources.ClassHookSources.Enqueue(testSource);
-    }
-
-    /// <summary>
-    /// Registers an assembly hook source.
-    /// </summary>
-    /// <param name="testSource">The assembly hook source to register.</param>
-    public static void RegisterAssemblyHookSource(IAssemblyHookSource testSource)
-    {
-        Sources.AssemblyHookSources.Enqueue(testSource);
-    }
-
-    /// <summary>
-    /// Registers a test session hook source.
-    /// </summary>
-    /// <param name="testSource">The test session hook source to register.</param>
-    public static void RegisterTestSessionHookSource(ITestSessionHookSource testSource)
-    {
-        Sources.TestSessionHookSources.Enqueue(testSource);
-    }
-
-    /// <summary>
-    /// Registers a test discovery hook source.
-    /// </summary>
-    /// <param name="testSource">The test discovery hook source to register.</param>
-    public static void RegisterTestDiscoveryHookSource(ITestDiscoveryHookSource testSource)
-    {
-        Sources.TestDiscoveryHookSources.Enqueue(testSource);
-    }
-
-    /// <summary>
-    /// Registers a property initializer for a specific type that takes a DataGeneratorMetadata parameter.
-    /// </summary>
-    /// <typeparam name="T">The type to register the initializer for.</typeparam>
-    public static void RegisterProperty<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
-    {
-        var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-            .Where(p => p.CanWrite && p.IsDefined(typeof(IDataSourceGeneratorAttribute), true))
-            .ToArray();
-
-        if (properties.Length == 0)
-        {
-            return;
-        }
-
-        Sources.DataGeneratorProperties.TryAdd(typeof(T), properties);
+        Sources.PropertySources.Enqueue(propertySource);
     }
 }

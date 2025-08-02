@@ -1,8 +1,5 @@
 ﻿#pragma warning disable
 
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-
 namespace TUnit.TestProject.OrderedSetupTests;
 
 public class Tests : Base2

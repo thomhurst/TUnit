@@ -20,7 +20,7 @@ internal class DisableLogoCommandProvider(IExtension extension) : ICommandLineOp
     public string DisplayName => extension.DisplayName;
 
     public string Description => extension.Description;
-    
+
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     {
         return

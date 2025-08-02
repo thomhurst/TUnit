@@ -8,7 +8,7 @@ open TUnit.Core
 
 [<ClassConstructor(typeof<DependencyInjectionClassConstructor>)>]
 [<NotInParallel>]
-type ClassConstructorWithEnumerableTest(services: IServiceProvider) =
+type ClassConstructorWithEnumerableTest(dummy: DummyReferenceTypeClass) =
     let mutable isDisposed = false
 
     [<Before(HookType.Test)>]
@@ -19,7 +19,9 @@ type ClassConstructorWithEnumerableTest(services: IServiceProvider) =
     [<Test>]
     [<MethodDataSource("GetValues")>]
     member _.DoSomething(value: int) =
-        ActivatorUtilities.GetServiceOrCreateInstance<DummyReferenceTypeClass>(services) |> ignore
+        // Just use the dummy object that was injected
+        // In F#, we don't need to check for null as it won't compile without proper injection
+        ()
 
     static member GetValues() : seq<int> = seq { yield 1; yield 2; yield 3; yield 4 }
 

@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace TUnit.TestProject.OrderedByAttributeOrderParameterSetupTests;
+﻿namespace TUnit.TestProject.OrderedByAttributeOrderParameterSetupTests;
 #pragma warning disable
 public class Base3
 {

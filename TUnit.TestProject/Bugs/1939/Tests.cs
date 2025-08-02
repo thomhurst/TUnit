@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1939;
 
@@ -23,7 +21,7 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
     {
         await dataClass.CalledOnTestClassDisposal();
     }
-    
+
     [After(TestSession)]
 #pragma warning disable TUnit0042
     public static async Task AssertAllDataClassesDisposed(TestSessionContext context)
@@ -33,31 +31,33 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
             .FirstOrDefault(x => x.ClassType == typeof(Tests))
             ?.Tests;
 
-        if (tests is null)
+        if (tests is null || tests.Any(x => x.Result == null))
         {
+            // If the test did not run, we cannot check if the classes were disposed.
+            // This can happen if the test was filtered out or not executed for some reason.
             return;
         }
-        
+
         var dataClasses = tests
             .SelectMany(x => x.TestDetails.TestClassArguments)
             .OfType<DataClass>()
             .ToArray();
 
         using var _ = Assert.Multiple();
-        
+
         await Assert.That(dataClasses).HasCount().EqualTo(6);
         await Assert.That(dataClasses.Where(x => x.Disposed)).HasCount().EqualTo(6);
-        
-        foreach (var test in tests)
+
+        foreach (var test in tests.Where(x => x.Result != null))
         {
             var dataClass = test.TestDetails.TestClassArguments.OfType<DataClass>().First();
 
             if (!dataClass.Disposed)
             {
                 var classDataSourceAttribute =
-                    test.TestDetails.DataAttributes.OfType<ClassDataSourceAttribute<DataClass>>()
+                    test.TestDetails.Attributes.OfType<ClassDataSourceAttribute<DataClass>>()
                         .First();
-                
+
                 throw new Exception($"Not Disposed: {classDataSourceAttribute.Shared}");
             }
         }

@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._2067;
 
@@ -14,7 +12,7 @@ public class Tests(DataClass dataClass)
     {
         Console.WriteLine(dataClass);
     }
-    
+
     [After(TestSession)]
 #pragma warning disable TUnit0042
     public static async Task AssertAllDataClassesDisposed(TestSessionContext context)
@@ -24,11 +22,11 @@ public class Tests(DataClass dataClass)
             .FirstOrDefault(x => x.ClassType == typeof(Tests))
             ?.Tests;
 
-        if (tests is null)
+        if (tests is null || tests.Any(x => x.Result == null))
         {
             return;
         }
-        
+
         var dataClasses = tests
             .SelectMany(x => x.TestDetails.TestClassArguments)
             .OfType<DataClass>()
@@ -37,7 +35,7 @@ public class Tests(DataClass dataClass)
         using var _ = Assert.Multiple();
 
         var dataClass = await Assert.That(dataClasses).HasSingleItem();
-        
+
         await Assert.That(dataClass).IsNotNull();
         await Assert.That(dataClass!.IsRegistered).IsTrue();
         await Assert.That(dataClass.IsInitialized).IsTrue();

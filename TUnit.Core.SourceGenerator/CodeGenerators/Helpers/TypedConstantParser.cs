@@ -1,15 +1,24 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 public static class TypedConstantParser
 {
+    private static readonly TypedConstantFormatter _formatter = new();
+    
     public static string GetTypedConstantValue(SemanticModel semanticModel,
         (TypedConstant typedConstant, AttributeArgumentSyntax a) element, ITypeSymbol? parameterType)
     {
+        // For constant values, use the formatter which handles type conversions properly
+        if (element.typedConstant.Kind == TypedConstantKind.Primitive)
+        {
+            return _formatter.FormatForCode(element.typedConstant, parameterType);
+        }
+
         var argumentExpression = element.a.Expression;
 
         var newExpression = argumentExpression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
@@ -40,7 +49,7 @@ public static class TypedConstantParser
     {
         if (typedConstant.Kind == TypedConstantKind.Type)
         {
-            var type = (INamedTypeSymbol)typedConstant.Value!;
+            var type = (INamedTypeSymbol) typedConstant.Value!;
             return type.GloballyQualified();
         }
 
@@ -59,27 +68,8 @@ public static class TypedConstantParser
 
     public static string GetRawTypedConstantValue(TypedConstant typedConstant)
     {
-        if (typedConstant.IsNull)
-        {
-            return "null";
-        }
-
-        switch (typedConstant.Kind)
-        {
-            case TypedConstantKind.Primitive:
-                return FormatPrimitive(typedConstant);
-            case TypedConstantKind.Enum:
-                return $"({typedConstant.Type!.GloballyQualified()})({typedConstant.Value})";
-            case TypedConstantKind.Type:
-                return $"typeof({((ITypeSymbol)typedConstant.Value!).GloballyQualified()})";
-            case TypedConstantKind.Array:
-                var elements = typedConstant.Values.Select(GetRawTypedConstantValue);
-                return $"new[] {{ {string.Join(", ", elements)} }}";
-            case TypedConstantKind.Error:
-                return "default";
-            default:
-                throw new NotSupportedException($"Unsupported TypedConstantKind: {typedConstant.Kind}");
-        }
+        // Use the formatter for consistent handling
+        return _formatter.FormatForCode(typedConstant);
     }
 
     private static string FormatPrimitive(TypedConstant typedConstant)
@@ -89,13 +79,30 @@ public static class TypedConstantParser
 
     public static string FormatPrimitive(object? value)
     {
-        return value switch
+        switch (value)
         {
-            string s => $"\"{s}\"",
-            char c => $"'{c}'",
-            bool b => b ? "true" : "false",
-            null => "null",
-            _ => value.ToString() ?? "null"
-        };
+            case string s:
+                return SymbolDisplay.FormatLiteral(s, quote: true);
+            case char c:
+                return SymbolDisplay.FormatLiteral(c, quote: true);
+            case bool b:
+                return b ? "true" : "false";
+            case float.NaN:
+                return "float.NaN";
+            case float f when float.IsPositiveInfinity(f):
+                return "float.PositiveInfinity";
+            case float f when float.IsNegativeInfinity(f):
+                return "float.NegativeInfinity";
+            case double.NaN:
+                return "double.NaN";
+            case double d when double.IsPositiveInfinity(d):
+                return "double.PositiveInfinity";
+            case double d when double.IsNegativeInfinity(d):
+                return "double.NegativeInfinity";
+            case null:
+                return "null";
+            default:
+                return value.ToString() ?? "null";
+        }
     }
 }

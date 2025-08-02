@@ -12,6 +12,7 @@ public class ClassConstructorDataSourceAnalyzerTests
                 """
                 using System;
                 using System.Diagnostics.CodeAnalysis;
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Core.Interfaces;
 
@@ -30,15 +31,16 @@ public class ClassConstructorDataSourceAnalyzerTests
 
                 public class MyClassConstructor : IClassConstructor
                 {
-                    public object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
+                    public Task<object> Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
                     {
-                        return Activator.CreateInstance(type, 1)!;
+                        return Task.FromResult(Activator.CreateInstance(type, 1)!);
                     }
                 }
-                """
+                """,
+                test => test.CompilerDiagnostics = Microsoft.CodeAnalysis.Testing.CompilerDiagnostics.None
             );
     }
-    
+
     [Test]
     public async Task Assembly_Attribute_No_Error()
     {
@@ -47,6 +49,7 @@ public class ClassConstructorDataSourceAnalyzerTests
                 """
                 using System;
                 using System.Diagnostics.CodeAnalysis;
+                using System.Threading.Tasks;
                 using TUnit.Core;
                 using TUnit.Core.Interfaces;
 
@@ -66,12 +69,13 @@ public class ClassConstructorDataSourceAnalyzerTests
 
                 public class MyClassConstructor : IClassConstructor
                 {
-                    public object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
+                    public Task<object> Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
                     {
-                        return Activator.CreateInstance(type, 1)!;
+                        return Task.FromResult(Activator.CreateInstance(type, 1)!);
                     }
                 }
-                """
+                """,
+                test => test.CompilerDiagnostics = Microsoft.CodeAnalysis.Testing.CompilerDiagnostics.None
             );
     }
 }

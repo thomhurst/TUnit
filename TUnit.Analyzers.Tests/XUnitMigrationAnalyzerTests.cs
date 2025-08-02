@@ -1,7 +1,7 @@
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.XUnitMigrationAnalyzer>;
 using CodeFixer = TUnit.Analyzers.Tests.Verifiers.CSharpCodeFixVerifier<TUnit.Analyzers.XUnitMigrationAnalyzer, TUnit.Analyzers.CodeFixers.XUnitMigrationCodeFixProvider>;
+using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.XUnitMigrationAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
@@ -128,7 +128,7 @@ public class XUnitMigrationAnalyzerTests
                     {
                     }
                 }
-                
+
                 [CollectionDefinition("MyCollection")]
                 public class MyCollection : ICollectionFixture<MyType>
                 {
@@ -149,7 +149,7 @@ public class XUnitMigrationAnalyzerTests
                         {
                         }
                     }
-                    
+
                     [System.Obsolete]
                     public class MyCollection
                     {
@@ -259,7 +259,7 @@ public class XUnitMigrationAnalyzerTests
 
     [Test]
     [Arguments("AssemblyFixture(typeof(Exception))", "ClassDataSource<Exception>(Shared = SharedType.PerAssembly)")]
-    [Skip("TODO")]
+    [Skip("Assembly attribute migration is not yet implemented - requires analyzer support for assembly-level attributes")]
     public async Task Assembly_Attributes_Can_Be_Fixed(string attribute, string expected)
     {
         await CodeFixer
@@ -267,7 +267,7 @@ public class XUnitMigrationAnalyzerTests
                 $$"""
                   {|#0:using System;
                   using TUnit.Core;
-                  
+
                   [assembly: {|#0:{{attribute}}|}]
                   namespace MyNamespace;
 
@@ -286,7 +286,7 @@ public class XUnitMigrationAnalyzerTests
 
                   [assembly: {{expected}}]
                   namespace MyNamespace;
-                  
+
                   public class MyClass
                   {
                       [Test]
@@ -436,20 +436,20 @@ public class XUnitMigrationAnalyzerTests
                 Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
                 """
                 using TUnit.Core;
-                
+
                 public class MyClass
                 {
                     [Test]
                     public void MyTest()
                     {
                     }
-                
+
                     [Before(Test)]
                     public Task InitializeAsync()
                     {
                         return default;
                     }
-                
+
                     [After(Test)]
                     public Task DisposeAsync()
                     {
@@ -492,7 +492,7 @@ public class XUnitMigrationAnalyzerTests
                     {
                         return default;
                     }
-                
+
                     public ValueTask DisposeAsync()
                     {
                         return default;
@@ -600,7 +600,7 @@ public class XUnitMigrationAnalyzerTests
                 {
                     private ITestOutputHelper _testOutputHelper = testOutputHelper;
                     public ITestOutputHelper TestOutputHelper { get; } = testOutputHelper;
-                
+
                     [Fact]
                     public void Test1()
                     {
@@ -641,7 +641,7 @@ public class XUnitMigrationAnalyzerTests
     private static void ConfigureXUnitTest(CodeFixer.Test test)
     {
         var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Xunit;"));
-        
+
         test.TestState.Sources.Add(globalUsings);
         test.FixedState.Sources.Add(globalUsings);
 

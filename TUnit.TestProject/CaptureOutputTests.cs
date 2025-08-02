@@ -1,7 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 [Repeat(15)]
 public class CaptureOutputTests

@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1914;
@@ -13,16 +11,16 @@ public class AsyncHookTests
 {
     private static readonly AsyncLocal<string> _0BeforeTestDiscoveryLocal = new();
     private static readonly AsyncLocal<string> _0BeforeTestDiscoveryLocal2 = new();
-    
+
     private static readonly AsyncLocal<string> _1BeforeTestSessionLocal = new();
     private static readonly AsyncLocal<string> _1BeforeTestSessionLocal2 = new();
-    
+
     private static readonly AsyncLocal<string> _2BeforeAssemblyLocal = new();
     private static readonly AsyncLocal<string> _2BeforeAssemblyLocal2 = new();
-    
+
     private static readonly AsyncLocal<string> _3BeforeClassLocal = new();
     private static readonly AsyncLocal<string> _3BeforeClassLocal2 = new();
-    
+
     private static readonly AsyncLocal<string> _4BeforeTestLocal = new();
     private static readonly AsyncLocal<string> _4BeforeTestLocal2 = new();
 
@@ -35,7 +33,7 @@ public class AsyncHookTests
         context.AddAsyncLocalValues();
 #endif
     }
-    
+
     [Before(TestDiscovery)]
     public static async Task BeforeTestDiscovery2(BeforeTestDiscoveryContext context)
     {
@@ -49,16 +47,26 @@ public class AsyncHookTests
     [Before(TestSession)]
     public static async Task BeforeTestSession(TestSessionContext context)
     {
+        await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession");
+        await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession");
+
         await Task.CompletedTask;
         _1BeforeTestSessionLocal.Value = "BeforeTestSession";
 #if NET
         context.AddAsyncLocalValues();
 #endif
     }
-    
+
     [Before(TestSession)]
     public static async Task BeforeTestSession2(TestSessionContext context)
     {
+        await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession");
+        await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession");
+
         await Task.CompletedTask;
         _1BeforeTestSessionLocal2.Value = "BeforeTestSession2";
 #if NET
@@ -69,16 +77,36 @@ public class AsyncHookTests
     [Before(Assembly)]
     public static async Task BeforeAssembly(AssemblyHookContext context)
     {
+        await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeAssembly");
+        await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeAssembly");
+
+        await Assert.That(_1BeforeTestSessionLocal.Value).IsEqualTo("BeforeTestSession")
+            .Because("AsyncLocal should flow from BeforeTestSession to BeforeAssembly");
+        await Assert.That(_1BeforeTestSessionLocal2.Value).IsEqualTo("BeforeTestSession2")
+            .Because("AsyncLocal should flow from BeforeTestSession to BeforeAssembly");
+
         await Task.CompletedTask;
         _2BeforeAssemblyLocal.Value = "BeforeAssembly";
 #if NET
         context.AddAsyncLocalValues();
 #endif
     }
-    
+
     [Before(Assembly)]
     public static async Task BeforeAssembly2(AssemblyHookContext context)
     {
+        await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeAssembly");
+        await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeAssembly");
+
+        await Assert.That(_1BeforeTestSessionLocal.Value).IsEqualTo("BeforeTestSession")
+            .Because("AsyncLocal should flow from BeforeTestSession to BeforeAssembly");
+        await Assert.That(_1BeforeTestSessionLocal2.Value).IsEqualTo("BeforeTestSession2")
+            .Because("AsyncLocal should flow from BeforeTestSession to BeforeAssembly");
+
         await Task.CompletedTask;
         _2BeforeAssemblyLocal2.Value = "BeforeAssembly2";
 #if NET
@@ -89,16 +117,46 @@ public class AsyncHookTests
     [Before(Class)]
     public static async Task BeforeClass(ClassHookContext context)
     {
+        await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeClass");
+        await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeClass");
+
+        await Assert.That(_1BeforeTestSessionLocal.Value).IsEqualTo("BeforeTestSession")
+            .Because("AsyncLocal should flow from BeforeTestSession to BeforeClass");
+        await Assert.That(_1BeforeTestSessionLocal2.Value).IsEqualTo("BeforeTestSession2")
+            .Because("AsyncLocal should flow from BeforeTestSession to BeforeClass");
+
+        await Assert.That(_2BeforeAssemblyLocal.Value).IsEqualTo("BeforeAssembly")
+            .Because("AsyncLocal should flow from BeforeAssembly to BeforeClass");
+        await Assert.That(_2BeforeAssemblyLocal2.Value).IsEqualTo("BeforeAssembly2")
+            .Because("AsyncLocal should flow from BeforeAssembly to BeforeClass");
+
         await Task.CompletedTask;
         _3BeforeClassLocal.Value = "BeforeClass";
 #if NET
         context.AddAsyncLocalValues();
 #endif
     }
-    
+
     [Before(Class)]
     public static async Task BeforeClass2(ClassHookContext context)
     {
+        await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeClass");
+        await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeClass");
+
+        await Assert.That(_1BeforeTestSessionLocal.Value).IsEqualTo("BeforeTestSession")
+            .Because("AsyncLocal should flow from BeforeTestSession to BeforeClass");
+        await Assert.That(_1BeforeTestSessionLocal2.Value).IsEqualTo("BeforeTestSession2")
+            .Because("AsyncLocal should flow from BeforeTestSession to BeforeClass");
+
+        await Assert.That(_2BeforeAssemblyLocal.Value).IsEqualTo("BeforeAssembly")
+            .Because("AsyncLocal should flow from BeforeAssembly to BeforeClass");
+        await Assert.That(_2BeforeAssemblyLocal2.Value).IsEqualTo("BeforeAssembly2")
+            .Because("AsyncLocal should flow from BeforeAssembly to BeforeClass");
+
         await Task.CompletedTask;
         _3BeforeClassLocal2.Value = "BeforeClass2";
 #if NET
@@ -109,16 +167,56 @@ public class AsyncHookTests
     [Before(Test)]
     public async Task BeforeTest(TestContext context)
     {
+        await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTest");
+        await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTest");
+
+        await Assert.That(_1BeforeTestSessionLocal.Value).IsEqualTo("BeforeTestSession")
+            .Because("AsyncLocal should flow from BeforeTestSession to BeforeTest");
+        await Assert.That(_1BeforeTestSessionLocal2.Value).IsEqualTo("BeforeTestSession2")
+            .Because("AsyncLocal should flow from BeforeTestSession to BeforeTest");
+
+        await Assert.That(_2BeforeAssemblyLocal.Value).IsEqualTo("BeforeAssembly")
+            .Because("AsyncLocal should flow from BeforeAssembly to BeforeTest");
+        await Assert.That(_2BeforeAssemblyLocal2.Value).IsEqualTo("BeforeAssembly2")
+            .Because("AsyncLocal should flow from BeforeAssembly to BeforeTest");
+
+        await Assert.That(_3BeforeClassLocal.Value).IsEqualTo("BeforeClass")
+            .Because("AsyncLocal should flow from BeforeClass to BeforeTest");
+        await Assert.That(_3BeforeClassLocal2.Value).IsEqualTo("BeforeClass2")
+            .Because("AsyncLocal should flow from BeforeClass to BeforeTest");
+
         await Task.CompletedTask;
         _4BeforeTestLocal.Value = "BeforeTest";
 #if NET
         context.AddAsyncLocalValues();
 #endif
     }
-    
+
     [Before(Test)]
     public async Task BeforeTest2(TestContext context)
     {
+        await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTest");
+        await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
+            .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTest");
+
+        await Assert.That(_1BeforeTestSessionLocal.Value).IsEqualTo("BeforeTestSession")
+            .Because("AsyncLocal should flow from BeforeTestSession to BeforeTest");
+        await Assert.That(_1BeforeTestSessionLocal2.Value).IsEqualTo("BeforeTestSession2")
+            .Because("AsyncLocal should flow from BeforeTestSession to BeforeTest");
+
+        await Assert.That(_2BeforeAssemblyLocal.Value).IsEqualTo("BeforeAssembly")
+            .Because("AsyncLocal should flow from BeforeAssembly to BeforeTest");
+        await Assert.That(_2BeforeAssemblyLocal2.Value).IsEqualTo("BeforeAssembly2")
+            .Because("AsyncLocal should flow from BeforeAssembly to BeforeTest");
+
+        await Assert.That(_3BeforeClassLocal.Value).IsEqualTo("BeforeClass")
+            .Because("AsyncLocal should flow from BeforeClass to BeforeTest");
+        await Assert.That(_3BeforeClassLocal2.Value).IsEqualTo("BeforeClass2")
+            .Because("AsyncLocal should flow from BeforeClass to BeforeTest");
+
         await Task.CompletedTask;
         _4BeforeTestLocal2.Value = "BeforeTest2";
 #if NET
@@ -143,7 +241,7 @@ public class AsyncHookTests
         await Assert.That(_2BeforeAssemblyLocal.Value).IsEqualTo("BeforeAssembly");
         await Assert.That(_3BeforeClassLocal.Value).IsEqualTo("BeforeClass");
         await Assert.That(_4BeforeTestLocal.Value).IsEqualTo("BeforeTest");
-        
+
         await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2");
         await Assert.That(_1BeforeTestSessionLocal2.Value).IsEqualTo("BeforeTestSession2");
         await Assert.That(_2BeforeAssemblyLocal2.Value).IsEqualTo("BeforeAssembly2");

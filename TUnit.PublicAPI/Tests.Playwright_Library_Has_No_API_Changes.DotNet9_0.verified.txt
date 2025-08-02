@@ -1,48 +1,114 @@
-﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v9.0", FrameworkDisplayName=".NET 9.0")]
-namespace TUnit.Playwright
+[assembly: .(".NETCoreApp,Version=v9.0", FrameworkDisplayName=".NET 9.0")]
+namespace .Helpers
 {
-    public class BrowserTest : TUnit.Playwright.PlaywrightTest
+    public static class ReflectionReplacements
+    {
+        public static bool IsAotMode { get; }
+        public static object?[]? ConvertTupleToArray(object tuple) { }
+        public static .<object?> InvokeMethodAsync(string methodKey, object? instance, params object?[]? parameters) { }
+        public static bool IsTupleType( type) { }
+        public static ? MakeGenericType( genericDefinition, params [] typeArguments) { }
+        public static void RegisterGenericTypeFactory(..GenericTypeFactoryDelegate genericTypeFactory) { }
+        public static void RegisterMethodInvoker(..MethodInvokerDelegate methodInvoker) { }
+        public static void RegisterPropertyInjector<T>(..PropertyInjectorDelegate<T> propertyInjector)
+            where T :  notnull { }
+        public static void RegisterTupleConverter(..TupleConverterDelegate tupleConverter) { }
+        public static void RegisterTupleTypeChecker(..TupleTypeCheckerDelegate tupleTypeChecker) { }
+        public static void RegisterTypeResolver(..TypeResolverDelegate typeResolver) { }
+        public static ? ResolveType(string assemblyQualifiedName) { }
+        public delegate ? GenericTypeFactoryDelegate( genericDefinition, [] typeArguments);
+        public delegate .<object?> MethodInvokerDelegate(string methodKey, object? instance, object?[]? parameters);
+        public delegate . PropertyInjectorDelegate<T>(T instance, .<string, object?> propertyValues, .TestContext testContext);
+        public delegate object?[]? TupleConverterDelegate(object tuple);
+        public delegate bool TupleTypeCheckerDelegate( type);
+        public delegate ? TypeResolverDelegate(string assemblyQualifiedName);
+    }
+}
+namespace 
+{
+    public static class PropertyInjectionRegistry
+    {
+        public static void Clear() { }
+        public static .<T>? GetInjector<T>()
+            where T :  notnull { }
+        public static .<> GetRegisteredTypes() { }
+        public static bool HasInjector( type) { }
+        public static bool HasInjector<T>()
+            where T :  notnull { }
+        public static void RegisterInjector<T>(.<T> injector)
+            where T :  notnull { }
+        public delegate . PropertyInjectorDelegate<T>(T instance, .<string, object?> propertyValues, .TestContext testContext);
+    }
+}
+namespace 
+{
+    public static class AotMethodInvokers
+    {
+        public static string GetMethodKey(string typeName, string methodName, int parameterCount = 0) { }
+        public static .<object?> InvokeMethodAsync(string methodKey, object? instance, params object?[]? parameters) { }
+    }
+    public static class AotReplacementRegistry
+    {
+        [.]
+        public static void Initialize() { }
+    }
+    public static class AotTypeResolver
+    {
+        public static ? MakeGenericType( genericTypeDefinition, params [] typeArguments) { }
+        public static ? ResolveType(string assemblyQualifiedName) { }
+    }
+}
+namespace .Hooks
+{
+    public sealed class GeneratedHookRegistry
+    {
+        public GeneratedHookRegistry() { }
+    }
+}
+namespace 
+{
+    public class BrowserTest : .PlaywrightTest
     {
         public BrowserTest() { }
-        public BrowserTest(Microsoft.Playwright.BrowserTypeLaunchOptions options) { }
-        public Microsoft.Playwright.IBrowser Browser { get; }
-        [TUnit.Core.Before(TUnit.Core.HookType.Test, "", 0)]
-        public System.Threading.Tasks.Task BrowserSetup() { }
-        [TUnit.Core.After(TUnit.Core.HookType.Test, "", 0)]
-        public System.Threading.Tasks.Task BrowserTearDown(TUnit.Core.TestContext testContext) { }
-        public System.Threading.Tasks.Task<Microsoft.Playwright.IBrowserContext> NewContext(Microsoft.Playwright.BrowserNewContextOptions options) { }
+        public BrowserTest(.BrowserTypeLaunchOptions options) { }
+        public .IBrowser Browser { get; }
+        [.Before(., "", 0)]
+        public . BrowserSetup() { }
+        [.After(., "", 0)]
+        public . BrowserTearDown(.TestContext testContext) { }
+        public .<.IBrowserContext> NewContext(.BrowserNewContextOptions options) { }
     }
-    public class ContextTest : TUnit.Playwright.BrowserTest
+    public class ContextTest : .BrowserTest
     {
         public ContextTest() { }
-        public Microsoft.Playwright.IBrowserContext Context { get; }
-        public virtual Microsoft.Playwright.BrowserNewContextOptions ContextOptions(TUnit.Core.TestContext testContext) { }
-        [TUnit.Core.Before(TUnit.Core.HookType.Test, "", 0)]
-        public System.Threading.Tasks.Task ContextSetup(TUnit.Core.TestContext testContext) { }
+        public .IBrowserContext Context { get; }
+        public virtual .BrowserNewContextOptions ContextOptions(.TestContext testContext) { }
+        [.Before(., "", 0)]
+        public . ContextSetup(.TestContext testContext) { }
     }
-    public sealed class DefaultPlaywrightParallelLimiter : TUnit.Core.Interfaces.IParallelLimit
+    public sealed class DefaultPlaywrightParallelLimiter : .
     {
         public DefaultPlaywrightParallelLimiter() { }
         public int Limit { get; }
     }
     public interface IWorkerService
     {
-        System.Threading.Tasks.Task DisposeAsync();
-        System.Threading.Tasks.Task ResetAsync();
+        . DisposeAsync();
+        . ResetAsync();
     }
-    public class PageTest : TUnit.Playwright.ContextTest
+    public class PageTest : .ContextTest
     {
         public PageTest() { }
-        public Microsoft.Playwright.IPage Page { get; }
-        [TUnit.Core.Before(TUnit.Core.HookType.Test, "", 0)]
-        public System.Threading.Tasks.Task PageSetup() { }
+        public .IPage Page { get; }
+        [.Before(., "", 0)]
+        public . PageSetup() { }
     }
-    public class PlaywrightSkipAttribute : TUnit.Core.SkipAttribute
+    public class PlaywrightSkipAttribute : .SkipAttribute
     {
-        public PlaywrightSkipAttribute(params TUnit.Playwright.PlaywrightSkipAttribute.Targets[] combinations) { }
-        public TUnit.Core.TestContext? TestContext { get; set; }
-        public override System.Threading.Tasks.Task<bool> ShouldSkip(TUnit.Core.BeforeTestContext context) { }
-        [System.Flags]
+        public PlaywrightSkipAttribute(params .[] combinations) { }
+        public .TestContext? TestContext { get; set; }
+        public override .<bool> ShouldSkip(.TestRegisteredContext context) { }
+        []
         public enum Targets : short
         {
             Windows = 1,
@@ -53,33 +119,33 @@ namespace TUnit.Playwright
             Webkit = 32,
         }
     }
-    public class PlaywrightTest : TUnit.Playwright.WorkerAwareTest
+    public class PlaywrightTest : .WorkerAwareTest
     {
         public PlaywrightTest() { }
         public virtual string BrowserName { get; }
-        public Microsoft.Playwright.IBrowserType BrowserType { get; }
-        public static Microsoft.Playwright.IPlaywright Playwright { get; }
-        public Microsoft.Playwright.IAPIResponseAssertions Expect(Microsoft.Playwright.IAPIResponse response) { }
-        public Microsoft.Playwright.ILocatorAssertions Expect(Microsoft.Playwright.ILocator locator) { }
-        public Microsoft.Playwright.IPageAssertions Expect(Microsoft.Playwright.IPage page) { }
-        [TUnit.Core.After(TUnit.Core.HookType.TestSession, "", 0)]
+        public .IBrowserType BrowserType { get; }
+        public static .IPlaywright Playwright { get; }
+        public .IAPIResponseAssertions Expect(.IAPIResponse response) { }
+        public .ILocatorAssertions Expect(.ILocator locator) { }
+        public .IPageAssertions Expect(.IPage page) { }
+        [.After(., "", 0)]
         public static void PlaywrightCleanup() { }
-        [TUnit.Core.Before(TUnit.Core.HookType.TestSession, "", 0)]
-        public static System.Threading.Tasks.Task PlaywrightSetup() { }
+        [.Before(., "", 0)]
+        public static . PlaywrightSetup() { }
         public static void SetDefaultExpectTimeout(float timeout) { }
     }
-    public class WorkerAwareTest : TUnit.Core.Interfaces.IEventReceiver, TUnit.Core.Interfaces.ITestRegisteredEventReceiver
+    public class WorkerAwareTest : ., .
     {
         public WorkerAwareTest() { }
         public virtual bool UseDefaultParallelLimiter { get; }
         public int WorkerIndex { get; }
-        public System.Threading.Tasks.ValueTask OnTestRegistered(TUnit.Core.TestRegisteredContext context) { }
-        public System.Threading.Tasks.Task<T> RegisterService<T>(string name, System.Func<System.Threading.Tasks.Task<T>> factory)
-            where T :  class, TUnit.Playwright.IWorkerService { }
-        protected bool TestOk(TUnit.Core.TestContext testContext) { }
-        [TUnit.Core.Before(TUnit.Core.HookType.Test, "", 0)]
+        public . OnTestRegistered(.TestRegisteredContext context) { }
+        public .<T> RegisterService<T>(string name, <.<T>> factory)
+            where T :  class, .IWorkerService { }
+        protected bool TestOk(.TestContext testContext) { }
+        [.Before(., "", 0)]
         public void WorkerSetup() { }
-        [TUnit.Core.After(TUnit.Core.HookType.Test, "", 0)]
-        public System.Threading.Tasks.Task WorkerTeardown(TUnit.Core.TestContext testContext) { }
+        [.After(., "", 0)]
+        public . WorkerTeardown(.TestContext testContext) { }
     }
 }

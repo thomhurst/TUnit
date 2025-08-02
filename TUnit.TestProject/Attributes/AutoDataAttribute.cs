@@ -2,11 +2,11 @@
 
 namespace TUnit.TestProject.Attributes;
 
-public class AutoDataAttribute : NonTypedDataSourceGeneratorAttribute
+public class AutoDataAttribute : UntypedDataSourceGeneratorAttribute
 {
     private static readonly AutoFixture.Fixture Fixture = new();
 
-    public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () => GenerateRow(dataGeneratorMetadata);
     }

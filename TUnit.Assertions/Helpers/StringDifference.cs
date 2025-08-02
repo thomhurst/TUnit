@@ -8,11 +8,11 @@ public class StringDifference(string? actualValue, string? expectedValue, IEqual
     private const char ArrowUp = '\u2191';
 
     private readonly IEqualityComparer<string> _comparer = comparer ?? StringComparer.Ordinal;
-    
+
     public int? OverriddenIndex { get; set; }
     public int IgnoreWhiteSpace { get; set; }
-    
-    
+
+
     /// <summary>
     /// Returns the first index at which the two values do not match.
     /// </summary>

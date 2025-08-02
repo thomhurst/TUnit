@@ -20,7 +20,7 @@ public abstract class StringMatcher
     /// </summary>
     public static implicit operator StringMatcher(string pattern) => AsWildcard(pattern);
 
-    
+
     public static implicit operator StringMatcher(Regex pattern) => AsRegex(pattern.ToString());
 
     /// <summary>
@@ -28,13 +28,13 @@ public abstract class StringMatcher
     ///     Supports * to match zero or more characters and ? to match exactly one character.
     /// </summary>
     public static WildcardMatch AsWildcard(string pattern)
-        => new WildcardMatch(pattern);
+        => new(pattern);
 
     /// <summary>
     ///     A <see cref="Regex"> match.
     /// </summary>
     public static RegexMatch AsRegex([StringSyntax("regex")] string pattern)
-        => new RegexMatch(pattern);
+        => new(pattern);
 
     public sealed class WildcardMatch : StringMatcher
     {
@@ -68,7 +68,7 @@ public abstract class StringMatcher
 
         private static string WildcardToRegularExpression(string value)
         {
-            string regex = Regex.Escape(value)
+            var regex = Regex.Escape(value)
                 .Replace("\\?", ".")
                 .Replace("\\*", ".*");
             return $"^{regex}$";
@@ -93,7 +93,7 @@ public abstract class StringMatcher
                 return false;
             }
 
-            RegexOptions options = RegexOptions.Multiline;
+            var options = RegexOptions.Multiline;
             if (_ignoreCase)
             {
                 options |= RegexOptions.IgnoreCase;

@@ -1,6 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
@@ -13,7 +11,7 @@ public class NotInParallelTests
     [After(Test)]
     public async Task TestOverlaps()
     {
-        TestDateTimeRanges.Add(new DateTimeRange(TestContext.Current!.TestStart!.Value.DateTime, TestContext.Current.Result!.End!.Value.DateTime));
+        TestDateTimeRanges.Add(new DateTimeRange(TestContext.Current!.TestStart.DateTime, TestContext.Current.Result!.End!.Value.DateTime));
 
         await AssertNoOverlaps();
     }

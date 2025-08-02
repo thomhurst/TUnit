@@ -10,4 +10,8 @@
     <ProjectReference Include="..\TUnit.Aspire.Starter.ServiceDefaults\TUnit.Aspire.Starter.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Testcontainers.PostgreSql" Version="1.0.0" />
+  </ItemGroup>
+
 </Project>

@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
@@ -20,7 +18,7 @@ public class MicrosoftDependencyInjectionDataSourceAttribute : DependencyInjecti
     {
         return scope.ServiceProvider.GetService(type);
     }
-    
+
     private static IServiceProvider CreateServiceProvider()
     {
         return new ServiceCollection()
@@ -44,21 +42,28 @@ public class MEDITest(MEDIClass mediClass)
     [After(TestSession)]
     public static async Task CheckDisposed(TestSessionContext testSessionContext)
     {
-        var mediClass = testSessionContext.TestClasses
-                .FirstOrDefault(x => x.ClassType == typeof(MEDITest))
+        var test = testSessionContext.TestClasses
+            .FirstOrDefault(x => x.ClassType == typeof(MEDITest))
             ?.Tests
-            .FirstOrDefault()
+            .FirstOrDefault();
+
+        if (test?.Result == null)
+        {
+            // If the test did not run, we cannot check if the class was disposed.
+            return;
+        }
+
+        var mediClass = test
             ?.TestDetails
             .TestClassArguments
             .OfType<MEDIClass>()
             .First();
 
-
         if (mediClass == null)
         {
             return;
         }
-        
+
         await Assert.That(mediClass.IsDisposed).IsTrue();
     }
 }
@@ -67,7 +72,7 @@ public class MEDIClass : IAsyncInitializer, IAsyncDisposable
 {
     public bool IsInitialized { get; private set; }
     public bool IsDisposed { get; private set; }
-   
+
     public Task InitializeAsync()
     {
         IsInitialized = true;
@@ -77,6 +82,6 @@ public class MEDIClass : IAsyncInitializer, IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         IsDisposed = true;
-        return default;
+        return default(ValueTask);
     }
 }

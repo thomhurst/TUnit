@@ -89,6 +89,9 @@ Please note that for the coverage and trx report, you need to install [additiona
         Output verbosity when reporting tests.
         Valid values are 'Normal', 'Detailed'. Default is 'Normal'.
 
+    --reflection
+        Enable reflection mode for test discovery and execution (defaults to AOT-optimized mode)
+
     --report-trx
         Enable generating TRX report
 

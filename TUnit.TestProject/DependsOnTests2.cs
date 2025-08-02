@@ -1,7 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.AssertConditions.Throws;
-using TUnit.Assertions.Extensions;
-using TUnit.Core.Extensions;
+﻿using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
@@ -16,14 +13,14 @@ public class DependsOnTests2
     [Arguments("1", 2, true)]
     public async Task Test1(string one, int two, bool three)
     {
-        _test1Start = TestContext.Current!.TestStart!.Value.DateTime;
+        _test1Start = TestContext.Current!.TestStart.DateTime;
         await Task.Delay(TimeSpan.FromSeconds(5));
     }
 
     [Test, DependsOn(nameof(Test1), parameterTypes: [typeof(string), typeof(int), typeof(bool)])]
     public async Task Test2()
     {
-        _test2Start = TestContext.Current!.TestStart!.Value.DateTime;
+        _test2Start = TestContext.Current!.TestStart.DateTime;
         await Task.CompletedTask;
     }
 

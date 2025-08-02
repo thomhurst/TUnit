@@ -14,7 +14,7 @@ public class DataClass : IAsyncInitializer, IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         Disposed = true;
-        return default;
+        return default(ValueTask);
     }
 
     public ValueTask DoSomething()
@@ -23,7 +23,7 @@ public class DataClass : IAsyncInitializer, IAsyncDisposable
         {
             throw new ObjectDisposedException(nameof(DataClass));
         }
-        
-        return default;
+
+        return default(ValueTask);
     }
 }

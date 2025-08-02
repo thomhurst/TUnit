@@ -8,8 +8,8 @@ public class DataDrivenTestArgumentsAnalyzerTests
     public async Task Method_Data_Source_Is_Flagged_When_No_Parameters_Passed()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using TUnit.Core;
 
                 public class MyClass
@@ -23,19 +23,19 @@ public class DataDrivenTestArgumentsAnalyzerTests
 
                 }
                 """,
-                
-                Verifier.Diagnostic(Rules.NoTestDataProvided)
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
-                    .WithArguments("int", "string")
+                    .WithArguments("<null>", "string")
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Flagged_When_Does_Not_Match_Parameter_Type()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using TUnit.Core;
 
                 public class MyClass
@@ -55,13 +55,13 @@ public class DataDrivenTestArgumentsAnalyzerTests
                     .WithArguments("int", "string")
             );
     }
-    
+
     [Test]
     public async Task Method_Data_Source_Is_Not_Flagged_When_Matches_Parameter_Type()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using TUnit.Core;
 
                 public class MyClass
@@ -75,15 +75,15 @@ public class DataDrivenTestArgumentsAnalyzerTests
 
                 }
                 """
-			);
+            );
     }
-    
+
     [Test]
     public async Task Optional_Argument_Is_Not_Flagged()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using TUnit.Core;
 
                 public class MyClass
@@ -97,9 +97,9 @@ public class DataDrivenTestArgumentsAnalyzerTests
 
                 }
                 """
-			);
+            );
     }
-    
+
     [Test]
     public async Task Argument_Not_Flagged_When_Matching_Type()
     {
@@ -121,7 +121,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Argument_Not_Flagged_When_Matching_Type_Enum()
     {
@@ -149,7 +149,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Argument_Not_Flagged_When_Matching_ExternalType_Package_Enum()
     {
@@ -172,7 +172,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Argument_Not_Flagged_When_Matching_ExternalType_Project_Enum()
     {
@@ -194,7 +194,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Convertible_Type_Does_Not_Flag()
     {
@@ -214,7 +214,7 @@ public class DataDrivenTestArgumentsAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Error_When_Too_Many_Arguments()
     {

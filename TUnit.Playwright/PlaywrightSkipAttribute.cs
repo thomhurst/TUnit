@@ -30,7 +30,7 @@ public class PlaywrightSkipAttribute : SkipAttribute
         _combinations = combinations;
     }
 
-    public override Task<bool> ShouldSkip(BeforeTestContext context)
+    public override Task<bool> ShouldSkip(TestRegisteredContext context)
     {
         var browserName = GetBrowserName(context.TestDetails);
 

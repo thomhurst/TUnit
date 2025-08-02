@@ -9,13 +9,12 @@ public class CultureAttribute(CultureInfo cultureInfo) : TUnitAttribute, ITestRe
     public CultureAttribute(string cultureName) : this(CultureInfo.GetCultureInfo(cultureName))
     {
     }
-    
+
     public int Order => 0;
 
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
-        context.DiscoveredTest.TestExecutor = new CultureExecutor(cultureInfo);
-
-        return default;
+        context.SetTestExecutor(new CultureExecutor(cultureInfo));
+        return default(ValueTask);
     }
 }

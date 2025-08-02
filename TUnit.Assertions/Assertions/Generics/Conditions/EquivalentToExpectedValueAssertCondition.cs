@@ -9,20 +9,20 @@ namespace TUnit.Assertions.Assertions.Generics.Conditions;
 
 public class EquivalentToExpectedValueAssertCondition<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
-    TActual,  
+TActual,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
-    TExpected>(TExpected expected, string? expectedExpression) : ExpectedValueAssertCondition<TActual, TExpected>(expected)
+TExpected>(TExpected expected, string? expectedExpression) : ExpectedValueAssertCondition<TActual, TExpected>(expected)
 {
     private readonly List<string> _ignoredMembers = [];
 
     public EquivalencyKind EquivalencyKind { get; set; } = EquivalencyKind.Full;
-    
+
     internal protected override string GetExpectation()
     {
-        var expectedMessage = typeof(TExpected).IsSimpleType() || typeof(IEnumerable).IsAssignableFrom(typeof(TExpected)) 
+        var expectedMessage = typeof(TExpected).IsSimpleType() || typeof(IEnumerable).IsAssignableFrom(typeof(TExpected))
             ? Formatter.Format(ExpectedValue)
             : expectedExpression;
-        
+
         return $"to be equivalent to {expectedMessage ?? "null"}";
     }
 
@@ -43,7 +43,7 @@ public class EquivalentToExpectedValueAssertCondition<
         }
 
         bool? isEqual = null;
-        
+
         if (actualValue is IEqualityComparer basicEqualityComparer)
         {
             isEqual = basicEqualityComparer.Equals(actualValue, ExpectedValue);
@@ -61,7 +61,7 @@ public class EquivalentToExpectedValueAssertCondition<
 
         var failures = Compare.CheckEquivalent(actualValue, ExpectedValue, new CompareOptions
         {
-            MembersToIgnore = [.._ignoredMembers],
+            MembersToIgnore = [.. _ignoredMembers],
             EquivalencyKind = EquivalencyKind
         }, null).ToList();
 
@@ -71,7 +71,7 @@ public class EquivalentToExpectedValueAssertCondition<
             {
                 return FailWithMessage(Formatter.Format(firstFailure.Actual));
             }
-            
+
             if (firstFailure.Type == MemberType.EnumerableItem)
             {
                 return FailWithMessage($"""

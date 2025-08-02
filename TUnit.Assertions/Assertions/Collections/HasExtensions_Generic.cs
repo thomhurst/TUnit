@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.ClassMember;
 using TUnit.Assertions.AssertConditions.Interfaces;
@@ -7,6 +8,8 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class HasExtensions
 {
+    [RequiresUnreferencedCode("Expression compilation requires unreferenced code")]
+    [RequiresDynamicCode("Expression compilation requires dynamic code generation")]
     public static Member<TRootObject, TPropertyType> HasMember<TRootObject, TPropertyType>(this IValueSource<TRootObject> valueSource, Expression<Func<TRootObject, TPropertyType>> selector, [CallerArgumentExpression(nameof(selector))] string expression = "")
     {
         valueSource.AppendExpression($"HasMember({expression})");

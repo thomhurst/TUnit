@@ -31,7 +31,7 @@ public class CreateReleaseModule : Module<Release>
         var versionModule = await GetModule<GenerateVersionModule>();
 
         var version = versionModule.Value!.SemVer;
-        
+
         var repositoryId = long.Parse(context.GitHub().EnvironmentVariables.RepositoryId!);
 
         var lastRelease = await context.GitHub().Client.Repository.Release.GetLatest(repositoryId);

@@ -13,7 +13,7 @@ public class TestDiscoveryContext : Context
         get => Contexts.Value;
         internal set => Contexts.Value = value;
     }
-    
+
     internal TestDiscoveryContext(BeforeTestDiscoveryContext parent) : base(parent)
     {
     }
@@ -22,19 +22,19 @@ public class TestDiscoveryContext : Context
     {
         AllTests = tests as IReadOnlyList<TestContext> ?? tests.ToArray();
     }
-    
+
     public BeforeTestDiscoveryContext BeforeTestDiscoveryContext => (BeforeTestDiscoveryContext) Parent!;
 
     public required string? TestFilter { get; init; }
 
     [field: AllowNull, MaybeNull]
     public IEnumerable<AssemblyHookContext> Assemblies => field ??= TestClasses.Select(x => x.AssemblyContext).Distinct().ToArray();
-    
+
     [field: AllowNull, MaybeNull]
-    public IEnumerable<ClassHookContext> TestClasses => field ??= AllTests.Select(x => x.ClassContext).Distinct().ToArray();
+    public IEnumerable<ClassHookContext> TestClasses => field ??= AllTests.Where(x => x.ClassContext != null).Select(x => x.ClassContext!).Distinct().ToArray();
 
     public IReadOnlyList<TestContext> AllTests { get; private set; } = [];
-    
+
     internal override void RestoreContextAsyncLocal()
     {
         Current = this;
