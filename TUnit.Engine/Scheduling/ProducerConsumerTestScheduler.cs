@@ -142,16 +142,9 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         
         foreach (var state in testsToRoute)
         {
-            // Skip routing tests that are already failed (e.g., circular dependencies)
-            if (state.State != TestState.Failed)
-            {
-                await RouteTestAsync(state, cancellationToken);
-            }
-            else
-            {
-                // Still increment routed count for failed tests
-                Interlocked.Increment(ref _routedTestCount);
-            }
+            // Route all tests, including pre-failed ones (e.g., circular dependencies)
+            // The executor will handle reporting for pre-failed tests
+            await RouteTestAsync(state, cancellationToken);
         }
         
         foreach (var kvp in keyedTestsWithOrder)
@@ -159,27 +152,20 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             var sortedTests = kvp.Value.OrderBy(s => s.Order).ToList();
             foreach (var state in sortedTests)
             {
-                // Skip routing tests that are already failed (e.g., circular dependencies)
-                if (state.State != TestState.Failed)
-                {
-                    await RouteTestAsync(state, cancellationToken);
-                }
-                else
-                {
-                    // Still increment routed count for failed tests
-                    Interlocked.Increment(ref _routedTestCount);
-                }
+                // Route all tests, including pre-failed ones (e.g., circular dependencies)
+                // The executor will handle reporting for pre-failed tests
+                await RouteTestAsync(state, cancellationToken);
             }
         }
         
         var totalTestCount = executionStates.Count;
         
-        // If all tests are already failed (e.g., all have circular dependencies), skip execution
+        // Continue with execution even if all tests are pre-failed
+        // The executor will handle reporting for pre-failed tests
         var nonFailedCount = executionStates.Values.Count(s => s.State != TestState.Failed);
         if (nonFailedCount == 0)
         {
-            await _logger.LogInformationAsync("All tests are already failed. Skipping execution.");
-            return;
+            await _logger.LogInformationAsync("All tests are pre-failed. Will route them for proper reporting.");
         }
         
         var consumerTask = _consumerManager.StartConsumersAsync(
@@ -399,16 +385,9 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         
         foreach (var readyTest in newlyReadyTests)
         {
-            // Skip routing tests that are already failed (e.g., circular dependencies)
-            if (readyTest.State != TestState.Failed)
-            {
-                await RouteTestAsync(readyTest, cancellationToken);
-            }
-            else
-            {
-                // Still increment routed count for failed tests
-                Interlocked.Increment(ref _routedTestCount);
-            }
+            // Route all tests, including pre-failed ones (e.g., circular dependencies)
+            // The executor will handle reporting for pre-failed tests
+            await RouteTestAsync(readyTest, cancellationToken);
         }
         
         foreach (var kvp in keyedTestsWithOrder)
@@ -416,19 +395,13 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             var sortedTests = kvp.Value.OrderBy(s => s.Order).ToList();
             foreach (var readyTest in sortedTests)
             {
-                // Skip routing tests that are already failed (e.g., circular dependencies)
-                if (readyTest.State != TestState.Failed)
-                {
-                    await RouteTestAsync(readyTest, cancellationToken);
-                }
-                else
-                {
-                    // Still increment routed count for failed tests
-                    Interlocked.Increment(ref _routedTestCount);
-                }
+                // Route all tests, including pre-failed ones (e.g., circular dependencies)
+                // The executor will handle reporting for pre-failed tests
+                await RouteTestAsync(readyTest, cancellationToken);
             }
         }
     }
+    
     
 }
 
