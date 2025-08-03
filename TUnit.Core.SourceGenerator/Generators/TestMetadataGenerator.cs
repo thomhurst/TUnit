@@ -857,11 +857,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             GenerateMethodDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
         }
-        else if (attr.IsTypedDataSourceAttribute())
-        {
-            // Generate optimized typed data source with metadata
-            GenerateTypedDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
-        }
         else
         {
             // Use the generic attribute instantiation method for all other attributes
@@ -871,44 +866,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateTypedDataSourceAttribute(CodeWriter writer, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
-    {
-        var dataType = attr.GetTypedDataSourceType();
-        if (dataType == null)
-        {
-            // Fallback to standard generation
-            var generatedCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
-            writer.AppendLine($"{generatedCode},");
-            return;
-        }
-        
-        // Generate the typed data source with type metadata
-        writer.AppendLine($"new global::TUnit.Core.TypedDataSourceWrapper<{dataType.GloballyQualified()}>({CodeGenerationHelpers.GenerateAttributeInstantiation(attr)})");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"DataType = typeof({dataType.GloballyQualified()}),");
-        writer.AppendLine($"IsValueType = {(dataType.IsValueType ? "true" : "false")},");
-        
-        // Check if parameters match to enable direct invocation
-        bool canOptimize = false;
-        if (methodSymbol.Parameters.Length == 1)
-        {
-            canOptimize = SymbolEqualityComparer.Default.Equals(dataType, methodSymbol.Parameters[0].Type);
-        }
-        else if (dataType is INamedTypeSymbol namedType && namedType.IsTupleType)
-        {
-            canOptimize = namedType.TupleElements.Length == methodSymbol.Parameters.Length;
-            for (int i = 0; i < methodSymbol.Parameters.Length && canOptimize; i++)
-            {
-                canOptimize = SymbolEqualityComparer.Default.Equals(namedType.TupleElements[i].Type, methodSymbol.Parameters[i].Type);
-            }
-        }
-        
-        writer.AppendLine($"CanOptimize = {(canOptimize ? "true" : "false")},");
-        writer.Unindent();
-        writer.AppendLine("},");
-    }
-    
     private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         // Extract method name and target type
@@ -1621,44 +1578,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Indent();
         writer.AppendLine($"var typedInstance = ({className})instance;");
         writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
-        
-        // Check for typed arguments to avoid boxing
-        if (parametersFromArgs.Length > 0)
-        {
-            writer.AppendLine("// Check if we have typed arguments to avoid boxing");
-            writer.AppendLine("if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)");
-            writer.AppendLine("{");
-            writer.Indent();
-            
-            if (parametersFromArgs.Length == 1)
-            {
-                var paramType = parametersFromArgs[0].Type.GloballyQualified();
-                writer.AppendLine($"if (typedArgs.TryGetTypedValue<{paramType}>(out var typedValue))");
-                writer.AppendLine("{");
-                writer.Indent();
-                
-                var methodCall = hasCancellationToken
-                    ? $"typedInstance.{methodName}(typedValue, context?.CancellationToken ?? System.Threading.CancellationToken.None)"
-                    : $"typedInstance.{methodName}(typedValue)";
-                    
-                if (isAsync)
-                {
-                    writer.AppendLine($"await {methodCall};");
-                }
-                else
-                {
-                    writer.AppendLine($"{methodCall};");
-                    writer.AppendLine("await global::System.Threading.Tasks.Task.CompletedTask;");
-                }
-                
-                writer.AppendLine("return;");
-                writer.Unindent();
-                writer.AppendLine("}");
-            }
-            
-            writer.Unindent();
-            writer.AppendLine("}");
-        }
 
         if (parametersFromArgs.Length == 0)
         {
