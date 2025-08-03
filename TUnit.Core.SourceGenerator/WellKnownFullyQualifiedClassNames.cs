@@ -37,6 +37,7 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName CancellationToken = "System.Threading.CancellationToken";
 
     public static readonly FullyQualifiedTypeName IDataSourceAttribute = "TUnit.Core.IDataSourceAttribute";
+    public static readonly FullyQualifiedTypeName ITypedDataSourceAttribute = "TUnit.Core.ITypedDataSourceAttribute";
     public static readonly FullyQualifiedTypeName AsyncDataSourceGeneratorAttribute = "TUnit.Core.AsyncDataSourceGeneratorAttribute";
     public static readonly FullyQualifiedTypeName AsyncUntypedDataSourceGeneratorAttribute = "TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute";
 }

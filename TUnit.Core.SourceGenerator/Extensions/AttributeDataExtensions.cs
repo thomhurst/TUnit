@@ -20,6 +20,26 @@ public static class AttributeDataExtensions
                    x.GloballyQualified() == WellKnownFullyQualifiedClassNames.IDataSourceAttribute.WithGlobalPrefix)
                == true;
     }
+    
+    public static bool IsTypedDataSourceAttribute(this AttributeData? attributeData)
+    {
+        return attributeData?.AttributeClass?.AllInterfaces.Any(x =>
+                   x.IsGenericType && 
+                   x.ConstructedFrom.GloballyQualified() == WellKnownFullyQualifiedClassNames.ITypedDataSourceAttribute.WithGlobalPrefix + "`1")
+               == true;
+    }
+    
+    public static ITypeSymbol? GetTypedDataSourceType(this AttributeData? attributeData)
+    {
+        if (attributeData?.AttributeClass == null)
+            return null;
+            
+        var typedInterface = attributeData.AttributeClass.AllInterfaces
+            .FirstOrDefault(x => x.IsGenericType && 
+                x.ConstructedFrom.GloballyQualified() == WellKnownFullyQualifiedClassNames.ITypedDataSourceAttribute.WithGlobalPrefix + "`1");
+                
+        return typedInterface?.TypeArguments.FirstOrDefault();
+    }
 
     public static bool IsNonGlobalHook(this AttributeData attributeData, Compilation compilation)
     {
