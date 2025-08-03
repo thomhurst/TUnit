@@ -409,8 +409,6 @@ namespace
         public required .MemberMetadata[] MembersToGenerate { get; init; }
         public required .TestBuilderContextAccessor? TestBuilderContext { get; init; }
         public required object? TestClassInstance { get; init; }
-        [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]
-        public ? TestClassType { get; }
         public required .MethodMetadata? TestInformation { get; init; }
         public required string TestSessionId { get; init; }
         public required . Type { get; init; }
@@ -1999,6 +1997,10 @@ namespace .Helpers
         public ReferenceEqualityComparer() { }
         public bool Equals(object? x, object? y) { }
         public int GetHashCode(object obj) { }
+    }
+    public static class TestClassTypeHelper
+    {
+        public static ? GetTestClassType(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     public static class TestNameGenerator
     {
