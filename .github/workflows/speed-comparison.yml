@@ -11,7 +11,7 @@ jobs:
     strategy: 
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        class: [RepeatTests, BasicTest]
+        class: [BasicTests, DataDrivenTests, SetupTeardownTests, AsyncTests, FixtureTests, ParallelTests, AssertionTests, RepeatTests]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     concurrency: 
