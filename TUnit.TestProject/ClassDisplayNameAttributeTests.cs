@@ -14,3 +14,18 @@ public class ClassDisplayNameAttributeTests
             .DoesNotContain("ClassDisplayNameAttributeTests");
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments("TestValue")]
+[DisplayName("Class with parameter: $value")]
+public class ClassDisplayNameWithParametersTests(string value)
+{
+    [Test]
+    public async Task Test()
+    {
+        // This test should show the class display name with parameter substitution
+        var displayName = TestContext.Current!.GetDisplayName();
+        await Assert.That(displayName)
+            .Contains("TestValue");
+    }
+}
