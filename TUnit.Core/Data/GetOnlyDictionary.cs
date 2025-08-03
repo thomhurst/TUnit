@@ -10,14 +10,34 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
 {
     private ConcurrentDictionary<TKey, TValue> InnerDictionary { get; } = new();
 
-    private static readonly Lock Lock = new();
+    // ReSharper disable once StaticMemberInGenericType
+    private static readonly Lock _lock = new();
 
-    public ICollection<TKey> Keys => InnerDictionary.Keys;
-    public ICollection<TValue> Values => InnerDictionary.Values;
+    public ICollection<TKey> Keys
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return InnerDictionary.Keys;
+            }
+        }
+    }
+
+    public ICollection<TValue> Values
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return InnerDictionary.Values;
+            }
+        }
+    }
 
     public TValue GetOrAdd(TKey key, Func<TKey, TValue> func)
     {
-        lock (Lock)
+        lock (_lock)
         {
             return InnerDictionary.GetOrAdd(key, func);
         }
@@ -25,30 +45,15 @@ public class GetOnlyDictionary<TKey, TValue> where TKey : notnull
 
     public bool TryGetValue(TKey key, [NotNullWhen(true)] out TValue? value)
     {
-        lock (Lock)
+        lock (_lock)
         {
             return InnerDictionary.TryGetValue(key, out value!);
         }
     }
 
-    public TValue GetOrAdd(TKey key, Func<TKey, TValue> func, out bool previouslyExisted)
-    {
-        lock (Lock)
-        {
-            if (InnerDictionary.TryGetValue(key, out var foundValue))
-            {
-                previouslyExisted = true;
-                return foundValue;
-            }
-
-            previouslyExisted = false;
-            return InnerDictionary.GetOrAdd(key, func);
-        }
-    }
-
     public TValue? Remove(TKey key)
     {
-        lock (Lock)
+        lock (_lock)
         {
             if (InnerDictionary.TryRemove(key, out var value))
             {
