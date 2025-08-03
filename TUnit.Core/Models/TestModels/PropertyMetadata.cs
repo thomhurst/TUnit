@@ -17,6 +17,7 @@ public record PropertyMetadata : MemberMetadata
     public required PropertyInfo ReflectionInfo { get; init; }
 
     public required bool IsStatic { get; init; }
+    public bool IsNullable { get; init; }
     public required Func<object?, object?> Getter { get; init; }
     public ClassMetadata? ClassMetadata { get; set; }
 }

@@ -188,6 +188,7 @@ internal static class MetadataGenerationHelper
 {{
     Name = ""{parameter.Name}"",
     TypeReference = {CodeGenerationHelpers.GenerateTypeReference(parameter.Type)},
+    IsNullable = {parameter.Type.IsNullable().ToString().ToLowerInvariant()},
     ReflectionInfo = {reflectionInfo}
 }}";
     }
@@ -281,6 +282,7 @@ internal static class MetadataGenerationHelper
     Type = typeof({safePropertyTypeName}),
     Name = ""{property.Name}"",
     IsStatic = {property.IsStatic.ToString().ToLower()},
+    IsNullable = {property.Type.IsNullable().ToString().ToLowerInvariant()},
     Getter = {GetPropertyAccessor(containingType, property)},
     ClassMetadata = null
 }}";

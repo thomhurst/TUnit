@@ -34,6 +34,7 @@ internal static class CodeGenerationHelpers
                 {
                     writer.AppendLine($"Name = \"{param.Name}\",");
                     writer.AppendLine($"TypeReference = {GenerateTypeReference(param.Type)},");
+                    writer.AppendLine($"IsNullable = {param.Type.IsNullable().ToString().ToLowerInvariant()},");
                     var paramTypesArray = GenerateParameterTypesArray(method);
                     if (paramTypesArray == "null")
                     {
@@ -185,6 +186,7 @@ internal static class CodeGenerationHelpers
                     writer.AppendLine($"Type = typeof({prop.Type.GloballyQualified()}),");
                     writer.AppendLine($"ReflectionInfo = typeof({typeSymbol.GloballyQualified()}).GetProperty(\"{prop.Name}\"),");
                     writer.AppendLine("IsStatic = false,");
+                    writer.AppendLine($"IsNullable = {prop.Type.IsNullable().ToString().ToLowerInvariant()},");
                     writer.AppendLine($"Getter = obj => ((({typeSymbol.GloballyQualified()})obj).{prop.Name}),");
                     writer.AppendLine("ClassMetadata = null");
                 }

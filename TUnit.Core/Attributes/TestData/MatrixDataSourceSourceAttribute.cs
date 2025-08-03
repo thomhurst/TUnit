@@ -93,10 +93,24 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         }
 
         var type = sourceGeneratedParameterInformation.Type;
-        var parameterType = sourceGeneratedParameterInformation.ReflectionInfo.ParameterType;
         
-        // Use reflection info for more reliable nullable detection in AOT scenarios
-        var underlyingType = Nullable.GetUnderlyingType(parameterType) ?? Nullable.GetUnderlyingType(type);
+        // Use the IsNullable property for AOT-safe nullable detection
+        Type? underlyingType = null;
+        var isNullable = sourceGeneratedParameterInformation.IsNullable;
+        
+        if (isNullable)
+        {
+            // Try to get underlying type, but if it fails in AOT, we'll handle it
+            underlyingType = Nullable.GetUnderlyingType(type);
+            
+            // If Nullable.GetUnderlyingType failed but we know it's nullable from metadata,
+            // check if it's a generic type with one type argument
+            if (underlyingType == null && type.IsGenericType && type.GetGenericArguments().Length == 1)
+            {
+                underlyingType = type.GetGenericArguments()[0];
+            }
+        }
+        
         var resolvedType = underlyingType ?? type;
         if (resolvedType != typeof(bool) && !resolvedType.IsEnum)
         {
@@ -110,7 +124,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
                 throw new InvalidOperationException("Do not exclude values from a boolean.");
             }
 
-            return underlyingType is null ? [true, false] : [true, false, null];
+            return isNullable ? [true, false, null] : [true, false];
         }
 
 #if NET
@@ -120,7 +134,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         var enumValues = Enum.GetValues(resolvedType)
                              .Cast<object?>();
 #endif
-        if (underlyingType is not null)
+        if (isNullable)
         {
             enumValues = enumValues.Append(null);
             if (matrixAttribute?.Excluding?.Any(x => x is null) ?? false)

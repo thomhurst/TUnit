@@ -19,6 +19,7 @@ public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedM
     public required ParameterInfo ReflectionInfo { get; set; }
     public bool IsParams => ReflectionInfo.IsDefined(typeof(ParamArrayAttribute), false);
     public bool IsOptional => ReflectionInfo.IsOptional;
+    public bool IsNullable { get; init; }
 
     public object? DefaultValue => ReflectionInfo.DefaultValue;
 }
