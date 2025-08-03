@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -19,12 +20,13 @@ public sealed class ClassDataSourceAttribute<
     {
         yield return () =>
         {
+            var testClassType = TestClassTypeHelper.GetTestClassType(dataGeneratorMetadata);
             var item1 = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                .GetItemForIndexAsync<T1>(0, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata);
+                .GetItemForIndexAsync<T1>(0, testClassType, Shared, Keys, dataGeneratorMetadata);
             var item2 = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                .GetItemForIndexAsync<T2>(1, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata);
+                .GetItemForIndexAsync<T2>(1, testClassType, Shared, Keys, dataGeneratorMetadata);
             var item3 = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                .GetItemForIndexAsync<T3>(2, dataGeneratorMetadata.TestClassType, Shared, Keys, dataGeneratorMetadata);
+                .GetItemForIndexAsync<T3>(2, testClassType, Shared, Keys, dataGeneratorMetadata);
 
             return (item1.Item1, item2.Item1, item3.Item1);
         };

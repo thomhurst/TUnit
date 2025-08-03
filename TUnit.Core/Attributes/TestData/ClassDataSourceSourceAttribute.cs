@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -12,9 +13,11 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 
     protected override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        var testClassType = TestClassTypeHelper.GetTestClassType(dataGeneratorMetadata);
         yield return () => ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-            .Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key, dataGeneratorMetadata);
+            .Get<T>(Shared, testClassType, Key, dataGeneratorMetadata);
     }
+
 
     public IEnumerable<SharedType> GetSharedTypes() => [Shared];
 
@@ -107,8 +110,9 @@ public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribu
 
             for (var i = 0; i < _types.Length; i++)
             {
+                var testClassType = TestClassTypeHelper.GetTestClassType(dataGeneratorMetadata);
                 items[i] = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                    .Get(Shared.ElementAtOrDefault(i), _types[i], dataGeneratorMetadata.TestClassType, Keys.ElementAtOrDefault(i), dataGeneratorMetadata);
+                    .Get(Shared.ElementAtOrDefault(i), _types[i], testClassType, Keys.ElementAtOrDefault(i), dataGeneratorMetadata);
             }
 
             return items;
@@ -118,4 +122,5 @@ public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribu
     public IEnumerable<SharedType> GetSharedTypes() => Shared;
 
     public IEnumerable<string> GetKeys() => Keys;
+
 }

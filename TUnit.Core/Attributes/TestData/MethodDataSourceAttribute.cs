@@ -75,7 +75,7 @@ public class MethodDataSourceAttribute : TestDataAttribute
 
         var targetType = ClassProvidingDataSource
             ?? (item1 as PropertyMetadata)?.ClassMetadata.Type
-            ?? dataGeneratorMetadata.TestClassType;
+            ?? TestClassTypeHelper.GetTestClassType(dataGeneratorMetadata);
 
         // If we have a test class instance and no explicit class was provided,
         // use the instance's actual type (which will be the constructed generic type)
