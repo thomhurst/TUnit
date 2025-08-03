@@ -425,10 +425,16 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
+            // Skip instance hooks if ClassInstance is null (e.g., for pre-skipped tests)
+            if (context.TestDetails.ClassInstance == null)
+            {
+                return;
+            }
+
             if (hook.Body != null)
             {
                 await hook.Body(
-                    context.TestDetails.ClassInstance ?? throw new InvalidOperationException("ClassInstance is null"),
+                    context.TestDetails.ClassInstance,
                     context,
                     cancellationToken);
             }

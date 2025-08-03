@@ -9,7 +9,7 @@ public class TestDetails
     public required string TestName { get; init; }
     public required Type ClassType { get; init; }
     public required string MethodName { get; init; }
-    public required object ClassInstance { get; set; }
+    public required object? ClassInstance { get; set; }
     public required object?[] TestMethodArguments { get; set; }
     public required object?[] TestClassArguments { get; set; }
     public TimeSpan? Timeout { get; set; }
