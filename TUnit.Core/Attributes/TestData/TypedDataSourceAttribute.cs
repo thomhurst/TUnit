@@ -8,10 +8,9 @@ public abstract class TypedDataSourceAttribute<T> : Attribute, ITypedDataSourceA
     
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        // Note: This method boxes value types when converting to object?[]
-        // Future optimization: The source generator could detect when a data source
-        // implements ITypedDataSourceAttribute<T> and generate specialized code
-        // that calls GetTypedDataRowsAsync directly, avoiding boxing for value types
+        // This method provides compatibility with the IDataSourceAttribute interface.
+        // The source generator detects typed data sources and generates optimized code
+        // that avoids boxing when possible by using TypedTestArguments.
         await foreach (var row in GetTypedDataRowsAsync(dataGeneratorMetadata))
         {
             var result = await row();
