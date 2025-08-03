@@ -28,6 +28,169 @@ if (TestContext.Current?.Result?.State == TestState.Failed)
 }
 ```
 
+## Service Provider Integration
+
+`TestContext` provides access to dependency injection services through the `GetService<T>()` and `GetRequiredService<T>()` methods. This allows you to access registered services within your tests, hooks, and custom extensions.
+
+### Accessing Services
+
+```csharp
+[Test]
+public async Task DatabaseTest()
+{
+    // Get an optional service (returns null if not registered)
+    var logger = TestContext.Current?.GetService<ILogger<DatabaseTest>>();
+    logger?.LogInformation("Starting database test");
+    
+    // Get a required service (throws if not registered)
+    var dbContext = TestContext.Current!.GetRequiredService<ApplicationDbContext>();
+    
+    // Use the service
+    var users = await dbContext.Users.ToListAsync();
+    await Assert.That(users).IsNotEmpty();
+}
+```
+
+### Common Use Cases
+
+#### 1. Accessing Loggers
+
+```csharp
+[Before(HookType.Test)]
+public void LogTestStart()
+{
+    var logger = TestContext.Current?.GetService<ILogger>();
+    logger?.LogInformation("Test {TestName} starting", 
+        TestContext.Current?.TestDetails.TestName);
+}
+```
+
+#### 2. Working with Scoped Services
+
+```csharp
+[Test]
+public async Task ScopedServiceTest()
+{
+    // Each test gets its own scope, so scoped services are isolated
+    var service1 = TestContext.Current!.GetRequiredService<IScopedService>();
+    var service2 = TestContext.Current!.GetRequiredService<IScopedService>();
+    
+    // These will be the same instance within the test
+    await Assert.That(ReferenceEquals(service1, service2)).IsTrue();
+}
+```
+
+#### 3. Configuration Access
+
+```csharp
+[Test]
+public async Task ConfigurationTest()
+{
+    var configuration = TestContext.Current?.GetService<IConfiguration>();
+    var apiKey = configuration?["ApiSettings:Key"];
+    
+    await Assert.That(apiKey).IsNotNull();
+}
+```
+
+### Service Provider in Custom Extensions
+
+When implementing custom test executors or hook executors, you can use the service provider:
+
+```csharp
+public class DatabaseTransactionExecutor : ITestExecutor
+{
+    public async Task ExecuteAsync(TestContext context, Func<Task> testBody)
+    {
+        // Get database context from DI
+        var dbContext = context.GetRequiredService<ApplicationDbContext>();
+        
+        using var transaction = await dbContext.Database.BeginTransactionAsync();
+        
+        try
+        {
+            await testBody();
+            await transaction.RollbackAsync(); // Keep tests isolated
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+}
+```
+
+### Integration with Test Lifecycle
+
+The service provider is available throughout the test lifecycle:
+
+```csharp
+public class ServiceIntegrationTests
+{
+    [Before(HookType.Class)]
+    public static async Task ClassSetup()
+    {
+        // Services available in class-level hooks via the hook context
+        var context = ClassHookContext.Current;
+        var cache = context?.GetService<IMemoryCache>();
+        cache?.Set("test-data", await LoadTestData());
+    }
+    
+    [Before(HookType.Test)]
+    public async Task TestSetup()
+    {
+        // Services available in test-level hooks
+        var cache = TestContext.Current?.GetService<IMemoryCache>();
+        var testData = cache?.Get<TestData>("test-data");
+    }
+    
+    [Test]
+    public async Task ActualTest()
+    {
+        // Services available in test methods
+        var service = TestContext.Current!.GetRequiredService<IBusinessService>();
+        var result = await service.PerformOperation();
+        await Assert.That(result).IsNotNull();
+    }
+}
+```
+
+### Best Practices
+
+1. **Use GetRequiredService for Essential Services**
+   ```csharp
+   // Good - Fails fast if service is missing
+   var critical = TestContext.Current!.GetRequiredService<ICriticalService>();
+   
+   // Less ideal - Might hide configuration issues
+   var critical = TestContext.Current?.GetService<ICriticalService>() 
+       ?? throw new InvalidOperationException("Service not found");
+   ```
+
+2. **Null Check When Using GetService**
+   ```csharp
+   var optional = TestContext.Current?.GetService<IOptionalService>();
+   if (optional != null)
+   {
+       await optional.DoSomething();
+   }
+   ```
+
+3. **Consider Service Lifetime**
+   ```csharp
+   // Singleton services persist across tests
+   var singleton = TestContext.Current?.GetService<ISingletonService>();
+   
+   // Scoped services are unique per test
+   var scoped = TestContext.Current?.GetService<IScopedService>();
+   
+   // Transient services are created each time
+   var transient1 = TestContext.Current?.GetService<ITransientService>();
+   var transient2 = TestContext.Current?.GetService<ITransientService>();
+   // transient1 and transient2 are different instances
+   ```
+
 ## TestBuilderContext
 
 In addition to `TestContext`, TUnit also provides `TestBuilderContext` which is available during the test discovery and building phase. This is particularly useful when you need context information in data generators or other scenarios that run before test execution.
