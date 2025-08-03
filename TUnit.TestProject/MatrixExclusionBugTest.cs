@@ -27,6 +27,11 @@ public class MatrixExclusionBugTest
     public async Task Should_Filter_By_Status(Status status)
     {
         // Should generate 4 tests (all statuses except Draft)
+        // If this test runs with Status.Draft, the bug is NOT fixed
+        if (status == Status.Draft)
+        {
+            throw new InvalidOperationException("Draft status should have been excluded but was not!");
+        }
         await Task.CompletedTask;
     }
     
@@ -35,7 +40,12 @@ public class MatrixExclusionBugTest
     [MatrixExclusion(Status.Draft)]  // This should work with the base attribute
     public async Task Should_Filter_By_Status_Base(Status status)
     {
-        // Should generate 4 tests (all statuses except Draft)  
+        // Should generate 4 tests (all statuses except Draft)
+        // If this test runs with Status.Draft, the bug is NOT fixed  
+        if (status == Status.Draft)
+        {
+            throw new InvalidOperationException("Draft status should have been excluded but was not!");
+        }
         await Task.CompletedTask;
     }
 }
