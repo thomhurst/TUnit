@@ -367,10 +367,10 @@ namespace
         public DataGeneratorMetadata() { }
         public required object?[]? ClassInstanceArguments { get; init; }
         public required .MemberMetadata[] MembersToGenerate { get; init; }
-        public required .TestBuilderContextAccessor TestBuilderContext { get; init; }
+        public required .TestBuilderContextAccessor? TestBuilderContext { get; init; }
         public required object? TestClassInstance { get; init; }
-        public  TestClassType { get; }
-        public required .MethodMetadata TestInformation { get; init; }
+        public ? TestClassType { get; }
+        public required .MethodMetadata? TestInformation { get; init; }
         public required string TestSessionId { get; init; }
         public required . Type { get; init; }
     }
@@ -968,7 +968,8 @@ namespace
     public class PropertyMetadata : .MemberMetadata, <.PropertyMetadata>
     {
         public PropertyMetadata() { }
-        public .ClassMetadata? ClassMetadata { get; set; }
+        public required .ClassMetadata ClassMetadata { get; set; }
+        public required .ClassMetadata ContainingTypeMetadata { get; set; }
         public required <object?, object?> Getter { get; init; }
         public bool IsNullable { get; init; }
         public required bool IsStatic { get; init; }

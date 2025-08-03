@@ -242,7 +242,8 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property1,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 new global::TUnit.Core.PropertyMetadata
 {
@@ -252,7 +253,8 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property2,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 new global::TUnit.Core.PropertyMetadata
 {
@@ -262,7 +264,8 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property3,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 new global::TUnit.Core.PropertyMetadata
 {
@@ -272,7 +275,8 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property4,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 new global::TUnit.Core.PropertyMetadata
 {
@@ -282,7 +286,8 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property5,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 new global::TUnit.Core.PropertyMetadata
 {
@@ -292,7 +297,8 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property6,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 new global::TUnit.Core.PropertyMetadata
 {
@@ -302,7 +308,8 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.PropertySetterTests)o).Property7,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 new global::TUnit.Core.PropertyMetadata
 {
@@ -312,15 +319,17 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = true,
     IsNullable = false,
     Getter = _ => global::TUnit.TestProject.PropertySetterTests.StaticProperty,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 },
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })

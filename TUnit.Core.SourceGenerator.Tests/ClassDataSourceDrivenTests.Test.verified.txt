@@ -78,10 +78,11 @@ Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -213,10 +214,11 @@ Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -348,10 +350,11 @@ Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -490,10 +493,11 @@ Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -641,10 +645,11 @@ Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -801,10 +806,11 @@ Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -970,10 +976,11 @@ Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })

@@ -118,15 +118,17 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.Bugs._1924.None.BaseClass)o).Data,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 },
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -293,10 +295,11 @@ Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -463,10 +466,11 @@ Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -633,10 +637,11 @@ Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })

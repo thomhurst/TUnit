@@ -73,15 +73,17 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 },
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -190,15 +192,17 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 },
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -340,15 +344,17 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 },
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -497,15 +503,17 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 },
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -642,15 +650,17 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 },
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -775,15 +785,17 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 },
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -892,15 +904,17 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 },
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
@@ -1009,15 +1023,17 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 },
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })

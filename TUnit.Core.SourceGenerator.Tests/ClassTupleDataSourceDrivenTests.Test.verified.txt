@@ -326,7 +326,8 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property1,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 new global::TUnit.Core.PropertyMetadata
 {
@@ -336,7 +337,8 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property2,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 new global::TUnit.Core.PropertyMetadata
 {
@@ -346,7 +348,8 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property3,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 new global::TUnit.Core.PropertyMetadata
 {
@@ -356,15 +359,17 @@ new global::TUnit.Core.PropertyMetadata
     IsStatic = false,
     IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property4,
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 },
 },
 Parent = null
 };
-// Set ClassMetadata reference on properties to avoid circular dependency
+// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
 foreach (var prop in classMetadata.Properties)
 {
 prop.ClassMetadata = classMetadata;
+prop.ContainingTypeMetadata = classMetadata;
 }
 return classMetadata;
 })
