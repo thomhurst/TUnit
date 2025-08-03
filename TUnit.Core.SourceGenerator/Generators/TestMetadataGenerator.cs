@@ -230,8 +230,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 (testMethod.IsGenericType && testMethod.TypeSymbol.GetAttributes()
                 .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true));
 
-            // Check if generic class has class-level Arguments attributes
-            var hasClassArgumentsForGenericType = testMethod.IsGenericType && testMethod.TypeSymbol.GetAttributes()
+            // Check if class has class-level Arguments attributes (for both generic and non-generic classes)
+            var hasClassArguments = testMethod.TypeSymbol.GetAttributes()
                 .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") is true);
 
             // Check if generic class has method-level typed data source attributes that can provide type information
@@ -249,10 +249,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 .Any(a => a.AttributeClass?.Name == "MethodDataSourceAttribute" &&
                           InferClassTypesFromMethodDataSource(compilation, testMethod, a) != null);
 
-            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArgumentsForGenericType || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType || hasMethodDataSourceForGenericType)
+            if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArguments || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType || hasMethodDataSourceForGenericType)
             {
                 // Use concrete types approach for AOT compatibility
-                // For generic methods, we always use this approach to support Arguments attributes
+                // For generic methods and classes with Arguments attributes, we always use this approach 
                 GenerateGenericTestWithConcreteTypes(writer, compilation, testMethod, className, combinationGuid);
             }
             else
@@ -2731,6 +2731,54 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
+        // Process class-level Arguments attributes for non-generic classes with parameterized constructors
+        if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
+        {
+            var nonGenericClassArguments = testMethod.TypeSymbol.GetAttributes()
+                .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
+                .ToList();
+
+            var nonGenericMethodArguments = testMethod.MethodAttributes
+                .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
+                .ToList();
+
+            if (nonGenericClassArguments.Any() && nonGenericMethodArguments.Any())
+            {
+                // Generate all combinations of class and method arguments
+                foreach (var classArgAttr in nonGenericClassArguments)
+                {
+                    foreach (var methodArgAttr in nonGenericMethodArguments)
+                    {
+                        // Generate a concrete test metadata for this combination
+                        writer.AppendLine($"// Class arguments: {string.Join(", ", classArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
+                        writer.AppendLine($"// Method arguments: {string.Join(", ", methodArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
+                        GenerateConcreteTestMetadataForNonGeneric(writer, compilation, testMethod, className, classArgAttr, methodArgAttr);
+                        writer.AppendLine();
+                    }
+                }
+            }
+            else if (nonGenericClassArguments.Any())
+            {
+                // Only class arguments, no method arguments
+                foreach (var classArgAttr in nonGenericClassArguments)
+                {
+                    writer.AppendLine($"// Class arguments: {string.Join(", ", classArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
+                    GenerateConcreteTestMetadataForNonGeneric(writer, compilation, testMethod, className, classArgAttr, null);
+                    writer.AppendLine();
+                }
+            }
+            else if (nonGenericMethodArguments.Any())
+            {
+                // Only method arguments, no class arguments
+                foreach (var methodArgAttr in nonGenericMethodArguments)
+                {
+                    writer.AppendLine($"// Method arguments: {string.Join(", ", methodArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
+                    GenerateConcreteTestMetadataForNonGeneric(writer, compilation, testMethod, className, null, methodArgAttr);
+                    writer.AppendLine();
+                }
+            }
+        }
+
         // Process GenerateGenericTest attributes from both methods and classes
         var generateGenericTestAttributes = testMethod.MethodAttributes
             .Where(a => a.AttributeClass?.Name == "GenerateGenericTestAttribute")
@@ -4085,6 +4133,201 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             current = current.BaseType;
         }
         return null;
+    }
+
+    private static void GenerateConcreteTestMetadataForNonGeneric(
+        CodeWriter writer,
+        Compilation compilation,
+        TestMethodMetadata testMethod,
+        string className,
+        AttributeData? classArgumentsAttribute,
+        AttributeData? methodArgumentsAttribute)
+    {
+        var methodName = testMethod.MethodSymbol.Name;
+
+        writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{className}>");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        writer.AppendLine($"TestName = \"{methodName}\",");
+        writer.AppendLine($"TestClassType = typeof({className}),");
+        writer.AppendLine($"TestMethodName = \"{methodName}\",");
+
+        // Generate metadata with filtered data sources for this specific combination
+        var filteredClassAttributes = new List<AttributeData>();
+        var filteredMethodAttributes = new List<AttributeData>();
+
+        // Add the specific Arguments attributes we're generating for
+        if (classArgumentsAttribute != null)
+        {
+            filteredClassAttributes.Add(classArgumentsAttribute);
+        }
+        if (methodArgumentsAttribute != null)
+        {
+            filteredMethodAttributes.Add(methodArgumentsAttribute);
+        }
+
+        // Add other non-Arguments attributes from class and method
+        filteredClassAttributes.AddRange(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes()
+            .Where(a => a.AttributeClass?.Name != "ArgumentsAttribute"));
+        filteredMethodAttributes.AddRange(testMethod.MethodSymbol.GetAttributes()
+            .Where(a => a.AttributeClass?.Name != "ArgumentsAttribute"));
+
+        // Generate metadata
+        writer.AppendLine("TimeoutMs = null,");
+        writer.AppendLine("RetryCount = 0,");
+        writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(testMethod.MethodSymbol, testMethod.TypeSymbol)},");
+        writer.AppendLine("CanRunInParallel = true,");
+
+        // Generate dependencies
+        GenerateDependencies(writer, compilation, testMethod.MethodSymbol);
+
+        // Generate attribute factory
+        writer.AppendLine("AttributeFactory = () =>");
+        writer.AppendLine("[");
+        writer.Indent();
+
+        var attributes = filteredMethodAttributes
+            .Concat(filteredClassAttributes)
+            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
+            .ToImmutableArray();
+
+        AttributeWriter.WriteAttributes(writer, compilation, attributes);
+
+        writer.Unindent();
+        writer.AppendLine("],");
+
+        // Generate data sources
+        writer.AppendLine("DataSources = new global::TUnit.Core.IDataSourceAttribute[]");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        // Add method data source if present
+        if (methodArgumentsAttribute != null)
+        {
+            GenerateDataSourceAttribute(writer, methodArgumentsAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
+        }
+
+        writer.Unindent();
+        writer.AppendLine("},");
+
+        // Generate class data sources
+        writer.AppendLine("ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        // Add class data source if present
+        if (classArgumentsAttribute != null)
+        {
+            GenerateDataSourceAttribute(writer, classArgumentsAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
+        }
+
+        writer.Unindent();
+        writer.AppendLine("},");
+
+        // Generate property data sources and injections
+        GeneratePropertyDataSources(writer, compilation, testMethod);
+        GeneratePropertyInjections(writer, testMethod.TypeSymbol, className);
+
+        // Parameter types
+        writer.AppendLine("ParameterTypes = new global::System.Type[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        foreach (var param in testMethod.MethodSymbol.Parameters)
+        {
+            writer.AppendLine($"typeof({param.Type.GloballyQualified()}),");
+        }
+        writer.Unindent();
+        writer.AppendLine("},");
+
+        // String parameter types
+        writer.AppendLine("TestMethodParameterTypes = new string[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        foreach (var param in testMethod.MethodSymbol.Parameters)
+        {
+            var paramType = param.Type.GloballyQualified();
+            writer.AppendLine($"\"{paramType}\",");
+        }
+        writer.Unindent();
+        writer.AppendLine("},");
+
+        // Method metadata
+        writer.Append("MethodMetadata = ");
+        SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
+
+        // Generate instance factory
+        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        // Check if the class has a constructor that requires arguments
+        var hasParameterizedConstructor = false;
+        var constructorParamCount = 0;
+
+        // Find the primary constructor or first public constructor
+        var constructor = testMethod.TypeSymbol.Constructors
+            .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
+            .OrderByDescending(c => c.Parameters.Length)
+            .FirstOrDefault();
+
+        if (constructor is { Parameters.Length: > 0 })
+        {
+            hasParameterizedConstructor = true;
+            constructorParamCount = constructor.Parameters.Length;
+        }
+
+        if (hasParameterizedConstructor)
+        {
+            // For classes with constructor parameters, use the specific constructor arguments from the Arguments attribute
+            if (classArgumentsAttribute != null && classArgumentsAttribute.ConstructorArguments.Length > 0 &&
+                classArgumentsAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
+            {
+                var argumentValues = classArgumentsAttribute.ConstructorArguments[0].Values;
+                var constructorArgs = string.Join(", ", argumentValues.Select(arg =>
+                {
+                    if (arg.Value is string str)
+                        return $"\"{str}\"";
+                    else if (arg.Value is char chr)
+                        return $"'{chr}'";
+                    else if (arg.Value is bool b)
+                        return b.ToString().ToLower();
+                    else if (arg.Value == null)
+                        return "null";
+                    else
+                        return arg.Value.ToString();
+                }));
+
+                writer.AppendLine($"return new {className}({constructorArgs});");
+            }
+            else
+            {
+                // Use the args parameter if no specific arguments are provided
+                writer.AppendLine($"if (args.Length >= {constructorParamCount})");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"return new {className}({string.Join(", ", Enumerable.Range(0, constructorParamCount).Select(i => $"args[{i}]"))});");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine($"throw new global::System.InvalidOperationException(\"Not enough arguments provided for class constructor\");");
+            }
+        }
+        else
+        {
+            // No constructor parameters needed
+            writer.AppendLine($"return new {className}();");
+        }
+
+        writer.Unindent();
+        writer.AppendLine("},");
+
+        // Generate typed invoker
+        GenerateTypedInvokers(writer, testMethod, className);
+
+        writer.Unindent();
+        writer.AppendLine("};");
+
+        writer.AppendLine("tests.Add(metadata);");
     }
 }
 
