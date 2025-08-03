@@ -44,7 +44,7 @@ public class ThrowsException<TActual, TException> where TException : Exception
 
     public ThrowsException<TActual, TException> WithMessageContaining(string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null, [CallerArgumentExpression(nameof(stringComparison))] string? doNotPopulateThisValue2 = null)
     {
-        _source.RegisterAssertion(new ThrowsWithMessageContainingAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, _selector)
+        _source.RegisterAssertion(new ThrowsWithMessageContainingAssertCondition<TActual, TException>(expected, stringComparison, _selector)
             , [doNotPopulateThisValue, doNotPopulateThisValue2]);
         return this;
     }
