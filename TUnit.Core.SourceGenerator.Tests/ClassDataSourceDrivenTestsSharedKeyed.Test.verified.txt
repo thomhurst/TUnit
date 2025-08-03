@@ -62,6 +62,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(SomeAsyncDisposableClass))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("SomeAsyncDisposableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
 },
 },
@@ -197,6 +198,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(SomeAsyncDisposableClass))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("SomeAsyncDisposableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class_Generic", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
 },
 },

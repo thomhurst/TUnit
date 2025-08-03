@@ -67,6 +67,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.DummyR
 {
     Name = "dummyReferenceTypeClass",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DummyReferenceTypeClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassConstructorTest).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.DummyReferenceTypeClass) })!.GetParameters()[0]
 },
 },
@@ -78,6 +79,7 @@ new global::TUnit.Core.PropertyMetadata
     Type = typeof(global::TUnit.TestProject.DummyReferenceTypeClass),
     Name = "DummyReferenceTypeClass",
     IsStatic = false,
+    IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.ClassConstructorTest)o).DummyReferenceTypeClass,
     ClassMetadata = null
 },

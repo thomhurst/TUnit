@@ -61,6 +61,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(short))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("short, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1603.Tests).GetMethod("Casted_Integer_To_Short_Converts", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(short) }, null)!.GetParameters()[0]
 },
 },
@@ -193,6 +194,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(short))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("short, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1603.Tests).GetMethod("Integer_To_Short_Converts", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(short) }, null)!.GetParameters()[0]
 },
 },

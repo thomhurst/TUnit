@@ -61,6 +61,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "i",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Int", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },
@@ -195,6 +196,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(double))
 {
     Name = "d",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("double, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Double", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
 },
 },
@@ -329,6 +331,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(float))
 {
     Name = "f",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("float, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Float", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
 },
 },
@@ -463,6 +466,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(long))
 {
     Name = "l",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("long, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Long", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0]
 },
 },
@@ -597,6 +601,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(ulong))
 {
     Name = "l",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("ulong, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("ULong", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(ulong) }, null)!.GetParameters()[0]
 },
 },
@@ -731,6 +736,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(uint))
 {
     Name = "i",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("uint, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("UInt", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(uint) }, null)!.GetParameters()[0]
 },
 },

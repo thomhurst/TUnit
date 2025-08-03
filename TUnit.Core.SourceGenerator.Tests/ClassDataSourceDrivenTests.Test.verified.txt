@@ -61,6 +61,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Librar
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Library.Models.SomeAsyncDisposableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
 },
 },
@@ -195,6 +196,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Librar
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Library.Models.SomeAsyncDisposableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class_Generic", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
 },
 },
@@ -329,6 +331,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class1",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_1_ClassDataSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass) }, null)!.GetParameters()[0]
 },
 },
@@ -463,12 +466,14 @@ new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class1",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[1]
 },
 },
@@ -605,18 +610,21 @@ new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class1",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[1]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class3",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[2]
 },
 },
@@ -755,24 +763,28 @@ new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class1",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[1]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class3",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[2]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class4",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[3]
 },
 },
@@ -913,30 +925,35 @@ new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class1",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[1]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class3",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[2]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class4",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[3]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
 {
     Name = "class5",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[4]
 },
 },

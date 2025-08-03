@@ -82,6 +82,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests).GetMethod("DataSource_Method", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },
@@ -235,6 +236,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests).GetMethod("DataSource_Method2", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },
@@ -388,6 +390,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Enumer
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.EnumerableDataSourceDrivenTests.BaseValue, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests).GetMethod("DataSource_WithBaseReturn", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests.BaseValue) }, null)!.GetParameters()[0]
 },
 },

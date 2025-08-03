@@ -71,6 +71,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.ClassD
 {
     Name = "base",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2.Base, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base) })!.GetParameters()[0]
 },
 },
@@ -192,6 +193,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.ClassD
 {
     Name = "base",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2.Base, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base) })!.GetParameters()[0]
 },
 },

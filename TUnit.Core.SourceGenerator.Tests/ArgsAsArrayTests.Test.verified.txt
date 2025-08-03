@@ -60,6 +60,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string[]))
 {
     Name = "arguments",
     TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"), 1),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Params", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
 },
 },
@@ -223,6 +224,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string[]))
 {
     Name = "arguments",
     TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"), 1),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("NonParams", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
 },
 },
@@ -356,6 +358,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Gener
 {
     Name = "arguments",
     TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib")),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("ParamsEnumerable", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
 },
 },
@@ -519,6 +522,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Gener
 {
     Name = "arguments",
     TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib")),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Enumerable", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
 },
 },
@@ -654,12 +658,14 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "i",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Generic.IEnumerable<string>))
 {
     Name = "arguments",
     TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib")),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[1]
 },
 },

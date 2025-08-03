@@ -94,6 +94,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },
@@ -115,6 +116,7 @@ new global::TUnit.Core.PropertyMetadata
     Type = typeof(global::TUnit.TestProject.Bugs._1924.DataClass),
     Name = "Data",
     IsStatic = false,
+    IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.Bugs._1924.None.BaseClass)o).Data,
     ClassMetadata = null
 },
@@ -274,6 +276,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },
@@ -443,6 +446,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },
@@ -612,6 +616,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetMethod("Test", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },

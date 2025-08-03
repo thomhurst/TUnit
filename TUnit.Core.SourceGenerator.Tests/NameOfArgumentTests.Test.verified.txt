@@ -61,6 +61,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "name",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.NameOfArgumentTests).GetMethod("TestName", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },

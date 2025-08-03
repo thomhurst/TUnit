@@ -70,6 +70,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._
 {
     Name = "myFixture",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1589.MyFixture, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1589.MyTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1589.MyFixture) })!.GetParameters()[0]
 },
 },

@@ -265,18 +265,21 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "value2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(bool))
 {
     Name = "value3",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2]
 },
 },
@@ -295,18 +298,21 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "value2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[1]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(bool))
 {
     Name = "value3",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetConstructor(new global::System.Type[] { typeof(int), typeof(string), typeof(bool) })!.GetParameters()[2]
 },
 },
@@ -318,6 +324,7 @@ new global::TUnit.Core.PropertyMetadata
     Type = typeof((int, string, bool)),
     Name = "Property1",
     IsStatic = false,
+    IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property1,
     ClassMetadata = null
 },
@@ -327,6 +334,7 @@ new global::TUnit.Core.PropertyMetadata
     Type = typeof((int, string, bool)),
     Name = "Property2",
     IsStatic = false,
+    IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property2,
     ClassMetadata = null
 },
@@ -336,6 +344,7 @@ new global::TUnit.Core.PropertyMetadata
     Type = typeof((int Number, string Word, bool Flag)),
     Name = "Property3",
     IsStatic = false,
+    IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property3,
     ClassMetadata = null
 },
@@ -345,6 +354,7 @@ new global::TUnit.Core.PropertyMetadata
     Type = typeof((int Number, string Word, bool Flag)),
     Name = "Property4",
     IsStatic = false,
+    IsNullable = false,
     Getter = o => ((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)o).Property4,
     ClassMetadata = null
 },

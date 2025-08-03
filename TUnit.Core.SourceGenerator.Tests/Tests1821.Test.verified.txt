@@ -63,6 +63,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetMethod("MethodDataSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
@@ -81,6 +82,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._
 {
     Name = "data",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1821.MyData, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1821.MyData) })!.GetParameters()[0]
 },
 },
@@ -208,6 +210,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetMethod("MatrixDataSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
@@ -226,6 +229,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._
 {
     Name = "data",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1821.MyData, TestsBase`1"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1821.MyData) })!.GetParameters()[0]
 },
 },

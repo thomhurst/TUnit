@@ -70,6 +70,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "arg1",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetConstructor(new global::System.Type[] { typeof(string) })!.GetParameters()[0]
 },
 },
@@ -184,6 +185,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "arg2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("WithMethodLevel", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
@@ -202,6 +204,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "arg1",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetConstructor(new global::System.Type[] { typeof(string) })!.GetParameters()[0]
 },
 },
@@ -332,6 +335,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "arg2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("IgnoreParameters", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
@@ -350,6 +354,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "arg1",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetConstructor(new global::System.Type[] { typeof(string) })!.GetParameters()[0]
 },
 },

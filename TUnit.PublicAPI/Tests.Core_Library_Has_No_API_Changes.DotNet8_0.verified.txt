@@ -971,6 +971,7 @@ namespace
     {
         public ParameterMetadata([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  Type) { }
         public object? DefaultValue { get; }
+        public bool IsNullable { get; init; }
         public bool IsOptional { get; }
         public bool IsParams { get; }
         public required .ParameterInfo ReflectionInfo { get; set; }
@@ -1036,6 +1037,7 @@ namespace
         public PropertyMetadata() { }
         public .ClassMetadata? ClassMetadata { get; set; }
         public required <object?, object?> Getter { get; init; }
+        public bool IsNullable { get; init; }
         public required bool IsStatic { get; init; }
         public required .PropertyInfo ReflectionInfo { get; init; }
         [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]

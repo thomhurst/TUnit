@@ -61,6 +61,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(double))
 {
     Name = "d",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("double, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Double_SpecialConsts", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
 },
 },
@@ -193,6 +194,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(float))
 {
     Name = "d",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("float, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Float_SpecialConsts", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
 },
 },

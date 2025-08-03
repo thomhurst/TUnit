@@ -96,48 +96,56 @@ new global::TUnit.Core.ParameterMetadata(typeof(bool))
 {
     Name = "expectedSuccess",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "expectedError",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[1]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "expectedT0",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[2]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "expectedT1",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[3]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "expectedT2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[4]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "expectedT3",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[5]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "expectedT4",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[6]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "expectedT5",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("Eight_Args", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[7]
 },
 },
@@ -323,96 +331,112 @@ new global::TUnit.Core.ParameterMetadata(typeof(bool))
 {
     Name = "expectedSuccess",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item1",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[1]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[2]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item3",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[3]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item4",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[4]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item5",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[5]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item6",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[6]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item7",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[7]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item8",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[8]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item9",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[9]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item10",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[10]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item11",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[11]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item12",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[12]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item13",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[13]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item14",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[14]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "item15",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+    IsNullable = true,
     ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1538.Tests).GetMethod("SixteenArgs", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string) }, null)!.GetParameters()[15]
 },
 },

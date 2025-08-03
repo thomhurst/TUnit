@@ -137,6 +137,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "i",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetMethod("DataSourceClassCombinedWithDataSourceMethodTest", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },
@@ -155,6 +156,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "i",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetConstructor(new global::System.Type[] { typeof(int) })!.GetParameters()[0]
 },
 },
