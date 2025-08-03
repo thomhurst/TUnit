@@ -23,8 +23,8 @@ public abstract class Context : IContext, IDisposable
     private StringBuilder? _outputStringBuilder;
     private StringBuilder? _errorOutputStringBuilder;
     private DefaultLogger? _defaultLogger;
-    private readonly object _outputLock = new();
-    private readonly object _errorLock = new();
+    private readonly Lock _outputLock = new();
+    private readonly Lock _errorLock = new();
 
     [field: AllowNull, MaybeNull]
     public TextWriter OutputWriter => field ??= new SynchronizedStringWriter(_outputStringBuilder ??= new StringBuilder(), _outputLock);
@@ -106,9 +106,9 @@ public abstract class Context : IContext, IDisposable
 internal sealed class SynchronizedStringWriter : TextWriter
 {
     private readonly StringBuilder _stringBuilder;
-    private readonly object _lock;
+    private readonly Lock _lock;
 
-    public SynchronizedStringWriter(StringBuilder stringBuilder, object lockObject)
+    public SynchronizedStringWriter(StringBuilder stringBuilder, Lock lockObject)
     {
         _stringBuilder = stringBuilder;
         _lock = lockObject;
