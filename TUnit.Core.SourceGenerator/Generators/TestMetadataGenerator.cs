@@ -997,37 +997,35 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             methodCall = $"{dataSourceMethod.Name}()";
         }
 
-        // Invoke the data source method
-        if (isStatic)
-        {
-            writer.AppendLine($"var result = {fullyQualifiedType}.{methodCall};");
-        }
-        else
-        {
-            // For instance methods, check if test instance is available
-            writer.AppendLine("object? instance;");
-            writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("else");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine($"instance = new {fullyQualifiedType}();");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
-        }
-        writer.AppendLine();
-
-        // Handle different return types
+        // For collections (IEnumerable, IAsyncEnumerable), we need to evaluate once to iterate
+        // For single values, we'll generate a lambda that invokes the method each time
         var returnTypeName = returnType.ToDisplayString();
 
         if (IsAsyncEnumerable(returnType))
         {
-            // IAsyncEnumerable<T>
+            // IAsyncEnumerable<T> - must evaluate once to iterate
+            if (isStatic)
+            {
+                writer.AppendLine($"var result = {fullyQualifiedType}.{methodCall};");
+            }
+            else
+            {
+                writer.AppendLine("object? instance;");
+                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
+            }
+            writer.AppendLine();
             writer.AppendLine("await foreach (var item in result)");
             writer.AppendLine("{");
             writer.Indent();
@@ -1037,7 +1035,29 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else if (IsTask(returnType))
         {
-            // Task<T>
+            // Task<T> - must evaluate and await once
+            if (isStatic)
+            {
+                writer.AppendLine($"var result = {fullyQualifiedType}.{methodCall};");
+            }
+            else
+            {
+                writer.AppendLine("object? instance;");
+                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
+            }
+            writer.AppendLine();
             writer.AppendLine("var taskResult = await result;");
             writer.AppendLine("if (taskResult is System.Collections.IEnumerable enumerable && !(taskResult is string))");
             writer.AppendLine("{");
@@ -1059,29 +1079,88 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else if (IsEnumerable(returnType))
         {
-            // IEnumerable<T>
+            // IEnumerable<T> - generate lambda that invokes method each time
+            writer.AppendLine("yield return () =>");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            if (isStatic)
+            {
+                writer.AppendLine($"var result = {fullyQualifiedType}.{methodCall};");
+            }
+            else
+            {
+                writer.AppendLine("object? instance;");
+                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
+            }
+            
             writer.AppendLine("if (result is System.Collections.IEnumerable enumerable && !(result is string))");
             writer.AppendLine("{");
             writer.Indent();
+            writer.AppendLine("var items = new System.Collections.Generic.List<object?>();");
             writer.AppendLine("foreach (var item in enumerable)");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
+            writer.AppendLine("items.Add(item);");
             writer.Unindent();
             writer.AppendLine("}");
+            writer.AppendLine("return global::System.Threading.Tasks.Task.FromResult(items.ToArray());");
             writer.Unindent();
             writer.AppendLine("}");
             writer.AppendLine("else");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
+            writer.AppendLine("return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
             writer.Unindent();
             writer.AppendLine("}");
+            
+            writer.Unindent();
+            writer.AppendLine("};");
         }
         else
         {
-            // Single value
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
+            // Single value - generate lambda that invokes method each time
+            writer.AppendLine("yield return () =>");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            if (isStatic)
+            {
+                writer.AppendLine($"var result = {fullyQualifiedType}.{methodCall};");
+            }
+            else
+            {
+                writer.AppendLine("object? instance;");
+                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
+            }
+            
+            writer.AppendLine("return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
+            writer.Unindent();
+            writer.AppendLine("};");
         }
 
         writer.Unindent();
