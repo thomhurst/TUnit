@@ -5,7 +5,7 @@ using TUnit.Core.Extensions;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-[UnconditionalSuppressMessage("AOT", "IL2109:Type 'MatrixDataSourceAttribute' derives from base class with RequiresUnreferencedCodeAttribute", 
+[UnconditionalSuppressMessage("AOT", "IL2109:Type 'MatrixDataSourceAttribute' derives from base class with RequiresUnreferencedCodeAttribute",
     Justification = "Matrix data source implementation is AOT-compatible with proper enum field preservation")]
 public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttribute, IAccessesInstanceData
 {
@@ -55,7 +55,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
             .ToArray();
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL2072:Target parameter argument does not satisfy DynamicallyAccessedMemberTypes requirements", 
+    [UnconditionalSuppressMessage("AOT", "IL2072:Target parameter argument does not satisfy DynamicallyAccessedMemberTypes requirements",
         Justification = "Test parameter types are comprehensively preserved by the source generation system for matrix data scenarios")]
     private IReadOnlyList<object?> GetAllArguments(DataGeneratorMetadata dataGeneratorMetadata,
         ParameterMetadata sourceGeneratedParameterInformation)
@@ -98,16 +98,16 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         }
 
         var type = sourceGeneratedParameterInformation.Type;
-        
+
         // Use the IsNullable property for AOT-safe nullable detection
         Type? underlyingType = null;
         var isNullable = sourceGeneratedParameterInformation.IsNullable;
-        
+
         if (isNullable)
         {
             // Try to get underlying type, but if it fails in AOT, we'll handle it
             underlyingType = Nullable.GetUnderlyingType(type);
-            
+
             // If Nullable.GetUnderlyingType failed but we know it's nullable from metadata,
             // check if it's a generic type with one type argument
             if (underlyingType == null && type.IsGenericType && type.GetGenericArguments().Length == 1)
@@ -115,12 +115,8 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
                 underlyingType = type.GetGenericArguments()[0];
             }
         }
-        
+
         var resolvedType = underlyingType ?? type;
-        if (resolvedType != typeof(bool) && !resolvedType.IsEnum)
-        {
-            throw new ArgumentNullException($"No MatrixAttribute found for parameter {sourceGeneratedParameterInformation.Name}");
-        }
 
         if (resolvedType == typeof(bool))
         {
@@ -132,29 +128,34 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
             return isNullable ? [true, false, null] : [true, false];
         }
 
+        if (resolvedType.IsEnum)
+        {
 #if NET
         var enumValues = Enum.GetValuesAsUnderlyingType(resolvedType)
                              .Cast<object?>();
 #else
-        var enumValues = Enum.GetValues(resolvedType)
-                             .Cast<object?>();
+            var enumValues = Enum.GetValues(resolvedType)
+                .Cast<object?>();
 #endif
-        if (isNullable)
-        {
-            enumValues = enumValues.Append(null);
-            if (matrixAttribute?.Excluding?.Any(x => x is null) ?? false)
+            if (isNullable)
             {
-                throw new InvalidOperationException("Do not exclude null from a nullable enum - instead use the enum directly");
+                enumValues = enumValues.Append(null);
+                if (matrixAttribute?.Excluding?.Any(x => x is null) ?? false)
+                {
+                    throw new InvalidOperationException("Do not exclude null from a nullable enum - instead use the enum directly");
+                }
             }
-        }
 
-        return enumValues
+            return enumValues
 #if NET
                .Except(matrixAttribute?.Excluding?.Select(e => Convert.ChangeType(e, Enum.GetUnderlyingType(resolvedType))) ?? [])
 #else
-               .Except(matrixAttribute?.Excluding ?? [])
+                .Except(matrixAttribute?.Excluding ?? [])
 #endif
-               .ToArray();
+                .ToArray();
+        }
+
+        throw new ArgumentNullException($"No MatrixAttribute found for parameter '{sourceGeneratedParameterInformation.Name}' and the parameter type '{resolvedType.Name}' cannot be auto-generated. Only bool and enum types support auto-generation.");
     }
 
     private readonly IEnumerable<IEnumerable<object?>> _seed = [[]];

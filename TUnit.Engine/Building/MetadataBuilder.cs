@@ -5,31 +5,41 @@ namespace TUnit.Engine.Building;
 
 internal static class MetadataBuilder
 {
+    private static TypeReference CreateTypeReference(Type type)
+    {
+        return TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name);
+    }
+
+    [UnconditionalSuppressMessage("AOT", "IL2067:'Type' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ParameterMetadata.ParameterMetadata(Type)'", Justification = "Parameter types are known at compile time")]
+    private static ParameterMetadata CreateParameterMetadata(Type parameterType, string? name, int index, System.Reflection.ParameterInfo? reflectionInfo = null)
+    {
+        return new ParameterMetadata(parameterType)
+        {
+            Name = name ?? $"param{index}",
+            TypeReference = CreateTypeReference(parameterType),
+            ReflectionInfo = reflectionInfo
+        };
+    }
     [UnconditionalSuppressMessage("AOT", "IL2072:'value' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ClassMetadata.Type.init'", Justification = "Type annotations are handled by source generators")]
     [UnconditionalSuppressMessage("AOT", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicConstructors' in call to 'System.Type.GetConstructors(BindingFlags)'", Justification = "Constructor discovery needed for metadata")]
-    public static ClassMetadata CreateClassMetadata(TestMetadata metadata)
+    private static ClassMetadata CreateClassMetadataInternal(Type type)
     {
-        var type = metadata.TestClassType;
-
         return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => 
         {
             // Get constructor parameters for the class
             var constructors = type.GetConstructors(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
             var constructor = constructors.FirstOrDefault();
             
-            var constructorParameters = constructor?.GetParameters().Select((p, i) => new ParameterMetadata(p.ParameterType)
-            {
-                Name = p.Name ?? $"param{i}",
-                TypeReference = new TypeReference { AssemblyQualifiedName = p.ParameterType.AssemblyQualifiedName },
-                ReflectionInfo = p
-            }).ToArray() ?? [];
+            var constructorParameters = constructor?.GetParameters()
+                .Select((p, i) => CreateParameterMetadata(p.ParameterType, p.Name, i, p))
+                .ToArray() ?? [];
             
             return new ClassMetadata
             {
                 Name = type.Name,
                 Type = type,
-                TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
-                Namespace = type.Namespace,
+                TypeReference = CreateTypeReference(type),
+                Namespace = type.Namespace ?? string.Empty,
                 Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.FullName ?? "Unknown", () => new AssemblyMetadata
                 {
                     Name = type.Assembly.GetName().Name ?? "Unknown",
@@ -41,26 +51,28 @@ internal static class MetadataBuilder
         });
     }
 
+    public static ClassMetadata CreateClassMetadata(TestMetadata metadata)
+    {
+        return CreateClassMetadataInternal(metadata.TestClassType);
+    }
+
     [UnconditionalSuppressMessage("AOT", "IL2072:'value' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.MethodMetadata.Type.init'", Justification = "Type annotations are handled by source generators")]
     [UnconditionalSuppressMessage("AOT", "IL2067:'Type' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ParameterMetadata.ParameterMetadata(Type)'", Justification = "Parameter types are known at compile time")]
     public static MethodMetadata CreateMethodMetadata(TestMetadata metadata)
     {
-        var parameters = metadata.ParameterTypes.Select((type, index) => new ParameterMetadata(type)
-        {
-            Name = $"param{index}",
-            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
-            ReflectionInfo = null!
-        }).ToArray();
+        var parameters = metadata.ParameterTypes
+            .Select((type, index) => CreateParameterMetadata(type, null, index))
+            .ToArray();
 
         return new MethodMetadata
         {
             Name = metadata.TestMethodName,
             Type = metadata.TestClassType,
-            TypeReference = TypeReference.CreateConcrete(metadata.TestClassType.AssemblyQualifiedName ?? metadata.TestClassType.FullName ?? metadata.TestClassType.Name),
+            TypeReference = CreateTypeReference(metadata.TestClassType),
             Class = CreateClassMetadata(metadata),
             Parameters = parameters,
             GenericTypeCount = 0,
-            ReturnTypeReference = TypeReference.CreateConcrete(typeof(Task).AssemblyQualifiedName ?? typeof(Task).FullName ?? "System.Threading.Tasks.Task"),
+            ReturnTypeReference = CreateTypeReference(typeof(Task)),
             ReturnType = typeof(Task),
         };
     }
@@ -77,40 +89,13 @@ internal static class MetadataBuilder
         {
             Name = method.Name,
             Type = type,
-            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
-            Class = ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => 
-            {
-                // Get constructor parameters for the class
-                var constructors = type.GetConstructors(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-                var constructor = constructors.FirstOrDefault();
-                
-                var constructorParameters = constructor?.GetParameters().Select((p, i) => new ParameterMetadata(p.ParameterType)
-                {
-                    Name = p.Name ?? $"param{i}",
-                    TypeReference = new TypeReference { AssemblyQualifiedName = p.ParameterType.AssemblyQualifiedName },
-                    ReflectionInfo = p
-                }).ToArray() ?? [];
-                
-                return new ClassMetadata
-                {
-                    Name = type.Name,
-                    Type = type,
-                    TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
-                    Namespace = type.Namespace ?? string.Empty,
-                    Assembly = new AssemblyMetadata { Name = type.Assembly.GetName().Name ?? "Unknown" },
-                    Parameters = constructorParameters,
-                    Properties = [],
-                    Parent = null
-                };
-            }),
-            Parameters = method.GetParameters().Select(p => new ParameterMetadata(p.ParameterType)
-            {
-                Name = p.Name ?? "unnamed",
-                TypeReference = TypeReference.CreateConcrete(p.ParameterType.AssemblyQualifiedName ?? p.ParameterType.FullName ?? p.ParameterType.Name),
-                ReflectionInfo = p
-            }).ToArray(),
+            TypeReference = CreateTypeReference(type),
+            Class = CreateClassMetadataInternal(type),
+            Parameters = method.GetParameters()
+                .Select((p, i) => CreateParameterMetadata(p.ParameterType, p.Name ?? "unnamed", i, p))
+                .ToArray(),
             GenericTypeCount = method.IsGenericMethodDefinition ? method.GetGenericArguments().Length : 0,
-            ReturnTypeReference = TypeReference.CreateConcrete(method.ReturnType.AssemblyQualifiedName ?? method.ReturnType.FullName ?? method.ReturnType.Name),
+            ReturnTypeReference = CreateTypeReference(method.ReturnType),
             ReturnType = method.ReturnType,
         };
     }
