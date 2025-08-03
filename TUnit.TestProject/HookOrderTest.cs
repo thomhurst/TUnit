@@ -1,6 +1,6 @@
 namespace TUnit.TestProject;
 
-public class HookOrderTest
+public class HookOrderTests
 {
     [Before(Test)]
     public void Setup()
