@@ -12,7 +12,7 @@ T>(string methodNameProvidingDataSource)
     : MethodDataSourceAttribute(typeof(T), methodNameProvidingDataSource);
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
-public class MethodDataSourceAttribute : TestDataAttribute
+public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 {
     private const BindingFlags BindingFlags = System.Reflection.BindingFlags.Public
         | System.Reflection.BindingFlags.NonPublic
@@ -54,7 +54,7 @@ public class MethodDataSourceAttribute : TestDataAttribute
 
     [UnconditionalSuppressMessage("AOT", "IL2072:UnrecognizedReflectionPattern", Justification = "Data source methods use dynamic patterns")]
     [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", Justification = "Data source methods use dynamic patterns")]
-    public override async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (Factory != null)
         {

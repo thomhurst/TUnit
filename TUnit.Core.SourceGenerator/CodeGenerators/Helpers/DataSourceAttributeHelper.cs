@@ -12,8 +12,7 @@ internal static class DataSourceAttributeHelper
             return false;
         }
 
-        // Check if the attribute inherits from one of the base data source types
-        return attributeClass.IsOrInherits("global::TUnit.Core.TestDataAttribute") ||
-               attributeClass.IsOrInherits("global::TUnit.Core.IDataSourceAttribute");
+        // Check if the attribute implements IDataSourceAttribute
+        return attributeClass.AllInterfaces.Any(i => i.GloballyQualified() == "global::TUnit.Core.IDataSourceAttribute");
     }
 }

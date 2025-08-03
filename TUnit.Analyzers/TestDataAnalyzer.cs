@@ -143,9 +143,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 {
                     var typeName = currentType.Name;
                     
-                    // Check for known data source base classes
-                    if (typeName == "TestDataAttribute" ||
-                        typeName == "ArgumentsAttribute")
+                    // Check for known data source attributes
+                    if (typeName == "ArgumentsAttribute")
                     {
                         return true;
                     }
@@ -795,7 +794,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                            genericTypeName.StartsWith("AsyncDataSourceGeneratorAttribute") ||
                            genericTypeName.StartsWith("ClassDataSourceAttribute");
                 }
-                return typeName == "TestDataAttribute" || typeName == "ArgumentsAttribute";
+                return typeName == "ArgumentsAttribute";
             });
             
             if (!isDataSourceGenerator)

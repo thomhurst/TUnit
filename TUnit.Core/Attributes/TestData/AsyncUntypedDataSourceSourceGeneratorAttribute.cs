@@ -5,7 +5,7 @@ namespace TUnit.Core;
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
 [RequiresDynamicCode("AsyncUntypedDataSourceGeneratorAttribute requires dynamic code generation for runtime data source creation. Consider using strongly-typed AsyncDataSourceGeneratorAttribute<T> overloads for AOT compatibility.")]
 [RequiresUnreferencedCode("AsyncUntypedDataSourceGeneratorAttribute may require unreferenced code for runtime data source creation. Consider using strongly-typed AsyncDataSourceGeneratorAttribute<T> overloads for AOT compatibility.")]
-public abstract class AsyncUntypedDataSourceGeneratorAttribute : TestDataAttribute, IAsyncUntypedDataSourceGeneratorAttribute
+public abstract class AsyncUntypedDataSourceGeneratorAttribute : Attribute, IAsyncUntypedDataSourceGeneratorAttribute
 {
     protected abstract IAsyncEnumerable<Func<Task<object?[]?>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata);
 
@@ -24,7 +24,7 @@ public abstract class AsyncUntypedDataSourceGeneratorAttribute : TestDataAttribu
         }
     }
 
-    public override IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         return GenerateAsync(dataGeneratorMetadata);
     }

@@ -1,7 +1,7 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
-public sealed class ArgumentsAttribute : TestDataAttribute
+public sealed class ArgumentsAttribute : Attribute, IDataSourceAttribute
 {
     public object?[] Values { get; }
 
@@ -17,7 +17,7 @@ public sealed class ArgumentsAttribute : TestDataAttribute
         }
     }
 
-    public override async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () => Task.FromResult<object?[]?>(Values);
         await Task.CompletedTask;

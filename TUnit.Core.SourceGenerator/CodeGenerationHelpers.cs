@@ -276,9 +276,8 @@ internal static class CodeGenerationHelpers
             return false;
         }
 
-        // Check if the attribute inherits from TestDataAttribute or implements IDataSourceAttribute
-        return attr.AttributeClass.IsOrInherits("global::TUnit.Core.TestDataAttribute") ||
-               attr.AttributeClass.AllInterfaces.Any(i => i.GloballyQualified() == "global::TUnit.Core.IDataSourceAttribute");
+        // Check if the attribute implements IDataSourceAttribute
+        return attr.AttributeClass.AllInterfaces.Any(i => i.GloballyQualified() == "global::TUnit.Core.IDataSourceAttribute");
     }
 
     /// <summary>
@@ -381,7 +380,7 @@ internal static class CodeGenerationHelpers
 
     private static string GenerateCustomDataProvider(AttributeData attr)
     {
-        // For custom data attributes that inherit from TestDataAttribute (including AsyncDataSourceGeneratorAttribute),
+        // For custom data attributes that implement IDataSourceAttribute (including AsyncDataSourceGeneratorAttribute),
         // we need to instantiate the attribute and use it directly
         var attributeType = attr.AttributeClass!.GloballyQualified();
         
@@ -405,7 +404,7 @@ internal static class CodeGenerationHelpers
             ? " { " + string.Join(", ", propertyInitializers) + " }" 
             : string.Empty;
 
-        // For attributes that inherit from TestDataAttribute, instantiate them directly
+        // For attributes that implement IDataSourceAttribute, instantiate them directly
         return $"new {attributeType}({constructorArgs}){propertyInit}";
     }
 
