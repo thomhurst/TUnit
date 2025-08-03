@@ -4,11 +4,11 @@ using TUnit.Core.Extensions;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
-public abstract class AsyncDataSourceGeneratorAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)] T> : Attribute, IDataSourceAttribute
+public abstract class AsyncDataSourceGeneratorAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)] T> : TypedDataSourceAttribute<T>
 {
     protected abstract IAsyncEnumerable<Func<Task<T>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata);
 
-    public async IAsyncEnumerable<Func<Task<T>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public override async IAsyncEnumerable<Func<Task<T>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (dataGeneratorMetadata.TestBuilderContext != null && dataGeneratorMetadata.TestInformation != null)
         {
@@ -20,15 +20,6 @@ public abstract class AsyncDataSourceGeneratorAttribute<[DynamicallyAccessedMemb
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
-        }
-    }
-
-
-    public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        await foreach (var dataSourceDelegate in GenerateAsync(dataGeneratorMetadata))
-        {
-            yield return async () => [await dataSourceDelegate()];
         }
     }
 }
@@ -38,11 +29,11 @@ public abstract class AsyncDataSourceGeneratorAttribute<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T1,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
-    T2> : Attribute, IDataSourceAttribute
+    T2> : TypedDataSourceAttribute<(T1, T2)>
 {
     protected abstract IAsyncEnumerable<Func<Task<(T1, T2)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata);
 
-    public async IAsyncEnumerable<Func<Task<(T1, T2)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public override async IAsyncEnumerable<Func<Task<(T1, T2)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (dataGeneratorMetadata.TestBuilderContext != null && dataGeneratorMetadata.TestInformation != null)
         {
@@ -54,15 +45,6 @@ public abstract class AsyncDataSourceGeneratorAttribute<
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
-        }
-    }
-
-
-    public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        await foreach (var dataSourceDelegate in GenerateAsync(dataGeneratorMetadata))
-        {
-            yield return async () => (await dataSourceDelegate()).ToObjectArray();
         }
     }
 }
@@ -74,11 +56,11 @@ public abstract class AsyncDataSourceGeneratorAttribute<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T2,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
-    T3> : Attribute, IDataSourceAttribute
+    T3> : TypedDataSourceAttribute<(T1, T2, T3)>
 {
     protected abstract IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata);
 
-    public async IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public override async IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (dataGeneratorMetadata.TestBuilderContext != null && dataGeneratorMetadata.TestInformation != null)
         {
@@ -90,15 +72,6 @@ public abstract class AsyncDataSourceGeneratorAttribute<
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
-        }
-    }
-
-
-    public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        await foreach (var dataSourceDelegate in GenerateAsync(dataGeneratorMetadata))
-        {
-            yield return async () => (await dataSourceDelegate()).ToObjectArray();
         }
     }
 }
@@ -112,11 +85,11 @@ public abstract class AsyncDataSourceGeneratorAttribute<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T3,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
-    T4> : Attribute, IDataSourceAttribute
+    T4> : TypedDataSourceAttribute<(T1, T2, T3, T4)>
 {
     protected abstract IAsyncEnumerable<Func<Task<(T1, T2, T3, T4)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata);
 
-    public async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public override async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (dataGeneratorMetadata.TestBuilderContext != null && dataGeneratorMetadata.TestInformation != null)
         {
@@ -128,15 +101,6 @@ public abstract class AsyncDataSourceGeneratorAttribute<
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
-        }
-    }
-
-
-    public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        await foreach (var dataSourceDelegate in GenerateAsync(dataGeneratorMetadata))
-        {
-            yield return async () => (await dataSourceDelegate()).ToObjectArray();
         }
     }
 }
@@ -152,11 +116,11 @@ public abstract class AsyncDataSourceGeneratorAttribute<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
     T4,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
-    T5> : Attribute, IDataSourceAttribute
+    T5> : TypedDataSourceAttribute<(T1, T2, T3, T4, T5)>
 {
     protected abstract IAsyncEnumerable<Func<Task<(T1, T2, T3, T4, T5)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata);
 
-    public async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4, T5)>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    public override async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4, T5)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (dataGeneratorMetadata.TestBuilderContext != null && dataGeneratorMetadata.TestInformation != null)
         {
@@ -168,15 +132,6 @@ public abstract class AsyncDataSourceGeneratorAttribute<
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
-        }
-    }
-
-
-    public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
-    {
-        await foreach (var dataSourceDelegate in GenerateAsync(dataGeneratorMetadata))
-        {
-            yield return async () => (await dataSourceDelegate()).ToObjectArray();
         }
     }
 }
