@@ -28,7 +28,7 @@ namespace TUnit.Core;
 /// <param name="displayName">
 /// The display name template. Can include parameter placeholders in the format of "$parameterName".
 /// </param>
-[AttributeUsage(AttributeTargets.Method, Inherited = false)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = false)]
 public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormatterAttribute, IScopedAttribute<DisplayNameAttribute>
 {
     /// <inheritdoc />
