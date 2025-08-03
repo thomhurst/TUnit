@@ -2536,13 +2536,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        // Process Matrix attributes on parameters
+        // Process attributes that implement IInfersType<T> on parameters
         if (testMethod.IsGenericMethod)
         {
-            var matrixInferredTypes = InferTypesFromMatrixAttributes(testMethod.MethodSymbol);
-            if (matrixInferredTypes is { Length: > 0 })
+            var inferredTypes = InferTypesFromTypeInferringAttributes(testMethod.MethodSymbol);
+            if (inferredTypes is { Length: > 0 })
             {
-                var typeKey = string.Join(",", matrixInferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
                 // Skip if we've already processed this type combination
                 if (!processedTypeCombinations.Contains(typeKey))
@@ -2550,11 +2550,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     processedTypeCombinations.Add(typeKey);
 
                     // Validate constraints
-                    if (ValidateTypeConstraints(testMethod.MethodSymbol, matrixInferredTypes))
+                    if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
                     {
                         // Generate a concrete instantiation for this type combination
-                        writer.AppendLine($"[{string.Join(" + \",\" + ", matrixInferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                        GenerateConcreteTestMetadata(writer, compilation, testMethod, className, matrixInferredTypes);
+                        writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                        GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
                         writer.AppendLine(",");
                     }
                 }
@@ -3941,27 +3941,36 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return true;
     }
 
-    private static ITypeSymbol[]? InferTypesFromMatrixAttributes(IMethodSymbol method)
+    private static ITypeSymbol[]? InferTypesFromTypeInferringAttributes(IMethodSymbol method)
     {
         var inferredTypes = new Dictionary<string, ITypeSymbol>();
         var typeParameters = method.TypeParameters;
 
-        // Look at each parameter to see if it has Matrix<T> attributes
+        // Look at each parameter to see if it has generic data source attributes we can infer types from
         foreach (var parameter in method.Parameters)
         {
             if (parameter.Type is ITypeParameterSymbol typeParam)
             {
-                // Check if this parameter has a Matrix<T> attribute
+                // Check if this parameter has attributes that implement IInfersType<T>
                 foreach (var attr in parameter.GetAttributes())
                 {
-                    if (attr.AttributeClass is { Name: "MatrixAttribute", IsGenericType: true, TypeArguments.Length: > 0 })
+                    if (attr.AttributeClass != null)
                     {
-                        // Get the type argument from Matrix<T>
-                        var matrixType = attr.AttributeClass.TypeArguments[0];
-
-                        // Map this to the method's type parameter
-                        inferredTypes[typeParam.Name] = matrixType;
-                        break;
+                        // Look for IInfersType<T> in the attribute's interfaces
+                        var infersTypeInterface = attr.AttributeClass.AllInterfaces
+                            .FirstOrDefault(i => ((ISymbol)i).GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" && 
+                                                 i.IsGenericType && 
+                                                 i.TypeArguments.Length == 1);
+                        
+                        if (infersTypeInterface != null)
+                        {
+                            // Get the type argument from IInfersType<T>
+                            var inferredType = infersTypeInterface.TypeArguments[0];
+                            
+                            // Map this to the method's type parameter
+                            inferredTypes[typeParam.Name] = inferredType;
+                            break;
+                        }
                     }
                 }
             }
@@ -3997,29 +4006,36 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var isClassTypeParam = classTypeParameters.Any(ctp => ctp.Name == typeParam.Name);
                 if (isClassTypeParam)
                 {
-                    // Check if this parameter has a typed data source attribute
+                    // Check if this parameter has attributes that implement IInfersType<T>
                     foreach (var attr in parameter.GetAttributes())
                     {
-                        if (attr.AttributeClass != null &&
-                            attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncDataSourceGeneratorAttribute"))
+                        if (attr.AttributeClass != null)
                         {
-                            // For Matrix<T> attributes, get the type argument
-                            if (attr.AttributeClass.Name == "MatrixAttribute" &&
-                                attr.AttributeClass.IsGenericType &&
-                                attr.AttributeClass.TypeArguments.Length > 0)
+                            // Look for IInfersType<T> in the attribute's interfaces
+                            var infersTypeInterface = attr.AttributeClass.AllInterfaces
+                                .FirstOrDefault(i => ((ISymbol)i).GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" && 
+                                                     i.IsGenericType && 
+                                                     i.TypeArguments.Length == 1);
+                            
+                            if (infersTypeInterface != null)
                             {
-                                var matrixType = attr.AttributeClass.TypeArguments[0];
-                                inferredTypes[typeParam.Name] = matrixType;
+                                // Get the type argument from IInfersType<T>
+                                var inferredType = infersTypeInterface.TypeArguments[0];
+                                inferredTypes[typeParam.Name] = inferredType;
                                 break;
                             }
-
-                            // For other typed data sources, try to infer from the base type
-                            var baseType = GetTypedDataSourceBase(attr.AttributeClass);
-                            if (baseType is { TypeArguments.Length: > 0 })
+                            
+                            // Fall back to checking if it's a data source attribute with type info
+                            if (attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute"))
                             {
-                                var dataSourceType = baseType.TypeArguments[0];
-                                inferredTypes[typeParam.Name] = dataSourceType;
-                                break;
+                                // Try to infer from the base type
+                                var baseType = GetTypedDataSourceBase(attr.AttributeClass);
+                                if (baseType is { TypeArguments.Length: > 0 })
+                                {
+                                    var dataSourceType = baseType.TypeArguments[0];
+                                    inferredTypes[typeParam.Name] = dataSourceType;
+                                    break;
+                                }
                             }
                         }
                     }

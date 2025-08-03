@@ -196,12 +196,8 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         {
             GenerateMethodDataSource(writer, attr, propertyData.Property.ContainingType);
         }
-        else if (attributeClassName?.StartsWith("ClassDataSource") == true)
-        {
-            GenerateClassDataSource(writer, attr);
-        }
-        else if (attr.AttributeClass?.IsOrInherits("TUnit.Core.AsyncDataSourceGeneratorAttribute") == true ||
-                 attr.AttributeClass?.IsOrInherits("TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute") == true)
+        else if (attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") == true ||
+                 attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute") == true)
         {
             GenerateAsyncDataSourceGenerator(writer, attr);
         }
@@ -277,32 +273,6 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("return await global::TUnit.Core.Helpers.DataSourceHelpers.ProcessDataSourceResultGeneric(data);");
     }
 
-    private static void GenerateClassDataSource(CodeWriter writer, AttributeData attr)
-    {
-        ITypeSymbol? targetType = null;
-        
-        // Check for constructor argument first (non-generic case)
-        if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is ITypeSymbol constructorType)
-        {
-            targetType = constructorType;
-        }
-        // Check for generic type argument (generic case like ClassDataSource<T>)
-        else if (attr.AttributeClass?.TypeArguments.Length > 0)
-        {
-            targetType = attr.AttributeClass.TypeArguments[0];
-        }
-        
-        if (targetType != null)
-        {
-            var fullyQualifiedType = targetType.GloballyQualified();
-            writer.AppendLine($"var instance = new {fullyQualifiedType}();");
-            writer.AppendLine("return instance;");
-        }
-        else
-        {
-            writer.AppendLine("return null;");
-        }
-    }
 
     private static void GenerateAsyncDataSourceGenerator(CodeWriter writer, AttributeData attr)
     {
@@ -311,8 +281,8 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("var metadata = new global::TUnit.Core.DataGeneratorMetadata");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("Type = global::TUnit.Core.DataGeneratorType.ClassParameters,");
-        writer.AppendLine("TestBuilderContext = new global::TUnit.Core.TestBuilderContextAccessor(new global::TUnit.Core.TestBuilderContext()),");
+        writer.AppendLine("Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,");
+        writer.AppendLine("TestBuilderContext = new global::TUnit.Core.TestBuilderContextAccessor(new global::TUnit.Core.TestBuilderContext { TestMetadata = null! }),");
         writer.AppendLine("MembersToGenerate = new global::TUnit.Core.MemberMetadata[0],");
         writer.AppendLine("TestInformation = null,");
         writer.AppendLine("TestSessionId = string.Empty,");

@@ -448,8 +448,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
         sb.AppendLine($"        // Initialize {propertyName} property");
         
-        if (attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
-            attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
+        if (attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
+            attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
         {
             GenerateAsyncDataSourcePropertyInit(sb, propInfo);
         }
@@ -530,8 +530,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
         sb.AppendLine($"            // Initialize {propertyName} property (init-only)");
         
-        if (attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
-            attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
+        if (attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
+            attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
         {
             // For async data sources, we need to generate a temporary value since we can't await in object initializer
             sb.AppendLine($"            {propertyName} = default!,");
@@ -582,8 +582,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
         sb.AppendLine($"        // Initialize static {propertyName} property");
         
-        if (attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
-            attr.AttributeClass.IsOrInherits("TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
+        if (attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
+            attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
         {
             GenerateStaticAsyncDataSourcePropertyInit(sb, propInfo, fullyQualifiedTypeName);
         }

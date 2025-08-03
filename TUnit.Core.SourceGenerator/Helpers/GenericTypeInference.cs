@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.Helpers;
 
@@ -33,8 +34,8 @@ internal static class GenericTypeInference
             return inferredTypes;
         }
 
-        // Try to infer from Matrix parameter attributes
-        inferredTypes = TryInferFromMatrixParameters(method);
+        // Try to infer from parameter attributes that implement IInfersType<T>
+        inferredTypes = TryInferFromTypeInferringAttributes(method);
         if (inferredTypes != null)
         {
             return inferredTypes;
@@ -143,42 +144,51 @@ internal static class GenericTypeInference
             : null;
     }
 
-    private static ImmutableArray<ITypeSymbol>? TryInferFromMatrixParameters(IMethodSymbol method)
+    private static ImmutableArray<ITypeSymbol>? TryInferFromTypeInferringAttributes(IMethodSymbol method)
     {
         var inferredTypes = new List<ITypeSymbol>();
 
-        // Look at each parameter to see if it has Matrix<T> attributes
+        // Look at each parameter to see if it has attributes that implement IInfersType<T>
         foreach (var parameter in method.Parameters)
         {
             if (parameter.Type is ITypeParameterSymbol typeParam)
             {
-                // Check if this parameter has a Matrix<T> attribute
+                // Check if this parameter has attributes that implement IInfersType<T>
                 foreach (var attr in parameter.GetAttributes())
                 {
-                    if (attr.AttributeClass is { Name: "MatrixAttribute", IsGenericType: true, TypeArguments.Length: > 0 })
+                    if (attr.AttributeClass != null)
                     {
-                        // Get the type argument from Matrix<T>
-                        var matrixType = attr.AttributeClass.TypeArguments[0];
+                        // Look for IInfersType<T> in the attribute's interfaces
+                        var infersTypeInterface = attr.AttributeClass.AllInterfaces
+                            .FirstOrDefault(i => ((ISymbol)i).GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" && 
+                                                 i.IsGenericType && 
+                                                 i.TypeArguments.Length == 1);
                         
-                        // Find the index of this type parameter
-                        var typeParamIndex = -1;
-                        for (int i = 0; i < method.TypeParameters.Length; i++)
+                        if (infersTypeInterface != null)
                         {
-                            if (method.TypeParameters[i].Name == typeParam.Name)
+                            // Get the type argument from IInfersType<T>
+                            var inferredType = infersTypeInterface.TypeArguments[0];
+                            
+                            // Find the index of this type parameter
+                            var typeParamIndex = -1;
+                            for (int i = 0; i < method.TypeParameters.Length; i++)
                             {
-                                typeParamIndex = i;
-                                break;
+                                if (method.TypeParameters[i].Name == typeParam.Name)
+                                {
+                                    typeParamIndex = i;
+                                    break;
+                                }
                             }
-                        }
 
-                        if (typeParamIndex >= 0)
-                        {
-                            // Make sure we have enough slots
-                            while (inferredTypes.Count <= typeParamIndex)
+                            if (typeParamIndex >= 0)
                             {
-                                inferredTypes.Add(null!);
+                                // Make sure we have enough slots
+                                while (inferredTypes.Count <= typeParamIndex)
+                                {
+                                    inferredTypes.Add(null!);
+                                }
+                                inferredTypes[typeParamIndex] = inferredType;
                             }
-                            inferredTypes[typeParamIndex] = matrixType;
                         }
                     }
                 }
@@ -355,11 +365,11 @@ internal static class GenericTypeInference
             combinations.Add(typedSourceTypes.Value);
         }
 
-        // For Matrix parameter attributes
-        var matrixTypes = TryInferFromMatrixParameters(method);
-        if (matrixTypes != null && !combinations.Any(c => TypeArraysEqual(c, matrixTypes.Value)))
+        // For parameter attributes that implement IInfersType<T>
+        var inferredTypes = TryInferFromTypeInferringAttributes(method);
+        if (inferredTypes != null && !combinations.Any(c => TypeArraysEqual(c, inferredTypes.Value)))
         {
-            combinations.Add(matrixTypes.Value);
+            combinations.Add(inferredTypes.Value);
         }
 
         // For MethodDataSource attributes

@@ -1,3 +1,5 @@
+using TUnit.Core.Interfaces;
+
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Parameter)]
@@ -13,4 +15,4 @@ public class MatrixAttribute(params object?[]? objects) : TUnitAttribute
 }
 
 [AttributeUsage(AttributeTargets.Parameter)]
-public class MatrixAttribute<T>(params T?[]? objects) : MatrixAttribute(objects?.Cast<object>().ToArray());
+public class MatrixAttribute<T>(params T?[]? objects) : MatrixAttribute(objects?.Cast<object>().ToArray()), IInfersType<T>;
