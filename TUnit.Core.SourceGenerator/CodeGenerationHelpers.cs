@@ -270,14 +270,14 @@ internal static class CodeGenerationHelpers
     /// </summary>
     private static bool IsDataSourceAttribute(AttributeData attr)
     {
-        var fullName = attr.AttributeClass!.GloballyQualified();
-        return fullName == "TUnit.Core.ArgumentsAttribute" ||
-               fullName == "TUnit.Core.InlineDataAttribute" ||
-               fullName == "TUnit.Core.MethodDataSourceAttribute" ||
-               fullName == "TUnit.Core.ClassDataSourceAttribute" ||
-               fullName == "TUnit.Core.PropertyDataSourceAttribute" ||
-               attr.AttributeClass!.AllInterfaces.Any(i =>
-                   i.GloballyQualified() == "TUnit.Core.Interfaces.IDataSourceAttribute");
+        if (attr.AttributeClass == null)
+        {
+            return false;
+        }
+
+        // Check if the attribute inherits from TestDataAttribute or implements IDataSourceAttribute
+        return attr.AttributeClass.IsOrInherits("global::TUnit.Core.TestDataAttribute") ||
+               attr.AttributeClass.AllInterfaces.Any(i => i.GloballyQualified() == "global::TUnit.Core.IDataSourceAttribute");
     }
 
     /// <summary>
@@ -296,14 +296,11 @@ internal static class CodeGenerationHelpers
             case "TUnit.Core.MethodDataSourceAttribute":
                 return GenerateMethodDataSourceProvider(attr, containingType);
 
-            case "TUnit.Core.ClassDataSourceAttribute":
-                return GenerateClassDataSourceProvider(attr);
-
             case "TUnit.Core.PropertyDataSourceAttribute":
                 return GeneratePropertyDataSourceProvider(attr, containingType);
 
             default:
-                // For custom IDataSourceAttribute implementations
+                // For custom IDataSourceAttribute implementations (including ClassDataSourceAttribute)
                 return GenerateCustomDataProvider(attr);
         }
     }
@@ -360,32 +357,6 @@ internal static class CodeGenerationHelpers
         return $"new System.Type[] {{ {string.Join(", ", parameterTypes)} }}";
     }
 
-    private static string GenerateClassDataSourceProvider(AttributeData attr)
-    {
-        if (attr.ConstructorArguments.Length == 0)
-        {
-            return "";
-        }
-
-        if (attr.ConstructorArguments[0].Value is not ITypeSymbol dataSourceType)
-        {
-            return "";
-        }
-
-        var isShared = attr.NamedArguments.FirstOrDefault(na => na.Key == "Shared").Value.Value as bool? ?? false;
-
-        // Check if we can use AOT-friendly approach for class data sources
-        if (dataSourceType is INamedTypeSymbol namedType)
-        {
-            var getDataMethod = FindDataSourceMethod("GetData", namedType);
-            if (getDataMethod != null && ShouldUseAotOptimizedDataSource(getDataMethod))
-            {
-                return GenerateAotOptimizedClassDataSource("GetData", namedType, isShared);
-            }
-        }
-
-        return $"new global::TUnit.Core.DynamicTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ SourceType = typeof({dataSourceType.GloballyQualified()}), SourceMemberName = \"GetData\" }}";
-    }
 
     private static string GeneratePropertyDataSourceProvider(AttributeData attr, INamedTypeSymbol containingType)
     {
@@ -409,10 +380,32 @@ internal static class CodeGenerationHelpers
 
     private static string GenerateCustomDataProvider(AttributeData attr)
     {
-        // For custom data attributes, we need to be more careful about AOT compatibility
-        // Most custom data attributes will require dynamic code, so they should use DynamicTestDataSource
-        // with appropriate warning attributes on the attribute class itself
-        return $"new global::TUnit.Core.DynamicTestDataSource(false) {{ SourceType = typeof({attr.AttributeClass!.GloballyQualified()}), SourceMemberName = \"GetData\" }}";
+        // For custom data attributes that inherit from TestDataAttribute (including AsyncDataSourceGeneratorAttribute),
+        // we need to instantiate the attribute and use it directly
+        var attributeType = attr.AttributeClass!.GloballyQualified();
+        
+        // Generate constructor arguments if any
+        var constructorArgs = string.Empty;
+        if (attr.ConstructorArguments.Length > 0)
+        {
+            var args = attr.ConstructorArguments.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg));
+            constructorArgs = string.Join(", ", args);
+        }
+
+        // Generate property initializers for named arguments
+        var propertyInitializers = new List<string>();
+        foreach (var namedArg in attr.NamedArguments)
+        {
+            var value = TypedConstantParser.GetRawTypedConstantValue(namedArg.Value);
+            propertyInitializers.Add($"{namedArg.Key} = {value}");
+        }
+
+        var propertyInit = propertyInitializers.Count > 0 
+            ? " { " + string.Join(", ", propertyInitializers) + " }" 
+            : string.Empty;
+
+        // For attributes that inherit from TestDataAttribute, instantiate them directly
+        return $"new {attributeType}({constructorArgs}){propertyInit}";
     }
 
     /// <summary>
@@ -655,16 +648,6 @@ internal static class CodeGenerationHelpers
                $"SourceMemberName = \"{methodName}\" }}";
     }
 
-    /// <summary>
-    /// Generates AOT-optimized class data source code that avoids reflection.
-    /// </summary>
-    private static string GenerateAotOptimizedClassDataSource(string methodName, INamedTypeSymbol containingType, bool isShared)
-    {
-        return $"new global::TUnit.Core.AotFriendlyTestDataSource({isShared.ToString().ToLowerInvariant()}) {{ " +
-               $"MethodInvoker = () => new {containingType.GloballyQualified()}().{methodName}(), " +
-               $"SourceType = typeof({containingType.GloballyQualified()}), " +
-               $"SourceMemberName = \"{methodName}\" }}";
-    }
 
     /// <summary>
     /// Generates AOT-optimized property data source code that avoids reflection.

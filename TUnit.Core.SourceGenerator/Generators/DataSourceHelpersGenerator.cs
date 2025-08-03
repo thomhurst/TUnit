@@ -457,10 +457,6 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         {
             GenerateArgumentsPropertyInit(sb, propInfo);
         }
-        else if (fullyQualifiedName == "global::TUnit.Core.ClassDataSourceAttribute")
-        {
-            GenerateClassDataSourcePropertyInit(sb, propInfo);
-        }
     }
 
     private static void GenerateAsyncDataSourcePropertyInit(StringBuilder sb, PropertyWithDataSource propInfo)
@@ -518,39 +514,6 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateClassDataSourcePropertyInit(StringBuilder sb, PropertyWithDataSource propInfo)
-    {
-        var property = propInfo.Property;
-        var attr = propInfo.DataSourceAttribute;
-        
-        // For generic ClassDataSource<T>, get type from generic type argument
-        if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
-        {
-            var dataSourceType = attr.AttributeClass.TypeArguments[0];
-            var fullyQualifiedType = dataSourceType.GloballyQualified();
-            var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-            
-            sb.AppendLine("        {");
-            sb.AppendLine($"            var dataSourceInstance = await CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
-            sb.AppendLine($"            instance.{property.Name} = dataSourceInstance;");
-            sb.AppendLine("        }");
-        }
-        // For non-generic ClassDataSource, get type from constructor arguments
-        else if (attr.ConstructorArguments.Length > 0)
-        {
-            var firstArg = attr.ConstructorArguments[0];
-            if (firstArg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol dataSourceType })
-            {
-                var fullyQualifiedType = dataSourceType.GloballyQualified();
-                var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-                
-                sb.AppendLine("        {");
-                sb.AppendLine($"            var dataSourceInstance = await CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
-                sb.AppendLine($"            instance.{property.Name} = dataSourceInstance;");
-                sb.AppendLine("        }");
-            }
-        }
-    }
 
     private static void GenerateInitOnlyPropertyAssignment(StringBuilder sb, PropertyWithDataSource propInfo)
     {
@@ -576,11 +539,6 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         else if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
         {
             GenerateArgumentsPropertyAssignment(sb, propInfo);
-        }
-        else if (fullyQualifiedName == "global::TUnit.Core.ClassDataSourceAttribute")
-        {
-            // For class data sources, we need to generate a temporary value since we can't await in object initializer
-            sb.AppendLine($"            {propertyName} = default!,");
         }
         else
         {
@@ -632,10 +590,6 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         else if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
         {
             GenerateStaticArgumentsPropertyInit(sb, propInfo, fullyQualifiedTypeName);
-        }
-        else if (fullyQualifiedName == "global::TUnit.Core.ClassDataSourceAttribute")
-        {
-            GenerateStaticClassDataSourcePropertyInit(sb, propInfo, fullyQualifiedTypeName);
         }
     }
 
@@ -694,39 +648,6 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateStaticClassDataSourcePropertyInit(StringBuilder sb, PropertyWithDataSource propInfo, string fullyQualifiedTypeName)
-    {
-        var property = propInfo.Property;
-        var attr = propInfo.DataSourceAttribute;
-        
-        // For generic ClassDataSource<T>, get type from generic type argument
-        if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
-        {
-            var dataSourceType = attr.AttributeClass.TypeArguments[0];
-            var fullyQualifiedType = dataSourceType.GloballyQualified();
-            var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-            
-            sb.AppendLine("        {");
-            sb.AppendLine($"            var dataSourceInstance = await CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
-            sb.AppendLine($"            {fullyQualifiedTypeName}.{property.Name} = dataSourceInstance;");
-            sb.AppendLine("        }");
-        }
-        // For non-generic ClassDataSource, get type from constructor arguments
-        else if (attr.ConstructorArguments.Length > 0)
-        {
-            var firstArg = attr.ConstructorArguments[0];
-            if (firstArg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol dataSourceType })
-            {
-                var fullyQualifiedType = dataSourceType.GloballyQualified();
-                var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-                
-                sb.AppendLine("        {");
-                sb.AppendLine($"            var dataSourceInstance = await CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
-                sb.AppendLine($"            {fullyQualifiedTypeName}.{property.Name} = dataSourceInstance;");
-                sb.AppendLine("        }");
-            }
-        }
-    }
 
     private static string GetDefaultValueForType(ITypeSymbol type)
     {
