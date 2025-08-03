@@ -224,6 +224,33 @@ public static class TypeExtensions
         return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     }
 
+    /// <summary>
+    /// Gets the globally qualified name with extern alias support
+    /// </summary>
+    public static string GloballyQualified(this ISymbol typeSymbol, Compilation compilation)
+    {
+        if (typeSymbol is not ITypeSymbol ts)
+        {
+            return typeSymbol.GloballyQualified();
+        }
+
+        // Only generate open generic form for types with unresolved type parameters
+        // This ensures we get BaseClass<> for generic definitions but List<int> for constructed types
+        if(typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && 
+           namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
+        {
+            var displayString = ts.ToDisplayStringWithAlias(compilation, DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+            var typeBuilder = new StringBuilder(displayString);
+            typeBuilder.Append('<');
+            typeBuilder.Append(new string(',', namedTypeSymbol.TypeArguments.Length - 1));
+            typeBuilder.Append('>');
+
+            return typeBuilder.ToString();
+        }
+
+        return ts.ToDisplayStringWithAlias(compilation, DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    }
+
     public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
 

@@ -101,7 +101,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         return new ClassWithDataSourceProperties
         {
             ClassSymbol = typeSymbol,
-            Properties = propertiesWithDataSources.ToImmutableArray()
+            Properties = propertiesWithDataSources.ToImmutableArray(),
+            Compilation = semanticModel.Compilation
         };
     }
 
@@ -156,7 +157,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         foreach (var classInfo in classes)
         {
             var sourceClassName = GetPropertySourceClassName(classInfo.ClassSymbol);
-            sb.AppendLine($"        PropertySourceRegistry.Register(typeof({classInfo.ClassSymbol.ToDisplayString()}), new {sourceClassName}());");
+            sb.AppendLine($"        PropertySourceRegistry.Register(typeof({classInfo.ClassSymbol.GloballyQualified(classInfo.Compilation)}), new {sourceClassName}());");
         }
 
         sb.AppendLine("    }");
@@ -169,7 +170,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static void GeneratePropertySource(StringBuilder sb, ClassWithDataSourceProperties classInfo)
     {
         var sourceClassName = GetPropertySourceClassName(classInfo.ClassSymbol);
-        var classTypeName = classInfo.ClassSymbol.GloballyQualified();
+        var classTypeName = classInfo.ClassSymbol.GloballyQualified(classInfo.Compilation);
 
         sb.AppendLine($"internal sealed class {sourceClassName} : IPropertySource");
         sb.AppendLine("{");
@@ -191,11 +192,11 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         {
             if (propInfo.Property.SetMethod?.IsInitOnly == true)
             {
-                var propertyType = propInfo.Property.Type.ToDisplayString();
+                var propertyType = propInfo.Property.Type.GloballyQualified(classInfo.Compilation);
                 var backingFieldName = $"<{propInfo.Property.Name}>k__BackingField";
 
                 // Use the property's containing type for the UnsafeAccessor, not the derived class
-                var containingType = propInfo.Property.ContainingType.ToDisplayString();
+                var containingType = propInfo.Property.ContainingType.GloballyQualified(classInfo.Compilation);
                 
                 sb.AppendLine("#if NET8_0_OR_GREATER");
                 sb.AppendLine($"    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
@@ -213,58 +214,58 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
         foreach (var propInfo in classInfo.Properties)
         {
-            GeneratePropertyMetadata(sb, propInfo, classInfo.ClassSymbol, classTypeName);
+            GeneratePropertyMetadata(sb, propInfo, classInfo.ClassSymbol, classTypeName, classInfo.Compilation);
         }
 
         sb.AppendLine("    }");
     }
 
-    private static void GeneratePropertyMetadata(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, INamedTypeSymbol classSymbol, string classTypeName)
+    private static void GeneratePropertyMetadata(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, INamedTypeSymbol classSymbol, string classTypeName, Compilation compilation)
     {
         var propertyName = propInfo.Property.Name;
-        var propertyType = propInfo.Property.Type.ToDisplayString();
-        var propertyTypeForTypeof = GetNonNullableTypeString(propInfo.Property.Type);
-        var attributeTypeName = propInfo.DataSourceAttribute.AttributeClass!.ToDisplayString();
+        var propertyType = propInfo.Property.Type.GloballyQualified(compilation);
+        var propertyTypeForTypeof = GetNonNullableTypeString(propInfo.Property.Type, compilation);
+        var attributeTypeName = propInfo.DataSourceAttribute.AttributeClass!.GloballyQualified(compilation);
 
         sb.AppendLine("        yield return new PropertyInjectionMetadata");
         sb.AppendLine("        {");
         sb.AppendLine($"            PropertyName = \"{propertyName}\",");
         sb.AppendLine($"            PropertyType = typeof({propertyTypeForTypeof}),");
-        sb.AppendLine($"            ContainingType = typeof({classSymbol.ToDisplayString()}),");
+        sb.AppendLine($"            ContainingType = typeof({classSymbol.GloballyQualified(compilation)}),");
 
         // Generate CreateDataSource delegate
         sb.AppendLine("            CreateDataSource = () =>");
         sb.AppendLine("            {");
-        GenerateDataSourceCreation(sb, propInfo.DataSourceAttribute, attributeTypeName);
+        GenerateDataSourceCreation(sb, propInfo.DataSourceAttribute, attributeTypeName, compilation);
         sb.AppendLine("            },");
 
         // Generate SetProperty delegate
         sb.AppendLine("            SetProperty = (instance, value) =>");
         sb.AppendLine("            {");
         sb.AppendLine($"                var typedInstance = ({classTypeName})instance;");
-        GeneratePropertySetting(sb, propInfo, propertyType, "typedInstance", classTypeName);
+        GeneratePropertySetting(sb, propInfo, propertyType, "typedInstance", classTypeName, compilation);
         sb.AppendLine("            }");
 
         sb.AppendLine("        };");
         sb.AppendLine();
     }
 
-    private static void GenerateDataSourceCreation(StringBuilder sb, AttributeData attributeData, string attributeTypeName)
+    private static void GenerateDataSourceCreation(StringBuilder sb, AttributeData attributeData, string attributeTypeName, Compilation compilation)
     {
-        var constructorArgs = string.Join(", ", attributeData.ConstructorArguments.Select(FormatTypedConstant));
+        var constructorArgs = string.Join(", ", attributeData.ConstructorArguments.Select(c => FormatTypedConstant(c, compilation)));
 
         sb.AppendLine($"                var dataSource = new {attributeTypeName}({constructorArgs});");
 
         foreach (var namedArg in attributeData.NamedArguments)
         {
-            var value = FormatTypedConstant(namedArg.Value);
+            var value = FormatTypedConstant(namedArg.Value, compilation);
             sb.AppendLine($"                dataSource.{namedArg.Key} = {value};");
         }
 
         sb.AppendLine("                return dataSource;");
     }
 
-    private static void GeneratePropertySetting(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, string propertyType, string instanceVariableName, string classTypeName)
+    private static void GeneratePropertySetting(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, string propertyType, string instanceVariableName, string classTypeName, Compilation compilation)
     {
         if (propInfo.Property.SetMethod?.IsInitOnly == true)
         {
@@ -272,7 +273,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
             sb.AppendLine("#if NET8_0_OR_GREATER");
             // Cast to the property's containing type if needed
-            var containingType = propInfo.Property.ContainingType.ToDisplayString();
+            var containingType = propInfo.Property.ContainingType.GloballyQualified(compilation);
             if (containingType != classTypeName)
             {
                 sb.AppendLine($"                Get{propInfo.Property.Name}BackingField(({containingType}){instanceVariableName}) = {castExpression};");
@@ -282,14 +283,14 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 sb.AppendLine($"                Get{propInfo.Property.Name}BackingField({instanceVariableName}) = {castExpression};");
             }
             sb.AppendLine("#else");
-            sb.AppendLine($"                var backingField = typeof({propInfo.Property.ContainingType.ToDisplayString()}).GetField(\"<{propInfo.Property.Name}>k__BackingField\",");
+            sb.AppendLine($"                var backingField = typeof({propInfo.Property.ContainingType.GloballyQualified(compilation)}).GetField(\"<{propInfo.Property.Name}>k__BackingField\",");
             sb.AppendLine("                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");
             sb.AppendLine($"                backingField?.SetValue({instanceVariableName}, value);");
             sb.AppendLine("#endif");
         }
         else if (propInfo.Property.IsStatic)
         {
-            var className = propInfo.Property.ContainingType.ToDisplayString();
+            var className = propInfo.Property.ContainingType.GloballyQualified(compilation);
             var castExpression = GetPropertyCastExpression(propInfo.Property, propertyType);
             sb.AppendLine($"                {className}.{propInfo.Property.Name} = {castExpression};");
         }
@@ -320,56 +321,56 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         return $"{typeName}_PropertyInjectionSource_{hash}";
     }
 
-    private static string FormatTypedConstant(TypedConstant constant)
+    private static string FormatTypedConstant(TypedConstant constant, Compilation compilation)
     {
         return constant.Kind switch
         {
             TypedConstantKind.Primitive when constant.Value is string str => $"\"{str}\"",
             TypedConstantKind.Primitive => constant.Value?.ToString() ?? "null",
-            TypedConstantKind.Enum => FormatEnumConstant(constant),
-            TypedConstantKind.Type => FormatTypeConstant(constant),
-            TypedConstantKind.Array => $"new object[] {{ {string.Join(", ", constant.Values.Select(FormatTypedConstant))} }}",
+            TypedConstantKind.Enum => FormatEnumConstant(constant, compilation),
+            TypedConstantKind.Type => FormatTypeConstant(constant, compilation),
+            TypedConstantKind.Array => $"new object[] {{ {string.Join(", ", constant.Values.Select(c => FormatTypedConstant(c, compilation)))} }}",
             _ => constant.Value?.ToString() ?? "null"
         };
     }
 
-    private static string FormatEnumConstant(TypedConstant constant)
+    private static string FormatEnumConstant(TypedConstant constant, Compilation compilation)
     {
         if (constant is { Type: not null, Value: not null })
         {
-            var enumTypeName = constant.Type.ToDisplayString();
+            var enumTypeName = constant.Type.GloballyQualified(compilation);
             return $"({enumTypeName}){constant.Value}";
         }
         return constant.Value?.ToString() ?? "null";
     }
 
-    private static string FormatTypeConstant(TypedConstant constant)
+    private static string FormatTypeConstant(TypedConstant constant, Compilation compilation)
     {
         if (constant.Value is ITypeSymbol typeSymbol)
         {
-            var displayString = GetNonNullableTypeString(typeSymbol);
+            var displayString = GetNonNullableTypeString(typeSymbol, compilation);
             return $"typeof({displayString})";
         }
 
         return $"typeof({constant.Value})";
     }
 
-    private static string GetNonNullableTypeString(ITypeSymbol typeSymbol)
+    private static string GetNonNullableTypeString(ITypeSymbol typeSymbol, Compilation compilation)
     {
         if (typeSymbol.NullableAnnotation == NullableAnnotation.Annotated)
         {
             if (typeSymbol is INamedTypeSymbol { IsReferenceType: true })
             {
-                return typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
+                return typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).GloballyQualified(compilation);
             }
         }
 
         if (typeSymbol is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.SpecialType: SpecialType.System_Nullable_T } namedType)
         {
-            return namedType.TypeArguments[0].ToDisplayString();
+            return namedType.TypeArguments[0].GloballyQualified(compilation);
         }
 
-        var displayString = typeSymbol.ToDisplayString();
+        var displayString = typeSymbol.GloballyQualified(compilation);
 
         if (displayString.EndsWith("?"))
         {
@@ -384,6 +385,7 @@ internal sealed class ClassWithDataSourceProperties
 {
     public required INamedTypeSymbol ClassSymbol { get; init; }
     public required ImmutableArray<PropertyWithDataSourceAttribute> Properties { get; init; }
+    public required Compilation Compilation { get; init; }
 }
 
 internal sealed class PropertyWithDataSourceAttribute
