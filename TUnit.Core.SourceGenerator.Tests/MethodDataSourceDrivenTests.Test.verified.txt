@@ -112,8 +112,6 @@ return classMetadata;
                         await global::System.Threading.Tasks.Task.CompletedTask;
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -271,8 +269,6 @@ return classMetadata;
                         await global::System.Threading.Tasks.Task.CompletedTask;
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -430,8 +426,6 @@ return classMetadata;
                         await global::System.Threading.Tasks.Task.CompletedTask;
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -607,8 +601,6 @@ return classMetadata;
                         await global::System.Threading.Tasks.Task.CompletedTask;
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -815,8 +807,6 @@ return classMetadata;
                         await global::System.Threading.Tasks.Task.CompletedTask;
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -974,8 +964,6 @@ return classMetadata;
                         await global::System.Threading.Tasks.Task.CompletedTask;
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -1142,8 +1130,6 @@ return classMetadata;
                         await typedInstance.EnumerableFuncArrayTest(typedValue);
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)

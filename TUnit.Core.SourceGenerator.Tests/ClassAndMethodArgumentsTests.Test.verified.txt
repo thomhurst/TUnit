@@ -237,8 +237,6 @@ return classMetadata;
                         await typedInstance.WithMethodLevel(typedValue);
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -399,8 +397,6 @@ return classMetadata;
                         await typedInstance.IgnoreParameters(typedValue);
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)

@@ -100,8 +100,6 @@ return classMetadata;
                         await typedInstance.Casted_Integer_To_Short_Converts(typedValue);
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -245,8 +243,6 @@ return classMetadata;
                         await typedInstance.Integer_To_Short_Converts(typedValue);
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)

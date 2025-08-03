@@ -102,8 +102,6 @@ return classMetadata;
                         await typedInstance.NullTest(typedValue);
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)

@@ -100,8 +100,6 @@ return classMetadata;
                         await global::System.Threading.Tasks.Task.CompletedTask;
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -277,8 +275,6 @@ return classMetadata;
                         await global::System.Threading.Tasks.Task.CompletedTask;
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -424,8 +420,6 @@ return classMetadata;
                         await global::System.Threading.Tasks.Task.CompletedTask;
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -601,8 +595,6 @@ return classMetadata;
                         await global::System.Threading.Tasks.Task.CompletedTask;
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -751,8 +743,6 @@ return classMetadata;
                 // Check if we have typed arguments to avoid boxing
                 if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
                 {
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)

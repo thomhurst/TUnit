@@ -117,8 +117,6 @@ return classMetadata;
                         await typedInstance.TryParse_InvalidString_ReturnsFailure(typedValue, context?.CancellationToken ?? System.Threading.CancellationToken.None);
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -270,8 +268,6 @@ return classMetadata;
                         await typedInstance.Parse_InvalidString_ThrowsException(typedValue);
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -417,8 +413,6 @@ return classMetadata;
                         await typedInstance.TryParse_ValidString_ReturnsAccountId(typedValue);
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)

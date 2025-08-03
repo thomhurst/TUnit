@@ -605,8 +605,6 @@ return classMetadata;
                         await typedInstance.DataTest(typedValue, context?.CancellationToken ?? System.Threading.CancellationToken.None);
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -817,8 +815,6 @@ return classMetadata;
                         await typedInstance.DataSourceTest(typedValue, context?.CancellationToken ?? System.Threading.CancellationToken.None);
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
@@ -1009,8 +1005,6 @@ return classMetadata;
                         await typedInstance.MatrixTest(typedValue, context?.CancellationToken ?? System.Threading.CancellationToken.None);
                         return;
                     }
-                    // Fallback to untyped arguments from TypedTestArguments
-                    args = typedArgs.GetUntypedArguments();
                 }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
