@@ -1079,11 +1079,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else if (IsEnumerable(returnType))
         {
-            // IEnumerable<T> - generate lambda that invokes method each time
-            writer.AppendLine("yield return () =>");
-            writer.AppendLine("{");
-            writer.Indent();
-            
+            // IEnumerable<T> - must evaluate once to iterate, but create items list inside lambda for freshness
             if (isStatic)
             {
                 writer.AppendLine($"var result = {fullyQualifiedType}.{methodCall};");
@@ -1105,29 +1101,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
             }
-            
+            writer.AppendLine();
             writer.AppendLine("if (result is System.Collections.IEnumerable enumerable && !(result is string))");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("var items = new System.Collections.Generic.List<object?>();");
             writer.AppendLine("foreach (var item in enumerable)");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("items.Add(item);");
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
             writer.Unindent();
             writer.AppendLine("}");
-            writer.AppendLine("return global::System.Threading.Tasks.Task.FromResult(items.ToArray());");
             writer.Unindent();
             writer.AppendLine("}");
             writer.AppendLine("else");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
             writer.Unindent();
             writer.AppendLine("}");
-            
-            writer.Unindent();
-            writer.AppendLine("};");
         }
         else
         {
