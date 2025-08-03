@@ -783,7 +783,7 @@ namespace
         public virtual object?[] GetObjects(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Parameter)]
-    public class MatrixAttribute<T> : .MatrixAttribute
+    public class MatrixAttribute<T> : .MatrixAttribute, .<T>
     {
         public MatrixAttribute(params T?[]? objects) { }
     }
@@ -2138,6 +2138,7 @@ namespace .Interfaces
         . ExecuteBeforeTestHook(.MethodMetadata hookMethodInfo, .TestContext context, <.> action);
         . ExecuteBeforeTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action);
     }
+    public interface IInfersType<T> { }
     public interface ILastTestInAssemblyEventReceiver : .
     {
         . OnLastTestInAssembly(.AssemblyHookContext context, .TestContext testContext);
