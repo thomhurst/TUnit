@@ -1410,12 +1410,6 @@ namespace
         public  Start { get; init; }
         public string StepName { get; init; }
     }
-    public sealed class TupleTypedTestArguments<T1, T2> : .TypedTestArguments
-    {
-        public TupleTypedTestArguments(T1 item1, T2 item2) { }
-        public override object?[]? GetUntypedArguments() { }
-        public override bool TryGetTypedValue<T>(out T value) { }
-    }
     public sealed class TypeArrayComparer : .<[]>
     {
         public static readonly .TypeArrayComparer Instance;
@@ -1464,27 +1458,6 @@ namespace
         [.(typeof(.TypedDataSourceAttribute<T>.<GetDataRowsAsync>d__1))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public abstract .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-    }
-    public class TypedDataSourceWrapper<T> : .IDataSourceAttribute, .ITypedDataSourceAttribute<T>
-    {
-        public TypedDataSourceWrapper(.IDataSourceAttribute innerDataSource) { }
-        public bool CanOptimize { get; init; }
-        public  DataType { get; init; }
-        public bool IsValueType { get; init; }
-        public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
-        public .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
-    }
-    public abstract class TypedTestArguments
-    {
-        protected TypedTestArguments() { }
-        public abstract object?[]? GetUntypedArguments();
-        public abstract bool TryGetTypedValue<T>(out T value);
-    }
-    public sealed class TypedTestArguments<T> : .TypedTestArguments
-    {
-        public TypedTestArguments(T value) { }
-        public override object?[]? GetUntypedArguments() { }
-        public override bool TryGetTypedValue<TResult>(out TResult value) { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
     public abstract class UntypedDataSourceGeneratorAttribute : .AsyncUntypedDataSourceGeneratorAttribute
@@ -2185,16 +2158,6 @@ namespace .Interfaces
     public interface ITestStartEventReceiver : .
     {
         . OnTestStart(.TestContext context);
-    }
-    public interface ITypedDataSourceHandler
-    {
-        bool CanHandle(.IDataSourceAttribute dataSource);
-        ? GetDataType(.IDataSourceAttribute dataSource);
-        .<object?> ProcessDataSourceAsync(.IDataSourceAttribute dataSource, .DataGeneratorMetadata metadata);
-    }
-    public interface ITypedDataSourceHandler<T> : .
-    {
-        .<.<<.<T>>>> ProcessTypedDataSourceAsync(.ITypedDataSourceAttribute<T> dataSource, .DataGeneratorMetadata metadata);
     }
     public interface ITypedTestMetadata
     {
