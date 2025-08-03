@@ -9,7 +9,7 @@ public class StringEqualsAssertionTests
         var value2 = "Foo";
         await TUnitAssert.That(value1).IsEqualTo(value2);
     }
-    
+
     [Test]
     public async Task Equals_Trimmed1_Success()
     {
@@ -17,7 +17,7 @@ public class StringEqualsAssertionTests
         var value2 = "Foo ";
         await TUnitAssert.That(value1).IsEqualTo(value2).WithTrimming();
     }
-    
+
     [Test]
     public async Task Equals_Trimmed2_Success()
     {
@@ -25,7 +25,7 @@ public class StringEqualsAssertionTests
         var value2 = "Foo";
         await TUnitAssert.That(value1).IsEqualTo(value2).WithTrimming();
     }
-    
+
     [Test]
     public async Task IgnoringWhitespace_Success()
     {
@@ -33,7 +33,7 @@ public class StringEqualsAssertionTests
         var value2 = "Foo";
         await TUnitAssert.That(value1).IsEqualTo(value2).IgnoringWhitespace();
     }
-    
+
     [Test]
     public async Task Equals_NullAndEmptyEquality_Success()
     {
@@ -41,70 +41,70 @@ public class StringEqualsAssertionTests
         string? value2 = null;
         await TUnitAssert.That(value1).IsEqualTo(value2).WithNullAndEmptyEquality();
     }
-    
+
     [Test]
     public async Task Equals_NullAndEmptyEquality2_Success()
     {
         string? value1 = null;
         var value2 = "";
-        
+
         await TUnitAssert.That(value1).IsEqualTo(value2).WithNullAndEmptyEquality();
     }
-    
+
     [Test]
     public async Task Equals_Failure()
     {
         var value1 = "Foo";
         var value2 = "Bar";
-        
+
         await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
     }
-    
+
     [Test]
     public async Task Equals_Trimmed1_Failure()
     {
         var value1 = "Foo";
         var value2 = "Foo! ";
-        
+
         await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithTrimming());
     }
-    
+
     [Test]
     public async Task Equals_Trimmed2_Failure()
     {
         var value1 = "Foo! ";
         var value2 = "Foo";
-        
+
         await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithTrimming());
     }
-    
+
     [Test]
     public async Task IgnoringWhitespace_Failure()
     {
         var value1 = "       F    o    o    !";
         var value2 = "Foo";
-        
+
         await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).IgnoringWhitespace());
     }
-    
+
     [Test]
     public async Task Equals_NullAndEmptyEquality_Failure()
     {
         var value1 = "1";
         string? value2 = null;
-        
+
         await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithNullAndEmptyEquality());
     }
-    
+
     [Test]
     public async Task Equals_NullAndEmptyEquality2_Failure()
     {
         string? value1 = null;
         var value2 = "1";
-        
+
         await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2).WithNullAndEmptyEquality());
     }
-    
+
     [Test]
     public async Task Equals_Failure_Long_Message()
     {
@@ -128,7 +128,7 @@ public class StringEqualsAssertionTests
                      Quis duo feugait erat diam. Amet minim vero veniam esse consequat tation takimata eu in diam ut ea hendrerit eos gubergren ea eirmod. 
                      Volutpat vero est ea clita clita magna dolor nulla ipsum aliquyam nonumy.
                      """.ReplaceLineEndings(" ");
-        
+
         var value2 = """
                      Lorem ipsum dolor sit amet diam duo amet sea rebum. 
                      Et voluptua ex voluptua no praesent diam eu sed consetetur sit at ipsum et consetetur aliquam ipsum dolor. 
@@ -149,7 +149,7 @@ public class StringEqualsAssertionTests
                      Quis duo feugait erat diam. Amet minim vero veniam esse consequat tation takimata eu in diam ut ea hendrerit eos gubergren ea eirmod. 
                      Volutpat vero est ea clita clita magna dolor nulla ipsum aliquyam nonumy.
                      """.ReplaceLineEndings(" ");
-        
+
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
         await TUnitAssert.That(exception!.Message).IsEqualTo("""
                                                         Expected value1 to be equal to "Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se…

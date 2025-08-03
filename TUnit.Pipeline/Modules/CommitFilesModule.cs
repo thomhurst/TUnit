@@ -34,20 +34,20 @@ public class CommitFilesModule : Module<CommandResult>
         }
 
         var result = await generateReadMeModule;
-        
+
         return result.SkipDecision.ShouldSkip || !result.HasValue;
     }
 
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var repositoryId = long.Parse(context.GitHub().EnvironmentVariables.RepositoryId!);
-        
+
         await context.Git().Commands.Config(new GitConfigOptions
         {
             Global = true,
             Arguments = ["user.name", context.GitHub().EnvironmentVariables.Actor!]
         }, cancellationToken);
-        
+
         await context.Git().Commands.Config(new GitConfigOptions
         {
             Global = true,
@@ -55,9 +55,9 @@ public class CommitFilesModule : Module<CommandResult>
         }, cancellationToken);
 
         var newBranchName = $"feature/readme-{Guid.NewGuid():N}";
-        
+
         await context.Git().Commands.Checkout(new GitCheckoutOptions(newBranchName, true), cancellationToken);
-        
+
         await context.Git().Commands.Add(new GitAddOptions
         {
             Arguments = ["README.md"],
@@ -73,7 +73,7 @@ public class CommitFilesModule : Module<CommandResult>
         {
             Arguments = ["--set-upstream", "origin", newBranchName]
         }, cancellationToken);
-        
+
         await context.Git().Commands.Push(token: cancellationToken);
 
         var pr = await context.GitHub().Client.PullRequest.Create(repositoryId,
@@ -81,7 +81,7 @@ public class CommitFilesModule : Module<CommandResult>
 
         var issueUpdate = new IssueUpdate();
         issueUpdate.AddLabel("ignore-for-release");
-        
+
         await context.GitHub().Client.Issue.Update(repositoryId, pr.Number,
             issueUpdate);
 

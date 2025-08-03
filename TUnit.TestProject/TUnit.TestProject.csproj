@@ -1,77 +1,64 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\TestProject.props" />
+    <Import Project="..\TestProject.props" />
 
-  <PropertyGroup>
-    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
-  </PropertyGroup>
+    <PropertyGroup>
+        <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Aot)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
-    <IsAotCompatible>true</IsAotCompatible>
-    <PublishAot>true</PublishAot>
-    <PublishTrimmed>true</PublishTrimmed>
-    <AotMsCodeCoverageInstrumentation>true</AotMsCodeCoverageInstrumentation>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Aot)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+        <IsAotCompatible>true</IsAotCompatible>
+        <PublishAot>true</PublishAot>
+        <PublishTrimmed>true</PublishTrimmed>
+        <AotMsCodeCoverageInstrumentation>true</AotMsCodeCoverageInstrumentation>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(SingleFile)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
-    <UseAppHost>true</UseAppHost>
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
-    <PublishTrimmed>true</PublishTrimmed>
-    <SingleFileMsCodeCoverageInstrumentation>true</SingleFileMsCodeCoverageInstrumentation>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(SingleFile)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+        <UseAppHost>true</UseAppHost>
+        <PublishSingleFile>true</PublishSingleFile>
+        <SelfContained>true</SelfContained>
+        <PublishTrimmed>true</PublishTrimmed>
+        <SingleFileMsCodeCoverageInstrumentation>true</SingleFileMsCodeCoverageInstrumentation>
+    </PropertyGroup>
 
-  <ItemGroup Condition="'$(SingleFile)' != 'true' and '$(Aot)' != 'true'">
-    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="AutoFixture" />
-    <PackageReference Include="coverlet.collector" />
-    <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" />
-    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
-    <PackageReference Include="OneOf" />
-    <PackageReference Include="OneOf.SourceGenerator" />
-    <PackageReference Include="RandomDataGenerator.Net" />
-    <PackageReference Include="Shouldly" />
-    <PackageReference Include="Humanizer" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
-    <PackageReference Include="Polly" />
-    <PackageReference Include="Vogen" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
-    <ProjectReference Include="..\TUnit\TUnit.csproj" />
-  </ItemGroup>
+    <ItemGroup Condition="'$(SingleFile)' != 'true' and '$(Aot)' != 'true'">
+        <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Data\Blah.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\Zip.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="testconfig.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="AutoFixture" />
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" />
+        <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+        <PackageReference Include="OneOf" />
+        <PackageReference Include="OneOf.SourceGenerator" />
+        <PackageReference Include="RandomDataGenerator.Net" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="Humanizer" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+        <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
+        <PackageReference Include="Polly" />
+        <PackageReference Include="Vogen" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
+        <ProjectReference Include="..\TUnit\TUnit.csproj" />
+        <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
 
-<!--      <Target Name="CleanGenerated" BeforeTargets="PreBuildEvent">-->
-<!--          <Message Text="Removing SourceGeneratedViewer directory..." Importance="high" />-->
-<!--          <RemoveDir Directories="$(ProjectDir)SourceGeneratedViewer" />-->
-<!--      </Target>-->
+    <ItemGroup>
+        <None Update="Data\Blah.txt">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Data\Zip.zip">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="testconfig.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
-<!--      <PropertyGroup>-->
-<!--          <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
-<!--          <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>-->
-<!--      </PropertyGroup>-->
-
-<!--      <ItemGroup>-->
-<!--          <Compile Remove="SourceGeneratedViewer\**" />-->
-<!--          <None Include="SourceGeneratedViewer\**" />-->
-<!--      </ItemGroup>-->
-
-<Import Project="..\TestProject.targets" />
+    <Import Project="..\TestProject.targets" />
+    <Import Project="..\SourceGenerationDebug.props" />
 
 </Project>

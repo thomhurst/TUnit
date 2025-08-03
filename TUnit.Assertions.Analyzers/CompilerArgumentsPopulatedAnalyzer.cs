@@ -51,7 +51,7 @@ public class CompilerArgumentsPopulatedAnalyzer : ConcurrentDiagnosticAnalyzer
         if (argumentOperation.Parameter?.GetAttributes().Any(x =>
                 x.AttributeClass?.GloballyQualified()
                     is "global::System.Runtime.CompilerServices.CallerMemberNameAttribute"
-                    or "global::System.Runtime.CompilerServices.CallerArgumentExpressionAttribute") 
+                    or "global::System.Runtime.CompilerServices.CallerArgumentExpressionAttribute")
             == true)
         {
             context.ReportDiagnostic(

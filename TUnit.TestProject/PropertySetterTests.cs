@@ -9,8 +9,8 @@ namespace TUnit.TestProject;
 [NotInParallel(nameof(PropertySetterTests))]
 public class PropertySetterTests
 {
-    [Arguments("1")]
-    public required string Property1 { get; init; }
+    // Arguments attribute not supported on properties - initialize in constructor or with default
+    public required string Property1 { get; init; } = "1";
 
     [MethodDataSource(nameof(MethodData))]
     public required string Property2 { get; init; }
@@ -27,7 +27,7 @@ public class PropertySetterTests
     [ClassDataSource<InnerModel>(Shared = SharedType.Keyed, Key = "Key")]
     public required InnerModel Property6 { get; init; }
 
-    [DataSourceGeneratorTests.AutoFixtureGenerator<string>]
+    [AutoFixtureGenerator<string>]
     public required string Property7 { get; init; }
 
     [ClassDataSource<StaticInnerModel>(Shared = SharedType.PerTestSession)]
@@ -75,7 +75,7 @@ public class PropertySetterTests
         await Assert.That(StaticProperty).IsNotNull();
         await Assert.That(StaticProperty.IsInitialized).IsTrue();
         await Assert.That(StaticProperty.Foo).IsEqualTo("Bar");
-        
+
         await Assert.That(Property3.IsInitialized).IsTrue();
         await Assert.That(Property4.IsInitialized).IsTrue();
         await Assert.That(Property5.IsInitialized).IsTrue();
@@ -99,7 +99,7 @@ public class PropertySetterTests
         {
             Console.WriteLine(@"Disposing Property");
 
-            return default;
+            return default(ValueTask);
         }
     }
 
@@ -119,7 +119,7 @@ public class PropertySetterTests
         public ValueTask DisposeAsync()
         {
             Console.WriteLine(@"Disposing Static Property");
-            return default;
+            return default(ValueTask);
         }
     }
 

@@ -16,19 +16,19 @@ public class StringContainsAssertionBuilderWrapper : InvokableValueAssertionBuil
         assertion.WithTransform(s => s?.Trim(), s => s?.Trim());
 
         AppendCallerMethod([]);
-        
+
         return this;
     }
-    
+
     public StringContainsAssertionBuilderWrapper IgnoringWhitespace()
     {
         var assertion = (StringContainsExpectedValueAssertCondition) Assertions.Peek();
 
         assertion.WithTransform(StringUtils.StripWhitespace, StringUtils.StripWhitespace);
         assertion.IgnoreWhitespace = true;
-        
+
         AppendCallerMethod([]);
-        
+
         return this;
     }
 }

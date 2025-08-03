@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Composition;
-using System.Runtime.InteropServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -28,7 +27,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                     equivalenceKey: Rules.XunitMigration.Title.ToString()),
                 diagnostic);
         }
-        
+
         return Task.CompletedTask;
     }
 
@@ -40,23 +39,23 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         {
             return document;
         }
-        
+
         var compilation = await document.Project.GetCompilationAsync(cancellationToken);
 
         if (compilation is null)
         {
             return document;
         }
-        
+
         var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
-        
+
         if (semanticModel is null)
         {
             return document;
         }
-        
+
         var syntaxTree = root.SyntaxTree;
-        
+
         // Always use the latest updatedRoot as input for the next transformation
         var updatedRoot = UpdateInitializeDispose(compilation, root);
         UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
@@ -75,7 +74,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
 
         updatedRoot = RemoveUsingDirectives(updatedRoot);
         UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
-        
+
         // Apply all changes in one step
         return document.WithSyntaxRoot(updatedRoot);
     }
@@ -85,13 +84,13 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         var currentRoot = root;
 
         var compilationValue = compilation;
-        
+
         while (currentRoot.DescendantNodes()
                .OfType<InvocationExpressionSyntax>()
                .FirstOrDefault(x => IsTestOutputHelperInvocation(compilationValue, x))
-               is {} invocationExpressionSyntax)
+               is { } invocationExpressionSyntax)
         {
-            var memberAccessExpressionSyntax = (MemberAccessExpressionSyntax)invocationExpressionSyntax.Expression;
+            var memberAccessExpressionSyntax = (MemberAccessExpressionSyntax) invocationExpressionSyntax.Expression;
 
             currentRoot = currentRoot.ReplaceNode(
                 invocationExpressionSyntax,
@@ -103,35 +102,35 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                     )
                 )
             );
-            
+
             UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref currentRoot);
             compilationValue = compilation;
         }
 
         while (currentRoot.DescendantNodes()
                      .OfType<ParameterSyntax>()
-                     .FirstOrDefault(x => x.Type?.TryGetInferredMemberName() == "ITestOutputHelper") 
-               is {} parameterSyntax)
+                     .FirstOrDefault(x => x.Type?.TryGetInferredMemberName() == "ITestOutputHelper")
+               is { } parameterSyntax)
         {
             currentRoot = currentRoot.RemoveNode(parameterSyntax, SyntaxRemoveOptions.KeepNoTrivia)!;
         }
-        
+
         while (currentRoot.DescendantNodes()
                      .OfType<PropertyDeclarationSyntax>()
                      .FirstOrDefault(x => x.Type.TryGetInferredMemberName() == "ITestOutputHelper")
-                     is {} propertyDeclarationSyntax)
+                     is { } propertyDeclarationSyntax)
         {
             currentRoot = currentRoot.RemoveNode(propertyDeclarationSyntax, SyntaxRemoveOptions.KeepNoTrivia)!;
         }
-        
+
         while (currentRoot.DescendantNodes()
                      .OfType<FieldDeclarationSyntax>()
                      .FirstOrDefault(x => x.Declaration.Type.TryGetInferredMemberName() == "ITestOutputHelper")
-                     is {} fieldDeclarationSyntax)
+                     is { } fieldDeclarationSyntax)
         {
             currentRoot = currentRoot.RemoveNode(fieldDeclarationSyntax, SyntaxRemoveOptions.KeepNoTrivia)!;
         }
-        
+
         return currentRoot;
     }
 
@@ -171,13 +170,13 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             {
                 type = qualifiedNameSyntax.Right;
             }
-            
+
             if (type is not GenericNameSyntax genericNameSyntax ||
                 genericNameSyntax.Identifier.Text != "TheoryData")
             {
                 continue;
             }
-            
+
             var collectionItems = objectCreationExpressionSyntax.Initializer!
                 .ChildNodes()
                 .Select(x => x.DescendantNodesAndSelf().OfType<ExpressionSyntax>().First());
@@ -209,7 +208,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
 
             currentRoot = currentRoot.ReplaceNode(genericTheoryDataTypeSyntax, enumerableTypeSyntax);
         }
-        
+
         return currentRoot.NormalizeWhitespace();
     }
 
@@ -223,7 +222,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             {
                 continue;
             }
-            
+
             var semanticModel = compilation.GetSemanticModel(classDeclaration.SyntaxTree);
 
             if (semanticModel.GetDeclaredSymbol(classDeclaration) is not { } symbol)
@@ -294,7 +293,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         var compilationUnit = updatedRoot.DescendantNodesAndSelf()
             .OfType<CompilationUnitSyntax>()
             .FirstOrDefault();
-        
+
         if (compilationUnit is null)
         {
             return updatedRoot;
@@ -494,7 +493,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                             SyntaxFactory.IdentifierName("Obsolete")))],
                     _ => [attr]
                 };
-                
+
                 newAttributes.AddRange(converted);
             }
 
@@ -520,9 +519,9 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             }
 
             INamedTypeSymbol[] types = namedTypeSymbol.BaseType != null && namedTypeSymbol.BaseType.SpecialType != SpecialType.System_Object
-                ? [namedTypeSymbol.BaseType, ..namedTypeSymbol.AllInterfaces] 
-                : [..namedTypeSymbol.AllInterfaces];
-            
+                ? [namedTypeSymbol.BaseType, .. namedTypeSymbol.AllInterfaces]
+                : [.. namedTypeSymbol.AllInterfaces];
+
             var classFixturesToConvert = types
                 .Where(x => x.Name == "IClassFixture" && x.ContainingNamespace.Name.StartsWith("Xunit"))
                 .Select(x => SyntaxFactory.Attribute(
@@ -537,8 +536,8 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                         )
                 ).WithLeadingTrivia(SyntaxFactory.ElasticMarker))
                 .ToList();
-            
-            if(classFixturesToConvert.Count > 0)
+
+            if (classFixturesToConvert.Count > 0)
             {
                 node = node.AddAttributeLists(SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(classFixturesToConvert)));
             }
@@ -546,7 +545,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             var newBaseList = types.Where(x => !x.ContainingNamespace.Name.StartsWith("Xunit"))
                 .Select(x => SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName(x.ToDisplayString())))
                 .ToList();
-            
+
             if (newBaseList.Count == 0)
             {
                 // Preserve original trivia instead of forcing elastic trivia
@@ -555,11 +554,11 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             }
 
             var baseListSyntax = node.BaseList!.WithTypes(SyntaxFactory.SeparatedList<BaseTypeSyntax>(newBaseList));
-            
+
             return node.WithBaseList(baseListSyntax);
         }
     }
-    
+
     private class InitializeDisposeRewriter(INamedTypeSymbol namedTypeSymbol) : CSharpSyntaxRewriter
     {
         public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
@@ -577,7 +576,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             {
                 return node;
             }
-            
+
             var hasAsyncLifetime = interfaces.Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == "global::Xunit.IAsyncLifetime");
             var hasAsyncDisposable = interfaces.Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == "global::System.IAsyncDisposable");
             var hasDisposable = interfaces.Any(x => x.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix) == "global::System.IDisposable");
@@ -592,7 +591,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
 
             if (isTestClass)
             {
-                if(hasAsyncLifetime && GetInitializeMethod(node) is {} initializeMethod)
+                if (hasAsyncLifetime && GetInitializeMethod(node) is { } initializeMethod)
                 {
                     node = node
                         .AddMembers(
@@ -609,7 +608,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                                 )
                                 .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
                         );
-                    
+
                     node = node.RemoveNode(GetInitializeMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
 
                     node = node.WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
@@ -617,8 +616,8 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                         .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
 
                 }
-                
-                if((hasAsyncLifetime || hasAsyncDisposable) && GetDisposeAsyncMethod(node) is { } disposeAsyncMethod)
+
+                if ((hasAsyncLifetime || hasAsyncDisposable) && GetDisposeAsyncMethod(node) is { } disposeAsyncMethod)
                 {
                     node = node
                         .AddMembers(
@@ -635,15 +634,15 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                                 )
                                 .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
                         );
-                    
+
                     node = node.RemoveNode(GetDisposeAsyncMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
 
                     node = node.WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
                             node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IAsyncDisposable") is null or false))))
                         .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
                 }
-                
-                if(hasDisposable && GetDisposeMethod(node) is {} disposeMethod)
+
+                if (hasDisposable && GetDisposeMethod(node) is { } disposeMethod)
                 {
                     node = node
                         .AddMembers(
@@ -660,7 +659,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                                 )
                                 .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
                         );
-                    
+
                     node = node.RemoveNode(GetDisposeMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
 
                     node = node.WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
@@ -670,7 +669,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             }
             else
             {
-                if (hasAsyncLifetime && GetInitializeMethod(node) is {} initializeMethod)
+                if (hasAsyncLifetime && GetInitializeMethod(node) is { } initializeMethod)
                 {
                     node = node
                         .ReplaceNode(initializeMethod, initializeMethod.WithReturnType(SyntaxFactory.ParseTypeName("Task")))
@@ -683,7 +682,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                         ])))
                         .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
                 }
-                
+
                 if (hasAsyncLifetime && !hasAsyncDisposable)
                 {
                     node = node
@@ -733,14 +732,14 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         {
             newSyntaxTree = CSharpSyntaxTree.ParseText(
                 updatedRoot.ToFullString(),
-                (CSharpParseOptions)parseOptions,
+                (CSharpParseOptions) parseOptions,
                 syntaxTree.FilePath
             );
         }
 
         compilation = compilation.ReplaceSyntaxTree(syntaxTree, newSyntaxTree);
         syntaxTree = newSyntaxTree;
-        
+
         updatedRoot = newSyntaxTree.GetRoot();
     }
 }

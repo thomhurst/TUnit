@@ -49,7 +49,7 @@ public interface IConfiguration
     /// The configuration value associated with the specified key, or <c>null</c> if the key is not found.
     /// </returns>
     /// <remarks>
-    /// This method provides access to configuration values that can be set via command-line arguments,
+    /// Provides access to configuration values that can be set via command-line arguments,
     /// environment variables, or configuration files used in the test execution context.
     /// The configuration system is used by the TUnit testing framework to provide runtime
     /// configuration to tests and test infrastructure components.

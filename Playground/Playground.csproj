@@ -1,6 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    
-    <Import Project="..\TestProject.props" />
 
     <PropertyGroup>
         <TUnitReflectionScanner>true</TUnitReflectionScanner>
@@ -25,8 +23,6 @@
     <ItemGroup>
         <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
-
-    <Import Project="..\TestProject.targets" />
 
     <PropertyGroup>
         <GenerateTestingPlatformEntryPoint>false</GenerateTestingPlatformEntryPoint>

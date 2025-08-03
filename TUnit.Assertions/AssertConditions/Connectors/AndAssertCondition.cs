@@ -1,4 +1,6 @@
-﻿namespace TUnit.Assertions.AssertConditions.Connectors;
+﻿using TUnit.Engine;
+
+namespace TUnit.Assertions.AssertConditions.Connectors;
 
 internal class AndAssertCondition : BaseAssertCondition
 {
@@ -9,14 +11,13 @@ internal class AndAssertCondition : BaseAssertCondition
     {
         Verify.ArgNotNull(condition1);
         Verify.ArgNotNull(condition2);
-        
+
         _condition1 = condition1;
         _condition2 = condition2;
     }
 
 
-    // This method is not used, as the GetExpectationWithReason is overwritten
-    // and uses the expectation from the two conditions.
+    // Not used, as GetExpectationWithReason is overridden
     internal protected override string GetExpectation() => "";
 
     internal override string GetExpectationWithReason()

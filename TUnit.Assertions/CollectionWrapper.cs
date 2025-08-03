@@ -11,7 +11,7 @@ public class CollectionWrapper<TInner>(IValueSource<IEnumerable<TInner>> valueSo
     public InvokableValueAssertionBuilder<IEnumerable<TInner>> Satisfy<TExpected>(
         Func<TInner?, TExpected> mapper,
         Func<IValueSource<TExpected?>, IInvokableAssertionBuilder> assert,
-        [CallerArgumentExpression(nameof(mapper))] string mapperExpression = "", 
+        [CallerArgumentExpression(nameof(mapper))] string mapperExpression = "",
         [CallerArgumentExpression(nameof(assert))] string assertionBuilderExpression = "")
     {
         var subject = "items mapped by " + mapperExpression;
@@ -19,18 +19,18 @@ public class CollectionWrapper<TInner>(IValueSource<IEnumerable<TInner>> valueSo
             [mapperExpression, assertionBuilderExpression]);
     }
 
-    
+
     public InvokableValueAssertionBuilder<IEnumerable<TInner>> Satisfy<TExpected>(
         Func<TInner?, Task<TExpected>?> asyncMapper,
         Func<IValueSource<TExpected?>, IInvokableAssertionBuilder> assert,
-        [CallerArgumentExpression(nameof(asyncMapper))] string mapperExpression = "", 
+        [CallerArgumentExpression(nameof(asyncMapper))] string mapperExpression = "",
         [CallerArgumentExpression(nameof(assert))] string assertionBuilderExpression = "")
     {
         var subject = "items mapped by " + mapperExpression;
         return valueSource.RegisterAssertion(new EnumerableSatisfiesAssertCondition<IEnumerable<TInner>, TInner, TExpected>(asyncMapper, assert, subject, assertionBuilderExpression),
             [mapperExpression, assertionBuilderExpression]);
     }
-    
+
     public InvokableValueAssertionBuilder<IEnumerable<TInner>> Satisfy(
         Func<IValueSource<TInner?>, IInvokableAssertionBuilder> assert,
         [CallerArgumentExpression(nameof(assert))] string assertionBuilderExpression = "")

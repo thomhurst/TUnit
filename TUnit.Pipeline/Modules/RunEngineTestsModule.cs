@@ -28,7 +28,7 @@ public class RunEngineTestsModule : Module<CommandResult>
     protected override async Task<CommandResult?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Engine.Tests.csproj").AssertExists();
-        
+
         return await context.DotNet().Run(new DotNetRunOptions
         {
             Project = project.Name,
@@ -38,6 +38,7 @@ public class RunEngineTestsModule : Module<CommandResult>
             WorkingDirectory = project.Folder!,
             Arguments = [
                 "--hangdump", "--hangdump-filename", "hangdump.engine-tests.txt", "--hangdump-timeout", "20m",
+                "--maximum-parallel-tests", $"{Environment.ProcessorCount}",
                 "--fail-fast"
             ],
             EnvironmentVariables = new Dictionary<string, string?>

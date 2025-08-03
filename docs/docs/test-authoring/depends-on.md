@@ -1,5 +1,20 @@
 # Depends On
 
+:::warning Test Isolation Best Practice
+**Important**: Tests should ideally be self-contained, isolated, and side-effect free. This ensures they are:
+- Reliable and repeatable
+- Can run in any order
+- Easy to understand and maintain
+- Fast to execute
+
+The `[DependsOn]` feature should only be used for systems where creating stateless tests is:
+- Impossible (e.g., testing deployment pipelines)
+- Extremely difficult (e.g., complex multi-step workflows)
+- Too slow (e.g., expensive setup that must be shared)
+
+Before using `[DependsOn]`, consider if you can refactor your tests to be independent by using proper setup/teardown methods or test fixtures.
+:::
+
 A test can depend on another test. This means that your test will not start unless the other test has finished.
 
 To do this, add a  `[DependsOn]` to your test.

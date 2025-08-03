@@ -1,0 +1,16 @@
+<!-- 
+  TUnit.Core MSBuild targets
+  Automatically imported when TUnit.Core package is referenced
+-->
+<Project>
+
+  <!-- Clean up generated files -->
+  <Target Name="CleanTUnitGenerated" BeforeTargets="Clean">
+    <ItemGroup>
+      <TUnitGeneratedFiles Include="$(IntermediateOutputPath)**\TUnit.*.g.cs" />
+      <TUnitGeneratedFiles Include="$(IntermediateOutputPath)**\*TestMetadataRegistry*.g.cs" />
+    </ItemGroup>
+    <Delete Files="@(TUnitGeneratedFiles)" />
+  </Target>
+
+</Project>

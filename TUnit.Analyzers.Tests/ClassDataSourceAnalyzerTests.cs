@@ -219,7 +219,7 @@ public class ClassDataSourceAnalyzerTests
                     }
                 }
                 """,
-                
+
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
                     .WithArguments("int", "")
@@ -243,7 +243,7 @@ public class ClassDataSourceAnalyzerTests
                     }
                 }
                 """,
-                
+
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
                     .WithArguments("int", "string")

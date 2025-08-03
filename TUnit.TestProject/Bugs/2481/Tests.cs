@@ -2,6 +2,7 @@
 
 namespace TUnit.TestProject.Bugs._2481;
 
+[EngineTest(ExpectedResult.Pass)]
 public class Tests
 {
     [Test]
@@ -11,7 +12,7 @@ public class Tests
     public async Task Test()
     {
         var properties = TestContext.Current!.TestDetails.CustomProperties;
-        
+
         var array = properties["Group"].ToArray();
 
         await Assert.That(array).HasCount().EqualTo(3)

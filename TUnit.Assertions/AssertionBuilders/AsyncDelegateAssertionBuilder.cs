@@ -3,7 +3,7 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class AsyncDelegateAssertionBuilder 
+public class AsyncDelegateAssertionBuilder
     : AssertionBuilder,
         IDelegateSource
 {

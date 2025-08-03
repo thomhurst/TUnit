@@ -4,7 +4,7 @@ namespace TUnit.Assertions.Analyzers.Tests;
 
 public class ObjectBaseEqualsMethodAnalyzerTests
 {
-    
+
     [Test]
     public async Task No_Error()
     {

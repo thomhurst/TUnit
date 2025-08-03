@@ -1,45 +1,27 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
 namespace TUnit.Core;
 
+/// <summary>
+/// Context for building dynamic tests
+/// </summary>
 public class DynamicTestBuilderContext
 {
-    private readonly string _filePath;
-    private readonly int _lineNumber;
+    private readonly List<DynamicTest> _tests =
+    [
+    ];
 
     public DynamicTestBuilderContext(string filePath, int lineNumber)
     {
-        _filePath = filePath;
-        _lineNumber = lineNumber;
+        FilePath = filePath;
+        LineNumber = lineNumber;
     }
 
-    public DynamicTestBuilderContext(TestContext testContext) : this(testContext.TestDetails.TestFilePath, testContext.TestDetails.TestLineNumber)
-    {
-    }
+    public string FilePath { get; }
+    public int LineNumber { get; }
 
-    public List<DynamicTest> Tests { get; } = [];
+    public IReadOnlyList<DynamicTest> Tests => _tests.AsReadOnly();
 
-    public void AddTest<
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
-                                    | DynamicallyAccessedMemberTypes.PublicMethods 
-                                    | DynamicallyAccessedMemberTypes.PublicProperties)]
-        TClass>(DynamicTest<TClass> dynamicTest) where TClass : class
+    public void AddTest(DynamicTest test)
     {
-        var testToRegister = dynamicTest with
-        {
-            TestFilePath = _filePath,
-            TestLineNumber = _lineNumber
-        };
-        
-        Tests.Add(testToRegister);
-    }
-
-    public async Task AddTestAtRuntime<
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors 
-                                    | DynamicallyAccessedMemberTypes.PublicMethods
-                                    | DynamicallyAccessedMemberTypes.PublicProperties)]
-        TClass>(TestContext testContext, DynamicTest<TClass> dynamicTest) where TClass : class
-    {
-        await testContext.GetService<IDynamicTestRegistrar>().Register(dynamicTest);
+        _tests.Add(test);
     }
 }

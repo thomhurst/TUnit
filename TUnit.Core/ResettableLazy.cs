@@ -6,16 +6,16 @@ namespace TUnit.Core;
 
 public class ResettableLazy<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-    TClassConstructor,
+TClassConstructor,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-    T> : ResettableLazy<T>
+T> : ResettableLazy<T>
     where TClassConstructor : IClassConstructor, new()
     where T : class
 {
     public ResettableLazy(string sessionId, TestBuilderContext testBuilderContext) : base(new TClassConstructor(), sessionId, testBuilderContext)
     {
     }
-    
+
     public override async ValueTask ResetLazy()
     {
         await DisposeAsync(ClassConstructor);
@@ -34,9 +34,9 @@ public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMembe
     public IClassConstructor? ClassConstructor { get; protected set; }
     public TestBuilderContext TestBuilderContext { get; }
 
-    private Lazy<T> _lazy;
-    protected Func<T> _factory;
-    
+    private Lazy<Task<T>> _lazy;
+    protected Func<Task<T>> _factory;
+
     protected readonly string SessionId;
 
     protected ResettableLazy(IClassConstructor classConstructor, string sessionId,
@@ -50,31 +50,32 @@ public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMembe
             TestSessionId = sessionId,
             TestBuilderContext = testBuilderContext
         });
-        _lazy = new Lazy<T>(_factory);
+        _lazy = new Lazy<Task<T>>(_factory);
     }
 
-    public ResettableLazy(Func<T> factory, string sessionId, TestBuilderContext testBuilderContext)
+    public ResettableLazy(Func<Task<T>> factory, string sessionId, TestBuilderContext testBuilderContext)
     {
         TestBuilderContext = testBuilderContext;
         _factory = factory;
         SessionId = sessionId;
-        _lazy = new Lazy<T>(factory);
+        _lazy = new Lazy<Task<T>>(factory);
     }
 
-    public T Value => _lazy.Value;
+    public Task<T> Value => _lazy.Value;
 
     public virtual async ValueTask ResetLazy()
     {
         await DisposeAsync();
-        
-        _lazy = new Lazy<T>(_factory);
+
+        _lazy = new Lazy<Task<T>>(_factory);
     }
-    
+
     public async ValueTask DisposeAsync()
     {
         if (_lazy.IsValueCreated)
         {
-            await DisposeAsync(_lazy.Value);
+            var instance = await _lazy.Value;
+            await DisposeAsync(instance);
         }
     }
 

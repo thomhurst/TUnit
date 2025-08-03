@@ -4,29 +4,20 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;
 
-public class DependencyInjectionClassConstructor : IClassConstructor, ITestEndEventReceiver
+public class DependencyInjectionClassConstructor : IClassConstructor
 {
     private readonly IServiceProvider _serviceProvider = CreateServiceProvider();
-    private AsyncServiceScope? _scope;
 
-    public object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
+    public Task<object> Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
     {
-        _scope ??= _serviceProvider.CreateAsyncScope();
-
-        return ActivatorUtilities.GetServiceOrCreateInstance(_scope!.Value.ServiceProvider, type);
-    }
-
-    public ValueTask OnTestEnd(AfterTestContext testContext)
-    {
-        return _scope!.Value.DisposeAsync();
+        var instance = ActivatorUtilities.GetServiceOrCreateInstance(_serviceProvider, type);
+        return Task.FromResult(instance);
     }
 
     private static IServiceProvider CreateServiceProvider()
     {
-        return new ServiceCollection()
-            .AddTransient<DummyReferenceTypeClass>()
-            .BuildServiceProvider();
+        var services = new ServiceCollection();
+        services.AddTransient<DummyReferenceTypeClass>();
+        return services.BuildServiceProvider();
     }
-
-    public int Order => 0;
 }

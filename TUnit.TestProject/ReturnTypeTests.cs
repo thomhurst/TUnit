@@ -32,7 +32,7 @@ public class ReturnTypeTests
     [Test]
     public ValueTask Test5()
     {
-        return default;
+        return default(ValueTask);
     }
 
     [Test]

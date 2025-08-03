@@ -5,4 +5,4 @@ namespace TUnit.TestProject.Bugs._1899;
 
 [EngineTest(ExpectedResult.Pass)]
 [InheritsTests]
-public class DerivedTest: BaseClass<DummyReferenceTypeClass>;
+public class DerivedTest : BaseClass<DummyReferenceTypeClass>;

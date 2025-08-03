@@ -23,7 +23,7 @@ internal class ParametersCommandProvider(IExtension extension) : ICommandLineOpt
     public string Description => extension.Description;
 
     public readonly Regex Regex = new("^.+=.*$");
-    
+
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     {
         return
@@ -36,7 +36,7 @@ internal class ParametersCommandProvider(IExtension extension) : ICommandLineOpt
     {
         if (arguments.Any(argument => !Regex.IsMatch(argument)))
         {
-            return ValidationResult.InvalidTask("TestParameter must be in the format of KEY=VALUE");
+            return ValidationResult.InvalidTask("ParameterMetadata must be in the format of KEY=VALUE");
         }
 
         return ValidationResult.ValidTask;

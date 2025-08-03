@@ -63,7 +63,7 @@ public class AwaitValueTaskAssertThatAnalyzerTests
                     .WithLocation(0)
             );
     }
-    
+
     [Test]
     public async Task ValueTask_Assert_That_Is_Not_Flagged_When_Awaited()
     {
@@ -90,7 +90,7 @@ public class AwaitValueTaskAssertThatAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task ValueTask_Assert_That_Func_Is_Not_Flagged_When_Awaited()
     {

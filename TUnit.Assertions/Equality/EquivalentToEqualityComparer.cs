@@ -10,7 +10,7 @@ namespace TUnit.Assertions.Equality;
 
 public class EquivalentToEqualityComparer<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
-    T>(CompareOptions compareOptions) : IEqualityComparer<T>
+T>(CompareOptions compareOptions) : IEqualityComparer<T>
 {
     public virtual int? EnumerableIndex { get; protected set; }
 
@@ -19,11 +19,11 @@ public class EquivalentToEqualityComparer<
     public EquivalentToEqualityComparer() : this(new CompareOptions())
     {
     }
-    
+
     public virtual bool Equals(T? x, T? y)
     {
         ComparisonFailures = Compare.CheckEquivalent(x, y, compareOptions, EnumerableIndex).ToArray();
-        
+
         return ComparisonFailures.Length == 0;
     }
 
@@ -38,7 +38,7 @@ public class EquivalentToEqualityComparer<
 
         stringBuilder.AppendLine("found the following mismatches:");
         stringBuilder.AppendLine();
-            
+
         foreach (var comparisonFailure in ComparisonFailures ?? [])
         {
             stringBuilder.AppendLine($"{string.Join(".", comparisonFailure.NestedMemberNames)}:");
@@ -46,7 +46,7 @@ public class EquivalentToEqualityComparer<
             stringBuilder.AppendLine($"\tActual: {Formatter.Format(comparisonFailure.Actual)}");
             stringBuilder.AppendLine();
         }
-            
+
         return stringBuilder.ToString();
     }
 }

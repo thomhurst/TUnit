@@ -5,7 +5,7 @@ internal class NullLogger : ILogger
     public ValueTask LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception,
         Func<TState, Exception?, string> formatter)
     {
-        return default;
+        return default(ValueTask);
     }
 
     public void Log<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)

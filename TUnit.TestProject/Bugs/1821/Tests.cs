@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1821;
 
@@ -14,7 +12,7 @@ public class Tests(MyData data)
     {
         await Assert.That(value).IsEqualTo("Hello World!");
     }
-    
+
     [Test]
     [MatrixDataSource]
     public async Task MatrixDataSource([MatrixInstanceMethod<Tests>(nameof(DataSource))] string value)

@@ -1,510 +1,396 @@
-﻿using System.Diagnostics;
-using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Requests;
+using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
-using TUnit.Core.Enums;
-using TUnit.Core.Exceptions;
-using TUnit.Core.Extensions;
+using TUnit.Core.Data;
 using TUnit.Core.Logging;
-using TUnit.Engine.Capabilities;
-using TUnit.Engine.Exceptions;
+using TUnit.Core.ReferenceTracking;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Extensions;
-using TUnit.Engine.Helpers;
-using TUnit.Engine.Hooks;
+using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
-
-#pragma warning disable TPEXP
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Services;
 
-internal class SingleTestExecutor(
-    IExtension extension,
-    InstanceTracker instanceTracker,
-    TestInvoker testInvoker,
-    ParallelLimitLockProvider parallelLimitLockProvider,
-    AssemblyHookOrchestrator assemblyHookOrchestrator,
-    ClassHookOrchestrator classHookOrchestrator,
-    ITUnitMessageBus messageBus,
-    TUnitFrameworkLogger logger,
-    EngineCancellationToken engineCancellationToken,
-    TestRegistrar testRegistrar,
-    StopExecutionCapability stopExecutionCapability)
-    : IDataProducer
+/// Handles ExecutionContext restoration for AsyncLocal support and test lifecycle management
+internal class SingleTestExecutor : ISingleTestExecutor
 {
-    private static readonly Lock Lock = new();
-    private static readonly SemaphoreSlim AssemblyEventsLock = new(1, 1);
-    private static readonly SemaphoreSlim ClassEventsLock = new(1, 1);
-    private static readonly SemaphoreSlim SessionEventsLock = new(1, 1);
-    
-    public Task ExecuteTestAsync(DiscoveredTest test, ITestExecutionFilter? filter,
-        bool isStartedAsDependencyForAnotherTest)
+    private readonly TUnitFrameworkLogger _logger;
+    private readonly ITestResultFactory _resultFactory;
+    private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
+    private readonly IHookCollectionService _hookCollectionService;
+    private SessionUid? _sessionUid;
+
+    public SingleTestExecutor(TUnitFrameworkLogger logger, EventReceiverOrchestrator eventReceiverOrchestrator, IHookCollectionService hookCollectionService)
     {
-        lock (Lock)
-        {
-            return test.TestContext.TestTask ??= Task.Run(async () => await ExecuteTestInternalAsync(test, filter, isStartedAsDependencyForAnotherTest));
-        }
+        _logger = logger;
+        _eventReceiverOrchestrator = eventReceiverOrchestrator;
+        _hookCollectionService = hookCollectionService;
+        _resultFactory = new TestResultFactory();
     }
 
-    private async ValueTask ExecuteTestInternalAsync(DiscoveredTest test, ITestExecutionFilter? filter,
-        bool isStartedAsDependencyForAnotherTest)
+    public void SetSessionId(SessionUid sessionUid)
     {
-        var semaphore = WaitForParallelLimiter(test, isStartedAsDependencyForAnotherTest);
+        _sessionUid = sessionUid;
+    }
 
-        if (semaphore != null)
+    public async Task<TestNodeUpdateMessage> ExecuteTestAsync(
+        AbstractExecutableTest test,
+        CancellationToken cancellationToken)
+    {
+        // If test is already failed (e.g., from data source expansion error),
+        // just report the existing failure
+        if (test is { State: TestState.Failed, Result: not null })
         {
-            await semaphore.WaitAsync();
+            return CreateUpdateMessage(test);
         }
 
-        DateTimeOffset? start = null;
+        TestContext.Current = test.Context;
+
+        test.StartTime = DateTimeOffset.Now;
+        test.State = TestState.Running;
+
+        var instance = await test.CreateInstanceAsync();
+        test.Context.TestDetails.ClassInstance = instance;
+
+        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
+        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
+
+        await PropertyInjector.InjectPropertiesAsync(
+            test.Context,
+            instance,
+            test.Metadata.PropertyDataSources,
+            test.Metadata.PropertyInjections,
+            test.Metadata.MethodMetadata,
+            test.Context.TestDetails.TestId);
+
+        await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
+
+        var classContext = test.Context.ClassContext;
+        var assemblyContext = classContext.AssemblyContext;
+        var sessionContext = assemblyContext.TestSessionContext;
+
+        await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
+
+        await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
+
+        await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
+        await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken);
+
         try
         {
-            var testContext = test.TestContext;
-
-            if (stopExecutionCapability.IsStopRequested || engineCancellationToken.Token.IsCancellationRequested)
+            if (!string.IsNullOrEmpty(test.Context.SkipReason))
             {
-                throw new TestRunCanceledException();
+                return await HandleSkippedTestAsync(test, cancellationToken);
             }
-            
-            await messageBus.InProgress(testContext);
 
-            var cleanUpExceptions = new List<Exception>();
+            if(test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
+            {
 
-            start = DateTimeOffset.Now;
+                await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken);
+            }
+            else
+            {
+                await ExecuteTestWithHooksAsync(test, instance, cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleTestFailure(test, ex);
+        }
+        finally
+        {
+            test.EndTime = DateTimeOffset.Now;
 
+            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
+
+            var endClassContext = test.Context!.ClassContext;
+            var endAssemblyContext = endClassContext.AssemblyContext;
+            var endSessionContext = endAssemblyContext.TestSessionContext;
+
+            await _eventReceiverOrchestrator.InvokeLastTestInClassEventReceiversAsync(test.Context, endClassContext, cancellationToken);
+
+            await _eventReceiverOrchestrator.InvokeLastTestInAssemblyEventReceiversAsync(test.Context, endAssemblyContext, cancellationToken);
+            await _eventReceiverOrchestrator.InvokeLastTestInSessionEventReceiversAsync(test.Context, endSessionContext, cancellationToken);
+        }
+
+        return CreateUpdateMessage(test);
+    }
+
+    private async Task ExecuteTestWithRetries(Func<Task> testDelegate, TestContext testContext, CancellationToken cancellationToken)
+    {
+        var retryLimit = testContext.TestDetails.RetryLimit;
+        var retryFunc = testContext.RetryFunc!;
+
+        for (var i = 0; i < retryLimit + 1; i++)
+        {
             try
             {
-                if (testContext.Result?.Exception is {} exception)
-                {
-                    throw exception;
-                }
-                
-                await WaitForDependencies(test, filter);
-
-                start = DateTimeOffset.Now;
-
-                await RegisterIfNotAlready(testContext);
-
-                if (testContext.SkipReason != null)
-                {
-                    throw new SkipTestException(testContext.SkipReason);
-                }
-
-                if (engineCancellationToken.Token.IsCancellationRequested)
-                {
-                    throw new SkipTestException("The test session has been cancelled...");
-                }
-                
-                TestContext.Current = testContext;
-                
-                await RunFirstTestEventReceivers(testContext);
-                
-                await ExecuteWithRetries(test, cleanUpExceptions);
-
-                ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
+                cancellationToken.ThrowIfCancellationRequested();
+                await testDelegate();
+                return;
             }
-            catch (SkipTestException skipTestException)
+            catch (Exception ex) when (i < retryLimit)
             {
-                await logger.LogInformationAsync($"Skipping {testContext.GetClassTypeName()}.{testContext.GetTestDisplayName()}...");
-                
-                testContext.SetResult(skipTestException);
-            }
-            catch (Exception e)
-            {
-                if (testContext.Result is null
-                    || testContext.Result?.IsOverridden is false
-                    || testContext.Result?.Status is Status.Failed or Status.Cancelled)
+                if (!await retryFunc(testContext, ex, i + 1))
                 {
-                    await logger.LogDebugAsync($"Error in test {testContext.TestDetails.TestClass.Type.FullName}.{testContext.GetTestDisplayName()}: {e}");
-                    testContext.SetResult(e);
                     throw;
                 }
-            }
-            finally
-            {
-                await RunCleanUps(test, testContext, cleanUpExceptions);
-            }
-        }
-        finally
-        {
-            semaphore?.Release();
 
-            var result = test.TestContext.Result!;
-            
-            var task = result.Status switch
-            {
-                Status.Passed => messageBus.Passed(test.TestContext, start.GetValueOrDefault()),
-                Status.Failed => messageBus.Failed(test.TestContext, result.Exception!, start.GetValueOrDefault()),
-                Status.Cancelled => messageBus.Cancelled(test.TestContext, start.GetValueOrDefault()),
-                Status.Skipped => messageBus.Skipped(test.TestContext, test.TestContext.SkipReason!),
-                _ => default,
-            };
-
-            await task;
+                await _logger.LogWarningAsync($"Retrying test due to exception: {ex.Message}. Attempt {i} of {retryLimit}.");
+            }
         }
     }
 
-    private async Task RunFirstTestEventReceivers(TestContext testContext)
+    private async Task<TestNodeUpdateMessage> HandleSkippedTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        await RunFirstTestInSessionEventReceivers(testContext);
+        test.State = TestState.Skipped;
 
-        await RunFirstTestInAssemblyEventReceivers(testContext);
-        
-        await RunFirstTestInClassEventReceivers(testContext);
+        test.Result = _resultFactory.CreateSkippedResult(
+            test.StartTime!.Value,
+            test.Context.SkipReason ?? "Test skipped");
+
+        test.EndTime = DateTimeOffset.Now;
+        await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
+
+        return CreateUpdateMessage(test);
     }
 
-    private async Task RunFirstTestInSessionEventReceivers(TestContext testContext)
+    private async Task ExecuteTestWithHooksAsync(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
     {
-        var testSessionContext = testContext.AssemblyContext.TestSessionContext;
+        RestoreHookContexts(test.Context);
 
-        if (testSessionContext.FirstTestStarted)
-        {
-            return;
-        }
-        
-        await SessionEventsLock.WaitAsync();
-        
+        // Collect hooks lazily at execution time
+        var testClassType = test.Context.TestDetails.ClassType;
+        var beforeTestHooks = await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType);
+        var afterTestHooks = await _hookCollectionService.CollectAfterTestHooksAsync(testClassType);
+
         try
         {
-            if (testSessionContext.FirstTestStarted)
-            {
-                return;
-            }
-            
-            foreach (var firstTestInAssemblyEventReceiver in testContext.GetFirstTestInTestSessionEventObjects())
-            {
-                testContext.RestoreExecutionContext();
-                await firstTestInAssemblyEventReceiver.OnFirstTestInTestSession(testSessionContext, testContext);
-            }
-        }
-        finally
-        {
-            testSessionContext.FirstTestStarted = true;
-            SessionEventsLock.Release();
-        }
-    }
-    
-    private async Task RunFirstTestInAssemblyEventReceivers(TestContext testContext)
-    {
-        var assemblyHookContext = testContext.AssemblyContext;
+            await ExecuteBeforeTestHooksAsync(beforeTestHooks, test.Context, cancellationToken);
 
-        if (assemblyHookContext.FirstTestStarted)
-        {
-            return;
-        }
-        
-        await AssemblyEventsLock.WaitAsync();
-        
-        try
-        {
-            if (assemblyHookContext.FirstTestStarted)
-            {
-                return;
-            }
-            
-            foreach (var firstTestInAssemblyEventReceiver in testContext.GetFirstTestInAssemblyEventObjects())
-            {
-                testContext.RestoreExecutionContext();
+            test.Context.RestoreExecutionContext();
 
-                await firstTestInAssemblyEventReceiver.OnFirstTestInAssembly(assemblyHookContext, testContext);
-            }
-        }
-        finally
-        {
-            assemblyHookContext.FirstTestStarted = true;
-            AssemblyEventsLock.Release();
-        }
-    }
-    
-    private async Task RunFirstTestInClassEventReceivers(TestContext testContext)
-    {
-        var classHookContext = testContext.ClassContext;
+            await InvokeTestWithTimeout(test, instance, cancellationToken);
 
-        if (classHookContext.FirstTestStarted)
-        {
-            return;
+            test.State = TestState.Passed;
+            test.Result = _resultFactory.CreatePassedResult(test.StartTime!.Value);
         }
-        
-        await ClassEventsLock.WaitAsync();
-        
-        try
+        catch (Exception ex)
         {
-            if (classHookContext.FirstTestStarted)
-            {
-                return;
-            }
-            
-            foreach (var firstTestInAssemblyEventReceiver in testContext.GetFirstTestInClassEventObjects())
-            {
-                testContext.RestoreExecutionContext();
-                await firstTestInAssemblyEventReceiver.OnFirstTestInClass(classHookContext, testContext);
-            }
-        }
-        finally
-        {
-            classHookContext.FirstTestStarted = true;
-            ClassEventsLock.Release();
-        }
-    }
-
-    private ValueTask RegisterIfNotAlready(TestContext testContext)
-    {
-        lock (Lock)
-        {
-            // Could not be registered if wasn't in the original filter and it's triggered from a [DependsOn]
-            if (!testContext.IsRegistered)
-            {
-                return testRegistrar.RegisterInstance(testContext.InternalDiscoveredTest,
-                    _ => default);
-            }
-            
-            return default;
-        }
-    }
-
-    private async Task RunCleanUps(DiscoveredTest test, TestContext testContext,
-        List<Exception> cleanUpExceptions)
-    {
-        try
-        {
-            if (testContext.Result?.Status == Status.Skipped)
-            {
-                foreach (var testSkippedEventReceiver in testContext.GetTestSkippedEventObjects())
-                {
-                    await RunHelpers.RunValueTaskSafelyAsync(() => testSkippedEventReceiver.OnTestSkipped(testContext),
-                        cleanUpExceptions);
-                }
-            }
-
-            TestContext.Current = null;
-
-            await ExecuteStaticAfterHooks(test, testContext, cleanUpExceptions);
-
-            ExceptionsHelper.ThrowIfAny(cleanUpExceptions);
-        }
-        catch (Exception e)
-        {
-            testContext.SetResult(e);
+            HandleTestFailure(test, ex);
             throw;
         }
-    }
-
-    private async ValueTask ExecuteStaticAfterHooks(DiscoveredTest test, TestContext testContext,
-        List<Exception> cleanUpExceptions)
-    {
-        var afterClassHooks = classHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.TestClass.Type);
-        var classHookContext = test.TestContext.ClassContext;
-                
-        ClassHookContext.Current = classHookContext;
-                
-        foreach (var afterHook in afterClassHooks)
+        finally
         {
-            await RunHelpers.RunValueTaskSafelyAsync(() =>
-            {
-                try
-                {
-                    return afterHook.ExecuteAsync(classHookContext, CancellationToken.None);
-                }
-                catch (Exception e)
-                {
-                    throw new HookFailedException($"Error executing [After(Class)] hook: {afterHook.MethodInfo.Type.FullName}.{afterHook.Name}", e);
-                }
-            }, cleanUpExceptions);
-        }
-                
-        ClassHookContext.Current = null;
-        
-        var afterAssemblyHooks = assemblyHookOrchestrator.CollectAfterHooks(testContext, test.TestContext.TestDetails.TestClass.Type.Assembly);
-        var assemblyHookContext = test.TestContext.AssemblyContext;
-
-        AssemblyHookContext.Current = assemblyHookContext;
-                
-        foreach (var afterHook in afterAssemblyHooks)
-        {
-            await RunHelpers.RunValueTaskSafelyAsync(() =>
-            {
-                try
-                {
-                    return afterHook.ExecuteAsync(assemblyHookContext, CancellationToken.None);
-                }
-                catch (Exception e)
-                {
-                    throw new HookFailedException($"Error executing [After(Assembly)] hook: {afterHook.MethodInfo.Type.FullName}.{afterHook.Name}", e);
-                }
-            }, cleanUpExceptions);
-        }
-                
-        AssemblyHookContext.Current = null;
-        
-        if (instanceTracker.IsLastTest())
-        {
-            var testSessionContext = assemblyHookContext.TestSessionContext!;
-
-            foreach (var testEndEventsObject in testContext.GetLastTestInTestSessionEventObjects())
-            {
-                await RunHelpers.RunValueTaskSafelyAsync(
-                    () => testEndEventsObject.OnLastTestInTestSession(testSessionContext, testContext),
-                    cleanUpExceptions);
-            }
+            await ExecuteAfterTestHooksAsync(afterTestHooks, test.Context, cancellationToken);
+            await DecrementAndDisposeTrackedObjectsAsync(test);
         }
     }
 
-    private SemaphoreSlim? WaitForParallelLimiter(DiscoveredTest test, bool isStartedAsDependencyForAnotherTest)
+
+    private async Task ExecuteBeforeTestHooksAsync(IReadOnlyList<Func<TestContext, CancellationToken, Task>> hooks, TestContext context, CancellationToken cancellationToken)
     {
-        if (test.TestDetails.ParallelLimit is { } parallelLimit && !isStartedAsDependencyForAnotherTest)
-        {
-            return parallelLimitLockProvider.GetLock(parallelLimit);
-        }
+        RestoreHookContexts(context);
+        context.RestoreExecutionContext();
 
-        return null;
-    }
-
-    private async ValueTask ExecuteWithRetries(DiscoveredTest discoveredTest, List<Exception> cleanupExceptions)
-    {
-        var retryCount = discoveredTest.TestDetails.RetryLimit;
-
-        discoveredTest.TestContext.TestStart = DateTimeOffset.Now;
-
-        // +1 for the original non-retry
-        for (var i = 0; i < retryCount + 1; i++)
+        foreach (var hook in hooks)
         {
             try
             {
-                await ExecuteWithCancellationTokens(discoveredTest, cleanupExceptions);
-                break;
+                await hook(context, cancellationToken);
+
+                context.RestoreExecutionContext();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                if (i == retryCount
-                    || Debugger.IsAttached
-                    || !await ShouldRetry(discoveredTest.TestContext, e, i + 1))
-                {
-                    throw;
-                }
-
-                // Clear context for a new run
-                cleanupExceptions.Clear();
-                discoveredTest.TestContext.Result = null;
-
-                await logger.LogWarningAsync($"""
-                                              {discoveredTest.TestContext.GetClassTypeName()}.{discoveredTest.TestContext.GetTestDisplayName()} attempt {i + 1} failed, retrying...");
-                                              Error was {e.GetType().Name}: {e.Message}
-                                             """);
-
-                await discoveredTest.ResetTestInstance();
-
-                foreach (var testRetryEventReceiver in discoveredTest.TestContext.GetTestRetryEventObjects())
-                {
-                    await testRetryEventReceiver.OnTestRetry(discoveredTest.TestContext, i + 1);
-                }
-
-                discoveredTest.TestContext.CurrentRetryAttempt++;
+                await _logger.LogErrorAsync($"Error in before test hook: {ex.Message}");
+                throw;
             }
         }
     }
 
-    private async ValueTask<bool> ShouldRetry(TestContext context, Exception e, int currentRetryCount)
+    private async Task ExecuteAfterTestHooksAsync(IReadOnlyList<Func<TestContext, CancellationToken, Task>> hooks, TestContext context, CancellationToken cancellationToken)
     {
-        try
+        foreach (var hook in hooks)
         {
-            var retryLogic = context.TestDetails.RetryLogic;
-
-            if (retryLogic == null)
-            {
-                return false;
-            }
-
-            return await retryLogic(context, e, currentRetryCount);
-        }
-        catch (Exception exception)
-        {
-            await logger.LogErrorAsync(exception);
-            return false;
-        }
-    }
-
-    private async ValueTask ExecuteWithCancellationTokens(DiscoveredTest discoveredTest, List<Exception> cleanupExceptions)
-    {
-        var cancellationTokens = discoveredTest.TestContext.LinkedCancellationTokens;
-
-        if (cancellationTokens.Count == 0)
-        {
-            await ExecuteTestMethodWithTimeout(discoveredTest, engineCancellationToken.Token, cleanupExceptions);
-            return;
-        }
-
-        using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource([engineCancellationToken.Token, .. cancellationTokens]);
-        await ExecuteTestMethodWithTimeout(discoveredTest, linkedTokenSource.Token, cleanupExceptions);
-    }
-
-    private async ValueTask ExecuteTestMethodWithTimeout(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
-    {
-        var timeout = discoveredTest.TestDetails.Timeout;
-        
-        await RunHelpers.RunWithTimeoutAsync(token => RunTest(discoveredTest, token, cleanupExceptions), timeout, cancellationToken);
-    }
-
-    private Task RunTest(DiscoveredTest discoveredTest, CancellationToken cancellationToken, List<Exception> cleanupExceptions)
-    {
-        return Task.Run(() => testInvoker.Invoke(discoveredTest, cancellationToken, cleanupExceptions), cancellationToken);
-    }
-
-    private async ValueTask WaitForDependencies(DiscoveredTest test, ITestExecutionFilter? filter)
-    {
-        var dependencies = CollectDependencyChain(test).ToArray();
-        
-        // Reverse so most nested dependencies resolve first
-        for (var index = dependencies.Length - 1; index >= 0; index--)
-        {
-            var dependency = dependencies[index];
             try
             {
-                await ExecuteTestAsync(dependency.Test, filter, true);
+                RestoreHookContexts(context);
+
+                await hook(context, cancellationToken);
             }
-            catch (Exception e) when (dependency.ProceedOnFailure)
+            catch (Exception ex)
             {
-                test.TestContext.OutputWriter.WriteLine(
-                    $"A dependency has failed: {dependency.Test.TestDetails.TestName}", e);
-            }
-            catch (Exception e)
-            {
-                throw new InconclusiveTestException($"A dependency has failed: {dependency.Test.TestDetails.TestName}",
-                    e);
+                await _logger.LogErrorAsync($"Error in after test hook: {ex.Message}");
             }
         }
     }
 
-    private static IEnumerable<Dependency> CollectDependencyChain(DiscoveredTest test)
+    private void HandleTestFailure(AbstractExecutableTest test, Exception ex)
     {
-        foreach (var testDependency in test.Dependencies)
+        if (ex is OperationCanceledException && test.Metadata.TimeoutMs.HasValue)
         {
-            yield return testDependency;
+            test.State = TestState.Timeout;
+            test.Result = _resultFactory.CreateTimeoutResult(
+                test.StartTime!.Value,
+                test.Metadata.TimeoutMs.Value);
+        }
+        else
+        {
+            test.State = TestState.Failed;
+            test.Result = _resultFactory.CreateFailedResult(
+                test.StartTime!.Value,
+                ex);
+        }
+    }
+
+
+    private TestNodeUpdateMessage CreateUpdateMessage(AbstractExecutableTest test)
+    {
+        var testNode = test.Context.ToTestNode()
+            .WithProperty(GetTestNodeState(test));
+
+        var standardOutput = test.Context.GetStandardOutput();
+        var errorOutput = test.Context.GetErrorOutput();
+
+        if (!string.IsNullOrEmpty(standardOutput))
+        {
+#pragma warning disable TPEXP
+            testNode = testNode.WithProperty(new StandardOutputProperty(standardOutput));
+#pragma warning restore TPEXP
         }
 
-        foreach (var testDependency in test.Dependencies)
+        if (!string.IsNullOrEmpty(errorOutput))
         {
-            foreach (var dependency in CollectDependencyChain(testDependency.Test))
+#pragma warning disable TPEXP
+            testNode = testNode.WithProperty(new StandardErrorProperty(errorOutput));
+#pragma warning restore TPEXP
+        }
+
+        var sessionUid = _sessionUid ?? CreateSessionUid(test);
+
+        return new TestNodeUpdateMessage(
+            sessionUid: sessionUid,
+            testNode: testNode);
+    }
+
+    private IProperty GetTestNodeState(AbstractExecutableTest test)
+    {
+        return test.State switch
+        {
+            TestState.Passed => PassedTestNodeStateProperty.CachedInstance,
+            TestState.Failed => new FailedTestNodeStateProperty(test.Result!.Exception!),
+            TestState.Skipped => new SkippedTestNodeStateProperty(test.Result!.OverrideReason ?? "Test skipped"),
+            TestState.Timeout => new TimeoutTestNodeStateProperty(test.Result!.OverrideReason ?? "Test timed out"),
+            TestState.Cancelled => new CancelledTestNodeStateProperty(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
+    private SessionUid CreateSessionUid(AbstractExecutableTest test)
+    {
+        return _sessionUid ?? new SessionUid(Guid.NewGuid().ToString());
+    }
+
+    private async Task InvokeTestWithTimeout(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
+    {
+        var discoveredTest = test.Context.InternalDiscoveredTest;
+        var testAction = test.Metadata.TimeoutMs.HasValue
+            ? CreateTimeoutTestAction(test, instance, cancellationToken)
+            : CreateNormalTestAction(test, instance, cancellationToken);
+
+        await InvokeWithTestExecutor(discoveredTest, test.Context, testAction);
+    }
+
+    private Func<ValueTask> CreateTimeoutTestAction(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
+    {
+        return async () =>
+        {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(test.Metadata.TimeoutMs!.Value);
+
+            var testTask = test.InvokeTestAsync(instance, cts.Token);
+            var timeoutTask = Task.Delay(test.Metadata.TimeoutMs.Value, cancellationToken);
+            var completedTask = await Task.WhenAny(testTask, timeoutTask);
+
+            if (completedTask == timeoutTask)
             {
-                yield return dependency;
+                cts.Cancel();
+                throw new OperationCanceledException($"Test '{test.Context.GetDisplayName()}' exceeded timeout of {test.Metadata.TimeoutMs.Value}ms");
+            }
+
+            await testTask;
+        };
+    }
+
+    private Func<ValueTask> CreateNormalTestAction(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
+    {
+        return async () =>
+        {
+            await test.InvokeTestAsync(instance, cancellationToken);
+        };
+    }
+
+    private async Task InvokeWithTestExecutor(DiscoveredTest? discoveredTest, TestContext context, Func<ValueTask> testAction)
+    {
+        if (discoveredTest?.TestExecutor != null)
+        {
+            await discoveredTest.TestExecutor.ExecuteTest(context, testAction);
+        }
+        else
+        {
+            await testAction();
+        }
+    }
+
+
+    private async Task DecrementAndDisposeTrackedObjectsAsync(AbstractExecutableTest test)
+    {
+        var objectsToCheck = new List<object?>();
+        objectsToCheck.AddRange(test.ClassArguments);
+        objectsToCheck.AddRange(test.Arguments);
+
+        if (test.Context?.TestDetails.TestClassInjectedPropertyArguments != null)
+        {
+            objectsToCheck.AddRange(test.Context.TestDetails.TestClassInjectedPropertyArguments.Values);
+        }
+
+        foreach (var obj in objectsToCheck)
+        {
+            if (obj == null)
+            {
+                continue;
+            }
+
+            if (ObjectTracker.TryGetReference(obj, out var counter))
+            {
+                var count = counter!.Decrement();
+                if (count == 0)
+                {
+                    ObjectTracker.RemoveObject(obj);
+
+                    if (obj is IAsyncDisposable asyncDisposable)
+                    {
+                        await asyncDisposable.DisposeAsync();
+                    }
+                    else if (obj is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                    }
+                }
             }
         }
     }
 
-    public Task<bool> IsEnabledAsync()
+    private static void RestoreHookContexts(TestContext context)
     {
-        return extension.IsEnabledAsync();
+        if (context.ClassContext != null)
+        {
+            var assemblyContext = context.ClassContext.AssemblyContext;
+            AssemblyHookContext.Current = assemblyContext;
+
+            ClassHookContext.Current = context.ClassContext;
+        }
     }
-
-    public string Uid => extension.Uid;
-
-    public string Version => extension.Version;
-
-    public string DisplayName => extension.DisplayName;
-
-    public string Description => extension.Description;
-
-    public Type[] DataTypesProduced { get; } =
-    [
-        typeof(TestNodeUpdateMessage),
-    ];
 }

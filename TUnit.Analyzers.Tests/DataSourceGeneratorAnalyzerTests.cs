@@ -8,8 +8,8 @@ public class DataSourceGeneratorAnalyzerTests
     public async Task Constructor_Derived_No_Error_Generic()
     {
         await Verifier
-			.VerifyAnalyzerAsync(
-				"""
+            .VerifyAnalyzerAsync(
+                """
                 using System.Collections.Generic;
                 using TUnit.Core;
 
@@ -27,6 +27,6 @@ public class DataSourceGeneratorAnalyzerTests
                 public record MyModel : BaseModel;
                 public record BaseModel;
                 """
-			);
+            );
     }
 }

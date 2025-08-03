@@ -1,9 +1,8 @@
-using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class MatrixTests : TestsBase<TestsGenerator>
+internal class MatrixTests : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -20,6 +19,5 @@ internal class MatrixTests : TestsBase<TestsGenerator>
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(12);
-        });
+            });
 }

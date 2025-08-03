@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Testing;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
@@ -15,8 +14,7 @@ internal class ReferencesHelper
                 // add your app/lib specifics, e.g.:
                 MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
-                MetadataReference.CreateFromFile("TUnit.TestProject.Library.dll"),
-                MetadataReference.CreateFromFile("TUnit.Core.dll"),
+                MetadataReference.CreateFromFile(typeof(Polyfill).Assembly.Location),
             ])
             .ToList();
 }

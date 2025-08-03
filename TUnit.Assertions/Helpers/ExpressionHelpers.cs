@@ -6,15 +6,13 @@ public static class ExpressionHelpers
 {
     public static string GetName<T1, T2>(Expression<Func<T1, T2>> exp)
     {
-        var body = exp.Body as MemberExpression;
-
-        if (body == null)
+        if (exp.Body is not MemberExpression body)
         {
-            var unaryExpression = (UnaryExpression)exp.Body;
+            var unaryExpression = (UnaryExpression) exp.Body;
 
-            body = unaryExpression.Operand as MemberExpression;
+            body = (MemberExpression)unaryExpression.Operand;
         }
 
-        return body!.Member.Name;
+        return body.Member.Name;
     }
 }

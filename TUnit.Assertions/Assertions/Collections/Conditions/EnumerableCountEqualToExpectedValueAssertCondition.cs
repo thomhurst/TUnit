@@ -24,7 +24,7 @@ public class EnumerableCountEqualToExpectedValueAssertCondition<TActual, TInner>
         {
             return collection.Count;
         }
-        
+
         return actualValue?.Cast<object>().Count() ?? 0;
     }
 }

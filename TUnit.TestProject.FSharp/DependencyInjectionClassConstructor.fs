@@ -7,20 +7,11 @@ open TUnit.Core.Interfaces
 
 type DependencyInjectionClassConstructor() =
     let serviceProvider: IServiceProvider = 
-        ServiceCollection()
-            .AddTransient<DummyReferenceTypeClass>()
-            .BuildServiceProvider()
-    let mutable scope : AsyncServiceScope option = None
+        let services = ServiceCollection()
+        services.AddTransient<DummyReferenceTypeClass>() |> ignore
+        services.BuildServiceProvider()
 
     interface IClassConstructor with
         member _.Create(typ, _) =
-            if scope.IsNone then
-                scope <- Some(serviceProvider.CreateAsyncScope())
-            ActivatorUtilities.GetServiceOrCreateInstance(scope.Value.ServiceProvider, typ)
-
-    interface ITestEndEventReceiver with
-        member _.OnTestEnd(_testContext) =
-            match scope with
-            | Some s -> s.DisposeAsync()
-            | None -> ValueTask()
-        member _.Order = 0
+            let instance = ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, typ)
+            Task.FromResult(instance)

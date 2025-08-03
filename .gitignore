@@ -403,3 +403,21 @@ FodyWeavers.xsd
 # Verify
 *.received.*
 *.received/
+
+SourceGeneratedViewer
+
+# Requirements gathering folder
+requirements/
+**/SourceGeneratedViewer/
+
+# TUnit test output files
+TUnit.TestProject/TestDiscovery*.txt
+TUnit.TestProject/TestSession*.txt
+
+.mcp.json
+requirements
+
+TESTPROJECT_AOT
+TESTPROJECT_SINGLEFILE
+
+nul

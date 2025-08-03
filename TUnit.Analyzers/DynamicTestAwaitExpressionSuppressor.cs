@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using TUnit.Analyzers.Extensions;
 
 namespace TUnit.Analyzers;
 
@@ -17,7 +16,7 @@ public class DynamicTestAwaitExpressionSuppressor : DiagnosticSuppressor
             {
                 continue;
             }
-            
+
             if (GetParentObjectInitializerSyntax(invocationExpressionSyntax) is not { } objectCreationExpressionSyntax)
             {
                 continue;
@@ -29,8 +28,8 @@ public class DynamicTestAwaitExpressionSuppressor : DiagnosticSuppressor
             {
                 continue;
             }
-            
-            if(namedTypeSymbol.Name == "DynamicTest")
+
+            if (namedTypeSymbol.Name == "DynamicTest" || namedTypeSymbol.Name == "DynamicTestInstance")
             {
                 Suppress(context, diagnostic);
             }
@@ -68,7 +67,7 @@ public class DynamicTestAwaitExpressionSuppressor : DiagnosticSuppressor
 
     public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } =
         ImmutableArray.Create(CreateDescriptor("CA2012"), CreateDescriptor("CS4014"));
-        
+
     private static SuppressionDescriptor CreateDescriptor(string id)
         => new(
             id: $"{id}Suppression",

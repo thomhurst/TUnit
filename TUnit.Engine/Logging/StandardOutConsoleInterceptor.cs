@@ -1,11 +1,11 @@
-﻿using Microsoft.Testing.Platform.CommandLine;
-using TUnit.Core;
+﻿using TUnit.Core;
+using TUnit.Engine.Services;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
 
 namespace TUnit.Engine.Logging;
 
-internal class StandardOutConsoleInterceptor : ConsoleInterceptor
+internal class StandardOutConsoleInterceptor : OptimizedConsoleInterceptor
 {
     public static StandardOutConsoleInterceptor Instance { get; private set; } = null!;
 
@@ -18,11 +18,11 @@ internal class StandardOutConsoleInterceptor : ConsoleInterceptor
         DefaultOut = Console.Out;
     }
 
-    public StandardOutConsoleInterceptor(ICommandLineOptions commandLineOptions) : base(commandLineOptions)
+    public StandardOutConsoleInterceptor(VerbosityService verbosityService) : base(verbosityService)
     {
         Instance = this;
     }
-    
+
     public void Initialize()
     {
         Console.SetOut(this);

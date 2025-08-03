@@ -1,7 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-
-namespace TUnit.TestProject;
+﻿namespace TUnit.TestProject;
 
 public abstract class AssemblyHooks
 {
@@ -21,12 +18,6 @@ public abstract class AssemblyHooks
         await Assert.That(context.TestCount).IsPositive();
     }
 #endif
-
-    [Before(Assembly), Timeout(30_000)]
-    public static void BeforeHook3(CancellationToken cancellationToken)
-    {
-        // Dummy method
-    }
 
 #if NET
     [Before(Assembly), Timeout(30_000)]
@@ -49,12 +40,6 @@ public abstract class AssemblyHooks
         await Assert.That(context.TestCount).IsPositive();
     }
 #endif
-
-    [After(Assembly), Timeout(30_000)]
-    public static void AfterHook3(CancellationToken cancellationToken)
-    {
-        // Dummy method
-    }
 
 #if NET
     [After(Assembly), Timeout(30_000)]

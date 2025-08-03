@@ -13,11 +13,11 @@ public class DisplayFormats
         SymbolDisplayExtensionMethodStyle.Default,
         SymbolDisplayParameterOptions.IncludeType,
         SymbolDisplayPropertyStyle.NameOnly,
-        SymbolDisplayLocalOptions.IncludeType, 
-        SymbolDisplayKindOptions.None, 
+        SymbolDisplayLocalOptions.IncludeType,
+        SymbolDisplayKindOptions.None,
         SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier | SymbolDisplayMiscellaneousOptions.UseSpecialTypes
     );
-    
+
     public static readonly SymbolDisplayFormat FullyQualifiedGenericWithGlobalPrefix = new(
         SymbolDisplayGlobalNamespaceStyle.Included,
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
@@ -27,11 +27,11 @@ public class DisplayFormats
         SymbolDisplayExtensionMethodStyle.Default,
         SymbolDisplayParameterOptions.IncludeType,
         SymbolDisplayPropertyStyle.NameOnly,
-        SymbolDisplayLocalOptions.IncludeType, 
-        SymbolDisplayKindOptions.None, 
+        SymbolDisplayLocalOptions.IncludeType,
+        SymbolDisplayKindOptions.None,
         SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier | SymbolDisplayMiscellaneousOptions.UseSpecialTypes
     );
-    
+
     public static readonly SymbolDisplayFormat FullyQualifiedNonGeneric = new(
         SymbolDisplayGlobalNamespaceStyle.Omitted,
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
@@ -42,9 +42,9 @@ public class DisplayFormats
         SymbolDisplayParameterOptions.IncludeType,
         SymbolDisplayPropertyStyle.NameOnly,
         SymbolDisplayLocalOptions.IncludeType,
-        SymbolDisplayKindOptions.None, 
+        SymbolDisplayKindOptions.None,
         SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier | SymbolDisplayMiscellaneousOptions.UseSpecialTypes
     );
-    
+
     public static readonly SymbolDisplayFormat NameOnly = new(miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 }

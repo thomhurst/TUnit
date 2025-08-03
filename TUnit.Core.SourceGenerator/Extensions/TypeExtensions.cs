@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using TUnit.Analyzers.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
@@ -64,7 +65,7 @@ public static class TypeExtensions
 
     public static IEnumerable<INamedTypeSymbol> GetSelfAndBaseTypes(this INamedTypeSymbol namedTypeSymbol)
     {
-        return [namedTypeSymbol, ..GetBaseTypes(namedTypeSymbol)];
+        return [namedTypeSymbol, .. GetBaseTypes(namedTypeSymbol)];
     }
 
     public static IEnumerable<INamedTypeSymbol> GetBaseTypes(this ITypeSymbol namedTypeSymbol)
@@ -105,7 +106,7 @@ public static class TypeExtensions
     public static bool IsIEnumerable(this ITypeSymbol namedTypeSymbol, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)
     {
         var interfaces = namedTypeSymbol.TypeKind == TypeKind.Interface
-            ? [(INamedTypeSymbol)namedTypeSymbol, ..namedTypeSymbol.AllInterfaces]
+            ? [(INamedTypeSymbol) namedTypeSymbol, .. namedTypeSymbol.AllInterfaces]
             : namedTypeSymbol.AllInterfaces.AsEnumerable();
 
         foreach (var enumerable in interfaces
@@ -174,7 +175,7 @@ public static class TypeExtensions
             return true;
         }
 
-        if (!enumerableInnerType.IsTupleType && firstParameterType is INamedTypeSymbol { IsGenericType:true })
+        if (!enumerableInnerType.IsTupleType && firstParameterType is INamedTypeSymbol { IsGenericType: true })
         {
             return true;
         }
@@ -205,8 +206,23 @@ public static class TypeExtensions
         return false;
     }
 
-    public static string GloballyQualified(this ISymbol typeSymbol) =>
-        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    public static string GloballyQualified(this ISymbol typeSymbol)
+    {
+        // Only generate open generic form for types with unresolved type parameters
+        // This ensures we get BaseClass<> for generic definitions but List<int> for constructed types
+        if(typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && 
+           namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
+        {
+            var typeBuilder = new StringBuilder(typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix));
+            typeBuilder.Append('<');
+            typeBuilder.Append(new string(',', namedTypeSymbol.TypeArguments.Length - 1));
+            typeBuilder.Append('>');
+
+            return typeBuilder.ToString();
+        }
+
+        return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    }
 
     public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
@@ -226,6 +242,11 @@ public static class TypeExtensions
         if (namedTypeSymbol.IsUnboundGenericType)
         {
             return true;
+        }
+
+        if (!namedTypeSymbol.IsGenericType)
+        {
+            return false;
         }
 
         return namedTypeSymbol.TypeArguments.Any(IsGenericDefinition);
@@ -257,7 +278,7 @@ public static class TypeExtensions
 
         if (typeSymbol.AllInterfaces
                 .FirstOrDefault(x => SymbolEqualityComparer.Default.Equals(x.OriginalDefinition, enumerableT))
-            is {} enumerableType)
+            is { } enumerableType)
         {
             innerType = enumerableType.TypeArguments[0];
             return true;

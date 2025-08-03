@@ -1,9 +1,8 @@
-using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests.Bugs._1889;
 
-internal class Tests1889 : TestsBase<TestsGenerator>
+internal class Tests1889 : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -13,11 +12,14 @@ internal class Tests1889 : TestsBase<TestsGenerator>
             "DerivedTest.cs"),
         new RunTestOptions
         {
+            AdditionalFiles =
+            [
+                Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject.Library", "Bugs", "1889", "BaseTests.cs")
+            ],
             VerifyConfigurator = settingsTask => settingsTask.ScrubLinesContaining("TestFilePath = ")
                 .UniqueForTargetFrameworkAndVersion()
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

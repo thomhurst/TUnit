@@ -1,5 +1,9 @@
-﻿namespace TUnit.Core;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
+namespace TUnit.Core;
+
+[DebuggerDisplay("{ClassType.Name}")]
 public class ClassHookContext : Context
 {
     private static readonly AsyncLocal<ClassHookContext?> Contexts = new();
@@ -8,25 +12,30 @@ public class ClassHookContext : Context
         get => Contexts.Value;
         internal set => Contexts.Value = value;
     }
-    
+
     internal ClassHookContext(AssemblyHookContext assemblyHookContext) : base(assemblyHookContext)
     {
         assemblyHookContext.AddClass(this);
     }
-    
+
     public AssemblyHookContext AssemblyContext => (AssemblyHookContext) Parent!;
-    
+
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
     public required Type ClassType { get; init; }
-    
+
     private readonly List<TestContext> _tests = [];
-    
+
     public void AddTest(TestContext testContext)
     {
+        if (_tests.Contains(testContext))
+        {
+            return; // Prevent duplicates
+        }
         _tests.Add(testContext);
     }
-    
+
     public IReadOnlyList<TestContext> Tests => _tests;
-    
+
     public int TestCount => Tests.Count;
     internal bool FirstTestStarted { get; set; }
 
@@ -52,7 +61,7 @@ public class ClassHookContext : Context
             return false;
         }
 
-        return Equals((ClassHookContext)obj);
+        return Equals((ClassHookContext) obj);
     }
 
     public override int GetHashCode()
@@ -63,13 +72,13 @@ public class ClassHookContext : Context
     internal void RemoveTest(TestContext test)
     {
         _tests.Remove(test);
-        
-        if(_tests.Count is 0)
+
+        if (_tests.Count is 0)
         {
             AssemblyContext.RemoveClass(this);
         }
     }
-    
+
     internal override void RestoreContextAsyncLocal()
     {
         Current = this;

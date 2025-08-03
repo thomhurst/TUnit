@@ -1,6 +1,4 @@
-using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
 namespace TUnit.Core.Data;
 
@@ -12,7 +10,7 @@ internal class DependencyTracker
     // Use ConditionalWeakTable to avoid preventing garbage collection
     private readonly ConditionalWeakTable<object, List<IDisposableReference>> _dependencies = new();
     private readonly object _lock = new();
-    private int _dependencyCount = 0;
+    private int _dependencyCount;
 
     /// <summary>
     /// Registers a nested dependency relationship.
@@ -55,7 +53,7 @@ internal class DependencyTracker
         }
 
         List<IDisposableReference>? dependencies = null;
-        bool hadDependencies = false;
+        var hadDependencies = false;
 
         lock (_lock)
         {

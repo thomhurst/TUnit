@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Assertions.UnitTests;
 
@@ -13,10 +12,10 @@ public class DictionaryAssertionTests
         {
             ["Blah"] = []
         };
-        
+
         await TUnitAssert.That(dictionary).ContainsKey("Blah");
     }
-    
+
     [Test]
     public async Task String_Dictionary_Does_Not_Contain_Key()
     {
@@ -24,18 +23,18 @@ public class DictionaryAssertionTests
         {
             ["Blah"] = []
         };
-        
+
         await TUnitAssert.That(dictionary).DoesNotContainKey("blah");
     }
-    
+
     [Test]
     public async Task String_ReadOnlyDictionary_Contains_Key()
     {
         var dictionary = new ReadDictionary();
-        
+
         await TUnitAssert.That(dictionary).ContainsKey("Blah");
     }
-    
+
     [Test]
     public async Task String_ReadOnlyDictionary_Does_Not_Contain_Key()
     {
@@ -43,10 +42,10 @@ public class DictionaryAssertionTests
         {
             ["Blah"] = []
         }.AsReadOnly();
-        
+
         await TUnitAssert.That(dictionary).DoesNotContainKey("blah");
     }
-    
+
     [Test]
     public async Task String_Dictionary_Contains_Key_IgnoreCase()
     {
@@ -54,10 +53,10 @@ public class DictionaryAssertionTests
         {
             ["Blah"] = []
         };
-        
+
         await TUnitAssert.That(dictionary).ContainsKey("blah", StringComparer.InvariantCultureIgnoreCase);
     }
-    
+
     [Test]
     public async Task Immutable_Dictionary_Does_Not_Contain_Key()
     {
@@ -66,7 +65,7 @@ public class DictionaryAssertionTests
                 .IsEquivalentTo(ImmutableDictionary<string, int>.Empty.Add("Hello2", 1))
         );
     }
-    
+
     public class ReadDictionary : IReadOnlyDictionary<string, string>
     {
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator()

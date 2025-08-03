@@ -1,8 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._1577;
@@ -19,7 +17,7 @@ public partial class Tests
     public async Task MyRecordType_SerializesProperly()
     {
         MyRecordType original = new(["a", "b"]);
-        MyRecordType? roundTripped = RoundTripSerialize(original);
+        var roundTripped = RoundTripSerialize(original);
 
         await Assert.That(roundTripped).IsEquivalentTo(original);
     }
@@ -28,7 +26,7 @@ public partial class Tests
     public async Task MyRecordType2_SerializesProperly()
     {
         MyRecordType2 original = new(new List<string> { "a", "b" });
-        MyRecordType2? roundTripped = RoundTripSerialize(original);
+        var roundTripped = RoundTripSerialize(original);
         await Assert.That(roundTripped).IsEquivalentTo(original);
     }
 
@@ -36,7 +34,7 @@ public partial class Tests
     public async Task MyRecordType3_SerializesProperly()
     {
         MyRecordType3 original = new(new List<string> { "a", "b" });
-        MyRecordType3 roundTripped = RoundTripSerialize(original);
+        var roundTripped = RoundTripSerialize(original);
         await Assert.That(roundTripped).IsEquivalentTo(original);
     }
 
@@ -44,13 +42,13 @@ public partial class Tests
     public async Task MyRecordType4_SerializesProperly()
     {
         MyRecordType4 original = new(new Dictionary<string, int> { { "a", 1 }, { "b", 2 } });
-        MyRecordType4? roundTripped = RoundTripSerialize(original);
+        var roundTripped = RoundTripSerialize(original);
         await Assert.That(roundTripped).IsEquivalentTo(original);
     }
 
     private T RoundTripSerialize<T>(T original)
     {
-        var jsonTypeInfo = (JsonTypeInfo<T>)SourceGenerationContext.Default.GetTypeInfo(original!.GetType())!;
+        var jsonTypeInfo = (JsonTypeInfo<T>) SourceGenerationContext.Default.GetTypeInfo(original!.GetType())!;
         return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(original, jsonTypeInfo), jsonTypeInfo)!;
     }
 

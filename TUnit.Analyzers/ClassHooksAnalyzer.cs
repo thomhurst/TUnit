@@ -10,15 +10,21 @@ namespace TUnit.Analyzers;
 public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(Rules.MethodMustBeParameterless, Rules.MethodMustNotBeAbstract, Rules.MethodMustBeStatic, Rules.MethodMustBePublic, Rules.UnknownParameters);
+        ImmutableArray.Create(
+            Rules.MethodMustBeParameterless,
+            Rules.MethodMustNotBeAbstract,
+            Rules.MethodMustBeStatic,
+            Rules.MethodMustBePublic,
+            Rules.UnknownParameters
+        );
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
@@ -48,14 +54,14 @@ public class ClassHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 context.Symbol.Locations.FirstOrDefault())
             );
         }
-        
+
         if (methodSymbol.DeclaredAccessibility != Accessibility.Public)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBePublic,
                 context.Symbol.Locations.FirstOrDefault())
             );
         }
-            
+
         if (!IsClassHookContextParameter(methodSymbol))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.UnknownParameters,

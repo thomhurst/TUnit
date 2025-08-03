@@ -26,7 +26,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         {
             return base.VisitMemberAccessExpression(node);
         }
-        
+
         return SyntaxFactory
             .IdentifierName(symbol.GloballyQualified())
             .WithoutTrivia();
@@ -35,7 +35,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
     public override SyntaxNode VisitPredefinedType(PredefinedTypeSyntax node)
     {
         var symbol = node.GetSymbolInfo(semanticModel);
-        
+
         return SyntaxFactory
             .IdentifierName(symbol!.GloballyQualified())
             .WithoutTrivia();
@@ -54,7 +54,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         {
             var type = methodSymbol.ReceiverType
                 ?? methodSymbol.ContainingType;
-            
+
             return SyntaxFactory
                 .IdentifierName(type.GloballyQualified())
                 .WithoutTrivia();
@@ -69,8 +69,8 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             .IdentifierName(symbol.GloballyQualified())
             .WithoutTrivia();
     }
-    
-    
+
+
 
     private static bool TryParseConstant(ISymbol? symbol, [NotNullWhen(true)] out SyntaxNode? literalSyntax)
     {
@@ -84,7 +84,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             && symbol.IsConst(out var constantValue))
         {
             literalSyntax = Literal(constantValue);
-            
+
             return true;
         }
 
@@ -100,14 +100,14 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             null => SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression),
             string strValue => SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(strValue)),
             char charValue => SyntaxFactory.LiteralExpression(SyntaxKind.CharacterLiteralExpression, SyntaxFactory.Literal(charValue)),
-            bool boolValue => boolValue ? SyntaxFactory.LiteralExpression(SyntaxKind.TrueLiteralExpression) 
+            bool boolValue => boolValue ? SyntaxFactory.LiteralExpression(SyntaxKind.TrueLiteralExpression)
                 : SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression),
             int intValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(intValue)),
-            double doubleValue when double.IsNaN(doubleValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("double.NaN", double.NaN)),
+            double and Double.NaN => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("double.NaN", double.NaN)),
             double doubleValue when double.IsPositiveInfinity(doubleValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("double.PositiveInfinity", double.PositiveInfinity)),
             double doubleValue when double.IsNegativeInfinity(doubleValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("double.NegativeInfinity", double.NegativeInfinity)),
             double doubleValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(doubleValue)),
-            float floatValue when float.IsNaN(floatValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("float.NaN", float.NaN)),
+            float and Single.NaN => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("float.NaN", float.NaN)),
             float floatValue when float.IsPositiveInfinity(floatValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("float.PositiveInfinity", float.PositiveInfinity)),
             float floatValue when float.IsNegativeInfinity(floatValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("float.NegativeInfinity", float.NegativeInfinity)),
             float floatValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(floatValue)),
@@ -138,16 +138,16 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
     public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node)
     {
         var childNodes = node.ChildNodes().ToArray();
-        
+
         if (childNodes.Length == 2
             && childNodes[0].IsKind(SyntaxKind.IdentifierName)
-            && ((IdentifierNameSyntax)childNodes[0]).Identifier.ValueText == "nameof"
+            && ((IdentifierNameSyntax) childNodes[0]).Identifier.ValueText == "nameof"
             && childNodes[1].IsKind(SyntaxKind.ArgumentList))
         {
             // nameof() syntax
             var argumentList = (ArgumentListSyntax) childNodes[1];
             var argumentExpression = argumentList.Arguments[0].Expression;
-            
+
             if (argumentExpression is IdentifierNameSyntax identifierNameSyntax)
             {
                 return SyntaxFactory.LiteralExpression(
@@ -169,7 +169,27 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
                 SyntaxFactory.Literal(argumentExpression.ToString())
             );
         }
-        
+
         return base.VisitInvocationExpression(node);
     }
+
+#if ROSLYN4_7_OR_GREATER
+    public override SyntaxNode? VisitCollectionExpression(CollectionExpressionSyntax node)
+    {
+        // For collection expressions, visit each element and ensure proper type conversion
+        var rewrittenElements = node.Elements.Select(element =>
+        {
+            if (element is ExpressionElementSyntax expressionElement)
+            {
+                var rewrittenExpression = Visit(expressionElement.Expression);
+                return SyntaxFactory.ExpressionElement((ExpressionSyntax)rewrittenExpression);
+            }
+            return element;
+        }).ToList();
+
+        return SyntaxFactory.CollectionExpression(
+            SyntaxFactory.SeparatedList(rewrittenElements)
+        );
+    }
+#endif
 }

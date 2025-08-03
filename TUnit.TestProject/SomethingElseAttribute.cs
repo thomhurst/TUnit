@@ -4,9 +4,9 @@ namespace TUnit.TestProject;
 
 public class SomethingElseAttribute : Attribute, ITestStartEventReceiver
 {
-    public ValueTask OnTestStart(BeforeTestContext beforeTestContext)
+    public ValueTask OnTestStart(TestContext testContext)
     {
-        return default;
+        return default(ValueTask);
     }
 
     public int Order => 0;

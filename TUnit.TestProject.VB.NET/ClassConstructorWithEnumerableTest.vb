@@ -9,10 +9,10 @@ Public NotInheritable Class ClassConstructorWithEnumerableTest
     Implements IDisposable
 
     Private _isDisposed As Boolean
-    Private ReadOnly _services As IServiceProvider
+    Private ReadOnly _dummy As DummyReferenceTypeClass
 
-    Public Sub New(services As IServiceProvider)
-        Me._services = services
+    Public Sub New(dummy As DummyReferenceTypeClass)
+        Me._dummy = dummy
     End Sub
 
     <Before(HookType.Test)>
@@ -25,7 +25,10 @@ Public NotInheritable Class ClassConstructorWithEnumerableTest
     <Test>
     <MethodDataSource(NameOf(GetValues))>
     Public Sub DoSomething(value As Integer)
-        ActivatorUtilities.GetServiceOrCreateInstance(Of DummyReferenceTypeClass)(_services)
+        ' Just use the dummy object that was injected
+        If _dummy Is Nothing Then
+            Throw New InvalidOperationException("Dummy object was not injected")
+        End If
     End Sub
 
     Public Shared Function GetValues() As IEnumerable(Of Integer)

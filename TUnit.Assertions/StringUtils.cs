@@ -33,12 +33,12 @@ internal static class StringUtils
 
         if (ignoreWhitespace)
         {
-            foreach (var (key, value) in actualDictionary.ToList().Where(x => char.IsWhiteSpace(x.Value)))
+            foreach (var (key, _) in actualDictionary.ToList().Where(x => char.IsWhiteSpace(x.Value)))
             {
                 actualDictionary.Remove(key);
             }
 
-            foreach (var (key, value) in expectedDictionary.ToList().Where(x => char.IsWhiteSpace(x.Value)))
+            foreach (var (key, _) in expectedDictionary.ToList().Where(x => char.IsWhiteSpace(x.Value)))
             {
                 expectedDictionary.Remove(key);
             }

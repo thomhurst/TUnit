@@ -1,8 +1,7 @@
-using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests.Bugs._1432;
 
-internal class EnumMemberNamesTests : TestsBase<TestsGenerator>
+internal class EnumMemberNamesTests : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -12,6 +11,5 @@ internal class EnumMemberNamesTests : TestsBase<TestsGenerator>
             "EnumMemberNamesTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

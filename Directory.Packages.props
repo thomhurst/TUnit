@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.2" />
+    <PackageVersion Include="BenchmarkDotNet.Annotations" Version="0.15.1" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="CliWrap" Version="3.9.0" />
     <PackageVersion Include="EnumerableAsyncProcessor" Version="2.1.0" />
@@ -31,6 +32,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" Version="1.1.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.7.0" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.54.0" />
@@ -42,6 +44,7 @@
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.7.3" />
     <PackageVersion Include="Microsoft.Testing.Platform" Version="1.7.3" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.4.3" />
+    <PackageVersion Include="System.Threading.Channels" Version="9.0.6" />
     <PackageVersion Include="ModularPipelines.DotNet" Version="2.44.121" />
     <PackageVersion Include="ModularPipelines.Git" Version="2.44.121" />
     <PackageVersion Include="ModularPipelines.GitHub" Version="2.44.121" />
@@ -55,7 +58,10 @@
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
     <PackageVersion Include="Polly" Version="8.6.2" />
-    <PackageVersion Include="Polyfill" Version="7.33.0" />
+    <PackageVersion Include="Polyfill" Version="8.7.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
     <PackageVersion Include="PublicApiGenerator" Version="11.4.6" />
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.19.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
@@ -75,11 +81,11 @@
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.6.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.6.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
+    <PackageVersion Include="Verify" Version="30.4.0" />
     <PackageVersion Include="Verify.NUnit" Version="30.5.0" />
     <PackageVersion Include="TUnit" Version="0.24.0" />
     <PackageVersion Include="TUnit.Core" Version="0.24.0" />
     <PackageVersion Include="TUnit.Assertions" Version="0.24.0" />
-    <PackageVersion Include="Verify.TUnit" Version="30.3.1" />
     <PackageVersion Include="Vogen" Version="7.0.4" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.9.3" />

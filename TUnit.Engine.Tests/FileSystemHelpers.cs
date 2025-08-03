@@ -8,7 +8,7 @@ public class FileSystemHelpers
             .EnumerateFiles("*", SearchOption.AllDirectories)
             .FirstOrDefault(predicate);
     }
-    
+
     public static DirectoryInfo? FindFolder(Func<DirectoryInfo, bool> predicate)
     {
         return Sourcy.Git.RootDirectory

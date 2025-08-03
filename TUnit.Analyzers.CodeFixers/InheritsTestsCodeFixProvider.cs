@@ -35,7 +35,7 @@ public class InheritsTestsCodeFixProvider : CodeFixProvider
             {
                 return;
             }
-            
+
             context.RegisterCodeFix(
                 CodeAction.Create(
                     title: Rules.DoesNotInheritTestsWarning.Title.ToString(),
@@ -44,7 +44,7 @@ public class InheritsTestsCodeFixProvider : CodeFixProvider
                 diagnostic);
         }
     }
-    
+
     private static async Task<Document> AddInheritsTests(Document document,
         ClassDeclarationSyntax classDeclarationSyntax, CancellationToken cancellationToken)
     {

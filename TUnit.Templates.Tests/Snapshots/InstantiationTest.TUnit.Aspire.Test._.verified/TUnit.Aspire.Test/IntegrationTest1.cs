@@ -1,6 +1,4 @@
-using TUnit.Aspire.Test.Data;
-
-namespace TUnit.Aspire.Test
+﻿namespace TUnit.Aspire.Test
 {
     public class IntegrationTest1
     {

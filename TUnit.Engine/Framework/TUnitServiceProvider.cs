@@ -1,213 +1,248 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
-using Microsoft.Testing.Platform.OutputDevice;
+using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
-using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
-using TUnit.Core.Logging;
-using TUnit.Engine.Capabilities;
+using TUnit.Engine.Building;
+using TUnit.Engine.Building.Collectors;
+using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.CommandLineProviders;
-using TUnit.Engine.Hooks;
+using TUnit.Engine.Discovery;
+using TUnit.Engine.Helpers;
+using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
-#pragma warning disable TPEXP
 
 namespace TUnit.Engine.Framework;
 
 internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 {
-    private readonly ITestFrameworkCapabilities _capabilities;
-    private readonly Dictionary<Type, object> _services = [];
+    public ITestExecutionFilter? Filter
+    {
+        get;
+    }
+    private readonly Dictionary<Type, object> _services = new();
 
-    public ILoggerFactory LoggerFactory;
-    public IOutputDevice OutputDevice;
-    public ICommandLineOptions CommandLineOptions;
-
+    // Core services
     public TUnitFrameworkLogger Logger { get; }
-    public TUnitMessageBus TUnitMessageBus { get; }
-
-    public ContextManager ContextManager { get; }
-
-    public HooksCollectorBase HooksCollector { get; set; }
+    public ICommandLineOptions CommandLineOptions { get; }
+    public VerbosityService VerbosityService { get; }
+    public TestDiscoveryService DiscoveryService { get; }
+    public TestBuilderPipeline TestBuilderPipeline { get; }
+    public TestExecutor TestExecutor { get; }
+    public TUnitMessageBus MessageBus { get; }
+    public EngineCancellationToken CancellationToken { get; }
+    public TestFilterService TestFilterService { get; }
+    public IHookCollectionService HookCollectionService { get; }
+    public HookOrchestrator HookOrchestrator { get; }
+    public EventReceiverOrchestrator EventReceiverOrchestrator { get; }
+    public ITestFinder TestFinder { get; }
     public TUnitInitializer Initializer { get; }
-    public StandardOutConsoleInterceptor StandardOutConsoleInterceptor { get; }
-    public StandardErrorConsoleInterceptor StandardErrorConsoleInterceptor { get; }
-    public TUnitTestDiscoverer TestDiscoverer { get; }
-    public TestGrouper TestGrouper { get; }
-    public TestsFinder TestFinder { get; }
-    public TestsExecutor TestsExecutor { get; }
-    public OnEndExecutor OnEndExecutor { get; }
-    public FilterParser FilterParser { get; }
-    public TestDiscoveryHookOrchestrator TestDiscoveryHookOrchestrator { get; }
-    public TestSessionHookOrchestrator TestSessionHookOrchestrator { get; }
-    public AssemblyHookOrchestrator AssemblyHookOrchestrator { get; }
-    public EngineCancellationToken EngineCancellationToken { get; }
+    public CancellationTokenSource FailFastCancellationSource { get; }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
+        ITestExecutionFilter? filter,
         IMessageBus messageBus,
         IServiceProvider frameworkServiceProvider,
         ITestFrameworkCapabilities capabilities)
     {
-        _capabilities = capabilities;
+        Filter = filter;
+        TestSessionId = context.Request.Session.SessionUid.Value;
 
-        Register(context);
-
-        EngineCancellationToken = Register(new EngineCancellationToken());
-
-        LoggerFactory = frameworkServiceProvider.GetLoggerFactory();
-
-        OutputDevice = frameworkServiceProvider.GetOutputDevice();
-
+        // Get framework services
+        var loggerFactory = frameworkServiceProvider.GetLoggerFactory();
+        var outputDevice = frameworkServiceProvider.GetOutputDevice();
         CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
 
-        Logger = Register(new TUnitFrameworkLogger(extension, OutputDevice, LoggerFactory.CreateLogger<TUnitFrameworkLogger>(), CommandLineOptions));
+        VerbosityService = Register(new VerbosityService(CommandLineOptions));
+        DiscoveryDiagnostics.Initialize(VerbosityService);
 
-        Initializer = Register(new TUnitInitializer(CommandLineOptions));
+        Initializer = new TUnitInitializer(CommandLineOptions);
 
-        StandardOutConsoleInterceptor = Register(new StandardOutConsoleInterceptor(CommandLineOptions));
+        Logger = Register(new TUnitFrameworkLogger(
+            extension,
+            outputDevice,
+            loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
+            VerbosityService));
 
-        StandardErrorConsoleInterceptor = Register(new StandardErrorConsoleInterceptor(CommandLineOptions));
+        TestFilterService = Register(new TestFilterService(Logger));
 
-        FilterParser = Register(new FilterParser());
+        MessageBus = Register(new TUnitMessageBus(
+            extension,
+            CommandLineOptions,
+            frameworkServiceProvider,
+            context));
 
-        var stringFilter = FilterParser.GetTestFilter(context);
+        CancellationToken = Register(new EngineCancellationToken());
 
-        ContextManager = new ContextManager(context.Request.Session.SessionUid.Value, stringFilter);
+        HookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
 
-        TUnitMessageBus = Register(new TUnitMessageBus(extension, CommandLineOptions, context));
+        ContextProvider = Register(new ContextProvider(this, TestSessionId, Filter?.ToString()));
 
-        var instanceTracker = Register(new InstanceTracker());
+        HookOrchestrator = Register(new HookOrchestrator(HookCollectionService, Logger, ContextProvider, this));
+        EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
 
-        var isReflectionScannerEnabled = IsReflectionScannerEnabled(CommandLineOptions);
+        // Detect execution mode from command line or environment
+        var useSourceGeneration = GetUseSourceGeneration(CommandLineOptions);
 
-        HooksCollector = Register<HooksCollectorBase>
-        (
-            isReflectionScannerEnabled
-                ? new ReflectionHooksCollector(context.Request.Session.SessionUid.Value)
-                : new SourceGeneratedHooksCollector(context.Request.Session.SessionUid.Value)
-        );
-
-        var dependencyCollector = new DependencyCollector();
-
-        var testMetadataCollector = Register(new TestsCollector(context.Request.Session.SessionUid.Value));
-
-        var testsConstructor = Register<BaseTestsConstructor>
-        (
-            isReflectionScannerEnabled
-                ? new ReflectionTestsConstructor(extension, dependencyCollector, ContextManager, this)
-                : new SourceGeneratedTestsConstructor(extension, testMetadataCollector, dependencyCollector, ContextManager, this)
-        );
-
-        var testFilterService = Register(new TestFilterService(LoggerFactory));
-
-        TestGrouper = Register(new TestGrouper());
-
-        TestSessionHookOrchestrator = Register(new TestSessionHookOrchestrator(HooksCollector));
-
-        AssemblyHookOrchestrator = Register(new AssemblyHookOrchestrator(instanceTracker, HooksCollector, ContextManager, TestSessionHookOrchestrator));
-
-        TestDiscoveryHookOrchestrator = Register(new TestDiscoveryHookOrchestrator(HooksCollector));
-
-        var classHookOrchestrator = Register(new ClassHookOrchestrator(instanceTracker, HooksCollector));
-
-        var testHookOrchestrator = Register(new TestHookOrchestrator(HooksCollector));
-
-        var testRegistrar = Register(new TestRegistrar(instanceTracker));
-
-        Disposer = Register(new Disposer(Logger));
-
-        var testInvoker = Register(new TestInvoker(testHookOrchestrator, Disposer));
-        var parallelLimitProvider = Register(new ParallelLimitLockProvider());
-
-        var singleTestExecutor = Register(new SingleTestExecutor(extension, instanceTracker, testInvoker, parallelLimitProvider, AssemblyHookOrchestrator, classHookOrchestrator, TUnitMessageBus, Logger, EngineCancellationToken, testRegistrar, GetCapability<StopExecutionCapability>()));
-
-        TestsExecutor = Register(new TestsExecutor(singleTestExecutor, Logger, CommandLineOptions, EngineCancellationToken, AssemblyHookOrchestrator, classHookOrchestrator));
-
-        TestDiscoverer = Register(new TUnitTestDiscoverer(testsConstructor, testFilterService, TestGrouper, testRegistrar, TUnitMessageBus, Logger, TestsExecutor));
-
-        DynamicTestRegistrar = Register<IDynamicTestRegistrar>(new DynamicTestRegistrar(testsConstructor, testRegistrar,
-            TestGrouper, TUnitMessageBus, TestsExecutor, EngineCancellationToken));
-
-        TestFinder = Register(new TestsFinder(TestDiscoverer));
-        Register<ITestFinder>(TestFinder);
-
-        // TODO
-        Register(new HookMessagePublisher(extension, messageBus));
-
-        OnEndExecutor = Register(new OnEndExecutor(CommandLineOptions, Logger));
-    }
-
-    public IDynamicTestRegistrar DynamicTestRegistrar { get; }
-
-    public Disposer Disposer { get; }
-
-    public async ValueTask DisposeAsync()
-    {
-#if NET
-        await StandardOutConsoleInterceptor.DisposeAsync();
-        await StandardErrorConsoleInterceptor.DisposeAsync();
-#else
-        StandardOutConsoleInterceptor.Dispose();
-        StandardErrorConsoleInterceptor.Dispose();
-#endif
-
-        foreach (var servicesValue in _services.Values)
+        // Create data collector factory that creates collectors with filter types
+#pragma warning disable IL2026 // Using member which has 'RequiresUnreferencedCodeAttribute'
+#pragma warning disable IL3050 // Using member which has 'RequiresDynamicCodeAttribute'
+        Func<HashSet<Type>?, ITestDataCollector> dataCollectorFactory = filterTypes =>
         {
-            await Disposer.DisposeAsync(servicesValue);
-        }
+            if (useSourceGeneration)
+            {
+                return new AotTestDataCollector(filterTypes);
+            }
+            else
+            {
+                return new ReflectionTestDataCollector();
+            }
+        };
+#pragma warning restore IL3050
+#pragma warning restore IL2026
+
+        var testBuilder = Register<ITestBuilder>(
+            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider));
+
+        // Create pipeline with all dependencies
+        TestBuilderPipeline = Register(
+            new TestBuilderPipeline(
+                dataCollectorFactory,
+                testBuilder,
+                ContextProvider,
+                EventReceiverOrchestrator));
+
+        DiscoveryService = Register(new TestDiscoveryService(HookOrchestrator, TestBuilderPipeline, TestFilterService));
+
+        // Create test finder service after discovery service so it can use its cache
+        TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
+
+        // Create single test executor with ExecutionContext support
+        var singleTestExecutor = Register<ISingleTestExecutor>(
+            new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService));
+
+        // Create the HookOrchestratingTestExecutorAdapter
+        // Note: We'll need to update this to handle dynamic dependencies properly
+        var sessionUid = context.Request.Session.SessionUid;
+        var isFailFastEnabled = CommandLineOptions.TryGetOptionArgumentList(FailFastCommandProvider.FailFast, out _);
+        FailFastCancellationSource = Register(new CancellationTokenSource());
+
+        var hookOrchestratingTestExecutorAdapter = Register(
+            new HookOrchestratingTestExecutorAdapter(
+                singleTestExecutor,
+                messageBus,
+                sessionUid,
+                isFailFastEnabled,
+                FailFastCancellationSource,
+                Logger,
+                HookOrchestrator));
+
+        TestExecutor = Register(new TestExecutor(
+            singleTestExecutor,
+            CommandLineOptions,
+            Logger,
+            loggerFactory,
+            testScheduler: null,
+            serviceProvider: this,
+            hookOrchestratingTestExecutorAdapter));
+
+        // Set session IDs for proper test reporting
+        singleTestExecutor.SetSessionId(sessionUid);
+        TestExecutor.SetSessionId(sessionUid);
+
+        Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, hookOrchestratingTestExecutorAdapter, TestSessionId, CancellationToken.Token));
+
+        InitializeConsoleInterceptors();
     }
 
-    private T Register<T>(T t)
-    {
-        _services.Add(typeof(T), t!);
+    public ContextProvider ContextProvider { get; }
 
-        return t;
+    public string TestSessionId { get; }
+
+    private void InitializeConsoleInterceptors()
+    {
+        var outInterceptor = new StandardOutConsoleInterceptor(VerbosityService);
+        var errorInterceptor = new StandardErrorConsoleInterceptor(VerbosityService);
+
+        outInterceptor.Initialize();
+        errorInterceptor.Initialize();
+
+        Register(outInterceptor);
+        Register(errorInterceptor);
     }
 
     public object? GetService(Type serviceType)
     {
-        _services.TryGetValue(serviceType, out object? result);
-        return result;
+        return _services.TryGetValue(serviceType, out var service) ? service : null;
     }
 
-    public TCapability GetCapability<TCapability>()
-        where TCapability : class, ITestFrameworkCapability
+    private T Register<T>(T service) where T : class
     {
-        var capability = _capabilities.GetCapability<TCapability>();
+        _services[typeof(T)] = service;
+        return service;
+    }
 
-        if (capability == null)
+    private static bool GetUseSourceGeneration(ICommandLineOptions commandLineOptions)
+    {
+        if (commandLineOptions.TryGetOptionArgumentList(CommandLineProviders.ReflectionModeCommandProvider.ReflectionMode, out _))
         {
-            throw new InvalidOperationException($"No capability registered for {typeof(TCapability).Name}");
+            return false; // Reflection mode explicitly requested
         }
 
-        return capability;
-    }
-
-    private static bool IsReflectionScannerEnabled(ICommandLineOptions commandLineOptions)
-    {
-#if NET
-        if (!RuntimeFeature.IsDynamicCodeSupported)
+        // Check for command line option
+        if (commandLineOptions.TryGetOptionArgumentList("tunit-execution-mode", out var modes) && modes.Length > 0)
         {
-            return false;
+            var mode = modes[0].ToLowerInvariant();
+            if (mode == "sourcegeneration" || mode == "aot")
+            {
+                return true;
+            }
+            else if (mode == "reflection")
+            {
+                return false;
+            }
         }
-#endif
 
-        return IsReflectionScannerEnabledByCommandLine(commandLineOptions) || !SourceRegistrar.IsEnabled;
+        // Check environment variable
+        var envMode = Environment.GetEnvironmentVariable("TUNIT_EXECUTION_MODE");
+        if (!string.IsNullOrEmpty(envMode))
+        {
+            var mode = envMode.ToLowerInvariant();
+            if (mode == "sourcegeneration" || mode == "aot")
+            {
+                return true;
+            }
+            else if (mode == "reflection")
+            {
+                return false;
+            }
+        }
+
+        return SourceRegistrar.IsEnabled;
     }
 
-    private static bool IsReflectionScannerEnabledByCommandLine(ICommandLineOptions commandLineOptions)
+    public async ValueTask DisposeAsync()
     {
-        return commandLineOptions.IsOptionSet(ReflectionScannerCommandProvider.ReflectionScanner);
+        foreach (var service in _services.Values)
+        {
+            if (service is IAsyncDisposable asyncDisposable)
+            {
+                await asyncDisposable.DisposeAsync();
+            }
+            else if (service is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
+
+        _services.Clear();
     }
 }

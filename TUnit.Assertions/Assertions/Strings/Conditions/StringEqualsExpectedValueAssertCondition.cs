@@ -45,7 +45,7 @@ public class StringEqualsExpectedValueAssertCondition(string expected, StringCom
 
             return AssertionDecision.Continue;
         });
-        
+
         return this;
     }
 

@@ -9,15 +9,15 @@ public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : Invokable
     internal EquivalentToAssertionBuilderWrapper(InvokableAssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
-    
+
     public EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMember(string propertyName, [CallerArgumentExpression(nameof(propertyName))] string doNotPopulateThis = "")
     {
         var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
 
         assertion.IgnoringMember(propertyName);
-        
+
         AppendCallerMethod([doNotPopulateThis]);
-        
+
         return this;
     }
 

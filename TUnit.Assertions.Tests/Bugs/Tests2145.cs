@@ -2,7 +2,7 @@
 
 namespace TUnit.Assertions.Tests.Bugs;
 
-public class Tests2145 
+public class Tests2145
 {
     [Test]
     public async Task TestFailMessage()

@@ -7,19 +7,19 @@ public class LongEqualsToAssertionTests
     {
         var value1 = 1L;
         var value2 = 1L;
-        
+
         await TUnitAssert.That(value1).IsEqualTo(value2);
     }
-    
+
     [Test]
     public async Task Long_EqualsTo_Failure()
     {
         var value1 = 1L;
         var value2 = 2L;
-        
+
         await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
     }
-    
+
 #if NET
     [Test]
     public async Task Long_EqualsTo__With_Tolerance_Success()

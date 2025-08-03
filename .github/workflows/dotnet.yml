@@ -12,14 +12,14 @@ on:
         type: string
         required: false
       publish-packages:
-        description: Publish packages?    
+        description: Publish packages?
         type: boolean
         required: true
 
 jobs:
   modularpipeline:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
-    strategy: 
+    strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
       fail-fast: false
@@ -36,22 +36,25 @@ jobs:
       - name: Setup .NET 6
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 6.0.x 
+          dotnet-version: 6.0.x
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x 
+          dotnet-version: 8.0.x
 
       - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
-          
+
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+
+      - name: Docker Setup Docker
+        uses: docker/setup-docker-action@v4.3.0
 
       - name: Build
         run: dotnet build -c Release
@@ -63,14 +66,14 @@ jobs:
           environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
           nuget-apikey: ${{ secrets.NUGET__APIKEY }}
           publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
-      
+
       - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v4.6.2
         if: always()
         with:
           name: TestingPlatformDiagnosticLogs${{matrix.os}}
           path: '**/log_*.diag'
-          
+
       - name: Upload Hang Dumps
         uses: actions/upload-artifact@v4.6.2
         if: always()

@@ -1,100 +1,152 @@
 ﻿#pragma warning disable TPEXP
 
 using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
-using TUnit.Engine.Extensions;
+using TUnit.Core.Interfaces;
+using TUnit.Core.Logging;
+using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Services;
 
-internal class TestFilterService(ILoggerFactory loggerFactory)
+internal class TestFilterService(TUnitFrameworkLogger logger)
 {
-    private readonly ILogger<TestFilterService> _logger = loggerFactory.CreateLogger<TestFilterService>();
-
-    public IReadOnlyCollection<DiscoveredTest> FilterTests(TestExecutionRequest? testExecutionRequest, IReadOnlyCollection<DiscoveredTest> testNodes)
+    public IReadOnlyCollection<AbstractExecutableTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IReadOnlyCollection<AbstractExecutableTest> testNodes)
     {
-        var testExecutionFilter = testExecutionRequest?.Filter;
-        
         if (testExecutionFilter is null or NopFilter)
         {
-            _logger.LogTrace("No test filter found.");
-
-            if (testExecutionRequest is RunTestExecutionRequest)
-            {
-                return testNodes
-                    .Where(x => !x.TestDetails.Attributes.OfType<ExplicitAttribute>().Any())
-                    .ToArray();
-            }
+            logger.LogTrace("No test filter found.");
 
             return testNodes;
         }
-        
-        _logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
 
-        var filteredTests = testNodes.Where(x => MatchesTest(testExecutionFilter, x)).ToArray();
-        
-        var testsWithExplicitAttributeCount = filteredTests.Count(x => x.TestDetails.Attributes.OfType<ExplicitAttribute>().Any());
-        
-        if (testsWithExplicitAttributeCount > 0 && testsWithExplicitAttributeCount < filteredTests.Length)
+        logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
+
+        var filteredTests = new List<AbstractExecutableTest>();
+        foreach (var test in testNodes)
         {
-            return testNodes
-                .Where(x => !x.TestDetails.Attributes.OfType<ExplicitAttribute>().Any())
-                .ToArray();
+            if (MatchesTest(testExecutionFilter, test))
+            {
+                filteredTests.Add(test);
+            }
         }
 
         return filteredTests;
     }
 
-    public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, DiscoveredTest discoveredTest)
+    private async Task RegisterTest(AbstractExecutableTest test)
+    {
+        var discoveredTest = new DiscoveredTest<object>
+        {
+            TestContext = test.Context
+        };
+
+        var registeredContext = new TestRegisteredContext(test.Context)
+        {
+            DiscoveredTest = discoveredTest
+        };
+
+        test.Context.InternalDiscoveredTest = discoveredTest;
+
+        var attributes = test.Context.TestDetails.Attributes;
+
+        foreach (var attribute in attributes)
+        {
+            if (attribute is ITestRegisteredEventReceiver receiver)
+            {
+                try
+                {
+                    await receiver.OnTestRegistered(registeredContext);
+                }
+                catch (Exception ex)
+                {
+                    await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
+                }
+            }
+        }
+
+    }
+
+    public async Task RegisterTestsAsync(IEnumerable<AbstractExecutableTest> tests)
+    {
+        foreach (var test in tests)
+        {
+            await RegisterTest(test);
+        }
+    }
+
+    public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, AbstractExecutableTest executableTest)
     {
 #pragma warning disable TPEXP
         var shouldRunTest = testExecutionFilter switch
         {
             null => true,
             NopFilter => true,
-            TestNodeUidListFilter testNodeUidListFilter => testNodeUidListFilter.TestNodeUids.Contains(new TestNodeUid(discoveredTest.TestDetails.TestId)),
-            TreeNodeFilter treeNodeFilter => treeNodeFilter.MatchesFilter(BuildPath(discoveredTest.TestDetails), BuildPropertyBag(discoveredTest.TestDetails)),
+            TestNodeUidListFilter testNodeUidListFilter => testNodeUidListFilter.TestNodeUids.Contains(new TestNodeUid(executableTest.TestId)),
+            TreeNodeFilter treeNodeFilter => CheckTreeNodeFilter(treeNodeFilter, executableTest),
             _ => UnhandledFilter(testExecutionFilter)
         };
-
-        if (!shouldRunTest)
-        {
-            discoveredTest.TestContext.ClassContext.RemoveTest(discoveredTest.TestContext);
-        }
 
         return shouldRunTest;
 #pragma warning restore TPEXP
     }
 
-    private string BuildPath(TestDetails testDetails)
+    private string BuildPath(AbstractExecutableTest test)
     {
-        var assembly = testDetails.TestClass.Type.Assembly.GetName();
+        var metadata = test.Metadata;
 
-        var classTypeName = testDetails.TestClass.Type.Name;
+        var classMetadata = test.Context.TestDetails.MethodMetadata.Class;
+        var assemblyName = classMetadata.Assembly.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
+        var namespaceName = classMetadata.Namespace ?? "*";
+        var classTypeName = classMetadata.Name;
+
+        var path = $"/{assemblyName}/{namespaceName}/{classTypeName}/{metadata.TestMethodName}";
         
-        return
-            $"/{assembly.Name ?? assembly.FullName}/{testDetails.TestClass.Type.Namespace}/{classTypeName}/{testDetails.TestMethod.Name}";
+        
+        return path;
     }
 
-    private PropertyBag BuildPropertyBag(TestDetails testDetails)
+    private bool CheckTreeNodeFilter(
+#pragma warning disable TPEXP
+        TreeNodeFilter treeNodeFilter,
+#pragma warning restore TPEXP
+        AbstractExecutableTest executableTest)
     {
-        var properties = testDetails.ExtractProperties();
+        var path = BuildPath(executableTest);
 
-        var categories = testDetails.Categories.Select(x => new TestMetadataProperty(x));
-        
-        return new PropertyBag(
-            [
-                ..properties,
-                ..categories,
-                ..testDetails.Categories.Select(x => new KeyValuePairStringProperty("Category", x))
-            ]
-        );
+        var propertyBag = BuildPropertyBag(executableTest);
+
+        var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
+
+        if (!matches)
+        {
+            logger.LogTrace($"Test {executableTest.TestId} with path '{path}' did not match treenode filter");
+        }
+
+        return matches;
     }
 
     private bool UnhandledFilter(ITestExecutionFilter testExecutionFilter)
     {
-        _logger.LogWarning($"Filter is Unhandled Type: {testExecutionFilter.GetType().FullName}");
+        logger.LogWarning($"Filter is Unhandled Type: {testExecutionFilter.GetType().FullName}");
         return true;
+    }
+
+    private PropertyBag BuildPropertyBag(AbstractExecutableTest test)
+    {
+        var properties = new List<IProperty>();
+
+        foreach (var category in test.Context.TestDetails.Categories)
+        {
+            properties.Add(new TestMetadataProperty(category));
+            properties.Add(new KeyValuePairStringProperty("Category", category));
+        }
+
+        foreach (var propertyEntry in test.Context.TestDetails.CustomProperties)
+        {
+            properties.AddRange(propertyEntry.Value.Select(value => new KeyValuePairStringProperty(propertyEntry.Key, value)));
+        }
+
+        return new PropertyBag(properties);
     }
 }

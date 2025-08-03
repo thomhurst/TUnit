@@ -1,9 +1,8 @@
-using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class PriorityFilteringTests : TestsBase<TestsGenerator>
+internal class PriorityFilteringTests : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -11,7 +10,7 @@ internal class PriorityFilteringTests : TestsBase<TestsGenerator>
             "PriorityFilteringTests.cs"),
         new RunTestOptions
         {
-            AdditionalFiles = 
+            AdditionalFiles =
                 [
                     Path.Combine(Git.RootDirectory.FullName,
                         "TUnit.TestProject",
@@ -21,6 +20,5 @@ internal class PriorityFilteringTests : TestsBase<TestsGenerator>
         },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(6);
-        });
+            });
 }

@@ -16,7 +16,7 @@ public class ApiTests(HttpClientDataClass httpClientData)
         var response = await httpClient.GetAsync("/weatherforecast");
         // Assert
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
-    } 
+    }
 
     [Test]
     [MatrixDataSource]

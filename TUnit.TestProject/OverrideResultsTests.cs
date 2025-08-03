@@ -1,5 +1,4 @@
-﻿using TUnit.Core.Enums;
-using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
@@ -19,15 +18,15 @@ public class OverrideResultsTests
         await Assert.That(classHookContext.Tests)
             .HasSingleItem()
             .And
-            .ContainsOnly(t => t.Result?.Status == Status.Passed);
+            .ContainsOnly(t => t.Result?.State == TestState.Passed);
     }
-    
+
     public class OverridePassAttribute : Attribute, ITestEndEventReceiver
     {
-        public ValueTask OnTestEnd(AfterTestContext afterTestContext)
+        public ValueTask OnTestEnd(TestContext afterTestContext)
         {
-            afterTestContext.OverrideResult(Status.Passed, "Because I said so");
-            return default;
+            afterTestContext.OverrideResult(TestState.Passed, "Because I said so");
+            return default(ValueTask);
         }
 
         public int Order => 0;

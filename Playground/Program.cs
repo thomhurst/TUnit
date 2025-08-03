@@ -1,6 +1,6 @@
-﻿using Microsoft.Testing.Platform.MSBuild;
-using Testcontainers.PostgreSql;
+﻿using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
+using TUnit.Core;
 using TUnit.Engine.Extensions;
 using Xunit;
 
@@ -13,13 +13,11 @@ public static class Program
 #pragma warning restore TUnit0034
     {
         var builder = await Microsoft.Testing.Platform.Builder.TestApplication.CreateBuilderAsync(args);
-        
-        builder.AddSelfRegisteredExtensions(args);
-        builder.AddMSBuild();
+
         builder.AddTUnit();
 
         using var app = await builder.BuildAsync();
-        
+
         return await app.RunAsync();
     }
 }
@@ -30,7 +28,7 @@ public class Tests
     public void Test()
     {
         var one = "1";
-        
+
         Xunit.Assert.Equal("1", one);
     }
 }
@@ -39,15 +37,15 @@ public class Hooks
 {
     public static PostgreSqlContainer PostgreSqlContainer { get; } = new PostgreSqlBuilder().Build();
     public static RedisContainer RedisContainer { get; } = new RedisBuilder().Build();
-        
-    [Before(Assembly)]
+
+    [Before(HookType.Assembly)]
     public static async Task Before()
     {
         await PostgreSqlContainer.StartAsync();
         await RedisContainer.StartAsync();
     }
-    
-    [After(Assembly)]
+
+    [After(HookType.Assembly)]
     public static async Task After()
     {
         await PostgreSqlContainer.StopAsync();

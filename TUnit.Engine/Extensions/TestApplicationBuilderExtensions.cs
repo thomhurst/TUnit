@@ -18,22 +18,22 @@ public static class TestApplicationBuilderExtensions
         TUnitExtension extension = new();
 
         var githubReporter = new GitHubReporter(extension);
-        
+
         testApplicationBuilder.RegisterTestFramework(
-            serviceProvider  => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
-            (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities, [githubReporter]));
-        
+            serviceProvider => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
+            (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));
+
         testApplicationBuilder.AddTreeNodeFilterService(extension);
         testApplicationBuilder.AddMaximumFailedTestsService(extension);
-        
-        // TODO: testApplicationBuilder.CommandLine.AddProvider(() => new JsonOutputCommandProvider(extension));
-        testApplicationBuilder.CommandLine.AddProvider(() => new HideTestOutputCommandProvider(extension));
+
+        // Core functionality command providers
         testApplicationBuilder.CommandLine.AddProvider(() => new MaximumParallelTestsCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ParametersCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new FailFastCommandProvider(extension));
-        testApplicationBuilder.CommandLine.AddProvider(() => new DisableLogoCommandProvider(extension));
-        testApplicationBuilder.CommandLine.AddProvider(() => new DetailedStacktraceCommandProvider(extension));
-        testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionScannerCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionModeCommandProvider(extension));
+        
+        // Unified verbosity control (replaces HideTestOutput, DisableLogo, DetailedStacktrace)
+        testApplicationBuilder.CommandLine.AddProvider(() => new VerbosityCommandProvider(extension));
 
         testApplicationBuilder.TestHost.AddDataConsumer(_ => githubReporter);
         testApplicationBuilder.TestHost.AddTestApplicationLifecycleCallbacks(_ => githubReporter);

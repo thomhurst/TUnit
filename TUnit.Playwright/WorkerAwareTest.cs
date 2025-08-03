@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using TUnit.Core;
-using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Playwright;
@@ -13,7 +12,7 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
         public readonly int WorkerIndex = Interlocked.Increment(ref _lastWorkedIndex);
         public readonly Dictionary<string, IWorkerService> Services = [];
     }
-    
+
     public virtual bool UseDefaultParallelLimiter => true;
 
     private static readonly ConcurrentStack<Worker> AllWorkers = [];
@@ -38,7 +37,7 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
         {
             _currentWorker = new();
         }
-        
+
         WorkerIndex = _currentWorker.WorkerIndex;
     }
 
@@ -51,7 +50,7 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
             {
                 await kv.Value.ResetAsync().ConfigureAwait(false);
             }
-            
+
             AllWorkers.Push(_currentWorker);
         }
         else
@@ -60,14 +59,14 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
             {
                 await kv.Value.DisposeAsync().ConfigureAwait(false);
             }
-            
+
             _currentWorker.Services.Clear();
         }
     }
 
     protected bool TestOk(TestContext testContext)
     {
-        return testContext.Result?.Status is Status.Passed or Status.Skipped;
+        return testContext.Result?.State is TestState.Passed or TestState.Skipped;
     }
 
     public ValueTask OnTestRegistered(TestRegisteredContext context)
@@ -76,8 +75,8 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
         {
             context.SetParallelLimiter(new DefaultPlaywrightParallelLimiter());
         }
-        
-        return default;
+
+        return default(ValueTask);
     }
 
     int IEventReceiver.Order => 0;

@@ -1,8 +1,9 @@
-﻿using TUnit.Core.Logging;
+﻿using Microsoft.Testing.Platform.Logging;
+using LogLevel = TUnit.Core.Logging.LogLevel;
 
 namespace TUnit.Engine.Logging;
 
-internal class MTPLoggerAdapter(global::Microsoft.Testing.Platform.Logging.ILogger logger) : ILogger
+internal class MTPLoggerAdapter(ILogger logger) : Core.Logging.ILogger
 {
     public async ValueTask LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
@@ -19,7 +20,7 @@ internal class MTPLoggerAdapter(global::Microsoft.Testing.Platform.Logging.ILogg
         return logger.IsEnabled(Map(logLevel));
     }
 
-    public static LogLevel Map(global::Microsoft.Testing.Platform.Logging.LogLevel logLevel)
+    public static LogLevel Map(Microsoft.Testing.Platform.Logging.LogLevel logLevel)
     {
         return logLevel switch
         {
@@ -33,8 +34,8 @@ internal class MTPLoggerAdapter(global::Microsoft.Testing.Platform.Logging.ILogg
             _ => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null)
         };
     }
-    
-    public static global::Microsoft.Testing.Platform.Logging.LogLevel Map(LogLevel logLevel)
+
+    public static Microsoft.Testing.Platform.Logging.LogLevel Map(LogLevel logLevel)
     {
         return logLevel switch
         {

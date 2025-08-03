@@ -1,8 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using Polyfills;
-
-namespace TUnit.TestProject.BeforeTests;
+﻿namespace TUnit.TestProject.BeforeTests;
 
 public class TestSessionBeforeHooks
 {
@@ -20,13 +16,7 @@ public class TestSessionBeforeHooks
         var test = context.AllTests.FirstOrDefault(x =>
             x.TestDetails.TestName == nameof(TestSessionBeforeTests.EnsureBeforeEveryTestSessionHit));
 
-        if (test == null)
-        {
-            // This test might not have been executed due to filters, so the below exception would cause problems.
-            return;
-        }
-
-        test.ObjectBag.Add("BeforeEveryTestSession", true);
+        test?.ObjectBag.Add("BeforeEveryTestSession", true);
     }
 }
 

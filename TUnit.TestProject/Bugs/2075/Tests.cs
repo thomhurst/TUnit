@@ -19,14 +19,14 @@ public class ServiceProviderFactory : IAsyncInitializer
     }
 }
 
-public class FromServiceProviderFactoryAttribute : NonTypedDataSourceGeneratorAttribute, IAccessesInstanceData
+public class FromServiceProviderFactoryAttribute : UntypedDataSourceGeneratorAttribute, IAccessesInstanceData
 {
     public Task InitializeAsync()
     {
         return Task.CompletedTask;
     }
 
-    public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (dataGeneratorMetadata.ClassInstanceArguments is null)
         {

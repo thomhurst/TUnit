@@ -9,12 +9,10 @@ namespace TUnit.Analyzers;
 public class SingleTUnitAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-        ImmutableArray.Create(
-            Rules.DuplicateSingleAttribute
-            );
+        ImmutableArray.Create(Rules.DuplicateSingleAttribute);
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
     }
@@ -24,23 +22,23 @@ public class SingleTUnitAttributeAnalyzer : ConcurrentDiagnosticAnalyzer
         var symbol = context.Symbol;
 
         var attributes = symbol.GetAttributes();
-        
+
         var singleAttributes = attributes.Select(ToClassInheritingSingleAttribute).OfType<INamedTypeSymbol>().ToList();
 
         var notDistinctAttributes = singleAttributes.GroupBy(x => x, SymbolEqualityComparer.Default).Where(x => x.Count() > 1).Select(x => x.Key!).ToList();
-        
+
         foreach (var notDistinctAttribute in notDistinctAttributes)
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.DuplicateSingleAttribute, symbol.Locations.FirstOrDefault(), notDistinctAttribute));   
+            context.ReportDiagnostic(Diagnostic.Create(Rules.DuplicateSingleAttribute, symbol.Locations.FirstOrDefault(), notDistinctAttribute));
         }
     }
 
     private INamedTypeSymbol? ToClassInheritingSingleAttribute(AttributeData attributeData)
     {
         var typeWithBases = attributeData.AttributeClass?.GetSelfAndBaseTypes().ToList();
-        
+
         var index = typeWithBases?.FindIndex(x => x?.GloballyQualified() == "global::TUnit.Core.SingleTUnitAttribute");
-        
+
         if (index is null or -1 or 0)
         {
             return null;

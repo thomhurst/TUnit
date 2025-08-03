@@ -11,7 +11,7 @@ namespace ExampleNamespace;
 
 public class GlobalHooks
 {
-    public static DistributedApplication? App{ get; private set; }
+    public static DistributedApplication? App { get; private set; }
     public static ResourceNotificationService? NotificationService { get; private set; }
 
     // Uncomment out and replace Projects reference with your app host

@@ -1,65 +1,23 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>
-    : DataSourceGeneratorAttribute<T>,
-        ISharedDataSourceAttribute
+public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)] T>
+    : DataSourceGeneratorAttribute<T>
 {
     public SharedType Shared { get; set; } = SharedType.None;
     public string Key { get; set; } = string.Empty;
     public Type ClassType => typeof(T);
-    public override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+
+    protected override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        yield return () =>
-        {
-            var item = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                .Get<T>(Shared, dataGeneratorMetadata.TestClassType, Key, dataGeneratorMetadata);
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestRegistered += async (obj, context) =>
-            {
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestRegistered(
-                    context.TestContext,
-                    ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
-                    Shared,
-                    Key,
-                    item);
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize += async (obj, context) =>
-            {
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
-                    context,
-                    ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
-                    Shared,
-                    Key,
-                    item);
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (obj, context) =>
-            {
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, item);
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (obj, context) =>
-            {
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(context, item);
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (obj, context) =>
-            {
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, Shared, Key, item);
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (obj, context) =>
-            {
-                await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, Shared, Key, item);
-            };
-
-            return item;
-        };
+        var testClassType = TestClassTypeHelper.GetTestClassType(dataGeneratorMetadata);
+        yield return () => ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
+            .Get<T>(Shared, testClassType, Key, dataGeneratorMetadata);
     }
+
 
     public IEnumerable<SharedType> GetSharedTypes() => [Shared];
 
@@ -67,14 +25,16 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttribute, ISharedDataSourceAttribute
+[UnconditionalSuppressMessage("Trimming", "IL2109:Type derives from type with 'RequiresUnreferencedCodeAttribute' which can break functionality when trimming application code",
+    Justification = "The specific constructors (1-5 parameters) are AOT-compatible when used with typeof() expressions. Only the params constructor is incompatible.")]
+public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribute
 {
     private readonly Type[] _types;
 
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
     public ClassDataSourceAttribute(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type) : this([type])
     {
     }
@@ -82,9 +42,9 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
     public ClassDataSourceAttribute(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type2) : this([type, type2])
     {
     }
@@ -92,11 +52,11 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
     public ClassDataSourceAttribute(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type2,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type3) : this([type, type2, type3])
     {
     }
@@ -104,13 +64,13 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
     public ClassDataSourceAttribute(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type2,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type3,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type4) : this([type, type2, type3, type4])
     {
     }
@@ -118,15 +78,15 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
     public ClassDataSourceAttribute(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type2,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type3,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type4,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type5) : this([type, type2, type3, type4, type5])
     {
     }
@@ -142,7 +102,7 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
     public string[] Keys { get; set; } = [];
 
     [UnconditionalSuppressMessage("Trimming", "IL2062:The parameter of method has a DynamicallyAccessedMembersAttribute, but the value passed to it can not be statically analyzed.")]
-    public override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () =>
         {
@@ -150,67 +110,10 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
 
             for (var i = 0; i < _types.Length; i++)
             {
+                var testClassType = TestClassTypeHelper.GetTestClassType(dataGeneratorMetadata);
                 items[i] = ClassDataSources.Get(dataGeneratorMetadata.TestSessionId)
-                    .Get(Shared.ElementAtOrDefault(0), _types[i], dataGeneratorMetadata.TestClassType, Keys.ElementAtOrDefault(0), dataGeneratorMetadata);
+                    .Get(Shared.ElementAtOrDefault(i), _types[i], testClassType, Keys.ElementAtOrDefault(i), dataGeneratorMetadata);
             }
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestRegistered += async (obj, context) =>
-            {
-                foreach (var item in items)
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestRegistered(
-                        context.TestContext,
-                        ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
-                        Shared.ElementAtOrDefault(0),
-                        Keys.ElementAtOrDefault(0),
-                        item);
-                }
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnInitialize += async (obj, context) =>
-            {
-                foreach (var item in items)
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnInitialize(
-                        context,
-                        ClassDataSources.IsStaticProperty(dataGeneratorMetadata),
-                        Shared.ElementAtOrDefault(0),
-                        Keys.ElementAtOrDefault(0),
-                        item);
-                }
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestStart += async (obj, context) =>
-            {
-                foreach (var item in items)
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestStart(context, item);
-                }
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestEnd += async (obj, context) =>
-            {
-                foreach (var item in items)
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnTestEnd(context, item);
-                }
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnTestSkipped += async (obj, context) =>
-            {
-                foreach (var item in items)
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, Shared.ElementAtOrDefault(0), Keys.ElementAtOrDefault(0), item);
-                }
-            };
-
-            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (obj, context) =>
-            {
-                foreach (var item in items)
-                {
-                    await ClassDataSources.Get(dataGeneratorMetadata.TestSessionId).OnDispose(context, Shared.ElementAtOrDefault(0), Keys.ElementAtOrDefault(0), item);
-                }
-            };
 
             return items;
         };
@@ -219,4 +122,5 @@ public sealed class ClassDataSourceAttribute : NonTypedDataSourceGeneratorAttrib
     public IEnumerable<SharedType> GetSharedTypes() => Shared;
 
     public IEnumerable<string> GetKeys() => Keys;
+
 }

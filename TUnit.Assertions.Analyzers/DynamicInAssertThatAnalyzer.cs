@@ -19,7 +19,7 @@ public class DynamicInAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         context.RegisterOperationAction(AnalyzeOperation, OperationKind.DynamicInvocation);
     }
-    
+
     private void AnalyzeOperation(OperationAnalysisContext context)
     {
         if (context.Operation is not IDynamicInvocationOperation dynamicInvocationOperation)
@@ -32,7 +32,7 @@ public class DynamicInAssertThatAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-        
+
         if (targetMethod.Name != "That"
             || !SymbolEqualityComparer.Default.Equals(targetMethod.ContainingType, context.Compilation.GetTypeByMetadataName("TUnit.Assertions.Assert")))
         {

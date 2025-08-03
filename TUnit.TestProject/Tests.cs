@@ -1,7 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using TUnit.Assertions;
 using TUnit.Assertions.AssertConditions.Throws;
-using TUnit.Assertions.Extensions;
 
 namespace TUnit.TestProject;
 
@@ -29,7 +27,7 @@ public class Tests
     [Category("Pass")]
     public async Task LessThan()
     {
-        int value = 1;
+        var value = 1;
         await Assert.That(value).IsLessThan(2);
     }
 
@@ -347,7 +345,7 @@ public class Tests
     {
         await Task.CompletedTask;
         Console.WriteLine(_retryCount);
-        throw new Exception();
+        throw new Exception("Random failing test Throws5");
     }
 
     [Test]
@@ -355,14 +353,14 @@ public class Tests
     {
         await Task.CompletedTask;
         Console.WriteLine(_retryCount);
-        throw new Exception();
+        throw new Exception("Random failing test Throws6");
     }
 
     [Test]
     public void Throws7()
     {
         Console.WriteLine(_retryCount);
-        throw new Exception();
+        throw new Exception("Random failing test Throws7");
     }
 
     [Test]

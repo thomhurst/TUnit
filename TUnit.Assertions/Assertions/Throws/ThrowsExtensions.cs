@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertConditions.Exceptions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Assertions.Throws;
@@ -17,7 +16,7 @@ public static class ThrowsExtensions
             delegateSource,
             e => e);
     }
-    
+
     public static ThrowsException<object?, Exception> Throws(this IDelegateSource delegateSource, Type type, [CallerArgumentExpression("type")] string? doNotPopulateThisValue = null)
     {
         return new ThrowsException<object?, Exception>(
@@ -34,8 +33,8 @@ public static class ThrowsExtensions
             delegateSource,
             e => e);
     }
-    
-    public static ThrowsException<object?, Exception> ThrowsWithin(this IDelegateSource delegateSource, TimeSpan timeSpan, [CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null) 
+
+    public static ThrowsException<object?, Exception> ThrowsWithin(this IDelegateSource delegateSource, TimeSpan timeSpan, [CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null)
     {
         return new ThrowsException<object?, Exception>(
             delegateSource.RegisterAssertion(new ThrowsWithinAssertCondition<object?, Exception>(timeSpan), [doNotPopulateThisValue]),
@@ -43,7 +42,7 @@ public static class ThrowsExtensions
             e => e
             );
     }
-    
+
     public static ThrowsException<object?, TException> ThrowsWithin<TException>(this IDelegateSource delegateSource, TimeSpan timeSpan, [CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null)
         where TException : Exception
     {

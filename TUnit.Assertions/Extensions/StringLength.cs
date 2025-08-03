@@ -16,7 +16,7 @@ public class StringLength(IValueSource<string> valueSource)
                     self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
-                
+
                 return actual.Length == expected;
             },
             (@string, _, _) =>
@@ -43,14 +43,14 @@ public class StringLength(IValueSource<string> valueSource)
             , []);
 
     public InvokableValueAssertionBuilder<string> Positive =>
-        valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(default, (@string, _, self) =>
+        valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0, (@string, _, self) =>
             {
                 if (@string is null)
                 {
                     self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
-                
+
                 return @string.Length > 0;
             },
             (@string, _, _) =>
@@ -68,7 +68,7 @@ public class StringLength(IValueSource<string> valueSource)
                     self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
-                
+
                 return @string.Length > expected;
             },
             (@string, _, _) =>
@@ -86,7 +86,7 @@ public class StringLength(IValueSource<string> valueSource)
                     self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
-                
+
                 return @string.Length >= expected;
             },
             (@string, _, _) =>
@@ -104,7 +104,7 @@ public class StringLength(IValueSource<string> valueSource)
                     self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
-                
+
                 return @string.Length < expected;
             },
             (@string, _, _) =>
@@ -122,7 +122,7 @@ public class StringLength(IValueSource<string> valueSource)
                     self.OverriddenMessage = "Actual string is null";
                     return false;
                 }
-                
+
                 return @string.Length <= expected;
             },
             (@string, _, _) =>

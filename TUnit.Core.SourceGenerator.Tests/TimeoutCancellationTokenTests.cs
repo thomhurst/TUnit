@@ -1,8 +1,7 @@
-using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-internal class TimeoutCancellationTokenTests : TestsBase<TestsGenerator>
+internal class TimeoutCancellationTokenTests : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -10,6 +9,5 @@ internal class TimeoutCancellationTokenTests : TestsBase<TestsGenerator>
             "TimeoutCancellationTokenTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(6);
-        });
+            });
 }

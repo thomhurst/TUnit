@@ -1,4 +1,4 @@
-﻿namespace TUnit.Assertions.UnitTests;
+﻿namespace TUnit.Engine;
 
 internal static class PolyfillExtensions
 {

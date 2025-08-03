@@ -1,4 +1,4 @@
-using TUnit.Aspire.Starter.ApiService;
+﻿using TUnit.Aspire.Starter.ApiService;
 using TUnit.Aspire.Starter.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,6 +38,6 @@ namespace TUnit.Aspire.Starter.ApiService
 {
     record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
     {
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        public int TemperatureF => 32 + (int) (TemperatureC / 0.5556);
     }
 }

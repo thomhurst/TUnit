@@ -29,7 +29,6 @@ public class EngineCancellationToken : IDisposable
             if (!CancellationTokenSource.IsCancellationRequested)
             {
                 CancellationTokenSource.Cancel();
-                e.Cancel = true;
             }
 
             _ = Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(_ =>

@@ -59,7 +59,7 @@ public class MatrixDataSourceAnalyzerTests
             );
     }
 
-    
+
     [Test]
     public async Task Method_No_Error()
     {
@@ -82,7 +82,7 @@ public class MatrixDataSourceAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     public async Task Method_Missing_Attribute_Error()
     {
@@ -102,7 +102,7 @@ public class MatrixDataSourceAnalyzerTests
                     }
                 }
                 """,
-                
+
                 Verifier.Diagnostic(Rules.MatrixDataSourceAttributeRequired)
                     .WithLocation(0)
             );

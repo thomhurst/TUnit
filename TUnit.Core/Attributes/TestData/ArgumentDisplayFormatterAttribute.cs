@@ -7,10 +7,11 @@ public abstract class ArgumentDisplayFormatterAttribute : TUnitAttribute, ITestD
     public virtual int Order => 0;
 
     public abstract ArgumentDisplayFormatter Formatter { get; }
-    
-    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+
+    public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        discoveredTestContext.AddArgumentDisplayFormatter(Formatter);
+        context.AddArgumentDisplayFormatter(Formatter);
+        return default(ValueTask);
     }
 }
 

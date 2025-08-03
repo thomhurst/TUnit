@@ -22,7 +22,7 @@ public class NestedExceptionTests
             throw new Exception("Thrown from Method1", e);
         }
     }
-    
+
     private void Method2()
     {
         try
@@ -34,7 +34,7 @@ public class NestedExceptionTests
             throw new ArgumentException("Thrown from Method2", e);
         }
     }
-    
+
     private void Method3()
     {
         throw new InvalidOperationException("Thrown from Method3");

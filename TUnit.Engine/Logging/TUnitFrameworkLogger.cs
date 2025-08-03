@@ -1,20 +1,19 @@
-﻿using Microsoft.Testing.Platform.CommandLine;
-using Microsoft.Testing.Platform.Extensions;
+﻿using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.OutputDevice;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.OutputDevice;
-using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Services;
 using LogLevel = TUnit.Core.Logging.LogLevel;
 
 namespace TUnit.Engine.Logging;
 
-internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger, ICommandLineOptions commandLineOptions)
-    : IOutputDeviceDataProducer, global::TUnit.Core.Logging.ILogger
+public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger, VerbosityService verbosityService)
+    : IOutputDeviceDataProducer, Core.Logging.ILogger
 {
-    private readonly bool _hideTestOutput = commandLineOptions.IsOptionSet(HideTestOutputCommandProvider.HideTestOutput);
-    
+    private readonly bool _hideTestOutput = verbosityService.HideTestOutput;
+
     private readonly MTPLoggerAdapter _adapter = new(logger);
-    
+
     public Task<bool> IsEnabledAsync()
     {
         return Task.FromResult(true);
@@ -24,14 +23,14 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
     public string Version => extension.Version;
     public string DisplayName => extension.DisplayName;
     public string Description => extension.Description;
-    
+
     public async ValueTask LogAsync<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
         if (!IsEnabled(logLevel))
         {
             return;
         }
-        
+
         var text = formatter(state, exception);
 
         await outputDevice.DisplayAsync(this, new FormattedTextOutputDeviceData(text)
@@ -41,7 +40,7 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
                 ConsoleColor = GetConsoleColor(logLevel)
             }
         });
-        
+
         await _adapter.LogAsync(logLevel, state, exception, formatter);
     }
 
@@ -51,7 +50,7 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
         {
             return;
         }
-        
+
         var text = formatter(state, exception);
 
         outputDevice.DisplayAsync(this, new FormattedTextOutputDeviceData(text)
@@ -61,7 +60,7 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
                 ConsoleColor = GetConsoleColor(logLevel)
             }
         });
-        
+
         _adapter.Log(logLevel, state, exception, formatter);
     }
 
@@ -71,7 +70,7 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
         {
             return ConsoleColor.DarkYellow;
         }
-        
+
         if (logLevel >= LogLevel.Error)
         {
             return ConsoleColor.DarkRed;
@@ -83,5 +82,15 @@ internal class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDe
     public bool IsEnabled(LogLevel logLevel)
     {
         return !_hideTestOutput && logger.IsEnabled(MTPLoggerAdapter.Map(logLevel));
+    }
+
+    public async Task LogErrorAsync(string message)
+    {
+        await LogAsync(LogLevel.Error, message, null, (s, _) => s);
+    }
+
+    public async Task LogErrorAsync(Exception exception)
+    {
+        await LogAsync(LogLevel.Error, exception.Message, exception, (s, e) => e?.ToString() ?? s);
     }
 }

@@ -13,7 +13,7 @@ internal class AssertionScope : IDisposable
     {
         AppDomain.CurrentDomain.FirstChanceException += InterceptException;
     }
-    
+
     internal AssertionScope()
     {
         _parent = GetCurrentAssertionScope();
@@ -38,7 +38,7 @@ internal class AssertionScope : IDisposable
             {
                 _parent._exceptions.Add(exception);
             }
-            
+
             return;
         }
 
@@ -47,7 +47,7 @@ internal class AssertionScope : IDisposable
             // If there's no assertion exceptions, return, and user thrown exceptions should just propogate up
             return;
         }
-        
+
         // It could be an intercepted exception,
         // In which case it should just throw itself, so we don't need to do that
         if (_exceptions.Count == 1)
@@ -61,7 +61,7 @@ internal class AssertionScope : IDisposable
             throw new AssertionException(message, new AggregateException(_exceptions));
         }
     }
-    
+
     internal static AssertionScope? GetCurrentAssertionScope()
     {
         return CurrentScope.Value;
@@ -76,7 +76,7 @@ internal class AssertionScope : IDisposable
     {
         _exceptions.Add(exception);
     }
-    
+
     internal void RemoveException(Exception exception)
     {
         if (_exceptions.Contains(exception))

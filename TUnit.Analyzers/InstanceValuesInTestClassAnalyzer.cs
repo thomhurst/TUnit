@@ -14,7 +14,7 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
         ImmutableArray.Create(Rules.InstanceAssignmentInTestClass);
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterOperationAction(AnalyzeOperation, OperationKind.SimpleAssignment);
     }
 
@@ -24,7 +24,7 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-        
+
         if (!TryGetParentMethodBody(assignmentOperation, out var methodBodyOperation))
         {
             return;
@@ -40,16 +40,16 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-        
+
         var testClass = methodSymbol.ContainingType;
 
         var typeMembers = testClass.GetMembers();
-        
+
         var fieldsAndProperties = typeMembers
             .OfType<IFieldSymbol>()
             .Concat<ISymbol>(typeMembers.OfType<IPropertySymbol>())
             .Where(x => !x.IsStatic);
-        
+
         foreach (var fieldOrProperty in fieldsAndProperties)
         {
             var targetSymbol = GetTarget(assignmentOperation);
@@ -58,7 +58,7 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 return;
             }
-            
+
             if (SymbolEqualityComparer.Default.Equals(targetSymbol, fieldOrProperty))
             {
                 context.ReportDiagnostic(
@@ -74,12 +74,12 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return propertyReferenceOperation.Property;
         }
-        
+
         if (assignmentOperation.Target is IFieldReferenceOperation fieldReferenceOperation)
         {
             return fieldReferenceOperation.Field;
         }
-        
+
         return null;
     }
 
@@ -98,7 +98,7 @@ public class InstanceValuesInTestClassAnalyzer : ConcurrentDiagnosticAnalyzer
             parent = parent.Parent;
         }
 
-        methodBodyOperation  = null;
+        methodBodyOperation = null;
         return false;
     }
 }

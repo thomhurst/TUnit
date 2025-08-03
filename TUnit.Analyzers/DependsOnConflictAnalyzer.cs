@@ -8,10 +8,10 @@ namespace TUnit.Analyzers;
 
 public record Chain(IMethodSymbol OriginalMethod)
 {
-    public List<IMethodSymbol> Dependencies { get; } = [];
-    
+    public List<IMethodSymbol> Dependencies { get; } = new List<IMethodSymbol>();
+
     public bool MethodTraversed(IMethodSymbol method) => Dependencies.Contains(method, SymbolEqualityComparer.Default);
-    
+
     public bool Any() => Dependencies.Any();
 
     public void Add(IMethodSymbol dependency)
@@ -21,11 +21,9 @@ public record Chain(IMethodSymbol OriginalMethod)
 
     public IMethodSymbol[] GetCompleteChain()
     {
-        return
-        [
-            OriginalMethod,
-            ..Dependencies.TakeUntil(d => SymbolEqualityComparer.Default.Equals(d, OriginalMethod))
-        ];
+        return new[] { OriginalMethod }
+            .Concat(Dependencies.TakeUntil(d => SymbolEqualityComparer.Default.Equals(d, OriginalMethod)))
+            .ToArray();
     }
 }
 
@@ -43,19 +41,19 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
     private void AnalyzeSymbol(SymbolAnalysisContext context)
     {
         var method = (IMethodSymbol) context.Symbol;
-        
-        AttributeData[] dependsOnAttributes = [..GetDependsOnAttributes(method), ..GetDependsOnAttributes(method.ReceiverType ?? method.ContainingType)];
-        
+
+        AttributeData[] dependsOnAttributes = GetDependsOnAttributes(method).Concat(GetDependsOnAttributes(method.ReceiverType ?? method.ContainingType)).ToArray();
+
         var dependencies = GetDependencies(context, new Chain(method), method, dependsOnAttributes);
 
         if (!dependencies.Any() || !dependencies.MethodTraversed(method))
         {
             return;
         }
-        
+
         context.ReportDiagnostic(Diagnostic.Create(Rules.DependsOnConflicts,
             method.Locations.FirstOrDefault(),
-                string.Join(" > ", [..dependencies.GetCompleteChain().Select(x => $"{(x.ReceiverType ?? x.ContainingType).Name}.{x.Name}")])));
+                string.Join(" > ", dependencies.GetCompleteChain().Select(x => $"{(x.ReceiverType ?? x.ContainingType).Name}.{x.Name}"))));
     }
 
     private AttributeData[] GetDependsOnAttributes(ISymbol methodSymbol)
@@ -79,7 +77,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return chain;
         }
-        
+
         foreach (var dependsOnAttribute in dependsOnAttributes)
         {
             var dependencyType = GetTypeContainingMethod(methodToGetDependenciesFor, dependsOnAttribute);
@@ -90,7 +88,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
             var dependencyParameterTypes = dependsOnAttribute.ConstructorArguments
                 .FirstOrNull(x => x.Kind == TypedConstantKind.Array)
                 ?.Values
-                .Select(x => (INamedTypeSymbol)x.Value!)
+                .Select(x => (INamedTypeSymbol) x.Value!)
                 .ToArray();
 
             if (dependencyType is not INamedTypeSymbol namedTypeSymbol)
@@ -127,11 +125,11 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
                     chain.Add(foundDependency);
                     return chain;
                 }
-                
+
                 chain.Add(foundDependency);
 
-                var nestedChain = GetDependencies(context, chain, foundDependency, [..GetDependsOnAttributes(foundDependency), ..GetDependsOnAttributes(foundDependency.ReceiverType ?? foundDependency.ContainingType)]);
-                
+                var nestedChain = GetDependencies(context, chain, foundDependency, GetDependsOnAttributes(foundDependency).Concat(GetDependsOnAttributes(foundDependency.ReceiverType ?? foundDependency.ContainingType)).ToArray());
+
                 foreach (var nestedDependency in nestedChain.Dependencies)
                 {
                     if (chain.MethodTraversed(nestedDependency))
@@ -139,7 +137,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
                         chain.Add(nestedDependency);
                         return chain;
                     }
-                    
+
                     chain.Add(nestedDependency);
                 }
             }
@@ -154,7 +152,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return dependsOnAttribute.AttributeClass!.TypeArguments.First();
         }
-        
+
         return dependsOnAttribute.ConstructorArguments
                    .FirstOrNull(x => x.Kind == TypedConstantKind.Type)?.Value as INamedTypeSymbol
                ?? methodToGetDependenciesFor.ReceiverType
@@ -168,7 +166,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return methods;
         }
-        
+
         var filtered = methods.Where(x => x.Name == dependencyMethodName);
 
         if (dependencyParameterTypes != null)
@@ -176,7 +174,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
             filtered = filtered.Where(x => x.Parameters.Select(p => p.Type)
                 .SequenceEqual(dependencyParameterTypes, SymbolEqualityComparer.Default));
         }
-        
+
         return filtered.ToArray();
     }
 }

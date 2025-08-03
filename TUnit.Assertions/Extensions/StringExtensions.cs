@@ -6,7 +6,7 @@ public static class StringExtensions
     {
         return GetStringOr(value, string.Empty);
     }
-    
+
     public static string GetStringOr(this string? value, string defaultValue)
     {
         return value ?? defaultValue;
@@ -30,7 +30,7 @@ public static class StringExtensions
         {
             return value;
         }
-        
+
         if (value.Length <= maxLength)
         {
             return value;

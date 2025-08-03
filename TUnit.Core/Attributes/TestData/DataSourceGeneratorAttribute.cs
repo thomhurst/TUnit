@@ -1,73 +1,113 @@
-﻿using TUnit.Core.Extensions;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
-public abstract class DataSourceGeneratorAttribute<T> : TestDataAttribute, IDataSourceGeneratorAttribute
+public abstract class DataSourceGeneratorAttribute<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T> : AsyncDataSourceGeneratorAttribute<T>
 {
-    public abstract IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
+    protected abstract IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
 
-    IEnumerable<Func<object?[]?>> IDataSourceGeneratorAttribute.GenerateDataSourcesInternal(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override async IAsyncEnumerable<Func<Task<T>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        foreach (var dataSourceDelegate in GenerateDataSources(dataGeneratorMetadata))
+        foreach (var generateDataSource in GenerateDataSources(dataGeneratorMetadata))
         {
-            yield return () => [dataSourceDelegate()];
+            yield return () => Task.FromResult(generateDataSource());
         }
+
+        await Task.CompletedTask;
     }
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public abstract class DataSourceGeneratorAttribute<T1, T2> : TestDataAttribute, IDataSourceGeneratorAttribute
+public abstract class DataSourceGeneratorAttribute<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T1,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T2> : AsyncDataSourceGeneratorAttribute<T1, T2>
 {
-    public abstract IEnumerable<Func<(T1, T2)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
+    protected abstract IEnumerable<Func<(T1, T2)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
 
-    IEnumerable<Func<object?[]?>> IDataSourceGeneratorAttribute.GenerateDataSourcesInternal(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override async IAsyncEnumerable<Func<Task<(T1, T2)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        foreach (var dataSourceDelegate in GenerateDataSources(dataGeneratorMetadata))
+        foreach (var generateDataSource in GenerateDataSources(dataGeneratorMetadata))
         {
-            yield return () => dataSourceDelegate().ToObjectArray();
+            yield return () => Task.FromResult(generateDataSource());
         }
+
+        await Task.CompletedTask;
     }
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public abstract class DataSourceGeneratorAttribute<T1, T2, T3> : TestDataAttribute, IDataSourceGeneratorAttribute
+public abstract class DataSourceGeneratorAttribute<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T1,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T2,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T3> : AsyncDataSourceGeneratorAttribute<T1, T2, T3>
 {
-    public abstract IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
+    protected abstract IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
 
-    IEnumerable<Func<object?[]?>> IDataSourceGeneratorAttribute.GenerateDataSourcesInternal(DataGeneratorMetadata dataGeneratorMetadata)
+    protected sealed override async IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        foreach (var dataSourceDelegate in GenerateDataSources(dataGeneratorMetadata))
+        foreach (var generateDataSource in GenerateDataSources(dataGeneratorMetadata))
         {
-            yield return () => dataSourceDelegate().ToObjectArray();
+            yield return () => Task.FromResult(generateDataSource());
         }
+
+        await Task.CompletedTask;
     }
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4> : TestDataAttribute, IDataSourceGeneratorAttribute
+public abstract class DataSourceGeneratorAttribute<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T1,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T2,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T3,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T4> : AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>
 {
-    public abstract IEnumerable<Func<(T1, T2, T3, T4)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
+    protected abstract IEnumerable<Func<(T1, T2, T3, T4)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
 
-    IEnumerable<Func<object?[]?>> IDataSourceGeneratorAttribute.GenerateDataSourcesInternal(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        foreach (var dataSourceDelegate in GenerateDataSources(dataGeneratorMetadata))
+        foreach (var generateDataSource in GenerateDataSources(dataGeneratorMetadata))
         {
-            yield return () => dataSourceDelegate().ToObjectArray();
+            yield return () => Task.FromResult(generateDataSource());
         }
+
+        await Task.CompletedTask;
     }
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : TestDataAttribute, IDataSourceGeneratorAttribute
+public abstract class DataSourceGeneratorAttribute<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T1,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T2,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T3,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T4,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)]
+    T5> : AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
 {
-    public abstract IEnumerable<Func<(T1, T2, T3, T4, T5)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
+    protected abstract IEnumerable<Func<(T1, T2, T3, T4, T5)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata);
 
-    IEnumerable<Func<object?[]?>> IDataSourceGeneratorAttribute.GenerateDataSourcesInternal(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4, T5)>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        foreach (var dataSourceDelegate in GenerateDataSources(dataGeneratorMetadata))
+        foreach (var generateDataSource in GenerateDataSources(dataGeneratorMetadata))
         {
-            yield return () => dataSourceDelegate().ToObjectArray();
+            yield return () => Task.FromResult(generateDataSource());
         }
+
+        await Task.CompletedTask;
     }
 }

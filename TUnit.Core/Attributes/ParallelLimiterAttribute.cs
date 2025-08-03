@@ -57,9 +57,9 @@ public sealed class ParallelLimiterAttribute<TParallelLimit> : TUnitAttribute, I
     public int Order => 0;
 
     /// <inheritdoc />
-    public ValueTask OnTestRegistered(TestRegisteredContext testRegisteredContext)
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
-        testRegisteredContext.SetParallelLimiter(new TParallelLimit());
-        return default;
+        context.SetParallelLimiter(new TParallelLimit());
+        return default(ValueTask);
     }
-};
+}

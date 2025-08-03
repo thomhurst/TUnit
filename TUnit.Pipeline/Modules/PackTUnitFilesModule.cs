@@ -21,7 +21,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         var version = versionResult.Value!;
 
         var packageVersion = version.SemVer!;
-        
+
         var packedProjects = new List<PackedProject>();
 
         foreach (var project in projects.Value!)
@@ -40,10 +40,10 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                         IncludeSource = project == Sourcy.DotNet.Projects.TUnit_Templates ? false : true,
                         Configuration = Configuration.Release,
                     }, cancellationToken);
-                
+
             packedProjects.Add(new PackedProject(project.NameWithoutExtension, version.SemVer!));
         }
-        
+
         return packedProjects;
     }
 }

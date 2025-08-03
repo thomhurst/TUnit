@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -11,7 +10,7 @@ namespace TUnit.Core;
 /// Use this attribute to enforce time limits on test execution. Tests that exceed
 /// the specified timeout will be canceled and marked as failed.
 /// </para>
-/// 
+///
 /// <para>
 /// The attribute can be applied at different levels:
 /// </para>
@@ -33,7 +32,7 @@ namespace TUnit.Core;
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class TimeoutAttribute(int timeoutInMilliseconds) : TUnitAttribute, ITestDiscoveryEventReceiver
+public class TimeoutAttribute(int timeoutInMilliseconds) : TUnitAttribute, ITestDiscoveryEventReceiver, IScopedAttribute<TimeoutAttribute>
 {
     /// <inheritdoc />
     public int Order => 0;
@@ -43,10 +42,11 @@ public class TimeoutAttribute(int timeoutInMilliseconds) : TUnitAttribute, ITest
     /// </summary>
     /// <value>A <see cref="TimeSpan"/> representing the maximum allowed execution time.</value>
     public TimeSpan Timeout { get; } = TimeSpan.FromMilliseconds(timeoutInMilliseconds);
-    
+
     /// <inheritdoc />
-    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        discoveredTestContext.TestDetails.Timeout = Timeout;
+        context.TestDetails.Timeout = Timeout;
+        return default(ValueTask);
     }
 }

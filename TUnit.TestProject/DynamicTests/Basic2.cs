@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 
 #pragma warning disable TUnitWIP0001
 
@@ -15,9 +13,9 @@ public class Basic2
         var machine = new StateMachine();
 
         context.AddTest(
-            new DynamicTest<Basic2>
+            new DynamicTestInstance<Basic2>
             {
-                TestMethod = @class => @class.AssertNotStarted(DynamicTest.Argument<string>()),
+                TestMethod = @class => @class.AssertNotStarted(DynamicTestHelper.Argument<string>()),
                 TestMethodArguments = [machine.CurrentState],
                 Attributes = []
             }
@@ -26,9 +24,9 @@ public class Basic2
         machine.Advance();
 
         context.AddTest( // 👈 Problem: if first test fails, this one doesn't run?
-            new DynamicTest<Basic2>
+            new DynamicTestInstance<Basic2>
             {
-                TestMethod = @class => @class.AssertQueuedAfterAdvance(DynamicTest.Argument<string>()), // 👈 Problem: this needs to expect a Task
+                TestMethod = @class => @class.AssertQueuedAfterAdvance(DynamicTestHelper.Argument<string>()), // 👈 Problem: this needs to expect a Task
                 TestMethodArguments = [machine.CurrentState],
                 Attributes = []
             }

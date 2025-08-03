@@ -8,7 +8,7 @@ public class DependsOnTestsWithoutProceedOnFailure
     [Test]
     public void Test1()
     {
-        throw new Exception();
+        throw new Exception("This exception should block Test2 from executing");
     }
 
     [Test, DependsOn(nameof(Test1))]

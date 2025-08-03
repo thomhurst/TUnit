@@ -13,12 +13,12 @@ public class InstanceTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
         ImmutableArray.Create(Rules.MethodMustNotBeStatic, Rules.MethodMustBePublic, Rules.MethodMustBeParameterless);
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
     }
-    
+
     private void AnalyzeSymbol(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
@@ -48,7 +48,7 @@ public class InstanceTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 context.Symbol.Locations.FirstOrDefault())
             );
         }
-        
+
         if (methodSymbol.DeclaredAccessibility != Accessibility.Public)
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MethodMustBePublic,
@@ -56,7 +56,7 @@ public class InstanceTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
             );
         }
     }
-    
+
     private static bool IsContextParameter(IMethodSymbol methodSymbol)
     {
         if (methodSymbol.Parameters.IsDefaultOrEmpty)

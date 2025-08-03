@@ -1,6 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using Microsoft.CodeAnalysis.Testing;
-using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Analyzers.Tests.Verifiers;
 

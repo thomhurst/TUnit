@@ -1,15 +1,15 @@
-﻿using TUnit.Core.Extensions;
-using TUnit.Core.Interfaces;
+﻿using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
-[assembly: ClassDisplayName]
+// [assembly: ClassDisplayName]
 namespace TUnit.TestProject.Attributes;
 
 public class ClassDisplayNameAttribute : Attribute, ITestDiscoveryEventReceiver
 {
-    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        discoveredTestContext.SetDisplayName($"{discoveredTestContext.TestDetails.TestClass.Name}.{discoveredTestContext.TestContext.GetTestDisplayName()}");
+        context.SetDisplayName($"{context.TestDetails.MethodMetadata.Class.Name}.{context.GetDisplayName()}");
+        return default(ValueTask);
     }
 
     public int Order => 0;

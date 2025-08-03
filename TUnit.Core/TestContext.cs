@@ -1,152 +1,321 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using TUnit.Core.Enums;
+using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
+using TUnit.Core.Services;
 
 namespace TUnit.Core;
 
 /// <summary>
-/// Represents the context for a test.
+/// Simplified test context for the new architecture
 /// </summary>
-[DebuggerDisplay("{TestDetails.TestClass.Name}.{TestDetails.TestName}")]
-public partial class TestContext : Context
+[DebuggerDisplay("{TestDetails.ClassType.Name}.{GetDisplayName(),nq}")]
+public class TestContext : Context
 {
-    private readonly IServiceProvider _serviceProvider;
+    public TestContext(string testName, IServiceProvider serviceProvider, ClassHookContext classContext, TestBuilderContext testBuilderContext, CancellationToken cancellationToken) : base(classContext)
+    {
+        TestName = testName;
+        CancellationToken = cancellationToken;
+        ServiceProvider = serviceProvider;
+        ClassContext = classContext;
 
-    /// <summary>
-    /// Gets a service of the specified type.
-    /// </summary>
-    /// <typeparam name="T">The type of the service.</typeparam>
-    /// <returns>The service instance.</returns>
-    internal T GetService<T>() => (T) _serviceProvider.GetService(typeof(T))!;
-    
-    internal readonly List<Artifact> Artifacts = [];
-    internal readonly List<CancellationToken> LinkedCancellationTokens = [];
-    internal readonly TestMetadata OriginalMetadata;
+        Events = testBuilderContext.Events;
+        ObjectBag = testBuilderContext.ObjectBag;
+    }
 
-#if NET9_0_OR_GREATER
-    /// <summary>
-    /// Gets the lock object.
-    /// </summary>
-    public readonly Lock Lock = new();
-#else
-    /// <summary>
-    /// Gets the lock object.
-    /// </summary>
-    public readonly object Lock = new();
+    private static readonly AsyncLocal<TestContext?> TestContexts = new();
+
+    internal static readonly Dictionary<string, string> InternalParametersDictionary = new();
+
+    private readonly StringWriter _outputWriter = new();
+
+    private readonly StringWriter _errorWriter = new();
+
+    public static new TestContext? Current
+    {
+        get => TestContexts.Value;
+        internal set => TestContexts.Value = value;
+    }
+
+    public static IReadOnlyDictionary<string, string> Parameters => InternalParametersDictionary;
+
+    public static IConfiguration Configuration { get; internal set; } = null!;
+
+    public static string? OutputDirectory
+    {
+        [UnconditionalSuppressMessage("SingleFile", "IL3000:Avoid accessing Assembly file path when publishing as a single file", Justification = "Dynamic code check implemented")]
+        get
+        {
+#if NET
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                return AppContext.BaseDirectory;
+            }
 #endif
-
-    internal bool ReportResult = true;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TestContext"/> class.
-    /// </summary>
-    /// <param name="serviceProvider">The service provider.</param>
-    /// <param name="testDetails">The test details.</param>
-    /// <param name="originalMetadata">The original metadata.</param>
-    /// <param name="classHookContext"></param>
-    internal TestContext(IServiceProvider serviceProvider, TestDetails testDetails, TestMetadata originalMetadata, ClassHookContext classHookContext) : base(classHookContext)
-    {
-        _serviceProvider = serviceProvider;
-        OriginalMetadata = originalMetadata;
-        TestDetails = testDetails;
-        ObjectBag = originalMetadata.TestBuilderContext.ObjectBag;
-        Events = originalMetadata.TestBuilderContext.Events;
-        classHookContext.AddTest(this);
+            return Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
+                   ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        }
     }
-    
-    public ClassHookContext ClassContext => (ClassHookContext) Parent!;
-    public AssemblyHookContext AssemblyContext => ClassContext.AssemblyContext;
 
-    /// <summary>
-    /// Gets the events associated with the test context.
-    /// </summary>
-    public TestContextEvents Events { get; }
-    
-    /// <summary>
-    /// Gets or sets a value indicating whether the test is registered.
-    /// </summary>
-    public bool IsRegistered { get; internal set; }
-
-    /// <summary>
-    /// Gets or sets the start time of the test.
-    /// </summary>
-    public DateTimeOffset? TestStart { get; internal set; }
-    
-    internal Task? TestTask { get; set; }
-
-    /// <summary>
-    /// Gets the details of the test.
-    /// </summary>
-    public TestDetails TestDetails { get; }
-
-    [field: AllowNull, MaybeNull]
-    public TestContext[] Dependencies => field ??= InternalDiscoveredTest.Dependencies.Select(x => x.Test.TestContext).ToArray();
-
-    /// <summary>
-    /// Gets or sets the current retry attempt for the test.
-    /// </summary>
-    public int CurrentRetryAttempt { get; internal set; }
-
-    /// <summary>
-    /// Gets the argument display formatters for the test.
-    /// </summary>
-    public List<ArgumentDisplayFormatter> ArgumentDisplayFormatters { get; } = [];
-    
-    /// <summary>
-    /// Gets the timings for the test.
-    /// </summary>
-    public List<Timing> Timings { get; } = [];
-    
-    /// <summary>
-    /// Gets the object bag for the test.
-    /// </summary>
-    public Dictionary<string, object?> ObjectBag { get; }
-    
-    /// <summary>
-    /// Gets or sets the result of the test.
-    /// </summary>
-    public TestResult? Result { get; internal set; }
-    
-    /// <summary>
-    /// Gets or sets the cancellation token for the test.
-    /// </summary>
-    public CancellationToken CancellationToken { get; internal set; }
-    
-    /// <summary>
-    /// Gets or sets the internal discovered test.
-    /// </summary>
-    internal DiscoveredTest InternalDiscoveredTest { get; set; } = null!;
-
-    /// <summary>
-    /// Suppresses reporting the result.
-    /// </summary>
-    public void SuppressReportingResult()
+    public static string WorkingDirectory
     {
-        ReportResult = false;
+        get => Environment.CurrentDirectory;
+        set => Environment.CurrentDirectory = value;
     }
-    
-    /// <summary>
-    /// Adds an artifact to the test context.
-    /// </summary>
-    /// <param name="artifact">The artifact to add.</param>
-    public void AddArtifact(Artifact artifact)
-    {
-        Artifacts.Add(artifact);
-    }
-    
-    /// <summary>
-    /// Gets or sets the reason for skipping the test.
-    /// </summary>
-    internal string? SkipReason { get; set; }
-    
-    /// <summary>
-    /// Gets or sets the event objects.
-    /// </summary>
-    internal object?[]? EventObjects { get; set; }
 
-    internal bool RunOnTestDiscovery { get; set; }
-    
+    public string TestName { get; }
+
+    internal string? CustomDisplayName { get; set; }
+
+
+    public CancellationToken CancellationToken { get; set; }
+
+    public TestDetails TestDetails { get; set; } = null!;
+
+    public TestPhase Phase { get; set; } = TestPhase.Execution;
+
+    public TestResult? Result { get; set; }
+
+    public string? SkipReason { get; set; }
+
+    public IParallelLimit? ParallelLimiter { get; private set; }
+
+    public Type? DisplayNameFormatter { get; set; }
+
+    public Func<TestContext, Exception, int, Task<bool>>? RetryFunc { get; set; }
+
+    public IParallelConstraint? ParallelConstraint { get; set; }
+
+    public Priority ExecutionPriority { get; set; } = Priority.Normal;
+
+    /// <summary>
+    /// Will be null until initialized by HookOrchestrator
+    /// </summary>
+    public ClassHookContext ClassContext { get; }
+
+    public CancellationTokenSource? LinkedCancellationTokens { get; set; }
+
+    public List<Func<object?, string?>> ArgumentDisplayFormatters { get; } =
+    [
+    ];
+
+    public TestContextEvents Events { get; } = new();
+
+    internal DiscoveredTest? InternalDiscoveredTest { get; set; }
+
+    internal IServiceProvider ServiceProvider
+    {
+        get;
+    }
+
+    public void WriteLine(string message)
+    {
+        _outputWriter.WriteLine(message);
+    }
+
+    public void WriteError(string message)
+    {
+        _errorWriter.WriteLine(message);
+    }
+
+    public string GetOutput() => _outputWriter.ToString();
+
+    public new string GetErrorOutput() => _errorWriter.ToString();
+
+    public T? GetService<T>() where T : class
+    {
+        return ServiceProvider.GetService(typeof(T)) as T;
+    }
+
     internal override void RestoreContextAsyncLocal()
     {
-        Current = this;
+        TestContexts.Value = this;
+    }
+
+    internal bool RunOnTestDiscovery { get; set; }
+
+    public object Lock { get; } = new();
+
+    public List<Timing> Timings { get; } =
+    [
+    ];
+
+    public Dictionary<string, object?> Artifacts { get; } = new();
+
+    public string GetDisplayName()
+    {
+        if(!string.IsNullOrEmpty(CustomDisplayName))
+        {
+            return CustomDisplayName!;
+        }
+
+        var arguments = string.Join(", ", TestDetails.TestMethodArguments
+            .Select(arg => ArgumentFormatter.Format(arg, ArgumentDisplayFormatters)));
+
+        if (string.IsNullOrEmpty(arguments))
+        {
+            return TestName;
+        }
+
+        return $"{TestName}({arguments})";
+    }
+
+    public Dictionary<string, object?> ObjectBag { get; }
+
+    public bool ReportResult { get; set; } = true;
+
+
+    public void SetParallelLimiter(IParallelLimit parallelLimit)
+    {
+        ParallelLimiter = parallelLimit;
+    }
+
+    public void AddLinkedCancellationToken(CancellationToken cancellationToken)
+    {
+        if (LinkedCancellationTokens == null)
+        {
+            LinkedCancellationTokens = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+        }
+        else
+        {
+            var existingToken = LinkedCancellationTokens.Token;
+            LinkedCancellationTokens = CancellationTokenSource.CreateLinkedTokenSource(existingToken, cancellationToken);
+        }
+
+        CancellationToken = LinkedCancellationTokens.Token;
+    }
+
+    public DateTimeOffset TestStart { get; set; } = DateTimeOffset.UtcNow;
+
+    public void AddArtifact(string name, object? value)
+    {
+        Artifacts[name] = value;
+    }
+
+    public void AddArtifact(Artifact artifact)
+    {
+        Artifacts[artifact.DisplayName ?? artifact.File?.Name ?? "artifact"] = artifact;
+    }
+
+    public void OverrideResult(string reason)
+    {
+        OverrideResult(TestState.Passed, reason);
+    }
+
+    public void OverrideResult(TestState state, string reason)
+    {
+        Result = new TestResult
+        {
+            State = state,
+            OverrideReason = reason,
+            IsOverridden = true,
+            Start = TestStart,
+            End = DateTimeOffset.UtcNow,
+            Duration = DateTimeOffset.UtcNow - TestStart,
+            Exception = null,
+            ComputerName = Environment.MachineName,
+            TestContext = this
+        };
+
+        InternalExecutableTest.State = state;
+    }
+
+    /// <summary>
+    /// Reregisters a test with new arguments. This method is currently non-functional as the underlying
+    /// ITestFinder interface has been removed. This functionality may be reimplemented in a future version.
+    /// </summary>
+    /// <remarks>
+    /// Previously used for dynamically modifying test arguments at runtime. Consider using data source
+    /// attributes for parameterized tests instead.
+    /// </remarks>
+    [Obsolete("This method is non-functional after the removal of ITestFinder. It will be removed in a future version.")]
+    public async Task ReregisterTestWithArguments(object?[]? methodArguments = null, Dictionary<string, object?>? objectBag = null)
+    {
+        if (methodArguments != null)
+        {
+            TestDetails.TestMethodArguments = methodArguments;
+        }
+
+        if (objectBag != null)
+        {
+            foreach (var kvp in objectBag)
+            {
+                ObjectBag[kvp.Key] = kvp.Value;
+            }
+        }
+
+        // This method is currently non-functional - see Obsolete attribute above
+        await Task.CompletedTask;
+    }
+
+    public List<TestDetails> Dependencies { get; } =
+    [
+    ];
+
+    internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
+    public DateTimeOffset? TestEnd { get; set; }
+
+    public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
+    {
+        var testFinder = ServiceProvider.GetService<ITestFinder>()!;
+
+        // Get all tests from the current class and filter using the predicate
+        var classType = TestDetails?.ClassType;
+        if (classType == null)
+        {
+            return [
+            ];
+        }
+
+        return testFinder.GetTests(classType).Where(predicate);
+    }
+
+    public List<TestContext> GetTests(string testName)
+    {
+        var testFinder = ServiceProvider.GetService<ITestFinder>()!;
+
+        // Use the current test's class type by default
+        var classType = TestDetails.ClassType;
+
+        // Call GetTestsByNameAndParameters with empty parameter lists to get all tests with this name
+        var tests = testFinder.GetTestsByNameAndParameters(
+            testName,
+            [
+            ],
+            classType,
+            [
+            ],
+            [
+            ]
+        ).ToList();
+
+        if (tests.Any(x => x.Result == null))
+        {
+            throw new InvalidOperationException(
+                "Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?"
+            );
+        }
+
+        return tests;
+    }
+
+    public List<TestContext> GetTests(string testName, Type classType)
+    {
+        var testFinder = ServiceProvider.GetService<ITestFinder>()!;
+
+        // Call GetTestsByNameAndParameters with empty parameter lists to get all tests with this name
+        return testFinder.GetTestsByNameAndParameters(
+            testName,
+            [
+            ],
+            classType,
+            [
+            ],
+            [
+            ]
+        ).ToList();
     }
 }

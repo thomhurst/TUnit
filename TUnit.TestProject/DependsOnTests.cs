@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -13,14 +11,14 @@ public class DependsOnTests
     [Test]
     public async Task Test1()
     {
-        _test1Start = TestContext.Current!.TestStart!.Value.DateTime;
+        _test1Start = DateTime.Now;
         await Task.Delay(TimeSpan.FromSeconds(5));
     }
 
     [Test, DependsOn(nameof(Test1))]
     public async Task Test2()
     {
-        _test2Start = TestContext.Current!.TestStart!.Value.DateTime;
+        _test2Start = DateTime.Now;
         await Task.CompletedTask;
     }
 

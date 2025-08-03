@@ -3,11 +3,11 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventReceiver
+public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventReceiver, IScopedAttribute<NotInParallelAttribute>
 {
     public string[] ConstraintKeys { get; } = [];
 
-    public int Order { get; init; }
+    public int Order { get; init; } = int.MaxValue / 2;
 
     public NotInParallelAttribute()
     {
@@ -27,15 +27,16 @@ public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventR
         {
             throw new ArgumentException("Duplicate constraint keys are not allowed.");
         }
-        
+
         ConstraintKeys = constraintKeys;
     }
 
-    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        discoveredTestContext.SetParallelConstraint(new NotInParallelConstraint(ConstraintKeys)
+        context.SetParallelConstraint(new NotInParallelConstraint(ConstraintKeys)
         {
             Order = Order
         });
+        return default(ValueTask);
     }
 }

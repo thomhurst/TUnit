@@ -20,21 +20,21 @@ public abstract class DisplayNameFormatterAttribute : TUnitAttribute, ITestDisco
     public int Order => 0;
 
     /// <inheritdoc />
-    public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+    public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        var displayName = FormatDisplayName(discoveredTestContext.TestContext);
-
-        discoveredTestContext.SetDisplayName(displayName);
+        var displayName = FormatDisplayName(context);
+        context.SetDisplayName(displayName);
+        return default(ValueTask);
     }
 
     /// <summary>
     /// When implemented in derived classes, formats the display name for a test.
     /// </summary>
-    /// <param name="testContext">
-    /// The test context containing information about the test being discovered.
+    /// <param name="context">
+    /// The test discovery context containing information about the test being discovered.
     /// </param>
     /// <returns>
     /// A string containing the formatted display name for the test.
     /// </returns>
-    protected abstract string FormatDisplayName(TestContext testContext);
+    protected abstract string FormatDisplayName(DiscoveredTestContext context);
 }

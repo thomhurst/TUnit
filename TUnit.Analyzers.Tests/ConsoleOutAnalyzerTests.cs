@@ -22,13 +22,13 @@ public class ConsoleOutAnalyzerTests
                 """
             );
     }
-    
+
     [Test]
     [Arguments("SetOut")]
     [Arguments("SetError")]
     public async Task Static_Error(string method)
     {
-        
+
         await Verifier
             .VerifyAnalyzerAsync(
                 $$"""

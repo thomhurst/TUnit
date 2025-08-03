@@ -1,7 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.Core.Extensions;
-using TUnit.TestProject.AfterTests;
+﻿using TUnit.TestProject.AfterTests;
 using TUnit.TestProject.Attributes;
 
 #pragma warning disable CS9113 // Parameter is unread.
@@ -18,7 +15,8 @@ public class CustomClassDisplayNameTests(Base1 base1)
     [Test]
     public async Task Test()
     {
-        await Assert.That(TestContext.Current!.GetTestDisplayName()).IsEqualTo("CustomClassDisplayNameTests.Test");
+        await Assert.That(TestContext.Current!.GetDisplayName())
+            .IsEqualTo("Test");
     }
 }
 
@@ -33,9 +31,9 @@ public class MyFormatter : ArgumentDisplayFormatter
     {
         return value switch
         {
-            Base3 base3 => "Third Base!",
-            Base2 base2 => "Second Base!",
-            Base1 base1 => "First Base!",
+            Base3 => "Third Base!",
+            Base2 => "Second Base!",
+            Base1 => "First Base!",
             _ => value?.ToString() ?? string.Empty
         };
     }

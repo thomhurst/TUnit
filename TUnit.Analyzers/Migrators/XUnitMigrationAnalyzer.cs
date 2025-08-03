@@ -70,7 +70,7 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                     return;
                 }
             }
-            
+
             var namedTypeSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
 
             if (namedTypeSymbol is null)
@@ -80,12 +80,10 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
             var members = namedTypeSymbol.GetMembers();
 
-            ITypeSymbol[] types =
-            [
-                ..members.OfType<IPropertySymbol>().Where(x => x.Type.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.Type),
-                ..members.OfType<IMethodSymbol>().Where(x => x.ReturnType.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.ReturnType),
-                ..members.OfType<IFieldSymbol>().Where(x => x.Type.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.Type),
-            ];
+            ITypeSymbol[] types = members.OfType<IPropertySymbol>().Where(x => x.Type.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.Type)
+                .Concat(members.OfType<IMethodSymbol>().Where(x => x.ReturnType.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.ReturnType))
+                .Concat(members.OfType<IFieldSymbol>().Where(x => x.Type.ContainingNamespace?.Name.StartsWith("Xunit") is true).Select(x => x.Type))
+                .ToArray();
 
             if (types.Any())
             {
@@ -100,8 +98,8 @@ public class XUnitMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
         foreach (var attributeData in symbol.GetAttributes())
         {
             var @namespace = attributeData.AttributeClass?.ContainingNamespace?.Name;
-            
-            if(@namespace == "Xunit")
+
+            if (@namespace == "Xunit")
             {
                 Flag(context);
                 return true;

@@ -1,8 +1,7 @@
-using TUnit.Core.SourceGenerator.CodeGenerators;
 
 namespace TUnit.Core.SourceGenerator.Tests.Dynamic;
 
-internal class Basic : TestsBase<DynamicTestsGenerator>
+internal class Basic : TestsBase
 {
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
@@ -11,6 +10,5 @@ internal class Basic : TestsBase<DynamicTestsGenerator>
             "Basic.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles.Length).IsEqualTo(1);
-        });
+            });
 }

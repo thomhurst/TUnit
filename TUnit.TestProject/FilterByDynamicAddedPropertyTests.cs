@@ -12,9 +12,10 @@ public class FilterByDynamicAddedPropertyTests
 
     public class MyDynamicallyAddedPropertyAttribute : Attribute, ITestDiscoveryEventReceiver
     {
-        public void OnTestDiscovery(DiscoveredTestContext discoveredTestContext)
+        public ValueTask OnTestDiscovered(DiscoveredTestContext context)
         {
-            discoveredTestContext.AddProperty("MyKey", "MyDynamicallyAddedValue");
+            context.AddProperty("MyKey", "MyDynamicallyAddedValue");
+            return default(ValueTask);
         }
 
         public int Order => 0;

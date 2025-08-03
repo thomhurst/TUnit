@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -12,8 +13,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(
-            Rules.WrongArgumentTypeTestData, 
-            Rules.NoTestDataProvided, 
+            Rules.WrongArgumentTypeTestData,
+            Rules.NoTestDataProvided,
             Rules.MethodParameterBadNullability,
             Rules.MethodMustBeParameterless,
             Rules.MethodMustBeStatic,
@@ -26,17 +27,18 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.ReturnFunc,
             Rules.MatrixDataSourceAttributeRequired,
             Rules.TooManyArguments,
-            Rules.InstanceMethodSource);
+            Rules.InstanceMethodSource
+        );
 
     protected override void InitializeInternal(AnalysisContext context)
-    { 
+    {
         context.RegisterSymbolAction(AnalyzeMethod, SymbolKind.Method);
         context.RegisterSymbolAction(AnalyzeClass, SymbolKind.NamedType);
         context.RegisterSymbolAction(AnalyzeProperty, SymbolKind.Property);
     }
-    
+
     private void AnalyzeMethod(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
             return;
@@ -53,7 +55,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         var attributes = methodSymbol.GetAttributes();
-        
+
         Analyze(context, attributes, methodSymbol.Parameters.WithoutCancellationTokenParameter().ToImmutableArray(), null, methodSymbol.ContainingType);
     }
 
@@ -77,7 +79,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
 
     private void AnalyzeClass(SymbolAnalysisContext context)
-    { 
+    {
         if (context.Symbol is not INamedTypeSymbol namedTypeSymbol)
         {
             return;
@@ -88,7 +90,22 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (!namedTypeSymbol.IsTestClass(context.Compilation))
+        // Check if it's a test class or has data source attributes
+        var hasDataSourceAttribute = namedTypeSymbol.GetAttributes().Any(a => 
+        {
+            var currentType = a.AttributeClass;
+            while (currentType != null)
+            {
+                if (currentType.Name.Contains("DataSource") || currentType.Name == "ArgumentsAttribute")
+                {
+                    return true;
+                }
+                currentType = currentType.BaseType;
+            }
+            return false;
+        });
+        
+        if (!namedTypeSymbol.IsTestClass(context.Compilation) && !hasDataSourceAttribute)
         {
             return;
         }
@@ -97,23 +114,65 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var parameters = namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ??
                          ImmutableArray<IParameterSymbol>.Empty;
-        
+
         Analyze(context, attributes, parameters, null, namedTypeSymbol);
     }
 
-    private void Analyze(SymbolAnalysisContext context, 
-        ImmutableArray<AttributeData> attributes, 
+    private void Analyze(SymbolAnalysisContext context,
+        ImmutableArray<AttributeData> attributes,
         ImmutableArray<IParameterSymbol> parameters,
-        IPropertySymbol? propertySymbol, 
+        IPropertySymbol? propertySymbol,
         INamedTypeSymbol testClassType)
     {
         var types = GetTypes(parameters, propertySymbol);
 
+        var dataSourceInterface = context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithoutGlobalPrefix);
+        
         var dataAttributes = attributes.Where(x =>
-                x.AttributeClass?.AllInterfaces.Contains(
-                    context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataAttribute
-                        .WithoutGlobalPrefix), SymbolEqualityComparer.Default
-                ) == true)
+            {
+                if (x.AttributeClass == null)
+                {
+                    return false;
+                }
+
+                var attributeClass = x.AttributeClass;
+                
+                // Check if this is a known data source attribute by inheritance chain
+                var currentType = attributeClass;
+                while (currentType != null)
+                {
+                    var typeName = currentType.Name;
+                    
+                    // Check for known data source attributes
+                    if (typeName == "ArgumentsAttribute")
+                    {
+                        return true;
+                    }
+                    
+                    // For generic types, check the type name without arity
+                    if (currentType.IsGenericType)
+                    {
+                        var genericTypeName = currentType.OriginalDefinition?.Name ?? typeName;
+                        if (genericTypeName.StartsWith("DataSourceGeneratorAttribute") ||
+                            genericTypeName.StartsWith("AsyncDataSourceGeneratorAttribute") ||
+                            genericTypeName.StartsWith("ClassDataSourceAttribute"))
+                        {
+                            return true;
+                        }
+                    }
+                    
+                    // Also check if we have IDataSourceAttribute interface
+                    if (dataSourceInterface != null && 
+                        currentType.Interfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, dataSourceInterface)))
+                    {
+                        return true;
+                    }
+                    
+                    currentType = currentType.BaseType;
+                }
+                
+                return false;
+            })
             .ToImmutableArray();
 
         if (dataAttributes.IsDefaultOrEmpty)
@@ -122,7 +181,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         CheckPropertyAccessor(context, propertySymbol);
-        
+
         foreach (var attribute in dataAttributes)
         {
             if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass,
@@ -130,25 +189,70 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 CheckArguments(context, attribute, parameters, propertySymbol);
             }
-            
+
             if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass,
                     context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.MethodDataSource.WithoutGlobalPrefix)))
             {
-                CheckMethodDataSource(context, attribute, testClassType, types);
+                // For property injection, only validate against the property type, not method parameters
+                var typesToValidate = propertySymbol != null 
+                    ? ImmutableArray.Create(propertySymbol.Type)
+                    : parameters.Select(p => p.Type).ToImmutableArray().WithoutCancellationTokenParameter();
+                CheckMethodDataSource(context, attribute, testClassType, typesToValidate, propertySymbol);
             }
-            
-            if (attribute.AttributeClass?.IsGenericType is true 
+
+            if (attribute.AttributeClass?.IsGenericType is true
                 && SymbolEqualityComparer.Default.Equals(attribute.AttributeClass.OriginalDefinition,
                     context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.GenericMethodDataSource.WithoutGlobalPrefix)))
             {
-                CheckMethodDataSource(context, attribute, testClassType, types);
+                // For property injection, only validate against the property type, not method parameters
+                var typesToValidate = propertySymbol != null 
+                    ? ImmutableArray.Create(propertySymbol.Type)
+                    : parameters.Select(p => p.Type).ToImmutableArray().WithoutCancellationTokenParameter();
+                CheckMethodDataSource(context, attribute, testClassType, typesToValidate, propertySymbol);
             }
             
-            if (attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.IDataSourceGeneratorAttribute.WithoutGlobalPrefix))) == true
-                && attribute.AttributeClass?.AllInterfaces.Any(x => SymbolEqualityComparer.Default.Equals(x, context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.INonTypedDataSourceGeneratorAttribute.WithoutGlobalPrefix))) != true)
+            // Check for ClassDataSourceAttribute<T> by fully qualified name
+            if (attribute.AttributeClass?.ToDisplayString()?.StartsWith("TUnit.Core.ClassDataSourceAttribute<") == true)
             {
-                CheckDataGenerator(context, attribute, types);
+                var typesToValidate = propertySymbol != null 
+                    ? ImmutableArray.Create(propertySymbol.Type)
+                    : types;
+                CheckDataGenerator(context, attribute, typesToValidate);
             }
+            
+            // Check for any custom data source generators that inherit from known base classes
+            // (excluding ClassDataSourceAttribute which is handled above)
+            if (attribute.AttributeClass != null && 
+                !attribute.AttributeClass.ToDisplayString()?.StartsWith("TUnit.Core.ClassDataSourceAttribute<") == true)
+            {
+                var isDataSourceGenerator = false;
+                var selfAndBaseTypes = attribute.AttributeClass.GetSelfAndBaseTypes();
+                
+                foreach (var type in selfAndBaseTypes)
+                {
+                    if (type.IsGenericType && type.TypeArguments.Length > 0)
+                    {
+                        var originalDef = type.OriginalDefinition;
+                        var metadataName = originalDef?.ToDisplayString();
+                        
+                        if (metadataName?.Contains("DataSourceGeneratorAttribute") == true ||
+                            metadataName?.Contains("AsyncDataSourceGeneratorAttribute") == true)
+                        {
+                            isDataSourceGenerator = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (isDataSourceGenerator)
+                {
+                    var typesToValidate = propertySymbol != null 
+                        ? ImmutableArray.Create(propertySymbol.Type)
+                        : types;
+                    CheckDataGenerator(context, attribute, typesToValidate);
+                }
+            }
+
         }
     }
 
@@ -158,12 +262,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return;
         }
-        
+
         if (propertySymbol is { IsStatic: false, IsRequired: false })
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.PropertyRequiredNotSet, propertySymbol.Locations.FirstOrDefault()));
         }
-            
+
         if (propertySymbol is { IsStatic: true, SetMethod: null })
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MustHavePropertySetter, propertySymbol.Locations.FirstOrDefault()));
@@ -172,11 +276,11 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private ImmutableArray<ITypeSymbol> GetTypes(ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? propertySymbol)
     {
-        IEnumerable<ITypeSymbol?> types = [..parameters.Select(x => x.Type), propertySymbol?.Type];
+        IEnumerable<ITypeSymbol?> types = parameters.Select(x => x.Type).Concat(new[] { propertySymbol?.Type }).Where(t => t != null);
 
         return types.OfType<ITypeSymbol>().ToImmutableArray().WithoutCancellationTokenParameter();
     }
-    
+
     private void CheckArguments(SymbolAnalysisContext context, AttributeData argumentsAttribute,
         ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? propertySymbol)
     {
@@ -206,19 +310,30 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 );
                 break;
             }
-            
+
             var argumentExists = i + 1 <= arguments.Length;
-            
+
             var typeSymbol = parameter?.Type ?? propertySymbol!.Type;
 
             var argument = arguments.ElementAtOrDefault(i);
-            
-            if (typeSymbol.IsCollectionType(context.Compilation, out var innerType)
+
+            // Handle params parameters specifically
+            if (parameter?.IsParams == true && typeSymbol.IsCollectionType(context.Compilation, out var innerType))
+            {
+                // For params parameters, validate remaining arguments against the element type
+                var remainingArguments = arguments.Skip(i);
+                if (remainingArguments.All(x => x.IsNull || CanConvert(context, x, innerType)))
+                {
+                    break;
+                }
+            }
+            // Handle regular collection types (non-params)
+            else if (typeSymbol.IsCollectionType(context.Compilation, out innerType)
                 && arguments.Skip(i).Select(x => x.Type).All(x => CanConvert(context, x, innerType)))
             {
                 break;
             }
-            
+
             if (SymbolEqualityComparer.Default.Equals(typeSymbol, cancellationTokenType))
             {
                 continue;
@@ -234,12 +349,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 context.ReportDiagnostic(
                     Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                         argumentsAttribute.GetLocation(),
-                        "null",
+                        "<null>",
                         typeSymbol.ToDisplayString())
                 );
                 return;
             }
-            
+
             if (argument.IsNull && typeSymbol.NullableAnnotation == NullableAnnotation.NotAnnotated)
             {
                 context.ReportDiagnostic(
@@ -248,12 +363,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                         parameter?.Name ?? propertySymbol!.Name)
                 );
             }
-            
+
             if (IsEnumAndInteger(typeSymbol, argument.Type))
             {
                 continue;
             }
-            
+
             if (!argument.IsNull && !CanConvert(context, argument, typeSymbol))
             {
                 context.ReportDiagnostic(
@@ -266,17 +381,18 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             }
         }
     }
-    
-    private void CheckMethodDataSource(SymbolAnalysisContext context, 
+
+    private void CheckMethodDataSource(SymbolAnalysisContext context,
         AttributeData attribute,
         INamedTypeSymbol testClassType,
-        ImmutableArray<ITypeSymbol> testParameterTypes)
+        ImmutableArray<ITypeSymbol> testParameterTypes,
+        IPropertySymbol? propertySymbol = null)
     {
         {
             var type = attribute.AttributeClass?.IsGenericType == true
                 ? attribute.AttributeClass.TypeArguments.First()
                 : attribute.ConstructorArguments[0].Value as INamedTypeSymbol ?? testClassType;
-            
+
             var methodName = attribute.ConstructorArguments[0].Value as string
                          ?? attribute.ConstructorArguments[1].Value as string;
 
@@ -291,19 +407,19 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                         .Select(x => x.Type)
                         .OfType<ITypeSymbol>()
                         .ToArray()
-                    : [];
+                    : Array.Empty<ITypeSymbol>();
 
             var methodSymbols = (type as INamedTypeSymbol)?.GetSelfAndBaseTypes()
                 .SelectMany(x => x.GetMembers())
                 .OfType<IMethodSymbol>()
-                .ToArray() ?? [];
+                .ToArray() ?? Array.Empty<IMethodSymbol>();
 
             var dataSourceMethod = methodSymbols
                                                .FirstOrDefault(methodSymbol =>
                                                    methodSymbol.Name == methodName &&
                                                    MatchesParameters(context, argumentForMethodCallTypes, methodSymbol))
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName);
-            
+
             if (dataSourceMethod is null)
             {
                 context.ReportDiagnostic(
@@ -313,7 +429,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 );
                 return;
             }
-        
+
             if (dataSourceMethod.ReturnsVoid)
             {
                 context.ReportDiagnostic(
@@ -324,7 +440,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            if (!dataSourceMethod.IsStatic 
+            if (!dataSourceMethod.IsStatic
                 && !dataSourceMethod.ContainingType.InstanceConstructors.Any(c => c.Parameters.IsDefaultOrEmpty)
                 && SymbolEqualityComparer.Default.Equals(dataSourceMethod.ContainingType, testClassType))
             {
@@ -338,8 +454,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             var canBeInstanceMethod = context.Symbol is IPropertySymbol or IMethodSymbol
                 && testClassType.InstanceConstructors.First().Parameters.IsDefaultOrEmpty;
-            
-            if (!canBeInstanceMethod && !dataSourceMethod.IsStatic && attribute.ConstructorArguments.Length != 1) 
+
+            if (!canBeInstanceMethod && !dataSourceMethod.IsStatic && attribute.ConstructorArguments.Length != 1)
             {
                 context.ReportDiagnostic(
                     Diagnostic.Create(
@@ -348,7 +464,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 );
                 return;
             }
-        
+
             if (dataSourceMethod.DeclaredAccessibility != Accessibility.Public)
             {
                 context.ReportDiagnostic(
@@ -359,6 +475,63 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
+            // Special check for property injection - the method should return exactly the property type or Func<PropertyType>
+            if (propertySymbol != null)
+            {
+                var returnType = dataSourceMethod.ReturnType;
+                var propertyType = propertySymbol.Type;
+                
+                // For property injection, if the return type exactly matches the property type, it's valid
+                if (returnType.ToDisplayString() == propertyType.ToDisplayString())
+                {
+                    return; // Valid property injection
+                }
+                
+                // Check if return type is Func<T> where T matches the property type
+                if (returnType is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } funcType &&
+                    funcType.ToDisplayString().StartsWith("System.Func<"))
+                {
+                    var funcReturnType = funcType.TypeArguments[0];
+                    if (funcReturnType.ToDisplayString() == propertyType.ToDisplayString() ||
+                        context.Compilation.HasImplicitConversion(funcReturnType, propertyType))
+                    {
+                        return; // Valid - Func<T> where T matches property type
+                    }
+                }
+                
+                // Check if types are compatible with implicit conversion
+                var conversion = context.Compilation.ClassifyConversion(returnType, propertyType);
+                if (conversion.IsImplicit || conversion.IsIdentity)
+                {
+                    return; // Valid property injection with implicit conversion
+                }
+                
+                // For property injection, we don't support IEnumerable - properties need single values
+                // If the return type is Func<T>, report T instead since that's what will be injected
+                var reportedType = returnType;
+                if (returnType is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } funcTypeForError &&
+                    funcTypeForError.ToDisplayString().StartsWith("System.Func<"))
+                {
+                    reportedType = funcTypeForError.TypeArguments[0];
+                }
+                
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        Rules.WrongArgumentTypeTestData,
+                        attribute.GetLocation(),
+                        reportedType.ToDisplayString(),
+                        propertyType.ToDisplayString())
+                );
+                return; // Don't continue with further checks - we've already reported the error
+            }
+
+            // If we already handled property injection, don't continue
+            // This should never happen due to the early return above, but let's be safe
+            if (propertySymbol != null)
+            {
+                return;
+            }
+            
             var unwrappedTypes = UnwrapTypes(context,
                 dataSourceMethod,
                 testParameterTypes,
@@ -370,22 +543,35 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 context.ReportDiagnostic(Diagnostic.Create(Rules.ReturnFunc,
                     dataSourceMethod.Locations.FirstOrDefault()));
             }
-            
-            var dataSourceMethodParameterTypes = dataSourceMethod.Parameters.Select(x => x.Type).ToArray();
 
-            if (!isTuples && testParameterTypes.Length > 1)
+            var dataSourceMethodParameterTypes = dataSourceMethod.Parameters
+                .WithoutCancellationTokenParameter()
+                .Select(x => x.Type)
+                .ToArray();
+
+            // Note: We no longer check if test has multiple parameters when data source doesn't return tuples
+            // because the data source method can return arrays of arrays (object[][]) to satisfy multiple parameters
+
+            // Skip type checking if unwrappedTypes is empty (indicating object[] which can contain any types)
+            if (unwrappedTypes.Length == 0)
             {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(
-                        Rules.TooManyArgumentsInTestMethod,
-                        attribute.GetLocation())
-                );
+                // object[] can contain any types - skip compile-time type checking
                 return;
             }
-
             var conversions = unwrappedTypes.ZipAll(testParameterTypes,
-                (argument, parameter) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter));
-            
+                (argument, parameter) => 
+                {
+                    // Handle exact type matches for property injection where types might have different metadata
+                    if (propertySymbol != null && 
+                        argument != null && 
+                        parameter != null && 
+                        argument.ToDisplayString() == parameter.ToDisplayString())
+                    {
+                        return true;
+                    }
+                    return context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter);
+                });
+
             if (!conversions.All(x => x))
             {
                 context.ReportDiagnostic(
@@ -400,7 +586,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             var argumentsToParamsConversions = argumentForMethodCallTypes.ZipAll(dataSourceMethodParameterTypes,
                 (argument, parameterType) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameterType));
-            
+
             if (!argumentsToParamsConversions.All(x => x))
             {
                 context.ReportDiagnostic(
@@ -439,7 +625,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     );
                     return;
                 }
-            
+
                 for (var i = 0; i < testParameterTypes.Length; i++)
                 {
                     var parameterType = testParameterTypes.ElementAtOrDefault(i);
@@ -449,7 +635,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     {
                         continue;
                     }
-                
+
                     if (!context.Compilation.HasImplicitConversionOrGenericParameter(argumentType, parameterType))
                     {
                         context.ReportDiagnostic(
@@ -462,10 +648,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                         return;
                     }
                 }
-            
+
                 return;
             }
-        
+
             context.ReportDiagnostic(
                 Diagnostic.Create(
                     Rules.WrongArgumentTypeTestData,
@@ -478,7 +664,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private static bool MatchesParameters(SymbolAnalysisContext context, ITypeSymbol[] argumentForMethodCallTypes, IMethodSymbol methodSymbol)
     {
-        return argumentForMethodCallTypes.ZipAll(methodSymbol.Parameters.Select(p => p.Type), 
+        return argumentForMethodCallTypes.ZipAll(methodSymbol.Parameters.Select(p => p.Type),
                 (argument, parameter) => context.Compilation.HasImplicitConversionOrGenericParameter(argument, parameter))
             .All(x => x);
     }
@@ -499,46 +685,65 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return ImmutableArray.Create(type);
         }
-        
+
         if (context.Symbol is IPropertySymbol)
         {
+            // For property injection, we expect a single value, not a collection
+            // Only unwrap Func<T> if present, NOT IEnumerable
             if (type is INamedTypeSymbol { IsGenericType: true } propertyFuncType
                 && SymbolEqualityComparer.Default.Equals(
-                    context.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName()),
-                    type.OriginalDefinition))
+                    context.Compilation.GetTypeByMetadataName("System.Func`1"),
+                    propertyFuncType.OriginalDefinition))
             {
                 isFunc = true;
                 type = propertyFuncType.TypeArguments[0];
             }
-            
+
             return ImmutableArray.Create(type);
         }
-        
+
         if (methodContainingTestData.ReturnType is not INamedTypeSymbol and not IArrayTypeSymbol)
         {
             return ImmutableArray.Create(methodContainingTestData.ReturnType);
         }
-        
-        if (methodContainingTestData.ReturnType.IsIEnumerable(context.Compilation, out var enumerableInnerType))
+
+        // Check for Task<T> or ValueTask<T> wrappers first
+        if (methodContainingTestData.ReturnType is INamedTypeSymbol { IsGenericType: true } taskType)
+        {
+            var taskTypeSymbol = context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.Task`1");
+            var valueTaskTypeSymbol = context.Compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask`1");
+
+            if ((taskTypeSymbol != null && SymbolEqualityComparer.Default.Equals(taskType.OriginalDefinition, taskTypeSymbol)) ||
+                (valueTaskTypeSymbol != null && SymbolEqualityComparer.Default.Equals(taskType.OriginalDefinition, valueTaskTypeSymbol)))
+            {
+                type = taskType.TypeArguments[0];
+            }
+        }
+
+        if (type.IsIEnumerable(context.Compilation, out var enumerableInnerType))
         {
             type = enumerableInnerType;
         }
-        
+
+        // Check for IAsyncEnumerable<T>
+        if (SymbolEqualityComparer.Default.Equals(type, methodContainingTestData.ReturnType) && IsIAsyncEnumerable(type, context.Compilation, out var asyncEnumerableInnerType))
+        {
+            type = asyncEnumerableInnerType;
+        }
+
         if (testParameterTypes.Length == 1
             && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
             return ImmutableArray.Create(type);
         }
 
-        if (type is INamedTypeSymbol { IsGenericType: true } genericType
-            && SymbolEqualityComparer.Default.Equals(
-                context.Compilation.GetTypeByMetadataName(typeof(Func<object>).GetMetadataName()),
-                type.OriginalDefinition))
+        if (type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } genericType
+            && genericType.ToDisplayString().StartsWith("System.Func<"))
         {
             isFunc = true;
             type = genericType.TypeArguments[0];
         }
-        
+
         if (testParameterTypes.Length == 1
             && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
         {
@@ -548,24 +753,54 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (type is INamedTypeSymbol { IsTupleType: true } tupleType)
         {
             isTuples = true;
-            return tupleType.TupleElements.Select(x => x.Type).ToImmutableArray();
+            return ImmutableArray.CreateRange(tupleType.TupleElements.Select(x => x.Type));
         }
-        
+
+        // Handle array cases - when a data source returns IEnumerable<T[]> or IAsyncEnumerable<T[]>,
+        // each array contains the arguments for one test invocation
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            // Arrays from data sources are always meant to contain test arguments,
+            // not to be passed as a single array parameter.
+            // Skip compile-time type checking for all array types.
+            return ImmutableArray<ITypeSymbol>.Empty;
+        }
+
         return ImmutableArray.Create(type);
     }
 
-    private void CheckDataGenerator(SymbolAnalysisContext context, 
+    private void CheckDataGenerator(SymbolAnalysisContext context,
         AttributeData attribute,
         ImmutableArray<ITypeSymbol> testDataTypes)
     {
-        var selfAndBaseTypes = attribute.AttributeClass?.GetSelfAndBaseTypes() ?? [];
-            
-        var baseGeneratorAttribute = selfAndBaseTypes
-            .FirstOrDefault(x => x.Interfaces.Any(i => i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataSourceGeneratorAttribute.WithGlobalPrefix));
+        var selfAndBaseTypes = attribute.AttributeClass?.GetSelfAndBaseTypes() ?? new List<INamedTypeSymbol>
+        {
+        }.AsReadOnly();
 
+        var baseGeneratorAttribute = selfAndBaseTypes
+            .FirstOrDefault(x => x.AllInterfaces.Any(i => i.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithGlobalPrefix));
+
+        // If interface check fails, use name-based detection as fallback
         if (baseGeneratorAttribute is null)
         {
-            return;
+            // Check if this is a known data source generator by name
+            var isDataSourceGenerator = selfAndBaseTypes.Any(type =>
+            {
+                var typeName = type.Name;
+                if (type.IsGenericType)
+                {
+                    var genericTypeName = type.OriginalDefinition?.Name ?? typeName;
+                    return genericTypeName.StartsWith("DataSourceGeneratorAttribute") ||
+                           genericTypeName.StartsWith("AsyncDataSourceGeneratorAttribute") ||
+                           genericTypeName.StartsWith("ClassDataSourceAttribute");
+                }
+                return typeName == "ArgumentsAttribute";
+            });
+            
+            if (!isDataSourceGenerator)
+            {
+                return;
+            }
         }
 
         if (testDataTypes.Any(x => x.IsGenericDefinition()))
@@ -573,9 +808,48 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        var conversions = baseGeneratorAttribute.TypeArguments.ZipAll(testDataTypes,
-            (returnType, parameterType) => context.Compilation.HasImplicitConversionOrGenericParameter(returnType, parameterType));
+        // Get type arguments from the attribute or its base types
+        var typeArguments = ImmutableArray<ITypeSymbol>.Empty;
         
+        // First check if the attribute itself has type arguments
+        if (attribute.AttributeClass?.TypeArguments.IsEmpty == false)
+        {
+            typeArguments = attribute.AttributeClass.TypeArguments;
+        }
+        else
+        {
+            // Otherwise, look for type arguments in base types (e.g., DataSourceGeneratorAttribute<T>)
+            foreach (var baseType in selfAndBaseTypes)
+            {
+                if (!baseType.TypeArguments.IsEmpty)
+                {
+                    typeArguments = baseType.TypeArguments;
+                    break;
+                }
+            }
+        }
+
+        // If still no type arguments (like ArgumentsAttribute which returns object?[]?),
+        // skip compile-time type checking as it will be validated at runtime
+        if (typeArguments.IsEmpty)
+        {
+            return;
+        }
+
+        // Check if there's a mismatch in the number of types
+        if (typeArguments.Length != testDataTypes.Length)
+        {
+            // If testDataTypes is empty, show "<none>" instead of empty string
+            var testTypesDisplay = testDataTypes.Length == 0 ? "" : string.Join(", ", testDataTypes);
+            context.ReportDiagnostic(Diagnostic.Create(Rules.WrongArgumentTypeTestData,
+                    attribute.GetLocation() ?? context.Symbol.Locations.FirstOrDefault(),
+                    string.Join(", ", typeArguments), testTypesDisplay));
+            return;
+        }
+
+        var conversions = typeArguments.ZipAll(testDataTypes,
+            (returnType, parameterType) => context.Compilation.HasImplicitConversionOrGenericParameter(returnType, parameterType));
+
         if (conversions.All(x => x))
         {
             return;
@@ -583,7 +857,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         context.ReportDiagnostic(Diagnostic.Create(Rules.WrongArgumentTypeTestData,
                 attribute.GetLocation() ?? context.Symbol.Locations.FirstOrDefault(),
-                string.Join(", ", baseGeneratorAttribute.TypeArguments), string.Join(", ", testDataTypes)));
+                string.Join(", ", typeArguments), string.Join(", ", testDataTypes)));
     }
 
     private static bool CanConvert(SymbolAnalysisContext context, TypedConstant argument, ITypeSymbol? methodParameterType)
@@ -599,14 +873,14 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         return CanConvert(context, argument.Type, methodParameterType);
     }
-    
+
     private static bool CanConvert(SymbolAnalysisContext context, ITypeSymbol? argumentType, ITypeSymbol? methodParameterType)
     {
         if (methodParameterType is ITypeParameterSymbol)
         {
             return true;
         }
-        
+
         if (argumentType is not null
             && methodParameterType is not null
             && context.Compilation.ClassifyConversion(argumentType, methodParameterType)
@@ -626,10 +900,41 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             return type2?.TypeKind == TypeKind.Enum;
         }
-        
+
         if (type2?.SpecialType is SpecialType.System_Int16 or SpecialType.System_Int32 or SpecialType.System_Int64)
         {
             return type1?.TypeKind == TypeKind.Enum;
+        }
+
+        return false;
+    }
+
+    private static bool IsIAsyncEnumerable(ITypeSymbol type, Compilation compilation, [NotNullWhen(true)] out ITypeSymbol? innerType)
+    {
+        innerType = null;
+
+        // Get IAsyncEnumerable<T> type
+        var asyncEnumerableType = compilation.GetTypeByMetadataName("System.Collections.Generic.IAsyncEnumerable`1");
+        if (asyncEnumerableType == null)
+        {
+            return false;
+        }
+
+        // Check if the type itself is IAsyncEnumerable<T>
+        if (type is INamedTypeSymbol namedType && namedType.OriginalDefinition.Equals(asyncEnumerableType, SymbolEqualityComparer.Default))
+        {
+            innerType = namedType.TypeArguments[0];
+            return true;
+        }
+
+        // Check interfaces
+        var asyncEnumerableInterface = type.AllInterfaces
+            .FirstOrDefault(i => i.OriginalDefinition.Equals(asyncEnumerableType, SymbolEqualityComparer.Default));
+
+        if (asyncEnumerableInterface != null)
+        {
+            innerType = asyncEnumerableInterface.TypeArguments[0];
+            return true;
         }
 
         return false;

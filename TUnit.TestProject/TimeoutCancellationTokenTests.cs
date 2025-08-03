@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -70,9 +68,9 @@ public class TimeoutCancellationTokenTests
         await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
     }
 
-    public static int DataSource()
+    public static IEnumerable<int> DataSource()
     {
-        return 1;
+        yield return 1;
     }
 
     public class FiveSecondTimeout() : TimeoutAttribute(5_000);
