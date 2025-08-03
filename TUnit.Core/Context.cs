@@ -23,12 +23,14 @@ public abstract class Context : IContext, IDisposable
     private StringBuilder? _outputStringBuilder;
     private StringBuilder? _errorOutputStringBuilder;
     private DefaultLogger? _defaultLogger;
+    private readonly object _outputLock = new();
+    private readonly object _errorLock = new();
 
     [field: AllowNull, MaybeNull]
-    public TextWriter OutputWriter => field ??= TextWriter.Synchronized(new StringWriter(_outputStringBuilder ??= new StringBuilder()));
+    public TextWriter OutputWriter => field ??= new SynchronizedStringWriter(_outputStringBuilder ??= new StringBuilder(), _outputLock);
 
     [field: AllowNull, MaybeNull]
-    public TextWriter ErrorOutputWriter => field ??= TextWriter.Synchronized(new StringWriter(_errorOutputStringBuilder ??= new StringBuilder()));
+    public TextWriter ErrorOutputWriter => field ??= new SynchronizedStringWriter(_errorOutputStringBuilder ??= new StringBuilder(), _errorLock);
 
     internal Context(Context? parent)
     {
@@ -71,12 +73,18 @@ public abstract class Context : IContext, IDisposable
 
     public string GetStandardOutput()
     {
-        return _outputStringBuilder?.ToString().Trim() ?? string.Empty;
+        lock (_outputLock)
+        {
+            return _outputStringBuilder?.ToString().Trim() ?? string.Empty;
+        }
     }
 
     public string GetErrorOutput()
     {
-        return _errorOutputStringBuilder?.ToString().Trim() ?? string.Empty;
+        lock (_errorLock)
+        {
+            return _errorOutputStringBuilder?.ToString().Trim() ?? string.Empty;
+        }
     }
 
     public DefaultLogger GetDefaultLogger()
@@ -89,5 +97,79 @@ public abstract class Context : IContext, IDisposable
 #if NET
         ExecutionContext?.Dispose();
 #endif
+    }
+}
+
+/// <summary>
+/// A TextWriter wrapper that provides thread-safe access to a StringBuilder
+/// </summary>
+internal sealed class SynchronizedStringWriter : TextWriter
+{
+    private readonly StringBuilder _stringBuilder;
+    private readonly object _lock;
+
+    public SynchronizedStringWriter(StringBuilder stringBuilder, object lockObject)
+    {
+        _stringBuilder = stringBuilder;
+        _lock = lockObject;
+    }
+
+    public override Encoding Encoding => Encoding.UTF8;
+
+    public override void Write(char value)
+    {
+        lock (_lock)
+        {
+            _stringBuilder.Append(value);
+        }
+    }
+
+    public override void Write(string? value)
+    {
+        if (value != null)
+        {
+            lock (_lock)
+            {
+                _stringBuilder.Append(value);
+            }
+        }
+    }
+
+    public override void Write(char[] buffer, int index, int count)
+    {
+        lock (_lock)
+        {
+            _stringBuilder.Append(buffer, index, count);
+        }
+    }
+
+    public override void WriteLine()
+    {
+        lock (_lock)
+        {
+            _stringBuilder.AppendLine();
+        }
+    }
+
+    public override void WriteLine(string? value)
+    {
+        lock (_lock)
+        {
+            _stringBuilder.AppendLine(value);
+        }
+    }
+
+    public override string ToString()
+    {
+        lock (_lock)
+        {
+            return _stringBuilder.ToString();
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        // Nothing to dispose, StringBuilder doesn't implement IDisposable
+        base.Dispose(disposing);
     }
 }
