@@ -110,10 +110,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -275,10 +271,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -431,10 +423,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -578,10 +566,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -725,10 +709,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -872,10 +852,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -1019,10 +995,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -1157,15 +1129,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<int>(out var typedValue))
-                    {
-                        await typedInstance.Method1(typedValue);
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -1300,15 +1263,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<int>(out var typedValue))
-                    {
-                        await typedInstance.Method2(typedValue);
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -1443,15 +1397,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<int>(out var typedValue))
-                    {
-                        await typedInstance.Method3(typedValue);
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -1586,15 +1531,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<int>(out var typedValue))
-                    {
-                        await typedInstance.Method4(typedValue);
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -1741,10 +1677,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {

@@ -113,15 +113,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.EnumerableDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<int>(out var typedValue))
-                    {
-                        await typedInstance.DataSource_Method(typedValue);
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -277,15 +268,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.EnumerableDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<int>(out var typedValue))
-                    {
-                        await typedInstance.DataSource_Method2(typedValue);
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -441,16 +423,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.EnumerableDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<global::TUnit.TestProject.EnumerableDataSourceDrivenTests.BaseValue>(out var typedValue))
-                    {
-                        typedInstance.DataSource_WithBaseReturn(typedValue);
-                        await global::System.Threading.Tasks.Task.CompletedTask;
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {

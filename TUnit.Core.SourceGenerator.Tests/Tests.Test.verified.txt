@@ -109,15 +109,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1304.Tests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<string>(out var typedValue))
-                    {
-                        await typedInstance.TryParse_InvalidString_ReturnsFailure(typedValue, context?.CancellationToken ?? System.Threading.CancellationToken.None);
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -260,15 +251,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1304.Tests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<string>(out var typedValue))
-                    {
-                        await typedInstance.Parse_InvalidString_ThrowsException(typedValue);
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -405,15 +387,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1304.Tests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<string>(out var typedValue))
-                    {
-                        await typedInstance.TryParse_ValidString_ReturnsAccountId(typedValue);
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {

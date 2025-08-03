@@ -141,15 +141,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1924.None.BaseClass)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<int>(out var typedValue))
-                    {
-                        await typedInstance.Test(typedValue);
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -321,15 +312,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1924.None.Tests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<int>(out var typedValue))
-                    {
-                        await typedInstance.Test(typedValue);
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -501,15 +483,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1924.None.Tests2)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<int>(out var typedValue))
-                    {
-                        await typedInstance.Test(typedValue);
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -681,15 +654,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1924.None.Tests3)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<int>(out var typedValue))
-                    {
-                        await typedInstance.Test(typedValue);
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {

@@ -94,16 +94,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.NullableByteArgumentTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                    if (typedArgs.TryGetTypedValue<byte?>(out var typedValue))
-                    {
-                        typedInstance.Test(typedValue);
-                        await global::System.Threading.Tasks.Task.CompletedTask;
-                        return;
-                    }
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -251,10 +241,6 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.NullableByteArgumentTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Check if we have typed arguments to avoid boxing
-                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
-                {
-                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
