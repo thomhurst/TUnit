@@ -1079,7 +1079,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else if (IsEnumerable(returnType))
         {
-            // IEnumerable<T> - must evaluate once to iterate, but create items list inside lambda for freshness
+            // IEnumerable<T>
             if (isStatic)
             {
                 writer.AppendLine($"var result = {fullyQualifiedType}.{methodCall};");
@@ -1122,11 +1122,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // Single value - generate lambda that invokes method each time
-            writer.AppendLine("yield return () =>");
-            writer.AppendLine("{");
-            writer.Indent();
-            
+            // Single value
             if (isStatic)
             {
                 writer.AppendLine($"var result = {fullyQualifiedType}.{methodCall};");
@@ -1148,10 +1144,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
             }
-            
-            writer.AppendLine("return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
-            writer.Unindent();
-            writer.AppendLine("};");
+            writer.AppendLine();
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
         }
 
         writer.Unindent();
