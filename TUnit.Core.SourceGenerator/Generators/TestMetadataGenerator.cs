@@ -2742,6 +2742,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
                 .ToList();
 
+            // Also get class-level data source generators for non-generic classes
+            var nonGenericClassDataSourceGenerators = testMethod.TypeSymbol.GetAttributes()
+                .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass) && 
+                           a.AttributeClass?.Name != "ArgumentsAttribute")
+                .ToList();
+
             if (nonGenericClassArguments.Any() && nonGenericMethodArguments.Any())
             {
                 // Generate all combinations of class and method arguments
@@ -2774,6 +2780,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     writer.AppendLine($"// Method arguments: {string.Join(", ", methodArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
                     GenerateConcreteTestMetadataForNonGeneric(writer, compilation, testMethod, className, null, methodArgAttr);
+                    writer.AppendLine();
+                }
+            }
+
+            // Process class-level data source generators for non-generic classes
+            if (nonGenericClassDataSourceGenerators.Any())
+            {
+                foreach (var dataSourceAttr in nonGenericClassDataSourceGenerators)
+                {
+                    writer.AppendLine($"// Class data source generator: {dataSourceAttr.AttributeClass?.Name}");
+                    GenerateConcreteTestMetadataForNonGeneric(writer, compilation, testMethod, className, dataSourceAttr, null);
                     writer.AppendLine();
                 }
             }
@@ -4140,8 +4157,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         Compilation compilation,
         TestMethodMetadata testMethod,
         string className,
-        AttributeData? classArgumentsAttribute,
-        AttributeData? methodArgumentsAttribute)
+        AttributeData? classDataSourceAttribute,
+        AttributeData? methodDataSourceAttribute)
     {
         var methodName = testMethod.MethodSymbol.Name;
 
@@ -4157,21 +4174,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var filteredClassAttributes = new List<AttributeData>();
         var filteredMethodAttributes = new List<AttributeData>();
 
-        // Add the specific Arguments attributes we're generating for
-        if (classArgumentsAttribute != null)
+        // Add the specific data source attributes we're generating for
+        if (classDataSourceAttribute != null)
         {
-            filteredClassAttributes.Add(classArgumentsAttribute);
+            filteredClassAttributes.Add(classDataSourceAttribute);
         }
-        if (methodArgumentsAttribute != null)
+        if (methodDataSourceAttribute != null)
         {
-            filteredMethodAttributes.Add(methodArgumentsAttribute);
+            filteredMethodAttributes.Add(methodDataSourceAttribute);
         }
 
-        // Add other non-Arguments attributes from class and method
+        // Add other non-data-source attributes from class and method
         filteredClassAttributes.AddRange(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes()
-            .Where(a => a.AttributeClass?.Name != "ArgumentsAttribute"));
+            .Where(a => !DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)));
         filteredMethodAttributes.AddRange(testMethod.MethodSymbol.GetAttributes()
-            .Where(a => a.AttributeClass?.Name != "ArgumentsAttribute"));
+            .Where(a => !DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)));
 
         // Generate metadata
         writer.AppendLine("TimeoutMs = null,");
@@ -4203,9 +4220,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Indent();
 
         // Add method data source if present
-        if (methodArgumentsAttribute != null)
+        if (methodDataSourceAttribute != null)
         {
-            GenerateDataSourceAttribute(writer, methodArgumentsAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
+            GenerateDataSourceAttribute(writer, methodDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
         }
 
         writer.Unindent();
@@ -4217,9 +4234,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Indent();
 
         // Add class data source if present
-        if (classArgumentsAttribute != null)
+        if (classDataSourceAttribute != null)
         {
-            GenerateDataSourceAttribute(writer, classArgumentsAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
+            GenerateDataSourceAttribute(writer, classDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
         }
 
         writer.Unindent();
@@ -4279,11 +4296,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (hasParameterizedConstructor)
         {
-            // For classes with constructor parameters, use the specific constructor arguments from the Arguments attribute
-            if (classArgumentsAttribute != null && classArgumentsAttribute.ConstructorArguments.Length > 0 &&
-                classArgumentsAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
+            // For classes with constructor parameters, check if we have Arguments attribute
+            var isArgumentsAttribute = classDataSourceAttribute?.AttributeClass?.Name == "ArgumentsAttribute";
+            
+            if (isArgumentsAttribute && classDataSourceAttribute != null && 
+                classDataSourceAttribute.ConstructorArguments.Length > 0 &&
+                classDataSourceAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
             {
-                var argumentValues = classArgumentsAttribute.ConstructorArguments[0].Values;
+                var argumentValues = classDataSourceAttribute.ConstructorArguments[0].Values;
                 var constructorArgs = string.Join(", ", argumentValues.Select(arg =>
                 {
                     if (arg.Value is string str)
