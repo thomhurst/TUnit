@@ -169,6 +169,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(bool))
 {
     Name = "condition",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test2", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0]
 },
 },
@@ -306,6 +307,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(bool))
 {
     Name = "condition",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+    IsNullable = false,
     ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test3", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0]
 },
 },
