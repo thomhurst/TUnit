@@ -54,7 +54,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Docker Setup Docker
-        if: matrix.os != 'macos-latest'
+        if: matrix.os == 'ubuntu-latest'
         uses: docker/setup-docker-action@v4.3.0
 
       - name: Build
