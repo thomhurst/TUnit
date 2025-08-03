@@ -15,7 +15,7 @@ public class RetryTests
     public void One()
     {
         RetryCount1++;
-        throw new Exception();
+        throw new Exception("Failure in One");
     }
 
     [Test]
@@ -23,14 +23,14 @@ public class RetryTests
     public void Two()
     {
         RetryCount2++;
-        throw new Exception();
+        throw new Exception("Failure in Two");
     }
 
     [Test]
     public void Three()
     {
         RetryCount3++;
-        throw new Exception();
+        throw new Exception("Failure in Three");
     }
 
     [Test]

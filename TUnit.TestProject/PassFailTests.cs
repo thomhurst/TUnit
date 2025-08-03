@@ -58,7 +58,7 @@ public class PassFailTests
     [EngineTest(ExpectedResult.Failure)]
     public void Fail1()
     {
-        throw new Exception();
+        throw new Exception("Test failure");
     }
 
     [Test]
@@ -71,7 +71,7 @@ public class PassFailTests
     [EngineTest(ExpectedResult.Failure)]
     public void Fail2(int value)
     {
-        throw new Exception();
+        throw new Exception("Test failure with value: " + value);
     }
 
     [Test]
@@ -87,7 +87,7 @@ public class PassFailTests
     [EngineTest(ExpectedResult.Failure)]
     public void Fail3(int value)
     {
-        throw new Exception();
+        throw new Exception("Test failure with value: " + value);
     }
 
     [Test]
@@ -99,7 +99,7 @@ public class PassFailTests
         [Matrix(1, 2, 3, 4)] int value2,
         [Matrix(1, 2, 3)] int value3)
     {
-        throw new Exception();
+        throw new Exception("Test failure with values: " + value + ", " + value2 + ", " + value3);
     }
 
     public static int Data1() => 1;

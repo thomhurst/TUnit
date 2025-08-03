@@ -13,6 +13,6 @@ public class LongFailures
     public async Task LongFailure()
     {
         await Task.Delay(TimeSpan.FromSeconds(Interlocked.Increment(ref _counter)));
-        throw new Exception();
+        throw new Exception($"Failure after {_counter} seconds");
     }
 }

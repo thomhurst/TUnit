@@ -46,7 +46,7 @@ public class DynamicDataGenerator : DataSourceGeneratorAttribute<int>, ITestStar
             // We need a condition to end execution at some point otherwise we could go forever recursively
             if (Interlocked.Increment(ref _count) > 5)
             {
-                throw new Exception();
+                throw new Exception("DynamicDataGenerator reached maximum retry count.");
             }
 
             if (IsReregisteredTest(testContext))

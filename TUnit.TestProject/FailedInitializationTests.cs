@@ -11,5 +11,5 @@ public class FailedInitializationTests
     {
     }
 
-    public static int Data() => throw new Exception();
+    public static int Data() => throw new Exception("Initialization failed");
 }
