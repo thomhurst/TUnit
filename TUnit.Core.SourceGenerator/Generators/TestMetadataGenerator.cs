@@ -1656,8 +1656,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine("}");
             }
             
-            writer.AppendLine("// Fallback to untyped arguments from TypedTestArguments");
-            writer.AppendLine("args = typedArgs.GetUntypedArguments();");
             writer.Unindent();
             writer.AppendLine("}");
         }
