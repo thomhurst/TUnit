@@ -27,7 +27,7 @@ public class TimingTestExecutor : ITestExecutor
     public async Task ExecuteAsync(TestContext context, Func<Task> testBody)
     {
         var stopwatch = Stopwatch.StartNew();
-        
+
         try
         {
             await testBody();
@@ -36,7 +36,7 @@ public class TimingTestExecutor : ITestExecutor
         {
             stopwatch.Stop();
             context.WriteLine($"Test execution took: {stopwatch.ElapsedMilliseconds}ms");
-            
+
             // You could also send this to telemetry
             TelemetryClient.TrackMetric("TestDuration", stopwatch.ElapsedMilliseconds);
         }
@@ -46,17 +46,29 @@ public class TimingTestExecutor : ITestExecutor
 
 ### Registering a Test Executor
 
-To use your custom test executor, register it in your test assembly:
+To use your custom test executor, apply the `TestExecutorAttribute` at the assembly, class, or method level:
 
 ```csharp
-[assembly: RegisterTestExecutor(typeof(TimingTestExecutor))]
-```
+// Assembly-level (applies to all tests in the assembly)
+[assembly: TestExecutor<TimingTestExecutor>]
 
-Or apply it to specific tests or classes:
+// Or use the non-generic version
+[assembly: TestExecutor(typeof(TimingTestExecutor))]
 
-```csharp
+// Class-level (applies to all tests in the class)
+[TestExecutor<TimingTestExecutor>]
+public class MyTestClass
+{
+    [Test]
+    public async Task MyTest()
+    {
+        // Test logic here
+    }
+}
+
+// Method-level (applies to specific test)
 [Test]
-[UseTestExecutor(typeof(TimingTestExecutor))]
+[TestExecutor<TimingTestExecutor>]
 public async Task MyTest()
 {
     // Test logic here
@@ -69,7 +81,6 @@ The `IHookExecutor` interface allows you to customize how setup and cleanup hook
 - Adding error handling around hooks
 - Implementing hook-specific logging
 - Managing shared resources during hooks
-- Controlling hook execution order
 
 ### Interface Definition
 
@@ -86,7 +97,7 @@ public interface IHookExecutor
 public class ResourceManagingHookExecutor : IHookExecutor
 {
     private static readonly Dictionary<string, IDisposable> Resources = new();
-    
+
     public async Task ExecuteAsync(HookContext context, Func<Task> hookBody)
     {
         if (context.HookType == HookType.Before)
@@ -95,7 +106,7 @@ public class ResourceManagingHookExecutor : IHookExecutor
             var resource = AllocateResource(context.TestContext.TestName);
             Resources[context.TestContext.TestName] = resource;
         }
-        
+
         try
         {
             await hookBody();
@@ -113,7 +124,7 @@ public class ResourceManagingHookExecutor : IHookExecutor
             }
         }
     }
-    
+
     private IDisposable AllocateResource(string testName)
     {
         // Allocate some resource
@@ -189,12 +200,12 @@ public interface ITestRetryEventReceiver
 public class TestReporter : ITestStartEventReceiver, ITestEndEventReceiver
 {
     private readonly ITestReportingService _reportingService;
-    
+
     public TestReporter(ITestReportingService reportingService)
     {
         _reportingService = reportingService;
     }
-    
+
     public async Task OnTestStart(TestContext context)
     {
         await _reportingService.ReportTestStarted(
@@ -203,7 +214,7 @@ public class TestReporter : ITestStartEventReceiver, ITestEndEventReceiver
             context.TestParameters
         );
     }
-    
+
     public async Task OnTestEnd(TestContext context, TestResult result)
     {
         await _reportingService.ReportTestCompleted(
@@ -218,10 +229,43 @@ public class TestReporter : ITestStartEventReceiver, ITestEndEventReceiver
 
 ### Registering Event Receivers
 
-Register event receivers at the assembly level:
+Event receivers are registered by implementing the interfaces in an attribute class, then applying that attribute at the assembly, class, or method level:
 
 ```csharp
-[assembly: RegisterEventReceiver(typeof(TestReporter))]
+// Create an attribute that implements the event receiver interfaces
+[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
+public class CustomEventReceiverAttribute : Attribute, ITestStartEventReceiver, ITestEndEventReceiver
+{
+    public int Order => 0;
+    
+    public ValueTask OnTestStart(TestContext context)
+    {
+        Console.WriteLine($"Test starting: {context.GetDisplayName()}");
+        return default;
+    }
+    
+    public ValueTask OnTestEnd(TestContext context)
+    {
+        Console.WriteLine($"Test ended: {context.GetDisplayName()} - {context.Result?.State}");
+        return default;
+    }
+}
+
+// Apply at assembly level
+[assembly: CustomEventReceiver]
+
+// Or at class level
+[CustomEventReceiver]
+public class MyTestClass
+{
+    [Test]
+    public async Task MyTest() { }
+}
+
+// Or at method level
+[Test]
+[CustomEventReceiver]
+public async Task MyTest() { }
 ```
 
 ## Parallel Execution Control
@@ -302,13 +346,13 @@ Example:
 public class DatabaseTests : IAsyncInitializer
 {
     private DatabaseConnection _connection;
-    
+
     public async Task InitializeAsync()
     {
         _connection = await DatabaseConnection.CreateAsync();
         await _connection.MigrateAsync();
     }
-    
+
     [Test]
     public async Task TestDatabaseOperation()
     {
@@ -363,13 +407,13 @@ public class TransactionalTestExecutor : ITestExecutor
     {
         // Get the database connection from DI
         var dbContext = context.GetService<ApplicationDbContext>();
-        
+
         using var transaction = await dbContext.Database.BeginTransactionAsync();
-        
+
         try
         {
             await testBody();
-            
+
             // Rollback instead of commit to keep tests isolated
             await transaction.RollbackAsync();
         }
@@ -381,16 +425,16 @@ public class TransactionalTestExecutor : ITestExecutor
     }
 }
 
-[UseTestExecutor(typeof(TransactionalTestExecutor))]
+[TestExecutor<TransactionalTestExecutor>]
 public class DatabaseTests
 {
     private readonly ApplicationDbContext _dbContext;
-    
+
     public DatabaseTests(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }
-    
+
     [Test]
     public async Task CreateUser_ShouldAddToDatabase()
     {
@@ -398,7 +442,7 @@ public class DatabaseTests
         var user = new User { Name = "Test User" };
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync();
-        
+
         var count = await _dbContext.Users.CountAsync();
         await Assert.That(count).IsEqualTo(1);
     }
