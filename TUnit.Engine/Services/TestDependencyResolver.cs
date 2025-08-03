@@ -13,12 +13,12 @@ internal sealed class TestDependencyResolver
     private readonly ConcurrentDictionary<string, AbstractExecutableTest> _testsByName = new();
     private readonly ConcurrentDictionary<string, List<string>> _pendingDependents = new();
     private readonly List<AbstractExecutableTest> _allTests = new();
-    
+
     public void RegisterTest(AbstractExecutableTest test)
     {
         _testsByName[test.TestId] = test;
         _allTests.Add(test);
-        
+
         // Process any tests waiting for this one
         if (_pendingDependents.TryRemove(test.TestId, out var dependents))
         {
@@ -31,28 +31,28 @@ internal sealed class TestDependencyResolver
             }
         }
     }
-    
+
     public bool TryResolveDependencies(AbstractExecutableTest test)
     {
         if (test.Dependencies.Length > 0)
         {
             return true; // Already resolved
         }
-        
+
         return ResolveDependenciesForTest(test);
     }
-    
+
     private bool ResolveDependenciesForTest(AbstractExecutableTest test)
     {
         var dependencies = new List<AbstractExecutableTest>();
         var allResolved = true;
-        
+
         foreach (var dependency in test.Metadata.Dependencies)
         {
             var matchingTests = _testsByName.Values
                 .Where(t => dependency.Matches(t.Metadata, test.Metadata))
                 .ToList();
-                
+
             if (matchingTests.Count == 0)
             {
                 // Dependency not yet discovered, register for notification
@@ -70,32 +70,32 @@ internal sealed class TestDependencyResolver
                 dependencies.AddRange(matchingTests);
             }
         }
-        
+
         if (allResolved)
         {
             test.Dependencies = dependencies
                 .Distinct()
                 .Where(d => d.TestId != test.TestId)
                 .ToArray();
-                
+
             // Skip updating TestContext.Dependencies for now - will be done after circular dependency check
             // to avoid infinite loops
         }
-        
+
         return allResolved;
     }
-    
+
     private IEnumerable<AbstractExecutableTest> GetAllDependencies(
-        AbstractExecutableTest test, 
+        AbstractExecutableTest test,
         HashSet<string> visited,
         Stack<AbstractExecutableTest>? path = null)
     {
         // Initialize path stack if this is the top-level call
         path ??= new Stack<AbstractExecutableTest>();
-        
+
         // Add current test to the path
         path.Push(test);
-        
+
         // Add the current test to the visited set to detect cycles
         if (!visited.Add(test.TestId))
         {
@@ -104,21 +104,18 @@ internal sealed class TestDependencyResolver
             var pathList = path.Reverse().ToList();
             var cycleStartIndex = pathList.FindIndex(t => t.TestId == test.TestId);
             var cycleTests = pathList.Skip(cycleStartIndex).ToList();
-            
-            // Add the repeated test at the end to show the full cycle
-            cycleTests.Add(test);
-            
+
             // Convert to TestDetails for the exception
             var testDetailsChain = cycleTests.Select(t => t.Context.TestDetails).ToList();
             throw new DependencyConflictException(testDetailsChain);
         }
-        
+
         try
         {
             foreach (var dep in test.Dependencies)
             {
                 yield return dep;
-                
+
                 // Recursively get dependencies of this dependency
                 foreach (var transitive in GetAllDependencies(dep, visited, path))
                 {
@@ -133,17 +130,17 @@ internal sealed class TestDependencyResolver
             path.Pop();
         }
     }
-    
+
     public void CheckForCircularDependencies()
     {
         Console.WriteLine($"[DEBUG] Checking for circular dependencies and updating TestContext.Dependencies for {_allTests.Count} tests");
-        
+
         // Update TestContext.Dependencies for all tests, with circular dependency detection built-in
         foreach (var test in _allTests)
         {
             test.Context.Dependencies.Clear();
             var visited = new HashSet<string>();
-            
+
             try
             {
                 foreach (var dep in GetAllDependencies(test, visited, null))
@@ -184,7 +181,7 @@ internal sealed class TestDependencyResolver
                 test.State = TestState.Failed;
             }
         }
-        
+
         // Log how many tests failed due to circular dependencies
         var failedTests = _allTests.Where(t => t.State == TestState.Failed).ToList();
         if (failedTests.Any())
@@ -196,8 +193,8 @@ internal sealed class TestDependencyResolver
             }
         }
     }
-    
-    
+
+
     private List<TestDetails> BuildTestChain(List<string> cycle)
     {
         var testChain = new List<TestDetails>();
