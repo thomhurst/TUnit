@@ -1135,6 +1135,11 @@ namespace
         public .<string, object?> Context { get; set; }
         public .TestMetadata? TestMetadata { get; set; }
     }
+    [(.Constructor)]
+    public sealed class TestConstructorAttribute : .TUnitAttribute
+    {
+        public TestConstructorAttribute() { }
+    }
     [.DebuggerDisplay("{.Name}.{GetDisplayName(),nq}")]
     public class TestContext : .Context
     {

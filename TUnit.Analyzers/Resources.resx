@@ -540,6 +540,15 @@
     <data name="TUnit0300Title" xml:space="preserve">
         <value>Generic type or method may not be AOT-compatible</value>
     </data>
+    <data name="TUnit0052Description" xml:space="preserve">
+        <value>When a test class has multiple constructors, one should be marked with [TestConstructor] to avoid ambiguity.</value>
+    </data>
+    <data name="TUnit0052MessageFormat" xml:space="preserve">
+        <value>Class '{0}' has multiple constructors but none are marked with [TestConstructor]. Consider adding [TestConstructor] to specify which constructor to use.</value>
+    </data>
+    <data name="TUnit0052Title" xml:space="preserve">
+        <value>Multiple constructors found without [TestConstructor] attribute</value>
+    </data>
     <data name="TUnit0301Description" xml:space="preserve">
         <value>Tuple types require reflection for property/field access which is not AOT-compatible. Consider using concrete types or value deconstruction.</value>
     </data>
