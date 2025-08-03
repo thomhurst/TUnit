@@ -5,11 +5,44 @@ namespace TUnit.Engine.Building;
 
 internal static class ReflectionMetadataBuilder
 {
+    /// <summary>
+    /// Creates method metadata from reflection info with proper ReflectionInfo populated
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method",
+        Justification = "Parameter types discovered from MethodInfo.GetParameters() cannot be statically analyzed. Used for reflection-based and dynamic test discovery.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.",
+        Justification = "ParameterInfo.ParameterType cannot be annotated. For AOT scenarios, source-generated metadata is preferred.")]
+    public static MethodMetadata CreateMethodMetadata(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+            | DynamicallyAccessedMemberTypes.NonPublicConstructors
+            | DynamicallyAccessedMemberTypes.PublicMethods
+            | DynamicallyAccessedMemberTypes.NonPublicMethods
+            | DynamicallyAccessedMemberTypes.PublicProperties
+            | DynamicallyAccessedMemberTypes.All)] Type type,
+        System.Reflection.MethodInfo method)
+    {
+        return new MethodMetadata
+        {
+            Name = method.Name,
+            Type = type,
+            TypeReference = CreateTypeReference(type),
+            Class = CreateClassMetadata(type),
+            Parameters = method.GetParameters()
+                .Select((p, i) => CreateParameterMetadata(p.ParameterType, p.Name ?? "unnamed", i, p))
+                .ToArray(),
+            GenericTypeCount = method.IsGenericMethodDefinition ? method.GetGenericArguments().Length : 0,
+            ReturnTypeReference = CreateTypeReference(method.ReturnType),
+            ReturnType = method.ReturnType
+        };
+    }
+
     private static TypeReference CreateTypeReference(Type type)
     {
         return TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name);
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method",
+        Justification = "ParameterMetadata constructor requires annotated types. Callers ensure types have required members preserved.")]
     private static ParameterMetadata CreateParameterMetadata(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.PublicMethods
@@ -26,6 +59,8 @@ internal static class ReflectionMetadataBuilder
         };
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.",
+        Justification = "Constructor parameter types from ParameterInfo cannot be annotated. Used for test class metadata creation.")]
     private static ClassMetadata CreateClassMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
@@ -57,31 +92,5 @@ internal static class ReflectionMetadataBuilder
                 Parent = null
             };
         });
-    }
-
-    /// <summary>
-    /// Creates method metadata from reflection info with proper ReflectionInfo populated
-    /// </summary>
-    public static MethodMetadata CreateMethodMetadata(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
-        | DynamicallyAccessedMemberTypes.NonPublicConstructors
-        | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods
-        | DynamicallyAccessedMemberTypes.PublicProperties)] Type type,
-        System.Reflection.MethodInfo method)
-    {
-        return new MethodMetadata
-        {
-            Name = method.Name,
-            Type = type,
-            TypeReference = CreateTypeReference(type),
-            Class = CreateClassMetadata(type),
-            Parameters = method.GetParameters()
-                .Select((p, i) => CreateParameterMetadata(p.ParameterType, p.Name ?? "unnamed", i, p))
-                .ToArray(),
-            GenericTypeCount = method.IsGenericMethodDefinition ? method.GetGenericArguments().Length : 0,
-            ReturnTypeReference = CreateTypeReference(method.ReturnType),
-            ReturnType = method.ReturnType
-        };
     }
 }
