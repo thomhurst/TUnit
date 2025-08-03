@@ -12,48 +12,26 @@ internal static class ConstructorHelper
     /// <summary>
     /// Finds a suitable constructor for a test class, preferring parameterless but handling class data sources
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", 
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements",
         Justification = "Constructor discovery is required for test instantiation. AOT scenarios should use source-generated test metadata.")]
     public static ConstructorInfo? FindSuitableConstructor(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type testClass,
         Attribute[] classAttributes)
     {
         var constructors = testClass.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-        
-        // First, try to find a parameterless constructor
-        var parameterless = constructors.FirstOrDefault(c => c.GetParameters().Length == 0);
-        if (parameterless != null)
-        {
-            return parameterless;
-        }
-        
-        // If no parameterless constructor, look for one that matches class data sources
-        var classDataSources = classAttributes.OfType<ClassDataSourceAttribute>().ToArray();
-        if (classDataSources.Length > 0)
-        {
-            // Find constructor with parameters matching the class data sources
-            foreach (var constructor in constructors)
-            {
-                var parameters = constructor.GetParameters();
-                if (CanMatchClassDataSources(parameters, classDataSources))
-                {
-                    return constructor;
-                }
-            }
-        }
-        
-        // If still no match, return the constructor with the fewest parameters
-        return constructors.OrderBy(c => c.GetParameters().Length).FirstOrDefault();
+
+        // Just return the first instance constructor
+        return constructors.FirstOrDefault();
     }
-    
+
     /// <summary>
     /// Creates an instance of a test class with proper constructor parameter handling
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2067:Target type's member does not satisfy annotation requirements", 
+    [UnconditionalSuppressMessage("Trimming", "IL2067:Target type's member does not satisfy annotation requirements",
         Justification = "Test class instantiation requires constructor access. AOT scenarios should use source-generated factories.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", 
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements",
         Justification = "Dynamic property initialization is a fallback. AOT scenarios should use compile-time initialization.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2072:Target method return value does not satisfy annotation requirements", 
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target method return value does not satisfy annotation requirements",
         Justification = "Type flow in reflection mode cannot be statically analyzed. Use source generation for AOT.")]
     public static object? CreateTestClassInstanceWithConstructor(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type testClass,
@@ -66,27 +44,27 @@ internal static class ConstructorHelper
             {
                 return null;
             }
-            
+
             if (constructor == null)
             {
                 // Try Activator.CreateInstance as last resort
                 return CreateInstanceSafely(testClass);
             }
-            
+
             var parameters = constructor.GetParameters();
-            
+
             // If we have constructor args, use them
             if (constructorArgs != null && constructorArgs.Length == parameters.Length)
             {
                 return constructor.Invoke(constructorArgs);
             }
-            
+
             // If parameterless, invoke with no args
             if (parameters.Length == 0)
             {
                 return constructor.Invoke(null);
             }
-            
+
             // Try to create default values for parameters
             var defaultArgs = new object?[parameters.Length];
             for (var i = 0; i < parameters.Length; i++)
@@ -113,7 +91,7 @@ internal static class ConstructorHelper
                     }
                 }
             }
-            
+
             return constructor.Invoke(defaultArgs);
         }
         catch (Exception ex)
@@ -124,51 +102,12 @@ internal static class ConstructorHelper
                 $"Error: {ex.Message}", ex);
         }
     }
-    
-    private static bool CanMatchClassDataSources(ParameterInfo[] parameters, ClassDataSourceAttribute[] classDataSources)
-    {
-        // Simple check - if parameter count matches and types are compatible
-        if (parameters.Length != classDataSources.Length)
-        {
-            return false;
-        }
-        
-        for (var i = 0; i < parameters.Length; i++)
-        {
-            var paramType = parameters[i].ParameterType;
-            // Get the type from the generic attribute if possible
-            var dataSourceType = GetClassDataSourceType(classDataSources[i]);
-            
-            if (dataSourceType != null && !paramType.IsAssignableFrom(dataSourceType))
-            {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-    
-    private static Type? GetClassDataSourceType(ClassDataSourceAttribute attr)
-    {
-        // Check if it's a generic ClassDataSourceAttribute<T>
-        var attrType = attr.GetType();
-        if (attrType.IsGenericType)
-        {
-            var genericArgs = attrType.GetGenericArguments();
-            if (genericArgs.Length > 0)
-            {
-                return genericArgs[0];
-            }
-        }
-        
-        // For non-generic ClassDataSourceAttribute, we can't determine the type
-        return null;
-    }
-    
+
+
     /// <summary>
     /// Checks if a type has required properties that need initialization
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", 
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements",
         Justification = "Required property checking uses reflection. For AOT, ensure test classes don't use required properties or use source generation.")]
     public static bool HasRequiredProperties([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
@@ -177,50 +116,50 @@ internal static class ConstructorHelper
         {
             return true;
         }
-        
+
         // Also check individual properties for RequiredAttribute (older approach)
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
         return properties.Any(p => p.GetCustomAttributes().Any(a => a.GetType().Name == "RequiredAttribute"));
     }
-    
+
     /// <summary>
     /// Tries to initialize required properties on an instance
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", 
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements",
         Justification = "Required property initialization needs reflection. AOT scenarios should initialize properties in constructors.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2072:Target method return value does not satisfy annotation requirements", 
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target method return value does not satisfy annotation requirements",
         Justification = "Property type information flows through reflection. Use explicit property initialization for AOT.")]
     public static void InitializeRequiredProperties(
         object instance,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        
+
         foreach (var property in properties)
         {
             // In C# 11+, required properties are marked with RequiredMemberAttribute at the member level
             var isRequired = property.GetCustomAttribute<System.Runtime.CompilerServices.RequiredMemberAttribute>() != null ||
                             property.GetCustomAttributes().Any(a => a.GetType().Name == "RequiredAttribute");
-            
+
             // Also check if property is marked with 'required' modifier by checking if it's init-only and the type has RequiredMemberAttribute
-            if (!isRequired && property is { CanWrite: true, SetMethod.IsSpecialName: true } && 
-                property.SetMethod.Name.StartsWith("set_") && 
+            if (!isRequired && property is { CanWrite: true, SetMethod.IsSpecialName: true } &&
+                property.SetMethod.Name.StartsWith("set_") &&
                 type.GetCustomAttribute<System.Runtime.CompilerServices.RequiredMemberAttribute>() != null)
             {
                 // This is likely a required init property
                 isRequired = true;
             }
-            
+
             if (isRequired && property.CanWrite)
             {
                 try
                 {
                     // Check if property has a data source attribute
                     var dataSourceAttr = property.GetCustomAttributes()
-                        .FirstOrDefault(a => a.GetType().Name.Contains("DataSource") || 
+                        .FirstOrDefault(a => a.GetType().Name.Contains("DataSource") ||
                                            a.GetType().Name.Contains("Arguments") ||
                                            a.GetType().Name.Contains("Generator"));
-                    
+
                     if (dataSourceAttr != null)
                     {
                         // For properties with data source attributes, create placeholder values
@@ -280,11 +219,11 @@ internal static class ConstructorHelper
             }
         }
     }
-    
+
     /// <summary>
     /// AOT-safe wrapper for Activator.CreateInstance with proper attribution
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements", 
+    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements",
         Justification = "Parameterless constructor invocation with preserved type. For full AOT support, use source-generated factories.")]
     private static object? CreateInstanceSafely([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type)
     {
