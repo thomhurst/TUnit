@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Utilities;
 
@@ -382,30 +383,9 @@ internal static class CodeGenerationHelpers
     {
         // For custom data attributes that implement IDataSourceAttribute (including AsyncDataSourceGeneratorAttribute),
         // we need to instantiate the attribute and use it directly
-        var attributeType = attr.AttributeClass!.GloballyQualified();
-        
-        // Generate constructor arguments if any
-        var constructorArgs = string.Empty;
-        if (attr.ConstructorArguments.Length > 0)
-        {
-            var args = attr.ConstructorArguments.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg));
-            constructorArgs = string.Join(", ", args);
-        }
-
-        // Generate property initializers for named arguments
-        var propertyInitializers = new List<string>();
-        foreach (var namedArg in attr.NamedArguments)
-        {
-            var value = TypedConstantParser.GetRawTypedConstantValue(namedArg.Value);
-            propertyInitializers.Add($"{namedArg.Key} = {value}");
-        }
-
-        var propertyInit = propertyInitializers.Count > 0 
-            ? " { " + string.Join(", ", propertyInitializers) + " }" 
-            : string.Empty;
-
-        // For attributes that implement IDataSourceAttribute, instantiate them directly
-        return $"new {attributeType}({constructorArgs}){propertyInit}";
+        var writer = new CodeWriter();
+        AttributeWriter.WriteAttributeWithoutSyntax(writer, attr);
+        return writer.ToString();
     }
 
     /// <summary>
