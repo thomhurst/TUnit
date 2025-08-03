@@ -13,8 +13,11 @@ public abstract class TypedDataSourceAttribute<T> : Attribute, ITypedDataSourceA
         // that avoids boxing when possible by using TypedTestArguments.
         await foreach (var row in GetTypedDataRowsAsync(dataGeneratorMetadata))
         {
-            var result = await row();
-            yield return () => Task.FromResult<object?[]?>(result.ToObjectArray());
+            yield return async () =>
+            {
+                var result = await row();
+                return result.ToObjectArray();
+            };
         }
     }
 }
