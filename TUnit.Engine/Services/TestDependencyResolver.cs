@@ -87,13 +87,30 @@ internal sealed class TestDependencyResolver
     
     private IEnumerable<AbstractExecutableTest> GetAllDependencies(
         AbstractExecutableTest test, 
-        HashSet<string> visited)
+        HashSet<string> visited,
+        Stack<AbstractExecutableTest>? path = null)
     {
+        // Initialize path stack if this is the top-level call
+        path ??= new Stack<AbstractExecutableTest>();
+        
+        // Add current test to the path
+        path.Push(test);
+        
         // Add the current test to the visited set to detect cycles
         if (!visited.Add(test.TestId))
         {
             // We've encountered this test before in our current path - circular dependency
-            throw new InvalidOperationException($"Circular dependency detected involving test {test.TestId}");
+            // Build the dependency chain for the error message
+            var pathList = path.Reverse().ToList();
+            var cycleStartIndex = pathList.FindIndex(t => t.TestId == test.TestId);
+            var cycleTests = pathList.Skip(cycleStartIndex).ToList();
+            
+            // Add the repeated test at the end to show the full cycle
+            cycleTests.Add(test);
+            
+            // Convert to TestDetails for the exception
+            var testDetailsChain = cycleTests.Select(t => t.Context.TestDetails).ToList();
+            throw new DependencyConflictException(testDetailsChain);
         }
         
         try
@@ -103,7 +120,7 @@ internal sealed class TestDependencyResolver
                 yield return dep;
                 
                 // Recursively get dependencies of this dependency
-                foreach (var transitive in GetAllDependencies(dep, visited))
+                foreach (var transitive in GetAllDependencies(dep, visited, path))
                 {
                     yield return transitive;
                 }
@@ -111,8 +128,9 @@ internal sealed class TestDependencyResolver
         }
         finally
         {
-            // Remove from visited set when we're done with this path
+            // Remove from visited set and path when we're done with this test
             visited.Remove(test.TestId);
+            path.Pop();
         }
     }
     
@@ -128,10 +146,26 @@ internal sealed class TestDependencyResolver
             
             try
             {
-                foreach (var dep in GetAllDependencies(test, visited))
+                foreach (var dep in GetAllDependencies(test, visited, null))
                 {
                     test.Context.Dependencies.Add(dep.Context.TestDetails);
                 }
+            }
+            catch (DependencyConflictException ex)
+            {
+                Console.WriteLine($"[DEBUG] Circular dependency detected for test {test.TestId}: {ex.Message}");
+                // Mark this test as failed due to circular dependency
+                test.Result = new TestResult
+                {
+                    State = TestState.Failed,
+                    Start = DateTimeOffset.UtcNow,
+                    End = DateTimeOffset.UtcNow,
+                    Duration = TimeSpan.Zero,
+                    Exception = ex,
+                    ComputerName = Environment.MachineName,
+                    TestContext = test.Context
+                };
+                test.State = TestState.Failed;
             }
             catch (Exception ex)
             {
