@@ -43,7 +43,7 @@ internal static class DataGeneratorMetadataCreator
             {
                 var propertyMetadataList = new List<PropertyMetadata>();
                 var allProperties = testMetadata.MethodMetadata.Class.Properties;
-                
+
                 foreach (var propertyDataSource in testMetadata.PropertyDataSources)
                 {
                     var matchingProperty = allProperties.FirstOrDefault(p => p.Name == propertyDataSource.PropertyName);
@@ -52,7 +52,7 @@ internal static class DataGeneratorMetadataCreator
                         propertyMetadataList.Add(matchingProperty);
                     }
                 }
-                
+
                 membersToGenerate = [.. propertyMetadataList];
             }
             else
@@ -272,9 +272,9 @@ internal static class DataGeneratorMetadataCreator
                 TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
                 Name = type.Name,
                 Namespace = type.Namespace ?? string.Empty,
-                Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().Name ?? type.Assembly.FullName ?? "Unknown", () => new AssemblyMetadata
+                Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().Name ?? type.Assembly.GetName().FullName ?? "Unknown", () => new AssemblyMetadata
                 {
-                    Name = type.Assembly.GetName().Name ?? type.Assembly.FullName ?? "Unknown"
+                    Name = type.Assembly.GetName().Name ?? type.Assembly.GetName().FullName ?? "Unknown"
                 }),
                 Properties = [],
                 Parameters = constructorParameters,

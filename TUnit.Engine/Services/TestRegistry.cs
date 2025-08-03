@@ -143,7 +143,7 @@ internal sealed class TestRegistry : ITestRegistry
             TestMethodParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
             FilePath = null,
             LineNumber = null,
-            MethodMetadata = MetadataBuilder.CreateMethodMetadata(result.TestClassType, methodInfo),
+            MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(result.TestClassType, methodInfo),
             GenericTypeInfo = null,
             GenericMethodInfo = null,
             GenericMethodTypeArguments = null,

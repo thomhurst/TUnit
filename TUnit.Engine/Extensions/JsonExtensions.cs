@@ -17,7 +17,7 @@ public static class JsonExtensions
     {
         return new TestAssemblyJson
         {
-            AssemblyName = context.Assembly.FullName,
+            AssemblyName = context.Assembly.GetName().FullName,
             Classes = context.TestClasses.Select(x => x.ToJsonModel()).ToArray()
         };
     }

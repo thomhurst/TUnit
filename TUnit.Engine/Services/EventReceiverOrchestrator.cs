@@ -36,7 +36,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     public async ValueTask InitializeAllEligibleObjectsAsync(TestContext context, CancellationToken cancellationToken)
     {
         var eligibleObjects = context.GetEligibleEventObjects().ToArray();
-        
+
 
         // Register all event receivers for fast lookup
         _registry.RegisterReceivers(eligibleObjects);
@@ -82,7 +82,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             .OfType<ITestStartEventReceiver>()
             .OrderBy(r => r.Order)
             .ToList();
-        
+
         // Filter scoped attributes
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
 
@@ -131,7 +131,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             .OfType<ITestEndEventReceiver>()
             .OrderBy(r => r.Order)
             .ToList();
-        
+
         // Filter scoped attributes
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
 
@@ -170,7 +170,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             .OfType<ITestSkippedEventReceiver>()
             .OrderBy(r => r.Order)
             .ToList();
-        
+
         // Filter scoped attributes
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
 
@@ -209,10 +209,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             .OfType<ITestRegisteredEventReceiver>()
             .OrderBy(r => r.Order)
             .ToList();
-        
+
         // Filter scoped attributes
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
-        
+
         var registeredContext = new TestRegisteredContext(context)
         {
             DiscoveredTest = context.InternalDiscoveredTest!
@@ -304,7 +304,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             return;
         }
 
-        var assemblyName = assemblyContext.Assembly.FullName ?? "";
+        var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
         if (_firstTestInAssemblyInvoked.TryAdd(assemblyName, true))
         {
             await InvokeFirstTestInAssemblyEventReceiversCore(context, assemblyContext, cancellationToken);
@@ -418,7 +418,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             return;
         }
 
-        var assemblyName = assemblyContext.Assembly.FullName ?? "";
+        var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
         if (_assemblyTestCounts.AddOrUpdate(assemblyName, 0, (_, count) => count - 1) == 0)
         {
             await InvokeLastTestInAssemblyEventReceiversCore(context, assemblyContext, cancellationToken);
@@ -491,7 +491,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         var contexts = allTestContexts.ToList();
         _sessionTestCount = contexts.Count;
 
-        foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.AssemblyContext.Assembly.FullName))
+        foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.AssemblyContext.Assembly.GetName().FullName))
         {
             if (group.Key != null)
             {

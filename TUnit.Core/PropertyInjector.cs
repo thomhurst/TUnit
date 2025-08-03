@@ -39,10 +39,10 @@ public static class PropertyInjector
                 await ObjectInitializer.InitializeAsync(propertyDataSource.DataSource);
 
                 var propertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
-                
+
                 var containingType = testInformation.Type;
                 var propertyType = propertyInjection?.PropertyType ?? typeof(object);
-                
+
                 // Create property metadata
                 PropertyMetadata? propertyMetadata = null;
                 if (propertyInjection != null)
@@ -58,7 +58,7 @@ public static class PropertyInjector
                         ContainingTypeMetadata = GetClassMetadataForType(containingType)
                     };
                 }
-                
+
                 var dataGeneratorMetadata = propertyMetadata != null
                     ? DataGeneratorMetadataCreator.CreateForPropertyInjection(
                         propertyMetadata,
@@ -82,10 +82,10 @@ public static class PropertyInjector
                 await foreach (var factory in dataRows)
                 {
                     var args = await factory();
-                    
+
                     var currentPropertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
                     object? value;
-                    
+
                     if (currentPropertyInjection != null && TupleFactory.IsTupleType(currentPropertyInjection.PropertyType))
                     {
                         if (args is { Length: > 1 })
@@ -101,7 +101,7 @@ public static class PropertyInjector
                             // Single tuple argument - check if it needs type conversion
                             var tupleValue = args[0]!;
                             var tupleType = tupleValue!.GetType();
-                            
+
                             if (tupleType != currentPropertyInjection.PropertyType)
                             {
                                 // Tuple types don't match - unwrap and recreate with correct types
@@ -154,7 +154,7 @@ public static class PropertyInjector
         // First inject all properties
         var allInjectedObjects = new Dictionary<object, int>(); // object -> depth
         await InjectPropertiesWithValuesAsync(testContext, instance, propertyValues, injectionData, 5, 0, allInjectedObjects);
-        
+
         // Then schedule initialization of all injected objects in the correct order (deepest first)
         if (allInjectedObjects.Count > 0)
         {
@@ -164,7 +164,7 @@ public static class PropertyInjector
                 .Select(kvp => kvp.Key)
                 .Where(obj => obj is Interfaces.IAsyncInitializer)
                 .ToList();
-            
+
             if (objectsByDepth.Count > 0)
             {
                 onTestStart.InsertAtFront(async (o, context) =>
@@ -210,7 +210,7 @@ public static class PropertyInjector
                 ObjectTracker.TrackObject(testContext.Events, value);
 
                 injection.Setter(instance, value);
-                
+
                 // Track this object for initialization ordering
                 if (allInjectedObjects != null && value != null)
                 {
@@ -356,7 +356,7 @@ public static class PropertyInjector
 
                 var setter = CreatePropertySetter(property);
                 setter(instance, propertyValue);
-                
+
                 // Track this object for initialization ordering
                 if (allInjectedObjects != null && propertyValue != null)
                 {
@@ -604,11 +604,11 @@ public static class PropertyInjector
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
     private static ClassMetadata GetClassMetadataForType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
-        return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => 
+        return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () =>
         {
             var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             var constructor = constructors.FirstOrDefault();
-            
+
             var constructorParameters = constructor?.GetParameters().Select((p, i) => new ParameterMetadata(p.ParameterType)
             {
                 Name = p.Name ?? $"param{i}",
@@ -622,9 +622,9 @@ public static class PropertyInjector
                 TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
                 Name = type.Name,
                 Namespace = type.Namespace ?? string.Empty,
-                Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().Name ?? type.Assembly.FullName ?? "Unknown", () => new AssemblyMetadata 
-                { 
-                    Name = type.Assembly.GetName().Name ?? type.Assembly.FullName ?? "Unknown" 
+                Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().Name ?? type.Assembly.GetName().FullName ?? "Unknown", () => new AssemblyMetadata
+                {
+                    Name = type.Assembly.GetName().Name ?? type.Assembly.GetName().FullName ?? "Unknown"
                 }),
                 Properties = [],
                 Parameters = constructorParameters,

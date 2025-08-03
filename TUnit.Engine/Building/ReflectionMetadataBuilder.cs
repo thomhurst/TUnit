@@ -3,15 +3,17 @@ using TUnit.Core;
 
 namespace TUnit.Engine.Building;
 
-internal static class MetadataBuilder
+internal static class ReflectionMetadataBuilder
 {
     private static TypeReference CreateTypeReference(Type type)
     {
         return TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name);
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL2067:'Type' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ParameterMetadata.ParameterMetadata(Type)'", Justification = "Parameter types are known at compile time")]
-    private static ParameterMetadata CreateParameterMetadata(Type parameterType, string? name, int index, System.Reflection.ParameterInfo reflectionInfo)
+    private static ParameterMetadata CreateParameterMetadata(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+            | DynamicallyAccessedMemberTypes.PublicMethods
+            | DynamicallyAccessedMemberTypes.PublicProperties)]Type parameterType, string? name, int index, System.Reflection.ParameterInfo reflectionInfo)
     {
         return new ParameterMetadata(parameterType)
         {
@@ -23,9 +25,12 @@ internal static class MetadataBuilder
                 || Nullable.GetUnderlyingType(parameterType) != null
         };
     }
-    [UnconditionalSuppressMessage("AOT", "IL2072:'value' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ClassMetadata.Type.init'", Justification = "Type annotations are handled by source generators")]
-    [UnconditionalSuppressMessage("AOT", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicConstructors' in call to 'System.Type.GetConstructors(BindingFlags)'", Justification = "Constructor discovery needed for metadata")]
-    private static ClassMetadata CreateClassMetadata(Type type)
+
+    private static ClassMetadata CreateClassMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () =>
         {
@@ -43,7 +48,7 @@ internal static class MetadataBuilder
                 Type = type,
                 TypeReference = CreateTypeReference(type),
                 Namespace = type.Namespace ?? string.Empty,
-                Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.FullName, () => new AssemblyMetadata
+                Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().FullName, () => new AssemblyMetadata
                 {
                     Name = type.Assembly.GetName().Name ?? "Unknown"
                 }),
@@ -57,10 +62,13 @@ internal static class MetadataBuilder
     /// <summary>
     /// Creates method metadata from reflection info with proper ReflectionInfo populated
     /// </summary>
-    [UnconditionalSuppressMessage("AOT", "IL2072:'value' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.MethodMetadata.Type.init'", Justification = "Type annotations are handled by reflection")]
-    [UnconditionalSuppressMessage("AOT", "IL2067:'Type' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ParameterMetadata.ParameterMetadata(Type)'", Justification = "Parameter types are known through reflection")]
-    [UnconditionalSuppressMessage("AOT", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicConstructors' in call to 'System.Type.GetConstructors(BindingFlags)'", Justification = "Constructor discovery needed for metadata")]
-    public static MethodMetadata CreateMethodMetadata(Type type, System.Reflection.MethodInfo method)
+    public static MethodMetadata CreateMethodMetadata(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)] Type type,
+        System.Reflection.MethodInfo method)
     {
         return new MethodMetadata
         {

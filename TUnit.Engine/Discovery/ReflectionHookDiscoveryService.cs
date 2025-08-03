@@ -19,7 +19,7 @@ internal sealed class ReflectionHookDiscoveryService
     private static readonly HashSet<Assembly> _scannedAssemblies = new();
     private static readonly object _lock = new();
     private readonly IHookExecutor _hookExecutor;
-    
+
     public ReflectionHookDiscoveryService(IHookExecutor hookExecutor)
     {
         _hookExecutor = hookExecutor;
@@ -39,7 +39,7 @@ internal sealed class ReflectionHookDiscoveryService
         {
             DiscoverHooksInAssembly(assembly);
         }
-        
+
         return Task.CompletedTask;
     }
 
@@ -130,7 +130,7 @@ internal sealed class ReflectionHookDiscoveryService
                     // Check for assembly-level Before hooks
                     var beforeAttrs = method.GetCustomAttributes<BeforeAttribute>()
                         .Where(a => a.HookType.HasFlag(HookType.Assembly));
-                    
+
                     foreach (var attr in beforeAttrs)
                     {
                         if (!attr.HookType.HasFlag(HookType.TestDiscovery))
@@ -142,7 +142,7 @@ internal sealed class ReflectionHookDiscoveryService
                     // Check for assembly-level After hooks
                     var afterAttrs = method.GetCustomAttributes<AfterAttribute>()
                         .Where(a => a.HookType.HasFlag(HookType.Assembly));
-                    
+
                     foreach (var attr in afterAttrs)
                     {
                         if (!attr.HookType.HasFlag(HookType.TestDiscovery))
@@ -161,7 +161,7 @@ internal sealed class ReflectionHookDiscoveryService
 
     private void AddRuntimeHook(Type type, MethodInfo method, HookAttribute attr, bool isBeforeHook)
     {
-        var methodMetadata = MetadataBuilder.CreateMethodMetadata(type, method);
+        var methodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method);
 
         if (attr.HookType.HasFlag(HookType.Class))
         {
@@ -255,8 +255,8 @@ internal sealed class ReflectionHookDiscoveryService
 
     private void AddAssemblyHook(Assembly assembly, MethodInfo method, HookAttribute attr, bool isBeforeHook)
     {
-        var methodMetadata = MetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method);
-        
+        var methodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method);
+
         var hook = new BeforeAssemblyHookMethod
         {
             MethodInfo = methodMetadata,
@@ -279,8 +279,8 @@ internal sealed class ReflectionHookDiscoveryService
 
     private void AddTestDiscoveryHook(MethodInfo method, HookAttribute attr, bool isBeforeHook)
     {
-        var methodMetadata = MetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method);
-        
+        var methodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method);
+
         if (isBeforeHook)
         {
             var hook = new BeforeTestDiscoveryHookMethod

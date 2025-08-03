@@ -23,7 +23,7 @@ internal static class TestExtensions
                 )),
                 new TestMethodIdentifierProperty(
                     Namespace: testDetails.MethodMetadata.Class.Type.Namespace ?? testDetails.ClassType?.Namespace ?? "GlobalNamespace",
-                    AssemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.FullName!,
+                    AssemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.GetName().FullName!,
                     TypeName: testContext.GetClassTypeName(),
                     MethodName: testDetails.TestName,
                     ParameterTypeFullNames: CreateParameterTypeArray(testDetails.TestMethodParameterTypes),
