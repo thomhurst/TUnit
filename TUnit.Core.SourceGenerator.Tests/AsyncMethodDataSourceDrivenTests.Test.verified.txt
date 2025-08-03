@@ -34,23 +34,18 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Sin
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
+                            var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethod();
+                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
                             {
-                                var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethod();
-                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                                foreach (var item in enumerable)
                                 {
-                                    var items = new System.Collections.Generic.List<object?>();
-                                    foreach (var item in enumerable)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
+                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
                                 }
-                                else
-                                {
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                }
-                            };
+                            }
+                            else
+                            {
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            }
                         }
                         return Factory();
                     }
@@ -194,23 +189,18 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Tup
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
+                            var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithTuples();
+                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
                             {
-                                var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithTuples();
-                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                                foreach (var item in enumerable)
                                 {
-                                    var items = new System.Collections.Generic.List<object?>();
-                                    foreach (var item in enumerable)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
+                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
                                 }
-                                else
-                                {
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                }
-                            };
+                            }
+                            else
+                            {
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            }
                         }
                         return Factory();
                     }
@@ -363,23 +353,18 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Enu
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
+                            var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncEnumerableDataMethod();
+                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
                             {
-                                var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncEnumerableDataMethod();
-                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                                foreach (var item in enumerable)
                                 {
-                                    var items = new System.Collections.Generic.List<object?>();
-                                    foreach (var item in enumerable)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
+                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
                                 }
-                                else
-                                {
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                }
-                            };
+                            }
+                            else
+                            {
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            }
                         }
                         return Factory();
                     }
@@ -523,23 +508,18 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Fun
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
+                            var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncFuncDataMethod();
+                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
                             {
-                                var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncFuncDataMethod();
-                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                                foreach (var item in enumerable)
                                 {
-                                    var items = new System.Collections.Generic.List<object?>();
-                                    foreach (var item in enumerable)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
+                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
                                 }
-                                else
-                                {
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                }
-                            };
+                            }
+                            else
+                            {
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            }
                         }
                         return Factory();
                     }
@@ -684,23 +664,18 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Wit
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
+                            var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithArgs();
+                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
                             {
-                                var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithArgs();
-                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                                foreach (var item in enumerable)
                                 {
-                                    var items = new System.Collections.Generic.List<object?>();
-                                    foreach (var item in enumerable)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
+                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
                                 }
-                                else
-                                {
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                }
-                            };
+                            }
+                            else
+                            {
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            }
                         }
                         return Factory();
                     }
@@ -844,23 +819,18 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Ext
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
+                            var result = global::TUnit.TestProject.AsyncExternalDataSource.GetData();
+                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
                             {
-                                var result = global::TUnit.TestProject.AsyncExternalDataSource.GetData();
-                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                                foreach (var item in enumerable)
                                 {
-                                    var items = new System.Collections.Generic.List<object?>();
-                                    foreach (var item in enumerable)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
+                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
                                 }
-                                else
-                                {
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                }
-                            };
+                            }
+                            else
+                            {
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            }
                         }
                         return Factory();
                     }
@@ -1004,23 +974,18 @@ internal sealed class AsyncMethodDataSourceDrivenTests_ValueTaskMethodDataSource
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
+                            var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.ValueTaskDataMethod();
+                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
                             {
-                                var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.ValueTaskDataMethod();
-                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                                foreach (var item in enumerable)
                                 {
-                                    var items = new System.Collections.Generic.List<object?>();
-                                    foreach (var item in enumerable)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
+                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
                                 }
-                                else
-                                {
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                }
-                            };
+                            }
+                            else
+                            {
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            }
                         }
                         return Factory();
                     }

@@ -441,11 +441,8 @@ internal sealed class CustomDisplayNameTests_MethodDataSourceTest_TestSource_GUI
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.CustomDisplayNameTests.Method();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.CustomDisplayNameTests.Method();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }

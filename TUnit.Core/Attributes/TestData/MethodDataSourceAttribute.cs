@@ -120,7 +120,10 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         {
             await foreach (var item in ConvertToAsyncEnumerable(methodResult))
             {
-                yield return () => Task.FromResult<object?[]?>(item.ToObjectArray());
+                yield return async () =>
+                {
+                    return await Task.FromResult<object?[]?>(item.ToObjectArray());
+                };
             }
         }
         // If it's Task<IEnumerable>
@@ -133,12 +136,18 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             {
                 foreach (var item in enumerable)
                 {
-                    yield return () => Task.FromResult<object?[]?>(item.ToObjectArray());
+                    yield return async () =>
+                    {
+                        return await Task.FromResult<object?[]?>(item.ToObjectArray());
+                    };
                 }
             }
             else
             {
-                yield return () => Task.FromResult<object?[]?>(taskResult.ToObjectArray());
+                yield return async () =>
+                {
+                    return await Task.FromResult<object?[]?>(taskResult.ToObjectArray());
+                };
             }
         }
         // Regular IEnumerable - but check if it's a tuple first
@@ -152,7 +161,10 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
         else
         {
-            yield return () => Task.FromResult<object?[]?>(methodResult.ToObjectArray());
+            yield return async () =>
+            {
+                return await Task.FromResult<object?[]?>(methodResult.ToObjectArray());
+            };
         }
     }
 

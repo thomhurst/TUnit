@@ -280,11 +280,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.TestData.Foo();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.TestData.Foo();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -784,11 +781,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.TestData.Foo();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.TestData.Foo();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }

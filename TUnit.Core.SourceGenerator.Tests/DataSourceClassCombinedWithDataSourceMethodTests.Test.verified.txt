@@ -39,11 +39,8 @@ internal sealed class DataSourceClassCombinedWithDataSourceMethod_DataSourceClas
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.CommonTestData.One();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.CommonTestData.One();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -54,11 +51,8 @@ internal sealed class DataSourceClassCombinedWithDataSourceMethod_DataSourceClas
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.CommonTestData.Two();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.CommonTestData.Two();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -69,11 +63,8 @@ internal sealed class DataSourceClassCombinedWithDataSourceMethod_DataSourceClas
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.CommonTestData.Three();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.CommonTestData.Three();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -87,11 +78,8 @@ internal sealed class DataSourceClassCombinedWithDataSourceMethod_DataSourceClas
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.CommonTestData.One();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.CommonTestData.One();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -102,11 +90,8 @@ internal sealed class DataSourceClassCombinedWithDataSourceMethod_DataSourceClas
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.CommonTestData.Two();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.CommonTestData.Two();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -117,11 +102,8 @@ internal sealed class DataSourceClassCombinedWithDataSourceMethod_DataSourceClas
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.CommonTestData.Three();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.CommonTestData.Three();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }

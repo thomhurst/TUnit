@@ -34,23 +34,18 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method_TestSour
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
+                            var result = global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod();
+                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
                             {
-                                var result = global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod();
-                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                                foreach (var item in enumerable)
                                 {
-                                    var items = new System.Collections.Generic.List<object?>();
-                                    foreach (var item in enumerable)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
+                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
                                 }
-                                else
-                                {
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                }
-                            };
+                            }
+                            else
+                            {
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            }
                         }
                         return Factory();
                     }
@@ -194,23 +189,18 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method2_TestSou
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
+                            var result = global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod();
+                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
                             {
-                                var result = global::TUnit.TestProject.EnumerableDataSourceDrivenTests.SomeMethod();
-                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                                foreach (var item in enumerable)
                                 {
-                                    var items = new System.Collections.Generic.List<object?>();
-                                    foreach (var item in enumerable)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
+                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
                                 }
-                                else
-                                {
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                }
-                            };
+                            }
+                            else
+                            {
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            }
                         }
                         return Factory();
                     }
@@ -354,23 +344,18 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_WithBaseReturn_
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
+                            var result = global::TUnit.TestProject.EnumerableDataSourceDrivenTests.MethodWithBaseReturn();
+                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
                             {
-                                var result = global::TUnit.TestProject.EnumerableDataSourceDrivenTests.MethodWithBaseReturn();
-                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                                foreach (var item in enumerable)
                                 {
-                                    var items = new System.Collections.Generic.List<object?>();
-                                    foreach (var item in enumerable)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
+                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
                                 }
-                                else
-                                {
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                }
-                            };
+                            }
+                            else
+                            {
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            }
                         }
                         return Factory();
                     }

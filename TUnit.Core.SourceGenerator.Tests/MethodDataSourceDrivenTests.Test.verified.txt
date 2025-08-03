@@ -34,11 +34,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_TestSource_G
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -184,11 +181,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method2_TestSource_
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -334,11 +328,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_WithAction_T
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeAction();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeAction();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -487,11 +478,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method3_TestSource_
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -505,11 +493,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method3_TestSource_
                         var arguments = new object[] { 5 };
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -662,11 +647,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -680,11 +662,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
                         var arguments = new object[] { "Hello World!", 6, true };
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -695,11 +674,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -713,11 +689,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
                         var arguments = new object[] { "Hello World!", 8, true };
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -863,11 +836,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_WithBaseReturn_Test
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.MethodWithBaseReturn();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.MethodWithBaseReturn();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
@@ -1013,23 +983,18 @@ internal sealed class MethodDataSourceDrivenTests_EnumerableFuncArrayTest_TestSo
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
+                            var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.EnumerableFuncArrayTestData();
+                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
                             {
-                                var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.EnumerableFuncArrayTestData();
-                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                                foreach (var item in enumerable)
                                 {
-                                    var items = new System.Collections.Generic.List<object?>();
-                                    foreach (var item in enumerable)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
+                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
                                 }
-                                else
-                                {
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                }
-                            };
+                            }
+                            else
+                            {
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            }
                         }
                         return Factory();
                     }

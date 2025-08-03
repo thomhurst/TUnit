@@ -34,23 +34,18 @@ internal sealed class Tests_Eight_Args_TestSource_GUID : global::TUnit.Core.Inte
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
+                            var result = global::TUnit.TestProject.Bugs._1538.Tests.EightItems();
+                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
                             {
-                                var result = global::TUnit.TestProject.Bugs._1538.Tests.EightItems();
-                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                                foreach (var item in enumerable)
                                 {
-                                    var items = new System.Collections.Generic.List<object?>();
-                                    foreach (var item in enumerable)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
+                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
                                 }
-                                else
-                                {
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                }
-                            };
+                            }
+                            else
+                            {
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            }
                         }
                         return Factory();
                     }
@@ -259,23 +254,18 @@ internal sealed class Tests_SixteenArgs_TestSource_GUID : global::TUnit.Core.Int
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
+                            var result = global::TUnit.TestProject.Bugs._1538.Tests.SixteenItems();
+                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
                             {
-                                var result = global::TUnit.TestProject.Bugs._1538.Tests.SixteenItems();
-                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                                foreach (var item in enumerable)
                                 {
-                                    var items = new System.Collections.Generic.List<object?>();
-                                    foreach (var item in enumerable)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
+                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
                                 }
-                                else
-                                {
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                }
-                            };
+                            }
+                            else
+                            {
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            }
                         }
                         return Factory();
                     }

@@ -58,11 +58,8 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
                         {
                             async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                             {
-                                yield return () =>
-                                {
-                                    var result = global::TUnit.TestProject.PropertySetterTests.MethodData();
-                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                                };
+                                var result = global::TUnit.TestProject.PropertySetterTests.MethodData();
+                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                             }
                             return Factory();
                         }

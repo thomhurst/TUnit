@@ -34,11 +34,8 @@ internal sealed class TupleDataSourceDrivenTests_DataSource_TupleMethod_TestSour
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            yield return () =>
-                            {
-                                var result = global::TUnit.TestProject.TupleDataSourceDrivenTests.TupleMethod();
-                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            };
+                            var result = global::TUnit.TestProject.TupleDataSourceDrivenTests.TupleMethod();
+                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
                         }
                         return Factory();
                     }
