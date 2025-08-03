@@ -546,7 +546,7 @@ namespace
         public void AddArgumentDisplayFormatter(.ArgumentDisplayFormatter formatter) { }
         public void AddCategory(string category) { }
         public void AddProperty(string key, string value) { }
-        public string GetTestDisplayName() { }
+        public string GetDisplayName() { }
         public void SetDisplayName(string displayName) { }
         public void SetDisplayNameFormatter( formatterType) { }
         public void SetParallelConstraint(object constraint) { }
