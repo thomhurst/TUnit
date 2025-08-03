@@ -4,7 +4,7 @@ TUnit provides generic versions of several attributes that offer enhanced type s
 
 ## Generic Test Attributes
 
-### MethodDataSourceAttribute<T>
+### MethodDataSourceAttribute&lt;T&gt;
 
 The generic version of `MethodDataSource` provides type safety for the class containing the data source method.
 
@@ -36,7 +36,7 @@ Benefits over non-generic version:
 - IDE refactoring support
 - Prevents typos in class names
 
-### ClassDataSourceAttribute<T>
+### ClassDataSourceAttribute&lt;T&gt;
 
 The generic version ensures type safety when referencing data source classes.
 
@@ -64,7 +64,7 @@ public class UserTests
 }
 ```
 
-### DependsOnAttribute<T>
+### DependsOnAttribute&lt;T&gt;
 
 The generic `DependsOn` attribute provides type-safe test dependency declarations.
 
@@ -98,7 +98,7 @@ public class ShippingTests
 
 ## Generic Data Source Attributes
 
-### DataSourceGeneratorAttribute<T>
+### DataSourceGeneratorAttribute&lt;T&gt;
 
 Create strongly-typed data source generators:
 
@@ -141,7 +141,7 @@ public void TestWithRandomNumbers(int number)
 }
 ```
 
-### AsyncDataSourceGeneratorAttribute<T>
+### AsyncDataSourceGeneratorAttribute&lt;T&gt;
 
 For asynchronous data generation:
 
@@ -180,7 +180,7 @@ public async Task AdminUser_ShouldHaveFullPermissions(User adminUser)
 }
 ```
 
-### TypedDataSourceAttribute<T>
+### TypedDataSourceAttribute&lt;T&gt;
 
 Base class for creating custom typed data sources:
 
