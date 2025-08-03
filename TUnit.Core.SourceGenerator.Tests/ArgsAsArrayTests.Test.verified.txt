@@ -91,6 +91,18 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
+                // Check if we have typed arguments to avoid boxing
+                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
+                {
+                    if (typedArgs.TryGetTypedValue<string[]>(out var typedValue))
+                    {
+                        typedInstance.Params(typedValue);
+                        await global::System.Threading.Tasks.Task.CompletedTask;
+                        return;
+                    }
+                    // Fallback to untyped arguments from TypedTestArguments
+                    args = typedArgs.GetUntypedArguments();
+                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -256,6 +268,18 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
+                // Check if we have typed arguments to avoid boxing
+                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
+                {
+                    if (typedArgs.TryGetTypedValue<string[]>(out var typedValue))
+                    {
+                        typedInstance.NonParams(typedValue);
+                        await global::System.Threading.Tasks.Task.CompletedTask;
+                        return;
+                    }
+                    // Fallback to untyped arguments from TypedTestArguments
+                    args = typedArgs.GetUntypedArguments();
+                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -391,6 +415,18 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
+                // Check if we have typed arguments to avoid boxing
+                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
+                {
+                    if (typedArgs.TryGetTypedValue<global::System.Collections.Generic.IEnumerable<string>>(out var typedValue))
+                    {
+                        typedInstance.ParamsEnumerable(typedValue);
+                        await global::System.Threading.Tasks.Task.CompletedTask;
+                        return;
+                    }
+                    // Fallback to untyped arguments from TypedTestArguments
+                    args = typedArgs.GetUntypedArguments();
+                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -556,6 +592,18 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
+                // Check if we have typed arguments to avoid boxing
+                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
+                {
+                    if (typedArgs.TryGetTypedValue<global::System.Collections.Generic.IEnumerable<string>>(out var typedValue))
+                    {
+                        typedInstance.Enumerable(typedValue);
+                        await global::System.Threading.Tasks.Task.CompletedTask;
+                        return;
+                    }
+                    // Fallback to untyped arguments from TypedTestArguments
+                    args = typedArgs.GetUntypedArguments();
+                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
@@ -700,6 +748,12 @@ return classMetadata;
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
+                // Check if we have typed arguments to avoid boxing
+                if (args?.Length == 1 && args[0] is global::TUnit.Core.TypedTestArguments typedArgs)
+                {
+                    // Fallback to untyped arguments from TypedTestArguments
+                    args = typedArgs.GetUntypedArguments();
+                }
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
