@@ -47,8 +47,11 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod();
-                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            yield return () =>
+                            {
+                                var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod();
+                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            };
                         }
                         return Factory();
                     }
@@ -59,8 +62,11 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod();
-                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            yield return () =>
+                            {
+                                var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod();
+                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            };
                         }
                         return Factory();
                     }
@@ -74,8 +80,11 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod();
-                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            yield return () =>
+                            {
+                                var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod();
+                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            };
                         }
                         return Factory();
                     }
@@ -86,8 +95,11 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod();
-                            yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            yield return () =>
+                            {
+                                var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod();
+                                return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                            };
                         }
                         return Factory();
                     }
@@ -105,8 +117,11 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                         {
                             async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                             {
-                                var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod();
-                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                yield return () =>
+                                {
+                                    var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod();
+                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                };
                             }
                             return Factory();
                         }
@@ -122,8 +137,11 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                         {
                             async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                             {
-                                var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod();
-                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                yield return () =>
+                                {
+                                    var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod();
+                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                };
                             }
                             return Factory();
                         }
@@ -139,8 +157,11 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                         {
                             async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                             {
-                                var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod();
-                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                yield return () =>
+                                {
+                                    var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.TupleMethod();
+                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                };
                             }
                             return Factory();
                         }
@@ -156,8 +177,11 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                         {
                             async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                             {
-                                var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod();
-                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                yield return () =>
+                                {
+                                    var result = global::TUnit.TestProject.ClassTupleDataSourceDrivenTests.NamedTupleMethod();
+                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                };
                             }
                             return Factory();
                         }

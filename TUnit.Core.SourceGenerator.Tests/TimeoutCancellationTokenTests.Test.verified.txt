@@ -38,18 +38,23 @@ internal sealed class TimeoutCancellationTokenTests_DefaultTest_TestSource_GUID 
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            yield return () =>
                             {
-                                foreach (var item in enumerable)
+                                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
                                 {
-                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
+                                    var items = new System.Collections.Generic.List<object?>();
+                                    foreach (var item in enumerable)
+                                    {
+                                        items.Add(item);
+                                    }
+                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
                                 }
-                            }
-                            else
-                            {
-                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            }
+                                else
+                                {
+                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                }
+                            };
                         }
                         return Factory();
                     }
@@ -192,18 +197,23 @@ internal sealed class TimeoutCancellationTokenTests_BasicTest_TestSource_GUID : 
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            yield return () =>
                             {
-                                foreach (var item in enumerable)
+                                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
                                 {
-                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
+                                    var items = new System.Collections.Generic.List<object?>();
+                                    foreach (var item in enumerable)
+                                    {
+                                        items.Add(item);
+                                    }
+                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
                                 }
-                            }
-                            else
-                            {
-                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            }
+                                else
+                                {
+                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                }
+                            };
                         }
                         return Factory();
                     }
@@ -345,18 +355,23 @@ internal sealed class TimeoutCancellationTokenTests_InheritedTimeoutAttribute_Te
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            yield return () =>
                             {
-                                foreach (var item in enumerable)
+                                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
                                 {
-                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
+                                    var items = new System.Collections.Generic.List<object?>();
+                                    foreach (var item in enumerable)
+                                    {
+                                        items.Add(item);
+                                    }
+                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
                                 }
-                            }
-                            else
-                            {
-                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            }
+                                else
+                                {
+                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                }
+                            };
                         }
                         return Factory();
                     }
@@ -500,18 +515,23 @@ internal sealed class TimeoutCancellationTokenTests_DataTest_TestSource_GUID : g
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            yield return () =>
                             {
-                                foreach (var item in enumerable)
+                                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
                                 {
-                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
+                                    var items = new System.Collections.Generic.List<object?>();
+                                    foreach (var item in enumerable)
+                                    {
+                                        items.Add(item);
+                                    }
+                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
                                 }
-                            }
-                            else
-                            {
-                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            }
+                                else
+                                {
+                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                }
+                            };
                         }
                         return Factory();
                     }
@@ -676,18 +696,23 @@ internal sealed class TimeoutCancellationTokenTests_DataSourceTest_TestSource_GU
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            yield return () =>
                             {
-                                foreach (var item in enumerable)
+                                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
                                 {
-                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
+                                    var items = new System.Collections.Generic.List<object?>();
+                                    foreach (var item in enumerable)
+                                    {
+                                        items.Add(item);
+                                    }
+                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
                                 }
-                            }
-                            else
-                            {
-                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            }
+                                else
+                                {
+                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                }
+                            };
                         }
                         return Factory();
                     }
@@ -701,18 +726,23 @@ internal sealed class TimeoutCancellationTokenTests_DataSourceTest_TestSource_GU
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            yield return () =>
                             {
-                                foreach (var item in enumerable)
+                                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
                                 {
-                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
+                                    var items = new System.Collections.Generic.List<object?>();
+                                    foreach (var item in enumerable)
+                                    {
+                                        items.Add(item);
+                                    }
+                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
                                 }
-                            }
-                            else
-                            {
-                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            }
+                                else
+                                {
+                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                }
+                            };
                         }
                         return Factory();
                     }
@@ -882,18 +912,23 @@ internal sealed class TimeoutCancellationTokenTests_MatrixTest_TestSource_GUID :
                     {
                         async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
                         {
-                            var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            yield return () =>
                             {
-                                foreach (var item in enumerable)
+                                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
+                                if (result is System.Collections.IEnumerable enumerable && !(result is string))
                                 {
-                                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
+                                    var items = new System.Collections.Generic.List<object?>();
+                                    foreach (var item in enumerable)
+                                    {
+                                        items.Add(item);
+                                    }
+                                    return global::System.Threading.Tasks.Task.FromResult(items.ToArray());
                                 }
-                            }
-                            else
-                            {
-                                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                            }
+                                else
+                                {
+                                    return global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
+                                }
+                            };
                         }
                         return Factory();
                     }
