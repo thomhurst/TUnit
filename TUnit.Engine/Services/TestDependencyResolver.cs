@@ -257,20 +257,67 @@ internal sealed class TestDependencyResolver
         }
 
         // Second pass: Build transitive dependencies for non-failed tests
-        // OPTIMIZATION: Skip transitive dependency calculation for TestContext.Dependencies
-        // This is only used for informational purposes and causes performance issues
-        // with large dependency graphs. The actual test execution still respects
-        // all dependencies through the test.Dependencies array.
+        // We need to populate TestContext.Dependencies with all transitive dependencies
+        // for backward compatibility. Use an efficient approach with memoization.
         
-        // Only populate direct dependencies to avoid exponential complexity
         foreach (var test in _allTests.Where(t => t.State != TestState.Failed))
         {
             test.Context.Dependencies.Clear();
             
-            // Only add direct dependencies, not transitive ones
+            // Check if we already have cached dependencies
+            if (_cachedTransitiveDependencies.TryGetValue(test.TestId, out var cachedDeps))
+            {
+                foreach (var dep in cachedDeps)
+                {
+                    test.Context.Dependencies.Add(dep);
+                }
+                continue;
+            }
+            
+            // Build transitive dependencies using BFS to avoid stack overflow
+            var allDeps = new HashSet<TestDetails>();
+            var depQueue = new Queue<AbstractExecutableTest>();
+            var visited = new HashSet<string>();
+            
+            // Add direct dependencies to queue
             foreach (var dep in test.Dependencies)
             {
-                test.Context.Dependencies.Add(dep.Context.TestDetails);
+                depQueue.Enqueue(dep);
+            }
+            
+            // Process queue to get all transitive dependencies
+            // Limit iterations to prevent infinite loops
+            const int maxIterations = 10000;
+            var iterations = 0;
+            
+            while (depQueue.Count > 0 && iterations < maxIterations)
+            {
+                iterations++;
+                var dep = depQueue.Dequeue();
+                
+                // Skip if we've already processed this test
+                if (!visited.Add(dep.TestId))
+                {
+                    continue;
+                }
+                
+                allDeps.Add(dep.Context.TestDetails);
+                
+                // Add this test's dependencies to the queue
+                foreach (var subDep in dep.Dependencies)
+                {
+                    depQueue.Enqueue(subDep);
+                }
+            }
+            
+            // Cache the result
+            var depsList = allDeps.ToList();
+            _cachedTransitiveDependencies[test.TestId] = depsList;
+            
+            // Add to context
+            foreach (var dep in depsList)
+            {
+                test.Context.Dependencies.Add(dep);
             }
         }
     }
