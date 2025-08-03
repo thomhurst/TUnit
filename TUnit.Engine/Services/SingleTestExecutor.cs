@@ -117,6 +117,13 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 return await HandleSkippedTestInternalAsync(test, cancellationToken);
             }
 
+            // Check for failed dependencies and skip test if needed
+            await CheckDependenciesAndSetSkipReasonIfNeeded(test);
+            if (!string.IsNullOrEmpty(test.Context.SkipReason))
+            {
+                return await HandleSkippedTestAsync(test, cancellationToken);
+            }
+
             if(test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
             {
                 await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken);
@@ -448,5 +455,56 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
             ClassHookContext.Current = context.ClassContext;
         }
+    }
+
+    private async Task CheckDependenciesAndSetSkipReasonIfNeeded(AbstractExecutableTest test)
+    {
+        if (test.Dependencies.Length == 0)
+        {
+            return; // No dependencies to check
+        }
+
+        var failedDependencies = new List<string>();
+
+        foreach (var dependency in test.Dependencies)
+        {
+            // Check if the dependency has failed
+            if (dependency.State == TestState.Failed || dependency.State == TestState.Timeout)
+            {
+                // Get the corresponding TestDependency metadata to check ProceedOnFailure
+                var dependencyMetadata = test.Metadata.Dependencies.FirstOrDefault(d => 
+                    DependencyMatches(d, dependency));
+
+                if (dependencyMetadata?.ProceedOnFailure == false)
+                {
+                    // Add to failed dependencies list for skip reason
+                    var dependencyName = GetDependencyDisplayName(dependency);
+                    failedDependencies.Add(dependencyName);
+                }
+            }
+        }
+
+        if (failedDependencies.Count > 0)
+        {
+            var dependencyNames = string.Join(", ", failedDependencies);
+            test.Context.SkipReason = $"Dependency failed: {dependencyNames}";
+            await _logger.LogInformationAsync($"Skipping test '{test.Context.TestDetails.TestName}' due to failed dependencies: {dependencyNames}");
+        }
+    }
+
+    private static bool DependencyMatches(TestDependency dependencyMetadata, AbstractExecutableTest dependencyTest)
+    {
+        // Use the existing Matches method from TestDependency
+        return dependencyMetadata.Matches(dependencyTest.Metadata, null);
+    }
+
+    private static string GetDependencyDisplayName(AbstractExecutableTest dependency)
+    {
+        var testName = dependency.Context.TestDetails.TestName;
+        var className = dependency.Metadata.TestClassType.Name;
+        
+        // If it's a test in the same class, just return the test name
+        // Otherwise, include the class name
+        return testName.Contains(className) ? testName : $"{className}.{dependency.Metadata.TestMethodName}";
     }
 }

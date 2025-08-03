@@ -15,29 +15,40 @@ public sealed class TestDependency : IEquatable<TestDependency>
 
     public int MethodGenericArity { get; init; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether this test should proceed even if its dependencies have failed.
+    /// When set to false (default), the test will be skipped if any of its dependencies failed.
+    /// When set to true, the test will run even if its dependencies failed.
+    /// </summary>
     public bool ProceedOnFailure { get; init; }
 
-    public static TestDependency FromMethodName(string methodName)
+    public static TestDependency FromMethodName(string methodName, bool proceedOnFailure = false)
     {
-        return new TestDependency { MethodName = methodName };
-    }
-
-    public static TestDependency FromClass(Type classType)
-    {
-        return new TestDependency
-        {
-            ClassType = classType,
-            ClassGenericArity = classType.IsGenericTypeDefinition ? classType.GetGenericArguments().Length : 0
+        return new TestDependency 
+        { 
+            MethodName = methodName,
+            ProceedOnFailure = proceedOnFailure
         };
     }
 
-    public static TestDependency FromClassAndMethod(Type classType, string methodName)
+    public static TestDependency FromClass(Type classType, bool proceedOnFailure = false)
     {
         return new TestDependency
         {
             ClassType = classType,
             ClassGenericArity = classType.IsGenericTypeDefinition ? classType.GetGenericArguments().Length : 0,
-            MethodName = methodName
+            ProceedOnFailure = proceedOnFailure
+        };
+    }
+
+    public static TestDependency FromClassAndMethod(Type classType, string methodName, bool proceedOnFailure = false)
+    {
+        return new TestDependency
+        {
+            ClassType = classType,
+            ClassGenericArity = classType.IsGenericTypeDefinition ? classType.GetGenericArguments().Length : 0,
+            MethodName = methodName,
+            ProceedOnFailure = proceedOnFailure
         };
     }
 
