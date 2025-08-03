@@ -51,12 +51,19 @@ namespace
         public override .ArgumentDisplayFormatter Formatter { get; }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
-    public sealed class ArgumentsAttribute : .TestDataAttribute
+    public sealed class ArgumentsAttribute : , .IDataSourceAttribute
     {
         public ArgumentsAttribute(params object?[]? values) { }
         public object?[] Values { get; }
         [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__4))]
-        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+    }
+    [(.Class | .Method | .Property, AllowMultiple=true)]
+    public sealed class ArgumentsAttribute<T> : .TypedDataSourceAttribute<T>
+    {
+        public ArgumentsAttribute(T value) { }
+        [.(typeof(.ArgumentsAttribute<T>.<GetTypedDataRowsAsync>d__2))]
+        public override .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     public class Artifact
     {
@@ -98,54 +105,44 @@ namespace
         public static bool TryGetAwaitableTask(object awaitable, [.(true)] out .? task) { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T> : .TestDataAttribute
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T> : .TypedDataSourceAttribute<T>
     {
         protected AsyncDataSourceGeneratorAttribute() { }
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T>.<GenerateAsync>d__1))]
-        public .<<.<T>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<T>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T>.<GetDataRowsAsync>d__2))]
-        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        [.(typeof(.AsyncDataSourceGeneratorAttribute<T>.<GetTypedDataRowsAsync>d__1))]
+        public override .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2> : .TestDataAttribute
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2> : .TypedDataSourceAttribute<<T1, T2>>
     {
         protected AsyncDataSourceGeneratorAttribute() { }
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2>.<GenerateAsync>d__1))]
-        public .<<.<<T1, T2>>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<<T1, T2>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2>.<GetDataRowsAsync>d__2))]
-        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2>.<GetTypedDataRowsAsync>d__1))]
+        public override .<<.<<T1, T2>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3> : .TestDataAttribute
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3> : .TypedDataSourceAttribute<<T1, T2, T3>>
     {
         protected AsyncDataSourceGeneratorAttribute() { }
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3>.<GenerateAsync>d__1))]
-        public .<<.<<T1, T2, T3>>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<<T1, T2, T3>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3>.<GetDataRowsAsync>d__2))]
-        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3>.<GetTypedDataRowsAsync>d__1))]
+        public override .<<.<<T1, T2, T3>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T4> : .TestDataAttribute
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T4> : .TypedDataSourceAttribute<<T1, T2, T3, T4>>
     {
         protected AsyncDataSourceGeneratorAttribute() { }
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>.<GenerateAsync>d__1))]
-        public .<<.<<T1, T2, T3, T4>>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<<T1, T2, T3, T4>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>.<GetDataRowsAsync>d__2))]
-        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>.<GetTypedDataRowsAsync>d__1))]
+        public override .<<.<<T1, T2, T3, T4>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T4, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T5> : .TestDataAttribute
+    public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T4, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T5> : .TypedDataSourceAttribute<<T1, T2, T3, T4, T5>>
     {
         protected AsyncDataSourceGeneratorAttribute() { }
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>.<GenerateAsync>d__1))]
-        public .<<.<<T1, T2, T3, T4, T5>>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<<T1, T2, T3, T4, T5>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>.<GetDataRowsAsync>d__2))]
-        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>.<GetTypedDataRowsAsync>d__1))]
+        public override .<<.<<T1, T2, T3, T4, T5>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     public class AsyncEvent<TEventArgs>
     {
@@ -167,13 +164,13 @@ namespace
     [.("AsyncUntypedDataSourceGeneratorAttribute may require unreferenced code for runtim" +
         "e data source creation. Consider using strongly-typed AsyncDataSourceGeneratorAt" +
         "tribute<T> overloads for AOT compatibility.")]
-    public abstract class AsyncUntypedDataSourceGeneratorAttribute : .TestDataAttribute, .IDataSourceAttribute
+    public abstract class AsyncUntypedDataSourceGeneratorAttribute : , .IDataSourceAttribute
     {
         protected AsyncUntypedDataSourceGeneratorAttribute() { }
         [.(typeof(.AsyncUntypedDataSourceGeneratorAttribute.<GenerateAsync>d__1))]
         public .<<.<object?[]?>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<object?[]?>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Method)]
     public abstract class BaseTestAttribute : .TUnitAttribute
@@ -806,6 +803,10 @@ namespace
     public interface IScopedAttribute<T> : .IScopedAttribute
         where T :  { }
     public interface ITestDefinition { }
+    public interface ITypedDataSourceAttribute<T> : .IDataSourceAttribute
+    {
+        .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
+    }
     [(.Class)]
     public sealed class InheritsTestsAttribute : .TUnitAttribute
     {
@@ -880,7 +881,7 @@ namespace
         protected virtual bool PrintMembers(.StringBuilder stringBuilder) { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
-    public class MethodDataSourceAttribute : .TestDataAttribute
+    public class MethodDataSourceAttribute : , .IDataSourceAttribute
     {
         public MethodDataSourceAttribute(string methodNameProvidingDataSource) { }
         public MethodDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]  classProvidingDataSource, string methodNameProvidingDataSource) { }
@@ -892,7 +893,7 @@ namespace
         [.("AOT", "IL2072:UnrecognizedReflectionPattern", Justification="Data source methods use dynamic patterns")]
         [.("AOT", "IL2075:UnrecognizedReflectionPattern", Justification="Data source methods use dynamic patterns")]
         [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__17))]
-        public override .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
     public class MethodDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]  T> : .MethodDataSourceAttribute
@@ -1277,11 +1278,6 @@ namespace
         public .AsyncEvent<.TestContext>? OnTestSkipped { get; set; }
         public .AsyncEvent<.TestContext>? OnTestStart { get; set; }
     }
-    public abstract class TestDataAttribute : .TUnitAttribute, .IDataSourceAttribute
-    {
-        protected TestDataAttribute() { }
-        public abstract .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
-    }
     public class TestDataCombination
     {
         public TestDataCombination() { }
@@ -1534,6 +1530,13 @@ namespace
         public static .TypeResolver CreateSimple() { }
         public static .TypeResolver FromTestInstance(object testInstance, .MethodInfo? testMethod = null) { }
     }
+    public abstract class TypedDataSourceAttribute<T> : , .IDataSourceAttribute, .ITypedDataSourceAttribute<T>
+    {
+        protected TypedDataSourceAttribute() { }
+        [.(typeof(.TypedDataSourceAttribute<T>.<GetDataRowsAsync>d__1))]
+        public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public abstract .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
+    }
     [(.Class | .Method | .Property, AllowMultiple=true)]
     [.("UntypedDataSourceGeneratorAttribute requires dynamic code generation for runtime " +
         "data source creation. Consider using strongly-typed AsyncDataSourceGeneratorAttr" +
@@ -1675,59 +1678,6 @@ namespace .Events
         LastTestInTestSession = 2048,
         TestRetry = 2049,
         All = 4095,
-    }
-}
-namespace .Examples
-{
-    public static class AotAsyncDataSourceBenefits { }
-    public static class AotMethodDataSourceBenefits { }
-    public static class GeneratedAotAsyncDataSourceExample
-    {
-        public static void RegisterFactories() { }
-        public static class MyAsyncApiDataSource_AotFactory
-        {
-            public static readonly <.DataGeneratorMetadata, .CancellationToken, .<<.<object?[]?>>>> AsyncFactory;
-            public static readonly <.DataGeneratorMetadata, .CancellationToken, .<.<<.<object?[]?>>>>> ListFactory;
-            [.(typeof(..MyAsyncApiDataSource_AotFactory.<GenerateDataAsync>d__0))]
-            public static .<<.<object?[]?>>> GenerateDataAsync(.DataGeneratorMetadata metadata, [.] .CancellationToken cancellationToken = default) { }
-            public static .<.<<.<object?[]?>>>> GenerateDataListAsync(.DataGeneratorMetadata metadata, .CancellationToken cancellationToken = default) { }
-        }
-        public static class MyAsyncTests_MyAsyncTest_AsyncDataResolver
-        {
-            public static .<.<<.<object?[]?>>>> ResolveAllAsyncDataAsync(.DataGeneratorMetadata metadata, .CancellationToken cancellationToken = default) { }
-            public static .<.<object?[]?>> ResolveAndExecuteAllAsyncDataAsync(.DataGeneratorMetadata metadata, .CancellationToken cancellationToken = default) { }
-        }
-    }
-    public static class GeneratedAotMethodDataSourceExample
-    {
-        public static void RegisterFactories() { }
-        public static class MyTests_GetTestData_DataSourceFactory
-        {
-            public static readonly <.<object?[]>> Factory;
-            public static .<object?[]> GetData() { }
-        }
-        public static class MyTests_MyTest_MethodDataResolver
-        {
-            public static .<object?[]> ResolveAllMethodData() { }
-            public static .<.<object?[]>> ResolveAllMethodDataAsync() { }
-        }
-    }
-    public class MyAsyncApiDataSource : .AsyncDataSourceGeneratorAttribute<string>
-    {
-        public MyAsyncApiDataSource() { }
-        [.(typeof(..<GenerateDataSourcesAsync>d__0))]
-        protected override .<<.<string>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
-    }
-    public class MyAsyncTests
-    {
-        public MyAsyncTests() { }
-        public . MyAsyncTest(string apiResult) { }
-    }
-    public class MyTests
-    {
-        public MyTests() { }
-        public void MyTest(string input, int number) { }
-        public static .<object[]> GetTestData() { }
     }
 }
 namespace .Exceptions
@@ -2202,11 +2152,6 @@ namespace .Interfaces
     public interface IDataSource
     {
         .<<object?[]>> GenerateDataFactories(.DataSourceContext context);
-    }
-    public interface IDataSourceProvider
-    {
-        bool IsCacheable { get; }
-        .<object?[]> GetData(.DataSourceContext context);
     }
     public interface IEventReceiver
     {
