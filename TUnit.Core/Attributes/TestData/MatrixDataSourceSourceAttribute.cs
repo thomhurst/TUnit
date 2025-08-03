@@ -93,7 +93,10 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         }
 
         var type = sourceGeneratedParameterInformation.Type;
-        var underlyingType = Nullable.GetUnderlyingType(type);
+        var parameterType = sourceGeneratedParameterInformation.ReflectionInfo.ParameterType;
+        
+        // Use reflection info for more reliable nullable detection in AOT scenarios
+        var underlyingType = Nullable.GetUnderlyingType(parameterType) ?? Nullable.GetUnderlyingType(type);
         var resolvedType = underlyingType ?? type;
         if (resolvedType != typeof(bool) && !resolvedType.IsEnum)
         {
@@ -128,7 +131,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
 
         return enumValues
 #if NET
-               .Except(matrixAttribute?.Excluding?.Select(e => Convert.ChangeType(e, Enum.GetUnderlyingType(type))) ?? [])
+               .Except(matrixAttribute?.Excluding?.Select(e => Convert.ChangeType(e, Enum.GetUnderlyingType(resolvedType))) ?? [])
 #else
                .Except(matrixAttribute?.Excluding ?? [])
 #endif
