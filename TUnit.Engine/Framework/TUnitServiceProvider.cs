@@ -82,8 +82,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         CancellationToken = Register(new EngineCancellationToken());
 
-        Register<ITestInvoker>(new TestInvoker());
-
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
 
         ContextProvider = Register(new ContextProvider(this, TestSessionId, Filter?.ToString()));
