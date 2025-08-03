@@ -17,7 +17,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicat
 
     public async Task<bool> IsEnabledAsync()
     {
-        if (Environment.GetEnvironmentVariable("DISABLE_GITHUB_REPORTER") is not null)
+        if (Environment.GetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER") is not null ||
+            Environment.GetEnvironmentVariable("DISABLE_GITHUB_REPORTER") is not null)
         {
             return false;
         }
