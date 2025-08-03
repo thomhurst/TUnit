@@ -471,11 +471,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
             // Check if the dependency has failed
             if (dependency.State == TestState.Failed || dependency.State == TestState.Timeout)
             {
-                // Get the corresponding TestDependency metadata to check ProceedOnFailure
+                // Find the corresponding TestDependency metadata to check ProceedOnFailure
                 var dependencyMetadata = test.Metadata.Dependencies.FirstOrDefault(d => 
                     DependencyMatches(d, dependency));
 
-                if (dependencyMetadata?.ProceedOnFailure == false)
+                // If no matching metadata found or ProceedOnFailure is false, skip the test
+                if (dependencyMetadata == null || dependencyMetadata.ProceedOnFailure == false)
                 {
                     // Add to failed dependencies list for skip reason
                     var dependencyName = GetDependencyDisplayName(dependency);
