@@ -123,6 +123,9 @@ public static class Rules
     public static readonly DiagnosticDescriptor TypeMustBePublic =
         CreateDescriptor("TUnit0051", UsageCategory, DiagnosticSeverity.Error);
 
+    public static readonly DiagnosticDescriptor MultipleConstructorsWithoutTestConstructor =
+        CreateDescriptor("TUnit0052", UsageCategory, DiagnosticSeverity.Warning);
+
     public static readonly DiagnosticDescriptor XunitMigration =
         CreateDescriptor("TUXU0001", UsageCategory, DiagnosticSeverity.Info);
 

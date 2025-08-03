@@ -34,6 +34,9 @@ internal static class TestInstanceHelper
             // Get all constructors
             var constructors = testClass.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             
+            // First check for [TestConstructor] attribute
+            var testConstructorMarked = constructors.Where(c => c.GetCustomAttribute<TestConstructorAttribute>() != null).ToArray();
+            
             // If we have class data sources, try to match them to constructor parameters
             if (classDataSources is { Length: > 0 })
             {
@@ -42,6 +45,16 @@ internal static class TestInstanceHelper
                 
                 if (classData is { Length: > 0 })
                 {
+                    // If we have a [TestConstructor] marked constructor, prefer it if it matches data count
+                    if (testConstructorMarked.Length > 0)
+                    {
+                        var markedConstructor = testConstructorMarked[0];
+                        if (markedConstructor.GetParameters().Length == classData.Length)
+                        {
+                            return markedConstructor.Invoke(classData);
+                        }
+                    }
+                    
                     // Find constructor that matches the data count
                     var matchingConstructor = constructors.FirstOrDefault(c => c.GetParameters().Length == classData.Length);
                     
@@ -50,6 +63,13 @@ internal static class TestInstanceHelper
                         return matchingConstructor.Invoke(classData);
                     }
                 }
+            }
+            
+            // If we have a marked constructor but no data sources, use it directly
+            if (testConstructorMarked.Length > 0)
+            {
+                var markedConstructor = testConstructorMarked[0];
+                return ConstructorHelper.CreateTestClassInstanceWithConstructor(testClass, markedConstructor);
             }
             
             // Fall back to parameterless constructor or GenericTestHelper
