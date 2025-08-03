@@ -139,25 +139,23 @@ TUnit provides several event receiver interfaces that allow you to hook into dif
 
 ### ITestDiscoveryEventReceiver
 
-Notified when tests are discovered during the discovery phase.
+Notified when a test is discovered during the discovery phase.
 
 ```csharp
 public interface ITestDiscoveryEventReceiver
 {
-    Task OnTestDiscoveryStarted(TestDiscoveryContext context);
-    Task OnTestDiscovered(DiscoveredTest test);
-    Task OnTestDiscoveryCompleted(TestDiscoveryContext context, IReadOnlyList<DiscoveredTest> tests);
+    ValueTask OnTestDiscovered(DiscoveredTestContext context);
 }
 ```
 
 ### ITestRegisteredEventReceiver
 
-Notified when tests are registered with the test engine.
+Notified when a test is registered with the test engine.
 
 ```csharp
 public interface ITestRegisteredEventReceiver
 {
-    Task OnTestRegistered(RegisteredTest test);
+    ValueTask OnTestRegistered(TestRegisteredContext context);
 }
 ```
 
@@ -168,7 +166,7 @@ Notified when a test starts execution.
 ```csharp
 public interface ITestStartEventReceiver
 {
-    Task OnTestStart(TestContext context);
+    ValueTask OnTestStart(TestContext context);
 }
 ```
 
@@ -179,7 +177,7 @@ Notified when a test completes execution.
 ```csharp
 public interface ITestEndEventReceiver
 {
-    Task OnTestEnd(TestContext context, TestResult result);
+    ValueTask OnTestEnd(TestContext context);
 }
 ```
 
@@ -190,38 +188,34 @@ Notified when a test is retried.
 ```csharp
 public interface ITestRetryEventReceiver
 {
-    Task OnTestRetry(TestContext context, int attemptNumber, Exception lastException);
+    ValueTask OnTestRetry(TestContext context, int retryAttempt);
 }
 ```
 
 ### Example Event Receiver Implementation
 
 ```csharp
-public class TestReporter : ITestStartEventReceiver, ITestEndEventReceiver
+[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
+public class TestReporterAttribute : Attribute, ITestStartEventReceiver, ITestEndEventReceiver
 {
-    private readonly ITestReportingService _reportingService;
+    public int Order => 0;
 
-    public TestReporter(ITestReportingService reportingService)
+    public async ValueTask OnTestStart(TestContext context)
     {
-        _reportingService = reportingService;
-    }
-
-    public async Task OnTestStart(TestContext context)
-    {
-        await _reportingService.ReportTestStarted(
-            context.TestName,
-            context.TestClass.FullName,
-            context.TestParameters
+        await ReportingService.ReportTestStarted(
+            context.GetDisplayName(),
+            context.TestDetails.TestClass?.FullName,
+            context.TestDetails.TestMethodArguments
         );
     }
 
-    public async Task OnTestEnd(TestContext context, TestResult result)
+    public async ValueTask OnTestEnd(TestContext context)
     {
-        await _reportingService.ReportTestCompleted(
-            context.TestName,
-            result.State,
-            result.Duration,
-            result.Exception?.Message
+        await ReportingService.ReportTestCompleted(
+            context.GetDisplayName(),
+            context.Result?.State,
+            context.Result?.Duration,
+            context.Result?.Exception?.Message
         );
     }
 }
