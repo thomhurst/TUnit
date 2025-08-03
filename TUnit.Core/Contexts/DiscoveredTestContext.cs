@@ -128,7 +128,7 @@ public class DiscoveredTestContext
     /// <summary>
     /// Gets the test display name
     /// </summary>
-    public string GetTestDisplayName()
+    public string GetDisplayName()
     {
         return TestContext.GetDisplayName();
     }
