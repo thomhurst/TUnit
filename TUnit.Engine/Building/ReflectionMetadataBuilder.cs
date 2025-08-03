@@ -17,8 +17,7 @@ internal static class ReflectionMetadataBuilder
             | DynamicallyAccessedMemberTypes.NonPublicConstructors
             | DynamicallyAccessedMemberTypes.PublicMethods
             | DynamicallyAccessedMemberTypes.NonPublicMethods
-            | DynamicallyAccessedMemberTypes.PublicProperties
-            | DynamicallyAccessedMemberTypes.All)] Type type,
+            | DynamicallyAccessedMemberTypes.PublicProperties)] Type type,
         System.Reflection.MethodInfo method)
     {
         return new MethodMetadata

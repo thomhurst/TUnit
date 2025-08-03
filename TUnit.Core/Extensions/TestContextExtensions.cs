@@ -18,8 +18,10 @@ public static class TestContextExtensions
 
     public static async Task AddDynamicTest<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicProperties
-        | DynamicallyAccessedMemberTypes.PublicMethods)] T>(this TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(this TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
     {
         await context.GetService<ITestRegistry>()!.AddDynamicTest(context, dynamicTest);;
     }

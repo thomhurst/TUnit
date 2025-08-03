@@ -19,8 +19,10 @@ public class DynamicDiscoveryResult : DiscoveryResult
 
     [DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicProperties
-        | DynamicallyAccessedMemberTypes.PublicMethods)]
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods)]
     public Type? TestClassType { get; set; }
 }
 
@@ -31,13 +33,17 @@ public abstract class DynamicTest
 
 public abstract class DynamicTest<[DynamicallyAccessedMembers(
     DynamicallyAccessedMemberTypes.PublicConstructors
+    | DynamicallyAccessedMemberTypes.NonPublicConstructors
     | DynamicallyAccessedMemberTypes.PublicProperties
-    | DynamicallyAccessedMemberTypes.PublicMethods)] T> : DynamicTest where T : class;
+    | DynamicallyAccessedMemberTypes.PublicMethods
+    | DynamicallyAccessedMemberTypes.NonPublicMethods)] T> : DynamicTest where T : class;
 
 public class DynamicTestInstance<[DynamicallyAccessedMembers(
     DynamicallyAccessedMemberTypes.PublicConstructors
+    | DynamicallyAccessedMemberTypes.NonPublicConstructors
     | DynamicallyAccessedMemberTypes.PublicProperties
-    | DynamicallyAccessedMemberTypes.PublicMethods)]T> : DynamicTest<T> where T : class
+    | DynamicallyAccessedMemberTypes.PublicMethods
+    | DynamicallyAccessedMemberTypes.NonPublicMethods)]T> : DynamicTest<T> where T : class
 {
     public Expression<Action<T>>? TestMethod { get; set; }
     public object?[]? TestClassArguments { get; set; }
@@ -73,8 +79,10 @@ public interface IDynamicTestSource
 
 public class FailedDynamicTest<[DynamicallyAccessedMembers(
     DynamicallyAccessedMemberTypes.PublicConstructors
+    | DynamicallyAccessedMemberTypes.NonPublicConstructors
     | DynamicallyAccessedMemberTypes.PublicProperties
-    | DynamicallyAccessedMemberTypes.PublicMethods)] T> : DynamicTest where T : class
+    | DynamicallyAccessedMemberTypes.PublicMethods
+    | DynamicallyAccessedMemberTypes.NonPublicMethods)] T> : DynamicTest where T : class
 {
     public string TestId { get; set; } = string.Empty;
     public string MethodName { get; set; } = string.Empty;

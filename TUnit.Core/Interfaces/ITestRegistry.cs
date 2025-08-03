@@ -16,7 +16,9 @@ public interface ITestRegistry
     /// <returns>A task that completes when the test has been queued for execution</returns>
     Task AddDynamicTest<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicProperties
-        | DynamicallyAccessedMemberTypes.PublicMethods)] T>(TestContext context, DynamicTestInstance<T> dynamicTest) 
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(TestContext context, DynamicTestInstance<T> dynamicTest) 
         where T : class;
 }
