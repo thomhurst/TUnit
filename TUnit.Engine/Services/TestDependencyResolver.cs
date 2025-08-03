@@ -89,126 +89,80 @@ internal sealed class TestDependencyResolver
         AbstractExecutableTest test, 
         HashSet<string> visited)
     {
-        foreach (var dep in test.Dependencies)
+        // Add the current test to the visited set to detect cycles
+        if (!visited.Add(test.TestId))
         {
-            if (visited.Add(dep.TestId))
+            // We've encountered this test before in our current path - circular dependency
+            throw new InvalidOperationException($"Circular dependency detected involving test {test.TestId}");
+        }
+        
+        try
+        {
+            foreach (var dep in test.Dependencies)
             {
                 yield return dep;
+                
+                // Recursively get dependencies of this dependency
                 foreach (var transitive in GetAllDependencies(dep, visited))
                 {
                     yield return transitive;
                 }
             }
         }
+        finally
+        {
+            // Remove from visited set when we're done with this path
+            visited.Remove(test.TestId);
+        }
     }
     
     public void CheckForCircularDependencies()
     {
-        var circularDependencies = DetectCircularDependencies();
-        if (circularDependencies.Count > 0)
+        Console.WriteLine($"[DEBUG] Checking for circular dependencies and updating TestContext.Dependencies for {_allTests.Count} tests");
+        
+        // Update TestContext.Dependencies for all tests, with circular dependency detection built-in
+        foreach (var test in _allTests)
         {
-            // Mark all tests involved in circular dependencies as failed
-            foreach (var cycle in circularDependencies)
+            test.Context.Dependencies.Clear();
+            var visited = new HashSet<string>();
+            
+            try
             {
-                Console.WriteLine($"[DEBUG] Found circular dependency cycle: {string.Join(" -> ", cycle)}");
-                foreach (var testId in cycle)
-                {
-                    if (_testsByName.TryGetValue(testId, out var test))
-                    {
-                        var testChain = BuildTestChain(cycle);
-                        var exception = new DependencyConflictException(testChain);
-                        
-                        // Create a failed test result
-                        test.Result = new TestResult
-                        {
-                            State = TestState.Failed,
-                            Start = DateTimeOffset.UtcNow,
-                            End = DateTimeOffset.UtcNow,
-                            Duration = TimeSpan.Zero,
-                            Exception = exception,
-                            ComputerName = Environment.MachineName,
-                            TestContext = test.Context
-                        };
-                        
-                        test.State = TestState.Failed;
-                    }
-                }
-            }
-        }
-        else
-        {
-            // No circular dependencies, safe to update TestContext.Dependencies
-            foreach (var test in _allTests)
-            {
-                test.Context.Dependencies.Clear();
-                var visited = new HashSet<string>();
                 foreach (var dep in GetAllDependencies(test, visited))
                 {
                     test.Context.Dependencies.Add(dep.Context.TestDetails);
                 }
             }
-        }
-    }
-    
-    private List<List<string>> DetectCircularDependencies()
-    {
-        var visited = new HashSet<string>();
-        var recursionStack = new HashSet<string>();
-        var cycles = new List<List<string>>();
-        var currentPath = new List<string>();
-        
-        foreach (var test in _allTests)
-        {
-            if (!visited.Contains(test.TestId))
+            catch (Exception ex)
             {
-                DetectCyclesRecursive(test.TestId, visited, recursionStack, currentPath, cycles);
+                Console.WriteLine($"[DEBUG] Error getting dependencies for test {test.TestId}: {ex.Message}");
+                // Mark this test as failed if we can't resolve its dependencies
+                test.Result = new TestResult
+                {
+                    State = TestState.Failed,
+                    Start = DateTimeOffset.UtcNow,
+                    End = DateTimeOffset.UtcNow,
+                    Duration = TimeSpan.Zero,
+                    Exception = new InvalidOperationException($"Failed to resolve dependencies: {ex.Message}"),
+                    ComputerName = Environment.MachineName,
+                    TestContext = test.Context
+                };
+                test.State = TestState.Failed;
             }
         }
         
-        return cycles;
-    }
-    
-    private bool DetectCyclesRecursive(
-        string testId,
-        HashSet<string> visited,
-        HashSet<string> recursionStack,
-        List<string> currentPath,
-        List<List<string>> cycles)
-    {
-        visited.Add(testId);
-        recursionStack.Add(testId);
-        currentPath.Add(testId);
-        
-        if (_testsByName.TryGetValue(testId, out var test))
+        // Log how many tests failed due to circular dependencies
+        var failedTests = _allTests.Where(t => t.State == TestState.Failed).ToList();
+        if (failedTests.Any())
         {
-            foreach (var dependency in test.Dependencies)
+            Console.WriteLine($"[DEBUG] {failedTests.Count} tests marked as failed after circular dependency check");
+            foreach (var test in failedTests.Take(5))
             {
-                if (!visited.Contains(dependency.TestId))
-                {
-                    if (DetectCyclesRecursive(dependency.TestId, visited, recursionStack, currentPath, cycles))
-                    {
-                        return true;
-                    }
-                }
-                else if (recursionStack.Contains(dependency.TestId))
-                {
-                    // Found a cycle - extract the cycle from currentPath
-                    var cycleStartIndex = currentPath.IndexOf(dependency.TestId);
-                    var cycle = new List<string>();
-                    for (int i = cycleStartIndex; i < currentPath.Count; i++)
-                    {
-                        cycle.Add(currentPath[i]);
-                    }
-                    cycle.Add(dependency.TestId); // Complete the cycle
-                    cycles.Add(cycle);
-                }
+                Console.WriteLine($"[DEBUG] Failed test: {test.Context.TestName}");
             }
         }
-        
-        recursionStack.Remove(testId);
-        currentPath.RemoveAt(currentPath.Count - 1);
-        return false;
     }
+    
     
     private List<TestDetails> BuildTestChain(List<string> cycle)
     {

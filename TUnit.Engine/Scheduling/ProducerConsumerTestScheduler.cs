@@ -123,7 +123,9 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         
         foreach (var state in orderedTests)
         {
-            if (state.RemainingDependencies == 0)
+            // Route failed tests (e.g., circular dependencies) immediately regardless of dependencies
+            // Also route tests with no remaining dependencies
+            if (state.RemainingDependencies == 0 || state.State == TestState.Failed)
             {
                 if (state.ConstraintKey != null && state.Order != int.MaxValue / 2)
                 {
@@ -211,9 +213,11 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
     {
         var state = testData.State;
         
-        // If test is already failed (e.g., due to circular dependencies), skip execution
+        // If test is already failed (e.g., due to circular dependencies), 
+        // still execute it so the failure can be reported to the test platform
         if (state.State == TestState.Failed)
         {
+            await executor.ExecuteTestAsync(state.Test, cancellationToken);
             await ProcessTestCompletionAsync(state, executionStates, cancellationToken);
             return;
         }
