@@ -2,6 +2,8 @@ using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Data;
+using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
@@ -117,12 +119,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 return await HandleSkippedTestInternalAsync(test, cancellationToken);
             }
 
-            // Check for failed dependencies and skip test if needed
-            await CheckDependenciesAndSetSkipReasonIfNeeded(test);
-            if (!string.IsNullOrEmpty(test.Context.SkipReason))
-            {
-                return await HandleSkippedTestAsync(test, cancellationToken);
-            }
+            // Check for failed dependencies and throw exception if test should be skipped
+            CheckDependenciesAndThrowIfShouldSkip(test);
 
             if(test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
             {
@@ -132,6 +130,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 await ExecuteTestWithHooksAsync(test, instance, cancellationToken);
             }
+        }
+        catch (TestDependencyException e)
+        {
+            test.Context.SkipReason = e.Message;
+            return await HandleSkippedTestAsync(test, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -457,14 +460,14 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
     }
 
-    private async Task CheckDependenciesAndSetSkipReasonIfNeeded(AbstractExecutableTest test)
+    private void CheckDependenciesAndThrowIfShouldSkip(AbstractExecutableTest test)
     {
         if (test.Dependencies.Length == 0)
         {
             return; // No dependencies to check
         }
 
-        var failedDependencies = new List<string>();
+        var failedDependenciesNotAllowingProceed = new List<string>();
 
         foreach (var dependency in test.Dependencies)
         {
@@ -475,21 +478,23 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 var dependencyMetadata = test.Metadata.Dependencies.FirstOrDefault(d => 
                     DependencyMatches(d, dependency));
 
-                // If no matching metadata found or ProceedOnFailure is false, skip the test
-                if (dependencyMetadata == null || dependencyMetadata.ProceedOnFailure == false)
+                // Get ProceedOnFailure setting (default to false if no metadata found)
+                var proceedOnFailure = dependencyMetadata?.ProceedOnFailure ?? false;
+                
+                // If this dependency doesn't allow proceeding on failure, add it to the list
+                if (!proceedOnFailure)
                 {
-                    // Add to failed dependencies list for skip reason
                     var dependencyName = GetDependencyDisplayName(dependency);
-                    failedDependencies.Add(dependencyName);
+                    failedDependenciesNotAllowingProceed.Add(dependencyName);
                 }
             }
         }
 
-        if (failedDependencies.Count > 0)
+        // Only throw if there are dependencies that don't allow proceeding
+        if (failedDependenciesNotAllowingProceed.Count > 0)
         {
-            var dependencyNames = string.Join(", ", failedDependencies);
-            test.Context.SkipReason = $"Dependency failed: {dependencyNames}";
-            await _logger.LogInformationAsync($"Skipping test '{test.Context.TestDetails.TestName}' due to failed dependencies: {dependencyNames}");
+            var dependencyNames = string.Join(", ", failedDependenciesNotAllowingProceed);
+            throw new TestDependencyException(dependencyNames, false);
         }
     }
 
