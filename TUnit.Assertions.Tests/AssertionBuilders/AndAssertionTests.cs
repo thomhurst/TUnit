@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Throws;
-
-namespace TUnit.Assertions.Tests.AssertionBuilders;
+﻿namespace TUnit.Assertions.Tests.AssertionBuilders;
 
 public sealed class AndAssertionTests
 {

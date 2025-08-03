@@ -1,5 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Throws;
-using TUnit.Assertions.Enums;
+﻿using TUnit.Assertions.Enums;
 
 namespace TUnit.Assertions.Tests.Bugs;
 

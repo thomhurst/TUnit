@@ -1,5 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Throws;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 

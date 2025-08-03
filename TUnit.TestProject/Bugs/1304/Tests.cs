@@ -1,5 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Throws;
-using TUnit.TestProject.Attributes;
+﻿using TUnit.TestProject.Attributes;
 using Vogen;
 
 namespace TUnit.TestProject.Bugs._1304;
