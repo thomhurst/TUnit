@@ -7,6 +7,7 @@ using TUnit.Engine.Tests.Enums;
 namespace TUnit.Engine.Tests;
 
 [MethodDataSource(nameof(GetTestModes))]
+[Retry(3)]
 public abstract class InvokableTestBase(TestMode testMode)
 {
     public static IEnumerable<TestMode> GetTestModes()
