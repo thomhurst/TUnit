@@ -147,6 +147,7 @@ public sealed class PropertyInjectionService
             Type = metadata.PropertyType,
             ReflectionInfo = GetPropertyInfo(metadata.ContainingType, metadata.PropertyName),
             Getter = parent => GetPropertyInfo(metadata.ContainingType, metadata.PropertyName).GetValue(parent!)!,
+            ContainingTypeMetadata = GetClassMetadataForType(metadata.ContainingType)
         };
         
         // Use centralized factory

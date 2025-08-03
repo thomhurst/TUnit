@@ -107,6 +107,11 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         
         foreach (var typeGroup in propertiesByType)
         {
+            if (typeGroup.Key == null)
+            {
+                continue;
+            }
+            
             var typeName = typeGroup.Key.GloballyQualified();
             writer.AppendLine($"// Initialize static properties for {typeName}");
             
@@ -184,6 +189,37 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
         
+        // Create PropertyMetadata with containing type information
+        writer.AppendLine($"// Create PropertyMetadata for {propertyName}");
+        writer.AppendLine("var containingTypeMetadata = new global::TUnit.Core.ClassMetadata");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"Name = \"{propertyData.Property.ContainingType.Name}\",");
+        writer.AppendLine($"Type = typeof({typeName}),");
+        writer.AppendLine($"Namespace = \"{propertyData.Property.ContainingType.ContainingNamespace?.ToDisplayString() ?? string.Empty}\",");
+        writer.AppendLine($"TypeReference = global::TUnit.Core.TypeReference.CreateConcrete(typeof({typeName}).AssemblyQualifiedName),");
+        writer.AppendLine($"Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd(\"{propertyData.Property.ContainingType.ContainingAssembly.Name}\", () => new global::TUnit.Core.AssemblyMetadata {{ Name = \"{propertyData.Property.ContainingType.ContainingAssembly.Name}\" }}),");
+        writer.AppendLine("Properties = System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),");
+        writer.AppendLine("Parameters = System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
+        writer.AppendLine("Parent = null");
+        writer.Unindent();
+        writer.AppendLine("};");
+        writer.AppendLine();
+        
+        writer.AppendLine("var propertyMetadata = new global::TUnit.Core.PropertyMetadata");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"Name = \"{propertyName}\",");
+        writer.AppendLine($"Type = typeof({propertyData.Property.Type.GloballyQualified()}),");
+        writer.AppendLine($"IsStatic = true,");
+        writer.AppendLine($"ReflectionInfo = typeof({typeName}).GetProperty(\"{propertyName}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static),");
+        writer.AppendLine($"Getter = _ => {typeName}.{propertyName},");
+        writer.AppendLine("ClassMetadata = containingTypeMetadata,");
+        writer.AppendLine("ContainingTypeMetadata = containingTypeMetadata");
+        writer.Unindent();
+        writer.AppendLine("};");
+        writer.AppendLine();
+        
         var attr = propertyData.DataSourceAttribute;
         var attributeClassName = attr.AttributeClass?.Name;
         
@@ -199,7 +235,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         else if (attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") == true ||
                  attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute") == true)
         {
-            GenerateAsyncDataSourceGenerator(writer, attr);
+            GenerateAsyncDataSourceGeneratorWithProperty(writer, attr, propertyData.Property.ContainingType);
         }
         else
         {
@@ -274,18 +310,18 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
     }
 
 
-    private static void GenerateAsyncDataSourceGenerator(CodeWriter writer, AttributeData attr)
+    private static void GenerateAsyncDataSourceGeneratorWithProperty(CodeWriter writer, AttributeData attr, INamedTypeSymbol containingType)
     {
         var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
         writer.AppendLine($"var generator = {generatorCode};");
         writer.AppendLine("var metadata = new global::TUnit.Core.DataGeneratorMetadata");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("Type = global::TUnit.Core.Enums.DataGeneratorType.ClassParameters,");
-        writer.AppendLine("TestBuilderContext = new global::TUnit.Core.TestBuilderContextAccessor(new global::TUnit.Core.TestBuilderContext { TestMetadata = null! }),");
-        writer.AppendLine("MembersToGenerate = new global::TUnit.Core.MemberMetadata[0],");
+        writer.AppendLine("Type = global::TUnit.Core.Enums.DataGeneratorType.Property,");
+        writer.AppendLine("TestBuilderContext = null,");
+        writer.AppendLine("MembersToGenerate = new global::TUnit.Core.MemberMetadata[] { propertyMetadata },");
         writer.AppendLine("TestInformation = null,");
-        writer.AppendLine("TestSessionId = string.Empty,");
+        writer.AppendLine("TestSessionId = global::TUnit.Core.TestSessionContext.Current?.Id ?? \"static-property-init\",");
         writer.AppendLine("TestClassInstance = null,");
         writer.AppendLine("ClassInstanceArguments = null");
         writer.Unindent();

@@ -74,7 +74,7 @@ public class MethodDataSourceAttribute : TestDataAttribute
         var item1 = dataGeneratorMetadata.MembersToGenerate[0];
 
         var targetType = ClassProvidingDataSource
-            ?? (item1 as PropertyMetadata)?.ClassMetadata?.Type
+            ?? (item1 as PropertyMetadata)?.ClassMetadata.Type
             ?? dataGeneratorMetadata.TestClassType;
 
         // If we have a test class instance and no explicit class was provided,
@@ -82,6 +82,11 @@ public class MethodDataSourceAttribute : TestDataAttribute
         if (ClassProvidingDataSource == null && dataGeneratorMetadata.TestClassInstance != null)
         {
             targetType = dataGeneratorMetadata.TestClassInstance.GetType();
+        }
+        
+        if (targetType == null)
+        {
+            throw new InvalidOperationException($"Could not determine target type for method '{MethodNameProvidingDataSource}'. This may occur during static property initialization without a test context.");
         }
 
         var methodInfo = targetType.GetMethods(BindingFlags).SingleOrDefault(x => x.Name == MethodNameProvidingDataSource

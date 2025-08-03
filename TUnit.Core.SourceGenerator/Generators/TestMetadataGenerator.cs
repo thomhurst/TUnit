@@ -878,7 +878,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ])
         {
             // MethodDataSource(Type, string) overload
-            targetType = (ITypeSymbol)attr.ConstructorArguments[0].Value;
+            targetType = (ITypeSymbol?)attr.ConstructorArguments[0].Value;
             methodName = attr.ConstructorArguments[1].Value?.ToString();
         }
         else if (attr.ConstructorArguments.Length >= 1)
@@ -893,9 +893,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("// Error: No method name in MethodDataSourceAttribute");
             return;
         }
+        
+        if (targetType == null)
+        {
+            writer.AppendLine("// Error: No target type for MethodDataSourceAttribute");
+            return;
+        }
 
         // Find the data source method
-        var dataSourceMethod = targetType?.GetMembers(methodName)
+        var dataSourceMethod = targetType.GetMembers(methodName)
             .OfType<IMethodSymbol>()
             .FirstOrDefault();
 

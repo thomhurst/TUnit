@@ -133,11 +133,12 @@ internal static class MetadataGenerationHelper
         writer.AppendLine();
 
         // Set ClassMetadata reference on each property
-        writer.AppendLine("// Set ClassMetadata reference on properties to avoid circular dependency");
+        writer.AppendLine("// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency");
         writer.AppendLine("foreach (var prop in classMetadata.Properties)");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine("prop.ClassMetadata = classMetadata;");
+        writer.AppendLine("prop.ContainingTypeMetadata = classMetadata;");
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
@@ -284,7 +285,8 @@ internal static class MetadataGenerationHelper
     IsStatic = {property.IsStatic.ToString().ToLower()},
     IsNullable = {property.Type.IsNullable().ToString().ToLowerInvariant()},
     Getter = {GetPropertyAccessor(containingType, property)},
-    ClassMetadata = null
+    ClassMetadata = null!,
+    ContainingTypeMetadata = null!
 }}";
     }
 

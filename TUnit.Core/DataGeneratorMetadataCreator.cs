@@ -220,7 +220,8 @@ internal static class DataGeneratorMetadataCreator
             ClassMetadata = GetClassMetadataForType(containingType),
             Type = property.PropertyType,
             ReflectionInfo = property,
-            Getter = parent => property.GetValue(parent)
+            Getter = parent => property.GetValue(parent),
+            ContainingTypeMetadata = GetClassMetadataForType(containingType)
         };
 
         return CreateForPropertyInjection(

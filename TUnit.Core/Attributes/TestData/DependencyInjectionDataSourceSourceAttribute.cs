@@ -10,17 +10,20 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
     {
         var scope = CreateScope(dataGeneratorMetadata);
 
-        dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (_, _) =>
+        if (dataGeneratorMetadata.TestBuilderContext != null)
         {
-            if (scope is IAsyncDisposable asyncDisposable)
+            dataGeneratorMetadata.TestBuilderContext.Current.Events.OnDispose += async (_, _) =>
             {
-                await asyncDisposable.DisposeAsync();
-            }
-            else if (scope is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-        };
+                if (scope is IAsyncDisposable asyncDisposable)
+                {
+                    await asyncDisposable.DisposeAsync();
+                }
+                else if (scope is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            };
+        }
 
         yield return () =>
         {

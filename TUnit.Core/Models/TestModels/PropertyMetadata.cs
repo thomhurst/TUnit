@@ -19,5 +19,10 @@ public record PropertyMetadata : MemberMetadata
     public required bool IsStatic { get; init; }
     public bool IsNullable { get; init; }
     public required Func<object?, object?> Getter { get; init; }
-    public ClassMetadata? ClassMetadata { get; set; }
+    public required ClassMetadata ClassMetadata { get; set; }
+    
+    /// <summary>
+    /// Metadata about the class that contains this property
+    /// </summary>
+    public required ClassMetadata ContainingTypeMetadata { get; set; }
 }

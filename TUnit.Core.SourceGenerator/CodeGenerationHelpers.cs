@@ -188,7 +188,8 @@ internal static class CodeGenerationHelpers
                     writer.AppendLine("IsStatic = false,");
                     writer.AppendLine($"IsNullable = {prop.Type.IsNullable().ToString().ToLowerInvariant()},");
                     writer.AppendLine($"Getter = obj => ((({typeSymbol.GloballyQualified()})obj).{prop.Name}),");
-                    writer.AppendLine("ClassMetadata = null");
+                    writer.AppendLine("ClassMetadata = null!,");
+                    writer.AppendLine("ContainingTypeMetadata = null!");
                 }
             }
         }

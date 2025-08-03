@@ -22,6 +22,11 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
             throw new Exception("[MatrixDataSource] only supports parameterised tests");
         }
 
+        if (dataGeneratorMetadata.TestInformation == null)
+        {
+            throw new InvalidOperationException("MatrixDataSource requires test information but none is available. This may occur during static property initialization.");
+        }
+
         var testInformation = dataGeneratorMetadata.TestInformation;
 
         var classType = testInformation.Class.Type;
@@ -67,8 +72,8 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         // Check if this is an instance data attribute and we don't have an instance
         if (matrixAttribute is IAccessesInstanceData && dataGeneratorMetadata.TestClassInstance == null)
         {
-            var className = dataGeneratorMetadata.TestInformation.Class.Type.Name;
-            if (dataGeneratorMetadata.TestInformation.Class.Type.IsGenericTypeDefinition)
+            var className = dataGeneratorMetadata.TestInformation?.Class.Type.Name ?? "Unknown";
+            if (dataGeneratorMetadata.TestInformation?.Class.Type.IsGenericTypeDefinition ?? false)
             {
                 throw new InvalidOperationException(
                     $"Cannot use MatrixInstanceMethod attribute in generic class '{className}' when the generic type parameters " +

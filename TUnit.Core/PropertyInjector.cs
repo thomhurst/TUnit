@@ -55,6 +55,7 @@ public static class PropertyInjector
                         Type = propertyType,
                         ReflectionInfo = GetPropertyInfo(containingType, propertyDataSource.PropertyName),
                         Getter = parent => GetPropertyInfo(containingType, propertyDataSource.PropertyName).GetValue(parent!)!,
+                        ContainingTypeMetadata = GetClassMetadataForType(containingType)
                     };
                 }
                 
