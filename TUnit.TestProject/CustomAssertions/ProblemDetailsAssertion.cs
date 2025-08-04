@@ -91,7 +91,7 @@ public class ProblemDetailsHasTitleAssertCondition(string? expected) : ExpectedV
     protected override ValueTask<AssertionResult> GetResult(ProblemDetails? actualValue, string? expectedValue)
     {
         return AssertionResult.FailIf(actualValue is null, "ProblemDetails is null")
-            .OrFailIf(actualValue!.Title != expectedValue, $"ProblemDetails has a title of {actualValue.Title}");
+            .OrFailIf(actualValue is not null && actualValue.Title != expectedValue, $"ProblemDetails has a title of {actualValue?.Title}");
     }
 }
 
@@ -105,7 +105,7 @@ public class ProblemDetailsHasDetailAssertCondition(string? expected) : Expected
     protected override ValueTask<AssertionResult> GetResult(ProblemDetails? actualValue, string? expectedValue)
     {
         return AssertionResult.FailIf(actualValue is null, "ProblemDetails is null")
-            .OrFailIf(actualValue!.Detail != expectedValue, $"ProblemDetails has a detail equal to {actualValue.Title}");
+            .OrFailIf(actualValue is not null && actualValue.Detail != expectedValue, $"ProblemDetails has a detail equal to {actualValue?.Title}");
     }
 }
 
