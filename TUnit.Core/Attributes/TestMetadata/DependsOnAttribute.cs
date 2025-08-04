@@ -212,14 +212,22 @@ public class DependsOnAttribute : TUnitAttribute
             return new TestDependency 
             { 
                 MethodName = TestName,
-                MethodParameters = ParameterTypes
+                MethodParameters = ParameterTypes,
+                ProceedOnFailure = ProceedOnFailure
             };
         }
         
         // If only class is specified, it's a dependency on all tests in that class
         if (ClassMetadata != null && string.IsNullOrEmpty(TestName))
         {
-            return TestDependency.FromClass(ClassMetadata);
+            return new TestDependency
+            {
+                ClassType = ClassMetadata,
+                ClassGenericArity = ClassMetadata.IsGenericTypeDefinition 
+                    ? ClassMetadata.GetGenericArguments().Length 
+                    : 0,
+                ProceedOnFailure = ProceedOnFailure
+            };
         }
         
         // If both class and method are specified
@@ -232,7 +240,8 @@ public class DependsOnAttribute : TUnitAttribute
                     ? ClassMetadata.GetGenericArguments().Length 
                     : 0,
                 MethodName = TestName,
-                MethodParameters = ParameterTypes
+                MethodParameters = ParameterTypes,
+                ProceedOnFailure = ProceedOnFailure
             };
         }
         

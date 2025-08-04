@@ -153,7 +153,8 @@
       "Bash(for dir in *.received)",
       "Bash(do rm -rf \"$dir%.received.verified\")",
       "Bash(done)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(/home/thomh/.dotnet/dotnet run -f net9.0 --treenode-filter \"/*/*/*/*[EngineTest=Pass]\")"
     ],
     "deny": []
   },

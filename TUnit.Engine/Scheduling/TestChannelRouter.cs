@@ -61,11 +61,6 @@ internal class TestChannelRouter
     }
 
     public ChannelMultiplexer GetMultiplexer() => _multiplexer;
-
-    public void SignalCompletion()
-    {
-        _multiplexer.SignalCompletion();
-    }
 }
 
 internal class ChannelMultiplexer
@@ -177,6 +172,12 @@ internal class ChannelMultiplexer
             : throw new InvalidOperationException($"Priority channel not found for key: {key}");
     }
 
+    
+    public bool TryClaimChannel(string channelKey)
+    {
+        return _claimedSequentialChannels.TryAdd(channelKey, true);
+    }
+
     public void SignalCompletion()
     {
         UnconstrainedChannel.TryComplete();
@@ -196,11 +197,6 @@ internal class ChannelMultiplexer
         {
             channel.TryComplete();
         }
-    }
-    
-    public bool TryClaimChannel(string channelKey)
-    {
-        return _claimedSequentialChannels.TryAdd(channelKey, true);
     }
     
     public void ReleaseChannelClaim(string channelKey)

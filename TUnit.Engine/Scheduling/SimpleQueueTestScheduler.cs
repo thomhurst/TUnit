@@ -9,19 +9,19 @@ using LoggingExtensions = TUnit.Core.Logging.LoggingExtensions;
 
 namespace TUnit.Engine.Scheduling;
 
-internal sealed class ProducerConsumerTestScheduler : ITestScheduler
+internal sealed class SimpleQueueTestScheduler : ITestScheduler
 {
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestGroupingService _groupingService;
     private readonly SchedulerConfiguration _configuration;
-    private readonly TestChannelRouter _channelRouter;
-    private readonly ChannelConsumerManager _consumerManager;
+    private readonly SimpleTestQueues _queues;
+    private readonly SimpleConsumerManager _consumerManager;
     private readonly ExecutionContextManager _executionContextManager;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private readonly HookOrchestrator _hookOrchestrator;
     private readonly ConcurrentDictionary<string, int> _runningConstraintKeys = new();
 
-    public ProducerConsumerTestScheduler(
+    public SimpleQueueTestScheduler(
         TUnitFrameworkLogger logger,
         ITestGroupingService groupingService,
         SchedulerConfiguration configuration,
@@ -34,8 +34,8 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         _eventReceiverOrchestrator = eventReceiverOrchestrator ?? throw new ArgumentNullException(nameof(eventReceiverOrchestrator));
         _hookOrchestrator = hookOrchestrator ?? throw new ArgumentNullException(nameof(hookOrchestrator));
         
-        _channelRouter = new TestChannelRouter(logger);
-        _consumerManager = new ChannelConsumerManager(logger, configuration);
+        _queues = new SimpleTestQueues(logger);
+        _consumerManager = new SimpleConsumerManager(logger, configuration);
         _executionContextManager = new ExecutionContextManager(logger);
     }
 
@@ -61,40 +61,37 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         }
 
         await _logger.LogInformationAsync($"Scheduling {testList.Count} tests for execution");
-        
 
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(testList);
         
-        var executionStates = new Dictionary<string, TestExecutionState>();
-        var orderedTests = new List<TestExecutionState>();
+        // Create execution states and enqueue all tests
+        var allTests = new List<TestExecutionState>();
         
+        // Add parallel tests
         foreach (var test in groupedTests.Parallel)
         {
             var state = new TestExecutionState(test);
-            executionStates[test.TestId] = state;
-            orderedTests.Add(state);
+            allTests.Add(state);
         }
         
+        // Add NotInParallel tests (ordered)
         while (groupedTests.NotInParallel.TryDequeue(out var test, out var testPriority))
         {
             var state = new TestExecutionState(test);
-            executionStates[test.TestId] = state;
-            orderedTests.Add(state);
-            
+            allTests.Add(state);
         }
         
+        // Add keyed NotInParallel tests (ordered by key then priority)
         foreach (var kvp in groupedTests.KeyedNotInParallel)
         {
-            var keyedOrderedTests = new List<TestExecutionState>();
             while (kvp.Value.TryDequeue(out var test, out var testPriority))
             {
                 var state = new TestExecutionState(test);
-                executionStates[test.TestId] = state;
-                keyedOrderedTests.Add(state);
+                allTests.Add(state);
             }
-            orderedTests.AddRange(keyedOrderedTests);
         }
         
+        // Add parallel group tests (ordered by group then priority)
         foreach (var group in groupedTests.ParallelGroups)
         {
             foreach (var orderGroup in group.Value)
@@ -102,74 +99,39 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                 foreach (var test in orderGroup.Value)
                 {
                     var state = new TestExecutionState(test);
-                    executionStates[test.TestId] = state;
-                    orderedTests.Add(state);
+                    allTests.Add(state);
                 }
             }
         }
         
-        await PreCreateChannelsForConstraintsAsync(executionStates.Values, cancellationToken);
+        // Sort all tests by priority (higher priority first)
+        allTests.Sort((a, b) => b.Priority.CompareTo(a.Priority));
         
-        // Route all tests immediately - dependency execution happens eagerly in test executor
-        var testsToRoute = new List<TestExecutionState>();
-        var keyedTestsWithOrder = new Dictionary<string, List<TestExecutionState>>();
-        
-        foreach (var state in orderedTests)
+        // Enqueue all tests in priority order
+        foreach (var state in allTests)
         {
-            if (state.ConstraintKey != null && state.Order != int.MaxValue / 2)
+            var testData = new TestExecutionData
             {
-                if (!keyedTestsWithOrder.ContainsKey(state.ConstraintKey))
-                {
-                    keyedTestsWithOrder[state.ConstraintKey] = new List<TestExecutionState>();
-                }
-                keyedTestsWithOrder[state.ConstraintKey].Add(state);
-            }
-            else
-            {
-                testsToRoute.Add(state);
-            }
+                Test = state.Test,
+                ExecutionContext = ExecutionContext.Capture(),
+                Constraints = GetConstraintKeys(state),
+                Priority = state.Priority,
+                State = state
+            };
+
+            _queues.EnqueueTest(testData);
         }
         
-        foreach (var state in testsToRoute)
-        {
-            await RouteTestAsync(state, cancellationToken);
-        }
+        await _logger.LogInformationAsync($"Enqueued {_queues.GetTotalQueuedCount()} tests in queues");
         
-        foreach (var kvp in keyedTestsWithOrder)
-        {
-            var sortedTests = kvp.Value.OrderBy(s => s.Order).ToList();
-            foreach (var state in sortedTests)
-            {
-                await RouteTestAsync(state, cancellationToken);
-            }
-        }
-        
-        // Start consumers to process tests from channels
-        var consumerTask = _consumerManager.StartConsumersAsync(
-            executor,
+        // Start consumers to process tests from queues
+        await _consumerManager.StartConsumersAsync(
+            _queues,
             _runningConstraintKeys,
             async (test, token) => await ExecuteTestWithContextAsync(test, executor, token),
-            _channelRouter.GetMultiplexer(),
             cancellationToken);
         
-        // No signaling needed - channels will auto-complete when empty and idle
-        await consumerTask;
-        
         await _logger.LogInformationAsync("Test execution completed");
-    }
-
-    private async Task RouteTestAsync(TestExecutionState state, CancellationToken cancellationToken)
-    {
-        var testData = new TestExecutionData
-        {
-            Test = state.Test,
-            ExecutionContext = ExecutionContext.Capture(),
-            Constraints = GetConstraintKeys(state),
-            Priority = state.Priority,
-            State = state
-        };
-
-        await _channelRouter.RouteTestAsync(testData, cancellationToken);
     }
 
     private async Task ExecuteTestWithContextAsync(
@@ -204,11 +166,6 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         }
         finally
         {
-            foreach (var key in testData.Constraints)
-            {
-                _runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
-            }
-            
             try
             {
                 using var cleanupCts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
@@ -257,47 +214,4 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
         
         return keys;
     }
-    
-    private Task PreCreateChannelsForConstraintsAsync(IEnumerable<TestExecutionState> states, CancellationToken cancellationToken)
-    {
-        var allConstraintKeys = new HashSet<string>();
-        var constraintKeyHasExplicitOrder = new Dictionary<string, bool>();
-        
-        foreach (var state in states)
-        {
-            var keys = GetConstraintKeys(state);
-            foreach (var key in keys)
-            {
-                allConstraintKeys.Add(key);
-                
-                if (!constraintKeyHasExplicitOrder.ContainsKey(key))
-                {
-                    constraintKeyHasExplicitOrder[key] = false;
-                }
-                
-                if (state.Order != int.MaxValue / 2)
-                {
-                    constraintKeyHasExplicitOrder[key] = true;
-                }
-            }
-        }
-        
-        foreach (var key in allConstraintKeys)
-        {
-            if (key.StartsWith("__parallel_group_"))
-            {
-                _channelRouter.GetMultiplexer().GetOrCreateParallelGroupChannel(key);
-            }
-            else if (key != "__global_not_in_parallel__")
-            {
-                var hasExplicitOrder = constraintKeyHasExplicitOrder.ContainsKey(key) ? constraintKeyHasExplicitOrder[key] : false;
-                _channelRouter.GetMultiplexer().GetOrCreateKeyedNotInParallelChannel(key, hasExplicitOrder);
-            }
-        }
-        
-        return Task.CompletedTask;
-    }
-    
-    
 }
-

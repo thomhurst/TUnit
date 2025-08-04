@@ -48,6 +48,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
         TestContext.Current = test.Context;
 
+        // Execute dependencies first (eager dependency execution)
+        await ExecuteDependenciesAsync(test, cancellationToken);
+
         test.StartTime = DateTimeOffset.Now;
         test.State = TestState.Running;
 
@@ -119,6 +122,195 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
 
         return CreateUpdateMessage(test);
+    }
+
+    private async Task ExecuteDependenciesAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        if (test.Dependencies.Length == 0)
+        {
+            return; // No dependencies to execute
+        }
+
+        var dependencyTasks = new List<Task<TestResult>>();
+
+        // Create execution tasks for all dependencies
+        foreach (var dependency in test.Dependencies)
+        {
+            var executionTask = GetOrCreateDependencyExecutionTaskAsync(dependency, cancellationToken);
+            dependencyTasks.Add(executionTask);
+        }
+
+        // Wait for all dependencies to complete
+        var dependencyResults = await Task.WhenAll(dependencyTasks);
+
+        // Check dependency results and handle proceed-on-failure logic
+        for (int i = 0; i < dependencyResults.Length; i++)
+        {
+            var result = dependencyResults[i];
+            var dependency = test.Dependencies[i];
+
+            // Find the corresponding dependency metadata by matching the dependency test
+            TestDependency? dependencyMeta = null;
+            foreach (var meta in test.Metadata.Dependencies)
+            {
+                if (meta.Matches(dependency.Metadata, test.Metadata))
+                {
+                    dependencyMeta = meta;
+                    break;
+                }
+            }
+
+            // If we can't find metadata, assume proceed-on-failure is false for safety
+            var proceedOnFailure = dependencyMeta?.ProceedOnFailure ?? false;
+
+            if (result.State == TestState.Failed && !proceedOnFailure)
+            {
+                // Dependency failed and proceed-on-failure is false - skip this test
+                test.State = TestState.Skipped;
+                test.Context.SkipReason = $"Dependency '{dependency.Context.GetDisplayName()}' failed";
+                test.Result = new TestResult
+                {
+                    State = TestState.Skipped,
+                    Start = DateTimeOffset.UtcNow,
+                    End = DateTimeOffset.UtcNow,
+                    Duration = TimeSpan.Zero,
+                    OverrideReason = test.Context.SkipReason,
+                    Exception = null,
+                    ComputerName = Environment.MachineName,
+                    TestContext = test.Context
+                };
+                return;
+            }
+        }
+    }
+
+    private Task<TestResult> GetOrCreateDependencyExecutionTaskAsync(AbstractExecutableTest dependency, CancellationToken cancellationToken)
+    {
+        // Check if execution task already exists (task reuse)
+        if (dependency.Context.ExecutionTask != null)
+        {
+            return dependency.Context.ExecutionTask;
+        }
+
+        // Create new execution task and store it for reuse
+        var executionTask = Task.Run(async () =>
+        {
+            try
+            {
+                // Execute the dependency test using direct execution (avoid recursive dependency execution)
+                await ExecuteTestDirectlyAsync(dependency, cancellationToken);
+                return dependency.Result ?? new TestResult
+                {
+                    State = TestState.Failed,
+                    Start = DateTimeOffset.UtcNow,
+                    End = DateTimeOffset.UtcNow,
+                    Duration = TimeSpan.Zero,
+                    Exception = new InvalidOperationException("Dependency execution completed but no result was set"),
+                    ComputerName = Environment.MachineName,
+                    TestContext = dependency.Context
+                };
+            }
+            catch (Exception ex)
+            {
+                return new TestResult
+                {
+                    State = TestState.Failed,
+                    Start = DateTimeOffset.UtcNow,
+                    End = DateTimeOffset.UtcNow,
+                    Duration = TimeSpan.Zero,
+                    Exception = ex,
+                    ComputerName = Environment.MachineName,
+                    TestContext = dependency.Context
+                };
+            }
+        }, cancellationToken);
+
+        // Store the task for reuse
+        dependency.Context.ExecutionTask = executionTask;
+        return executionTask;
+    }
+
+    private async Task ExecuteTestDirectlyAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        // This method executes a test directly without processing dependencies
+        // Used for dependency execution to avoid infinite recursion
+        
+        // If test is already failed, just return
+        if (test is { State: TestState.Failed, Result: not null })
+        {
+            return;
+        }
+
+        TestContext.Current = test.Context;
+
+        test.StartTime = DateTimeOffset.Now;
+        test.State = TestState.Running;
+
+        // Check if test is already marked as skipped
+        if (!string.IsNullOrEmpty(test.Context.SkipReason))
+        {
+            await HandleSkippedTestAsync(test, cancellationToken);
+            return;
+        }
+
+        // Check if we already have a skipped test instance from discovery
+        if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
+        {
+            await HandleSkippedTestAsync(test, cancellationToken);
+            return;
+        }
+
+        var instance = await test.CreateInstanceAsync();
+        test.Context.TestDetails.ClassInstance = instance;
+
+        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
+        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
+
+        await PropertyInjector.InjectPropertiesAsync(
+            test.Context,
+            instance,
+            test.Metadata.PropertyDataSources,
+            test.Metadata.PropertyInjections,
+            test.Metadata.MethodMetadata,
+            test.Context.TestDetails.TestId);
+
+        await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
+
+        var classContext = test.Context.ClassContext;
+        var assemblyContext = classContext.AssemblyContext;
+        var sessionContext = assemblyContext.TestSessionContext;
+
+        await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
+        await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
+        await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
+        await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken);
+
+        try
+        {
+            if (!string.IsNullOrEmpty(test.Context.SkipReason))
+            {
+                await HandleSkippedTestAsync(test, cancellationToken);
+                return;
+            }
+
+            if(test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
+            {
+                await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken);
+            }
+            else
+            {
+                await ExecuteTestWithHooksAsync(test, instance, cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleTestFailure(test, ex);
+        }
+        finally
+        {
+            test.EndTime = DateTimeOffset.Now;
+            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
+        }
     }
 
     private async Task ExecuteTestWithRetries(Func<Task> testDelegate, TestContext testContext, CancellationToken cancellationToken)

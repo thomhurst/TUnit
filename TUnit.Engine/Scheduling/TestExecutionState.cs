@@ -19,12 +19,6 @@ public sealed class TestExecutionState
     }
     
     // These are scheduling-specific fields not in the test context
-    private int _remainingDependencies;
-    public int RemainingDependencies
-    {
-        get => _remainingDependencies;
-        set => _remainingDependencies = value;
-    }
     public HashSet<string> Dependents { get; }
     public DateTime EnqueueTime { get; set; }
     public CancellationTokenSource? TimeoutCts { get; set; }
@@ -40,7 +34,6 @@ public sealed class TestExecutionState
     public TestExecutionState(AbstractExecutableTest test)
     {
         Test = test;
-        RemainingDependencies = test.Dependencies.Length;
         Dependents = new HashSet<string>();
         EnqueueTime = DateTime.UtcNow;
         
@@ -61,11 +54,4 @@ public sealed class TestExecutionState
         };
     }
 
-    /// <summary>
-    /// Atomically decrements the remaining dependencies count
-    /// </summary>
-    public int DecrementRemainingDependencies()
-    {
-        return Interlocked.Decrement(ref _remainingDependencies);
-    }
 }

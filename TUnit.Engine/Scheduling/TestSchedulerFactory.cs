@@ -24,7 +24,7 @@ internal static class TestSchedulerFactory
     {
         var groupingService = new TestGroupingService();
         
-        return new ProducerConsumerTestScheduler(
+        return new SimpleQueueTestScheduler(
             logger,
             groupingService,
             configuration,
