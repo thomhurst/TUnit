@@ -497,19 +497,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            // Skip instance hooks if this is a pre-skipped test
-            if (context.TestDetails.ClassInstance is SkippedTestInstance)
-            {
-                return;
-            }
-
-            if (hook.Body != null)
-            {
-                await hook.Body(
-                    context.TestDetails.ClassInstance,
-                    context,
-                    cancellationToken);
-            }
+            await hook.ExecuteAsync(context, cancellationToken);
         };
     }
 
@@ -517,10 +505,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            if (hook.Body != null)
-            {
-                await hook.Body(context, cancellationToken);
-            }
+            await hook.ExecuteAsync(context, cancellationToken);
         };
     }
 
@@ -528,10 +513,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            if (hook.Body != null)
-            {
-                await hook.Body(context, cancellationToken);
-            }
+            await hook.ExecuteAsync(context, cancellationToken);
         };
     }
 
@@ -539,10 +521,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            if (hook.Body != null)
-            {
-                await hook.Body(context, cancellationToken);
-            }
+            await hook.ExecuteAsync(context, cancellationToken);
         };
     }
 
@@ -550,10 +529,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            if (hook.Body != null)
-            {
-                await hook.Body(context, cancellationToken);
-            }
+            await hook.ExecuteAsync(context, cancellationToken);
         };
     }
 
@@ -561,10 +537,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            if (hook.Body != null)
-            {
-                await hook.Body(context, cancellationToken);
-            }
+            await hook.ExecuteAsync(context, cancellationToken);
         };
     }
 
@@ -572,10 +545,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            if (hook.Body != null)
-            {
-                await hook.Body(context, cancellationToken);
-            }
+            await hook.ExecuteAsync(context, cancellationToken);
         };
     }
 
