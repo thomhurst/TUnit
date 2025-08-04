@@ -132,7 +132,10 @@ internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDat
             // Execute cleanup hooks
             try
             {
-                await _hookOrchestrator.OnTestCompletedAsync(test, cancellationToken);
+                // Use a separate cancellation token for cleanup to ensure cleanup hooks execute
+                // even when the main test execution is cancelled. Give cleanup a reasonable timeout.
+                using var cleanupCts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+                await _hookOrchestrator.OnTestCompletedAsync(test, cleanupCts.Token);
             }
             catch (Exception ex)
             {
