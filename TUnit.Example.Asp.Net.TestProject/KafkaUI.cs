@@ -20,7 +20,7 @@ public class KafkaUI : IAsyncInitializer, IAsyncDisposable
     public IContainer Container => field ??= new ContainerBuilder()
         .WithNetwork(DockerNetwork.Instance)
         .WithImage("provectuslabs/kafka-ui:latest")
-        .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("*Started KafkaUiApplication*"))
+        .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged(".*Started KafkaUiApplication.*"))
         .WithPortBinding(8080, 8080)
         .WithEnvironment(new Dictionary<string, string>
         {

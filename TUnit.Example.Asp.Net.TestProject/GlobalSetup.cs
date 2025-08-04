@@ -5,4 +5,4 @@
 using TUnit.Core.Enums;
 
 [assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-[assembly: RunOn(OS.Linux)]
+//[assembly: RunOn(OS.Linux)]
