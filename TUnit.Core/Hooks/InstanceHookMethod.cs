@@ -38,7 +38,7 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
             return new ValueTask();
         }
 
-        return base.HookExecutor.ExecuteBeforeTestHook(MethodInfo, context,
+        return this.HookExecutor.ExecuteBeforeTestHook(MethodInfo, context,
             () => Body!.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
         );
     }

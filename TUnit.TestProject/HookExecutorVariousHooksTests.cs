@@ -31,7 +31,7 @@ public class HookExecutorVariousHooksTests
     
     [Before(HookType.Test)]
     [HookExecutor<STAThreadExecutor>]
-    public static void BeforeTest()
+    public void BeforeTest()
     {
         _beforeTestApartmentState = Thread.CurrentThread.GetApartmentState();
     }
