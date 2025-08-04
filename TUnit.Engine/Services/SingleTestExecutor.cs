@@ -21,13 +21,14 @@ internal class SingleTestExecutor : ISingleTestExecutor
     private readonly ITestResultFactory _resultFactory;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private readonly IHookCollectionService _hookCollectionService;
-    private SessionUid? _sessionUid;
+    private SessionUid _sessionUid;
 
-    public SingleTestExecutor(TUnitFrameworkLogger logger, EventReceiverOrchestrator eventReceiverOrchestrator, IHookCollectionService hookCollectionService)
+    public SingleTestExecutor(TUnitFrameworkLogger logger, EventReceiverOrchestrator eventReceiverOrchestrator, IHookCollectionService hookCollectionService, SessionUid sessionUid)
     {
         _logger = logger;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _hookCollectionService = hookCollectionService;
+        _sessionUid = sessionUid;
         _resultFactory = new TestResultFactory();
     }
 
@@ -40,11 +41,42 @@ internal class SingleTestExecutor : ISingleTestExecutor
         AbstractExecutableTest test,
         CancellationToken cancellationToken)
     {
+        // Check if this test is already executing to prevent duplicate execution
+        Task<TestResult>? existingTask = null;
+        lock (_executionTaskLock)
+        {
+            if (test.Context.ExecutionTask != null)
+            {
+                existingTask = test.Context.ExecutionTask;
+            }
+            else
+            {
+                // Create execution task without Task.Run to preserve AsyncLocal flow
+                test.Context.ExecutionTask = ExecuteTestInternalAsync(test, cancellationToken);
+            }
+        }
+
+        if (existingTask != null)
+        {
+            // Test is already executing, wait for it and return result
+            await existingTask;
+            return CreateUpdateMessage(test);
+        }
+
+        // Execute our newly created task
+        await test.Context.ExecutionTask!;
+        return CreateUpdateMessage(test);
+    }
+
+    private async Task<TestResult> ExecuteTestInternalAsync(
+        AbstractExecutableTest test,
+        CancellationToken cancellationToken)
+    {
         // If test is already failed (e.g., from data source expansion error),
         // just report the existing failure
         if (test is { State: TestState.Failed, Result: not null })
         {
-            return CreateUpdateMessage(test);
+            return test.Result;
         }
 
         TestContext.Current = test.Context;
@@ -58,13 +90,15 @@ internal class SingleTestExecutor : ISingleTestExecutor
         // Check if test is already marked as skipped (from basic SkipAttribute during discovery)
         if (!string.IsNullOrEmpty(test.Context.SkipReason))
         {
-            return await HandleSkippedTestAsync(test, cancellationToken);
+            await HandleSkippedTestInternalAsync(test, cancellationToken);
+            return test.Result!;
         }
 
         // Check if we already have a skipped test instance from discovery
         if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
         {
-            return await HandleSkippedTestAsync(test, cancellationToken);
+            await HandleSkippedTestInternalAsync(test, cancellationToken);
+            return test.Result!;
         }
 
         var instance = await test.CreateInstanceAsync();
@@ -98,7 +132,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             if (!string.IsNullOrEmpty(test.Context.SkipReason))
             {
-                return await HandleSkippedTestAsync(test, cancellationToken);
+                await HandleSkippedTestInternalAsync(test, cancellationToken);
+                return test.Result!;
             }
 
             if(test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
@@ -122,7 +157,16 @@ internal class SingleTestExecutor : ISingleTestExecutor
             await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
         }
 
-        return CreateUpdateMessage(test);
+        return test.Result ?? new TestResult
+        {
+            State = TestState.Failed,
+            Start = DateTimeOffset.UtcNow,
+            End = DateTimeOffset.UtcNow,
+            Duration = TimeSpan.Zero,
+            Exception = new InvalidOperationException("Test execution completed but no result was set"),
+            ComputerName = Environment.MachineName,
+            TestContext = test.Context
+        };
     }
 
     private async Task ExecuteDependenciesAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
@@ -191,37 +235,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         lock (_executionTaskLock)
         {
-            return dependency.Context.ExecutionTask ??= Task.Run(async () =>
-            {
-                try
-                {
-                    // Execute the dependency test using direct execution (avoid recursive dependency execution)
-                    await ExecuteTestDirectlyAsync(dependency, cancellationToken);
-                    return dependency.Result ?? new TestResult
-                    {
-                        State = TestState.Failed,
-                        Start = DateTimeOffset.UtcNow,
-                        End = DateTimeOffset.UtcNow,
-                        Duration = TimeSpan.Zero,
-                        Exception = new InvalidOperationException("Dependency execution completed but no result was set"),
-                        ComputerName = Environment.MachineName,
-                        TestContext = dependency.Context
-                    };
-                }
-                catch (Exception ex)
-                {
-                    return new TestResult
-                    {
-                        State = TestState.Failed,
-                        Start = DateTimeOffset.UtcNow,
-                        End = DateTimeOffset.UtcNow,
-                        Duration = TimeSpan.Zero,
-                        Exception = ex,
-                        ComputerName = Environment.MachineName,
-                        TestContext = dependency.Context
-                    };
-                }
-            }, cancellationToken);
+            return dependency.Context.ExecutionTask ??= ExecuteTestInternalAsync(dependency, cancellationToken);
         }
     }
 
@@ -345,6 +359,18 @@ internal class SingleTestExecutor : ISingleTestExecutor
         await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
 
         return CreateUpdateMessage(test);
+    }
+
+    private async Task HandleSkippedTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        test.State = TestState.Skipped;
+
+        test.Result = _resultFactory.CreateSkippedResult(
+            test.StartTime!.Value,
+            test.Context.SkipReason ?? "Test skipped");
+
+        test.EndTime = DateTimeOffset.Now;
+        await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
     }
 
     private async Task ExecuteTestWithHooksAsync(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
@@ -507,10 +533,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
 #pragma warning restore TPEXP
         }
 
-        var sessionUid = _sessionUid ?? CreateSessionUid(test);
-
         return new TestNodeUpdateMessage(
-            sessionUid: sessionUid,
+            sessionUid: _sessionUid,
             testNode: testNode);
     }
 
@@ -523,13 +547,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
             TestState.Skipped => new SkippedTestNodeStateProperty(test.Result!.OverrideReason ?? "Test skipped"),
             TestState.Timeout => new TimeoutTestNodeStateProperty(test.Result!.OverrideReason ?? "Test timed out"),
             TestState.Cancelled => new CancelledTestNodeStateProperty(),
-            _ => throw new ArgumentOutOfRangeException()
+            TestState.Running => new FailedTestNodeStateProperty(new InvalidOperationException("Test is still running")),
+            _ => new FailedTestNodeStateProperty(new InvalidOperationException($"Unknown test state: {test.State}"))
         };
-    }
-
-    private SessionUid CreateSessionUid(AbstractExecutableTest test)
-    {
-        return _sessionUid ?? new SessionUid(Guid.NewGuid().ToString());
     }
 
     private async Task InvokeTestWithTimeout(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)

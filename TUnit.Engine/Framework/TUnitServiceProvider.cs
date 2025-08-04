@@ -127,7 +127,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create single test executor with ExecutionContext support
         var singleTestExecutor = Register<ISingleTestExecutor>(
-            new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService));
+            new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService, context.Request.Session.SessionUid));
 
         // Create the HookOrchestratingTestExecutorAdapter
         // Note: We'll need to update this to handle dynamic dependencies properly
