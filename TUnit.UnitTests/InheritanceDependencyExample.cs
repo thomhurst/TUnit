@@ -3,6 +3,7 @@ namespace TUnit.UnitTests;
 /// <summary>
 /// Example showing how DependsOn works with inheritance
 /// </summary>
+[NotInParallel]
 public abstract class DatabaseTestBase
 {
     // Static dictionary to simulate a "database" that persists across test instances
@@ -76,6 +77,7 @@ public class ProductRepositoryTests : DatabaseTestBase
 /// <summary>
 /// Example with generic base classes
 /// </summary>
+[NotInParallel]
 public abstract class RepositoryTestBase<T> where T : class, new()
 {
     // Static dictionary to store entities by type
