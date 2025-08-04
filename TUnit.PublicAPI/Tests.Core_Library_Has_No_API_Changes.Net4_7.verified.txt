@@ -1189,7 +1189,7 @@ namespace
         public static . Configuration { get; }
         public new static .TestContext? Current { get; }
         public static string? OutputDirectory { get; }
-        public static .<string, string> Parameters { get; }
+        public static .<string, .<string>> Parameters { get; }
         public static string WorkingDirectory { get; set; }
         public void AddArtifact(.Artifact artifact) { }
         public void AddArtifact(string name, object? value) { }
@@ -1256,6 +1256,7 @@ namespace
         public int MethodGenericArity { get; init; }
         public string? MethodName { get; init; }
         public []? MethodParameters { get; init; }
+        public bool ProceedOnFailure { get; init; }
         public bool Equals(.TestDependency? other) { }
         public override bool Equals(object? obj) { }
         public override int GetHashCode() { }

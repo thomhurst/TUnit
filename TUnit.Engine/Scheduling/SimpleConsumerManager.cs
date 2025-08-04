@@ -60,34 +60,25 @@ internal class SimpleConsumerManager
             while (!cancellationToken.IsCancellationRequested)
             {
                 var currentConstraints = GetCurrentRunningConstraints(runningConstraintKeys);
-                var testData = queues.TryDequeueTest(currentConstraints);
+                var testData = queues.TryDequeueTestWithConstraints(currentConstraints, runningConstraintKeys, _constraintLock);
                 
                 if (testData != null)
                 {
-                    if (await TryAcquireConstraintsAsync(testData, runningConstraintKeys))
+                    try
                     {
-                        try
-                        {
-                            await executeTestFunc(testData, cancellationToken);
-                        }
-                        catch (Exception ex) when (ex is not OperationCanceledException)
-                        {
-                            await LoggingExtensions.LogErrorAsync(_logger, $"Error executing test {testData.Test.Context.TestName}: {ex.Message}");
-                        }
-                        finally
-                        {
-                            // Release constraints
-                            foreach (var key in testData.Constraints)
-                            {
-                                runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
-                            }
-                        }
+                        await executeTestFunc(testData, cancellationToken);
                     }
-                    else
+                    catch (Exception ex) when (ex is not OperationCanceledException)
                     {
-                        // Couldn't acquire constraints, put test back (this shouldn't happen with our logic)
-                        await LoggingExtensions.LogWarningAsync(_logger, $"Failed to acquire constraints for test {testData.Test.Context.TestName}");
-                        await Task.Delay(10, cancellationToken); // Brief delay to avoid tight loop
+                        await LoggingExtensions.LogErrorAsync(_logger, $"Error executing test {testData.Test.Context.TestName}: {ex.Message}");
+                    }
+                    finally
+                    {
+                        // Release constraints
+                        foreach (var key in testData.Constraints)
+                        {
+                            runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
+                        }
                     }
                 }
                 else
@@ -102,6 +93,7 @@ internal class SimpleConsumerManager
                         await LoggingExtensions.LogDebugAsync(_logger, $"{consumerName}: All queues empty and no tests running, exiting");
                         break;
                     }
+                    
                 }
             }
         }
@@ -122,6 +114,8 @@ internal class SimpleConsumerManager
             .Select(kvp => kvp.Key));
     }
 
+    private readonly object _constraintLock = new object();
+
     private Task<bool> TryAcquireConstraintsAsync(
         TestExecutionData testData,
         ConcurrentDictionary<string, int> runningConstraintKeys)
@@ -132,60 +126,57 @@ internal class SimpleConsumerManager
             return Task.FromResult(true);
         }
 
-        var acquired = new List<string>();
-        
-        try
+        lock (_constraintLock)
         {
-            foreach (var key in constraints)
+            var acquired = new List<string>();
+            
+            try
             {
-                var currentCount = runningConstraintKeys.AddOrUpdate(key, 1, (k, v) => v + 1);
-                
-                // Check constraint violations
-                var isNotInParallelConstraint = testData.State?.Constraint is NotInParallelConstraint;
-                
-                if (isNotInParallelConstraint && currentCount > 1)
+                // First, check if we can acquire ALL constraints without actually acquiring them
+                foreach (var key in constraints)
                 {
-                    runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
-                    break;
-                }
-                
-                if (key.StartsWith("__parallel_group_"))
-                {
-                    var otherGroups = runningConstraintKeys
-                        .Where(kvp => kvp.Key.StartsWith("__parallel_group_") && kvp.Key != key && kvp.Value > 0)
-                        .Any();
-                        
-                    if (otherGroups)
+                    runningConstraintKeys.TryGetValue(key, out var currentCount);
+                    var isNotInParallelConstraint = testData.State?.Constraint is NotInParallelConstraint;
+                    
+                    if (isNotInParallelConstraint && currentCount > 0)
                     {
-                        runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
-                        break;
+                        // Another NotInParallel test is already running with this key
+                        return Task.FromResult(false);
+                    }
+                    
+                    if (key.StartsWith("__parallel_group_"))
+                    {
+                        var otherGroups = runningConstraintKeys
+                            .Where(kvp => kvp.Key.StartsWith("__parallel_group_") && kvp.Key != key && kvp.Value > 0)
+                            .Any();
+                            
+                        if (otherGroups)
+                        {
+                            // Another parallel group is running
+                            return Task.FromResult(false);
+                        }
                     }
                 }
                 
-                acquired.Add(key);
-            }
+                // If we get here, we can acquire all constraints
+                foreach (var key in constraints)
+                {
+                    runningConstraintKeys.AddOrUpdate(key, 1, (k, v) => v + 1);
+                    acquired.Add(key);
+                }
 
-            if (acquired.Count == constraints.Count)
-            {
                 return Task.FromResult(true);
             }
-
-            // Rollback partial acquisition
-            foreach (var key in acquired)
+            catch
             {
-                runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
+                // Rollback on exception
+                foreach (var key in acquired)
+                {
+                    runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
+                }
+                
+                throw;
             }
-            
-            return Task.FromResult(false);
-        }
-        catch
-        {
-            // Rollback on exception
-            foreach (var key in acquired)
-            {
-                runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
-            }
-            throw;
         }
     }
 }

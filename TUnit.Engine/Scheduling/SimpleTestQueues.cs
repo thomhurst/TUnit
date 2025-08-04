@@ -25,6 +25,7 @@ internal class SimpleTestQueues
     {
         var constraints = testData.Constraints;
         
+        
         if (constraints.Count == 0)
         {
             // Unconstrained - can run in parallel with anything
@@ -61,7 +62,101 @@ internal class SimpleTestQueues
         }
     }
 
-    public TestExecutionData? TryDequeueTest(HashSet<string> runningConstraints)
+    public TestExecutionData? TryDequeueTestWithConstraints(
+        HashSet<string> runningConstraints, 
+        ConcurrentDictionary<string, int> runningConstraintKeys, 
+        object constraintLock)
+    {
+        lock (constraintLock)
+        {
+            return TryDequeueTestInternal(runningConstraints, runningConstraintKeys);
+        }
+    }
+
+    private TestExecutionData? TryDequeueTestInternal(
+        HashSet<string> runningConstraints, 
+        ConcurrentDictionary<string, int> runningConstraintKeys)
+    {
+        // Try keyed NotInParallel tests (if specific key not running) - with constraint acquisition
+        foreach (var kvp in _keyedNotInParallelQueues.ToList())
+        {
+            var key = kvp.Key;
+            var queue = kvp.Value;
+            
+            
+            if (!runningConstraints.Contains(key))
+            {
+                var lockObj = _keyedLocks.GetOrAdd(key, _ => new object());
+                lock (lockObj)
+                {
+                    if (queue.Count > 0)
+                    {
+                        var test = queue.Peek(); // Peek first, don't dequeue yet
+                        
+                        // Try to acquire constraints
+                        var constraints = test.Constraints;
+                        var canAcquire = true;
+                        var acquired = new List<string>();
+                        
+                        try
+                        {
+                            foreach (var constraintKey in constraints)
+                            {
+                                runningConstraintKeys.TryGetValue(constraintKey, out var currentCount);
+                                var isNotInParallelConstraint = test.State?.Constraint is NotInParallelConstraint;
+                                
+                                if (isNotInParallelConstraint && currentCount > 0)
+                                {
+                                    canAcquire = false;
+                                    break;
+                                }
+                                
+                                if (constraintKey.StartsWith("__parallel_group_"))
+                                {
+                                    var otherGroups = runningConstraintKeys
+                                        .Where(kvp => kvp.Key.StartsWith("__parallel_group_") && kvp.Key != constraintKey && kvp.Value > 0)
+                                        .Any();
+                                        
+                                    if (otherGroups)
+                                    {
+                                        canAcquire = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if (canAcquire)
+                            {
+                                // Acquire all constraints
+                                foreach (var constraintKey in constraints)
+                                {
+                                    runningConstraintKeys.AddOrUpdate(constraintKey, 1, (k, v) => v + 1);
+                                    acquired.Add(constraintKey);
+                                }
+                                
+                                // Now dequeue the test
+                                var dequeuedTest = queue.Dequeue();
+                                return dequeuedTest;
+                            }
+                        }
+                        catch
+                        {
+                            // Rollback on exception
+                            foreach (var constraintKey in acquired)
+                            {
+                                runningConstraintKeys.AddOrUpdate(constraintKey, 0, (k, v) => Math.Max(0, v - 1));
+                            }
+                            throw;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return TryDequeueTestOld(runningConstraints); // Fallback to old logic for other queue types
+    }
+    
+    public TestExecutionData? TryDequeueTestOld(HashSet<string> runningConstraints)
     {
         // Try unconstrained tests first (highest throughput)
         if (_unconstrainedQueue.TryDequeue(out var unconstrainedTest))
@@ -90,6 +185,7 @@ internal class SimpleTestQueues
         {
             var key = kvp.Key;
             var queue = kvp.Value;
+            
             
             if (!runningConstraints.Contains(key))
             {
