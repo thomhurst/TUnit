@@ -10,7 +10,7 @@ open TUnit.Assertions.Extensions
 
 type Tests() =
 
-    [<ClassDataSource(typeof<WebApplicationFactory>, Shared = SharedType.PerTestSession)>]
+    [<ClassDataSource(typeof<WebApplicationFactory>, Shared = [|SharedType.PerTestSession|])>]
     member val public WebApplicationFactory: WebApplicationFactory = Unchecked.defaultof<WebApplicationFactory> with get, set
 
     [<Test>]
