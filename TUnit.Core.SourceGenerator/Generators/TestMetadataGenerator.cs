@@ -95,7 +95,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             TypeSymbol = containingType,
             FilePath = methodSyntax.SyntaxTree.FilePath,
             LineNumber = methodSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
-            TestAttribute = context.Attributes.First(),
+            TestAttribute = context.Attributes.FirstOrDefault() ?? throw new InvalidOperationException($"No test attribute found for method {methodSymbol.Name}"),
             Context = context,
             MethodSyntax = methodSyntax,
             IsGenericType = isGenericType,
@@ -106,43 +106,216 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateInheritedTestSources(SourceProductionContext context, Compilation compilation, InheritsTestsClassMetadata? classInfo)
     {
-        if (classInfo?.TypeSymbol == null)
+        try
         {
-            return;
-        }
-
-        // Find all test methods in base classes
-        var inheritedTestMethods = CollectInheritedTestMethods(classInfo.TypeSymbol);
-
-        // Generate test metadata for each inherited test method
-        foreach (var method in inheritedTestMethods)
-        {
-            var testAttribute = method.GetAttributes().FirstOrDefault(a => a.IsTestAttribute());
-
-            // Skip if no test attribute found
-            if (testAttribute == null)
+            if (classInfo?.TypeSymbol == null)
             {
-                continue;
+                return;
             }
 
-            // Find the concrete implementation of this method in the derived class
-            var concreteMethod = FindConcreteMethodImplementation(classInfo.TypeSymbol, method);
+            // Find all test methods in base classes
+            var inheritedTestMethods = CollectInheritedTestMethods(classInfo.TypeSymbol);
 
-            var testMethodMetadata = new TestMethodMetadata
+            // Check if any inherited test methods have empty data sources
+            ValidateInheritedTestDataSources(context, classInfo, inheritedTestMethods);
+
+            // Generate test metadata for each inherited test method
+            foreach (var method in inheritedTestMethods)
             {
-                MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
-                TypeSymbol = classInfo.TypeSymbol,
-                FilePath = classInfo.ClassSyntax.SyntaxTree.FilePath,
-                LineNumber = classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
-                TestAttribute = testAttribute,
-                Context = null, // No context for inherited tests
-                MethodSyntax = null, // No syntax for inherited methods
-                IsGenericType = classInfo.TypeSymbol.IsGenericType,
-                IsGenericMethod = (concreteMethod ?? method).IsGenericMethod,
-                MethodAttributes = (concreteMethod ?? method).GetAttributes(), // Use concrete method attributes
-            };
+                var testAttribute = method.GetAttributes().FirstOrDefault(a => a.IsTestAttribute());
 
-            GenerateTestMethodSource(context, compilation, testMethodMetadata);
+                // Skip if no test attribute found
+                if (testAttribute == null)
+                {
+                    continue;
+                }
+
+                // Find the concrete implementation of this method in the derived class
+                var concreteMethod = FindConcreteMethodImplementation(classInfo.TypeSymbol, method);
+
+                var testMethodMetadata = new TestMethodMetadata
+                {
+                    MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
+                    TypeSymbol = classInfo.TypeSymbol,
+                    FilePath = classInfo.ClassSyntax.SyntaxTree.FilePath,
+                    LineNumber = classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+                    TestAttribute = testAttribute,
+                    Context = null, // No context for inherited tests
+                    MethodSyntax = null, // No syntax for inherited methods
+                    IsGenericType = classInfo.TypeSymbol.IsGenericType,
+                    IsGenericMethod = (concreteMethod ?? method).IsGenericMethod,
+                    MethodAttributes = (concreteMethod ?? method).GetAttributes(), // Use concrete method attributes
+                };
+
+                GenerateTestMethodSource(context, compilation, testMethodMetadata);
+            }
+        }
+        catch (Exception ex)
+        {
+            var className = classInfo?.TypeSymbol?.Name ?? "Unknown";
+
+            context.ReportDiagnostic(Diagnostic.Create(
+                new DiagnosticDescriptor(
+                    "TUNIT0998",
+                    "Inherited Test Generation Error",
+                    "Failed to generate inherited tests for class {0}: {1}",
+                    "TUnit",
+                    DiagnosticSeverity.Error,
+                    true),
+                classInfo?.ClassSyntax.GetLocation() ?? Location.None,
+                className,
+                ex.Message));
+        }
+    }
+
+    private static void ValidateInheritedTestDataSources(SourceProductionContext context, InheritsTestsClassMetadata classInfo, List<IMethodSymbol> inheritedTestMethods)
+    {
+        try
+        {
+            if (inheritedTestMethods == null || !inheritedTestMethods.Any())
+            {
+                return;
+            }
+
+            foreach (var method in inheritedTestMethods)
+            {
+                try
+                {
+                    // Check for data source attributes on inherited test methods
+                    var dataSourceAttributes = method.GetAttributes()
+                        .Where(attr => DataSourceAttributeHelper.IsDataSourceAttribute(attr.AttributeClass))
+                        .ToList();
+
+                    foreach (var attr in dataSourceAttributes)
+                    {
+                        // Check for InstanceMethodDataSource or MethodDataSource attributes
+                        if (attr.AttributeClass?.Name is "InstanceMethodDataSourceAttribute" or "MethodDataSourceAttribute")
+                        {
+                            ValidateMethodDataSourceAttribute(context, classInfo, method, attr);
+                        }
+                    }
+                }
+                catch (Exception methodEx)
+                {
+                    // Log per-method validation error but continue with other methods
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        new DiagnosticDescriptor(
+                            "TUNIT0993",
+                            "Test Method Data Source Validation Warning",
+                            "Warning while validating data sources for inherited test method '{0}' in class '{1}': {2}",
+                            "TUnit",
+                            DiagnosticSeverity.Warning,
+                            true),
+                        classInfo.ClassSyntax.GetLocation(),
+                        method.Name,
+                        classInfo.TypeSymbol.Name,
+                        methodEx.Message));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the validation error but don't fail the generation
+            context.ReportDiagnostic(Diagnostic.Create(
+                new DiagnosticDescriptor(
+                    "TUNIT0997",
+                    "Test Data Source Validation Warning",
+                    "Warning while validating data sources for inherited tests in class {0}: {1}",
+                    "TUnit",
+                    DiagnosticSeverity.Warning,
+                    true),
+                classInfo.ClassSyntax.GetLocation(),
+                classInfo.TypeSymbol.Name,
+                ex.Message));
+        }
+    }
+
+    private static void ValidateMethodDataSourceAttribute(SourceProductionContext context, InheritsTestsClassMetadata classInfo, IMethodSymbol testMethod, AttributeData attr)
+    {
+        try
+        {
+            // Extract method name and target type
+            string? methodName = null;
+            ITypeSymbol? targetType = null;
+
+            if (attr.ConstructorArguments is [{ Value: ITypeSymbol }, _, ..])
+            {
+                // MethodDataSource(Type, string) overload
+                targetType = (ITypeSymbol?)attr.ConstructorArguments[0].Value;
+                methodName = attr.ConstructorArguments[1].Value?.ToString();
+            }
+            else if (attr.ConstructorArguments.Length >= 1)
+            {
+                // MethodDataSource(string) overload
+                methodName = attr.ConstructorArguments[0].Value?.ToString();
+                targetType = testMethod.ContainingType;
+            }
+
+            if (string.IsNullOrEmpty(methodName) || targetType == null)
+            {
+                return;
+            }
+
+            // Find the data source method
+            var dataSourceMethods = targetType.GetMembers(methodName)
+                .OfType<IMethodSymbol>()
+                .ToList();
+
+            if (!dataSourceMethods.Any())
+            {
+                // Report that no data source method was found
+                context.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        "TUNIT0996",
+                        "Data Source Method Not Found",
+                        "Data source method '{0}' not found in type '{1}' for inherited test '{2}' in class '{3}'. This may cause runtime failures if the data source returns empty collections.",
+                        "TUnit",
+                        DiagnosticSeverity.Warning,
+                        true),
+                    classInfo.ClassSyntax.GetLocation(),
+                    methodName,
+                    targetType.Name,
+                    testMethod.Name,
+                    classInfo.TypeSymbol.Name));
+                return;
+            }
+
+            // Additional validation could be added here to check method signatures, return types, etc.
+            // For now, we just warn about the potential for empty data sources
+            if (dataSourceMethods.Count == 1)
+            {
+                var dataSourceMethod = dataSourceMethods[0];
+                
+                // Provide a warning about potential empty data sources in inherited tests
+                context.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        "TUNIT0995",
+                        "Potential Empty Data Source in Inherited Test",
+                        "Test method '{0}' in inherited class '{1}' uses data source method '{2}'. Ensure the data source method returns non-empty data to avoid test generation issues.",
+                        "TUnit",
+                        DiagnosticSeverity.Info,
+                        true),
+                    classInfo.ClassSyntax.GetLocation(),
+                    testMethod.Name,
+                    classInfo.TypeSymbol.Name,
+                    methodName));
+            }
+        }
+        catch (Exception ex)
+        {
+            // Don't fail the generation, just log the issue
+            context.ReportDiagnostic(Diagnostic.Create(
+                new DiagnosticDescriptor(
+                    "TUNIT0994",
+                    "Data Source Validation Error",
+                    "Error validating data source attribute for method '{0}' in class '{1}': {2}",
+                    "TUnit",
+                    DiagnosticSeverity.Warning,
+                    true),
+                classInfo.ClassSyntax.GetLocation(),
+                testMethod.Name,
+                classInfo.TypeSymbol.Name,
+                ex.Message));
         }
     }
 
