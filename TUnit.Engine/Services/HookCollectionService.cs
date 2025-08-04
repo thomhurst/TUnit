@@ -19,17 +19,20 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         var hooks = _beforeTestHooksCache.GetOrAdd(testClassType, type =>
         {
-            var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
+            var hooksByType = new List<(Type type, List<(int order, Func<TestContext, CancellationToken, Task> hook)> hooks)>();
 
+            // Collect hooks for each type in the hierarchy
             var currentType = type;
             while (currentType != null)
             {
-                if (Sources.BeforeTestHooks.TryGetValue(currentType, out var typeHooks))
+                var typeHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
+
+                if (Sources.BeforeTestHooks.TryGetValue(currentType, out var sourceHooks))
                 {
-                    foreach (var hook in typeHooks)
+                    foreach (var hook in sourceHooks)
                     {
                         var hookFunc = CreateInstanceHookDelegate(hook);
-                        allHooks.Add((hook.Order, hookFunc));
+                        typeHooks.Add((hook.Order, hookFunc));
                     }
                 }
 
@@ -42,18 +45,31 @@ internal sealed class HookCollectionService : IHookCollectionService
                         foreach (var hook in openTypeHooks)
                         {
                             var hookFunc = CreateInstanceHookDelegate(hook);
-                            allHooks.Add((hook.Order, hookFunc));
+                            typeHooks.Add((hook.Order, hookFunc));
                         }
                     }
+                }
+
+                if (typeHooks.Count > 0)
+                {
+                    hooksByType.Add((currentType, typeHooks));
                 }
 
                 currentType = currentType.BaseType;
             }
 
-            return allHooks
-                .OrderBy(h => h.order)
-                .Select(h => h.hook)
-                .ToList();
+            // For Before hooks: base class hooks run first
+            // Reverse the list since we collected from derived to base
+            hooksByType.Reverse();
+
+            var finalHooks = new List<Func<TestContext, CancellationToken, Task>>();
+            foreach (var (_, typeHooks) in hooksByType)
+            {
+                // Within each type level, sort by Order
+                finalHooks.AddRange(typeHooks.OrderBy(h => h.order).Select(h => h.hook));
+            }
+
+            return finalHooks;
         });
 
         return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(hooks);
@@ -63,17 +79,20 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         var hooks = _afterTestHooksCache.GetOrAdd(testClassType, type =>
         {
-            var allHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
+            var hooksByType = new List<(Type type, List<(int order, Func<TestContext, CancellationToken, Task> hook)> hooks)>();
 
+            // Collect hooks for each type in the hierarchy
             var currentType = type;
             while (currentType != null)
             {
-                if (Sources.AfterTestHooks.TryGetValue(currentType, out var typeHooks))
+                var typeHooks = new List<(int order, Func<TestContext, CancellationToken, Task> hook)>();
+
+                if (Sources.AfterTestHooks.TryGetValue(currentType, out var sourceHooks))
                 {
-                    foreach (var hook in typeHooks)
+                    foreach (var hook in sourceHooks)
                     {
                         var hookFunc = CreateInstanceHookDelegate(hook);
-                        allHooks.Add((hook.Order, hookFunc));
+                        typeHooks.Add((hook.Order, hookFunc));
                     }
                 }
 
@@ -86,18 +105,30 @@ internal sealed class HookCollectionService : IHookCollectionService
                         foreach (var hook in openTypeHooks)
                         {
                             var hookFunc = CreateInstanceHookDelegate(hook);
-                            allHooks.Add((hook.Order, hookFunc));
+                            typeHooks.Add((hook.Order, hookFunc));
                         }
                     }
+                }
+
+                if (typeHooks.Count > 0)
+                {
+                    hooksByType.Add((currentType, typeHooks));
                 }
 
                 currentType = currentType.BaseType;
             }
 
-            return allHooks
-                .OrderBy(h => h.order)
-                .Select(h => h.hook)
-                .ToList();
+            // For After hooks: derived class hooks run first
+            // No need to reverse since we collected from derived to base
+
+            var finalHooks = new List<Func<TestContext, CancellationToken, Task>>();
+            foreach (var (_, typeHooks) in hooksByType)
+            {
+                // Within each type level, sort by Order
+                finalHooks.AddRange(typeHooks.OrderBy(h => h.order).Select(h => h.hook));
+            }
+
+            return finalHooks;
         });
 
         return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(hooks);
@@ -151,17 +182,20 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         var hooks = _beforeClassHooksCache.GetOrAdd(testClassType, type =>
         {
-            var allHooks = new List<(int order, Func<ClassHookContext, CancellationToken, Task> hook)>();
+            var hooksByType = new List<(Type type, List<(int order, Func<ClassHookContext, CancellationToken, Task> hook)> hooks)>();
 
+            // Collect hooks for each type in the hierarchy
             var currentType = type;
             while (currentType != null)
             {
-                if (Sources.BeforeClassHooks.TryGetValue(currentType, out var typeHooks))
+                var typeHooks = new List<(int order, Func<ClassHookContext, CancellationToken, Task> hook)>();
+
+                if (Sources.BeforeClassHooks.TryGetValue(currentType, out var sourceHooks))
                 {
-                    foreach (var hook in typeHooks)
+                    foreach (var hook in sourceHooks)
                     {
                         var hookFunc = CreateClassHookDelegate(hook);
-                        allHooks.Add((hook.Order, hookFunc));
+                        typeHooks.Add((hook.Order, hookFunc));
                     }
                 }
 
@@ -174,18 +208,31 @@ internal sealed class HookCollectionService : IHookCollectionService
                         foreach (var hook in openTypeHooks)
                         {
                             var hookFunc = CreateClassHookDelegate(hook);
-                            allHooks.Add((hook.Order, hookFunc));
+                            typeHooks.Add((hook.Order, hookFunc));
                         }
                     }
+                }
+
+                if (typeHooks.Count > 0)
+                {
+                    hooksByType.Add((currentType, typeHooks));
                 }
 
                 currentType = currentType.BaseType;
             }
 
-            return allHooks
-                .OrderBy(h => h.order)
-                .Select(h => h.hook)
-                .ToList();
+            // For Before hooks: base class hooks run first
+            // Reverse the list since we collected from derived to base
+            hooksByType.Reverse();
+
+            var finalHooks = new List<Func<ClassHookContext, CancellationToken, Task>>();
+            foreach (var (_, typeHooks) in hooksByType)
+            {
+                // Within each type level, sort by Order
+                finalHooks.AddRange(typeHooks.OrderBy(h => h.order).Select(h => h.hook));
+            }
+
+            return finalHooks;
         });
 
         return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
@@ -195,17 +242,20 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         var hooks = _afterClassHooksCache.GetOrAdd(testClassType, type =>
         {
-            var allHooks = new List<(int order, Func<ClassHookContext, CancellationToken, Task> hook)>();
+            var hooksByType = new List<(Type type, List<(int order, Func<ClassHookContext, CancellationToken, Task> hook)> hooks)>();
 
+            // Collect hooks for each type in the hierarchy
             var currentType = type;
             while (currentType != null)
             {
-                if (Sources.AfterClassHooks.TryGetValue(currentType, out var typeHooks))
+                var typeHooks = new List<(int order, Func<ClassHookContext, CancellationToken, Task> hook)>();
+
+                if (Sources.AfterClassHooks.TryGetValue(currentType, out var sourceHooks))
                 {
-                    foreach (var hook in typeHooks)
+                    foreach (var hook in sourceHooks)
                     {
                         var hookFunc = CreateClassHookDelegate(hook);
-                        allHooks.Add((hook.Order, hookFunc));
+                        typeHooks.Add((hook.Order, hookFunc));
                     }
                 }
 
@@ -218,18 +268,30 @@ internal sealed class HookCollectionService : IHookCollectionService
                         foreach (var hook in openTypeHooks)
                         {
                             var hookFunc = CreateClassHookDelegate(hook);
-                            allHooks.Add((hook.Order, hookFunc));
+                            typeHooks.Add((hook.Order, hookFunc));
                         }
                     }
+                }
+
+                if (typeHooks.Count > 0)
+                {
+                    hooksByType.Add((currentType, typeHooks));
                 }
 
                 currentType = currentType.BaseType;
             }
 
-            return allHooks
-                .OrderBy(h => h.order)
-                .Select(h => h.hook)
-                .ToList();
+            // For After hooks: derived class hooks run first
+            // No need to reverse since we collected from derived to base
+
+            var finalHooks = new List<Func<ClassHookContext, CancellationToken, Task>>();
+            foreach (var (_, typeHooks) in hooksByType)
+            {
+                // Within each type level, sort by Order
+                finalHooks.AddRange(typeHooks.OrderBy(h => h.order).Select(h => h.hook));
+            }
+
+            return finalHooks;
         });
 
         return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
