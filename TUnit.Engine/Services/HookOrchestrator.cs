@@ -109,11 +109,11 @@ internal sealed class HookOrchestrator
                 exceptions.Add(ex);
             }
         }
-        
+
         if (exceptions.Count > 0)
         {
-            throw exceptions.Count == 1 
-                ? new HookFailedException(exceptions[0]) 
+            throw exceptions.Count == 1
+                ? new HookFailedException(exceptions[0])
                 : new HookFailedException("Multiple AfterTestSession hooks failed", new AggregateException(exceptions));
         }
 
@@ -167,11 +167,11 @@ internal sealed class HookOrchestrator
                 exceptions.Add(ex);
             }
         }
-        
+
         if (exceptions.Count > 0)
         {
-            throw exceptions.Count == 1 
-                ? new HookFailedException(exceptions[0]) 
+            throw exceptions.Count == 1
+                ? new HookFailedException(exceptions[0])
                 : new HookFailedException("Multiple AfterTestDiscovery hooks failed", new AggregateException(exceptions));
         }
 
@@ -184,6 +184,11 @@ internal sealed class HookOrchestrator
 
     public async Task<ExecutionContext> OnTestStartingAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
+        if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
+        {
+            return ExecutionContext.Capture()!;
+        }
+
         var testClassType = test.Metadata.TestClassType;
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";
 
@@ -210,6 +215,11 @@ internal sealed class HookOrchestrator
 
     public async Task OnTestCompletedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
+        if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
+        {
+            return;
+        }
+
         var testClassType = test.Metadata.TestClassType;
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";
 
@@ -309,11 +319,11 @@ internal sealed class HookOrchestrator
                 exceptions.Add(ex);
             }
         }
-        
+
         if (exceptions.Count > 0)
         {
-            throw exceptions.Count == 1 
-                ? new HookFailedException(exceptions[0]) 
+            throw exceptions.Count == 1
+                ? new HookFailedException(exceptions[0])
                 : new HookFailedException("Multiple AfterAssembly hooks failed", new AggregateException(exceptions));
         }
 
@@ -398,11 +408,11 @@ internal sealed class HookOrchestrator
                 exceptions.Add(ex);
             }
         }
-        
+
         if (exceptions.Count > 0)
         {
-            throw exceptions.Count == 1 
-                ? new HookFailedException(exceptions[0]) 
+            throw exceptions.Count == 1
+                ? new HookFailedException(exceptions[0])
                 : new HookFailedException("Multiple AfterClass hooks failed", new AggregateException(exceptions));
         }
 
@@ -446,11 +456,11 @@ internal sealed class HookOrchestrator
                 exceptions.Add(ex);
             }
         }
-        
+
         if (exceptions.Count > 0)
         {
-            throw exceptions.Count == 1 
-                ? new HookFailedException(exceptions[0]) 
+            throw exceptions.Count == 1
+                ? new HookFailedException(exceptions[0])
                 : new HookFailedException("Multiple AfterEveryTest hooks failed", new AggregateException(exceptions));
         }
     }

@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
 
@@ -136,6 +137,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         var lineNumber = location.GetLineSpan().StartLinePosition.Line + 1;
 
         var order = GetHookOrder(hookAttribute);
+        var hookExecutor = GetHookExecutorType(methodSymbol);
 
         return new HookMethodMetadata
         {
@@ -146,7 +148,8 @@ public class HookMetadataGenerator : IIncrementalGenerator
             HookKind = hookKind,
             HookType = hookType,
             Order = order,
-            Context = context
+            Context = context,
+            HookExecutor = hookExecutor
         };
     }
 
@@ -235,6 +238,62 @@ public class HookMetadataGenerator : IIncrementalGenerator
             return order;
         }
         return 0;
+    }
+
+    private static string? GetHookExecutorType(IMethodSymbol methodSymbol)
+    {
+        var hookExecutorAttribute = methodSymbol.GetAttributes()
+            .FirstOrDefault(a => a.AttributeClass?.Name == "HookExecutorAttribute" || 
+                                 (a.AttributeClass?.IsGenericType == true && 
+                                  a.AttributeClass?.ConstructedFrom?.Name == "HookExecutorAttribute"));
+
+        if (hookExecutorAttribute == null)
+        {
+            return null;
+        }
+
+        // For generic HookExecutorAttribute<T>, get the type argument
+        if (hookExecutorAttribute.AttributeClass?.IsGenericType == true)
+        {
+            var typeArg = hookExecutorAttribute.AttributeClass.TypeArguments.FirstOrDefault();
+            return typeArg?.GloballyQualified();
+        }
+
+        // For non-generic HookExecutorAttribute(Type type), get the constructor argument
+        var typeArgument = hookExecutorAttribute.ConstructorArguments.FirstOrDefault();
+        if (typeArgument.Value is ITypeSymbol typeSymbol)
+        {
+            return typeSymbol.GloballyQualified();
+        }
+
+        return null;
+    }
+
+    private static string GetConcreteHookType(string dictionaryName, bool isInstance)
+    {
+        if (isInstance)
+        {
+            return "InstanceHookMethod";
+        }
+
+        return dictionaryName switch
+        {
+            "BeforeClassHooks" => "BeforeClassHookMethod",
+            "AfterClassHooks" => "AfterClassHookMethod",
+            "BeforeAssemblyHooks" => "BeforeAssemblyHookMethod",
+            "AfterAssemblyHooks" => "AfterAssemblyHookMethod",
+            "BeforeTestSessionHooks" => "BeforeTestSessionHookMethod",
+            "AfterTestSessionHooks" => "AfterTestSessionHookMethod",
+            "BeforeTestDiscoveryHooks" => "BeforeTestDiscoveryHookMethod",
+            "AfterTestDiscoveryHooks" => "AfterTestDiscoveryHookMethod",
+            "BeforeEveryTestHooks" => "BeforeTestHookMethod",
+            "AfterEveryTestHooks" => "AfterTestHookMethod",
+            "BeforeEveryClassHooks" => "BeforeClassHookMethod",
+            "AfterEveryClassHooks" => "AfterClassHookMethod",
+            "BeforeEveryAssemblyHooks" => "BeforeAssemblyHookMethod",
+            "AfterEveryAssemblyHooks" => "AfterAssemblyHookMethod",
+            _ => throw new ArgumentException($"Unknown dictionary name: {dictionaryName}")
+        };
     }
 
     private static void GenerateHookRegistry(SourceProductionContext context, ImmutableArray<HookMethodMetadata> hooks)
@@ -663,7 +722,8 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateHookListPopulation(CodeWriter writer, string dictionaryName, string typeDisplay, List<HookMethodMetadata> hooks, bool isInstance)
     {
-        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd(typeof({typeDisplay}), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{(isInstance ? "InstanceHookMethod" : $"StaticHookMethod<{GetContextType(hooks.First().HookType)}>")}>());");
+        var hookType = GetConcreteHookType(dictionaryName, isInstance);
+        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd(typeof({typeDisplay}), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
 
         foreach (var hook in hooks.OrderBy(h => h.Order))
         {
@@ -679,7 +739,8 @@ public class HookMetadataGenerator : IIncrementalGenerator
     private static void GenerateAssemblyHookListPopulation(CodeWriter writer, string dictionaryName, string assemblyVarName, List<HookMethodMetadata> hooks)
     {
         var assemblyVar = assemblyVarName.Replace(".", "_") + "_assembly";
-        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd({assemblyVar}, _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.StaticHookMethod<AssemblyHookContext>>());");
+        var hookType = GetConcreteHookType(dictionaryName, false);
+        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd({assemblyVar}, _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
 
         foreach (var hook in hooks.OrderBy(h => h.Order))
         {
@@ -722,7 +783,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         writer.Append("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(writer, hook.Context.SemanticModel.Compilation, hook.TypeSymbol, hook.MethodSymbol, null, ',');
         writer.AppendLine();
-        writer.AppendLine("HookExecutor = null!,");
+        writer.AppendLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(hook.HookExecutor)},");
         writer.AppendLine($"Order = {hook.Order},");
         writer.AppendLine($"Body = {delegateKey}_Body" + (isInstance ? "" : ","));
 
@@ -835,4 +896,5 @@ public class HookMethodMetadata
     public required string HookType { get; init; }
     public required int Order { get; init; }
     public required GeneratorAttributeSyntaxContext Context { get; init; }
+    public string? HookExecutor { get; init; }
 }
