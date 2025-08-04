@@ -1,4 +1,4 @@
-[assembly: .(".NETStandard,Version=v2.0", FrameworkDisplayName=".NET Standard 2.0")]
+﻿[assembly: .(".NETStandard,Version=v2.0", FrameworkDisplayName=".NET Standard 2.0")]
 namespace 
 {
     public static class Assert
@@ -703,11 +703,13 @@ namespace .AssertionBuilders
     }
     public class MappableResultAssertionBuilder<TActual, TExpected> : .<TActual>
     {
+        public MappableResultAssertionBuilder(.<TActual> assertionBuilder, <TActual?, TExpected?> mapper) { }
         public new .<TExpected?> GetAwaiter() { }
     }
     public class MappableResultAssertionBuilder<TActual, TAssertCondition, TExpected> : .<TActual>
         where TAssertCondition : .<TActual>
     {
+        public MappableResultAssertionBuilder(.<TActual> assertionBuilder, TAssertCondition assertCondition, <TActual?, TAssertCondition, TExpected?> mapper) { }
         public new .<TExpected?> GetAwaiter() { }
     }
     public class OrAssertionBuilder : ., . { }
