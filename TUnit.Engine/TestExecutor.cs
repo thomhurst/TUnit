@@ -79,13 +79,23 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         }
         finally
         {
-            var afterSessionContext = await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cancellationToken);
-#if NET
-            if (afterSessionContext != null)
+            // Execute session cleanup hooks with a separate cancellation token to ensure
+            // cleanup executes even when test execution is cancelled
+            try
             {
-                ExecutionContext.Restore(afterSessionContext);
-            }
+                using var cleanupCts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+                var afterSessionContext = await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cleanupCts.Token);
+#if NET
+                if (afterSessionContext != null)
+                {
+                    ExecutionContext.Restore(afterSessionContext);
+                }
 #endif
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in session cleanup hooks: {ex}");
+            }
         }
     }
 
