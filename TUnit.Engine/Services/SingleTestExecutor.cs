@@ -207,7 +207,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 throw new AggregateException("Test and after hook both failed", testException, afterHookEx);
             }
-            
+
             // Otherwise, fail the test due to after hook failure
             HandleTestFailure(test, afterHookEx);
             throw;
@@ -215,8 +215,18 @@ internal class SingleTestExecutor : ISingleTestExecutor
         finally
         {
             await DecrementAndDisposeTrackedObjectsAsync(test);
+            
+            // Dispose the test class instance if it implements IDisposable or IAsyncDisposable
+            if (instance is IAsyncDisposable asyncDisposableInstance)
+            {
+                await asyncDisposableInstance.DisposeAsync();
+            }
+            else if (instance is IDisposable disposableInstance)
+            {
+                disposableInstance.Dispose();
+            }
         }
-        
+
         // Re-throw original test exception if after hooks succeeded
         if (testException != null)
         {
@@ -249,7 +259,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
     private async Task ExecuteAfterTestHooksAsync(IReadOnlyList<Func<TestContext, CancellationToken, Task>> hooks, TestContext context, CancellationToken cancellationToken)
     {
         var exceptions = new List<Exception>();
-        
+
         foreach (var hook in hooks)
         {
             try
@@ -264,7 +274,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 exceptions.Add(ex);
             }
         }
-        
+
         if (exceptions.Count > 0)
         {
             if (exceptions.Count == 1)
