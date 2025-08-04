@@ -57,6 +57,9 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         uses: docker/setup-docker-action@v4.3.0
 
+      - name: Install PlaywrightDependencies
+        run: npx playwright install-deps
+
       - name: Build
         run: dotnet build -c Release
 
