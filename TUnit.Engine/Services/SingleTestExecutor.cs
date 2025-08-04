@@ -41,11 +41,26 @@ internal class SingleTestExecutor : ISingleTestExecutor
         AbstractExecutableTest test,
         CancellationToken cancellationToken)
     {
+        // Use shared lock to coordinate between scheduler and dependency execution
+        Task<TestResult> task;
+        lock (test.Context.ExecutionLock)
+        {
+            task = test.Context.ExecutionTask ??= ExecuteTestInternalAsync(test, cancellationToken);
+        }
+        
+        await task;
+        return CreateUpdateMessage(test);
+    }
+
+    private async Task<TestResult> ExecuteTestInternalAsync(
+        AbstractExecutableTest test,
+        CancellationToken cancellationToken)
+    {
         // If test is already failed (e.g., from data source expansion error),
         // just report the existing failure
         if (test is { State: TestState.Failed, Result: not null })
         {
-            return CreateUpdateMessage(test);
+            return test.Result;
         }
 
         TestContext.Current = test.Context;
@@ -59,13 +74,13 @@ internal class SingleTestExecutor : ISingleTestExecutor
         // Check if test is already marked as skipped (from basic SkipAttribute during discovery)
         if (!string.IsNullOrEmpty(test.Context.SkipReason))
         {
-            return await HandleSkippedTestAsync(test, cancellationToken);
+            return await HandleSkippedTestInternalAsync(test, cancellationToken);
         }
 
         // Check if we already have a skipped test instance from discovery
         if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
         {
-            return await HandleSkippedTestAsync(test, cancellationToken);
+            return await HandleSkippedTestInternalAsync(test, cancellationToken);
         }
 
         var instance = await test.CreateInstanceAsync();
@@ -99,7 +114,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             if (!string.IsNullOrEmpty(test.Context.SkipReason))
             {
-                return await HandleSkippedTestAsync(test, cancellationToken);
+                return await HandleSkippedTestInternalAsync(test, cancellationToken);
             }
 
             if(test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
@@ -123,7 +138,16 @@ internal class SingleTestExecutor : ISingleTestExecutor
             await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
         }
 
-        return CreateUpdateMessage(test);
+        return test.Result ?? new TestResult
+        {
+            State = TestState.Failed,
+            Start = DateTimeOffset.UtcNow,
+            End = DateTimeOffset.UtcNow,
+            Duration = TimeSpan.Zero,
+            Exception = new InvalidOperationException("Test execution completed but no result was set"),
+            ComputerName = Environment.MachineName,
+            TestContext = test.Context
+        };
     }
 
 
@@ -187,115 +211,17 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
     }
 
-    private readonly object _executionTaskLock = new object();
-
     private async Task<TestResult> GetOrCreateDependencyExecutionTaskAsync(AbstractExecutableTest dependency, CancellationToken cancellationToken)
     {
+        // Use the same shared lock approach as ExecuteTestAsync
         Task<TestResult> task;
-        lock (_executionTaskLock)
+        lock (dependency.Context.ExecutionLock)
         {
-            task = dependency.Context.ExecutionTask ??= ExecuteTestDirectlyWithResultAsync(dependency, cancellationToken);
+            task = dependency.Context.ExecutionTask ??= ExecuteTestInternalAsync(dependency, cancellationToken);
         }
         return await task;
     }
 
-    private async Task<TestResult> ExecuteTestDirectlyWithResultAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
-    {
-        await ExecuteTestDirectlyAsync(test, cancellationToken);
-        return test.Result ?? new TestResult
-        {
-            State = TestState.Failed,
-            Start = DateTimeOffset.UtcNow,
-            End = DateTimeOffset.UtcNow,
-            Duration = TimeSpan.Zero,
-            Exception = new InvalidOperationException("Dependency execution completed but no result was set"),
-            ComputerName = Environment.MachineName,
-            TestContext = test.Context
-        };
-    }
-
-    private async Task ExecuteTestDirectlyAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
-    {
-        // This method executes a test directly without processing dependencies
-        // Used for dependency execution to avoid infinite recursion
-
-        // If test is already failed, just return
-        if (test is { State: TestState.Failed, Result: not null })
-        {
-            return;
-        }
-
-        TestContext.Current = test.Context;
-
-        test.StartTime = DateTimeOffset.Now;
-        test.State = TestState.Running;
-
-        // Check if test is already marked as skipped
-        if (!string.IsNullOrEmpty(test.Context.SkipReason))
-        {
-            await HandleSkippedTestAsync(test, cancellationToken);
-            return;
-        }
-
-        // Check if we already have a skipped test instance from discovery
-        if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
-        {
-            await HandleSkippedTestAsync(test, cancellationToken);
-            return;
-        }
-
-        var instance = await test.CreateInstanceAsync();
-        test.Context.TestDetails.ClassInstance = instance;
-
-        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
-        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
-
-        await PropertyInjector.InjectPropertiesAsync(
-            test.Context,
-            instance,
-            test.Metadata.PropertyDataSources,
-            test.Metadata.PropertyInjections,
-            test.Metadata.MethodMetadata,
-            test.Context.TestDetails.TestId);
-
-        await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
-
-        var classContext = test.Context.ClassContext;
-        var assemblyContext = classContext.AssemblyContext;
-        var sessionContext = assemblyContext.TestSessionContext;
-
-        await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
-        await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
-        await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
-        await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken);
-
-        try
-        {
-            if (!string.IsNullOrEmpty(test.Context.SkipReason))
-            {
-                await HandleSkippedTestAsync(test, cancellationToken);
-                return;
-            }
-
-            if(test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
-            {
-                await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken);
-            }
-            else
-            {
-                await ExecuteTestWithHooksAsync(test, instance, cancellationToken);
-            }
-        }
-        catch (Exception ex)
-        {
-            HandleTestFailure(test, ex);
-        }
-        finally
-        {
-            test.EndTime = DateTimeOffset.Now;
-            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
-        }
-    }
 
     private async Task ExecuteTestWithRetries(Func<Task> testDelegate, TestContext testContext, CancellationToken cancellationToken)
     {
@@ -334,6 +260,20 @@ internal class SingleTestExecutor : ISingleTestExecutor
         await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
 
         return CreateUpdateMessage(test);
+    }
+
+    private async Task<TestResult> HandleSkippedTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        test.State = TestState.Skipped;
+
+        test.Result = _resultFactory.CreateSkippedResult(
+            test.StartTime!.Value,
+            test.Context.SkipReason ?? "Test skipped");
+
+        test.EndTime = DateTimeOffset.Now;
+        await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
+
+        return test.Result;
     }
 
 
