@@ -1,19 +1,18 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Testcontainers.Kafka;
 using Testcontainers.PostgreSql;
+using Testcontainers.Redis;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Example.Asp.Net.TestProject;
 
-public class InMemoryPostgreSqlDatabase : IAsyncInitializer, IAsyncDisposable
+public class InMemoryKafka : IAsyncInitializer, IAsyncDisposable
 {
     [ClassDataSource<DockerNetwork>(Shared = SharedType.PerTestSession)]
     public required DockerNetwork DockerNetwork { get; init; }
 
     [field: AllowNull, MaybeNull]
-    public PostgreSqlContainer Container => field ??= new PostgreSqlBuilder()
-        .WithUsername("User")
-        .WithPassword("Password")
-        .WithDatabase("TestDatabase")
+    public KafkaContainer Container => field ??= new KafkaBuilder()
         .WithNetwork(DockerNetwork.Instance)
         .Build();
 
