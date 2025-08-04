@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Threading.Channels;
+using TUnit.Core;
 using TUnit.Engine.Logging;
 using LoggingExtensions = TUnit.Core.Logging.LoggingExtensions;
 
@@ -217,7 +218,12 @@ internal class ChannelConsumerManager
             {
                 var currentCount = runningConstraintKeys.AddOrUpdate(key, 1, (k, v) => v + 1);
                 
-                if (key.Contains("__not_in_parallel__") && currentCount > 1)
+                // Check if this is a NotInParallel constraint (either global or keyed)
+                // Global NotInParallel uses "__global_not_in_parallel__" key
+                // Keyed NotInParallel uses the actual key value (e.g., "1", "3", "MyKey")
+                var isNotInParallelConstraint = testData.State?.Constraint is NotInParallelConstraint;
+                
+                if (isNotInParallelConstraint && currentCount > 1)
                 {
                     runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
                     break;
