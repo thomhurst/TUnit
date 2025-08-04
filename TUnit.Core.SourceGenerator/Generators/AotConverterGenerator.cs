@@ -66,6 +66,13 @@ public class AotConverterGenerator : IIncrementalGenerator
         var sourceType = methodSymbol.Parameters[0].Type;
         var targetType = methodSymbol.ReturnType;
 
+        // Skip conversion operators with unbound generic type parameters
+        // These cannot be properly represented in AOT converters at runtime
+        if (sourceType.IsGenericDefinition() || targetType.IsGenericDefinition())
+        {
+            return null;
+        }
+
         return new ConversionInfo
         {
             ContainingType = containingType,
