@@ -36,7 +36,15 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
         foreach (var parameter in parameters)
         {
             var split = parameter.Split('=');
-            TestContext.InternalParametersDictionary.Add(split[0], split[1]);
+            var key = split[0];
+            var value = split[1];
+            
+            if (!TestContext.InternalParametersDictionary.TryGetValue(key, out var list))
+            {
+                list = new List<string>();
+                TestContext.InternalParametersDictionary[key] = list;
+            }
+            list.Add(value);
         }
     }
 
