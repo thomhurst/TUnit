@@ -780,6 +780,25 @@ namespace
         public int Line { get; }
         public int Order { get; init; }
     }
+    public static class HookRegistrationIndices
+    {
+        public static int GetNextAfterAssemblyHookIndex() { }
+        public static int GetNextAfterClassHookIndex() { }
+        public static int GetNextAfterEveryAssemblyHookIndex() { }
+        public static int GetNextAfterEveryClassHookIndex() { }
+        public static int GetNextAfterEveryTestHookIndex() { }
+        public static int GetNextAfterTestDiscoveryHookIndex() { }
+        public static int GetNextAfterTestHookIndex() { }
+        public static int GetNextAfterTestSessionHookIndex() { }
+        public static int GetNextBeforeAssemblyHookIndex() { }
+        public static int GetNextBeforeClassHookIndex() { }
+        public static int GetNextBeforeEveryAssemblyHookIndex() { }
+        public static int GetNextBeforeEveryClassHookIndex() { }
+        public static int GetNextBeforeEveryTestHookIndex() { }
+        public static int GetNextBeforeTestDiscoveryHookIndex() { }
+        public static int GetNextBeforeTestHookIndex() { }
+        public static int GetNextBeforeTestSessionHookIndex() { }
+    }
     public enum HookType
     {
         Test = 0,
@@ -1147,23 +1166,23 @@ namespace
     }
     public static class Sources
     {
-        public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> AfterAssemblyHooks;
-        public static readonly .<, .<.<.ClassHookContext>>> AfterClassHooks;
-        public static readonly .<.<.AssemblyHookContext>> AfterEveryAssemblyHooks;
-        public static readonly .<.<.ClassHookContext>> AfterEveryClassHooks;
-        public static readonly .<.<.TestContext>> AfterEveryTestHooks;
-        public static readonly .<.<.TestDiscoveryContext>> AfterTestDiscoveryHooks;
+        public static readonly .<.Assembly, .<.>> AfterAssemblyHooks;
+        public static readonly .<, .<.>> AfterClassHooks;
+        public static readonly .<.> AfterEveryAssemblyHooks;
+        public static readonly .<.> AfterEveryClassHooks;
+        public static readonly .<.> AfterEveryTestHooks;
+        public static readonly .<.> AfterTestDiscoveryHooks;
         public static readonly .<, .<.>> AfterTestHooks;
-        public static readonly .<.<.TestSessionContext>> AfterTestSessionHooks;
+        public static readonly .<.> AfterTestSessionHooks;
         public static readonly .<<.Assembly>> AssemblyLoaders;
-        public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> BeforeAssemblyHooks;
-        public static readonly .<, .<.<.ClassHookContext>>> BeforeClassHooks;
-        public static readonly .<.<.AssemblyHookContext>> BeforeEveryAssemblyHooks;
-        public static readonly .<.<.ClassHookContext>> BeforeEveryClassHooks;
-        public static readonly .<.<.TestContext>> BeforeEveryTestHooks;
-        public static readonly .<.<.BeforeTestDiscoveryContext>> BeforeTestDiscoveryHooks;
+        public static readonly .<.Assembly, .<.>> BeforeAssemblyHooks;
+        public static readonly .<, .<.>> BeforeClassHooks;
+        public static readonly .<.> BeforeEveryAssemblyHooks;
+        public static readonly .<.> BeforeEveryClassHooks;
+        public static readonly .<.> BeforeEveryTestHooks;
+        public static readonly .<.> BeforeTestDiscoveryHooks;
         public static readonly .<, .<.>> BeforeTestHooks;
-        public static readonly .<.<.TestSessionContext>> BeforeTestSessionHooks;
+        public static readonly .<.> BeforeTestSessionHooks;
         public static readonly .<.IDynamicTestSource> DynamicTestSources;
         public static readonly .<<.>> GlobalInitializers;
         public static readonly .<..IPropertySource> PropertySources;
@@ -2064,6 +2083,7 @@ namespace .Hooks
         public required .MethodMetadata MethodInfo { get; init; }
         public string Name { get; }
         public required int Order { get; init; }
+        public required int RegistrationIndex { get; init; }
         public ? Timeout { get; }
         public . ExecuteAsync(.TestContext context, .CancellationToken cancellationToken) { }
         public TAttribute? GetAttribute<TAttribute>()
@@ -2102,6 +2122,7 @@ namespace .Hooks
         public required .MethodMetadata MethodInfo { get; init; }
         public string Name { get; }
         public required int Order { get; init; }
+        public required int RegistrationIndex { get; init; }
         public ? Timeout { get; }
         public TAttribute? GetAttribute<TAttribute>()
             where TAttribute :  { }
