@@ -9,9 +9,44 @@ public static class SymbolExtensions
     {
         var attributes = symbol.GetAttributes();
 
-        return attributes.Any(a => a.AttributeClass?.AllInterfaces.Any(x =>
-            x.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithGlobalPrefix) == true)
-               || HasMatrixValues(symbol);
+        foreach (var attribute in attributes)
+        {
+            if (attribute.AttributeClass == null)
+                continue;
+
+            // Check if the attribute directly implements IDataSourceAttribute
+            if (ImplementsIDataSourceAttribute(attribute.AttributeClass))
+                return true;
+
+            // Check for well-known data source attributes as a fallback
+            if (IsWellKnownDataSourceAttribute(attribute.AttributeClass))
+                return true;
+        }
+
+        return HasMatrixValues(symbol);
+    }
+
+    private static bool ImplementsIDataSourceAttribute(INamedTypeSymbol attributeClass)
+    {
+        var expectedInterface = WellKnown.AttributeFullyQualifiedClasses.IDataSourceAttribute.WithGlobalPrefix;
+        
+        // Check if the class itself is the interface
+        if (attributeClass.GloballyQualified() == expectedInterface)
+            return true;
+
+        // Check if any of the implemented interfaces match
+        return attributeClass.AllInterfaces.Any(x => x.GloballyQualified() == expectedInterface);
+    }
+
+    private static bool IsWellKnownDataSourceAttribute(INamedTypeSymbol attributeClass)
+    {
+        var fullyQualifiedName = attributeClass.GloballyQualifiedNonGeneric();
+        
+        // List of well-known data source attributes
+        return fullyQualifiedName == WellKnown.AttributeFullyQualifiedClasses.Arguments.WithGlobalPrefix ||
+               fullyQualifiedName == WellKnown.AttributeFullyQualifiedClasses.MethodDataSource.WithGlobalPrefix ||
+               fullyQualifiedName == WellKnown.AttributeFullyQualifiedClasses.ClassDataSource.WithGlobalPrefix ||
+               fullyQualifiedName == WellKnown.AttributeFullyQualifiedClasses.MatrixDataSourceAttribute.WithGlobalPrefix;
     }
 
     private static bool HasMatrixValues(ISymbol symbol)

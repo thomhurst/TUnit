@@ -84,9 +84,69 @@ public class TestMethodParametersAnalyzerTests
     }
 
     [Test]
-    public async Task Arguments_Attribute_Error_Reproduction_Test()
+    public async Task MethodDataSource_Attribute_Should_Not_Trigger_Error()
     {
-        // This test should trigger TUnit0038 error if the bug exists
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [Test]
+                    [MethodDataSource(nameof(GetValues))]
+                    public void TestMethod(int value)
+                    {
+                        // Test logic here
+                    }
+
+                    public static IEnumerable<int> GetValues()
+                    {
+                        yield return 1;
+                        yield return 2;
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task ClassDataSource_Attribute_Should_Not_Trigger_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [Test]
+                    [ClassDataSource<MyDataSource>]
+                    public void TestMethod(int value)
+                    {
+                        // Test logic here
+                    }
+                }
+
+                public class MyDataSource : IEnumerable<object[]>
+                {
+                    public IEnumerator<object[]> GetEnumerator()
+                    {
+                        yield return new object[] { 1 };
+                        yield return new object[] { 2 };
+                    }
+
+                    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Multiple_Arguments_Attributes_Should_Not_Trigger_Error()
+    {
         await Verifier
             .VerifyAnalyzerAsync(
                 """
@@ -95,16 +155,15 @@ public class TestMethodParametersAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    [Arguments(-1)]
-                    [Arguments(6)]
-                    public void {|#0:GivenInvalidRating_WhenCreatingFeedback_ThenShouldThrowDomainException|}(int invalidRating)
+                    [Arguments(1, "test")]
+                    [Arguments(2, "test2")]
+                    [Arguments(3, "test3")]
+                    public void TestMethodWithMultipleArgs(int number, string text)
                     {
                         // Test logic here
                     }
                 }
-                """,
-
-                Verifier.Diagnostic(Rules.NoDataSourceProvided).WithLocation(0)
+                """
             );
     }
 
