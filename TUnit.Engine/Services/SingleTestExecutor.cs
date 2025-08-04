@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
@@ -184,57 +185,51 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
     }
 
+    private readonly object _executionTaskLock = new object();
+
     private Task<TestResult> GetOrCreateDependencyExecutionTaskAsync(AbstractExecutableTest dependency, CancellationToken cancellationToken)
     {
-        // Check if execution task already exists (task reuse)
-        if (dependency.Context.ExecutionTask != null)
+        lock (_executionTaskLock)
         {
-            return dependency.Context.ExecutionTask;
+            return dependency.Context.ExecutionTask ??= Task.Run(async () =>
+            {
+                try
+                {
+                    // Execute the dependency test using direct execution (avoid recursive dependency execution)
+                    await ExecuteTestDirectlyAsync(dependency, cancellationToken);
+                    return dependency.Result ?? new TestResult
+                    {
+                        State = TestState.Failed,
+                        Start = DateTimeOffset.UtcNow,
+                        End = DateTimeOffset.UtcNow,
+                        Duration = TimeSpan.Zero,
+                        Exception = new InvalidOperationException("Dependency execution completed but no result was set"),
+                        ComputerName = Environment.MachineName,
+                        TestContext = dependency.Context
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new TestResult
+                    {
+                        State = TestState.Failed,
+                        Start = DateTimeOffset.UtcNow,
+                        End = DateTimeOffset.UtcNow,
+                        Duration = TimeSpan.Zero,
+                        Exception = ex,
+                        ComputerName = Environment.MachineName,
+                        TestContext = dependency.Context
+                    };
+                }
+            }, cancellationToken);
         }
-
-        // Create new execution task and store it for reuse
-        var executionTask = Task.Run(async () =>
-        {
-            try
-            {
-                // Execute the dependency test using direct execution (avoid recursive dependency execution)
-                await ExecuteTestDirectlyAsync(dependency, cancellationToken);
-                return dependency.Result ?? new TestResult
-                {
-                    State = TestState.Failed,
-                    Start = DateTimeOffset.UtcNow,
-                    End = DateTimeOffset.UtcNow,
-                    Duration = TimeSpan.Zero,
-                    Exception = new InvalidOperationException("Dependency execution completed but no result was set"),
-                    ComputerName = Environment.MachineName,
-                    TestContext = dependency.Context
-                };
-            }
-            catch (Exception ex)
-            {
-                return new TestResult
-                {
-                    State = TestState.Failed,
-                    Start = DateTimeOffset.UtcNow,
-                    End = DateTimeOffset.UtcNow,
-                    Duration = TimeSpan.Zero,
-                    Exception = ex,
-                    ComputerName = Environment.MachineName,
-                    TestContext = dependency.Context
-                };
-            }
-        }, cancellationToken);
-
-        // Store the task for reuse
-        dependency.Context.ExecutionTask = executionTask;
-        return executionTask;
     }
 
     private async Task ExecuteTestDirectlyAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         // This method executes a test directly without processing dependencies
         // Used for dependency execution to avoid infinite recursion
-        
+
         // If test is already failed, just return
         if (test is { State: TestState.Failed, Result: not null })
         {
@@ -398,7 +393,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         finally
         {
             // Object tracking disposal is handled automatically by ObjectTracker via TestContext.Events.OnDispose
-            
+
             // Dispose the test class instance if it implements IDisposable or IAsyncDisposable
             if (instance is IAsyncDisposable asyncDisposableInstance)
             {
@@ -413,7 +408,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         // Re-throw original test exception if after hooks succeeded
         if (testException != null)
         {
-            throw testException;
+            ExceptionDispatchInfo.Capture(testException).Throw();
         }
     }
 
