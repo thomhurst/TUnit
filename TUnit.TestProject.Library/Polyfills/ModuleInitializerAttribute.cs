@@ -2,4 +2,4 @@
 namespace System.Runtime.CompilerServices;
 
 // ReSharper disable once RedundantExtendsListEntry
-sealed partial class ModuleInitializerAttribute : Attribute;
+sealed class ModuleInitializerAttribute : Attribute;

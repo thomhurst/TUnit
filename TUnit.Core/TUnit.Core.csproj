@@ -69,4 +69,7 @@
       <Compile Remove="IClassDataSourceAttribute.cs" />
       <Compile Remove="Interfaces\INestedClassDataSourceInitializer.cs" />
     </ItemGroup>
+
+  <Import Project="..\Library.targets" />
+
 </Project>
