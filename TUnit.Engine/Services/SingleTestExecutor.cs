@@ -116,15 +116,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.EndTime = DateTimeOffset.Now;
 
             await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
-
-            var endClassContext = test.Context!.ClassContext;
-            var endAssemblyContext = endClassContext.AssemblyContext;
-            var endSessionContext = endAssemblyContext.TestSessionContext;
-
-            await _eventReceiverOrchestrator.InvokeLastTestInClassEventReceiversAsync(test.Context, endClassContext, cancellationToken);
-
-            await _eventReceiverOrchestrator.InvokeLastTestInAssemblyEventReceiversAsync(test.Context, endAssemblyContext, cancellationToken);
-            await _eventReceiverOrchestrator.InvokeLastTestInSessionEventReceiversAsync(test.Context, endSessionContext, cancellationToken);
         }
 
         return CreateUpdateMessage(test);

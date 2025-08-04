@@ -176,7 +176,9 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
             }
         }
 
-        return TestSchedulerFactory.Create(config, _logger, _serviceProvider.CancellationToken);
+        var eventReceiverOrchestrator = _serviceProvider.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
+        var hookOrchestrator = _serviceProvider.GetService(typeof(HookOrchestrator)) as HookOrchestrator;
+        return TestSchedulerFactory.Create(config, _logger, _serviceProvider.CancellationToken, eventReceiverOrchestrator!, hookOrchestrator!);
     }
 
 

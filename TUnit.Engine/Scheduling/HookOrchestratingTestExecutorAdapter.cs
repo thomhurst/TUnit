@@ -128,64 +128,6 @@ internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDat
         finally
         {
             test.EndTime = DateTimeOffset.UtcNow;
-
-            // Execute cleanup hooks
-            Exception? cleanupException = null;
-            try
-            {
-                // Use a separate cancellation token for cleanup to ensure cleanup hooks execute
-                // even when the main test execution is cancelled. Give cleanup a reasonable timeout.
-                using var cleanupCts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
-                await _hookOrchestrator.OnTestCompletedAsync(test, cleanupCts.Token);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in cleanup hooks for test {test.TestId}: {ex}");
-                cleanupException = ex;
-                
-                // If test passed but after hooks failed, update the test result
-                if (test.State == TestState.Passed)
-                {
-                    test.State = TestState.Failed;
-                    test.Result = new TestResult
-                    {
-                        State = TestState.Failed,
-                        Start = test.StartTime,
-                        End = test.EndTime,
-                        Duration = test.EndTime.GetValueOrDefault() - test.StartTime.GetValueOrDefault(),
-                        Exception = ex,
-                        ComputerName = Environment.MachineName
-                    };
-                    
-                    // Report the failure
-                    await _messageBus.PublishAsync(
-                        this,
-                        new TestNodeUpdateMessage(
-                            _sessionUid,
-                            test.Context.ToTestNode().WithProperty(new FailedTestNodeStateProperty(ex))));
-                }
-                // If test already failed and after hooks also failed, we need to report both failures
-                else if (test.State == TestState.Failed && test.Result?.Exception != null)
-                {
-                    var aggregateException = new AggregateException("Test and after hooks both failed", test.Result.Exception, ex);
-                    test.Result = new TestResult
-                    {
-                        State = TestState.Failed,
-                        Start = test.Result.Start,
-                        End = test.EndTime,
-                        Duration = test.Result.Duration,
-                        Exception = aggregateException,
-                        ComputerName = test.Result.ComputerName
-                    };
-                    
-                    // Update the failure message
-                    await _messageBus.PublishAsync(
-                        this,
-                        new TestNodeUpdateMessage(
-                            _sessionUid,
-                            test.Context.ToTestNode().WithProperty(new FailedTestNodeStateProperty(aggregateException))));
-                }
-            }
         }
     }
 }

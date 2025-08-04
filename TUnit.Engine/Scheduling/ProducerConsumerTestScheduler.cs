@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Logging;
+using TUnit.Core.Models;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 using LoggingExtensions = TUnit.Core.Logging.LoggingExtensions;
@@ -16,17 +17,24 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
     private readonly TestChannelRouter _channelRouter;
     private readonly ChannelConsumerManager _consumerManager;
     private readonly ExecutionContextManager _executionContextManager;
+    private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
+    private readonly HookOrchestrator _hookOrchestrator;
     private readonly ConcurrentDictionary<string, int> _runningConstraintKeys = new();
     private int _routedTestCount = 0;
+    private int _completedTestCount = 0;
 
     public ProducerConsumerTestScheduler(
         TUnitFrameworkLogger logger,
         ITestGroupingService groupingService,
-        SchedulerConfiguration configuration)
+        SchedulerConfiguration configuration,
+        EventReceiverOrchestrator eventReceiverOrchestrator,
+        HookOrchestrator hookOrchestrator)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _groupingService = groupingService ?? throw new ArgumentNullException(nameof(groupingService));
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _eventReceiverOrchestrator = eventReceiverOrchestrator ?? throw new ArgumentNullException(nameof(eventReceiverOrchestrator));
+        _hookOrchestrator = hookOrchestrator ?? throw new ArgumentNullException(nameof(hookOrchestrator));
         
         _channelRouter = new TestChannelRouter(logger);
         _consumerManager = new ChannelConsumerManager(logger, configuration);
@@ -177,7 +185,7 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
             _channelRouter.GetMultiplexer(),
             cancellationToken);
         
-        while (_routedTestCount < totalTestCount)
+        while (_completedTestCount < totalTestCount)
         {
             await Task.Delay(100, cancellationToken);
         }
@@ -237,24 +245,50 @@ internal sealed class ProducerConsumerTestScheduler : ITestScheduler
                 async () => await executor.ExecuteTestAsync(state.Test, timeoutCts.Token),
                 timeoutCts.Token);
 
+            await ProcessTestCompletionAsync(state, executionStates, cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             state.State = TestState.Cancelled;
+            await ProcessTestCompletionAsync(state, executionStates, cancellationToken);
         }
         catch (Exception ex)
         {
             await LoggingExtensions.LogErrorAsync(_logger, $"Test {state.Test.Context.TestName} failed: {ex.Message}");
+            await ProcessTestCompletionAsync(state, executionStates, cancellationToken);
         }
         finally
         {
-            // Release constraint keys
             foreach (var key in testData.Constraints)
             {
                 _runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
             }
             
-            await ProcessTestCompletionAsync(state, executionStates, cancellationToken);
+            try
+            {
+                using var cleanupCts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+                await _hookOrchestrator.OnTestCompletedAsync(state.Test, cleanupCts.Token);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Hook orchestration failed for test {state.Test.Context.TestName}: {ex.Message}");
+                
+                if (state.Test.State == TestState.Passed)
+                {
+                    state.Test.State = TestState.Failed;
+                    state.Test.Result = new TestResult
+                    {
+                        State = TestState.Failed,
+                        Start = state.Test.StartTime,
+                        End = state.Test.EndTime,
+                        Duration = state.Test.EndTime.GetValueOrDefault() - state.Test.StartTime.GetValueOrDefault(),
+                        Exception = ex,
+                        ComputerName = Environment.MachineName
+                    };
+                }
+            }
+            
+            Interlocked.Increment(ref _completedTestCount);
         }
     }
 
