@@ -263,6 +263,46 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (!dataSourceMethods.Any())
             {
+                // Check if it's a property or field instead of a method
+                var property = targetType.GetMembers(methodName).OfType<IPropertySymbol>().FirstOrDefault();
+                var field = targetType.GetMembers(methodName).OfType<IFieldSymbol>().FirstOrDefault();
+                
+                if (property != null)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        new DiagnosticDescriptor(
+                            "TUNIT0992",
+                            "Data Source Should Be Method, Not Property",
+                            "Data source '{0}' in type '{1}' for inherited test '{2}' in class '{3}' is a property, not a method. InstanceMethodDataSource requires a method that returns data.",
+                            "TUnit",
+                            DiagnosticSeverity.Warning,
+                            true),
+                        classInfo.ClassSyntax.GetLocation(),
+                        methodName,
+                        targetType.Name,
+                        testMethod.Name,
+                        classInfo.TypeSymbol.Name));
+                    return;
+                }
+                
+                if (field != null)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        new DiagnosticDescriptor(
+                            "TUNIT0991",
+                            "Data Source Should Be Method, Not Field",
+                            "Data source '{0}' in type '{1}' for inherited test '{2}' in class '{3}' is a field, not a method. InstanceMethodDataSource requires a method that returns data.",
+                            "TUnit",
+                            DiagnosticSeverity.Warning,
+                            true),
+                        classInfo.ClassSyntax.GetLocation(),
+                        methodName,
+                        targetType.Name,
+                        testMethod.Name,
+                        classInfo.TypeSymbol.Name));
+                    return;
+                }
+
                 // Report that no data source method was found
                 context.ReportDiagnostic(Diagnostic.Create(
                     new DiagnosticDescriptor(
@@ -286,7 +326,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 var dataSourceMethod = dataSourceMethods[0];
                 
-                // Provide a warning about potential empty data sources in inherited tests
+                // Check if the method might return empty collections
+                // We can't evaluate the method at compile time, but we can provide helpful warnings
                 context.ReportDiagnostic(Diagnostic.Create(
                     new DiagnosticDescriptor(
                         "TUNIT0995",
