@@ -62,6 +62,53 @@ public class TestMethodParametersAnalyzerTests
     }
 
     [Test]
+    public async Task Arguments_Attribute_Should_Not_Trigger_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(-1)]
+                    [Arguments(6)]
+                    public void GivenInvalidRating_WhenCreatingFeedback_ThenShouldThrowDomainException(int invalidRating)
+                    {
+                        // Test logic here
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Arguments_Attribute_Error_Reproduction_Test()
+    {
+        // This test should trigger TUnit0038 error if the bug exists
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(-1)]
+                    [Arguments(6)]
+                    public void {|#0:GivenInvalidRating_WhenCreatingFeedback_ThenShouldThrowDomainException|}(int invalidRating)
+                    {
+                        // Test logic here
+                    }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.NoDataSourceProvided).WithLocation(0)
+            );
+    }
+
+    [Test]
     public async Task DataSourceGenerator()
     {
         await Verifier
