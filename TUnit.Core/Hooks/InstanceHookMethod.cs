@@ -32,8 +32,14 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
 
     public ValueTask ExecuteAsync(TestContext context, CancellationToken cancellationToken)
     {
+        // Skip instance hooks if this is a pre-skipped test
+        if (context.TestDetails.ClassInstance is SkippedTestInstance)
+        {
+            return new ValueTask();
+        }
+
         return HookExecutor.ExecuteBeforeTestHook(MethodInfo, context,
-            () => Body!.Invoke(context.TestDetails.ClassInstance ?? throw new InvalidOperationException("ClassInstance is null"), context, cancellationToken)
+            () => Body!.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
         );
     }
 }

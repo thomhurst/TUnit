@@ -262,7 +262,21 @@ internal sealed class TestBuilder : ITestBuilder
                                 {
                                     throw new InvalidOperationException($"Cannot create instance of generic type {metadata.TestClassType.Name} with empty type arguments");
                                 }
-                                var instance = await CreateInstance(metadata, resolvedClassGenericArgs, classData, contextAccessor.Current);
+
+                                // Check for basic skip attributes that can be evaluated at discovery time
+                                var basicSkipReason = GetBasicSkipReason(metadata);
+                                object instance;
+
+                                if (!string.IsNullOrEmpty(basicSkipReason))
+                                {
+                                    // Use placeholder instance for basic skip attributes to avoid calling constructor
+                                    instance = SkippedTestInstance.Instance;
+                                }
+                                else
+                                {
+                                    // No skip attributes or custom skip attributes - create instance normally
+                                    instance = await CreateInstance(metadata, resolvedClassGenericArgs, classData, contextAccessor.Current);
+                                }
 
                                 var testData = new TestData
                                 {
@@ -279,6 +293,12 @@ internal sealed class TestBuilder : ITestBuilder
                                 };
 
                                 var test = await BuildTestAsync(metadata, testData, contextAccessor.Current);
+
+                                // If we have a basic skip reason, set it immediately
+                                if (!string.IsNullOrEmpty(basicSkipReason))
+                                {
+                                    test.Context.SkipReason = basicSkipReason;
+                                }
                                 tests.Add(test);
 
                                 contextAccessor.Current = new TestBuilderContext
@@ -543,6 +563,37 @@ internal sealed class TestBuilder : ITestBuilder
         };
 
         return metadata.CreateExecutableTestFactory(creationContext, metadata);
+    }
+
+    /// <summary>
+    /// Checks if a test has basic SkipAttribute instances that can be evaluated at discovery time.
+    /// Returns null if no skip attributes, a skip reason if basic skip attributes are found,
+    /// or empty string if custom skip attributes requiring runtime evaluation are found.
+    /// </summary>
+    private static string? GetBasicSkipReason(TestMetadata metadata)
+    {
+        var attributes = metadata.AttributeFactory();
+        var skipAttributes = attributes.OfType<SkipAttribute>().ToList();
+        
+        if (skipAttributes.Count == 0)
+        {
+            return null; // No skip attributes
+        }
+
+        // Check if all skip attributes are basic (non-derived) SkipAttribute instances
+        foreach (var skipAttribute in skipAttributes)
+        {
+            var attributeType = skipAttribute.GetType();
+            if (attributeType != typeof(SkipAttribute))
+            {
+                // This is a derived skip attribute that might have custom ShouldSkip logic
+                return string.Empty; // Indicates custom skip attributes that need runtime evaluation
+            }
+        }
+
+        // All skip attributes are basic SkipAttribute instances
+        // Return the first reason (they all should skip)
+        return skipAttributes[0].Reason;
     }
 
 

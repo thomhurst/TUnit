@@ -51,6 +51,18 @@ internal class SingleTestExecutor : ISingleTestExecutor
         test.StartTime = DateTimeOffset.Now;
         test.State = TestState.Running;
 
+        // Check if test is already marked as skipped (from basic SkipAttribute during discovery)
+        if (!string.IsNullOrEmpty(test.Context.SkipReason))
+        {
+            return await HandleSkippedTestAsync(test, cancellationToken);
+        }
+
+        // Check if we already have a skipped test instance from discovery
+        if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
+        {
+            return await HandleSkippedTestAsync(test, cancellationToken);
+        }
+
         var instance = await test.CreateInstanceAsync();
         test.Context.TestDetails.ClassInstance = instance;
 
