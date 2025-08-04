@@ -146,8 +146,8 @@ public class AotConverterGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
         
-        writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
-        writer.AppendLine("[System.Diagnostics.CodeAnalysis.SuppressMessage(\"Performance\", \"CA2255:The 'ModuleInitializer' attribute should not be used in libraries\",");
+        writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+        writer.AppendLine("[global::System.Diagnostics.CodeAnalysis.SuppressMessage(\"Performance\", \"CA2255:The 'ModuleInitializer' attribute should not be used in libraries\",");
         writer.AppendLine("    Justification = \"Test framework needs to register AOT converters for conversion operators\")]");
         writer.AppendLine("public static void Initialize()");
         writer.AppendLine("{");

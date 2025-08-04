@@ -149,7 +149,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     {
         sb.AppendLine("internal static class PropertyInjectionInitializer");
         sb.AppendLine("{");
-        sb.AppendLine("    [System.Runtime.CompilerServices.ModuleInitializer]");
+        sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
         sb.AppendLine("    public static void InitializePropertyInjectionSources()");
         sb.AppendLine("    {");
 
