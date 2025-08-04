@@ -1147,23 +1147,23 @@ namespace
     }
     public static class Sources
     {
-        public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> AfterAssemblyHooks;
-        public static readonly .<, .<.<.ClassHookContext>>> AfterClassHooks;
-        public static readonly .<.<.AssemblyHookContext>> AfterEveryAssemblyHooks;
-        public static readonly .<.<.ClassHookContext>> AfterEveryClassHooks;
-        public static readonly .<.<.TestContext>> AfterEveryTestHooks;
-        public static readonly .<.<.TestDiscoveryContext>> AfterTestDiscoveryHooks;
+        public static readonly .<.Assembly, .<.>> AfterAssemblyHooks;
+        public static readonly .<, .<.>> AfterClassHooks;
+        public static readonly .<.> AfterEveryAssemblyHooks;
+        public static readonly .<.> AfterEveryClassHooks;
+        public static readonly .<.> AfterEveryTestHooks;
+        public static readonly .<.> AfterTestDiscoveryHooks;
         public static readonly .<, .<.>> AfterTestHooks;
-        public static readonly .<.<.TestSessionContext>> AfterTestSessionHooks;
+        public static readonly .<.> AfterTestSessionHooks;
         public static readonly .<<.Assembly>> AssemblyLoaders;
-        public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> BeforeAssemblyHooks;
-        public static readonly .<, .<.<.ClassHookContext>>> BeforeClassHooks;
-        public static readonly .<.<.AssemblyHookContext>> BeforeEveryAssemblyHooks;
-        public static readonly .<.<.ClassHookContext>> BeforeEveryClassHooks;
-        public static readonly .<.<.TestContext>> BeforeEveryTestHooks;
-        public static readonly .<.<.BeforeTestDiscoveryContext>> BeforeTestDiscoveryHooks;
+        public static readonly .<.Assembly, .<.>> BeforeAssemblyHooks;
+        public static readonly .<, .<.>> BeforeClassHooks;
+        public static readonly .<.> BeforeEveryAssemblyHooks;
+        public static readonly .<.> BeforeEveryClassHooks;
+        public static readonly .<.> BeforeEveryTestHooks;
+        public static readonly .<.> BeforeTestDiscoveryHooks;
         public static readonly .<, .<.>> BeforeTestHooks;
-        public static readonly .<.<.TestSessionContext>> BeforeTestSessionHooks;
+        public static readonly .<.> BeforeTestSessionHooks;
         public static readonly .<.IDynamicTestSource> DynamicTestSources;
         public static readonly .<<.>> GlobalInitializers;
         public static readonly .<..IPropertySource> PropertySources;

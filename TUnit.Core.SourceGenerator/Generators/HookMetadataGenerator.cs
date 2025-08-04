@@ -342,7 +342,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
             using (writer.BeginBlock("internal static class HookModuleInitializer"))
             {
-                writer.AppendLine("[ModuleInitializer]");
+                writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
                 using (writer.BeginBlock("public static void Initialize()"))
                 {
                     writer.AppendLine("_ = new GeneratedHookRegistry();");
