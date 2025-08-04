@@ -59,8 +59,7 @@ internal class SimpleConsumerManager
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var currentConstraints = GetCurrentRunningConstraints(runningConstraintKeys);
-                var testData = queues.TryDequeueTestWithConstraints(currentConstraints, runningConstraintKeys, _constraintLock);
+                var testData = queues.TryDequeueTestWithConstraints(runningConstraintKeys);
                 
                 if (testData != null)
                 {
@@ -114,69 +113,4 @@ internal class SimpleConsumerManager
             .Select(kvp => kvp.Key));
     }
 
-    private readonly object _constraintLock = new object();
-
-    private Task<bool> TryAcquireConstraintsAsync(
-        TestExecutionData testData,
-        ConcurrentDictionary<string, int> runningConstraintKeys)
-    {
-        var constraints = testData.Constraints;
-        if (constraints.Count == 0)
-        {
-            return Task.FromResult(true);
-        }
-
-        lock (_constraintLock)
-        {
-            var acquired = new List<string>();
-            
-            try
-            {
-                // First, check if we can acquire ALL constraints without actually acquiring them
-                foreach (var key in constraints)
-                {
-                    runningConstraintKeys.TryGetValue(key, out var currentCount);
-                    var isNotInParallelConstraint = testData.State?.Constraint is NotInParallelConstraint;
-                    
-                    if (isNotInParallelConstraint && currentCount > 0)
-                    {
-                        // Another NotInParallel test is already running with this key
-                        return Task.FromResult(false);
-                    }
-                    
-                    if (key.StartsWith("__parallel_group_"))
-                    {
-                        var otherGroups = runningConstraintKeys
-                            .Where(kvp => kvp.Key.StartsWith("__parallel_group_") && kvp.Key != key && kvp.Value > 0)
-                            .Any();
-                            
-                        if (otherGroups)
-                        {
-                            // Another parallel group is running
-                            return Task.FromResult(false);
-                        }
-                    }
-                }
-                
-                // If we get here, we can acquire all constraints
-                foreach (var key in constraints)
-                {
-                    runningConstraintKeys.AddOrUpdate(key, 1, (k, v) => v + 1);
-                    acquired.Add(key);
-                }
-
-                return Task.FromResult(true);
-            }
-            catch
-            {
-                // Rollback on exception
-                foreach (var key in acquired)
-                {
-                    runningConstraintKeys.AddOrUpdate(key, 0, (k, v) => Math.Max(0, v - 1));
-                }
-                
-                throw;
-            }
-        }
-    }
 }

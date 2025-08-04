@@ -62,101 +62,7 @@ internal class SimpleTestQueues
         }
     }
 
-    public TestExecutionData? TryDequeueTestWithConstraints(
-        HashSet<string> runningConstraints, 
-        ConcurrentDictionary<string, int> runningConstraintKeys, 
-        object constraintLock)
-    {
-        lock (constraintLock)
-        {
-            return TryDequeueTestInternal(runningConstraints, runningConstraintKeys);
-        }
-    }
-
-    private TestExecutionData? TryDequeueTestInternal(
-        HashSet<string> runningConstraints, 
-        ConcurrentDictionary<string, int> runningConstraintKeys)
-    {
-        // Try keyed NotInParallel tests (if specific key not running) - with constraint acquisition
-        foreach (var kvp in _keyedNotInParallelQueues.ToList())
-        {
-            var key = kvp.Key;
-            var queue = kvp.Value;
-            
-            
-            if (!runningConstraints.Contains(key))
-            {
-                var lockObj = _keyedLocks.GetOrAdd(key, _ => new object());
-                lock (lockObj)
-                {
-                    if (queue.Count > 0)
-                    {
-                        var test = queue.Peek(); // Peek first, don't dequeue yet
-                        
-                        // Try to acquire constraints
-                        var constraints = test.Constraints;
-                        var canAcquire = true;
-                        var acquired = new List<string>();
-                        
-                        try
-                        {
-                            foreach (var constraintKey in constraints)
-                            {
-                                runningConstraintKeys.TryGetValue(constraintKey, out var currentCount);
-                                var isNotInParallelConstraint = test.State?.Constraint is NotInParallelConstraint;
-                                
-                                if (isNotInParallelConstraint && currentCount > 0)
-                                {
-                                    canAcquire = false;
-                                    break;
-                                }
-                                
-                                if (constraintKey.StartsWith("__parallel_group_"))
-                                {
-                                    var otherGroups = runningConstraintKeys
-                                        .Where(kvp => kvp.Key.StartsWith("__parallel_group_") && kvp.Key != constraintKey && kvp.Value > 0)
-                                        .Any();
-                                        
-                                    if (otherGroups)
-                                    {
-                                        canAcquire = false;
-                                        break;
-                                    }
-                                }
-                            }
-                            
-                            if (canAcquire)
-                            {
-                                // Acquire all constraints
-                                foreach (var constraintKey in constraints)
-                                {
-                                    runningConstraintKeys.AddOrUpdate(constraintKey, 1, (k, v) => v + 1);
-                                    acquired.Add(constraintKey);
-                                }
-                                
-                                // Now dequeue the test
-                                var dequeuedTest = queue.Dequeue();
-                                return dequeuedTest;
-                            }
-                        }
-                        catch
-                        {
-                            // Rollback on exception
-                            foreach (var constraintKey in acquired)
-                            {
-                                runningConstraintKeys.AddOrUpdate(constraintKey, 0, (k, v) => Math.Max(0, v - 1));
-                            }
-                            throw;
-                        }
-                    }
-                }
-            }
-        }
-        
-        return TryDequeueTestOld(runningConstraints); // Fallback to old logic for other queue types
-    }
-    
-    public TestExecutionData? TryDequeueTestOld(HashSet<string> runningConstraints)
+    public TestExecutionData? TryDequeueTestWithConstraints(ConcurrentDictionary<string, int> runningConstraintKeys)
     {
         // Try unconstrained tests first (highest throughput)
         if (_unconstrainedQueue.TryDequeue(out var unconstrainedTest))
@@ -171,49 +77,72 @@ internal class SimpleTestQueues
             var queue = kvp.Value;
             
             // Check if any other parallel group is running
-            var otherGroupRunning = runningConstraints.Any(c => 
-                c.StartsWith("__parallel_group_") && c != groupKey);
+            var otherGroupRunning = runningConstraintKeys.Any(x => 
+                x.Key.StartsWith("__parallel_group_") && x.Key != groupKey && x.Value > 0);
                 
             if (!otherGroupRunning && queue.TryDequeue(out var groupTest))
             {
+                // Atomically acquire the constraint
+                runningConstraintKeys.AddOrUpdate(groupKey, 1, (k, v) => v + 1);
                 return groupTest;
             }
         }
 
-        // Try keyed NotInParallel tests (if specific key not running)
+        // Try keyed NotInParallel tests - only try keys that aren't currently running
         foreach (var kvp in _keyedNotInParallelQueues.ToList())
         {
             var key = kvp.Key;
             var queue = kvp.Value;
             
-            
-            if (!runningConstraints.Contains(key))
+            // Skip if this constraint key is currently running
+            runningConstraintKeys.TryGetValue(key, out var currentCount);
+            if (currentCount > 0)
             {
-                var lockObj = _keyedLocks.GetOrAdd(key, _ => new object());
-                lock (lockObj)
+                continue;
+            }
+            
+            var lockObj = _keyedLocks.GetOrAdd(key, _ => new object());
+            lock (lockObj)
+            {
+                if (queue.Count > 0)
                 {
-                    if (queue.Count > 0)
+                    // Double-check constraint availability under lock
+                    runningConstraintKeys.TryGetValue(key, out var reCheckCount);
+                    if (reCheckCount == 0)
                     {
-                        return queue.Dequeue();
+                        var testData = queue.Dequeue();
+                        // Atomically acquire the constraint
+                        runningConstraintKeys.AddOrUpdate(key, 1, (k, v) => v + 1);
+                        return testData;
                     }
                 }
             }
         }
 
-        // Try global NotInParallel tests (if nothing else running)
-        if (runningConstraints.Count == 0)
+        // Try global NotInParallel tests (if global constraint not running)
+        runningConstraintKeys.TryGetValue("__global_not_in_parallel__", out var globalConstraintCount);
+        if (globalConstraintCount == 0)
         {
             lock (_globalLock)
             {
                 if (_globalNotInParallelQueue.Count > 0)
                 {
-                    return _globalNotInParallelQueue.Dequeue();
+                    // Double-check constraint availability under lock
+                    runningConstraintKeys.TryGetValue("__global_not_in_parallel__", out var reCheckGlobalCount);
+                    if (reCheckGlobalCount == 0)
+                    {
+                        var testData = _globalNotInParallelQueue.Dequeue();
+                        // Atomically acquire the global constraint
+                        runningConstraintKeys.AddOrUpdate("__global_not_in_parallel__", 1, (k, v) => v + 1);
+                        return testData;
+                    }
                 }
             }
         }
 
         return null; // No work available
     }
+
 
     public bool IsEmpty()
     {
