@@ -97,7 +97,7 @@ return classMetadata;
 }
 internal static class STAThreadTests_With_STA_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_With_STA_TestSource_GUID());
@@ -205,7 +205,7 @@ return classMetadata;
 }
 internal static class STAThreadTests_Without_STA_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_Without_STA_TestSource_GUID());
@@ -314,7 +314,7 @@ return classMetadata;
 }
 internal static class STAThreadTests_STA_WithSimpleAwait_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithSimpleAwait_TestSource_GUID());
@@ -423,7 +423,7 @@ return classMetadata;
 }
 internal static class STAThreadTests_STA_WithTaskYield_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithTaskYield_TestSource_GUID());
@@ -532,7 +532,7 @@ return classMetadata;
 }
 internal static class STAThreadTests_STA_WithConfigureAwaitTrue_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithConfigureAwaitTrue_TestSource_GUID());
@@ -641,7 +641,7 @@ return classMetadata;
 }
 internal static class STAThreadTests_STA_WithNestedAsyncCalls_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithNestedAsyncCalls_TestSource_GUID());
@@ -750,7 +750,7 @@ return classMetadata;
 }
 internal static class STAThreadTests_STA_WithTaskFromResult_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithTaskFromResult_TestSource_GUID());
@@ -859,7 +859,7 @@ return classMetadata;
 }
 internal static class STAThreadTests_STA_WithCompletedTask_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithCompletedTask_TestSource_GUID());
@@ -968,7 +968,7 @@ return classMetadata;
 }
 internal static class STAThreadTests_STA_WithTaskRun_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithTaskRun_TestSource_GUID());
@@ -1077,7 +1077,7 @@ return classMetadata;
 }
 internal static class STAThreadTests_STA_WithMultipleAwaits_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithMultipleAwaits_TestSource_GUID());
@@ -1186,7 +1186,7 @@ return classMetadata;
 }
 internal static class STAThreadTests_STA_WithAsyncEnumerable_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithAsyncEnumerable_TestSource_GUID());
@@ -1295,7 +1295,7 @@ return classMetadata;
 }
 internal static class STAThreadTests_STA_WithTaskWhenAll_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithTaskWhenAll_TestSource_GUID());
@@ -1404,7 +1404,7 @@ return classMetadata;
 }
 internal static class STAThreadTests_STA_WithExceptionHandling_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithExceptionHandling_TestSource_GUID());
