@@ -53,7 +53,7 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         }
 
         var sourceBuilder = new CodeWriter();
-        sourceBuilder.AppendLine($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(AssemblyLoaderGenerator).Assembly.GetName().Version}\")]");
+        sourceBuilder.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(AssemblyLoaderGenerator).Assembly.GetName().Version}\")]");
         using (sourceBuilder.BeginBlock("file static class AssemblyLoader" + Guid.NewGuid().ToString("N")))
         {
             sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");

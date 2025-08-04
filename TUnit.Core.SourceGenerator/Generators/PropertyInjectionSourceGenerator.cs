@@ -149,7 +149,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     {
         sb.AppendLine("internal static class PropertyInjectionInitializer");
         sb.AppendLine("{");
-        sb.AppendLine("    [System.Runtime.CompilerServices.ModuleInitializer]");
+        sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
         sb.AppendLine("    public static void InitializePropertyInjectionSources()");
         sb.AppendLine("    {");
 
@@ -198,7 +198,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 var containingType = propInfo.Property.ContainingType.ToDisplayString();
                 
                 sb.AppendLine("#if NET8_0_OR_GREATER");
-                sb.AppendLine($"    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
+                sb.AppendLine($"    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
                 sb.AppendLine($"    private static extern ref {propertyType} Get{propInfo.Property.Name}BackingField({containingType} instance);");
                 sb.AppendLine("#endif");
                 sb.AppendLine();

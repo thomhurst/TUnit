@@ -1542,7 +1542,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             else
             {
                 writer.AppendLine($"{methodCall};");
-                writer.AppendLine("await Task.CompletedTask;");
+                writer.AppendLine("await global::System.Threading.Tasks.Task.CompletedTask;");
             }
         }
         else
@@ -1610,7 +1610,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (!isAsync)
             {
-                writer.AppendLine("await Task.CompletedTask;");
+                writer.AppendLine("await global::System.Threading.Tasks.Task.CompletedTask;");
             }
         }
 
@@ -1634,7 +1634,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             else
             {
                 writer.AppendLine($"{typedMethodCall};");
-                writer.AppendLine("await Task.CompletedTask;");
+                writer.AppendLine("await global::System.Threading.Tasks.Task.CompletedTask;");
             }
         }
         else
@@ -1702,7 +1702,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (!isAsync)
             {
-                writer.AppendLine("await Task.CompletedTask;");
+                writer.AppendLine("await global::System.Threading.Tasks.Task.CompletedTask;");
             }
         }
 
@@ -1717,7 +1717,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"internal static class {testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_ModuleInitializer_{guid}");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("[System.Runtime.CompilerServices.ModuleInitializer]");
+        writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
         writer.AppendLine("public static void Initialize()");
         writer.AppendLine("{");
         writer.Indent();

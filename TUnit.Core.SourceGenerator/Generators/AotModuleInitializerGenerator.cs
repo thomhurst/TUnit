@@ -50,7 +50,7 @@ public sealed class AotModuleInitializerGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("[ModuleInitializer]");
+        writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
         writer.AppendLine("public static void Initialize()");
         writer.AppendLine("{");
         writer.Indent();
