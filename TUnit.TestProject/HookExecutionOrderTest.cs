@@ -20,6 +20,50 @@ public class HookExecutionOrderTest
             ExecutionOrder.Add("BaseBeforeTest");
         }
 
+        [After(Test, Order = 2000)] // Use very high order to run after all other after hooks
+        public void VerifyExecutionOrder()
+        {
+            // Expected order:
+            // Before hooks (base to derived, with Order respected within each level):
+            // - Base: BaseBeforeTest2 (-5), then BaseBeforeTest (10)
+            // - Middle: MiddleBeforeTest2 (0), then MiddleBeforeTest (100)
+            // - Derived: DerivedBeforeTest (-1000), then DerivedBeforeTest2 (3)
+            // Test method
+            // After hooks (derived to base, with Order respected within each level):
+            // - Derived: DerivedAfterTest2 (-3), then DerivedAfterTest (1000)
+            // - Middle: MiddleAfterTest (-100), then MiddleAfterTest2 (0)
+            // - Base: BaseAfterTest (-10), then BaseAfterTest2 (5)
+
+            var expected = new List<string>
+            {
+                // Before hooks - base to derived
+                "BaseBeforeTest2",      // Base level, Order = -5
+                "BaseBeforeTest",       // Base level, Order = 10
+                "MiddleBeforeTest2",    // Middle level, Order = 0
+                "MiddleBeforeTest",     // Middle level, Order = 100
+                "DerivedBeforeTest",    // Derived level, Order = -1000
+                "DerivedBeforeTest2",   // Derived level, Order = 3
+
+                "TestMethod",
+
+                // After hooks - derived to base
+                "DerivedAfterTest2",    // Derived level, Order = -3
+                "DerivedAfterTest",     // Derived level, Order = 1000
+                "MiddleAfterTest",      // Middle level, Order = -100
+                "MiddleAfterTest2",     // Middle level, Order = 0
+                "BaseAfterTest",        // Base level, Order = -10
+                "BaseAfterTest2"        // Base level, Order = 5
+            };
+
+            for (var i = 0; i < expected.Count; i++)
+            {
+                if (i >= ExecutionOrder.Count || ExecutionOrder[i] != expected[i])
+                {
+                    throw new Exception($"Hook execution order is incorrect at index {i}. Expected: {expected[i]}, Actual: {(i < ExecutionOrder.Count ? ExecutionOrder[i] : "missing")}. Full order - Expected: [{string.Join(", ", expected)}], Actual: [{string.Join(", ", ExecutionOrder)}]");
+                }
+            }
+        }
+
         [Before(Test, Order = -5)] // Negative order, should run before BaseBeforeTest at same level
         public void BaseBeforeTest2()
         {
@@ -96,50 +140,6 @@ public class HookExecutionOrderTest
         public void TestHookExecutionOrder()
         {
             ExecutionOrder.Add("TestMethod");
-        }
-
-        [After(Test, Order = 2000)] // Use very high order to run after all other after hooks
-        public void VerifyExecutionOrder()
-        {
-            // Expected order:
-            // Before hooks (base to derived, with Order respected within each level):
-            // - Base: BaseBeforeTest2 (-5), then BaseBeforeTest (10)
-            // - Middle: MiddleBeforeTest2 (0), then MiddleBeforeTest (100)
-            // - Derived: DerivedBeforeTest (-1000), then DerivedBeforeTest2 (3)
-            // Test method
-            // After hooks (derived to base, with Order respected within each level):
-            // - Derived: DerivedAfterTest2 (-3), then DerivedAfterTest (1000)
-            // - Middle: MiddleAfterTest (-100), then MiddleAfterTest2 (0)
-            // - Base: BaseAfterTest (-10), then BaseAfterTest2 (5)
-
-            var expected = new List<string>
-            {
-                // Before hooks - base to derived
-                "BaseBeforeTest2",      // Base level, Order = -5
-                "BaseBeforeTest",       // Base level, Order = 10
-                "MiddleBeforeTest2",    // Middle level, Order = 0
-                "MiddleBeforeTest",     // Middle level, Order = 100
-                "DerivedBeforeTest",    // Derived level, Order = -1000
-                "DerivedBeforeTest2",   // Derived level, Order = 3
-
-                "TestMethod",
-
-                // After hooks - derived to base
-                "DerivedAfterTest2",    // Derived level, Order = -3
-                "DerivedAfterTest",     // Derived level, Order = 1000
-                "MiddleAfterTest",      // Middle level, Order = -100
-                "MiddleAfterTest2",     // Middle level, Order = 0
-                "BaseAfterTest",        // Base level, Order = -10
-                "BaseAfterTest2"        // Base level, Order = 5
-            };
-
-            for (int i = 0; i < expected.Count; i++)
-            {
-                if (i >= ExecutionOrder.Count || ExecutionOrder[i] != expected[i])
-                {
-                    throw new Exception($"Hook execution order is incorrect at index {i}. Expected: {expected[i]}, Actual: {(i < ExecutionOrder.Count ? ExecutionOrder[i] : "missing")}. Full order - Expected: [{string.Join(", ", expected)}], Actual: [{string.Join(", ", ExecutionOrder)}]");
-                }
-            }
         }
     }
 }
