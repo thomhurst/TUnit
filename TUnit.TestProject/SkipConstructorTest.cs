@@ -24,6 +24,6 @@ public class SkipConstructorTest : IAsyncDisposable
     {
         DisposeCalled = true;
         Console.WriteLine("SkipConstructorTest dispose called");
-        return ValueTask.CompletedTask;
+        return new ValueTask();
     }
 }
