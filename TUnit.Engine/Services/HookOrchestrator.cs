@@ -4,6 +4,7 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.Services;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -93,6 +94,7 @@ internal sealed class HookOrchestrator
     public async Task<ExecutionContext?> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterTestSessionHooksAsync();
+        var exceptions = new List<Exception>();
 
         foreach (var hook in hooks)
         {
@@ -104,8 +106,15 @@ internal sealed class HookOrchestrator
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"AfterTestSession hook failed: {ex.Message}");
-                // After hooks failures are logged but don't stop execution
+                exceptions.Add(ex);
             }
+        }
+        
+        if (exceptions.Count > 0)
+        {
+            throw exceptions.Count == 1 
+                ? new HookFailedException(exceptions[0]) 
+                : new HookFailedException("Multiple AfterTestSession hooks failed", new AggregateException(exceptions));
         }
 
 #if NET
@@ -143,6 +152,7 @@ internal sealed class HookOrchestrator
     public async Task<ExecutionContext?> ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterTestDiscoveryHooksAsync();
+        var exceptions = new List<Exception>();
 
         foreach (var hook in hooks)
         {
@@ -154,7 +164,15 @@ internal sealed class HookOrchestrator
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"AfterTestDiscovery hook failed: {ex.Message}");
+                exceptions.Add(ex);
             }
+        }
+        
+        if (exceptions.Count > 0)
+        {
+            throw exceptions.Count == 1 
+                ? new HookFailedException(exceptions[0]) 
+                : new HookFailedException("Multiple AfterTestDiscovery hooks failed", new AggregateException(exceptions));
         }
 
 #if NET
@@ -259,8 +277,8 @@ internal sealed class HookOrchestrator
     private async Task<ExecutionContext> ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterAssemblyHooksAsync(assembly);
-
         var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
+        var exceptions = new List<Exception>();
 
         // Execute global AfterEveryAssembly hooks first
         var everyHooks = await _hookCollectionService.CollectAfterEveryAssemblyHooksAsync();
@@ -274,6 +292,7 @@ internal sealed class HookOrchestrator
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"AfterEveryAssembly hook failed for {assembly.GetName().Name}: {ex.Message}");
+                exceptions.Add(ex);
             }
         }
 
@@ -287,7 +306,15 @@ internal sealed class HookOrchestrator
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"AfterAssembly hook failed for {assembly.GetName().Name}: {ex.Message}");
+                exceptions.Add(ex);
             }
+        }
+        
+        if (exceptions.Count > 0)
+        {
+            throw exceptions.Count == 1 
+                ? new HookFailedException(exceptions[0]) 
+                : new HookFailedException("Multiple AfterAssembly hooks failed", new AggregateException(exceptions));
         }
 
         return ExecutionContext.Capture()!;
@@ -339,8 +366,8 @@ internal sealed class HookOrchestrator
         Type testClassType, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClassType);
-
         var classContext = _contextProvider.GetOrCreateClassContext(testClassType);
+        var exceptions = new List<Exception>();
 
         // Execute global AfterEveryClass hooks first
         var everyHooks = await _hookCollectionService.CollectAfterEveryClassHooksAsync();
@@ -354,6 +381,7 @@ internal sealed class HookOrchestrator
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"AfterEveryClass hook failed for {testClassType.Name}: {ex.Message}");
+                exceptions.Add(ex);
             }
         }
 
@@ -367,7 +395,15 @@ internal sealed class HookOrchestrator
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"AfterClass hook failed for {testClassType.Name}: {ex.Message}");
+                exceptions.Add(ex);
             }
+        }
+        
+        if (exceptions.Count > 0)
+        {
+            throw exceptions.Count == 1 
+                ? new HookFailedException(exceptions[0]) 
+                : new HookFailedException("Multiple AfterClass hooks failed", new AggregateException(exceptions));
         }
 
         return ExecutionContext.Capture()!;
@@ -395,6 +431,7 @@ internal sealed class HookOrchestrator
     private async Task ExecuteAfterEveryTestHooksAsync(Type testClassType, TestContext testContext, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterEveryTestHooksAsync(testClassType);
+        var exceptions = new List<Exception>();
 
         foreach (var hook in hooks)
         {
@@ -406,7 +443,15 @@ internal sealed class HookOrchestrator
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"AfterEveryTest hook failed: {ex.Message}");
+                exceptions.Add(ex);
             }
+        }
+        
+        if (exceptions.Count > 0)
+        {
+            throw exceptions.Count == 1 
+                ? new HookFailedException(exceptions[0]) 
+                : new HookFailedException("Multiple AfterEveryTest hooks failed", new AggregateException(exceptions));
         }
     }
 }
