@@ -5,6 +5,7 @@ using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Services;
@@ -48,20 +49,18 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
 
         test.Context.InternalDiscoveredTest = discoveredTest;
 
-        var attributes = test.Context.TestDetails.Attributes;
+        var eventObjects = test.Context.GetEligibleEventObjects();
 
-        foreach (var attribute in attributes)
+        foreach (var receiver in eventObjects.OfType<ITestRegisteredEventReceiver>())
         {
-            if (attribute is ITestRegisteredEventReceiver receiver)
+            try
             {
-                try
-                {
-                    await receiver.OnTestRegistered(registeredContext);
-                }
-                catch (Exception ex)
-                {
-                    await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
-                }
+                await receiver.OnTestRegistered(registeredContext);
+            }
+            catch (Exception ex)
+            {
+                await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
+                throw;
             }
         }
 
@@ -101,8 +100,8 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
         var classTypeName = classMetadata.Name;
 
         var path = $"/{assemblyName}/{namespaceName}/{classTypeName}/{metadata.TestMethodName}";
-        
-        
+
+
         return path;
     }
 

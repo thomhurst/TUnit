@@ -192,45 +192,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask InvokeTestRegisteredEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
-    {
-        if (!_registry.HasTestRegisteredReceivers())
-        {
-            return;
-        }
-
-        await InvokeTestRegisteredEventReceiversCore(context, cancellationToken);
-    }
-
-    private async ValueTask InvokeTestRegisteredEventReceiversCore(TestContext context, CancellationToken cancellationToken)
-    {
-        var receivers = context.GetEligibleEventObjects()
-            .OfType<ITestRegisteredEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
-
-        // Filter scoped attributes
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
-
-        var registeredContext = new TestRegisteredContext(context)
-        {
-            DiscoveredTest = context.InternalDiscoveredTest!
-        };
-
-        foreach (var receiver in filteredReceivers)
-        {
-            try
-            {
-                await receiver.OnTestRegistered(registeredContext);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
-            }
-        }
-    }
-
     public async ValueTask InvokeTestDiscoveryEventReceiversAsync(TestContext context, DiscoveredTestContext discoveredContext, CancellationToken cancellationToken)
     {
         var eventReceivers = context.GetEligibleEventObjects()
