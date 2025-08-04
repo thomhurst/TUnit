@@ -215,7 +215,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         finally
         {
             await DecrementAndDisposeTrackedObjectsAsync(test);
-            
+
             // Dispose the test class instance if it implements IDisposable or IAsyncDisposable
             if (instance is IAsyncDisposable asyncDisposableInstance)
             {

@@ -27,6 +27,8 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
     public required IHookExecutor HookExecutor { get; init; }
 
     public required int Order { get; init; }
+    
+    public required int RegistrationIndex { get; init; }
 
     public Func<object, TestContext, CancellationToken, ValueTask>? Body { get; init; }
 

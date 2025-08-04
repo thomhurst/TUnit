@@ -724,6 +724,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
         writer.AppendLine("HookExecutor = null!,");
         writer.AppendLine($"Order = {hook.Order},");
+        writer.AppendLine($"RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNext{GetHookIndexMethodName(hook)},");
         writer.AppendLine($"Body = {delegateKey}_Body" + (isInstance ? "" : ","));
 
         if (!isInstance)
@@ -822,6 +823,15 @@ public class HookMetadataGenerator : IIncrementalGenerator
             ("TestDiscovery", "AfterEvery") => "TestDiscoveryContext",
             _ => "TestContext"
         };
+    }
+
+    private static string GetHookIndexMethodName(HookMethodMetadata hook)
+    {
+        var prefix = hook.HookKind == "Before" || hook.HookKind == "BeforeEvery" ? "Before" : "After";
+        var suffix = hook.HookKind.Contains("Every") && hook.HookType != "TestSession" && hook.HookType != "TestDiscovery" ? "Every" : "";
+        var hookType = hook.HookType;
+        
+        return $"{prefix}{suffix}{hookType}HookIndex()";
     }
 }
 

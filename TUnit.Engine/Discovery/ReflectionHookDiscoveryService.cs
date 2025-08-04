@@ -170,6 +170,7 @@ internal sealed class ReflectionHookDiscoveryService
                 MethodInfo = methodMetadata,
                 HookExecutor = _hookExecutor,
                 Order = attr.Order,
+                RegistrationIndex = isBeforeHook ? HookRegistrationIndices.GetNextBeforeClassHookIndex() : HookRegistrationIndices.GetNextAfterClassHookIndex(),
                 FilePath = "Unknown", // Assembly.Location not available in single-file apps
                 LineNumber = 0,
                 Body = CreateClassHookBody(method)
@@ -194,6 +195,7 @@ internal sealed class ReflectionHookDiscoveryService
                     MethodInfo = methodMetadata,
                     HookExecutor = _hookExecutor,
                     Order = attr.Order,
+                    RegistrationIndex = isBeforeHook ? HookRegistrationIndices.GetNextBeforeEveryTestHookIndex() : HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
                     FilePath = "Unknown", // Assembly.Location not available in single-file apps
                     LineNumber = 0,
                     Body = CreateStaticTestHookBody(method)
@@ -216,6 +218,7 @@ internal sealed class ReflectionHookDiscoveryService
                     MethodInfo = methodMetadata,
                     HookExecutor = _hookExecutor,
                     Order = attr.Order,
+                    RegistrationIndex = isBeforeHook ? HookRegistrationIndices.GetNextBeforeTestHookIndex() : HookRegistrationIndices.GetNextAfterTestHookIndex(),
                     Body = CreateInstanceHookBody(method)
                 };
 
@@ -237,6 +240,7 @@ internal sealed class ReflectionHookDiscoveryService
                 MethodInfo = methodMetadata,
                 HookExecutor = _hookExecutor,
                 Order = attr.Order,
+                RegistrationIndex = isBeforeHook ? HookRegistrationIndices.GetNextBeforeTestSessionHookIndex() : HookRegistrationIndices.GetNextAfterTestSessionHookIndex(),
                 FilePath = "Unknown", // Assembly.Location not available in single-file apps
                 LineNumber = 0,
                 Body = CreateTestSessionHookBody(method)
@@ -262,6 +266,7 @@ internal sealed class ReflectionHookDiscoveryService
             MethodInfo = methodMetadata,
             HookExecutor = _hookExecutor,
             Order = attr.Order,
+            RegistrationIndex = isBeforeHook ? HookRegistrationIndices.GetNextBeforeAssemblyHookIndex() : HookRegistrationIndices.GetNextAfterAssemblyHookIndex(),
             FilePath = "Unknown", // Assembly.Location not available in single-file apps
             LineNumber = 0,
             Body = CreateAssemblyHookBody(method)
@@ -288,6 +293,7 @@ internal sealed class ReflectionHookDiscoveryService
                 MethodInfo = methodMetadata,
                 HookExecutor = _hookExecutor,
                 Order = attr.Order,
+                RegistrationIndex = HookRegistrationIndices.GetNextBeforeTestDiscoveryHookIndex(),
                 FilePath = "Unknown", // Assembly.Location not available in single-file apps
                 LineNumber = 0,
                 Body = CreateBeforeTestDiscoveryHookBody(method)
@@ -301,6 +307,7 @@ internal sealed class ReflectionHookDiscoveryService
                 MethodInfo = methodMetadata,
                 HookExecutor = _hookExecutor,
                 Order = attr.Order,
+                RegistrationIndex = HookRegistrationIndices.GetNextAfterTestDiscoveryHookIndex(),
                 FilePath = "Unknown", // Assembly.Location not available in single-file apps
                 LineNumber = 0,
                 Body = CreateAfterTestDiscoveryHookBody(method)
