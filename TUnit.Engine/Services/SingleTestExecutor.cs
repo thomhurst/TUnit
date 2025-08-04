@@ -56,6 +56,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
             return await HandleSkippedTestAsync(test, cancellationToken);
         }
 
+        // Check if we already have a skipped test instance from discovery
+        if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
+        {
+            return await HandleSkippedTestAsync(test, cancellationToken);
+        }
+
         var instance = await test.CreateInstanceAsync();
         test.Context.TestDetails.ClassInstance = instance;
 

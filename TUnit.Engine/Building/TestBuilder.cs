@@ -265,14 +265,18 @@ internal sealed class TestBuilder : ITestBuilder
 
                                 // Check for basic skip attributes that can be evaluated at discovery time
                                 var basicSkipReason = GetBasicSkipReason(metadata);
-                                object? instance = null;
+                                object instance;
 
-                                if (basicSkipReason == null || basicSkipReason == string.Empty)
+                                if (!string.IsNullOrEmpty(basicSkipReason))
+                                {
+                                    // Use placeholder instance for basic skip attributes to avoid calling constructor
+                                    instance = SkippedTestInstance.Instance;
+                                }
+                                else
                                 {
                                     // No skip attributes or custom skip attributes - create instance normally
                                     instance = await CreateInstance(metadata, resolvedClassGenericArgs, classData, contextAccessor.Current);
                                 }
-                                // If basicSkipReason is not null and not empty, it's a basic skip - don't create instance
 
                                 var testData = new TestData
                                 {
@@ -921,7 +925,7 @@ internal sealed class TestBuilder : ITestBuilder
 
     internal class TestData
     {
-        public required object? TestClassInstance { get; init; }
+        public required object TestClassInstance { get; init; }
 
         public required int ClassDataSourceAttributeIndex { get; init; }
         public required int ClassDataLoopIndex { get; init; }
