@@ -4,7 +4,7 @@ public record BeforeTestSessionHookMethod : StaticHookMethod<TestSessionContext>
 {
     public override ValueTask ExecuteAsync(TestSessionContext context, CancellationToken cancellationToken)
     {
-        return HookExecutor.ExecuteBeforeTestSessionHook(MethodInfo, context,
+        return base.HookExecutor.ExecuteBeforeTestSessionHook(MethodInfo, context,
             () => Body!.Invoke(context, cancellationToken)
         );
     }
