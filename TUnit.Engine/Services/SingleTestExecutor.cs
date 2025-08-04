@@ -397,8 +397,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         finally
         {
-            await DecrementAndDisposeTrackedObjectsAsync(test);
-
+            // Object tracking disposal is handled automatically by ObjectTracker via TestContext.Events.OnDispose
+            
             // Dispose the test class instance if it implements IDisposable or IAsyncDisposable
             if (instance is IAsyncDisposable asyncDisposableInstance)
             {
@@ -589,43 +589,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
     }
 
 
-    private async Task DecrementAndDisposeTrackedObjectsAsync(AbstractExecutableTest test)
-    {
-        var objectsToCheck = new List<object?>();
-        objectsToCheck.AddRange(test.ClassArguments);
-        objectsToCheck.AddRange(test.Arguments);
-
-        if (test.Context?.TestDetails.TestClassInjectedPropertyArguments != null)
-        {
-            objectsToCheck.AddRange(test.Context.TestDetails.TestClassInjectedPropertyArguments.Values);
-        }
-
-        foreach (var obj in objectsToCheck)
-        {
-            if (obj == null)
-            {
-                continue;
-            }
-
-            if (ObjectTracker.TryGetReference(obj, out var counter))
-            {
-                var count = counter!.Decrement();
-                if (count == 0)
-                {
-                    ObjectTracker.RemoveObject(obj);
-
-                    if (obj is IAsyncDisposable asyncDisposable)
-                    {
-                        await asyncDisposable.DisposeAsync();
-                    }
-                    else if (obj is IDisposable disposable)
-                    {
-                        disposable.Dispose();
-                    }
-                }
-            }
-        }
-    }
 
     private static void RestoreHookContexts(TestContext context)
     {

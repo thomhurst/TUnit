@@ -64,52 +64,15 @@ internal sealed class SimpleQueueTestScheduler : ITestScheduler
 
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(testList);
         
-        // Create execution states and enqueue all tests
-        var allTests = new List<TestExecutionState>();
+        // Process each constraint group separately with proper sorting
         
-        // Add parallel tests
-        foreach (var test in groupedTests.Parallel)
+        // 1. Parallel tests - sort by priority only (can run concurrently)
+        var parallelTests = groupedTests.Parallel.ToList();
+        parallelTests.Sort((a, b) => b.Context.ExecutionPriority.CompareTo(a.Context.ExecutionPriority));
+        
+        foreach (var test in parallelTests)
         {
             var state = new TestExecutionState(test);
-            allTests.Add(state);
-        }
-        
-        // Add NotInParallel tests (ordered)
-        while (groupedTests.NotInParallel.TryDequeue(out var test, out var testPriority))
-        {
-            var state = new TestExecutionState(test);
-            allTests.Add(state);
-        }
-        
-        // Add keyed NotInParallel tests (ordered by key then priority)
-        foreach (var kvp in groupedTests.KeyedNotInParallel)
-        {
-            while (kvp.Value.TryDequeue(out var test, out var testPriority))
-            {
-                var state = new TestExecutionState(test);
-                allTests.Add(state);
-            }
-        }
-        
-        // Add parallel group tests (ordered by group then priority)
-        foreach (var group in groupedTests.ParallelGroups)
-        {
-            foreach (var orderGroup in group.Value)
-            {
-                foreach (var test in orderGroup.Value)
-                {
-                    var state = new TestExecutionState(test);
-                    allTests.Add(state);
-                }
-            }
-        }
-        
-        // Sort all tests by priority (higher priority first)
-        allTests.Sort((a, b) => b.Priority.CompareTo(a.Priority));
-        
-        // Enqueue all tests in priority order
-        foreach (var state in allTests)
-        {
             var testData = new TestExecutionData
             {
                 Test = state.Test,
@@ -118,8 +81,91 @@ internal sealed class SimpleQueueTestScheduler : ITestScheduler
                 Priority = state.Priority,
                 State = state
             };
-
             _queues.EnqueueTest(testData);
+        }
+        
+        // 2. Global NotInParallel tests - sort by Order first, then Priority
+        var globalNotInParallelTests = new List<AbstractExecutableTest>();
+        while (groupedTests.NotInParallel.TryDequeue(out var test, out var testPriority))
+        {
+            globalNotInParallelTests.Add(test);
+        }
+        
+        globalNotInParallelTests.Sort((a, b) =>
+        {
+            var aOrder = a.Context.ParallelConstraint is NotInParallelConstraint nip1 ? nip1.Order : int.MaxValue / 2;
+            var bOrder = b.Context.ParallelConstraint is NotInParallelConstraint nip2 ? nip2.Order : int.MaxValue / 2;
+            
+            var orderComparison = aOrder.CompareTo(bOrder);
+            return orderComparison != 0 ? orderComparison : b.Context.ExecutionPriority.CompareTo(a.Context.ExecutionPriority);
+        });
+        
+        foreach (var test in globalNotInParallelTests)
+        {
+            var state = new TestExecutionState(test);
+            var testData = new TestExecutionData
+            {
+                Test = state.Test,
+                ExecutionContext = ExecutionContext.Capture(),
+                Constraints = GetConstraintKeys(state),
+                Priority = state.Priority,
+                State = state
+            };
+            _queues.EnqueueTest(testData);
+        }
+        
+        // 3. Keyed NotInParallel tests - sort by Order first, then Priority within each key
+        foreach (var kvp in groupedTests.KeyedNotInParallel)
+        {
+            var keyedTests = new List<AbstractExecutableTest>();
+            while (kvp.Value.TryDequeue(out var test, out var testPriority))
+            {
+                keyedTests.Add(test);
+            }
+            
+            keyedTests.Sort((a, b) =>
+            {
+                var aOrder = a.Context.ParallelConstraint is NotInParallelConstraint nip1 ? nip1.Order : int.MaxValue / 2;
+                var bOrder = b.Context.ParallelConstraint is NotInParallelConstraint nip2 ? nip2.Order : int.MaxValue / 2;
+                
+                var orderComparison = aOrder.CompareTo(bOrder);
+                return orderComparison != 0 ? orderComparison : b.Context.ExecutionPriority.CompareTo(a.Context.ExecutionPriority);
+            });
+            
+            foreach (var test in keyedTests)
+            {
+                var state = new TestExecutionState(test);
+                var testData = new TestExecutionData
+                {
+                    Test = state.Test,
+                    ExecutionContext = ExecutionContext.Capture(),
+                    Constraints = GetConstraintKeys(state),
+                    Priority = state.Priority,
+                    State = state
+                };
+                _queues.EnqueueTest(testData);
+            }
+        }
+        
+        // 4. Parallel group tests - preserve existing order logic (already sorted by the grouping service)
+        foreach (var group in groupedTests.ParallelGroups)
+        {
+            foreach (var orderGroup in group.Value)
+            {
+                foreach (var test in orderGroup.Value)
+                {
+                    var state = new TestExecutionState(test);
+                    var testData = new TestExecutionData
+                    {
+                        Test = state.Test,
+                        ExecutionContext = ExecutionContext.Capture(),
+                        Constraints = GetConstraintKeys(state),
+                        Priority = state.Priority,
+                        State = state
+                    };
+                    _queues.EnqueueTest(testData);
+                }
+            }
         }
         
         await _logger.LogInformationAsync($"Enqueued {_queues.GetTotalQueuedCount()} tests in queues");
