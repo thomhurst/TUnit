@@ -13,14 +13,24 @@ public class CompleteWithinAssertCondition<TActual>(TimeSpan timeSpan) : Delegat
         TActual? actualValue, Exception? exception,
         AssertionMetadata assertionMetadata
     )
-        => AssertionResult
-            .FailIf(exception is not null && exception.GetType().IsAssignableTo(typeof(CompleteWithinException)),
-                "it took too long to complete")
-        .OrFailIf(exception is not null,
-            $"a {exception!.GetType().Name} was thrown")
-        .OrFailIf(assertionMetadata.Duration > timeSpan,
-            $"it took {assertionMetadata.Duration.PrettyPrint()}"
-        );
+    {
+        if (exception is not null && exception.GetType().IsAssignableTo(typeof(CompleteWithinException)))
+        {
+            return AssertionResult.Fail("it took too long to complete");
+        }
+
+        if (exception is not null)
+        {
+            return AssertionResult.Fail($"a {exception.GetType().Name} was thrown");
+        }
+
+        if (assertionMetadata.Duration > timeSpan)
+        {
+            return AssertionResult.Fail($"it took {assertionMetadata.Duration.PrettyPrint()}");
+        }
+
+        return AssertionResult.Passed;
+    }
 
     public override TimeSpan? WaitFor => timeSpan;
 }
