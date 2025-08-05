@@ -5,6 +5,7 @@ using TUnit.Core.Data;
 using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Core.Enums;
 using TUnit.Core.Services;
+using TUnit.Core.Helpers;
 using System.Reflection;
 
 namespace TUnit.Core;
@@ -68,8 +69,16 @@ public sealed class PropertyInjectionService
     /// Uses source generation mode when available, falls back to reflection mode.
     /// After injection, handles tracking, initialization, and recursive injection.
     /// </summary>
-    public static async Task InjectPropertiesIntoObjectAsync(object instance, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
+    public static async Task InjectPropertiesIntoObjectAsync(object instance, Dictionary<string, object?>? objectBag, MethodMetadata? methodMetadata, TestContextEvents? events)
     {
+        // If we don't have the required context, try to get it from the current test context
+        objectBag ??= TestContext.Current?.ObjectBag ?? new Dictionary<string, object?>();
+        methodMetadata ??= TestContext.Current?.TestDetails?.MethodMetadata;
+        events ??= TestContext.Current?.Events;
+        
+        // If we still don't have events after trying to get from context, create a default instance
+        events ??= new TestContextEvents();
+        
         try
         {
             await _injectionTasks.GetOrAdd(instance, async _ =>
@@ -93,7 +102,7 @@ public sealed class PropertyInjectionService
     /// <summary>
     /// Injects properties using source-generated metadata (AOT-safe mode).
     /// </summary>
-    private static async Task InjectPropertiesUsingSourceGenerationAsync(object instance, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
+    private static async Task InjectPropertiesUsingSourceGenerationAsync(object instance, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
     {
         var type = instance.GetType();
         var propertySource = PropertySourceRegistry.GetSource(type);
@@ -113,7 +122,7 @@ public sealed class PropertyInjectionService
     /// Injects properties using runtime reflection (full feature mode).
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static async Task InjectPropertiesUsingReflectionAsync(object instance, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
+    private static async Task InjectPropertiesUsingReflectionAsync(object instance, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
     {
         var type = instance.GetType();
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
@@ -135,7 +144,7 @@ public sealed class PropertyInjectionService
     /// Processes property injection using metadata: creates data source, gets values, and injects them.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static async Task ProcessPropertyMetadata(object instance, PropertyInjectionMetadata metadata, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata,
+    private static async Task ProcessPropertyMetadata(object instance, PropertyInjectionMetadata metadata, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata,
         TestContextEvents events)
     {
         var dataSource = metadata.CreateDataSource();
@@ -182,7 +191,7 @@ public sealed class PropertyInjectionService
     /// Processes a property data source using reflection mode.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static async Task ProcessReflectionPropertyDataSource(object instance, PropertyInfo property, IDataSourceAttribute dataSource, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
+    private static async Task ProcessReflectionPropertyDataSource(object instance, PropertyInfo property, IDataSourceAttribute dataSource, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
     {
         // Use centralized factory for reflection mode
         var dataGeneratorMetadata = DataGeneratorMetadataCreator.CreateForPropertyInjection(
@@ -216,7 +225,7 @@ public sealed class PropertyInjectionService
     /// <summary>
     /// Processes a single injected property value: tracks it, initializes it, sets it on the instance, and handles cleanup.
     /// </summary>
-    private static async Task ProcessInjectedPropertyValue(object instance, object? propertyValue, Action<object, object?> setProperty, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
+    private static async Task ProcessInjectedPropertyValue(object instance, object? propertyValue, Action<object, object?> setProperty, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
     {
         if (propertyValue == null)
         {
@@ -380,7 +389,44 @@ public sealed class PropertyInjectionService
                 await foreach (var factory in dataRows)
                 {
                     var args = await factory();
-                    var value = args?.FirstOrDefault();
+                    object? value;
+
+                    // Handle tuple properties - need to create tuple from multiple arguments
+                    if (TupleFactory.IsTupleType(propertyInjection.PropertyType))
+                    {
+                        if (args is { Length: > 1 })
+                        {
+                            // Multiple arguments - create tuple from them
+                            value = TupleFactory.CreateTuple(propertyInjection.PropertyType, args);
+                        }
+                        else if (args is [not null] && TupleFactory.IsTupleType(args[0]!.GetType()))
+                        {
+                            // Single tuple argument - check if it needs type conversion
+                            var tupleValue = args[0]!;
+                            var tupleType = tupleValue!.GetType();
+
+                            if (tupleType != propertyInjection.PropertyType)
+                            {
+                                // Tuple types don't match - unwrap and recreate with correct types
+                                var elements = DataSourceHelpers.UnwrapTupleAot(tupleValue);
+                                value = TupleFactory.CreateTuple(propertyInjection.PropertyType, elements);
+                            }
+                            else
+                            {
+                                // Types match - use directly
+                                value = tupleValue;
+                            }
+                        }
+                        else
+                        {
+                            // Single non-tuple argument or null
+                            value = args?.FirstOrDefault();
+                        }
+                    }
+                    else
+                    {
+                        value = args?.FirstOrDefault();
+                    }
 
                     // Resolve the value (handle Func<T>, Task<T>, etc.)
                     value = await ResolveTestDataValueAsync(propertyInjection.PropertyType, value);
