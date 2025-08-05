@@ -326,6 +326,9 @@ public static class DataSourceHelpers
         {
             await initializer(instance, testInformation, testSessionId);
         }
+        else
+        {
+        }
         // If no initializer is registered, the type has no data source properties
     }
 
@@ -403,5 +406,36 @@ public static class DataSourceHelpers
             genericType == typeof(Tuple<,,,,,>) ||
             genericType == typeof(Tuple<,,,,,,>);
 #endif
+    }
+    
+    /// <summary>
+    /// Tries to create an instance using a generated creation method that handles init-only properties.
+    /// Returns true if successful, false if no creator is available.
+    /// </summary>
+    public static bool TryCreateWithInitializer(Type type, MethodMetadata testInformation, string testSessionId, out object createdInstance)
+    {
+        createdInstance = null!;
+        
+        // Check if we have a registered creator for this type
+        if (!TypeCreators.TryGetValue(type, out var creator))
+        {
+            return false;
+        }
+        
+        // Use the creator to create and initialize the instance
+        var task = creator(testInformation, testSessionId);
+        createdInstance = task.GetAwaiter().GetResult();
+        return true;
+    }
+    
+    private static readonly Dictionary<Type, Func<MethodMetadata, string, Task<object>>> TypeCreators = new();
+    
+    /// <summary>
+    /// Registers a type creator function for types with init-only data source properties.
+    /// Called by generated code.
+    /// </summary>
+    public static void RegisterTypeCreator<T>(Func<MethodMetadata, string, Task<T>> creator)
+    {
+        TypeCreators[typeof(T)] = async (metadata, sessionId) => (await creator(metadata, sessionId))!;
     }
 }

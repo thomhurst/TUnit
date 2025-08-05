@@ -137,7 +137,7 @@ public static class PropertyInjector
                                 nestedInjection.NestedPropertyInjections, 5, 0);
                         }
 
-                        await ObjectInitializer.InitializeAsync(value);
+                        // Don't initialize here - it will be initialized later after all properties are set
                     }
 
                     propertyValues[propertyDataSource.PropertyName] = value;

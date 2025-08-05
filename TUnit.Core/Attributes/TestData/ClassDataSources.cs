@@ -124,7 +124,35 @@ internal class ClassDataSources
     {
         try
         {
-            return Activator.CreateInstance(type)!;
+            
+            // Try to use the generated creation method if available (for types with init-only data source properties)
+            if (dataGeneratorMetadata.TestInformation != null)
+            {
+                if (Helpers.DataSourceHelpers.TryCreateWithInitializer(type, dataGeneratorMetadata.TestInformation, dataGeneratorMetadata.TestSessionId, out var createdInstance))
+                {
+                    return createdInstance;
+                }
+            }
+            else
+            {
+            }
+            
+            // Fall back to regular creation with property initialization
+            var instance = Activator.CreateInstance(type)!;
+            
+            // Initialize any data source properties on the created instance
+            if (dataGeneratorMetadata.TestInformation != null)
+            {
+                var initTask = Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(
+                    instance, 
+                    dataGeneratorMetadata.TestInformation,
+                    dataGeneratorMetadata.TestSessionId);
+                
+                // We need to block here since this method isn't async
+                initTask.GetAwaiter().GetResult();
+            }
+            
+            return instance;
         }
         catch (TargetInvocationException targetInvocationException)
         {
