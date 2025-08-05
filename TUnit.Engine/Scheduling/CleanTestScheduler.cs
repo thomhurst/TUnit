@@ -18,7 +18,7 @@ internal sealed class CleanTestScheduler : ITestScheduler
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestGroupingService _groupingService;
     private readonly int _maxParallelism;
-    
+
     public CleanTestScheduler(
         TUnitFrameworkLogger logger,
         ITestGroupingService groupingService,
@@ -26,7 +26,7 @@ internal sealed class CleanTestScheduler : ITestScheduler
     {
         _logger = logger;
         _groupingService = groupingService;
-        _maxParallelism = maxParallelism > 0 ? maxParallelism : Environment.ProcessorCount;
+        _maxParallelism = maxParallelism > 0 ? maxParallelism : Environment.ProcessorCount * 2;
     }
 
     public async Task ScheduleAndExecuteAsync(
@@ -39,9 +39,9 @@ internal sealed class CleanTestScheduler : ITestScheduler
 
         // Create execution plan upfront
         var plan = ExecutionPlan.Create(tests);
-        
+
         await _logger.LogInformationAsync($"Execution plan created: {plan.ExecutableTests.Count} executable tests out of {plan.AllTests.Count} total");
-        
+
         if (plan.ExecutableTests.Count == 0)
         {
             await _logger.LogDebugAsync("No executable tests found");
@@ -50,7 +50,7 @@ internal sealed class CleanTestScheduler : ITestScheduler
 
         // Group tests by constraints
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(plan.ExecutableTests);
-        
+
         // Execute tests
         await ExecuteGroupedTestsAsync(plan, groupedTests, executor, cancellationToken);
     }
@@ -64,23 +64,23 @@ internal sealed class CleanTestScheduler : ITestScheduler
         var runningTasks = new ConcurrentDictionary<AbstractExecutableTest, Task>();
         var completedTests = new ConcurrentDictionary<AbstractExecutableTest, bool>();
         var semaphore = new SemaphoreSlim(_maxParallelism, _maxParallelism);
-        
+
         // Process all test groups
         var allTestTasks = new List<Task>();
-        
+
         // 1. NotInParallel tests (global) - must run one at a time
         if (groupedTests.NotInParallel.Count > 0)
         {
             var globalNotInParallelTask = ExecuteNotInParallelTestsAsync(
-                plan, 
-                groupedTests.NotInParallel, 
-                executor, 
+                plan,
+                groupedTests.NotInParallel,
+                executor,
                 runningTasks,
                 completedTests,
                 cancellationToken);
             allTestTasks.Add(globalNotInParallelTask);
         }
-        
+
         // 2. Keyed NotInParallel tests - can run in parallel with other keys
         foreach (var kvp in groupedTests.KeyedNotInParallel)
         {
@@ -94,7 +94,7 @@ internal sealed class CleanTestScheduler : ITestScheduler
                 cancellationToken);
             allTestTasks.Add(keyedTask);
         }
-        
+
         // 3. Parallel groups - can run in parallel within constraints
         foreach (var group in groupedTests.ParallelGroups)
         {
@@ -109,7 +109,7 @@ internal sealed class CleanTestScheduler : ITestScheduler
                 cancellationToken);
             allTestTasks.Add(groupTask);
         }
-        
+
         // 4. Fully parallel tests
         var parallelTask = ExecuteParallelTestsAsync(
             plan,
@@ -120,7 +120,7 @@ internal sealed class CleanTestScheduler : ITestScheduler
             semaphore,
             cancellationToken);
         allTestTasks.Add(parallelTask);
-        
+
         // Wait for all tests to complete
         await Task.WhenAll(allTestTasks);
     }
@@ -138,15 +138,15 @@ internal sealed class CleanTestScheduler : ITestScheduler
         {
             tests.Add(test);
         }
-        
+
         // Sort by execution order from the plan
-        tests.Sort((a, b) => 
+        tests.Sort((a, b) =>
         {
             var aOrder = plan.ExecutionOrder.TryGetValue(a, out var ao) ? ao : int.MaxValue;
             var bOrder = plan.ExecutionOrder.TryGetValue(b, out var bo) ? bo : int.MaxValue;
             return aOrder.CompareTo(bOrder);
         });
-        
+
         // Execute sequentially
         foreach (var test in tests)
         {
@@ -168,15 +168,15 @@ internal sealed class CleanTestScheduler : ITestScheduler
         {
             tests.Add(test);
         }
-        
+
         // Sort by execution order
-        tests.Sort((a, b) => 
+        tests.Sort((a, b) =>
         {
             var aOrder = plan.ExecutionOrder.TryGetValue(a, out var ao) ? ao : int.MaxValue;
             var bOrder = plan.ExecutionOrder.TryGetValue(b, out var bo) ? bo : int.MaxValue;
             return aOrder.CompareTo(bOrder);
         });
-        
+
         // Execute sequentially within this key
         foreach (var test in tests)
         {
@@ -198,17 +198,17 @@ internal sealed class CleanTestScheduler : ITestScheduler
         foreach (var orderGroup in orderGroups.OrderBy(og => og.Key))
         {
             var tasks = new List<Task>();
-            
+
             foreach (var test in orderGroup.Value)
             {
                 await semaphore.WaitAsync(cancellationToken);
-                
+
                 var task = ExecuteTestWhenReadyAsync(plan, test, executor, runningTasks, completedTests, cancellationToken)
                     .ContinueWith(_ => semaphore.Release(), cancellationToken);
-                
+
                 tasks.Add(task);
             }
-            
+
             // Wait for all tests in this order group to complete
             await Task.WhenAll(tasks);
         }
@@ -224,17 +224,17 @@ internal sealed class CleanTestScheduler : ITestScheduler
         CancellationToken cancellationToken)
     {
         var tasks = new List<Task>();
-        
+
         foreach (var test in tests)
         {
             await semaphore.WaitAsync(cancellationToken);
-            
+
             var task = ExecuteTestWhenReadyAsync(plan, test, executor, runningTasks, completedTests, cancellationToken)
                 .ContinueWith(_ => semaphore.Release(), cancellationToken);
-            
+
             tasks.Add(task);
         }
-        
+
         await Task.WhenAll(tasks);
     }
 
@@ -255,10 +255,10 @@ internal sealed class CleanTestScheduler : ITestScheduler
                 completedTests[test] = true;
                 return;
             }
-            
+
             await Task.Delay(10, cancellationToken);
         }
-        
+
         // Execute the test
         var executionTask = Task.Run(async () =>
         {
@@ -271,7 +271,7 @@ internal sealed class CleanTestScheduler : ITestScheduler
                 completedTests[test] = true;
             }
         }, cancellationToken);
-        
+
         runningTasks[test] = executionTask;
         await executionTask;
         runningTasks.TryRemove(test, out _);

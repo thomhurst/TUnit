@@ -93,6 +93,9 @@ internal sealed class ExecutionPlan
             }
         }
         
+        // Populate TestContext.Dependencies with transitive dependencies
+        PopulateTransitiveDependencies(allTests);
+        
         return new ExecutionPlan(allTests, executableTests, dependencyGraph, dependentGraph, executionOrder);
     }
 
@@ -246,5 +249,70 @@ internal sealed class ExecutionPlan
             }
         }
         return null;
+    }
+
+    private static void PopulateTransitiveDependencies(List<AbstractExecutableTest> allTests)
+    {
+        var cachedTransitiveDependencies = new Dictionary<string, List<TestDetails>>();
+        
+        foreach (var test in allTests.Where(t => t.State != TestState.Failed))
+        {
+            test.Context.Dependencies.Clear();
+            
+            // Check if we already have cached dependencies
+            if (cachedTransitiveDependencies.TryGetValue(test.TestId, out var cachedDeps))
+            {
+                foreach (var dep in cachedDeps)
+                {
+                    test.Context.Dependencies.Add(dep);
+                }
+                continue;
+            }
+            
+            // Build transitive dependencies using BFS to avoid stack overflow
+            var allDeps = new HashSet<TestDetails>();
+            var depQueue = new Queue<AbstractExecutableTest>();
+            var visited = new HashSet<string>();
+            
+            // Add direct dependencies to queue
+            foreach (var dep in test.Dependencies)
+            {
+                depQueue.Enqueue(dep);
+            }
+            
+            // Process queue to get all transitive dependencies
+            const int maxIterations = 10000;
+            var iterations = 0;
+            
+            while (depQueue.Count > 0 && iterations < maxIterations)
+            {
+                iterations++;
+                var dep = depQueue.Dequeue();
+                
+                // Skip if we've already processed this test
+                if (!visited.Add(dep.TestId))
+                {
+                    continue;
+                }
+                
+                allDeps.Add(dep.Context.TestDetails);
+                
+                // Add this test's dependencies to the queue
+                foreach (var subDep in dep.Dependencies)
+                {
+                    depQueue.Enqueue(subDep);
+                }
+            }
+            
+            // Cache the result
+            var depsList = allDeps.ToList();
+            cachedTransitiveDependencies[test.TestId] = depsList;
+            
+            // Add to context
+            foreach (var dep in depsList)
+            {
+                test.Context.Dependencies.Add(dep);
+            }
+        }
     }
 }
