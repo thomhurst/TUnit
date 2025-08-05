@@ -259,11 +259,6 @@ public class TestContext : Context
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
     public DateTimeOffset? TestEnd { get; set; }
 
-    /// <summary>
-    /// The execution task for this test, used for dependency task reuse
-    /// </summary>
-    internal Task<TestResult>? ExecutionTask { get; set; }
-    internal readonly Lock ExecutionLock = new();
 
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
     {

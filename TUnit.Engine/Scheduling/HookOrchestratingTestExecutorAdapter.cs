@@ -48,25 +48,9 @@ internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDat
 
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        // If test is already failed (e.g., due to circular dependencies), report the failure and return
-        if (test.State == TestState.Failed && test.Result != null)
-        {
-            await _logger.LogErrorAsync($"Test {test.TestId} is already failed with: {test.Result.Exception?.Message}");
-            await _messageBus.PublishAsync(
-                this,
-                new TestNodeUpdateMessage(
-                    _sessionUid,
-                    test.Context.ToTestNode().WithProperty(new FailedTestNodeStateProperty(
-                        test.Result.Exception ?? new InvalidOperationException($"Test {test.TestId} was marked as failed but no exception was provided")))));
-            return;
-        }
-        
-        // Only set to Running if not already in a terminal state
-        if (test.State != TestState.Failed && test.State != TestState.Passed && test.State != TestState.Skipped)
-        {
-            test.State = TestState.Running;
-            test.StartTime = DateTimeOffset.UtcNow;
-        }
+        // Simple state management - scheduler ensures we only get here for executable tests
+        test.State = TestState.Running;
+        test.StartTime = DateTimeOffset.UtcNow;
 
         // Report test started
         await _messageBus.PublishAsync(

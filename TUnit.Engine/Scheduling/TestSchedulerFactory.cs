@@ -24,11 +24,10 @@ internal static class TestSchedulerFactory
     {
         var groupingService = new TestGroupingService();
         
-        return new SimpleQueueTestScheduler(
+        // Use the new clean scheduler
+        return new CleanTestScheduler(
             logger,
             groupingService,
-            configuration,
-            eventReceiverOrchestrator,
-            hookOrchestrator);
+            configuration.MaxParallelism);
     }
 }

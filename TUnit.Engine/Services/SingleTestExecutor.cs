@@ -41,71 +41,23 @@ internal class SingleTestExecutor : ISingleTestExecutor
         AbstractExecutableTest test,
         CancellationToken cancellationToken)
     {
-        Task<TestResult> executionTask;
+        // Simple execution - the scheduler ensures tests are only executed once
+        var result = await ExecuteTestInternalAsync(test, cancellationToken);
         
-        // Check if test is already executing (e.g., through dependency path)
-        lock (test.Context.ExecutionLock)
+        // Ensure test has proper state
+        if (test.State == TestState.Running)
         {
-            if (test.Context.ExecutionTask != null)
+            test.State = TestState.Failed;
+            test.Result ??= new TestResult
             {
-                // Test is already being executed by another path (likely as a dependency)
-                // We still need to wait for it to complete before creating the update message
-                executionTask = test.Context.ExecutionTask;
-            }
-            else
-            {
-                // Not executing yet, so create the execution task
-                test.Context.ExecutionTask = ExecuteTestInternalAsync(test, cancellationToken);
-                executionTask = test.Context.ExecutionTask;
-            }
-        }
-        
-        // Wait for the test to complete (whether we created it or it was already running)
-        try
-        {
-            await executionTask;
-        }
-        catch (Exception ex)
-        {
-            // If the task throws, ensure the test has a proper failed state
-            lock (test.Context.ExecutionLock)
-            {
-                if (test.State == TestState.Running)
-                {
-                    test.State = TestState.Failed;
-                    test.Result ??= new TestResult
-                    {
-                        State = TestState.Failed,
-                        Start = test.StartTime ?? DateTimeOffset.UtcNow,
-                        End = DateTimeOffset.UtcNow,
-                        Duration = TimeSpan.Zero,
-                        Exception = ex,
-                        ComputerName = Environment.MachineName,
-                        TestContext = test.Context
-                    };
-                }
-            }
-        }
-        
-        // Double-check that the test is not still running before creating the update message
-        lock (test.Context.ExecutionLock)
-        {
-            // If somehow the test is still in Running state, that means there's a bug in the execution logic
-            // Set it to failed to avoid the "Test is still running" error
-            if (test.State == TestState.Running)
-            {
-                test.State = TestState.Failed;
-                test.Result ??= new TestResult
-                {
-                    State = TestState.Failed,
-                    Start = test.StartTime ?? DateTimeOffset.UtcNow,
-                    End = DateTimeOffset.UtcNow,
-                    Duration = TimeSpan.Zero,
-                    Exception = new InvalidOperationException($"Test execution completed but state was not updated properly for {test.Context.GetDisplayName()}"),
-                    ComputerName = Environment.MachineName,
-                    TestContext = test.Context
-                };
-            }
+                State = TestState.Failed,
+                Start = test.StartTime ?? DateTimeOffset.UtcNow,
+                End = DateTimeOffset.UtcNow,
+                Duration = TimeSpan.Zero,
+                Exception = new InvalidOperationException($"Test execution completed but state was not updated properly"),
+                ComputerName = Environment.MachineName,
+                TestContext = test.Context
+            };
         }
         
         return CreateUpdateMessage(test);
@@ -125,15 +77,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
             }
 
             TestContext.Current = test.Context;
-
-            // Execute dependencies first (eager dependency execution)
-            await ExecuteDependenciesAsync(test, cancellationToken);
-            
-            // If dependencies failed and test was skipped, return the result
-            if (test.State == TestState.Skipped && test.Result != null)
-            {
-                return test.Result;
-            }
 
             test.StartTime = DateTimeOffset.Now;
             test.State = TestState.Running;
@@ -241,88 +184,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
     }
 
 
-    private async Task ExecuteDependenciesAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
-    {
-        if (test.Dependencies.Length == 0)
-        {
-            return; // No dependencies to execute
-        }
-
-        var dependencyTasks = new List<Task<TestResult>>();
-
-        // Create execution tasks for all dependencies
-        foreach (var dependency in test.Dependencies)
-        {
-            var executionTask = GetOrCreateExecutionTask(dependency, cancellationToken);
-            dependencyTasks.Add(executionTask);
-        }
-
-        // Wait for all dependencies to complete
-        var dependencyResults = await Task.WhenAll(dependencyTasks);
-
-        // Check dependency results and handle proceed-on-failure logic
-        for (int i = 0; i < dependencyResults.Length; i++)
-        {
-            var result = dependencyResults[i];
-            var dependency = test.Dependencies[i];
-
-            // Find the corresponding dependency metadata by matching the dependency test
-            TestDependency? dependencyMeta = null;
-            foreach (var meta in test.Metadata.Dependencies)
-            {
-                if (meta.Matches(dependency.Metadata, test.Metadata))
-                {
-                    dependencyMeta = meta;
-                    break;
-                }
-            }
-
-            // If we can't find metadata, assume proceed-on-failure is false for safety
-            var proceedOnFailure = dependencyMeta?.ProceedOnFailure ?? false;
-
-            if (result.State == TestState.Failed && !proceedOnFailure)
-            {
-                // Dependency failed and proceed-on-failure is false - skip this test
-                test.State = TestState.Skipped;
-                test.Context.SkipReason = $"Dependency '{dependency.Context.GetDisplayName()}' failed";
-                test.Result = new TestResult
-                {
-                    State = TestState.Skipped,
-                    Start = DateTimeOffset.UtcNow,
-                    End = DateTimeOffset.UtcNow,
-                    Duration = TimeSpan.Zero,
-                    OverrideReason = test.Context.SkipReason,
-                    Exception = null,
-                    ComputerName = Environment.MachineName,
-                    TestContext = test.Context
-                };
-                return;
-            }
-        }
-    }
-
-    private Task<TestResult> GetOrCreateExecutionTask(AbstractExecutableTest dependency, CancellationToken cancellationToken)
-    {
-        lock (dependency.Context.ExecutionLock)
-        {
-            // If the dependency is already failed (e.g., due to circular dependencies),
-            // return a completed task with the failed result
-            if (dependency.State == TestState.Failed && dependency.Result != null)
-            {
-                return Task.FromResult(dependency.Result);
-            }
-            
-            if (dependency.Context.ExecutionTask != null)
-            {
-                return dependency.Context.ExecutionTask;
-            }
-            else
-            {
-                dependency.Context.ExecutionTask = ExecuteTestInternalAsync(dependency, cancellationToken);
-                return dependency.Context.ExecutionTask;
-            }
-        }
-    }
 
 
     private async Task ExecuteTestWithRetries(Func<Task> testDelegate, TestContext testContext, CancellationToken cancellationToken)
@@ -550,8 +411,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             TestState.Passed => PassedTestNodeStateProperty.CachedInstance,
             TestState.Failed => new FailedTestNodeStateProperty(test.Result?.Exception ?? new InvalidOperationException($"Test failed but no exception was provided for {test.Context.GetDisplayName()}")),
-            TestState.Skipped => new SkippedTestNodeStateProperty(test.Result!.OverrideReason ?? "Test skipped"),
-            TestState.Timeout => new TimeoutTestNodeStateProperty(test.Result!.OverrideReason ?? "Test timed out"),
+            TestState.Skipped => new SkippedTestNodeStateProperty(test.Result?.OverrideReason ?? test.Context.SkipReason ?? "Test skipped"),
+            TestState.Timeout => new TimeoutTestNodeStateProperty(test.Result?.OverrideReason ?? "Test timed out"),
             TestState.Cancelled => new CancelledTestNodeStateProperty(),
             TestState.Running => new FailedTestNodeStateProperty(new InvalidOperationException($"Test is still running: {test.Context.TestDetails.ClassType.FullName}.{test.Context.GetDisplayName()}")),
             _ => new FailedTestNodeStateProperty(new InvalidOperationException($"Unknown test state: {test.State}"))
