@@ -58,8 +58,12 @@ internal sealed class TestBuilderPipeline
                 // Check if this is a dynamic test metadata that should bypass normal test building
                 if (metadata is IDynamicTestMetadata)
                 {
+                    // Get attributes first
+                    var attributes = metadata.AttributeFactory?.Invoke() ?? [];
+
                     // Dynamic tests need to honor attributes like RepeatCount, RetryCount, etc.
                     // We'll create multiple test instances based on RepeatCount
+                    // TODO: For now, use metadata.RepeatCount; later we should extract from attributes
                     for (var repeatIndex = 0; repeatIndex < metadata.RepeatCount + 1; repeatIndex++)
                     {
                         // Create a simple TestData for ID generation
@@ -97,11 +101,8 @@ internal sealed class TestBuilderPipeline
                             TestMethodParameterTypes = metadata.ParameterTypes,
                             ReturnType = typeof(Task),
                             MethodMetadata = metadata.MethodMetadata,
-                            Attributes = metadata.AttributeFactory?.Invoke() ?? [],
-                            Timeout = metadata.TimeoutMs.HasValue
-                                ? TimeSpan.FromMilliseconds(metadata.TimeoutMs.Value)
-                                : null,
-                            RetryLimit = metadata.RetryCount
+                            Attributes = attributes
+                            // Don't set Timeout and RetryLimit here - let discovery event receivers set them
                         };
 
                         var context = _contextProvider.CreateTestContext(
@@ -262,8 +263,6 @@ internal sealed class TestBuilderPipeline
             context);
 
         await _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
-
-        discoveredContext.TransferTo(context);
     }
 
 }
