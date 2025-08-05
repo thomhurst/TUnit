@@ -1,189 +1,158 @@
-using System.Diagnostics.CodeAnalysis;
-using TUnit.Core.Enums;
 using TUnit.Core.Executors;
+using TUnit.TestProject.Attributes;
+using TUnit.TestProject.TestExecutors;
 
 namespace TUnit.TestProject;
 
-[UnconditionalSuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
-[RunOn(OS.Linux)]
+[EngineTest(ExpectedResult.Pass)]
 public class HookExecutorTests
 {
     // Test Session Hooks
     [Before(TestSession)]
-    [HookExecutor<STAThreadExecutor>]
-    public static async Task BeforeTestSessionWithSTA(TestSessionContext context)
+    [HookExecutor<CrossPlatformTestExecutor>]
+    public static async Task BeforeTestSessionWithCustomExecutor(TestSessionContext context)
     {
-#if NET
-        if (!OperatingSystem.IsWindows())
-        {
-            return;
-        }
-#endif
-
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
+        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
 
         var test = context.AllTests.FirstOrDefault(x =>
-            x.TestDetails.TestName == nameof(VerifyBeforeTestSessionSTAExecuted));
-        test?.ObjectBag.Add("BeforeTestSessionSTAExecuted", true);
+            x.TestDetails.TestName == nameof(VerifyBeforeTestSessionExecutorExecuted));
+        test?.ObjectBag.Add("BeforeTestSessionExecutorExecuted", true);
     }
 
     [After(TestSession)]
-    [HookExecutor<STAThreadExecutor>]
-    public static async Task AfterTestSessionWithSTA(TestSessionContext context)
+    [HookExecutor<CrossPlatformTestExecutor>]
+    public static async Task AfterTestSessionWithCustomExecutor(TestSessionContext context)
     {
-#if NET
-        if (!OperatingSystem.IsWindows())
-        {
-            return;
-        }
-#endif
-
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
+        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
     }
 
     // Test Discovery Hooks
     [Before(TestDiscovery)]
-    [HookExecutor<STAThreadExecutor>]
-    public static async Task BeforeTestDiscoveryWithSTA(BeforeTestDiscoveryContext context)
+    [HookExecutor<CrossPlatformTestExecutor>]
+    public static async Task BeforeTestDiscoveryWithCustomExecutor(BeforeTestDiscoveryContext context)
     {
-#if NET
-        if (!OperatingSystem.IsWindows())
-        {
-            return;
-        }
-#endif
-
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
+        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
     }
 
     [After(TestDiscovery)]
-    [HookExecutor<STAThreadExecutor>]
-    public static async Task AfterTestDiscoveryWithSTA(TestDiscoveryContext context)
+    [HookExecutor<CrossPlatformTestExecutor>]
+    public static async Task AfterTestDiscoveryWithCustomExecutor(TestDiscoveryContext context)
     {
-#if NET
-        if (!OperatingSystem.IsWindows())
-        {
-            return;
-        }
-#endif
-
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
+        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
     }
 
     // Assembly Hooks
-    private static bool _beforeAssemblySTAExecuted;
+    private static bool _beforeAssemblyExecutorExecuted;
 
     [Before(Assembly)]
-    [HookExecutor<STAThreadExecutor>]
-    public static async Task BeforeAssemblyWithSTA(AssemblyHookContext context)
+    [HookExecutor<CrossPlatformTestExecutor>]
+    public static async Task BeforeAssemblyWithCustomExecutor(AssemblyHookContext context)
     {
-#if NET
-        if (!OperatingSystem.IsWindows())
-        {
-            return;
-        }
-#endif
-
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
-        _beforeAssemblySTAExecuted = true;
+        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
+        _beforeAssemblyExecutorExecuted = true;
     }
 
     [After(Assembly)]
-    [HookExecutor<STAThreadExecutor>]
-    public static async Task AfterAssemblyWithSTA(AssemblyHookContext context)
+    [HookExecutor<CrossPlatformTestExecutor>]
+    public static async Task AfterAssemblyWithCustomExecutor(AssemblyHookContext context)
     {
-#if NET
-        if (!OperatingSystem.IsWindows())
-        {
-            return;
-        }
-#endif
-
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
+        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
     }
 
     // Class Hooks
-    private static bool _beforeClassSTAExecuted;
+    private static bool _beforeClassExecutorExecuted;
 
     [Before(Class)]
-    [HookExecutor<STAThreadExecutor>]
-    public static async Task BeforeClassWithSTA(ClassHookContext context)
+    [HookExecutor<CrossPlatformTestExecutor>]
+    public static async Task BeforeClassWithCustomExecutor(ClassHookContext context)
     {
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
-        _beforeClassSTAExecuted = true;
+        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
+        _beforeClassExecutorExecuted = true;
     }
 
     [After(Class)]
-    [HookExecutor<STAThreadExecutor>]
-    public static async Task AfterClassWithSTA(ClassHookContext context)
+    [HookExecutor<CrossPlatformTestExecutor>]
+    public static async Task AfterClassWithCustomExecutor(ClassHookContext context)
     {
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
+        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
     }
 
     // Test Hooks - Instance methods
     [Before(Test)]
-    [HookExecutor<STAThreadExecutor>]
-    public async Task BeforeTestWithSTA(TestContext context)
+    [HookExecutor<CrossPlatformTestExecutor>]
+    public async Task BeforeTestWithCustomExecutor(TestContext context)
     {
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
-        context.ObjectBag.Add("BeforeTestSTAExecuted", true);
+        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
+        context.ObjectBag.Add("BeforeTestExecutorExecuted", true);
     }
 
     [After(Test)]
-    [HookExecutor<STAThreadExecutor>]
-    public async Task AfterTestWithSTA(TestContext context)
+    [HookExecutor<CrossPlatformTestExecutor>]
+    public async Task AfterTestWithCustomExecutor(TestContext context)
     {
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
+        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
     }
 
     // Test Hooks - Static methods
     [BeforeEvery(Test)]
-    [HookExecutor<STAThreadExecutor>]
-    public static async Task BeforeEveryTestWithSTA(TestContext context)
+    [HookExecutor<CrossPlatformTestExecutor>]
+    public static async Task BeforeEveryTestWithCustomExecutor(TestContext context)
     {
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
+        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
 
-        if (context.TestDetails.TestName == nameof(VerifyStaticTestHooksSTAExecuted))
+        if (context.TestDetails.TestName == nameof(VerifyStaticTestHooksExecutorExecuted))
         {
-            context.ObjectBag.Add("BeforeEveryTestSTAExecuted", true);
+            context.ObjectBag.Add("BeforeEveryTestExecutorExecuted", true);
         }
     }
 
     [AfterEvery(Test)]
-    [HookExecutor<STAThreadExecutor>]
-    public static async Task AfterEveryTestWithSTA(TestContext context)
+    [HookExecutor<CrossPlatformTestExecutor>]
+    public static async Task AfterEveryTestWithCustomExecutor(TestContext context)
     {
-        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
+        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
     }
 
     // Tests to verify hooks executed
     [Test]
-    public async Task VerifyBeforeTestSessionSTAExecuted()
+    public async Task VerifyBeforeTestSessionExecutorExecuted()
     {
-        await Assert.That(TestContext.Current?.ObjectBag["BeforeTestSessionSTAExecuted"]).IsEquatableOrEqualTo(true);
+        await Assert.That(TestContext.Current?.ObjectBag["BeforeTestSessionExecutorExecuted"]).IsEquatableOrEqualTo(true);
     }
 
     [Test]
-    public async Task VerifyBeforeAssemblySTAExecuted()
+    public async Task VerifyBeforeAssemblyExecutorExecuted()
     {
-        await Assert.That(_beforeAssemblySTAExecuted).IsTrue();
+        await Assert.That(_beforeAssemblyExecutorExecuted).IsTrue();
     }
 
     [Test]
-    public async Task VerifyBeforeClassSTAExecuted()
+    public async Task VerifyBeforeClassExecutorExecuted()
     {
-        await Assert.That(_beforeClassSTAExecuted).IsTrue();
+        await Assert.That(_beforeClassExecutorExecuted).IsTrue();
     }
 
     [Test]
-    public async Task VerifyBeforeTestSTAExecuted()
+    public async Task VerifyBeforeTestExecutorExecuted()
     {
-        await Assert.That(TestContext.Current?.ObjectBag["BeforeTestSTAExecuted"]).IsEquatableOrEqualTo(true);
+        await Assert.That(TestContext.Current?.ObjectBag["BeforeTestExecutorExecuted"]).IsEquatableOrEqualTo(true);
     }
 
     [Test]
-    public async Task VerifyStaticTestHooksSTAExecuted()
+    public async Task VerifyStaticTestHooksExecutorExecuted()
     {
-        await Assert.That(TestContext.Current?.ObjectBag["BeforeEveryTestSTAExecuted"]).IsEquatableOrEqualTo(true);
+        await Assert.That(TestContext.Current?.ObjectBag["BeforeEveryTestExecutorExecuted"]).IsEquatableOrEqualTo(true);
     }
 }
