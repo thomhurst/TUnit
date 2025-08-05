@@ -1038,7 +1038,7 @@ namespace
         [.("Trimming", "IL2072", Justification="Legacy compatibility method")]
         public static . InjectPropertiesAsync(.TestContext testContext, object instance, .PropertyDataSource[] propertyDataSources, .PropertyInjectionData[] injectionData, .MethodMetadata testInformation, string testSessionId) { }
         public static . InjectPropertiesIntoArgumentsAsync(object?[] arguments, .<string, object?> objectBag, .MethodMetadata methodMetadata, .TestContextEvents events) { }
-        public static . InjectPropertiesIntoObjectAsync(object instance, .<string, object?> objectBag, .MethodMetadata methodMetadata, .TestContextEvents events) { }
+        public static . InjectPropertiesIntoObjectAsync(object instance, .<string, object?>? objectBag, .MethodMetadata? methodMetadata, .TestContextEvents? events) { }
     }
     [.DebuggerDisplay("{Type} {Name})")]
     public class PropertyMetadata : .MemberMetadata, <.PropertyMetadata>
