@@ -31,7 +31,18 @@ public static class TypedConstantParser
 
         if (parameterType?.SpecialType == SpecialType.System_Decimal)
         {
-            return $"{newExpression.ToString().TrimEnd('d')}m";
+            // For decimal types, ensure we preserve precision by not relying on ToString()
+            // which might have already lost precision. Use the original expression text.
+            var expressionText = newExpression.ToString();
+            if (expressionText.EndsWith("d") || expressionText.EndsWith("D"))
+            {
+                return expressionText.Substring(0, expressionText.Length - 1) + "m";
+            }
+            else if (!expressionText.EndsWith("m") && !expressionText.EndsWith("M"))
+            {
+                return expressionText + "m";
+            }
+            return expressionText;
         }
 
         if (parameterType is not null
