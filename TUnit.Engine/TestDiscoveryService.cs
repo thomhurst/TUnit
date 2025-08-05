@@ -75,7 +75,10 @@ internal sealed class TestDiscoveryService : IDataProducer
             _dependencyResolver.TryResolveDependencies(test);
         }
         
-        // Create execution plan which will detect circular dependencies
+        // Check for circular dependencies and mark failed tests
+        _dependencyResolver.CheckForCircularDependencies();
+        
+        // Create execution plan for ordering
         var executionPlan = ExecutionPlan.Create(tests);
         
         // Apply filter first to get the tests we want to run
