@@ -26,7 +26,7 @@ internal sealed class CleanTestScheduler : ITestScheduler
     {
         _logger = logger;
         _groupingService = groupingService;
-        _maxParallelism = maxParallelism > 0 ? maxParallelism : Environment.ProcessorCount * 2;
+        _maxParallelism = maxParallelism > 0 ? maxParallelism : ParallelismDetector.DetectOptimalParallelism();
     }
 
     public async Task ScheduleAndExecuteAsync(
@@ -40,7 +40,7 @@ internal sealed class CleanTestScheduler : ITestScheduler
         // Create execution plan upfront
         var plan = ExecutionPlan.Create(tests);
 
-        await _logger.LogInformationAsync($"Execution plan created: {plan.ExecutableTests.Count} executable tests out of {plan.AllTests.Count} total");
+        await _logger.LogInformationAsync($"Execution plan created: {plan.ExecutableTests.Count} executable tests out of {plan.AllTests.Count} total (max parallelism: {_maxParallelism})");
 
         if (plan.ExecutableTests.Count == 0)
         {
