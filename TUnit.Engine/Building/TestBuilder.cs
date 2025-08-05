@@ -7,6 +7,7 @@ using TUnit.Core.Tracking;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
+using TUnit.Engine.Utilities;
 
 namespace TUnit.Engine.Building;
 
@@ -91,6 +92,12 @@ internal sealed class TestBuilder : ITestBuilder
                 return tests;
             }
 
+
+            // Extract repeat count from attributes
+            var attributes = metadata.AttributeFactory.Invoke();
+            var filteredAttributes = ScopedAttributeFilter.FilterScopedAttributes(attributes);
+            var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
+            var repeatCount = repeatAttr?.Times ?? 0;
 
             var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
             {
@@ -193,7 +200,7 @@ internal sealed class TestBuilder : ITestBuilder
                         {
                             methodDataLoopIndex++;
 
-                            for (var i = 0; i < metadata.RepeatCount + 1; i++)
+                            for (var i = 0; i < repeatCount + 1; i++)
                             {
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
                                 var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);

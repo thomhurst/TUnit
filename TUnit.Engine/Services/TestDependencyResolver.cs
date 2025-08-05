@@ -13,16 +13,16 @@ internal sealed class TestDependencyResolver
     private readonly ConcurrentDictionary<string, List<string>> _pendingDependents = new();
     private readonly List<AbstractExecutableTest> _allTests = new();
     private readonly ConcurrentDictionary<string, List<TestDetails>> _cachedTransitiveDependencies = new();
-    
+
     private readonly ConcurrentDictionary<string, List<AbstractExecutableTest>> _testsByClassName = new();
-    
+
     private readonly ConcurrentDictionary<string, bool> _testsBeingResolved = new();
 
     public void RegisterTest(AbstractExecutableTest test)
     {
         _testsByName[test.TestId] = test;
         _allTests.Add(test);
-        
+
         var className = test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name;
         _testsByClassName.AddOrUpdate(className,
             _ => [test],
@@ -38,13 +38,13 @@ internal sealed class TestDependencyResolver
                 }
             }
         }
-        
+
         var testClassName = test.Metadata.TestClassType.FullName ?? test.Metadata.TestClassType.Name;
         foreach (var kvp in _pendingDependents.ToList())
         {
             var depKey = kvp.Key;
-            
-            if (depKey.Contains($"Class={test.Metadata.TestClassType.Name}") && 
+
+            if (depKey.Contains($"Class={test.Metadata.TestClassType.Name}") &&
                 depKey.Contains("Method=") == false)
             {
                 if (_pendingDependents.TryRemove(depKey, out var waitingTests))
@@ -77,17 +77,17 @@ internal sealed class TestDependencyResolver
         {
             return false;
         }
-        
+
         try
         {
-            
+
             var resolvedDependencies = new List<ResolvedDependency>();
             var allResolved = true;
 
             foreach (var dependency in test.Metadata.Dependencies)
             {
                 List<AbstractExecutableTest> matchingTests;
-                
+
                 if (dependency.ClassType != null && string.IsNullOrEmpty(dependency.MethodName))
                 {
                     var className = dependency.ClassType.FullName ?? dependency.ClassType.Name;
@@ -140,13 +140,13 @@ internal sealed class TestDependencyResolver
                     .Select(g => g.First())
                     .Where(d => d.Test.TestId != test.TestId)
                     .ToList();
-                
+
                 const int MaxDirectDependencies = 1000;
                 if (distinctDeps.Count > MaxDirectDependencies)
                 {
                     distinctDeps = distinctDeps.Take(MaxDirectDependencies).ToList();
                 }
-                
+
                 test.Dependencies = distinctDeps.ToArray();
 
             }
@@ -162,16 +162,16 @@ internal sealed class TestDependencyResolver
 
     public void CheckForCircularDependencies()
     {
-        
+
         var inDegree = new Dictionary<string, int>();
         var adjacencyList = new Dictionary<string, List<string>>();
-        
+
         foreach (var test in _allTests)
         {
             inDegree[test.TestId] = 0;
             adjacencyList[test.TestId] = new List<string>();
         }
-        
+
         foreach (var test in _allTests)
         {
             foreach (var resolvedDep in test.Dependencies)
@@ -181,10 +181,10 @@ internal sealed class TestDependencyResolver
                 inDegree[test.TestId]++;
             }
         }
-        
+
         var queue = new Queue<string>();
         var sortedCount = 0;
-        
+
         foreach (var kvp in inDegree)
         {
             if (kvp.Value == 0)
@@ -192,12 +192,12 @@ internal sealed class TestDependencyResolver
                 queue.Enqueue(kvp.Key);
             }
         }
-        
+
         while (queue.Count > 0)
         {
             var currentId = queue.Dequeue();
             sortedCount++;
-            
+
             if (adjacencyList.TryGetValue(currentId, out var neighbors))
             {
                 foreach (var neighbor in neighbors)
@@ -210,11 +210,11 @@ internal sealed class TestDependencyResolver
                 }
             }
         }
-        
+
         if (sortedCount < _allTests.Count)
         {
             var testsInCycles = _allTests.Where(t => inDegree[t.TestId] > 0).ToList();
-            
+
             foreach (var test in testsInCycles)
             {
                 try
@@ -234,8 +234,6 @@ internal sealed class TestDependencyResolver
                         TestContext = test.Context
                     };
                     test.State = TestState.Failed;
-                    
-                    Console.WriteLine($"[DEBUG] Circular dependency detected for test: {test.Context.GetDisplayName()} - {ex.Message}");
                 }
             }
         }
@@ -243,7 +241,7 @@ internal sealed class TestDependencyResolver
         foreach (var test in _allTests.Where(t => t.State != TestState.Failed))
         {
             test.Context.Dependencies.Clear();
-            
+
             if (_cachedTransitiveDependencies.TryGetValue(test.TestId, out var cachedDeps))
             {
                 foreach (var dep in cachedDeps)
@@ -252,42 +250,42 @@ internal sealed class TestDependencyResolver
                 }
                 continue;
             }
-            
+
             var allDeps = new HashSet<TestDetails>();
             var depQueue = new Queue<AbstractExecutableTest>();
             var visited = new HashSet<string>();
-            
+
             foreach (var resolvedDep in test.Dependencies)
             {
                 var dep = resolvedDep.Test;
                 depQueue.Enqueue(dep);
             }
-            
+
             const int maxIterations = 10000;
             var iterations = 0;
-            
+
             while (depQueue.Count > 0 && iterations < maxIterations)
             {
                 iterations++;
                 var dep = depQueue.Dequeue();
-                
+
                 if (!visited.Add(dep.TestId))
                 {
                     continue;
                 }
-                
+
                 allDeps.Add(dep.Context.TestDetails);
-                
+
                 foreach (var resolvedSubDep in dep.Dependencies)
                 {
                     var subDep = resolvedSubDep.Test;
                     depQueue.Enqueue(subDep);
                 }
             }
-            
+
             var depsList = allDeps.ToList();
             _cachedTransitiveDependencies[test.TestId] = depsList;
-            
+
             foreach (var dep in depsList)
             {
                 test.Context.Dependencies.Add(dep);

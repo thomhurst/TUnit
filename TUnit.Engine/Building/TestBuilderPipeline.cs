@@ -2,6 +2,7 @@ using TUnit.Core;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Services;
+using TUnit.Engine.Utilities;
 
 namespace TUnit.Engine.Building;
 
@@ -61,10 +62,14 @@ internal sealed class TestBuilderPipeline
                     // Get attributes first
                     var attributes = metadata.AttributeFactory?.Invoke() ?? [];
 
+                    // Extract repeat count from attributes
+                    var filteredAttributes = ScopedAttributeFilter.FilterScopedAttributes(attributes);
+                    var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
+                    var repeatCount = repeatAttr?.Times ?? 0;
+
                     // Dynamic tests need to honor attributes like RepeatCount, RetryCount, etc.
                     // We'll create multiple test instances based on RepeatCount
-                    // TODO: For now, use metadata.RepeatCount; later we should extract from attributes
-                    for (var repeatIndex = 0; repeatIndex < metadata.RepeatCount + 1; repeatIndex++)
+                    for (var repeatIndex = 0; repeatIndex < repeatCount + 1; repeatIndex++)
                     {
                         // Create a simple TestData for ID generation
                         var testData = new TestBuilder.TestData
@@ -82,8 +87,8 @@ internal sealed class TestBuilderPipeline
                         };
 
                         var testId = TestIdentifierService.GenerateTestId(metadata, testData);
-                        var displayName = metadata.RepeatCount > 1
-                            ? $"{metadata.TestName} (Repeat {repeatIndex + 1}/{metadata.RepeatCount})"
+                        var displayName = repeatCount > 0
+                            ? $"{metadata.TestName} (Repeat {repeatIndex + 1}/{repeatCount + 1})"
                             : metadata.TestName;
 
                         // Create TestDetails for dynamic tests

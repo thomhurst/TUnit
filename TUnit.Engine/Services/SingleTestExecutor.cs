@@ -328,12 +328,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
     private void HandleTestFailure(AbstractExecutableTest test, Exception ex)
     {
-        if (ex is OperationCanceledException && test.Metadata.TimeoutMs.HasValue)
+        if (ex is OperationCanceledException && test.Context.TestDetails.Timeout.HasValue)
         {
             test.State = TestState.Timeout;
             test.Result = _resultFactory.CreateTimeoutResult(
                 test.StartTime!.Value,
-                test.Metadata.TimeoutMs.Value);
+                (int)test.Context.TestDetails.Timeout.Value.TotalMilliseconds);
         }
         else
         {
@@ -389,7 +389,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
     private async Task InvokeTestWithTimeout(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
     {
         var discoveredTest = test.Context.InternalDiscoveredTest;
-        var testAction = test.Metadata.TimeoutMs.HasValue
+        var testAction = test.Context.TestDetails.Timeout.HasValue
             ? CreateTimeoutTestAction(test, instance, cancellationToken)
             : CreateNormalTestAction(test, instance, cancellationToken);
 
@@ -401,16 +401,16 @@ internal class SingleTestExecutor : ISingleTestExecutor
         return async () =>
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(test.Metadata.TimeoutMs!.Value);
+            cts.CancelAfter((int)test.Context.TestDetails.Timeout!.Value.TotalMilliseconds);
 
             var testTask = test.InvokeTestAsync(instance, cts.Token);
-            var timeoutTask = Task.Delay(test.Metadata.TimeoutMs.Value, cancellationToken);
+            var timeoutTask = Task.Delay((int)test.Context.TestDetails.Timeout!.Value.TotalMilliseconds, cancellationToken);
             var completedTask = await Task.WhenAny(testTask, timeoutTask);
 
             if (completedTask == timeoutTask)
             {
                 cts.Cancel();
-                throw new OperationCanceledException($"Test '{test.Context.GetDisplayName()}' exceeded timeout of {test.Metadata.TimeoutMs.Value}ms");
+                throw new OperationCanceledException($"Test '{test.Context.GetDisplayName()}' exceeded timeout of {(int)test.Context.TestDetails.Timeout!.Value.TotalMilliseconds}ms");
             }
 
             await testTask;

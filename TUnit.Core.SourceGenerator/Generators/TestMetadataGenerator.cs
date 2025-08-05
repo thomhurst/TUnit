@@ -501,10 +501,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var methodSymbol = testMethod.MethodSymbol;
 
-        writer.AppendLine("TimeoutMs = null,");
-        writer.AppendLine("RetryCount = 0,");
-        writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(methodSymbol, testMethod.TypeSymbol)},");
-        writer.AppendLine("CanRunInParallel = true,");
 
         // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
@@ -592,10 +588,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var methodSymbol = testMethod.MethodSymbol;
 
-        writer.AppendLine("TimeoutMs = null,");
-        writer.AppendLine("RetryCount = 0,");
-        writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(methodSymbol, testMethod.TypeSymbol)},");
-        writer.AppendLine("CanRunInParallel = true,");
 
         // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
@@ -3797,10 +3789,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodSymbol = testMethod.MethodSymbol;
         var typeSymbol = testMethod.TypeSymbol;
 
-        writer.AppendLine("TimeoutMs = null,");
-        writer.AppendLine("RetryCount = 0,");
-        writer.AppendLine("RepeatCount = 0,");
-        writer.AppendLine("CanRunInParallel = true,");
 
         // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
@@ -4147,10 +4135,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Where(a => !DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)));
 
         // Generate metadata
-        writer.AppendLine("TimeoutMs = null,");
-        writer.AppendLine("RetryCount = 0,");
-        writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(testMethod.MethodSymbol, testMethod.TypeSymbol)},");
-        writer.AppendLine("CanRunInParallel = true,");
 
         // Generate dependencies
         GenerateDependencies(writer, compilation, testMethod.MethodSymbol);
