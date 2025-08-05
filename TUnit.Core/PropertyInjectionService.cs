@@ -330,8 +330,6 @@ public sealed class PropertyInjectionService
             throw new ArgumentNullException(nameof(instance), "Test instance cannot be null");
         }
 
-        Console.WriteLine($"[PropertyInjectionService] Legacy InjectPropertiesAsync called for {instance.GetType().FullName}");
-
         // Use the modern PropertyInjectionService for all injection work
         // This ensures consistent behavior and proper recursive injection
         var objectBag = new Dictionary<string, object?>();

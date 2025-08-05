@@ -475,12 +475,6 @@ namespace
         Property = 2,
         Parameter = 3,
     }
-    public static class DataSourcePropertyInjectionRegistry
-    {
-        public static .PropertyInjectionData[]? GetInjectionData( dataSourceType) { }
-        public static .PropertyDataSource[]? GetPropertyDataSources( dataSourceType) { }
-        public static void Register( dataSourceType, .PropertyInjectionData[] injectionData, .PropertyDataSource[] propertyDataSources) { }
-    }
     public class DedicatedThreadExecutor : .GenericAbstractExecutor, ., .
     {
         public DedicatedThreadExecutor() { }
@@ -1037,18 +1031,14 @@ namespace
     public sealed class PropertyInjectionService
     {
         public PropertyInjectionService() { }
-        public static . InjectPropertiesIntoArgumentsAsync(object?[] arguments, .<string, object?> objectBag, .MethodMetadata methodMetadata, .TestContextEvents events) { }
-        public static . InjectPropertiesIntoObjectAsync(object instance, .<string, object?> objectBag, .MethodMetadata methodMetadata, .TestContextEvents events) { }
-    }
-    public static class PropertyInjector
-    {
         public static .PropertyInjectionData CreatePropertyInjection(.PropertyInfo property) { }
         public static <object, object?> CreatePropertySetter(.PropertyInfo property) { }
+        [.("Trimming", "IL2070", Justification="Legacy compatibility method")]
         public static .PropertyInjectionData[] DiscoverInjectableProperties([.(..None | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  type) { }
-        [.("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttr" +
-            "ibute\' in call to target method. The return value of the source method does not " +
-            "have matching annotations.")]
+        [.("Trimming", "IL2072", Justification="Legacy compatibility method")]
         public static . InjectPropertiesAsync(.TestContext testContext, object instance, .PropertyDataSource[] propertyDataSources, .PropertyInjectionData[] injectionData, .MethodMetadata testInformation, string testSessionId) { }
+        public static . InjectPropertiesIntoArgumentsAsync(object?[] arguments, .<string, object?> objectBag, .MethodMetadata methodMetadata, .TestContextEvents events) { }
+        public static . InjectPropertiesIntoObjectAsync(object instance, .<string, object?> objectBag, .MethodMetadata methodMetadata, .TestContextEvents events) { }
     }
     [.DebuggerDisplay("{Type} {Name})")]
     public class PropertyMetadata : .MemberMetadata, <.PropertyMetadata>
@@ -1065,6 +1055,14 @@ namespace
     }
     public static class PropertySourceRegistry
     {
+        [.("Trimming", "IL2070", Justification="Legacy reflection fallback")]
+        public static .PropertyInjectionData[] DiscoverInjectableProperties([.(..None | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  type) { }
+        [return: .(new string[] {
+                "Type",
+                "Source"})]
+        public static .<<, ..IPropertySource>> GetAllSources() { }
+        public static .PropertyDataSource[]? GetPropertyDataSources( type) { }
+        public static .PropertyInjectionData[]? GetPropertyInjectionData( type) { }
         public static ..IPropertySource? GetSource( type) { }
         public static void Register( type, ..IPropertySource source) { }
     }
