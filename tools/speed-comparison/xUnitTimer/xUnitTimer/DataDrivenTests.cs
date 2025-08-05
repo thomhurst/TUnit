@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace xUnitTimer;
 
 public class DataDrivenTests
@@ -31,7 +33,7 @@ public class DataDrivenTests
     public void MemberDataSourceTest(TestData data)
     {
         var result = ProcessTestData(data);
-        
+
         Assert.Equal(data.Id, result.Id);
         Assert.Equal(data.Value * 2, result.ProcessedValue);
         Assert.True(result.IsValid);
@@ -56,7 +58,7 @@ public class DataDrivenTests
     {
         var sum = numbers.Sum();
         var average = numbers.Average();
-        
+
         Assert.Equal(expectedSum, sum);
         Assert.Equal((double)expectedSum / numbers.Length, average);
         Assert.NotEmpty(numbers);
