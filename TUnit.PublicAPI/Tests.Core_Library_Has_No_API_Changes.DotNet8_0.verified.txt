@@ -3,13 +3,15 @@
 [assembly: .(".NETCoreApp,Version=v8.0", FrameworkDisplayName=".NET 8.0")]
 namespace 
 {
+    [.DebuggerDisplay("{.Name}.{}")]
     public abstract class AbstractExecutableTest
     {
         protected AbstractExecutableTest() { }
         public required object?[] Arguments { get; init; }
         public object?[] ClassArguments { get; init; }
+        public . CompletionTask { get; }
         public required .TestContext Context { get; init; }
-        public .AbstractExecutableTest[] Dependencies { get; set; }
+        public .ResolvedDependency[] Dependencies { get; set; }
         public ? Duration { get; }
         public ? EndTime { get; set; }
         public virtual .TestMetadata Metadata { get; init; }
@@ -1094,6 +1096,13 @@ namespace
     {
         public ResettableLazy(string sessionId, .TestBuilderContext testBuilderContext) { }
         public override . ResetLazy() { }
+    }
+    public sealed class ResolvedDependency
+    {
+        public ResolvedDependency() { }
+        public required .TestDependency Metadata { get; init; }
+        public bool ProceedOnFailure { get; }
+        public required .AbstractExecutableTest Test { get; init; }
     }
     [(.Assembly | .Class | .Method)]
     public class RetryAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.RetryAttribute>, ., .
