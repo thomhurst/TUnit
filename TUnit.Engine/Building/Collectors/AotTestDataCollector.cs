@@ -213,7 +213,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             GenericMethodTypeArguments = null,
             AttributeFactory = () => result.Attributes.ToArray(),
 #pragma warning disable IL2072
-            PropertyInjections = PropertyInjector.DiscoverInjectableProperties(result.TestClassType)
+            PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(result.TestClassType)
 #pragma warning restore IL2072
         });
     }

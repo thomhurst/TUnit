@@ -297,4 +297,218 @@ public sealed class PropertyInjectionService
             };
         });
     }
+
+    // =====================================
+    // LEGACY COMPATIBILITY API
+    // =====================================
+    // These methods provide compatibility with the old PropertyInjector API
+    // while using the unified PropertySourceRegistry internally
+
+    /// <summary>
+    /// Legacy compatibility: Discovers injectable properties for a type
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Legacy compatibility method")]
+    public static PropertyInjectionData[] DiscoverInjectableProperties([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type)
+    {
+        return PropertySourceRegistry.DiscoverInjectableProperties(type);
+    }
+
+    /// <summary>
+    /// Legacy compatibility: Injects properties using array-based data structures
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Legacy compatibility method")]
+    public static async Task InjectPropertiesAsync(
+        TestContext testContext,
+        object instance,
+        PropertyDataSource[] propertyDataSources,
+        PropertyInjectionData[] injectionData,
+        MethodMetadata testInformation,
+        string testSessionId)
+    {
+        if (instance == null)
+        {
+            throw new ArgumentNullException(nameof(instance), "Test instance cannot be null");
+        }
+
+        Console.WriteLine($"[PropertyInjectionService] Legacy InjectPropertiesAsync called for {instance.GetType().FullName}");
+
+        // Use the modern PropertyInjectionService for all injection work
+        // This ensures consistent behavior and proper recursive injection
+        var objectBag = new Dictionary<string, object?>();
+        
+        // Process each property data source
+        foreach (var propertyDataSource in propertyDataSources)
+        {
+            try
+            {
+                // First inject properties into the data source itself (if it has any)
+                if (ShouldInjectProperties(propertyDataSource.DataSource))
+                {
+                    await InjectPropertiesIntoObjectAsync(propertyDataSource.DataSource, objectBag, testInformation, testContext.Events);
+                }
+
+                // Initialize the data source
+                await ObjectInitializer.InitializeAsync(propertyDataSource.DataSource);
+
+                // Get the property injection info
+                var propertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
+                if (propertyInjection == null)
+                {
+                    continue;
+                }
+
+                // Create property metadata for the data generator
+                var propertyMetadata = new PropertyMetadata
+                {
+                    IsStatic = false,
+                    Name = propertyDataSource.PropertyName,
+                    ClassMetadata = GetClassMetadataForType(testInformation.Type),
+                    Type = propertyInjection.PropertyType,
+                    ReflectionInfo = GetPropertyInfo(testInformation.Type, propertyDataSource.PropertyName),
+                    Getter = parent => GetPropertyInfo(testInformation.Type, propertyDataSource.PropertyName).GetValue(parent!)!,
+                    ContainingTypeMetadata = GetClassMetadataForType(testInformation.Type)
+                };
+
+                // Create data generator metadata
+                var dataGeneratorMetadata = DataGeneratorMetadataCreator.CreateForPropertyInjection(
+                    propertyMetadata,
+                    testInformation,
+                    propertyDataSource.DataSource,
+                    testContext,
+                    instance);
+
+                // Get data rows and process the first one
+                var dataRows = propertyDataSource.DataSource.GetDataRowsAsync(dataGeneratorMetadata);
+                await foreach (var factory in dataRows)
+                {
+                    var args = await factory();
+                    var value = args?.FirstOrDefault();
+
+                    // Resolve the value (handle Func<T>, Task<T>, etc.)
+                    value = await ResolveTestDataValueAsync(propertyInjection.PropertyType, value);
+
+                    if (value != null)
+                    {
+                        // Use the modern service for recursive injection and initialization
+                        await ProcessInjectedPropertyValue(instance, value, propertyInjection.Setter, objectBag, testInformation, testContext.Events);
+                        break; // Only use first value
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to resolve data source for property '{propertyDataSource.PropertyName}': {ex.Message}", ex);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Legacy compatibility: Creates PropertyInjectionData from PropertyInfo
+    /// </summary>
+    public static PropertyInjectionData CreatePropertyInjection(PropertyInfo property)
+    {
+        var setter = CreatePropertySetter(property);
+
+        return new PropertyInjectionData
+        {
+            PropertyName = property.Name,
+            PropertyType = property.PropertyType,
+            Setter = setter,
+            ValueFactory = () => throw new InvalidOperationException(
+                $"Property value factory should be provided by TestDataCombination for {property.Name}")
+        };
+    }
+
+    /// <summary>
+    /// Legacy compatibility: Creates property setter
+    /// </summary>
+    public static Action<object, object?> CreatePropertySetter(PropertyInfo property)
+    {
+        if (property.CanWrite && property.SetMethod != null)
+        {
+#if NETSTANDARD2_0
+            return (instance, value) => property.SetValue(instance, value);
+#else
+            var setMethod = property.SetMethod;
+            var isInitOnly = IsInitOnlyMethod(setMethod);
+
+            if (!isInitOnly)
+            {
+                return (instance, value) => property.SetValue(instance, value);
+            }
+#endif
+        }
+
+        var backingField = GetBackingField(property);
+        if (backingField != null)
+        {
+            return (instance, value) => backingField.SetValue(instance, value);
+        }
+
+        throw new InvalidOperationException(
+            $"Property '{property.Name}' on type '{property.DeclaringType?.Name}' " +
+            $"is not writable and no backing field was found.");
+    }
+
+    /// <summary>
+    /// Legacy compatibility: Gets backing field for property
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Legacy compatibility method")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Legacy compatibility method")]
+    private static FieldInfo? GetBackingField(PropertyInfo property)
+    {
+        var declaringType = property.DeclaringType;
+        if (declaringType == null)
+        {
+            return null;
+        }
+
+        var backingFieldFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
+
+        var backingFieldName = $"<{property.Name}>k__BackingField";
+        var field = GetFieldSafe(declaringType, backingFieldName, backingFieldFlags);
+
+        if (field != null)
+        {
+            return field;
+        }
+
+        var underscoreName = "_" + char.ToLowerInvariant(property.Name[0]) + property.Name.Substring(1);
+        field = GetFieldSafe(declaringType, underscoreName, backingFieldFlags);
+
+        if (field != null && field.FieldType == property.PropertyType)
+        {
+            return field;
+        }
+
+        field = GetFieldSafe(declaringType, property.Name, backingFieldFlags);
+
+        if (field != null && field.FieldType == property.PropertyType)
+        {
+            return field;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Helper method to get field with proper trimming suppression
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Legacy compatibility method")]
+    private static FieldInfo? GetFieldSafe([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type, string name, BindingFlags bindingFlags)
+    {
+        return type.GetField(name, bindingFlags);
+    }
+
+    /// <summary>
+    /// Legacy compatibility: Checks if method is init-only
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Legacy compatibility method")]
+    private static bool IsInitOnlyMethod(MethodInfo setMethod)
+    {
+        var methodType = setMethod.GetType();
+        var isInitOnlyProperty = methodType.GetProperty("IsInitOnly");
+        return isInitOnlyProperty != null && (bool)isInitOnlyProperty.GetValue(setMethod)!;
+    }
 }

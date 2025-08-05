@@ -102,7 +102,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             ]);
 
             // Apply property values using unified PropertyInjector
-            await PropertyInjector.InjectPropertiesAsync(context.Context, instance, metadata.PropertyDataSources, metadata.PropertyInjections, metadata.MethodMetadata, context.Context.TestDetails.TestId);
+            await PropertyInjectionService.InjectPropertiesAsync(context.Context, instance, metadata.PropertyDataSources, metadata.PropertyInjections, metadata.MethodMetadata, context.Context.TestDetails.TestId);
 
             return instance;
         }

@@ -89,7 +89,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
         await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
 
-        await PropertyInjector.InjectPropertiesAsync(
+        await PropertyInjectionService.InjectPropertiesAsync(
             test.Context,
             instance,
             test.Metadata.PropertyDataSources,
