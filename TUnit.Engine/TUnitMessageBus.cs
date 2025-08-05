@@ -43,6 +43,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
     {
         if (!testContext.ReportResult)
         {
+            testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
             return;
         }
 
@@ -68,6 +69,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
     {
         if (!testContext.ReportResult)
         {
+            testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
             return;
         }
 
