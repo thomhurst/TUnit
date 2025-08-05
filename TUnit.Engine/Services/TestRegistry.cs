@@ -35,7 +35,9 @@ internal sealed class TestRegistry : ITestRegistry
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicFields
+        | DynamicallyAccessedMemberTypes.NonPublicFields)] T>(TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
     {
         // Create a dynamic test discovery result
         var discoveryResult = new DynamicDiscoveryResult
@@ -142,7 +144,7 @@ internal sealed class TestRegistry : ITestRegistry
             GenericMethodInfo = null,
             GenericMethodTypeArguments = null,
             AttributeFactory = () => result.Attributes.ToArray(),
-            PropertyInjections = PropertyInjector.DiscoverInjectableProperties(result.TestClassType)
+            PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(result.TestClassType)
         });
     }
 

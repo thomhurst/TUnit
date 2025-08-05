@@ -1346,15 +1346,68 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         // Generate setter
                         if (property.SetMethod.IsInitOnly)
                         {
-                            writer.AppendLine("#if NET8_0_OR_GREATER");
-                            writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingFieldNested(({className})instance) = ({propertyType})value,");
-                            writer.AppendLine("#else");
-                            writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
-                            writer.AppendLine("#endif");
+                            // For nested init-only properties with ClassDataSource, create the value if null
+                            if (dataSourceAttr != null && 
+                                dataSourceAttr.AttributeClass?.IsOrInherits("global::TUnit.Core.ClassDataSourceAttribute") == true &&
+                                dataSourceAttr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
+                            {
+                                var dataSourceType = dataSourceAttr.AttributeClass.TypeArguments[0];
+                                var fullyQualifiedType = dataSourceType.GloballyQualified();
+                                
+                                writer.AppendLine("Setter = (instance, value) =>");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine("// If value is null, create it using Activator");
+                                writer.AppendLine("if (value == null)");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine($"value = System.Activator.CreateInstance<{fullyQualifiedType}>();");
+                                writer.Unindent();
+                                writer.AppendLine("}");
+                                writer.AppendLine($"var backingField = instance.GetType().GetField(\"<{property.Name}>k__BackingField\", ");
+                                writer.AppendLine("    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");
+                                writer.AppendLine("if (backingField != null)");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine("backingField.SetValue(instance, value);");
+                                writer.Unindent();
+                                writer.AppendLine("}");
+                                writer.AppendLine("else");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine($"throw new System.InvalidOperationException(\"Could not find backing field for property {property.Name}\");");
+                                writer.Unindent();
+                                writer.AppendLine("}");
+                                writer.Unindent();
+                                writer.AppendLine("},");
+                            }
+                            else
+                            {
+                                // For other init-only properties, use reflection to set the backing field
+                                writer.AppendLine("Setter = (instance, value) =>");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine($"var backingField = instance.GetType().GetField(\"<{property.Name}>k__BackingField\", ");
+                                writer.AppendLine("    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");
+                                writer.AppendLine("if (backingField != null)");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine("backingField.SetValue(instance, value);");
+                                writer.Unindent();
+                                writer.AppendLine("}");
+                                writer.AppendLine("else");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine($"throw new System.InvalidOperationException(\"Could not find backing field for property {property.Name}\");");
+                                writer.Unindent();
+                                writer.AppendLine("}");
+                                writer.Unindent();
+                                writer.AppendLine("},");
+                            }
                         }
                         else
                         {
-                            // For regular properties, use direct assignment (tuple conversion happens at runtime)
+                            // For regular properties, use direct assignment
                             writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
                         }
 
@@ -1373,7 +1426,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var currentType = typeSymbol;
         var processedProperties = new HashSet<string>();
-
+        var className = typeSymbol.GloballyQualified();
+        
+        // Generate a single cast check and extract all properties
+        var propertiesWithDataSource = new List<IPropertySymbol>();
+        
         while (currentType != null)
         {
             foreach (var member in currentType.GetMembers())
@@ -1387,18 +1444,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (dataSourceAttr != null)
                     {
                         processedProperties.Add(property.Name);
-                        var className = typeSymbol.GloballyQualified();
-
-                        writer.AppendLine($"if (obj is {className} typedObj)");
-                        writer.AppendLine("{");
-                        writer.Indent();
-                        writer.AppendLine($"nestedValues[\"{property.Name}\"] = typedObj.{property.Name};");
-                        writer.Unindent();
-                        writer.AppendLine("}");
+                        propertiesWithDataSource.Add(property);
                     }
                 }
             }
             currentType = currentType.BaseType;
+        }
+        
+        // Generate a single if statement with all property extractions
+        if (propertiesWithDataSource.Any())
+        {
+            writer.AppendLine($"if (obj is {className} typedObj)");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            foreach (var property in propertiesWithDataSource)
+            {
+                writer.AppendLine($"nestedValues[\"{property.Name}\"] = typedObj.{property.Name};");
+            }
+            
+            writer.Unindent();
+            writer.AppendLine("}");
         }
     }
 
