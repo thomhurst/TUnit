@@ -26,22 +26,6 @@ namespace .Helpers
 }
 namespace 
 {
-    public static class PropertyInjectionRegistry
-    {
-        public static void Clear() { }
-        public static .<T>? GetInjector<T>()
-            where T :  notnull { }
-        public static .<> GetRegisteredTypes() { }
-        public static bool HasInjector( type) { }
-        public static bool HasInjector<T>()
-            where T :  notnull { }
-        public static void RegisterInjector<T>(.<T> injector)
-            where T :  notnull { }
-        public delegate . PropertyInjectorDelegate<T>(T instance, .<string, object?> propertyValues, .TestContext testContext);
-    }
-}
-namespace 
-{
     public static class AotMethodInvokers
     {
         public static string GetMethodKey(string typeName, string methodName, int parameterCount = 0) { }
