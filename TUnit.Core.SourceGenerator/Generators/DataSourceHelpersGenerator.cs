@@ -147,14 +147,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
             sb.AppendLine($"        global::TUnit.Core.Helpers.DataSourceHelpers.RegisterPropertyInitializer<{fullyQualifiedType}>(InitializePropertiesAsync_{safeName});");
             
-            // Check if this type has init-only data source properties - if so, register a creator
-            var hasInitOnlyDataSourceProperties = typeWithProperties.Properties.Any(p => 
-                p.Property.SetMethod?.IsInitOnly == true);
-            
-            if (hasInitOnlyDataSourceProperties)
-            {
-                sb.AppendLine($"        global::TUnit.Core.Helpers.DataSourceHelpers.RegisterTypeCreator<{fullyQualifiedType}>(CreateAndInitializeAsync_{safeName});");
-            }
+            // Always register a TypeCreator for types that appear in the generator
+            // This includes types with init-only data source properties AND types referenced by data source attributes
+            sb.AppendLine($"        global::TUnit.Core.Helpers.DataSourceHelpers.RegisterTypeCreator<{fullyQualifiedType}>(CreateAndInitializeAsync_{safeName});");
         }
         sb.AppendLine("    }");
         sb.AppendLine();
@@ -470,17 +465,41 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 sb.AppendLine("        {");
                 
                 // Resolve the value for this property
-                if (propInfo.DataSourceAttribute?.AttributeClass?.IsOrInherits("global::TUnit.Core.ClassDataSourceAttribute") == true && 
-                    propInfo.DataSourceAttribute.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
+                // Handle any data source attribute that derives from IDataSourceAttribute
+                if (DataSourceAttributeHelper.IsDataSourceAttribute(propInfo.DataSourceAttribute?.AttributeClass))
                 {
-                    var dataSourceType = propInfo.DataSourceAttribute.AttributeClass.TypeArguments[0];
-                    var fullyQualifiedType = dataSourceType.GloballyQualified();
-                    var safeName2 = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-                    
-                    sb.AppendLine($"            var value = await CreateAndInitializeAsync_{safeName2}(testInformation, testSessionId);");
-                    sb.AppendLine($"            var backingField = instance.GetType().GetField(\"<{propertyName}>k__BackingField\", ");
-                    sb.AppendLine("                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");
-                    sb.AppendLine("            backingField?.SetValue(instance, value);");
+                    // For generic data source attributes (like ClassDataSource<T>, MethodDataSource<T>, etc.)
+                    if (propInfo.DataSourceAttribute.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
+                    {
+                        var dataSourceType = propInfo.DataSourceAttribute.AttributeClass.TypeArguments[0];
+                        var fullyQualifiedType = dataSourceType.GloballyQualified();
+                        var safeName2 = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
+                        
+                        // Check if we can create this type directly
+                        if (!dataSourceType.IsAbstract && !IsTestClass((INamedTypeSymbol)dataSourceType))
+                        {
+                            sb.AppendLine($"            var value = await CreateAndInitializeAsync_{safeName2}(testInformation, testSessionId);");
+                        }
+                        else
+                        {
+                            // For other data sources, use the runtime resolution
+                            sb.AppendLine($"            var value = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
+                            sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
+                        }
+                        
+                        sb.AppendLine($"            var backingField = instance.GetType().GetField(\"<{propertyName}>k__BackingField\", ");
+                        sb.AppendLine("                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");
+                        sb.AppendLine("            backingField?.SetValue(instance, value);");
+                    }
+                    else
+                    {
+                        // For non-generic data sources, use runtime resolution
+                        sb.AppendLine($"            var value = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
+                        sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
+                        sb.AppendLine($"            var backingField = instance.GetType().GetField(\"<{propertyName}>k__BackingField\", ");
+                        sb.AppendLine("                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");
+                        sb.AppendLine("            backingField?.SetValue(instance, value);");
+                    }
                 }
                 
                 sb.AppendLine("        }");
@@ -609,52 +628,48 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             return;
         }
 
-        // For ClassDataSource<T>, get the type and create an instance
-        if (attr.AttributeClass.IsOrInherits("global::TUnit.Core.ClassDataSourceAttribute") && 
-            attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
+        // Handle any data source attribute that derives from IDataSourceAttribute
+        if (DataSourceAttributeHelper.IsDataSourceAttribute(attr.AttributeClass))
         {
-            var dataSourceType = attr.AttributeClass.TypeArguments[0];
-            var fullyQualifiedType = dataSourceType.GloballyQualified();
-            
-            // Get the SharedType from the attribute
-            var sharedTypeArg = attr.NamedArguments.FirstOrDefault(a => a.Key == "Shared");
-            var sharedTypeValue = sharedTypeArg.Value.Value;
-            string sharedTypeName = "None";
-            if (sharedTypeValue != null)
+            // For generic data source attributes (those with type arguments)
+            if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
             {
-                // The value is an enum value, extract the name
-                var enumValue = (int)sharedTypeValue;
-                sharedTypeName = enumValue switch
+                var dataSourceType = attr.AttributeClass.TypeArguments[0];
+                var fullyQualifiedType = dataSourceType.GloballyQualified();
+                var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
+                
+                // Check if we can create this type directly (non-abstract, non-test class)
+                // This works for simple types regardless of which data source attribute is used
+                if (!dataSourceType.IsAbstract && !IsTestClass((INamedTypeSymbol)dataSourceType))
                 {
-                    0 => "None",
-                    1 => "PerTestSession",
-                    2 => "PerClass",
-                    3 => "Keyed",
-                    4 => "PerAssembly",
-                    _ => "None"
-                };
+                    sb.AppendLine($"        var {varName} = await CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
+                    sb.AppendLine($"        await global::TUnit.Core.ObjectInitializer.InitializeAsync({varName});");
+                }
+                else
+                {
+                    // Use runtime resolution for complex types, abstract types, or test classes
+                    // The runtime will handle the specific data source attribute behavior
+                    sb.AppendLine($"        var {varName} = ({property.Type.GloballyQualified()})await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourceForPropertyAsync(");
+                    sb.AppendLine($"            typeof({property.ContainingType.GloballyQualified()}),");
+                    sb.AppendLine($"            \"{propertyName}\",");
+                    sb.AppendLine($"            testInformation,");
+                    sb.AppendLine($"            testSessionId);");
+                    sb.AppendLine($"        await global::TUnit.Core.ObjectInitializer.InitializeAsync({varName});");
+                }
             }
-            
-            var keyArg = attr.NamedArguments.FirstOrDefault(a => a.Key == "Key");
-            var key = keyArg.Value.Value?.ToString() ?? string.Empty;
-            
-            // For now, just create a new instance directly since ClassDataSources is internal
-            // We'll rely on the PropertyInjector to handle sharing
-            var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
-            sb.AppendLine($"        var {varName} = await CreateAndInitializeAsync_{safeName}(testInformation, testSessionId);");
-            
-            // Initialize the nested property using ObjectInitializer (handles duplicate initialization tracking)
-            sb.AppendLine($"        await global::TUnit.Core.ObjectInitializer.InitializeAsync({varName});");
-        }
-        else if (attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
-                 attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
-        {
-            // For other async data sources, we'll need to resolve them differently
-            sb.AppendLine($"        var {varName} = default({property.Type.GloballyQualified()})!; // TODO: Resolve async data source");
+            else
+            {
+                // For non-generic data sources, always use runtime resolution
+                sb.AppendLine($"        var {varName} = ({property.Type.GloballyQualified()})await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourceForPropertyAsync(");
+                sb.AppendLine($"            typeof({property.ContainingType.GloballyQualified()}),");
+                sb.AppendLine($"            \"{propertyName}\",");
+                sb.AppendLine($"            testInformation,");
+                sb.AppendLine($"            testSessionId);");
+            }
         }
         else
         {
-            sb.AppendLine($"        var {varName} = default({property.Type.GloballyQualified()})!; // TODO: Resolve data source");
+            sb.AppendLine($"        var {varName} = default({property.Type.GloballyQualified()})!; // Not a recognized data source attribute");
         }
     }
 
@@ -674,19 +689,23 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
         sb.AppendLine($"            // Initialize {propertyName} property (init-only)");
         
-        // Use the pre-resolved value
-        if (attr.AttributeClass.IsOrInherits("global::TUnit.Core.ClassDataSourceAttribute") ||
-            attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
-            attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
+        // Use the pre-resolved value for any data source attribute
+        if (DataSourceAttributeHelper.IsDataSourceAttribute(attr.AttributeClass))
         {
-            sb.AppendLine($"            {propertyName} = {varName},");
-        }
-        else if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
-        {
-            GenerateArgumentsPropertyAssignment(sb, propInfo);
+            // Special handling for ArgumentsAttribute
+            if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
+            {
+                GenerateArgumentsPropertyAssignment(sb, propInfo);
+            }
+            else
+            {
+                // All other data source attributes use the resolved variable
+                sb.AppendLine($"            {propertyName} = {varName},");
+            }
         }
         else
         {
+            // Non-data source attributes (shouldn't happen, but handle gracefully)
             sb.AppendLine($"            {propertyName} = {varName},");
         }
     }
