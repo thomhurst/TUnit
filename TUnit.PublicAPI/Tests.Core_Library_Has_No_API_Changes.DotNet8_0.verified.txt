@@ -1402,7 +1402,6 @@ namespace
     {
         protected TestMetadata() { }
         public required <[]> AttributeFactory { get; init; }
-        public bool CanRunInParallel { get; init; }
         public required .IDataSourceAttribute[] ClassDataSources { get; init; }
         public abstract <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
         public required .IDataSourceAttribute[] DataSources { get; init; }
@@ -1412,16 +1411,12 @@ namespace
         public []? GenericMethodTypeArguments { get; init; }
         public .GenericTypeInfo? GenericTypeInfo { get; init; }
         public <[], object?[], object> InstanceFactory { get; init; }
-        public bool IsSkipped { get; init; }
         public int? LineNumber { get; init; }
         public required .MethodMetadata MethodMetadata { get; init; }
         public int ParameterCount { get; init; }
         public [] ParameterTypes { get; init; }
         public required .PropertyDataSource[] PropertyDataSources { get; init; }
         public .PropertyInjectionData[] PropertyInjections { get; init; }
-        public int RepeatCount { get; init; }
-        public int RetryCount { get; init; }
-        public string? SkipReason { get; init; }
         [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]
         public required  TestClassType { get; init; }
         public <object, object?[], .>? TestInvoker { get; init; }
@@ -1429,7 +1424,6 @@ namespace
         public string[] TestMethodParameterTypes { get; init; }
         public required string TestName { get; init; }
         public string TestSessionId { get; set; }
-        public int? TimeoutMs { get; init; }
     }
     public class TestMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T> : .TestMetadata, .
         where T :  class
