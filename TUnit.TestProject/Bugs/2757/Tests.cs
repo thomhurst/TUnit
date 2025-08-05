@@ -14,6 +14,7 @@ public class Tests
     [MethodDataSource(nameof(Data))]
     public void Test1(Foo<int> data)
     {
+        Console.WriteLine(data.Value);
     }
 
     public static IEnumerable<Foo<int>> Data() => [new(1)];
