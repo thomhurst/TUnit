@@ -1,20 +1,16 @@
-C:\Users\thomh\.nuget\packages\system.text.encodings.web\9.0.7\buildTransitive\netcoreapp2.0\System.Text.Encodings.Web.targets(4,5): warning : System.Text.Encodings.Web 9.0.7 doesn't support net6.0 and has not been tested with it. Consider upgrading your TargetFramework to net8.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [D:\git\TUnit\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj::TargetFramework=net6.0]
-C:\Users\thomh\.nuget\packages\system.io.pipelines\9.0.7\buildTransitive\netcoreapp2.0\System.IO.Pipelines.targets(4,5): warning : System.IO.Pipelines 9.0.7 doesn't support net6.0 and has not been tested with it. Consider upgrading your TargetFramework to net8.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [D:\git\TUnit\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj::TargetFramework=net6.0]
-C:\Users\thomh\.nuget\packages\microsoft.bcl.asyncinterfaces\9.0.7\buildTransitive\netcoreapp2.0\Microsoft.Bcl.AsyncInterfaces.targets(4,5): warning : Microsoft.Bcl.AsyncInterfaces 9.0.7 doesn't support net6.0 and has not been tested with it. Consider upgrading your TargetFramework to net8.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [D:\git\TUnit\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj::TargetFramework=net6.0]
-C:\Users\thomh\.nuget\packages\system.text.json\9.0.7\buildTransitive\netcoreapp2.0\System.Text.Json.targets(4,5): warning : System.Text.Json 9.0.7 doesn't support net6.0 and has not been tested with it. Consider upgrading your TargetFramework to net8.0 or later. You may also set <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings> in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk. [D:\git\TUnit\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj::TargetFramework=net6.0]
 
-████████╗██╗   ██╗███╗   ██╗██╗████████╗
-╚══██╔══╝██║   ██║████╗  ██║██║╚══██╔══╝
-   ██║   ██║   ██║██╔██╗ ██║██║   ██║
-   ██║   ██║   ██║██║╚██╗██║██║   ██║
-   ██║   ╚██████╔╝██║ ╚████║██║   ██║
-   ╚═╝    ╚═════╝ ╚═╝  ╚═══╝╚═╝   ╚═╝
+�������ۻ�ۻ   �ۻ��ۻ   �ۻ�ۻ�������ۻ
+�������ͼ�ۺ   �ۺ���ۻ  �ۺ�ۺ�������ͼ
+   �ۺ   �ۺ   �ۺ����ۻ �ۺ�ۺ   �ۺ
+   �ۺ   �ۺ   �ۺ�ۺ��ۻ�ۺ�ۺ   �ۺ
+   �ۺ   �������ɼ�ۺ ����ۺ�ۺ   �ۺ
+   �ͼ    �����ͼ �ͼ  ���ͼ�ͼ   �ͼ
 
    TUnit v1.0.0.0 | 64-bit | Microsoft Windows 10.0.26100 | win-x64 | .NET 9.0.7 | Microsoft Testing Platform v1.7.3
 
    Engine Mode: SourceGenerated
 
-Option '--treenode-filter' from provider 'TUnit' (UID: TUnitExtension) expects at most 1 arguments
+Option '--timeout' from provider 'Platform command line provider' (UID: PlatformCommandLineProvider) expects at most 1 arguments
 Usage TUnit.TestProject.exe [option providers] [extension option providers]
 
 Execute a .NET Test Application.

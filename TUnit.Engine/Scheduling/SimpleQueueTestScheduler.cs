@@ -54,15 +54,24 @@ internal sealed class SimpleQueueTestScheduler : ITestScheduler
         }
 
         var testList = tests.ToList();
-        if (testList.Count == 0)
+        
+        // Filter out tests that are already in a terminal state (e.g., failed due to circular dependencies)
+        var executableTests = testList.Where(t => t.State != TestState.Failed && t.State != TestState.Passed && t.State != TestState.Skipped).ToList();
+        
+        if (executableTests.Count == 0)
         {
             await _logger.LogDebugAsync("No tests to execute");
             return;
         }
+        
+        if (executableTests.Count < testList.Count)
+        {
+            await _logger.LogInformationAsync($"Filtered out {testList.Count - executableTests.Count} tests that are already in a terminal state");
+        }
 
-        await _logger.LogInformationAsync($"Scheduling {testList.Count} tests for execution");
+        await _logger.LogInformationAsync($"Scheduling {executableTests.Count} tests for execution");
 
-        var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(testList);
+        var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests);
         
         // Process each constraint group separately with proper sorting
         

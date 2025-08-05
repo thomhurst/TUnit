@@ -68,6 +68,30 @@ internal class SingleTestExecutor : ISingleTestExecutor
         catch (Exception ex)
         {
             // If the task throws, ensure the test has a proper failed state
+            lock (test.Context.ExecutionLock)
+            {
+                if (test.State == TestState.Running)
+                {
+                    test.State = TestState.Failed;
+                    test.Result ??= new TestResult
+                    {
+                        State = TestState.Failed,
+                        Start = test.StartTime ?? DateTimeOffset.UtcNow,
+                        End = DateTimeOffset.UtcNow,
+                        Duration = TimeSpan.Zero,
+                        Exception = ex,
+                        ComputerName = Environment.MachineName,
+                        TestContext = test.Context
+                    };
+                }
+            }
+        }
+        
+        // Double-check that the test is not still running before creating the update message
+        lock (test.Context.ExecutionLock)
+        {
+            // If somehow the test is still in Running state, that means there's a bug in the execution logic
+            // Set it to failed to avoid the "Test is still running" error
             if (test.State == TestState.Running)
             {
                 test.State = TestState.Failed;
@@ -77,12 +101,13 @@ internal class SingleTestExecutor : ISingleTestExecutor
                     Start = test.StartTime ?? DateTimeOffset.UtcNow,
                     End = DateTimeOffset.UtcNow,
                     Duration = TimeSpan.Zero,
-                    Exception = ex,
+                    Exception = new InvalidOperationException($"Test execution completed but state was not updated properly for {test.Context.GetDisplayName()}"),
                     ComputerName = Environment.MachineName,
                     TestContext = test.Context
                 };
             }
         }
+        
         return CreateUpdateMessage(test);
     }
 
@@ -92,7 +117,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         try
         {
-            // If test is already failed (e.g., from data source expansion error),
+            // If test is already failed (e.g., from data source expansion error or circular dependencies),
             // just report the existing failure
             if (test is { State: TestState.Failed, Result: not null })
             {
@@ -180,16 +205,21 @@ internal class SingleTestExecutor : ISingleTestExecutor
             await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
         }
 
-            return test.Result ?? new TestResult
+            if (test.Result == null)
             {
-                State = TestState.Failed,
-                Start = DateTimeOffset.UtcNow,
-                End = DateTimeOffset.UtcNow,
-                Duration = TimeSpan.Zero,
-                Exception = new InvalidOperationException("Test execution completed but no result was set"),
-                ComputerName = Environment.MachineName,
-                TestContext = test.Context
-            };
+                test.State = TestState.Failed;
+                test.Result = new TestResult
+                {
+                    State = TestState.Failed,
+                    Start = test.StartTime ?? DateTimeOffset.UtcNow,
+                    End = DateTimeOffset.UtcNow,
+                    Duration = TimeSpan.Zero,
+                    Exception = new InvalidOperationException("Test execution completed but no result was set"),
+                    ComputerName = Environment.MachineName,
+                    TestContext = test.Context
+                };
+            }
+            return test.Result;
         }
         catch (Exception ex)
         {
@@ -275,6 +305,13 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         lock (dependency.Context.ExecutionLock)
         {
+            // If the dependency is already failed (e.g., due to circular dependencies),
+            // return a completed task with the failed result
+            if (dependency.State == TestState.Failed && dependency.Result != null)
+            {
+                return Task.FromResult(dependency.Result);
+            }
+            
             if (dependency.Context.ExecutionTask != null)
             {
                 return dependency.Context.ExecutionTask;
@@ -512,11 +549,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
         return test.State switch
         {
             TestState.Passed => PassedTestNodeStateProperty.CachedInstance,
-            TestState.Failed => new FailedTestNodeStateProperty(test.Result!.Exception!),
+            TestState.Failed => new FailedTestNodeStateProperty(test.Result?.Exception ?? new InvalidOperationException($"Test failed but no exception was provided for {test.Context.GetDisplayName()}")),
             TestState.Skipped => new SkippedTestNodeStateProperty(test.Result!.OverrideReason ?? "Test skipped"),
             TestState.Timeout => new TimeoutTestNodeStateProperty(test.Result!.OverrideReason ?? "Test timed out"),
             TestState.Cancelled => new CancelledTestNodeStateProperty(),
-            TestState.Running => new FailedTestNodeStateProperty(new InvalidOperationException("Test is still running")),
+            TestState.Running => new FailedTestNodeStateProperty(new InvalidOperationException($"Test is still running: {test.Context.TestDetails.ClassType.FullName}.{test.Context.GetDisplayName()}")),
             _ => new FailedTestNodeStateProperty(new InvalidOperationException($"Unknown test state: {test.State}"))
         };
     }

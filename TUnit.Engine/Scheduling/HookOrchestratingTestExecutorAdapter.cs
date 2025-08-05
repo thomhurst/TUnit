@@ -56,12 +56,17 @@ internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDat
                 this,
                 new TestNodeUpdateMessage(
                     _sessionUid,
-                    test.Context.ToTestNode().WithProperty(new FailedTestNodeStateProperty(test.Result.Exception!))));
+                    test.Context.ToTestNode().WithProperty(new FailedTestNodeStateProperty(
+                        test.Result.Exception ?? new InvalidOperationException($"Test {test.TestId} was marked as failed but no exception was provided")))));
             return;
         }
         
-        test.State = TestState.Running;
-        test.StartTime = DateTimeOffset.UtcNow;
+        // Only set to Running if not already in a terminal state
+        if (test.State != TestState.Failed && test.State != TestState.Passed && test.State != TestState.Skipped)
+        {
+            test.State = TestState.Running;
+            test.StartTime = DateTimeOffset.UtcNow;
+        }
 
         // Report test started
         await _messageBus.PublishAsync(

@@ -252,6 +252,9 @@ internal sealed class TestDependencyResolver
                         TestContext = test.Context
                     };
                     test.State = TestState.Failed;
+                    
+                    // Log the circular dependency for debugging
+                    Console.WriteLine($"[DEBUG] Circular dependency detected for test: {test.Context.GetDisplayName()} - {ex.Message}");
                 }
             }
         }
