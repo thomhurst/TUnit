@@ -241,6 +241,7 @@ internal sealed class TestScheduler : ITestScheduler
             finally
             {
                 completedTests[test] = true;
+                test._taskCompletionSource.SetResult();
             }
         }, cancellationToken);
 

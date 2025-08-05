@@ -37,7 +37,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         AbstractExecutableTest test,
         CancellationToken cancellationToken)
     {
-        var result = await ExecuteTestInternalAsync(test, cancellationToken);
+        await ExecuteTestInternalAsync(test, cancellationToken);
 
         if (test.State == TestState.Running)
         {
@@ -170,9 +170,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
             return test.Result;
         }
     }
-
-
-
 
     private async Task ExecuteTestWithRetries(Func<Task> testDelegate, TestContext testContext, CancellationToken cancellationToken)
     {

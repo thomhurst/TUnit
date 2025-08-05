@@ -34,11 +34,7 @@ public abstract class AbstractExecutableTest
     public TestResult? Result
     {
         get => Context.Result;
-        set
-        {
-            Context.Result = value;
-            _taskCompletionSource.TrySetResult();
-        }
+        set => Context.Result = value;
     }
 
     public DateTimeOffset? StartTime
@@ -49,7 +45,7 @@ public abstract class AbstractExecutableTest
 
     public Task CompletionTask => _taskCompletionSource.Task;
 
-    private readonly TaskCompletionSource _taskCompletionSource = new();
+    internal readonly TaskCompletionSource _taskCompletionSource = new();
 
     public DateTimeOffset? EndTime { get => Context.TestEnd; set => Context.TestEnd = value; }
 
