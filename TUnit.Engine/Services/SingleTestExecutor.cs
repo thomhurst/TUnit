@@ -119,7 +119,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
             if(test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
             {
-
                 await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken);
             }
             else
