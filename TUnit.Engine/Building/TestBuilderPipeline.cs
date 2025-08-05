@@ -1,7 +1,6 @@
 using TUnit.Core;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
-using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Building;

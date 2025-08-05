@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using TUnit.Core;
-using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 
 namespace TUnit.Engine.Services;

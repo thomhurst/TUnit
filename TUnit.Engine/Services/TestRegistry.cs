@@ -2,11 +2,9 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
-using TUnit.Engine.Scheduling;
 
 namespace TUnit.Engine.Services;
 

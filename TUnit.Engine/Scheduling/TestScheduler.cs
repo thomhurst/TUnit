@@ -1,12 +1,9 @@
 using System.Collections.Concurrent;
 using TUnit.Core;
-using TUnit.Core.Enums;
 using TUnit.Core.Logging;
-using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 using TUnit.Engine.Services;
-using LoggingExtensions = TUnit.Core.Logging.LoggingExtensions;
 
 namespace TUnit.Engine.Scheduling;
 
@@ -86,7 +83,6 @@ internal sealed class TestScheduler : ITestScheduler
         {
             var keyedTask = ExecuteKeyedNotInParallelTestsAsync(
                 plan,
-                kvp.Key,
                 kvp.Value,
                 executor,
                 runningTasks,
@@ -98,10 +94,7 @@ internal sealed class TestScheduler : ITestScheduler
         // 3. Parallel groups - can run in parallel within constraints
         foreach (var group in groupedTests.ParallelGroups)
         {
-            var groupTask = ExecuteParallelGroupAsync(
-                plan,
-                group.Key,
-                group.Value,
+            var groupTask = ExecuteParallelGroupAsync(group.Value,
                 executor,
                 runningTasks,
                 completedTests,
@@ -111,9 +104,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
 
         // 4. Fully parallel tests
-        var parallelTask = ExecuteParallelTestsAsync(
-            plan,
-            groupedTests.Parallel,
+        var parallelTask = ExecuteParallelTestsAsync(groupedTests.Parallel,
             executor,
             runningTasks,
             completedTests,
@@ -150,13 +141,12 @@ internal sealed class TestScheduler : ITestScheduler
         // Execute sequentially
         foreach (var test in tests)
         {
-            await ExecuteTestWhenReadyAsync(plan, test, executor, runningTasks, completedTests, cancellationToken);
+            await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
         }
     }
 
     private async Task ExecuteKeyedNotInParallelTestsAsync(
         ExecutionPlan plan,
-        string key,
         PriorityQueue<AbstractExecutableTest, TestPriority> queue,
         ITestExecutor executor,
         ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
@@ -180,14 +170,11 @@ internal sealed class TestScheduler : ITestScheduler
         // Execute sequentially within this key
         foreach (var test in tests)
         {
-            await ExecuteTestWhenReadyAsync(plan, test, executor, runningTasks, completedTests, cancellationToken);
+            await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
         }
     }
 
-    private async Task ExecuteParallelGroupAsync(
-        ExecutionPlan plan,
-        string groupKey,
-        SortedDictionary<int, List<AbstractExecutableTest>> orderGroups,
+    private async Task ExecuteParallelGroupAsync(SortedDictionary<int, List<AbstractExecutableTest>> orderGroups,
         ITestExecutor executor,
         ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
@@ -203,7 +190,7 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 await semaphore.WaitAsync(cancellationToken);
 
-                var task = ExecuteTestWhenReadyAsync(plan, test, executor, runningTasks, completedTests, cancellationToken)
+                var task = ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken)
                     .ContinueWith(_ => semaphore.Release(), cancellationToken);
 
                 tasks.Add(task);
@@ -214,9 +201,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    private async Task ExecuteParallelTestsAsync(
-        ExecutionPlan plan,
-        IEnumerable<AbstractExecutableTest> tests,
+    private async Task ExecuteParallelTestsAsync(IEnumerable<AbstractExecutableTest> tests,
         ITestExecutor executor,
         ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
@@ -229,7 +214,7 @@ internal sealed class TestScheduler : ITestScheduler
         {
             await semaphore.WaitAsync(cancellationToken);
 
-            var task = ExecuteTestWhenReadyAsync(plan, test, executor, runningTasks, completedTests, cancellationToken)
+            var task = ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken)
                 .ContinueWith(_ => semaphore.Release(), cancellationToken);
 
             tasks.Add(task);
@@ -238,9 +223,7 @@ internal sealed class TestScheduler : ITestScheduler
         await Task.WhenAll(tasks);
     }
 
-    private async Task ExecuteTestWhenReadyAsync(
-        ExecutionPlan plan,
-        AbstractExecutableTest test,
+    private async Task ExecuteTestWhenReadyAsync(AbstractExecutableTest test,
         ITestExecutor executor,
         ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,

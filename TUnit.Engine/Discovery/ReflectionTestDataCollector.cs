@@ -3,15 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
-using System.Threading;
 using TUnit.Core;
-using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
-using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
-using TUnit.Engine.Helpers;
-using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Discovery;
 

@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Helpers;
-using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Discovery;
 
