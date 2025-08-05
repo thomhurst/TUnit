@@ -1,9 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
-using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Events;
 using TUnit.Engine.Extensions;

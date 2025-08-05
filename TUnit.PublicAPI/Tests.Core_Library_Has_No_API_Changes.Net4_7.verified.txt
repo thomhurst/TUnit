@@ -3,13 +3,15 @@
 [assembly: .(".NETStandard,Version=v2.0", FrameworkDisplayName=".NET Standard 2.0")]
 namespace 
 {
+    [.DebuggerDisplay("{.Name}.{}")]
     public abstract class AbstractExecutableTest
     {
         protected AbstractExecutableTest() { }
         public required object?[] Arguments { get; init; }
         public object?[] ClassArguments { get; init; }
+        public . CompletionTask { get; }
         public required .TestContext Context { get; init; }
-        public .AbstractExecutableTest[] Dependencies { get; set; }
+        public .ResolvedDependency[] Dependencies { get; set; }
         public ? Duration { get; }
         public ? EndTime { get; set; }
         public virtual .TestMetadata Metadata { get; init; }
@@ -503,12 +505,11 @@ namespace
         public string GetDisplayName() { }
         public void SetDisplayName(string displayName) { }
         public void SetDisplayNameFormatter( formatterType) { }
-        public void SetParallelConstraint(object constraint) { }
+        public void SetParallelConstraint(. constraint) { }
         public void SetPriority(. priority) { }
-        public void SetRetryCount(int retryCount, <.TestContext, , int, .<bool>> shouldRetry) { }
         public void SetRetryLimit(int retryLimit) { }
+        public void SetRetryLimit(int retryCount, <.TestContext, , int, .<bool>> shouldRetry) { }
         public void SetRunOnDiscovery(bool runOnDiscovery) { }
-        public void TransferTo(.TestContext testContext) { }
     }
     public class DiscoveredTest<T> : .DiscoveredTest
         where T :  class
@@ -1028,6 +1029,13 @@ namespace
         public ResettableLazy(string sessionId, .TestBuilderContext testBuilderContext) { }
         public override . ResetLazy() { }
     }
+    public sealed class ResolvedDependency
+    {
+        public ResolvedDependency() { }
+        public required .TestDependency Metadata { get; init; }
+        public bool ProceedOnFailure { get; }
+        public required .AbstractExecutableTest Test { get; init; }
+    }
     [(.Assembly | .Class | .Method)]
     public class RetryAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.RetryAttribute>, ., .
     {
@@ -1189,7 +1197,7 @@ namespace
         public static . Configuration { get; }
         public new static .TestContext? Current { get; }
         public static string? OutputDirectory { get; }
-        public static .<string, string> Parameters { get; }
+        public static .<string, .<string>> Parameters { get; }
         public static string WorkingDirectory { get; set; }
         public void AddArtifact(.Artifact artifact) { }
         public void AddArtifact(string name, object? value) { }
@@ -1256,6 +1264,7 @@ namespace
         public int MethodGenericArity { get; init; }
         public string? MethodName { get; init; }
         public []? MethodParameters { get; init; }
+        public bool ProceedOnFailure { get; init; }
         public bool Equals(.TestDependency? other) { }
         public override bool Equals(object? obj) { }
         public override int GetHashCode() { }
@@ -1316,7 +1325,6 @@ namespace
     {
         protected TestMetadata() { }
         public required <[]> AttributeFactory { get; init; }
-        public bool CanRunInParallel { get; init; }
         public required .IDataSourceAttribute[] ClassDataSources { get; init; }
         public abstract <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
         public required .IDataSourceAttribute[] DataSources { get; init; }
@@ -1326,23 +1334,18 @@ namespace
         public []? GenericMethodTypeArguments { get; init; }
         public .GenericTypeInfo? GenericTypeInfo { get; init; }
         public <[], object?[], object> InstanceFactory { get; init; }
-        public bool IsSkipped { get; init; }
         public int? LineNumber { get; init; }
         public required .MethodMetadata MethodMetadata { get; init; }
         public int ParameterCount { get; init; }
         public [] ParameterTypes { get; init; }
         public required .PropertyDataSource[] PropertyDataSources { get; init; }
         public .PropertyInjectionData[] PropertyInjections { get; init; }
-        public int RepeatCount { get; init; }
-        public int RetryCount { get; init; }
-        public string? SkipReason { get; init; }
         public required  TestClassType { get; init; }
         public <object, object?[], .>? TestInvoker { get; init; }
         public required string TestMethodName { get; init; }
         public string[] TestMethodParameterTypes { get; init; }
         public required string TestName { get; init; }
         public string TestSessionId { get; set; }
-        public int? TimeoutMs { get; init; }
     }
     public class TestMetadata<T> : .TestMetadata, .
         where T :  class

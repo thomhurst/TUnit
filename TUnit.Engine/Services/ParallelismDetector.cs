@@ -9,7 +9,10 @@ namespace TUnit.Engine.Services;
 public static class ParallelismDetector
 {
     /// <summary>
-    /// Detects optimal parallelism for test execution based on system capabilities
+    /// Detects optimal parallelism for test execution based on system capabilities.
+    /// Uses aggressive parallelism by default (2-3x processor count) since most tests
+    /// are IO-bound and consume minimal memory. Only reduces parallelism in extreme
+    /// low-memory situations.
     /// </summary>
     /// <returns>Optimal number of parallel threads</returns>
     public static int DetectOptimalParallelism()
@@ -20,18 +23,19 @@ public static class ParallelismDetector
         var isCiEnvironment = IsRunningInCI();
 
         // Base parallelism on processor count
-        var baseParallelism = processorCount;
+        // Default to 2x for mixed CPU/IO bound workloads
+        var baseParallelism = processorCount * 2;
 
-        // Adjust for memory constraints
-        if (availableMemoryGb < 2.0)
+        // Only be conservative in extremely low memory situations
+        if (availableMemoryGb < 1.0)
         {
-            // Low memory systems - be conservative
-            baseParallelism = Math.Max(1, processorCount / 2);
+            // Very low memory systems - still use at least processor count
+            baseParallelism = processorCount;
         }
-        else if (availableMemoryGb > 8.0)
+        else if (availableMemoryGb > 4.0)
         {
-            // High memory systems - can handle more parallel work
-            baseParallelism = processorCount * 2;
+            // Normal to high memory systems - can handle even more parallel work
+            baseParallelism = processorCount * 3;
         }
 
         // Container environments often have CPU limits that don't match processor count
@@ -40,14 +44,16 @@ public static class ParallelismDetector
             baseParallelism = Math.Min(baseParallelism, Math.Max(2, processorCount));
         }
 
-        // CI environments benefit from slightly higher parallelism for I/O bound operations
+        // CI environments often have good resources and benefit from higher parallelism
         if (isCiEnvironment && !isContainerEnvironment)
         {
-            baseParallelism = Math.Min(baseParallelism * 3 / 2, processorCount * 3);
+            // Boost CI environments since they typically have good resources
+            baseParallelism = Math.Max(baseParallelism, processorCount * 4);
         }
 
-        // Ensure minimum of 1 and reasonable maximum
-        return Math.Max(1, Math.Min(baseParallelism, processorCount * 4));
+        // Ensure minimum of processor count and reasonable maximum
+        // Cap at 8x to prevent excessive thread contention
+        return Math.Max(processorCount, Math.Min(baseParallelism, processorCount * 8));
     }
 
     /// <summary>
