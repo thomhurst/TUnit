@@ -39,7 +39,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
             .Combine(tupleDataSources.Collect());
 
         // Generate the tuple processing helpers
-        context.RegisterSourceOutput(allTupleInfo, GenerateTupleProcessors);
+        context.RegisterSourceOutput(allTupleInfo.Combine(context.CompilationProvider), GenerateTupleProcessors);
     }
 
     private static bool IsTupleUsage(SyntaxNode node)
@@ -255,9 +255,9 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
     }
 
     private static void GenerateTupleProcessors(SourceProductionContext context,
-        (ImmutableArray<TupleUsageInfo> usages, ImmutableArray<TupleDataSourceInfo> dataSources) data)
+        ((ImmutableArray<TupleUsageInfo> usages, ImmutableArray<TupleDataSourceInfo> dataSources) data, Compilation compilation) input)
     {
-        var (usages, dataSources) = data;
+        var ((usages, dataSources), compilation) = input;
 
         if (usages.IsEmpty && dataSources.IsEmpty)
         {
@@ -276,14 +276,15 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         writer.AppendLine("namespace TUnit.Generated;");
         writer.AppendLine();
 
-        GenerateTupleProcessorClass(writer, usages, dataSources);
+        GenerateTupleProcessorClass(writer, usages, dataSources, compilation);
 
         context.AddSource("AotTupleProcessors.g.cs", writer.ToString());
     }
 
     private static void GenerateTupleProcessorClass(CodeWriter writer,
         ImmutableArray<TupleUsageInfo> usages,
-        ImmutableArray<TupleDataSourceInfo> dataSources)
+        ImmutableArray<TupleDataSourceInfo> dataSources,
+        Compilation compilation)
     {
         writer.AppendLine("/// <summary>");
         writer.AppendLine("/// AOT-compatible tuple processing helpers to replace reflection-based tuple operations");
@@ -323,17 +324,17 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         {
             if (IsConcreteType(tupleType))
             {
-                var fullyQualifiedName = tupleType.GloballyQualified();
+                var fullyQualifiedName = tupleType.GloballyQualified(compilation);
                 if (!processorNameMap.ContainsKey(fullyQualifiedName))
                 {
-                    var processorName = GetUniqueTupleProcessorName(tupleType, new HashSet<string>(processorNameMap.Values));
+                    var processorName = GetUniqueTupleProcessorName(tupleType, new HashSet<string>(processorNameMap.Values), compilation);
                     processorNameMap[fullyQualifiedName] = processorName;
                 }
             }
         }
         
         // Generate tuple type registry
-        GenerateTupleRegistry(writer, allTupleTypes, processorNameMap);
+        GenerateTupleRegistry(writer, allTupleTypes, processorNameMap, compilation);
 
         // Generate main helper methods
         GenerateMainHelperMethods(writer);
@@ -343,11 +344,11 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         {
             if (IsConcreteType(tupleType))
             {
-                var fullyQualifiedName = tupleType.GloballyQualified();
+                var fullyQualifiedName = tupleType.GloballyQualified(compilation);
                 var processorName = processorNameMap[fullyQualifiedName];
                 if (processedProcessorNames.Add(processorName))
                 {
-                    GenerateTupleProcessor(writer, tupleType, processorName);
+                    GenerateTupleProcessor(writer, tupleType, processorName, compilation);
                 }
             }
         }
@@ -356,7 +357,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         writer.AppendLine("}");
     }
 
-    private static void GenerateTupleRegistry(CodeWriter writer, HashSet<ITypeSymbol> tupleTypes, Dictionary<string, string> processorNameMap)
+    private static void GenerateTupleRegistry(CodeWriter writer, HashSet<ITypeSymbol> tupleTypes, Dictionary<string, string> processorNameMap, Compilation compilation)
     {
         writer.AppendLine("private static readonly Dictionary<Type, Func<object, object?[]?>> _tupleConverters = new()");
         writer.AppendLine("{");
@@ -369,7 +370,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         {
             if (IsConcreteType(tupleType))
             {
-                var fullyQualifiedName = tupleType.GloballyQualified();
+                var fullyQualifiedName = tupleType.GloballyQualified(compilation);
                 
                 // Avoid duplicate entries by signature
                 if (processedSignatures.Add(fullyQualifiedName))
@@ -392,7 +393,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         {
             if (IsConcreteType(tupleType))
             {
-                var fullyQualifiedName = tupleType.GloballyQualified();
+                var fullyQualifiedName = tupleType.GloballyQualified(compilation);
                 writer.AppendLine($"typeof({fullyQualifiedName}),");
             }
         }
@@ -458,14 +459,14 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
 
-    private static void GenerateTupleProcessor(CodeWriter writer, ITypeSymbol tupleType, string processorName)
+    private static void GenerateTupleProcessor(CodeWriter writer, ITypeSymbol tupleType, string processorName, Compilation compilation)
     {
         if (tupleType is not INamedTypeSymbol namedTupleType || !namedTupleType.IsGenericType || !IsConcreteType(tupleType))
         {
             return;
         }
 
-        var fullyQualifiedName = tupleType.GloballyQualified();
+        var fullyQualifiedName = tupleType.GloballyQualified(compilation);
         var elementTypes = namedTupleType.TypeArguments;
         
         // Only generate for concrete types (no type parameters)
@@ -555,7 +556,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         return string.Join(", ", elements);
     }
 
-    private static string GetUniqueTupleProcessorName(ITypeSymbol tupleType, HashSet<string> processedNames)
+    private static string GetUniqueTupleProcessorName(ITypeSymbol tupleType, HashSet<string> processedNames, Compilation compilation)
     {
         if (tupleType is not INamedTypeSymbol namedType || !namedType.IsGenericType)
         {
@@ -575,7 +576,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         }
         
         // Generate a unique name by adding type hash
-        var typeSignature = tupleType.GloballyQualified();
+        var typeSignature = tupleType.GloballyQualified(compilation);
         var hash = Math.Abs(typeSignature.GetHashCode()).ToString();
         var uniqueName = $"{baseProcName}_{hash}";
         

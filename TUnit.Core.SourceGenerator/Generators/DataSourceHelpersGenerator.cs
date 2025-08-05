@@ -20,7 +20,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             .Where(static t => t is not null)
             .Collect();
 
-        context.RegisterSourceOutput(typesWithDataSourceProperties, static (spc, types) => GenerateDataSourceHelpers(spc, types!));
+        context.RegisterSourceOutput(typesWithDataSourceProperties.Combine(context.CompilationProvider), static (spc, input) => GenerateDataSourceHelpers(spc, input.Left!, input.Right));
     }
 
     private static TypeWithDataSourceProperties? GetTypeWithDataSourceProperties(GeneratorSyntaxContext context)
@@ -58,7 +58,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         };
     }
 
-    private static void GenerateDataSourceHelpers(SourceProductionContext context, ImmutableArray<TypeWithDataSourceProperties> types)
+    private static void GenerateDataSourceHelpers(SourceProductionContext context, ImmutableArray<TypeWithDataSourceProperties> types, Compilation compilation)
     {
         if (!types.Any())
         {
@@ -111,7 +111,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
         // Deduplicate types by their fully qualified name
         var uniqueTypes = filteredTypes
-            .GroupBy(t => t.TypeSymbol.GloballyQualified())
+            .GroupBy(t => t.TypeSymbol.GloballyQualified(compilation))
             .Select(g => g.First())
             .ToArray();
 
@@ -135,7 +135,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         sb.AppendLine("    {");
         foreach (var typeWithProperties in uniqueTypes)
         {
-            var fullyQualifiedType = typeWithProperties.TypeSymbol.GloballyQualified();
+            var fullyQualifiedType = typeWithProperties.TypeSymbol.GloballyQualified(compilation);
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
             sb.AppendLine($"        global::TUnit.Core.Helpers.DataSourceHelpers.RegisterPropertyInitializer<{fullyQualifiedType}>(InitializePropertiesAsync_{safeName});");
         }
@@ -144,7 +144,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
         foreach (var typeWithProperties in uniqueTypes)
         {
-            GenerateTypeSpecificHelpers(sb, typeWithProperties);
+            GenerateTypeSpecificHelpers(sb, typeWithProperties, compilation);
         }
 
         sb.AppendLine("}");
@@ -252,10 +252,10 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                type.CanBeReferencedByName;
     }
 
-    private static void GenerateTypeSpecificHelpers(StringBuilder sb, TypeWithDataSourceProperties typeInfo)
+    private static void GenerateTypeSpecificHelpers(StringBuilder sb, TypeWithDataSourceProperties typeInfo, Compilation compilation)
     {
         var typeSymbol = typeInfo.TypeSymbol;
-        var fullyQualifiedTypeName = typeSymbol.GloballyQualified();
+        var fullyQualifiedTypeName = typeSymbol.GloballyQualified(compilation);
         var safeName = fullyQualifiedTypeName.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
 
         // Separate data source properties into init-only and settable
@@ -319,7 +319,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 // Add init-only data source properties
                 foreach (var propInfo in initOnlyProperties)
                 {
-                    GenerateInitOnlyPropertyAssignment(sb, propInfo);
+                    GenerateInitOnlyPropertyAssignment(sb, propInfo, compilation);
                 }
                 
                 sb.AppendLine("        };");
@@ -333,7 +333,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         {
             // Use constructor with default values
             var constructorArgs = constructorWithDefaults.Parameters
-                .Select(p => GetDefaultValueForType(p.Type))
+                .Select(p => GetDefaultValueForType(p.Type, compilation))
                 .ToList();
                 
             if (requiredProperties.Any() || hasInitOnlyDataSourceProps)
@@ -357,7 +357,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 // Add init-only data source properties
                 foreach (var propInfo in initOnlyProperties)
                 {
-                    GenerateInitOnlyPropertyAssignment(sb, propInfo);
+                    GenerateInitOnlyPropertyAssignment(sb, propInfo, compilation);
                 }
                 
                 sb.AppendLine("        };");
@@ -408,7 +408,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
         foreach (var propInfo in settableProperties)
         {
-            GeneratePropertyInitialization(sb, propInfo, safeName);
+            GeneratePropertyInitialization(sb, propInfo, safeName, compilation);
         }
 
         sb.AppendLine("    }");
@@ -425,7 +425,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
             foreach (var propInfo in staticProperties)
             {
-                GenerateStaticPropertyInitialization(sb, propInfo, fullyQualifiedTypeName);
+                GenerateStaticPropertyInitialization(sb, propInfo, fullyQualifiedTypeName, compilation);
             }
 
             sb.AppendLine("    }");
@@ -433,7 +433,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GeneratePropertyInitialization(StringBuilder sb, PropertyWithDataSource propInfo, string typeSafeName)
+    private static void GeneratePropertyInitialization(StringBuilder sb, PropertyWithDataSource propInfo, string typeSafeName, Compilation compilation)
     {
         var property = propInfo.Property;
         var attr = propInfo.DataSourceAttribute;
@@ -451,15 +451,15 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         if (attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
             attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
         {
-            GenerateAsyncDataSourcePropertyInit(sb, propInfo);
+            GenerateAsyncDataSourcePropertyInit(sb, propInfo, compilation);
         }
         else if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
         {
-            GenerateArgumentsPropertyInit(sb, propInfo);
+            GenerateArgumentsPropertyInit(sb, propInfo, compilation);
         }
     }
 
-    private static void GenerateAsyncDataSourcePropertyInit(StringBuilder sb, PropertyWithDataSource propInfo)
+    private static void GenerateAsyncDataSourcePropertyInit(StringBuilder sb, PropertyWithDataSource propInfo, Compilation compilation)
     {
         var property = propInfo.Property;
         var attr = propInfo.DataSourceAttribute;
@@ -468,7 +468,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
-            var fullyQualifiedType = dataSourceType.GloballyQualified();
+            var fullyQualifiedType = dataSourceType.GloballyQualified(compilation);
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
             
             sb.AppendLine("        {");
@@ -482,7 +482,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             var firstArg = attr.ConstructorArguments[0];
             if (firstArg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol dataSourceType })
             {
-                var fullyQualifiedType = dataSourceType.GloballyQualified();
+                var fullyQualifiedType = dataSourceType.GloballyQualified(compilation);
                 var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
                 
                 sb.AppendLine("        {");
@@ -493,7 +493,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateArgumentsPropertyInit(StringBuilder sb, PropertyWithDataSource propInfo)
+    private static void GenerateArgumentsPropertyInit(StringBuilder sb, PropertyWithDataSource propInfo, Compilation compilation)
     {
         var property = propInfo.Property;
         var attr = propInfo.DataSourceAttribute;
@@ -503,19 +503,19 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
                 attr.ConstructorArguments[0].Values.Length > 0)
             {
-                var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0]);
+                var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0], compilation);
                 sb.AppendLine($"        instance.{property.Name} = {value};");
             }
             else if (attr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
             {
-                var value = FormatConstantValue(attr.ConstructorArguments[0]);
+                var value = FormatConstantValue(attr.ConstructorArguments[0], compilation);
                 sb.AppendLine($"        instance.{property.Name} = {value};");
             }
         }
     }
 
 
-    private static void GenerateInitOnlyPropertyAssignment(StringBuilder sb, PropertyWithDataSource propInfo)
+    private static void GenerateInitOnlyPropertyAssignment(StringBuilder sb, PropertyWithDataSource propInfo, Compilation compilation)
     {
         var property = propInfo.Property;
         var attr = propInfo.DataSourceAttribute;
@@ -538,7 +538,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         }
         else if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
         {
-            GenerateArgumentsPropertyAssignment(sb, propInfo);
+            GenerateArgumentsPropertyAssignment(sb, propInfo, compilation);
         }
         else
         {
@@ -546,7 +546,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateArgumentsPropertyAssignment(StringBuilder sb, PropertyWithDataSource propInfo)
+    private static void GenerateArgumentsPropertyAssignment(StringBuilder sb, PropertyWithDataSource propInfo, Compilation compilation)
     {
         var property = propInfo.Property;
         var attr = propInfo.DataSourceAttribute;
@@ -556,18 +556,18 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
                 attr.ConstructorArguments[0].Values.Length > 0)
             {
-                var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0]);
+                var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0], compilation);
                 sb.AppendLine($"            {property.Name} = {value},");
             }
             else if (attr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
             {
-                var value = FormatConstantValue(attr.ConstructorArguments[0]);
+                var value = FormatConstantValue(attr.ConstructorArguments[0], compilation);
                 sb.AppendLine($"            {property.Name} = {value},");
             }
         }
     }
 
-    private static void GenerateStaticPropertyInitialization(StringBuilder sb, PropertyWithDataSource propInfo, string fullyQualifiedTypeName)
+    private static void GenerateStaticPropertyInitialization(StringBuilder sb, PropertyWithDataSource propInfo, string fullyQualifiedTypeName, Compilation compilation)
     {
         var property = propInfo.Property;
         var attr = propInfo.DataSourceAttribute;
@@ -585,15 +585,15 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         if (attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
             attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
         {
-            GenerateStaticAsyncDataSourcePropertyInit(sb, propInfo, fullyQualifiedTypeName);
+            GenerateStaticAsyncDataSourcePropertyInit(sb, propInfo, fullyQualifiedTypeName, compilation);
         }
         else if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
         {
-            GenerateStaticArgumentsPropertyInit(sb, propInfo, fullyQualifiedTypeName);
+            GenerateStaticArgumentsPropertyInit(sb, propInfo, fullyQualifiedTypeName, compilation);
         }
     }
 
-    private static void GenerateStaticAsyncDataSourcePropertyInit(StringBuilder sb, PropertyWithDataSource propInfo, string fullyQualifiedTypeName)
+    private static void GenerateStaticAsyncDataSourcePropertyInit(StringBuilder sb, PropertyWithDataSource propInfo, string fullyQualifiedTypeName, Compilation compilation)
     {
         var property = propInfo.Property;
         var attr = propInfo.DataSourceAttribute;
@@ -602,7 +602,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         if (attr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
         {
             var dataSourceType = attr.AttributeClass.TypeArguments[0];
-            var fullyQualifiedType = dataSourceType.GloballyQualified();
+            var fullyQualifiedType = dataSourceType.GloballyQualified(compilation);
             var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
             
             sb.AppendLine("        {");
@@ -616,7 +616,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             var firstArg = attr.ConstructorArguments[0];
             if (firstArg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol dataSourceType })
             {
-                var fullyQualifiedType = dataSourceType.GloballyQualified();
+                var fullyQualifiedType = dataSourceType.GloballyQualified(compilation);
                 var safeName = fullyQualifiedType.Replace("global::", "").Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace(",", "_");
                 
                 sb.AppendLine("        {");
@@ -627,7 +627,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateStaticArgumentsPropertyInit(StringBuilder sb, PropertyWithDataSource propInfo, string fullyQualifiedTypeName)
+    private static void GenerateStaticArgumentsPropertyInit(StringBuilder sb, PropertyWithDataSource propInfo, string fullyQualifiedTypeName, Compilation compilation)
     {
         var property = propInfo.Property;
         var attr = propInfo.DataSourceAttribute;
@@ -637,19 +637,19 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
                 attr.ConstructorArguments[0].Values.Length > 0)
             {
-                var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0]);
+                var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0], compilation);
                 sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = {value};");
             }
             else if (attr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
             {
-                var value = FormatConstantValue(attr.ConstructorArguments[0]);
+                var value = FormatConstantValue(attr.ConstructorArguments[0], compilation);
                 sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = {value};");
             }
         }
     }
 
 
-    private static string GetDefaultValueForType(ITypeSymbol type)
+    private static string GetDefaultValueForType(ITypeSymbol type, Compilation compilation)
     {
         return type.SpecialType switch
         {
@@ -668,13 +668,13 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             SpecialType.System_Char => "'\\0'",
             SpecialType.System_String => "\"\"",
             SpecialType.System_DateTime => "default(System.DateTime)",
-            _ when type.TypeKind == TypeKind.Enum => $"default({type.GloballyQualified()})",
-            _ when type.CanBeReferencedByName => $"default({type.GloballyQualified()})",
+            _ when type.TypeKind == TypeKind.Enum => $"default({type.GloballyQualified(compilation)})",
+            _ when type.CanBeReferencedByName => $"default({type.GloballyQualified(compilation)})",
             _ => "null"
         };
     }
 
-    private static string FormatConstantValue(TypedConstant constant)
+    private static string FormatConstantValue(TypedConstant constant, Compilation compilation)
     {
         return constant.Kind switch
         {
@@ -682,8 +682,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             TypedConstantKind.Primitive when constant.Value is char ch => $"'{ch}'",
             TypedConstantKind.Primitive when constant.Value is bool b => b.ToString().ToLowerInvariant(),
             TypedConstantKind.Primitive => constant.Value?.ToString() ?? "null",
-            TypedConstantKind.Enum => $"({constant.Type!.GloballyQualified()}){constant.Value}",
-            TypedConstantKind.Type => $"typeof({((ITypeSymbol)constant.Value!).GloballyQualified()})",
+            TypedConstantKind.Enum => $"({constant.Type!.GloballyQualified(compilation)}){constant.Value}",
+            TypedConstantKind.Type => $"typeof({((ITypeSymbol)constant.Value!).GloballyQualified(compilation)})",
             _ when constant.IsNull => "null",
             _ => "null"
         };

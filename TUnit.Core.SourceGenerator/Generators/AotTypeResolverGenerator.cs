@@ -39,7 +39,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
             .Combine(genericTestInfo.Collect());
 
         // Generate the type resolver
-        context.RegisterSourceOutput(allTypeInfo, GenerateAotTypeResolver);
+        context.RegisterSourceOutput(allTypeInfo.Combine(context.CompilationProvider), GenerateAotTypeResolver);
     }
 
     private static bool IsTypeReferenceUsage(SyntaxNode node)
@@ -207,9 +207,9 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
     }
 
     private static void GenerateAotTypeResolver(SourceProductionContext context, 
-        (ImmutableArray<TypeReferenceInfo> typeRefs, ImmutableArray<GenericTestInfo> genericTests) data)
+        ((ImmutableArray<TypeReferenceInfo> typeRefs, ImmutableArray<GenericTestInfo> genericTests) data, Compilation compilation) input)
     {
-        var (typeReferences, genericTests) = data;
+        var ((typeReferences, genericTests), compilation) = input;
         
         // Always generate AotTypeResolver even if no specific references are found
         // This ensures the AotModuleInitializer can always reference it
@@ -226,14 +226,15 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         writer.AppendLine("namespace TUnit.Generated;");
         writer.AppendLine();
         
-        GenerateAotTypeResolverClass(writer, typeReferences, genericTests);
+        GenerateAotTypeResolverClass(writer, typeReferences, genericTests, compilation);
         
         context.AddSource("AotTypeResolver.g.cs", writer.ToString());
     }
 
     private static void GenerateAotTypeResolverClass(CodeWriter writer, 
         ImmutableArray<TypeReferenceInfo> typeReferences, 
-        ImmutableArray<GenericTestInfo> genericTests)
+        ImmutableArray<GenericTestInfo> genericTests,
+        Compilation compilation)
     {
         writer.AppendLine("/// <summary>");
         writer.AppendLine("/// AOT-compatible type resolver that replaces reflection-based TypeResolver");
@@ -276,18 +277,18 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         }
 
         // Generate static constructor to initialize type cache
-        GenerateStaticConstructor(writer, allReferencedTypes);
+        GenerateStaticConstructor(writer, allReferencedTypes, compilation);
 
         // Generate type resolution methods
-        GenerateResolveTypeMethod(writer, allReferencedTypes);
-        GenerateMakeGenericTypeMethod(writer, typeReferences, genericTests);
-        GenerateGenericTypeFactories(writer, genericTests);
+        GenerateResolveTypeMethod(writer, allReferencedTypes, compilation);
+        GenerateMakeGenericTypeMethod(writer, typeReferences, genericTests, compilation);
+        GenerateGenericTypeFactories(writer, genericTests, compilation);
 
         writer.Unindent();
         writer.AppendLine("}");
     }
 
-    private static void GenerateStaticConstructor(CodeWriter writer, HashSet<ITypeSymbol> allTypes)
+    private static void GenerateStaticConstructor(CodeWriter writer, HashSet<ITypeSymbol> allTypes, Compilation compilation)
     {
         writer.AppendLine("static AotTypeResolver()");
         writer.AppendLine("{");
@@ -301,8 +302,8 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
                 // Only generate code for concrete types
                 if (IsConcreteType(type))
                 {
-                    var fullyQualifiedName = type.GloballyQualified();
-                    var assemblyQualifiedName = GetAssemblyQualifiedName(type);
+                    var fullyQualifiedName = type.GloballyQualified(compilation);
+                    var assemblyQualifiedName = GetAssemblyQualifiedName(type, compilation);
                     
                     writer.AppendLine($"_typeCache[\"{assemblyQualifiedName}\"] = typeof({fullyQualifiedName});");
                 }
@@ -318,7 +319,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
 
-    private static void GenerateResolveTypeMethod(CodeWriter writer, HashSet<ITypeSymbol> allTypes)
+    private static void GenerateResolveTypeMethod(CodeWriter writer, HashSet<ITypeSymbol> allTypes, Compilation compilation)
     {
         writer.AppendLine("/// <summary>");
         writer.AppendLine("/// Resolves a type by its assembly-qualified name (AOT-safe replacement for Type.GetType)");
@@ -346,8 +347,8 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
                 // Only generate code for concrete types
                 if (IsConcreteType(type))
                 {
-                    var fullyQualifiedName = type.GloballyQualified();
-                    var assemblyQualifiedName = GetAssemblyQualifiedName(type);
+                    var fullyQualifiedName = type.GloballyQualified(compilation);
+                    var assemblyQualifiedName = GetAssemblyQualifiedName(type, compilation);
                     writer.AppendLine($"\"{assemblyQualifiedName}\" => typeof({fullyQualifiedName}),");
                 }
             }
@@ -369,7 +370,8 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
 
     private static void GenerateMakeGenericTypeMethod(CodeWriter writer, 
         ImmutableArray<TypeReferenceInfo> typeReferences, 
-        ImmutableArray<GenericTestInfo> genericTests)
+        ImmutableArray<GenericTestInfo> genericTests,
+        Compilation compilation)
     {
         writer.AppendLine("/// <summary>");
         writer.AppendLine("/// Creates a generic type (AOT-safe replacement for Type.MakeGenericType)");
@@ -392,13 +394,13 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         if (genericTypeCombinations.Count > 0)
         {
             writer.AppendLine("// Handle known generic type combinations");
-            writer.AppendLine($"if (genericTypeDefinition == typeof({genericTypeCombinations[0].GenericDefinition.GloballyQualified()}) && typeArguments.Length == {genericTypeCombinations[0].TypeArguments.Length})");
+            writer.AppendLine($"if (genericTypeDefinition == typeof({genericTypeCombinations[0].GenericDefinition.GloballyQualified(compilation)}) && typeArguments.Length == {genericTypeCombinations[0].TypeArguments.Length})");
             writer.AppendLine("{");
             writer.Indent();
             
             foreach (var combination in genericTypeCombinations)
             {
-                GenerateGenericTypeCombination(writer, combination);
+                GenerateGenericTypeCombination(writer, combination, compilation);
             }
             
             writer.Unindent();
@@ -413,7 +415,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
 
-    private static void GenerateGenericTypeFactories(CodeWriter writer, ImmutableArray<GenericTestInfo> genericTests)
+    private static void GenerateGenericTypeFactories(CodeWriter writer, ImmutableArray<GenericTestInfo> genericTests, Compilation compilation)
     {
         if (genericTests.IsDefaultOrEmpty)
         {
@@ -426,16 +428,16 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         {
             if (genericTest.TypeSymbol != null)
             {
-                var typeName = genericTest.TypeSymbol.GloballyQualified();
+                var typeName = genericTest.TypeSymbol.GloballyQualified(compilation);
                 if (processedTypes.Add(typeName))
                 {
-                    GenerateGenericTypeFactory(writer, genericTest.TypeSymbol);
+                    GenerateGenericTypeFactory(writer, genericTest.TypeSymbol, compilation);
                 }
             }
         }
     }
 
-    private static void GenerateGenericTypeFactory(CodeWriter writer, INamedTypeSymbol genericType)
+    private static void GenerateGenericTypeFactory(CodeWriter writer, INamedTypeSymbol genericType, Compilation compilation)
     {
         // Skip if the type contains unresolved generic parameters
         if (ContainsUnresolvedGenericParameters(genericType))
@@ -444,7 +446,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         }
         
         var safeName = GetSafeTypeName(genericType);
-        var fullyQualifiedName = genericType.GloballyQualified();
+        var fullyQualifiedName = genericType.GloballyQualified(compilation);
         
         writer.AppendLine("/// <summary>");
         writer.AppendLine($"/// Factory for creating instances of {genericType.Name}");
@@ -487,7 +489,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         return false;
     }
 
-    private static void GenerateGenericTypeCombination(CodeWriter writer, GenericTypeCombination combination)
+    private static void GenerateGenericTypeCombination(CodeWriter writer, GenericTypeCombination combination, Compilation compilation)
     {
         var conditions = new List<string>();
         
@@ -521,11 +523,11 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         // Build the constructed type with concrete types only
         var typeArgStrings = combination.TypeArguments
             .Where(t => t.TypeKind != TypeKind.TypeParameter)
-            .Select(t => t.GloballyQualified());
+            .Select(t => t.GloballyQualified(compilation));
             
         if (typeArgStrings.Count() == combination.TypeArguments.Length)
         {
-            var constructedType = $"{combination.GenericDefinition.GloballyQualified()}<{string.Join(", ", typeArgStrings)}>";
+            var constructedType = $"{combination.GenericDefinition.GloballyQualified(compilation)}<{string.Join(", ", typeArgStrings)}>";
             writer.AppendLine($"var result = typeof({constructedType});");
             writer.AppendLine("_genericTypeCache[cacheKey] = result;");
             writer.AppendLine("return result;");
@@ -560,10 +562,10 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         return combinations.Distinct().ToList();
     }
 
-    private static string GetAssemblyQualifiedName(ITypeSymbol type)
+    private static string GetAssemblyQualifiedName(ITypeSymbol type, Compilation compilation)
     {
         // Simplified assembly qualified name generation
-        var typeName = type.GloballyQualified();
+        var typeName = type.GloballyQualified(compilation);
         var assemblyName = type.ContainingAssembly?.Name ?? "UnknownAssembly";
         return $"{typeName}, {assemblyName}";
     }
