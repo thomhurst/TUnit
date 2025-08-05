@@ -49,9 +49,10 @@ internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDat
 
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        if (test.Dependencies.Any(x => x is { ProceedOnFailure: false, Test.Result.State: TestState.Failed }))
+        // Check if any dependencies failed without ProceedOnFailure flag
+        if (test.Dependencies.Any(dep => dep.Test.State == TestState.Failed && !dep.ProceedOnFailure))
         {
-            // If any dependencies have failed, skip this test
+            // If any dependencies have failed without ProceedOnFailure, skip this test
             test.State = TestState.Skipped;
             test.Result = new TestResult
             {

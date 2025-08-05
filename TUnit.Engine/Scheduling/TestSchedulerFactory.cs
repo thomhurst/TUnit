@@ -10,20 +10,12 @@ namespace TUnit.Engine.Scheduling;
 internal static class TestSchedulerFactory
 {
     /// <summary>
-    /// Creates a scheduler with default configuration
-    /// </summary>
-    public static ITestScheduler CreateDefault(TUnitFrameworkLogger logger, EngineCancellationToken engineCancellationToken, EventReceiverOrchestrator eventReceiverOrchestrator, HookOrchestrator hookOrchestrator)
-    {
-        return Create(SchedulerConfiguration.Default, logger, engineCancellationToken, eventReceiverOrchestrator, hookOrchestrator);
-    }
-
-    /// <summary>
     /// Creates a scheduler with specified configuration
     /// </summary>
     public static ITestScheduler Create(SchedulerConfiguration configuration, TUnitFrameworkLogger logger, EngineCancellationToken engineCancellationToken, EventReceiverOrchestrator eventReceiverOrchestrator, HookOrchestrator hookOrchestrator)
     {
         var groupingService = new TestGroupingService();
-        
+
         // Use the new clean scheduler
         return new CleanTestScheduler(
             logger,
