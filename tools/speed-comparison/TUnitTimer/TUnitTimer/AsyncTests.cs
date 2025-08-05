@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace TUnitTimer;
 
 public class AsyncTests
@@ -6,10 +8,10 @@ public class AsyncTests
     public async Task SimpleAsyncTest()
     {
         var result = await ComputeAsync(10);
-        Assert.That(result).IsEqualTo(100);
-        
+        await Assert.That(result).IsEqualTo(100);
+
         var text = await ProcessTextAsync("hello");
-        Assert.That(text).IsEqualTo("HELLO");
+        await Assert.That(text).IsEqualTo("HELLO");
     }
 
     [Test]
@@ -18,24 +20,24 @@ public class AsyncTests
         using var stream = new MemoryStream();
         using var writer = new StreamWriter(stream);
         using var reader = new StreamReader(stream);
-        
+
         await writer.WriteLineAsync("Line 1");
         await writer.WriteLineAsync("Line 2");
         await writer.WriteLineAsync("Line 3");
         await writer.FlushAsync();
-        
+
         stream.Position = 0;
-        
+
         var lines = new List<string>();
         string? line;
         while ((line = await reader.ReadLineAsync()) != null)
         {
             lines.Add(line);
         }
-        
-        Assert.That(lines).HasCount(3);
-        Assert.That(lines[0]).IsEqualTo("Line 1");
-        Assert.That(lines[2]).IsEqualTo("Line 3");
+
+        await Assert.That(lines).HasCount(3);
+        await Assert.That(lines[0]).IsEqualTo("Line 1");
+        await Assert.That(lines[2]).IsEqualTo("Line 3");
     }
 
     [Test]
@@ -48,15 +50,15 @@ public class AsyncTests
             ComputeAsync(15),
             ComputeAsync(20)
         };
-        
+
         var results = await Task.WhenAll(tasks);
-        
-        Assert.That(results).HasCount(4);
-        Assert.That(results[0]).IsEqualTo(25);
-        Assert.That(results[1]).IsEqualTo(100);
-        Assert.That(results[2]).IsEqualTo(225);
-        Assert.That(results[3]).IsEqualTo(400);
-        Assert.That(results.Sum()).IsEqualTo(750);
+
+        await Assert.That(results).HasCount(4);
+        await Assert.That(results[0]).IsEqualTo(25);
+        await Assert.That(results[1]).IsEqualTo(100);
+        await Assert.That(results[2]).IsEqualTo(225);
+        await Assert.That(results[3]).IsEqualTo(400);
+        await Assert.That(results.Sum()).IsEqualTo(750);
     }
 
     [Test]
@@ -64,15 +66,15 @@ public class AsyncTests
     {
         var sum = 0;
         var count = 0;
-        
+
         await foreach (var value in GenerateValuesAsync())
         {
             sum += value;
             count++;
         }
-        
-        Assert.That(count).IsEqualTo(10);
-        Assert.That(sum).IsEqualTo(55);
+
+        await Assert.That(count).IsEqualTo(10);
+        await Assert.That(sum).IsEqualTo(55);
     }
 
     [Test]
@@ -80,13 +82,13 @@ public class AsyncTests
     {
         var data = await SimulateFileReadAsync("test.txt");
         var lines = data.Split('\n');
-        
-        Assert.That(lines).HasCount(5);
-        Assert.That(lines[0]).IsEqualTo("Header: Test File");
-        Assert.That(lines[4]).IsEqualTo("Footer: End of File");
-        
+
+        await Assert.That(lines).HasCount(5);
+        await Assert.That(lines[0]).IsEqualTo("Header: Test File");
+        await Assert.That(lines[4]).IsEqualTo("Footer: End of File");
+
         var processed = await SimulateFileProcessAsync(data);
-        Assert.That(processed).Contains("PROCESSED");
+        await Assert.That(processed).Contains("PROCESSED");
     }
 
     [Test]
@@ -96,10 +98,10 @@ public class AsyncTests
     public async Task ParameterizedAsyncTest(int input)
     {
         var result = await ComputeAsync(input);
-        Assert.That(result).IsEqualTo(input * input);
-        
+        await Assert.That(result).IsEqualTo(input * input);
+
         var delayed = await DelayedComputeAsync(input, 10);
-        Assert.That(delayed).IsEqualTo(input + 10);
+        await Assert.That(delayed).IsEqualTo(input + 10);
     }
 
     [Test]
@@ -108,10 +110,10 @@ public class AsyncTests
         try
         {
             var result = await SafeComputeAsync(10);
-            Assert.That(result).IsEqualTo(100);
-            
+            await Assert.That(result).IsEqualTo(100);
+
             result = await SafeComputeAsync(-1);
-            Assert.That(result).IsEqualTo(0);
+            await Assert.That(result).IsEqualTo(0);
         }
         catch
         {
