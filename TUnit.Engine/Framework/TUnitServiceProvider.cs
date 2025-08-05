@@ -152,11 +152,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             loggerFactory,
             testScheduler: null,
             serviceProvider: this,
-            hookOrchestratingTestExecutorAdapter));
-
-        // Set session IDs for proper test reporting
-        singleTestExecutor.SetSessionId(sessionUid);
-        TestExecutor.SetSessionId(sessionUid);
+            hookOrchestratingTestExecutorAdapter,
+            ContextProvider,
+            MessageBus));
 
         Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, hookOrchestratingTestExecutorAdapter, TestSessionId, CancellationToken.Token));
 

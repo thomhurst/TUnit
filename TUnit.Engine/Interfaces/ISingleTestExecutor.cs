@@ -9,6 +9,5 @@ namespace TUnit.Engine.Interfaces;
 /// </summary>
 public interface ISingleTestExecutor
 {
-    void SetSessionId(SessionUid sessionUid);
     Task<TestNodeUpdateMessage> ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken);
 }

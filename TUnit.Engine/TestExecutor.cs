@@ -3,8 +3,8 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
-using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Services;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Interfaces;
@@ -15,16 +15,17 @@ using ITestExecutor = TUnit.Engine.Interfaces.ITestExecutor;
 
 namespace TUnit.Engine;
 
-internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, IAsyncDisposable
+internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposable
 {
     private readonly ISingleTestExecutor _singleTestExecutor;
     private readonly ICommandLineOptions _commandLineOptions;
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestScheduler _testScheduler;
     private readonly ILoggerFactory _loggerFactory;
-    private SessionUid? _sessionUid;
     private readonly TUnitServiceProvider _serviceProvider;
     private readonly Scheduling.TestExecutor _testExecutor;
+    private readonly IContextProvider _contextProvider;
+    private readonly ITUnitMessageBus _messageBus;
 
     public TestExecutor(
         ISingleTestExecutor singleTestExecutor,
@@ -33,7 +34,9 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         ILoggerFactory? loggerFactory,
         ITestScheduler? testScheduler,
         TUnitServiceProvider serviceProvider,
-        Scheduling.TestExecutor testExecutor)
+        Scheduling.TestExecutor testExecutor,
+        IContextProvider contextProvider,
+        ITUnitMessageBus messageBus)
     {
         _singleTestExecutor = singleTestExecutor;
         _commandLineOptions = commandLineOptions;
@@ -41,24 +44,13 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         _loggerFactory = loggerFactory ?? new NullLoggerFactory();
         _serviceProvider = serviceProvider;
         _testExecutor = testExecutor;
+        _contextProvider = contextProvider;
+        _messageBus = messageBus;
 
-        // Use provided scheduler or create default
         _testScheduler = testScheduler ?? CreateDefaultScheduler();
     }
 
-    // IDataProducer implementation
-    public string Uid => "TUnit.UnifiedTestExecutor";
-    public string Version => "1.0.0";
-    public string DisplayName => "TUnit Test Executor";
-    public string Description => "Unified test executor for TUnit";
-    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage)];
-
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
-
-    public void SetSessionId(SessionUid sessionUid)
-    {
-        _sessionUid = sessionUid;
-    }
 
     public async Task ExecuteTests(
         IEnumerable<AbstractExecutableTest> tests,
@@ -94,6 +86,11 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"Error in session cleanup hooks: {ex}");
+            }
+
+            foreach (var artifact in _contextProvider.TestSessionContext.Artifacts)
+            {
+                await _messageBus.SessionArtifact(artifact);
             }
         }
     }
