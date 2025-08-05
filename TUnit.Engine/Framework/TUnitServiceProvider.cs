@@ -136,7 +136,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         FailFastCancellationSource = Register(new CancellationTokenSource());
 
         var hookOrchestratingTestExecutorAdapter = Register(
-            new HookOrchestratingTestExecutorAdapter(
+            new Scheduling.TestExecutor(
                 singleTestExecutor,
                 messageBus,
                 sessionUid,

@@ -17,18 +17,18 @@ internal sealed class TestRegistry : ITestRegistry
 {
     private readonly ConcurrentQueue<PendingDynamicTest> _pendingTests = new();
     private readonly TestBuilderPipeline? _testBuilderPipeline;
-    private readonly HookOrchestratingTestExecutorAdapter _hookOrchestratingTestExecutorAdapter;
+    private readonly Scheduling.TestExecutor _testExecutor;
     private readonly CancellationToken _sessionCancellationToken;
     private readonly string? _sessionId;
 
 
     public TestRegistry(TestBuilderPipeline testBuilderPipeline,
-        HookOrchestratingTestExecutorAdapter hookOrchestratingTestExecutorAdapter,
+        Scheduling.TestExecutor testExecutor,
         string sessionId,
         CancellationToken sessionCancellationToken)
     {
         _testBuilderPipeline = testBuilderPipeline;
-        _hookOrchestratingTestExecutorAdapter = hookOrchestratingTestExecutorAdapter;
+        _testExecutor = testExecutor;
         _sessionId = sessionId;
         _sessionCancellationToken = sessionCancellationToken;
     }
@@ -93,7 +93,7 @@ internal sealed class TestRegistry : ITestRegistry
         foreach (var test in builtTests)
         {
             // The SingleTestExecutor will handle all execution-related message publishing
-            await _hookOrchestratingTestExecutorAdapter.ExecuteTestAsync(test, _sessionCancellationToken);
+            await _testExecutor.ExecuteTestAsync(test, _sessionCancellationToken);
         }
     }
 

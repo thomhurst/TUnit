@@ -11,7 +11,7 @@ using TUnit.Engine.Services;
 namespace TUnit.Engine.Scheduling;
 
 /// Test executor adapter with hook orchestration, fail-fast support, and class/assembly lifecycle management
-internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDataProducer
+internal sealed class TestExecutor : ITestExecutor, IDataProducer
 {
     private readonly ISingleTestExecutor _innerExecutor;
     private readonly IMessageBus _messageBus;
@@ -22,14 +22,14 @@ internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDat
     private readonly HookOrchestrator _hookOrchestrator;
 
     // IDataProducer implementation
-    public string Uid => "TUnit.HookOrchestratingTestExecutorAdapter";
+    public string Uid => "TUnit.TestExecutor";
     public string Version => "1.0.0";
     public string DisplayName => "Hook Orchestrating Test Executor Adapter";
     public string Description => "Test executor adapter with hook orchestration and fail-fast support";
     public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage)];
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
-    public HookOrchestratingTestExecutorAdapter(
+    public TestExecutor(
         ISingleTestExecutor innerExecutor,
         IMessageBus messageBus,
         SessionUid sessionUid,

@@ -17,7 +17,7 @@ internal static class TestSchedulerFactory
         var groupingService = new TestGroupingService();
 
         // Use the new clean scheduler
-        return new CleanTestScheduler(
+        return new TestScheduler(
             logger,
             groupingService,
             configuration.MaxParallelism);

@@ -13,13 +13,13 @@ namespace TUnit.Engine.Scheduling;
 /// <summary>
 /// A clean, simplified test scheduler that uses an execution plan
 /// </summary>
-internal sealed class CleanTestScheduler : ITestScheduler
+internal sealed class TestScheduler : ITestScheduler
 {
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestGroupingService _groupingService;
     private readonly int _maxParallelism;
 
-    public CleanTestScheduler(
+    public TestScheduler(
         TUnitFrameworkLogger logger,
         ITestGroupingService groupingService,
         int maxParallelism)

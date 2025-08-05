@@ -25,7 +25,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
     private readonly ILoggerFactory _loggerFactory;
     private SessionUid? _sessionUid;
     private readonly TUnitServiceProvider _serviceProvider;
-    private readonly HookOrchestratingTestExecutorAdapter _hookOrchestratingTestExecutorAdapter;
+    private readonly Scheduling.TestExecutor _testExecutor;
 
     public TestExecutor(
         ISingleTestExecutor singleTestExecutor,
@@ -34,14 +34,14 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         ILoggerFactory? loggerFactory,
         ITestScheduler? testScheduler,
         TUnitServiceProvider serviceProvider,
-        HookOrchestratingTestExecutorAdapter hookOrchestratingTestExecutorAdapter)
+        Scheduling.TestExecutor testExecutor)
     {
         _singleTestExecutor = singleTestExecutor;
         _commandLineOptions = commandLineOptions;
         _logger = logger;
         _loggerFactory = loggerFactory ?? new NullLoggerFactory();
         _serviceProvider = serviceProvider;
-        _hookOrchestratingTestExecutorAdapter = hookOrchestratingTestExecutorAdapter;
+        _testExecutor = testExecutor;
 
         // Use provided scheduler or create default
         _testScheduler = testScheduler ?? CreateDefaultScheduler();
@@ -75,7 +75,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         try
         {
             await PrepareHookOrchestrator(hookOrchestrator, testList, cancellationToken);
-            await ExecuteTestsCore(testList, _hookOrchestratingTestExecutorAdapter, cancellationToken);
+            await ExecuteTestsCore(testList, _testExecutor, cancellationToken);
         }
         finally
         {
