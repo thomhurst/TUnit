@@ -551,12 +551,11 @@ namespace
         public string GetDisplayName() { }
         public void SetDisplayName(string displayName) { }
         public void SetDisplayNameFormatter( formatterType) { }
-        public void SetParallelConstraint(object constraint) { }
+        public void SetParallelConstraint(. constraint) { }
         public void SetPriority(. priority) { }
-        public void SetRetryCount(int retryCount, <.TestContext, , int, .<bool>> shouldRetry) { }
         public void SetRetryLimit(int retryLimit) { }
+        public void SetRetryLimit(int retryCount, <.TestContext, , int, .<bool>> shouldRetry) { }
         public void SetRunOnDiscovery(bool runOnDiscovery) { }
-        public void TransferTo(.TestContext testContext) { }
     }
     public class DiscoveredTest<T> : .DiscoveredTest
         where T :  class
