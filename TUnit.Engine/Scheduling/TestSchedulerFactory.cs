@@ -12,7 +12,7 @@ internal static class TestSchedulerFactory
     /// <summary>
     /// Creates a scheduler with specified configuration
     /// </summary>
-    public static ITestScheduler Create(SchedulerConfiguration configuration, TUnitFrameworkLogger logger, EngineCancellationToken engineCancellationToken, EventReceiverOrchestrator eventReceiverOrchestrator, HookOrchestrator hookOrchestrator)
+    public static ITestScheduler Create(SchedulerConfiguration configuration, TUnitFrameworkLogger logger, ITUnitMessageBus messageBus, EngineCancellationToken engineCancellationToken, EventReceiverOrchestrator eventReceiverOrchestrator, HookOrchestrator hookOrchestrator)
     {
         var groupingService = new TestGroupingService();
 
@@ -20,6 +20,7 @@ internal static class TestSchedulerFactory
         return new TestScheduler(
             logger,
             groupingService,
+            messageBus,
             configuration.MaxParallelism);
     }
 }

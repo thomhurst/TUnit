@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Logging;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 using TUnit.Engine.Services;
@@ -14,15 +16,18 @@ internal sealed class TestScheduler : ITestScheduler
 {
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestGroupingService _groupingService;
+    private readonly ITUnitMessageBus _messageBus;
     private readonly int _maxParallelism;
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
         ITestGroupingService groupingService,
+        ITUnitMessageBus messageBus,
         int maxParallelism)
     {
         _logger = logger;
         _groupingService = groupingService;
+        _messageBus = messageBus;
         _maxParallelism = maxParallelism > 0 ? maxParallelism : ParallelismDetector.DetectOptimalParallelism();
     }
 
@@ -229,6 +234,22 @@ internal sealed class TestScheduler : ITestScheduler
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
         CancellationToken cancellationToken)
     {
+        // If test is already failed (e.g., due to circular dependencies), report the pre-failure
+        if (test.State == TestState.Failed)
+        {
+            await _messageBus.Failed(test.Context,
+                    test.Result?.Exception ?? new InvalidOperationException("Test was marked as failed before execution"),
+                    test.StartTime ?? DateTimeOffset.UtcNow);
+
+            return;
+        }
+
+        if (test.State == TestState.Skipped)
+        {
+            await _messageBus.Skipped(test.Context, "Test was skipped");
+            return;
+        }
+
         await Task.WhenAll(test.Dependencies.Select(x => x.Test.CompletionTask));
 
         // Execute the test

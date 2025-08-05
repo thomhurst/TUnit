@@ -15,6 +15,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
 {
     private readonly ISingleTestExecutor _innerExecutor;
     private readonly IMessageBus _messageBus;
+    private readonly ITUnitMessageBus _tunitMessageBus;
     private readonly SessionUid _sessionUid;
     private readonly bool _isFailFastEnabled;
     private readonly CancellationTokenSource _failFastCancellationSource;
@@ -32,6 +33,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
     public TestExecutor(
         ISingleTestExecutor innerExecutor,
         IMessageBus messageBus,
+        ITUnitMessageBus tunitMessageBus,
         SessionUid sessionUid,
         bool isFailFastEnabled,
         CancellationTokenSource failFastCancellationSource,
@@ -40,6 +42,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
     {
         _innerExecutor = innerExecutor;
         _messageBus = messageBus;
+        _tunitMessageBus = tunitMessageBus;
         _sessionUid = sessionUid;
         _isFailFastEnabled = isFailFastEnabled;
         _failFastCancellationSource = failFastCancellationSource;
@@ -65,11 +68,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
             };
 
             // Report the skipped state
-            await _messageBus.PublishAsync(
-                this,
-                new TestNodeUpdateMessage(
-                    _sessionUid,
-                    test.Context.ToTestNode().WithProperty(SkippedTestNodeStateProperty.CachedInstance)));
+            await _tunitMessageBus.Skipped(test.Context, "Skipped due to failed dependencies");
 
             return;
         }
@@ -79,11 +78,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
         test.StartTime = DateTimeOffset.UtcNow;
 
         // Report test started
-        await _messageBus.PublishAsync(
-            this,
-            new TestNodeUpdateMessage(
-                _sessionUid,
-                test.Context.ToTestNode().WithProperty(InProgressTestNodeStateProperty.CachedInstance)));
+        await _tunitMessageBus.InProgress(test.Context);
         try
         {
             // Execute class/assembly hooks on first test
@@ -121,11 +116,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
             };
 
             // Report the failure
-            await _messageBus.PublishAsync(
-                this,
-                new TestNodeUpdateMessage(
-                    _sessionUid,
-                    test.Context.ToTestNode().WithProperty(new FailedTestNodeStateProperty(ex))));
+            await _tunitMessageBus.Failed(test.Context, ex, test.StartTime.GetValueOrDefault());
 
             // Log the exception
             await _logger.LogErrorAsync($"Unhandled exception in test {test.TestId}: {ex}");

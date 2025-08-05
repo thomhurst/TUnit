@@ -76,22 +76,12 @@ internal sealed class ExecutionPlan
 
         foreach (var test in allTests)
         {
-            if (test.State != TestState.Failed && test.State != TestState.Skipped)
-            {
-                executableTests.Add(test);
-            }
+            executableTests.Add(test);
         }
 
         PopulateTransitiveDependencies(allTests);
 
         return new ExecutionPlan(allTests, executableTests, dependencyGraph, dependentGraph, executionOrder);
-    }
-
-    public IEnumerable<AbstractExecutableTest> GetDependents(AbstractExecutableTest test)
-    {
-        return _dependentGraph.TryGetValue(test, out var dependents)
-            ? dependents
-            : Enumerable.Empty<AbstractExecutableTest>();
     }
 
     private static bool TopologicalSort(

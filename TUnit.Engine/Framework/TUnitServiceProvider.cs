@@ -138,6 +138,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             new Scheduling.TestExecutor(
                 singleTestExecutor,
                 messageBus,
+                MessageBus,
                 sessionUid,
                 isFailFastEnabled,
                 FailFastCancellationSource,
