@@ -90,7 +90,7 @@ internal sealed class TestDependencyResolver
         try
         {
             
-            var dependencies = new List<AbstractExecutableTest>();
+            var resolvedDependencies = new List<ResolvedDependency>();
             var allResolved = true;
 
             foreach (var dependency in test.Metadata.Dependencies)
@@ -136,15 +136,24 @@ internal sealed class TestDependencyResolver
                 }
                 else
                 {
-                    dependencies.AddRange(matchingTests);
+                    // Create ResolvedDependency objects that maintain the metadata
+                    foreach (var matchingTest in matchingTests)
+                    {
+                        resolvedDependencies.Add(new ResolvedDependency
+                        {
+                            Test = matchingTest,
+                            Metadata = dependency
+                        });
+                    }
                 }
             }
 
             if (allResolved)
             {
-                var distinctDeps = dependencies
-                    .Distinct()
-                    .Where(d => d.TestId != test.TestId)
+                var distinctDeps = resolvedDependencies
+                    .GroupBy(d => d.Test.TestId)
+                    .Select(g => g.First())  // Take first if there are duplicates
+                    .Where(d => d.Test.TestId != test.TestId)
                     .ToList();
                 
                 // Safeguard: Limit the number of direct dependencies to prevent memory issues
@@ -186,8 +195,9 @@ internal sealed class TestDependencyResolver
         
         foreach (var test in _allTests)
         {
-            foreach (var dep in test.Dependencies)
+            foreach (var resolvedDep in test.Dependencies)
             {
+                var dep = resolvedDep.Test;
                 adjacencyList[dep.TestId].Add(test.TestId);
                 inDegree[test.TestId]++;
             }
@@ -283,8 +293,9 @@ internal sealed class TestDependencyResolver
             var visited = new HashSet<string>();
             
             // Add direct dependencies to queue
-            foreach (var dep in test.Dependencies)
+            foreach (var resolvedDep in test.Dependencies)
             {
+                var dep = resolvedDep.Test;
                 depQueue.Enqueue(dep);
             }
             
@@ -307,8 +318,9 @@ internal sealed class TestDependencyResolver
                 allDeps.Add(dep.Context.TestDetails);
                 
                 // Add this test's dependencies to the queue
-                foreach (var subDep in dep.Dependencies)
+                foreach (var resolvedSubDep in dep.Dependencies)
                 {
+                    var subDep = resolvedSubDep.Test;
                     depQueue.Enqueue(subDep);
                 }
             }
@@ -350,8 +362,9 @@ internal sealed class TestDependencyResolver
         try
         {
             // Check each dependency
-            foreach (var dep in test.Dependencies)
+            foreach (var resolvedDep in test.Dependencies)
             {
+                var dep = resolvedDep.Test;
                 CheckForCircularDependency(dep, visited, path);
             }
         }

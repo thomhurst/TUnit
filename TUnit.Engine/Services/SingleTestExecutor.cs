@@ -43,7 +43,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         // Simple execution - the scheduler ensures tests are only executed once
         var result = await ExecuteTestInternalAsync(test, cancellationToken);
-        
+
         // Ensure test has proper state
         if (test.State == TestState.Running)
         {
@@ -59,7 +59,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 TestContext = test.Context
             };
         }
-        
+
         return CreateUpdateMessage(test);
     }
 
@@ -209,20 +209,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 await _logger.LogWarningAsync($"Retrying test due to exception: {ex.Message}. Attempt {i} of {retryLimit}.");
             }
         }
-    }
-
-    private async Task<TestNodeUpdateMessage> HandleSkippedTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
-    {
-        test.State = TestState.Skipped;
-
-        test.Result = _resultFactory.CreateSkippedResult(
-            test.StartTime!.Value,
-            test.Context.SkipReason ?? "Test skipped");
-
-        test.EndTime = DateTimeOffset.Now;
-        await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
-
-        return CreateUpdateMessage(test);
     }
 
     private async Task<TestResult> HandleSkippedTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)

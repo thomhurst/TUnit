@@ -2,6 +2,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -48,6 +49,30 @@ internal sealed class HookOrchestratingTestExecutorAdapter : ITestExecutor, IDat
 
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
+        if (test.Dependencies.Any(x => x is { ProceedOnFailure: false, Test.Result.State: TestState.Failed }))
+        {
+            // If any dependencies have failed, skip this test
+            test.State = TestState.Skipped;
+            test.Result = new TestResult
+            {
+                State = TestState.Skipped,
+                Start = test.StartTime,
+                End = DateTimeOffset.Now,
+                Duration = DateTimeOffset.Now - test.StartTime.GetValueOrDefault(),
+                ComputerName = Environment.MachineName,
+                Exception = new SkipTestException("Skipped due to failed dependencies")
+            };
+
+            // Report the skipped state
+            await _messageBus.PublishAsync(
+                this,
+                new TestNodeUpdateMessage(
+                    _sessionUid,
+                    test.Context.ToTestNode().WithProperty(SkippedTestNodeStateProperty.CachedInstance)));
+
+            return;
+        }
+
         // Simple state management - scheduler ensures we only get here for executable tests
         test.State = TestState.Running;
         test.StartTime = DateTimeOffset.UtcNow;

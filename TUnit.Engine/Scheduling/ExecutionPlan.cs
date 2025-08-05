@@ -1,6 +1,4 @@
-using System.Collections.Concurrent;
 using TUnit.Core;
-using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 
 namespace TUnit.Engine.Scheduling;
@@ -12,10 +10,9 @@ internal sealed class ExecutionPlan
 {
     private readonly List<AbstractExecutableTest> _allTests;
     private readonly HashSet<AbstractExecutableTest> _executableTests;
-    private readonly Dictionary<AbstractExecutableTest, List<AbstractExecutableTest>> _dependencyGraph;
     private readonly Dictionary<AbstractExecutableTest, List<AbstractExecutableTest>> _dependentGraph;
     private readonly Dictionary<AbstractExecutableTest, int> _executionOrder;
-    
+
     public IReadOnlyList<AbstractExecutableTest> AllTests => _allTests;
     public IReadOnlyCollection<AbstractExecutableTest> ExecutableTests => _executableTests;
     public IReadOnlyDictionary<AbstractExecutableTest, int> ExecutionOrder => _executionOrder;
@@ -29,7 +26,6 @@ internal sealed class ExecutionPlan
     {
         _allTests = allTests;
         _executableTests = executableTests;
-        _dependencyGraph = dependencyGraph;
         _dependentGraph = dependentGraph;
         _executionOrder = executionOrder;
     }
@@ -44,14 +40,15 @@ internal sealed class ExecutionPlan
         var dependencyGraph = new Dictionary<AbstractExecutableTest, List<AbstractExecutableTest>>();
         var dependentGraph = new Dictionary<AbstractExecutableTest, List<AbstractExecutableTest>>();
         var executionOrder = new Dictionary<AbstractExecutableTest, int>();
-        
+
         // Build dependency graphs
         foreach (var test in allTests)
         {
-            dependencyGraph[test] = new List<AbstractExecutableTest>(test.Dependencies);
-            
-            foreach (var dependency in test.Dependencies)
+            dependencyGraph[test] = test.Dependencies.Select(rd => rd.Test).ToList();
+
+            foreach (var resolvedDep in test.Dependencies)
             {
+                var dependency = resolvedDep.Test;
                 if (!dependentGraph.TryGetValue(dependency, out var dependents))
                 {
                     dependents = new List<AbstractExecutableTest>();
@@ -60,12 +57,12 @@ internal sealed class ExecutionPlan
                 dependents.Add(test);
             }
         }
-        
+
         // Detect circular dependencies using topological sort
         var visited = new HashSet<AbstractExecutableTest>();
         var recursionStack = new HashSet<AbstractExecutableTest>();
         var topologicalOrder = new List<AbstractExecutableTest>();
-        
+
         foreach (var test in allTests)
         {
             if (!visited.Contains(test))
@@ -77,13 +74,13 @@ internal sealed class ExecutionPlan
                 }
             }
         }
-        
+
         // Assign execution order based on topological sort
         for (int i = 0; i < topologicalOrder.Count; i++)
         {
             executionOrder[topologicalOrder[i]] = i;
         }
-        
+
         // Determine which tests are executable
         foreach (var test in allTests)
         {
@@ -92,47 +89,11 @@ internal sealed class ExecutionPlan
                 executableTests.Add(test);
             }
         }
-        
+
         // Populate TestContext.Dependencies with transitive dependencies
         PopulateTransitiveDependencies(allTests);
-        
-        return new ExecutionPlan(allTests, executableTests, dependencyGraph, dependentGraph, executionOrder);
-    }
 
-    /// <summary>
-    /// Checks if a test can be executed based on its dependencies
-    /// </summary>
-    public bool CanExecute(AbstractExecutableTest test)
-    {
-        if (!_executableTests.Contains(test))
-        {
-            return false;
-        }
-        
-        // Check if all dependencies have completed
-        foreach (var dependency in test.Dependencies)
-        {
-            if (dependency.State != TestState.Passed && 
-                dependency.State != TestState.Failed && 
-                dependency.State != TestState.Skipped)
-            {
-                return false;
-            }
-            
-            // Check if dependency failed and we should skip
-            if (dependency.State == TestState.Failed)
-            {
-                var dependencyMeta = FindDependencyMetadata(test, dependency);
-                if (dependencyMeta?.ProceedOnFailure != true)
-                {
-                    // Mark this test as skipped
-                    SkipTestDueToDependency(test, dependency);
-                    return false;
-                }
-            }
-        }
-        
-        return true;
+        return new ExecutionPlan(allTests, executableTests, dependencyGraph, dependentGraph, executionOrder);
     }
 
     /// <summary>
@@ -140,8 +101,8 @@ internal sealed class ExecutionPlan
     /// </summary>
     public IEnumerable<AbstractExecutableTest> GetDependents(AbstractExecutableTest test)
     {
-        return _dependentGraph.TryGetValue(test, out var dependents) 
-            ? dependents 
+        return _dependentGraph.TryGetValue(test, out var dependents)
+            ? dependents
             : Enumerable.Empty<AbstractExecutableTest>();
     }
 
@@ -154,7 +115,7 @@ internal sealed class ExecutionPlan
     {
         visited.Add(test);
         recursionStack.Add(test);
-        
+
         if (dependencyGraph.TryGetValue(test, out var dependencies))
         {
             foreach (var dependency in dependencies)
@@ -173,7 +134,7 @@ internal sealed class ExecutionPlan
                 }
             }
         }
-        
+
         recursionStack.Remove(test);
         topologicalOrder.Add(test);
         return true;
@@ -187,25 +148,25 @@ internal sealed class ExecutionPlan
         var testsInCycle = new List<AbstractExecutableTest>();
         var current = test;
         var visited = new HashSet<AbstractExecutableTest>();
-        
+
         // Find all tests in the circular dependency
         while (current != null && visited.Add(current))
         {
             testsInCycle.Add(current);
-            
+
             if (dependencyGraph.TryGetValue(current, out var dependencies))
             {
-                current = dependencies.FirstOrDefault(d => recursionStack.Contains(d));
+                current = dependencies.FirstOrDefault(recursionStack.Contains);
             }
             else
             {
                 current = null;
             }
         }
-        
+
         // Mark all tests in the cycle as failed
         var exception = new DependencyConflictException(testsInCycle.Select(t => t.Context.TestDetails).ToList());
-        
+
         foreach (var testInCycle in testsInCycle)
         {
             testInCycle.State = TestState.Failed;
@@ -222,43 +183,15 @@ internal sealed class ExecutionPlan
         }
     }
 
-    private static void SkipTestDueToDependency(AbstractExecutableTest test, AbstractExecutableTest failedDependency)
-    {
-        test.State = TestState.Skipped;
-        test.Context.SkipReason = $"Dependency '{failedDependency.Context.GetDisplayName()}' failed";
-        test.Result = new TestResult
-        {
-            State = TestState.Skipped,
-            Start = DateTimeOffset.UtcNow,
-            End = DateTimeOffset.UtcNow,
-            Duration = TimeSpan.Zero,
-            OverrideReason = test.Context.SkipReason,
-            Exception = null,
-            ComputerName = Environment.MachineName,
-            TestContext = test.Context
-        };
-    }
-
-    private static TestDependency? FindDependencyMetadata(AbstractExecutableTest test, AbstractExecutableTest dependency)
-    {
-        foreach (var meta in test.Metadata.Dependencies)
-        {
-            if (meta.Matches(dependency.Metadata, test.Metadata))
-            {
-                return meta;
-            }
-        }
-        return null;
-    }
 
     private static void PopulateTransitiveDependencies(List<AbstractExecutableTest> allTests)
     {
         var cachedTransitiveDependencies = new Dictionary<string, List<TestDetails>>();
-        
+
         foreach (var test in allTests.Where(t => t.State != TestState.Failed))
         {
             test.Context.Dependencies.Clear();
-            
+
             // Check if we already have cached dependencies
             if (cachedTransitiveDependencies.TryGetValue(test.TestId, out var cachedDeps))
             {
@@ -268,46 +201,48 @@ internal sealed class ExecutionPlan
                 }
                 continue;
             }
-            
+
             // Build transitive dependencies using BFS to avoid stack overflow
             var allDeps = new HashSet<TestDetails>();
             var depQueue = new Queue<AbstractExecutableTest>();
             var visited = new HashSet<string>();
-            
+
             // Add direct dependencies to queue
-            foreach (var dep in test.Dependencies)
+            foreach (var resolvedDep in test.Dependencies)
             {
+                var dep = resolvedDep.Test;
                 depQueue.Enqueue(dep);
             }
-            
+
             // Process queue to get all transitive dependencies
             const int maxIterations = 10000;
             var iterations = 0;
-            
+
             while (depQueue.Count > 0 && iterations < maxIterations)
             {
                 iterations++;
                 var dep = depQueue.Dequeue();
-                
+
                 // Skip if we've already processed this test
                 if (!visited.Add(dep.TestId))
                 {
                     continue;
                 }
-                
+
                 allDeps.Add(dep.Context.TestDetails);
-                
+
                 // Add this test's dependencies to the queue
-                foreach (var subDep in dep.Dependencies)
+                foreach (var resolvedSubDep in dep.Dependencies)
                 {
+                    var subDep = resolvedSubDep.Test;
                     depQueue.Enqueue(subDep);
                 }
             }
-            
+
             // Cache the result
             var depsList = allDeps.ToList();
             cachedTransitiveDependencies[test.TestId] = depsList;
-            
+
             // Add to context
             foreach (var dep in depsList)
             {

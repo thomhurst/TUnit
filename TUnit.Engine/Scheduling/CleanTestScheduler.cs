@@ -246,18 +246,7 @@ internal sealed class CleanTestScheduler : ITestScheduler
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
         CancellationToken cancellationToken)
     {
-        // Wait for dependencies to complete
-        while (!plan.CanExecute(test))
-        {
-            if (test.State == TestState.Skipped || test.State == TestState.Failed)
-            {
-                // Test was skipped or failed due to dependency failure
-                completedTests[test] = true;
-                return;
-            }
-
-            await Task.Delay(10, cancellationToken);
-        }
+        await Task.WhenAll(test.Dependencies.Select(x => x.Test.CompletionTask));
 
         // Execute the test
         var executionTask = Task.Run(async () =>

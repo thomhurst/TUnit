@@ -88,8 +88,9 @@ internal sealed class TestDiscoveryService : IDataProducer
         while (queue.Count > 0)
         {
             var test = queue.Dequeue();
-            foreach (var dependency in test.Dependencies)
+            foreach (var resolvedDep in test.Dependencies)
             {
+                var dependency = resolvedDep.Test;
                 if (testsToInclude.Add(dependency))
                 {
                     queue.Enqueue(dependency);
