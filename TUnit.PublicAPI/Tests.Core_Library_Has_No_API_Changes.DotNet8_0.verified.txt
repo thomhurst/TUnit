@@ -1944,7 +1944,9 @@ namespace .Helpers
         public static .<object?> ProcessEnumerableDataSource<T>(.<T> enumerable) { }
         public static <.<object?>>[] ProcessTestDataSource<T>(T data, int expectedParameterCount = -1) { }
         public static void RegisterPropertyInitializer<T>(<T, .MethodMetadata, string, .> initializer) { }
+        public static void RegisterTypeCreator<T>(<.MethodMetadata, string, .<T>> creator) { }
         public static object?[] ToObjectArray(this object? item) { }
+        public static bool TryCreateWithInitializer( type, .MethodMetadata testInformation, string testSessionId, out object createdInstance) { }
         public static object?[] UnwrapTuple<T1>(<T1> tuple) { }
         public static object?[] UnwrapTuple<T1, T2>(<T1, T2> tuple) { }
         public static object?[] UnwrapTuple<T1, T2, T3>(<T1, T2, T3> tuple) { }
