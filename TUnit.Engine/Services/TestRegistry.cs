@@ -91,14 +91,7 @@ internal sealed class TestRegistry : ITestRegistry
         foreach (var test in builtTests)
         {
             // The SingleTestExecutor will handle all execution-related message publishing
-            try
-            {
-                await _testExecutor.ExecuteTestAsync(test, _sessionCancellationToken);
-            }
-            finally
-            {
-                test._taskCompletionSource.SetResult();
-            }
+            await _testExecutor.ExecuteTestAsync(test, _sessionCancellationToken);
         }
     }
 
