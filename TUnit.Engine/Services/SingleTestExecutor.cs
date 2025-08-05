@@ -61,7 +61,28 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         
         // Wait for the test to complete (whether we created it or it was already running)
-        await executionTask;
+        try
+        {
+            await executionTask;
+        }
+        catch (Exception ex)
+        {
+            // If the task throws, ensure the test has a proper failed state
+            if (test.State == TestState.Running)
+            {
+                test.State = TestState.Failed;
+                test.Result ??= new TestResult
+                {
+                    State = TestState.Failed,
+                    Start = test.StartTime ?? DateTimeOffset.UtcNow,
+                    End = DateTimeOffset.UtcNow,
+                    Duration = TimeSpan.Zero,
+                    Exception = ex,
+                    ComputerName = Environment.MachineName,
+                    TestContext = test.Context
+                };
+            }
+        }
         return CreateUpdateMessage(test);
     }
 
