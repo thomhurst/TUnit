@@ -71,14 +71,19 @@ public sealed class PropertyInjectionService
     /// </summary>
     public static async Task InjectPropertiesIntoObjectAsync(object instance, Dictionary<string, object?>? objectBag, MethodMetadata? methodMetadata, TestContextEvents? events)
     {
+        if (instance == null)
+        {
+            return;
+        }
+
         // If we don't have the required context, try to get it from the current test context
         objectBag ??= TestContext.Current?.ObjectBag ?? new Dictionary<string, object?>();
         methodMetadata ??= TestContext.Current?.TestDetails?.MethodMetadata;
         events ??= TestContext.Current?.Events;
-        
+
         // If we still don't have events after trying to get from context, create a default instance
         events ??= new TestContextEvents();
-        
+
         try
         {
             await _injectionTasks.GetOrAdd(instance, async _ =>
@@ -91,11 +96,14 @@ public sealed class PropertyInjectionService
                 {
                     await InjectPropertiesUsingReflectionAsync(instance, objectBag, methodMetadata, events);
                 }
+                
+                // Initialize the object AFTER all its properties have been injected and initialized
+                await ObjectInitializer.InitializeAsync(instance);
             });
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to inject properties for type '{instance?.GetType().Name}': {ex.Message}", ex);
+            throw new InvalidOperationException($"Failed to inject properties for type '{instance.GetType().Name}': {ex.Message}", ex);
         }
     }
 
@@ -113,7 +121,7 @@ public sealed class PropertyInjectionService
 
             foreach (var metadata in propertyMetadata)
             {
-                await ProcessPropertyMetadata(instance, metadata, objectBag, methodMetadata, events);
+                await ProcessPropertyMetadata(instance, metadata, objectBag, methodMetadata, events, TestContext.Current);
             }
         }
     }
@@ -126,7 +134,7 @@ public sealed class PropertyInjectionService
     {
         var type = instance.GetType();
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-            .Where(p => p.CanWrite);
+            .Where(p => p.CanWrite || p.SetMethod?.IsPublic == false);  // Include init-only properties
 
         foreach (var property in properties)
         {
@@ -134,7 +142,7 @@ public sealed class PropertyInjectionService
             {
                 if (attr is IDataSourceAttribute dataSourceAttr)
                 {
-                    await ProcessReflectionPropertyDataSource(instance, property, dataSourceAttr, objectBag, methodMetadata, events);
+                    await ProcessReflectionPropertyDataSource(instance, property, dataSourceAttr, objectBag, methodMetadata, events, TestContext.Current);
                 }
             }
         }
@@ -145,7 +153,7 @@ public sealed class PropertyInjectionService
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
     private static async Task ProcessPropertyMetadata(object instance, PropertyInjectionMetadata metadata, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata,
-        TestContextEvents events)
+        TestContextEvents events, TestContext? testContext = null)
     {
         var dataSource = metadata.CreateDataSource();
         var propertyMetadata = new PropertyMetadata
@@ -164,8 +172,8 @@ public sealed class PropertyInjectionService
             propertyMetadata,
             methodMetadata,
             dataSource,
-            TestContext.Current,
-            TestContext.Current?.TestDetails.ClassInstance,
+            testContext,
+            testContext?.TestDetails.ClassInstance,
             events,
             objectBag);
 
@@ -191,7 +199,7 @@ public sealed class PropertyInjectionService
     /// Processes a property data source using reflection mode.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static async Task ProcessReflectionPropertyDataSource(object instance, PropertyInfo property, IDataSourceAttribute dataSource, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
+    private static async Task ProcessReflectionPropertyDataSource(object instance, PropertyInfo property, IDataSourceAttribute dataSource, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, TestContext? testContext = null)
     {
         // Use centralized factory for reflection mode
         var dataGeneratorMetadata = DataGeneratorMetadataCreator.CreateForPropertyInjection(
@@ -199,7 +207,7 @@ public sealed class PropertyInjectionService
             property.DeclaringType!,
             methodMetadata,
             dataSource,
-            TestContext.Current,
+            testContext,
             instance,
             events,
             objectBag);
@@ -216,7 +224,8 @@ public sealed class PropertyInjectionService
 
             if (value != null)
             {
-                await ProcessInjectedPropertyValue(instance, value, (inst, val) => property.SetValue(inst, val), objectBag, methodMetadata, events);
+                var setter = CreatePropertySetter(property);
+                await ProcessInjectedPropertyValue(instance, value, setter, objectBag, methodMetadata, events);
                 break; // Only use first value
             }
         }
@@ -234,13 +243,19 @@ public sealed class PropertyInjectionService
 
         ObjectTracker.TrackObject(events, propertyValue);
 
+        // First, recursively inject and initialize all descendants of this property value
         if (ShouldInjectProperties(propertyValue))
         {
+            // This will recursively inject properties and initialize the object
             await InjectPropertiesIntoObjectAsync(propertyValue, objectBag, methodMetadata, events);
         }
-
-        await ObjectInitializer.InitializeAsync(propertyValue);
-
+        else
+        {
+            // For objects that don't need property injection, still initialize them
+            await ObjectInitializer.InitializeAsync(propertyValue);
+        }
+        
+        // Finally, set the fully initialized property on the parent
         setProperty(instance, propertyValue);
     }
 
@@ -342,7 +357,7 @@ public sealed class PropertyInjectionService
         // Use the modern PropertyInjectionService for all injection work
         // This ensures consistent behavior and proper recursive injection
         var objectBag = new Dictionary<string, object?>();
-        
+
         // Process each property data source
         foreach (var propertyDataSource in propertyDataSources)
         {

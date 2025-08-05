@@ -326,9 +326,6 @@ public static class DataSourceHelpers
         {
             await initializer(instance, testInformation, testSessionId);
         }
-        else
-        {
-        }
         // If no initializer is registered, the type has no data source properties
     }
 
