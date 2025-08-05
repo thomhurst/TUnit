@@ -1,9 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Enums;
 using TUnit.Core.Executors;
 
 namespace TUnit.TestProject;
 
 [UnconditionalSuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
+[RunOn(OS.Linux)]
 public class HookExecutorTests
 {
     // Test Session Hooks
@@ -11,8 +13,15 @@ public class HookExecutorTests
     [HookExecutor<STAThreadExecutor>]
     public static async Task BeforeTestSessionWithSTA(TestSessionContext context)
     {
+#if NET
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+#endif
+
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
-        
+
         var test = context.AllTests.FirstOrDefault(x =>
             x.TestDetails.TestName == nameof(VerifyBeforeTestSessionSTAExecuted));
         test?.ObjectBag.Add("BeforeTestSessionSTAExecuted", true);
@@ -22,6 +31,13 @@ public class HookExecutorTests
     [HookExecutor<STAThreadExecutor>]
     public static async Task AfterTestSessionWithSTA(TestSessionContext context)
     {
+#if NET
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+#endif
+
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
     }
 
@@ -30,6 +46,13 @@ public class HookExecutorTests
     [HookExecutor<STAThreadExecutor>]
     public static async Task BeforeTestDiscoveryWithSTA(BeforeTestDiscoveryContext context)
     {
+#if NET
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+#endif
+
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
     }
 
@@ -37,16 +60,30 @@ public class HookExecutorTests
     [HookExecutor<STAThreadExecutor>]
     public static async Task AfterTestDiscoveryWithSTA(TestDiscoveryContext context)
     {
+#if NET
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+#endif
+
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
     }
 
     // Assembly Hooks
     private static bool _beforeAssemblySTAExecuted;
-    
+
     [Before(Assembly)]
     [HookExecutor<STAThreadExecutor>]
     public static async Task BeforeAssemblyWithSTA(AssemblyHookContext context)
     {
+#if NET
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+#endif
+
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
         _beforeAssemblySTAExecuted = true;
     }
@@ -55,12 +92,19 @@ public class HookExecutorTests
     [HookExecutor<STAThreadExecutor>]
     public static async Task AfterAssemblyWithSTA(AssemblyHookContext context)
     {
+#if NET
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+#endif
+
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
     }
 
     // Class Hooks
     private static bool _beforeClassSTAExecuted;
-    
+
     [Before(Class)]
     [HookExecutor<STAThreadExecutor>]
     public static async Task BeforeClassWithSTA(ClassHookContext context)
@@ -98,7 +142,7 @@ public class HookExecutorTests
     public static async Task BeforeEveryTestWithSTA(TestContext context)
     {
         await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
-        
+
         if (context.TestDetails.TestName == nameof(VerifyStaticTestHooksSTAExecuted))
         {
             context.ObjectBag.Add("BeforeEveryTestSTAExecuted", true);
