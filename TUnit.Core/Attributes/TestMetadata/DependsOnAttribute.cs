@@ -201,12 +201,8 @@ public class DependsOnAttribute : TUnitAttribute
     /// </remarks>
     public bool ProceedOnFailure { get; set; }
 
-    /// <summary>
-    /// Creates a TestDependency object from this attribute's data
-    /// </summary>
     public TestDependency ToTestDependency()
     {
-        // If only test name is specified, it's a dependency on a test in the same class
         if (ClassMetadata == null && !string.IsNullOrEmpty(TestName))
         {
             return new TestDependency 
@@ -217,7 +213,6 @@ public class DependsOnAttribute : TUnitAttribute
             };
         }
         
-        // If only class is specified, it's a dependency on all tests in that class
         if (ClassMetadata != null && string.IsNullOrEmpty(TestName))
         {
             return new TestDependency
@@ -230,7 +225,6 @@ public class DependsOnAttribute : TUnitAttribute
             };
         }
         
-        // If both class and method are specified
         if (ClassMetadata != null && !string.IsNullOrEmpty(TestName))
         {
             return new TestDependency

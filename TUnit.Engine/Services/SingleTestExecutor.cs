@@ -37,10 +37,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
         AbstractExecutableTest test,
         CancellationToken cancellationToken)
     {
-        // Simple execution - the scheduler ensures tests are only executed once
         var result = await ExecuteTestInternalAsync(test, cancellationToken);
 
-        // Ensure test has proper state
         if (test.State == TestState.Running)
         {
             test.State = TestState.Failed;
@@ -65,8 +63,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         try
         {
-            // If test is already failed (e.g., from data source expansion error or circular dependencies),
-            // just report the existing failure
             if (test is { State: TestState.Failed, Result: not null })
             {
                 return test.Result;
@@ -77,13 +73,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.StartTime = DateTimeOffset.Now;
             test.State = TestState.Running;
 
-        // Check if test is already marked as skipped (from basic SkipAttribute during discovery)
         if (!string.IsNullOrEmpty(test.Context.SkipReason))
         {
             return await HandleSkippedTestInternalAsync(test, cancellationToken);
         }
 
-        // Check if we already have a skipped test instance from discovery
         if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
         {
             return await HandleSkippedTestInternalAsync(test, cancellationToken);
@@ -162,7 +156,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         catch (Exception ex)
         {
-            // Ensure test state is properly set on any exception
             test.State = TestState.Failed;
             test.EndTime = DateTimeOffset.Now;
             test.Result = new TestResult
@@ -226,7 +219,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         RestoreHookContexts(test.Context);
 
-        // Collect hooks lazily at execution time
         var testClassType = test.Context.TestDetails.ClassType;
         var beforeTestHooks = await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType);
         var afterTestHooks = await _hookCollectionService.CollectAfterTestHooksAsync(testClassType);
@@ -255,21 +247,16 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         catch (Exception afterHookEx)
         {
-            // If test already failed, aggregate the exceptions
             if (testException != null)
             {
                 throw new AggregateException("Test and after hook both failed", testException, afterHookEx);
             }
 
-            // Otherwise, fail the test due to after hook failure
             HandleTestFailure(test, afterHookEx);
             throw;
         }
         finally
         {
-            // Object tracking disposal is handled automatically by ObjectTracker via TestContext.Events.OnDispose
-
-            // Dispose the test class instance if it implements IDisposable or IAsyncDisposable
             if (instance is IAsyncDisposable asyncDisposableInstance)
             {
                 await asyncDisposableInstance.DisposeAsync();
@@ -280,7 +267,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
             }
         }
 
-        // Re-throw original test exception if after hooks succeeded
         if (testException != null)
         {
             ExceptionDispatchInfo.Capture(testException).Throw();

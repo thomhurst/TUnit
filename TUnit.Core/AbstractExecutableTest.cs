@@ -9,14 +9,8 @@ public abstract class AbstractExecutableTest
 
     public virtual TestMetadata Metadata { get; init; } = null!;
 
-    /// <summary>
-    /// Empty for parameterless tests
-    /// </summary>
     public required object?[] Arguments { get; init; }
 
-    /// <summary>
-    /// Empty for parameterless constructors
-    /// </summary>
     public object?[] ClassArguments { get; init; } = [];
 
     public abstract Task<object> CreateInstanceAsync();

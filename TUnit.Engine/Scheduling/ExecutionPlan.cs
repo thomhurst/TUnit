@@ -30,9 +30,6 @@ internal sealed class ExecutionPlan
         _executionOrder = executionOrder;
     }
 
-    /// <summary>
-    /// Creates an execution plan from a list of tests, resolving all dependencies upfront
-    /// </summary>
     public static ExecutionPlan Create(IEnumerable<AbstractExecutableTest> tests)
     {
         var allTests = tests.ToList();
@@ -41,7 +38,6 @@ internal sealed class ExecutionPlan
         var dependentGraph = new Dictionary<AbstractExecutableTest, List<AbstractExecutableTest>>();
         var executionOrder = new Dictionary<AbstractExecutableTest, int>();
 
-        // Build dependency graphs
         foreach (var test in allTests)
         {
             dependencyGraph[test] = test.Dependencies.Select(rd => rd.Test).ToList();
@@ -58,7 +54,6 @@ internal sealed class ExecutionPlan
             }
         }
 
-        // Detect circular dependencies using topological sort
         var visited = new HashSet<AbstractExecutableTest>();
         var recursionStack = new HashSet<AbstractExecutableTest>();
         var topologicalOrder = new List<AbstractExecutableTest>();
@@ -69,19 +64,16 @@ internal sealed class ExecutionPlan
             {
                 if (!TopologicalSort(test, visited, recursionStack, topologicalOrder, dependencyGraph))
                 {
-                    // Circular dependency detected - mark all tests in the cycle as failed
                     MarkCircularDependencyChain(test, recursionStack, dependencyGraph);
                 }
             }
         }
 
-        // Assign execution order based on topological sort
         for (int i = 0; i < topologicalOrder.Count; i++)
         {
             executionOrder[topologicalOrder[i]] = i;
         }
 
-        // Determine which tests are executable
         foreach (var test in allTests)
         {
             if (test.State != TestState.Failed && test.State != TestState.Skipped)
@@ -90,15 +82,11 @@ internal sealed class ExecutionPlan
             }
         }
 
-        // Populate TestContext.Dependencies with transitive dependencies
         PopulateTransitiveDependencies(allTests);
 
         return new ExecutionPlan(allTests, executableTests, dependencyGraph, dependentGraph, executionOrder);
     }
 
-    /// <summary>
-    /// Gets all tests that depend on the given test
-    /// </summary>
     public IEnumerable<AbstractExecutableTest> GetDependents(AbstractExecutableTest test)
     {
         return _dependentGraph.TryGetValue(test, out var dependents)
@@ -129,7 +117,6 @@ internal sealed class ExecutionPlan
                 }
                 else if (recursionStack.Contains(dependency))
                 {
-                    // Circular dependency detected
                     return false;
                 }
             }
@@ -149,7 +136,6 @@ internal sealed class ExecutionPlan
         var current = test;
         var visited = new HashSet<AbstractExecutableTest>();
 
-        // Find all tests in the circular dependency
         while (current != null && visited.Add(current))
         {
             testsInCycle.Add(current);
@@ -164,7 +150,6 @@ internal sealed class ExecutionPlan
             }
         }
 
-        // Mark all tests in the cycle as failed
         var exception = new DependencyConflictException(testsInCycle.Select(t => t.Context.TestDetails).ToList());
 
         foreach (var testInCycle in testsInCycle)
@@ -192,7 +177,6 @@ internal sealed class ExecutionPlan
         {
             test.Context.Dependencies.Clear();
 
-            // Check if we already have cached dependencies
             if (cachedTransitiveDependencies.TryGetValue(test.TestId, out var cachedDeps))
             {
                 foreach (var dep in cachedDeps)
@@ -202,19 +186,16 @@ internal sealed class ExecutionPlan
                 continue;
             }
 
-            // Build transitive dependencies using BFS to avoid stack overflow
             var allDeps = new HashSet<TestDetails>();
             var depQueue = new Queue<AbstractExecutableTest>();
             var visited = new HashSet<string>();
 
-            // Add direct dependencies to queue
             foreach (var resolvedDep in test.Dependencies)
             {
                 var dep = resolvedDep.Test;
                 depQueue.Enqueue(dep);
             }
 
-            // Process queue to get all transitive dependencies
             const int maxIterations = 10000;
             var iterations = 0;
 
@@ -223,7 +204,6 @@ internal sealed class ExecutionPlan
                 iterations++;
                 var dep = depQueue.Dequeue();
 
-                // Skip if we've already processed this test
                 if (!visited.Add(dep.TestId))
                 {
                     continue;
@@ -231,7 +211,6 @@ internal sealed class ExecutionPlan
 
                 allDeps.Add(dep.Context.TestDetails);
 
-                // Add this test's dependencies to the queue
                 foreach (var resolvedSubDep in dep.Dependencies)
                 {
                     var subDep = resolvedSubDep.Test;
@@ -239,11 +218,9 @@ internal sealed class ExecutionPlan
                 }
             }
 
-            // Cache the result
             var depsList = allDeps.ToList();
             cachedTransitiveDependencies[test.TestId] = depsList;
 
-            // Add to context
             foreach (var dep in depsList)
             {
                 test.Context.Dependencies.Add(dep);
