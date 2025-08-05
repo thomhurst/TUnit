@@ -1,5 +1,4 @@
 using Microsoft.Testing.Platform.CommandLine;
-using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;

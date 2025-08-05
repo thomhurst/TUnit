@@ -1,8 +1,6 @@
 using System.Collections.Concurrent;
-using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Logging;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 using TUnit.Engine.Services;
@@ -42,7 +40,6 @@ internal sealed class TestScheduler : ITestScheduler
         // Create execution plan upfront
         var plan = ExecutionPlan.Create(tests);
 
-        await _logger.LogInformationAsync($"Execution plan created: {plan.ExecutableTests.Count} executable tests out of {plan.AllTests.Count} total (max parallelism: {_maxParallelism})");
 
         if (plan.ExecutableTests.Count == 0)
         {
