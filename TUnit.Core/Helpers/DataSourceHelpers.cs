@@ -443,7 +443,7 @@ public static class DataSourceHelpers
     /// Resolves a data source property value at runtime.
     /// This method handles all IDataSourceAttribute implementations generically.
     /// </summary>
-    public static Task<object?> ResolveDataSourceForPropertyAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type containingType, string propertyName, MethodMetadata testInformation, string testSessionId)
+    public static Task<object?> ResolveDataSourceForPropertyAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type containingType, string propertyName, MethodMetadata testInformation, string testSessionId)
     {
         // For now, return a default value - the runtime resolution is complex
         // and would require implementing the full data source resolution logic

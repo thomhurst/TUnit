@@ -35,7 +35,9 @@ internal sealed class TestRegistry : ITestRegistry
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicFields
+        | DynamicallyAccessedMemberTypes.NonPublicFields)] T>(TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
     {
         // Create a dynamic test discovery result
         var discoveryResult = new DynamicDiscoveryResult

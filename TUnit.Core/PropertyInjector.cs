@@ -388,7 +388,7 @@ public static class PropertyInjector
         }
     }
 
-    public static PropertyInjectionData[] DiscoverInjectableProperties([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
+    public static PropertyInjectionData[] DiscoverInjectableProperties([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type)
     {
         var injectableProperties = new List<PropertyInjectionData>();
 
@@ -490,7 +490,7 @@ public static class PropertyInjector
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection-only fallback")]
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection-only fallback")]
     private static (PropertyDataSource[] properties, PropertyInjectionData[] injectionData)
-        DiscoverDataSourcePropertiesViaReflection([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
+        DiscoverDataSourcePropertiesViaReflection([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type)
     {
         var properties = new List<PropertyDataSource>();
         var injectionData = new List<PropertyInjectionData>();
@@ -602,7 +602,7 @@ public static class PropertyInjector
     /// Gets or creates ClassMetadata for the specified type.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static ClassMetadata GetClassMetadataForType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
+    private static ClassMetadata GetClassMetadataForType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type)
     {
         return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () =>
         {

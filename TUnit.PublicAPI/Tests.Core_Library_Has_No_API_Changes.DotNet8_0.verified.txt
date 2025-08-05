@@ -597,7 +597,7 @@ namespace
         public DynamicDiscoveryResult() { }
         public .<> Attributes { get; set; }
         public object?[]? TestClassArguments { get; set; }
-        [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]
+        [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]
         public ? TestClassType { get; set; }
         public .? TestMethod { get; set; }
         public object?[]? TestMethodArguments { get; set; }
@@ -624,7 +624,7 @@ namespace
     {
         public static T Argument<T>() { }
     }
-    public class DynamicTestInstance<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]  T> : .DynamicTest<T>
+    public class DynamicTestInstance<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T> : .DynamicTest<T>
         where T :  class
     {
         public DynamicTestInstance() { }
@@ -634,7 +634,7 @@ namespace
         public object?[]? TestMethodArguments { get; set; }
         public override .<.DiscoveryResult> GetTests() { }
     }
-    public abstract class DynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]  T> : .DynamicTest
+    public abstract class DynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T> : .DynamicTest
         where T :  class
     {
         protected DynamicTest() { }
@@ -1044,7 +1044,7 @@ namespace
     {
         public static .PropertyInjectionData CreatePropertyInjection(.PropertyInfo property) { }
         public static <object, object?> CreatePropertySetter(.PropertyInfo property) { }
-        public static .PropertyInjectionData[] DiscoverInjectableProperties([.(..PublicProperties)]  type) { }
+        public static .PropertyInjectionData[] DiscoverInjectableProperties([.(..None | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  type) { }
         [.("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttr" +
             "ibute\' in call to target method. The return value of the source method does not " +
             "have matching annotations.")]
@@ -1860,7 +1860,7 @@ namespace .Extensions
     }
     public static class TestContextExtensions
     {
-        public static . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]  T>(this .TestContext context, .DynamicTestInstance<T> dynamicTest)
+        public static . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T>(this .TestContext context, .DynamicTestInstance<T> dynamicTest)
             where T :  class { }
         public static string GetClassTypeName(this .TestContext context) { }
         public static T? GetService<T>(this .TestContext context)
@@ -1945,7 +1945,7 @@ namespace .Helpers
         public static <.<object?>>[] ProcessTestDataSource<T>(T data, int expectedParameterCount = -1) { }
         public static void RegisterPropertyInitializer<T>(<T, .MethodMetadata, string, .> initializer) { }
         public static void RegisterTypeCreator<T>(<.MethodMetadata, string, .<T>> creator) { }
-        public static .<object?> ResolveDataSourceForPropertyAsync([.(..None | ..PublicParameterlessConstructor | ..PublicProperties)]  containingType, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
+        public static .<object?> ResolveDataSourceForPropertyAsync([.(..None | ..PublicParameterlessConstructor | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  containingType, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static .<object?> ResolveDataSourcePropertyAsync(object instance, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static object?[] ToObjectArray(this object? item) { }
         public static bool TryCreateWithInitializer( type, .MethodMetadata testInformation, string testSessionId, out object createdInstance) { }
@@ -2286,7 +2286,7 @@ namespace .Interfaces
     }
     public interface ITestRegistry
     {
-        . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]  T>(.TestContext context, .DynamicTestInstance<T> dynamicTest)
+        . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T>(.TestContext context, .DynamicTestInstance<T> dynamicTest)
             where T :  class;
     }
     public interface ITestRetryEventReceiver : .
