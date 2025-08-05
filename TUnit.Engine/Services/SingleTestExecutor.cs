@@ -41,14 +41,27 @@ internal class SingleTestExecutor : ISingleTestExecutor
         AbstractExecutableTest test,
         CancellationToken cancellationToken)
     {
-        // Use shared lock to coordinate between scheduler and dependency execution
-        Task<TestResult> task;
+        Task<TestResult> executionTask;
+        
+        // Check if test is already executing (e.g., through dependency path)
         lock (test.Context.ExecutionLock)
         {
-            task = test.Context.ExecutionTask ??= ExecuteTestInternalAsync(test, cancellationToken);
+            if (test.Context.ExecutionTask != null)
+            {
+                // Test is already being executed by another path (likely as a dependency)
+                // We still need to wait for it to complete before creating the update message
+                executionTask = test.Context.ExecutionTask;
+            }
+            else
+            {
+                // Not executing yet, so create the execution task
+                test.Context.ExecutionTask = ExecuteTestInternalAsync(test, cancellationToken);
+                executionTask = test.Context.ExecutionTask;
+            }
         }
         
-        await task;
+        // Wait for the test to complete (whether we created it or it was already running)
+        await executionTask;
         return CreateUpdateMessage(test);
     }
 
@@ -56,20 +69,28 @@ internal class SingleTestExecutor : ISingleTestExecutor
         AbstractExecutableTest test,
         CancellationToken cancellationToken)
     {
-        // If test is already failed (e.g., from data source expansion error),
-        // just report the existing failure
-        if (test is { State: TestState.Failed, Result: not null })
+        try
         {
-            return test.Result;
-        }
+            // If test is already failed (e.g., from data source expansion error),
+            // just report the existing failure
+            if (test is { State: TestState.Failed, Result: not null })
+            {
+                return test.Result;
+            }
 
-        TestContext.Current = test.Context;
+            TestContext.Current = test.Context;
 
-        // Execute dependencies first (eager dependency execution)
-        await ExecuteDependenciesAsync(test, cancellationToken);
+            // Execute dependencies first (eager dependency execution)
+            await ExecuteDependenciesAsync(test, cancellationToken);
+            
+            // If dependencies failed and test was skipped, return the result
+            if (test.State == TestState.Skipped && test.Result != null)
+            {
+                return test.Result;
+            }
 
-        test.StartTime = DateTimeOffset.Now;
-        test.State = TestState.Running;
+            test.StartTime = DateTimeOffset.Now;
+            test.State = TestState.Running;
 
         // Check if test is already marked as skipped (from basic SkipAttribute during discovery)
         if (!string.IsNullOrEmpty(test.Context.SkipReason))
@@ -138,16 +159,34 @@ internal class SingleTestExecutor : ISingleTestExecutor
             await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
         }
 
-        return test.Result ?? new TestResult
+            return test.Result ?? new TestResult
+            {
+                State = TestState.Failed,
+                Start = DateTimeOffset.UtcNow,
+                End = DateTimeOffset.UtcNow,
+                Duration = TimeSpan.Zero,
+                Exception = new InvalidOperationException("Test execution completed but no result was set"),
+                ComputerName = Environment.MachineName,
+                TestContext = test.Context
+            };
+        }
+        catch (Exception ex)
         {
-            State = TestState.Failed,
-            Start = DateTimeOffset.UtcNow,
-            End = DateTimeOffset.UtcNow,
-            Duration = TimeSpan.Zero,
-            Exception = new InvalidOperationException("Test execution completed but no result was set"),
-            ComputerName = Environment.MachineName,
-            TestContext = test.Context
-        };
+            // Ensure test state is properly set on any exception
+            test.State = TestState.Failed;
+            test.EndTime = DateTimeOffset.Now;
+            test.Result = new TestResult
+            {
+                State = TestState.Failed,
+                Start = test.StartTime ?? DateTimeOffset.UtcNow,
+                End = DateTimeOffset.UtcNow,
+                Duration = TimeSpan.Zero,
+                Exception = ex,
+                ComputerName = Environment.MachineName,
+                TestContext = test.Context
+            };
+            return test.Result;
+        }
     }
 
 
@@ -163,7 +202,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         // Create execution tasks for all dependencies
         foreach (var dependency in test.Dependencies)
         {
-            var executionTask = GetOrCreateDependencyExecutionTaskAsync(dependency, cancellationToken);
+            var executionTask = GetOrCreateExecutionTask(dependency, cancellationToken);
             dependencyTasks.Add(executionTask);
         }
 
@@ -211,15 +250,20 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
     }
 
-    private async Task<TestResult> GetOrCreateDependencyExecutionTaskAsync(AbstractExecutableTest dependency, CancellationToken cancellationToken)
+    private Task<TestResult> GetOrCreateExecutionTask(AbstractExecutableTest dependency, CancellationToken cancellationToken)
     {
-        // Use the same shared lock approach as ExecuteTestAsync
-        Task<TestResult> task;
         lock (dependency.Context.ExecutionLock)
         {
-            task = dependency.Context.ExecutionTask ??= ExecuteTestInternalAsync(dependency, cancellationToken);
+            if (dependency.Context.ExecutionTask != null)
+            {
+                return dependency.Context.ExecutionTask;
+            }
+            else
+            {
+                dependency.Context.ExecutionTask = ExecuteTestInternalAsync(dependency, cancellationToken);
+                return dependency.Context.ExecutionTask;
+            }
         }
-        return await task;
     }
 
 
