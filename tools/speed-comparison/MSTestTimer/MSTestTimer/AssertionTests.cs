@@ -114,7 +114,7 @@ public class AssertionTests
         Assert.AreEqual(165, totalSum);
     }
     
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(new[] { 1, 2, 3 }, 6)]
     [DataRow(new[] { 10, 20, 30 }, 60)]
     [DataRow(new[] { -5, 0, 5 }, 0)]

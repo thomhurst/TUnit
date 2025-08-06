@@ -19,12 +19,17 @@ internal sealed class HookOrchestrator
     private readonly IContextProvider _contextProvider;
 
     // Cache initialization tasks for assemblies/classes
-    private readonly GetOnlyDictionary<string, Task<ExecutionContext>> _beforeAssemblyTasks = new();
-    private readonly GetOnlyDictionary<Type, Task<ExecutionContext>> _beforeClassTasks = new();
+    private readonly GetOnlyDictionary<string, Task<ExecutionContext?>> _beforeAssemblyTasks = new();
+    private readonly GetOnlyDictionary<Type, Task<ExecutionContext?>> _beforeClassTasks = new();
 
     // Track active test counts for cleanup
     private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
     private readonly ConcurrentDictionary<Type, int> _classTestCounts = new();
+    
+    // Store session context to flow to assembly/class hooks
+#if NET
+    private ExecutionContext? _sessionExecutionContext;
+#endif
 
     public HookOrchestrator(IHookCollectionService hookCollectionService, TUnitFrameworkLogger logger, IContextProvider contextProvider, TUnitServiceProvider serviceProvider)
     {
@@ -40,7 +45,7 @@ internal sealed class HookOrchestrator
     /// Gets or creates a cached task for BeforeAssembly hooks.
     /// This ensures the hooks only run once and all tests await the same result.
     /// </summary>
-    private Task<ExecutionContext> GetOrCreateBeforeAssemblyTask(string assemblyName, Assembly assembly, CancellationToken cancellationToken)
+    private Task<ExecutionContext?> GetOrCreateBeforeAssemblyTask(string assemblyName, Assembly assembly, CancellationToken cancellationToken)
     {
         return _beforeAssemblyTasks.GetOrAdd(assemblyName, _ =>
             ExecuteBeforeAssemblyHooksAsync(assembly, cancellationToken));
@@ -50,7 +55,7 @@ internal sealed class HookOrchestrator
     /// Gets or creates a cached task for BeforeClass hooks.
     /// This ensures the hooks only run once and all tests await the same result.
     /// </summary>
-    private Task<ExecutionContext> GetOrCreateBeforeClassTask(
+    private Task<ExecutionContext?> GetOrCreateBeforeClassTask(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClassType, Assembly assembly, CancellationToken cancellationToken)
     {
@@ -59,7 +64,10 @@ internal sealed class HookOrchestrator
 #if NET
             var assemblyName = assembly.GetName().Name ?? "Unknown";
             var assemblyContext = await GetOrCreateBeforeAssemblyTask(assemblyName, assembly, cancellationToken);
-            ExecutionContext.Restore(assemblyContext);
+            if (assemblyContext != null)
+            {
+                ExecutionContext.Restore(assemblyContext);
+            }
 #endif
             // Now run class hooks in the assembly context
             return await ExecuteBeforeClassHooksAsync(testClassType, cancellationToken);
@@ -85,7 +93,9 @@ internal sealed class HookOrchestrator
         }
 
 #if NET
-        return ExecutionContext.Capture();
+        // Store and return the context's ExecutionContext if user called AddAsyncLocalValues
+        _sessionExecutionContext = _contextProvider.TestSessionContext.ExecutionContext;
+        return _sessionExecutionContext;
 #else
         return null;
 #endif
@@ -118,7 +128,8 @@ internal sealed class HookOrchestrator
         }
 
 #if NET
-        return ExecutionContext.Capture();
+        // Return the context's ExecutionContext if user called AddAsyncLocalValues
+        return _contextProvider.TestSessionContext.ExecutionContext;
 #else
         return null;
 #endif
@@ -143,7 +154,8 @@ internal sealed class HookOrchestrator
         }
 
 #if NET
-        return ExecutionContext.Capture();
+        // Return the context's ExecutionContext if user called AddAsyncLocalValues
+        return _contextProvider.BeforeTestDiscoveryContext.ExecutionContext;
 #else
         return null;
 #endif
@@ -176,17 +188,18 @@ internal sealed class HookOrchestrator
         }
 
 #if NET
-        return ExecutionContext.Capture();
+        // Return the context's ExecutionContext if user called AddAsyncLocalValues
+        return _contextProvider.TestDiscoveryContext.ExecutionContext;
 #else
         return null;
 #endif
     }
 
-    public async Task<ExecutionContext> OnTestStartingAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public async Task<ExecutionContext?> OnTestStartingAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
         {
-            return ExecutionContext.Capture()!;
+            return null;
         }
 
         var testClassType = test.Metadata.TestClassType;
@@ -198,11 +211,15 @@ internal sealed class HookOrchestrator
 
         await GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken);
 
+        // Get the cached class context (includes assembly context)
         var classContext = await GetOrCreateBeforeClassTask(testClassType, testClassType.Assembly, cancellationToken);
 
 #if NET
-        // Restore the class context (which includes assembly context) before running test hooks
-        ExecutionContext.Restore(classContext);
+        // Only restore if there's actually a context to restore
+        if (classContext != null)
+        {
+            ExecutionContext.Restore(classContext);
+        }
 #endif
 
         var classContextObject = _contextProvider.GetOrCreateClassContext(testClassType);
@@ -210,7 +227,15 @@ internal sealed class HookOrchestrator
         // Execute BeforeEveryTest hooks in the accumulated context
         await ExecuteBeforeEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
 
-        return ExecutionContext.Capture()!;
+        // Return whichever context has AsyncLocal values:
+        // 1. If test context has it (from BeforeTest hooks), use that
+        // 2. Otherwise, use class context if it has it
+        // 3. Otherwise null (no AsyncLocal values to flow)
+#if NET
+        return test.Context.ExecutionContext ?? classContext;
+#else
+        return null;
+#endif
     }
 
     public async Task OnTestCompletedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
@@ -245,11 +270,19 @@ internal sealed class HookOrchestrator
         }
     }
 
-    private async Task<ExecutionContext> ExecuteBeforeAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
+    private async Task<ExecutionContext?> ExecuteBeforeAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeAssemblyHooksAsync(assembly);
 
         var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
+
+#if NET
+        // Restore session context first if it exists (to flow TestSession -> Assembly)
+        if (_sessionExecutionContext != null)
+        {
+            ExecutionContext.Restore(_sessionExecutionContext);
+        }
+#endif
 
         foreach (var hook in hooks)
         {
@@ -281,10 +314,15 @@ internal sealed class HookOrchestrator
             }
         }
 
-        return ExecutionContext.Capture()!;
+        // Return the context's ExecutionContext if user called AddAsyncLocalValues, otherwise null
+#if NET
+        return assemblyContext.ExecutionContext;
+#else
+        return null;
+#endif
     }
 
-    private async Task<ExecutionContext> ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
+    private async Task<ExecutionContext?> ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterAssemblyHooksAsync(assembly);
         var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
@@ -327,10 +365,15 @@ internal sealed class HookOrchestrator
                 : new HookFailedException("Multiple AfterAssembly hooks failed", new AggregateException(exceptions));
         }
 
-        return ExecutionContext.Capture()!;
+        // Return the context's ExecutionContext if user called AddAsyncLocalValues, otherwise null
+#if NET
+        return assemblyContext.ExecutionContext;
+#else
+        return null;
+#endif
     }
 
-    private async Task<ExecutionContext> ExecuteBeforeClassHooksAsync(
+    private async Task<ExecutionContext?> ExecuteBeforeClassHooksAsync(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClassType, CancellationToken cancellationToken)
     {
@@ -368,10 +411,15 @@ internal sealed class HookOrchestrator
             }
         }
 
-        return ExecutionContext.Capture()!;
+        // Return the context's ExecutionContext if user called AddAsyncLocalValues, otherwise null
+#if NET
+        return classContext.ExecutionContext;
+#else
+        return null;
+#endif
     }
 
-    private async Task<ExecutionContext> ExecuteAfterClassHooksAsync(
+    private async Task<ExecutionContext?> ExecuteAfterClassHooksAsync(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClassType, CancellationToken cancellationToken)
     {
@@ -416,7 +464,12 @@ internal sealed class HookOrchestrator
                 : new HookFailedException("Multiple AfterClass hooks failed", new AggregateException(exceptions));
         }
 
-        return ExecutionContext.Capture()!;
+        // Return the context's ExecutionContext if user called AddAsyncLocalValues, otherwise null
+#if NET
+        return classContext.ExecutionContext;
+#else
+        return null;
+#endif
     }
 
     private async Task ExecuteBeforeEveryTestHooksAsync(Type testClassType, TestContext testContext, CancellationToken cancellationToken)

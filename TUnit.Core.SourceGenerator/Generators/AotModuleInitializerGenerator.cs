@@ -106,11 +106,11 @@ public sealed class AotModuleInitializerGenerator : IIncrementalGenerator
 
         writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine("catch (System.Exception ex)");
+        writer.AppendLine("catch (global::System.Exception ex)");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine("// Log initialization failure if logging is available");
-        writer.AppendLine("System.Diagnostics.Debug.WriteLine($\"Failed to initialize AOT type resolution: {ex.Message}\");");
+        writer.AppendLine("global::System.Diagnostics.Debug.WriteLine($\"Failed to initialize AOT type resolution: {ex.Message}\");");
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -133,14 +133,14 @@ public sealed class AotModuleInitializerGenerator : IIncrementalGenerator
         writer.AppendLine("// Register method invocation if available");
         writer.AppendLine("// Note: AotMethodInvokers will be registered by its own generator when available");
         writer.AppendLine("// This is a placeholder for future method invocation registration");
-        writer.AppendLine("System.Diagnostics.Debug.WriteLine(\"AOT method invocation setup complete\");");
+        writer.AppendLine("global::System.Diagnostics.Debug.WriteLine(\"AOT method invocation setup complete\");");
 
         writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine("catch (System.Exception ex)");
+        writer.AppendLine("catch (global::System.Exception ex)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("System.Diagnostics.Debug.WriteLine($\"Failed to initialize AOT method invocation: {ex.Message}\");");
+        writer.AppendLine("global::System.Diagnostics.Debug.WriteLine($\"Failed to initialize AOT method invocation: {ex.Message}\");");
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -163,14 +163,14 @@ public sealed class AotModuleInitializerGenerator : IIncrementalGenerator
         writer.AppendLine("// Register tuple processing if available");
         writer.AppendLine("// Note: AotTupleProcessor will be registered by its own generator when available");
         writer.AppendLine("// This is a placeholder for future tuple processing registration");
-        writer.AppendLine("System.Diagnostics.Debug.WriteLine(\"AOT tuple processing setup complete\");");
+        writer.AppendLine("global::System.Diagnostics.Debug.WriteLine(\"AOT tuple processing setup complete\");");
 
         writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine("catch (System.Exception ex)");
+        writer.AppendLine("catch (global::System.Exception ex)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("System.Diagnostics.Debug.WriteLine($\"Failed to initialize AOT tuple processing: {ex.Message}\");");
+        writer.AppendLine("global::System.Diagnostics.Debug.WriteLine($\"Failed to initialize AOT tuple processing: {ex.Message}\");");
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -193,14 +193,14 @@ public sealed class AotModuleInitializerGenerator : IIncrementalGenerator
         writer.AppendLine("// Register enhanced property injection if available");
         writer.AppendLine("// Note: Enhanced property injectors will be registered by their own generator when available");
         writer.AppendLine("// This is a placeholder for future property injection registration");
-        writer.AppendLine("System.Diagnostics.Debug.WriteLine(\"AOT property injection setup complete\");");
+        writer.AppendLine("global::System.Diagnostics.Debug.WriteLine(\"AOT property injection setup complete\");");
 
         writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine("catch (System.Exception ex)");
+        writer.AppendLine("catch (global::System.Exception ex)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("System.Diagnostics.Debug.WriteLine($\"Failed to initialize enhanced property injection: {ex.Message}\");");
+        writer.AppendLine("global::System.Diagnostics.Debug.WriteLine($\"Failed to initialize enhanced property injection: {ex.Message}\");");
         writer.Unindent();
         writer.AppendLine("}");
 

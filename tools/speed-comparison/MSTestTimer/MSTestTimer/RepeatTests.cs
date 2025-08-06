@@ -20,7 +20,7 @@ public class RepeatTests
         return Enumerable.Range(0, 25).Select(i => new object[] { i });
     }
     
-    [DataTestMethod]
+    [TestMethod]
     [DynamicData(nameof(RepeatData100), DynamicDataSourceType.Method)]
     public void RepeatedCalculationTest(int iteration)
     {
@@ -31,7 +31,7 @@ public class RepeatTests
         Assert.AreEqual(0, result % localCounter);
     }
     
-    [DataTestMethod]
+    [TestMethod]
     [DynamicData(nameof(RepeatData50), DynamicDataSourceType.Method)]
     public async Task RepeatedAsyncTest(int iteration)
     {
@@ -43,7 +43,7 @@ public class RepeatTests
         Assert.AreEqual(taskId.ToString(), result);
     }
     
-    [DataTestMethod]
+    [TestMethod]
     [DynamicData(nameof(RepeatData25), DynamicDataSourceType.Method)]
     public void RepeatedStringOperationTest(int iteration)
     {

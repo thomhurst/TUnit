@@ -183,12 +183,12 @@ internal static class MetadataGenerationHelper
             if (method.TypeParameters.Length > 0 || method.Parameters.Any(p => CodeGenerationHelpers.ContainsTypeParameter(p.Type)))
             {
                 // For generic methods, use GetMethods and find by name
-                return $@"typeof({containingType}).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == ""{method.Name}"" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]!";
+                return $@"typeof({containingType}).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == ""{method.Name}"" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]!";
             }
             else
             {
                 // For non-generic methods, we can use GetMethod with parameter types
-                var bindingFlags = method.IsStatic ? "System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static" : "System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance";
+                var bindingFlags = method.IsStatic ? "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static" : "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance";
                 var paramTypes = GenerateParameterTypesArrayForReflection(method);
                 return $@"typeof({containingType}).GetMethod(""{method.Name}"", {bindingFlags}, null, {paramTypes}, null)!.GetParameters()[{parameterIndex}]";
             }

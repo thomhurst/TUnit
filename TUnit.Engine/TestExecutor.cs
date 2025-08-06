@@ -111,11 +111,11 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
     {
         await InitializeStaticPropertiesAsync(cancellationToken);
 
-        var beforeSessionContext = await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
+        var sessionContext = await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
 #if NET
-        if (beforeSessionContext != null)
+        if (sessionContext != null)
         {
-            ExecutionContext.Restore(beforeSessionContext);
+            ExecutionContext.Restore(sessionContext);
         }
 #endif
     }
@@ -161,6 +161,23 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
     {
         var config = SchedulerConfiguration.Default;
 
+        // Check environment variables first (can be overridden by command-line)
+        if (int.TryParse(Environment.GetEnvironmentVariable("TUNIT_ADAPTIVE_MIN_PARALLELISM"), out var envMinParallelism) && envMinParallelism > 0)
+        {
+            config.AdaptiveMinParallelism = envMinParallelism;
+        }
+
+        if (int.TryParse(Environment.GetEnvironmentVariable("TUNIT_ADAPTIVE_MAX_PARALLELISM"), out var envMaxParallelism) && envMaxParallelism > 0)
+        {
+            config.AdaptiveMaxParallelism = envMaxParallelism;
+        }
+
+        if (bool.TryParse(Environment.GetEnvironmentVariable("TUNIT_ADAPTIVE_METRICS"), out var envMetrics))
+        {
+            config.EnableAdaptiveMetrics = envMetrics;
+        }
+
+        // Handle --maximum-parallel-tests (applies to both fixed and adaptive strategies)
         if (_commandLineOptions.TryGetOptionArgumentList(
             MaximumParallelTestsCommandProvider.MaximumParallelTests,
             out var args) && args.Length > 0)
@@ -168,7 +185,24 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
             if (int.TryParse(args[0], out var maxParallelTests) && maxParallelTests > 0)
             {
                 config.MaxParallelism = maxParallelTests;
+                config.AdaptiveMaxParallelism = maxParallelTests;
+                // Don't change strategy - let it be controlled by --parallelism-strategy
             }
+        }
+
+        // Handle --parallelism-strategy
+        if (_commandLineOptions.TryGetOptionArgumentList(
+            ParallelismStrategyCommandProvider.ParallelismStrategy,
+            out var strategyArgs) && strategyArgs.Length > 0)
+        {
+            var strategy = strategyArgs[0].ToLowerInvariant();
+            config.Strategy = strategy == "fixed" ? ParallelismStrategy.Fixed : ParallelismStrategy.Adaptive;
+        }
+
+        // Handle --adaptive-metrics
+        if (_commandLineOptions.IsOptionSet(AdaptiveMetricsCommandProvider.AdaptiveMetrics))
+        {
+            config.EnableAdaptiveMetrics = true;
         }
 
         var eventReceiverOrchestrator = _serviceProvider.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
@@ -187,6 +221,9 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
         }
 
         _disposed = true;
+        
+        // Dispose the scheduler if it implements IDisposable
+        (_testScheduler as IDisposable)?.Dispose();
     }
 
     public ValueTask DisposeAsync()
@@ -197,6 +234,9 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
         }
 
         _disposed = true;
+        
+        // Dispose the scheduler if it implements IDisposable
+        (_testScheduler as IDisposable)?.Dispose();
 
         return default(ValueTask);
     }

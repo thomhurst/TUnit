@@ -312,7 +312,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             }
             sb.AppendLine("#else");
             sb.AppendLine($"                var backingField = typeof({propInfo.Property.ContainingType.ToDisplayString()}).GetField(\"<{propInfo.Property.Name}>k__BackingField\",");
-            sb.AppendLine("                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");
+            sb.AppendLine("                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
             sb.AppendLine($"                backingField?.SetValue({instanceVariableName}, value);");
             sb.AppendLine("#endif");
         }

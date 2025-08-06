@@ -29,10 +29,10 @@ internal sealed class EnumerableTupleDataSourceDrivenTests_DataSource_TupleMetho
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.TupleMethod();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
                             {
                                 foreach (var item in enumerable)
                                 {
@@ -51,10 +51,10 @@ internal sealed class EnumerableTupleDataSourceDrivenTests_DataSource_TupleMetho
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.NamedTupleMethod();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
                             {
                                 foreach (var item in enumerable)
                                 {
@@ -106,21 +106,21 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "value2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]
+    ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[1]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(bool))
 {
     Name = "value3",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2]
+    ReflectionInfo = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests", () => 

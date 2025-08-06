@@ -59,7 +59,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(SomeAsyncDisposableClass))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("SomeAsyncDisposableClass, TestsBase`1"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => 
@@ -192,7 +192,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(SomeAsyncDisposableClass))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("SomeAsyncDisposableClass, TestsBase`1"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class_Generic", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class_Generic", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => 

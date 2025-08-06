@@ -15,6 +15,10 @@ internal sealed class TestDependencyResolver
     private readonly ConcurrentDictionary<string, List<TestDetails>> _cachedTransitiveDependencies = new();
 
     private readonly ConcurrentDictionary<string, List<AbstractExecutableTest>> _testsByClassName = new();
+    
+    // Add indices for faster dependency lookups
+    private readonly ConcurrentDictionary<string, HashSet<AbstractExecutableTest>> _testsByMethodName = new();
+    private readonly ConcurrentDictionary<Type, HashSet<AbstractExecutableTest>> _testsByType = new();
 
     private readonly ConcurrentDictionary<string, bool> _testsBeingResolved = new();
 
@@ -27,6 +31,16 @@ internal sealed class TestDependencyResolver
         _testsByClassName.AddOrUpdate(className,
             _ => [test],
             (_, list) => { list.Add(test); return list; });
+            
+        // Add to method name index
+        _testsByMethodName.AddOrUpdate(test.Metadata.TestMethodName,
+            _ => new HashSet<AbstractExecutableTest> { test },
+            (_, set) => { set.Add(test); return set; });
+            
+        // Add to type index
+        _testsByType.AddOrUpdate(test.Metadata.TestClassType,
+            _ => new HashSet<AbstractExecutableTest> { test },
+            (_, set) => { set.Add(test); return set; });
 
         if (_pendingDependents.TryRemove(test.TestId, out var dependents))
         {
@@ -88,12 +102,37 @@ internal sealed class TestDependencyResolver
             {
                 List<AbstractExecutableTest> matchingTests;
 
+                // Use indices for O(1) lookup instead of O(n) scan
                 if (dependency.ClassType != null && string.IsNullOrEmpty(dependency.MethodName))
                 {
-                    var className = dependency.ClassType.FullName ?? dependency.ClassType.Name;
-                    if (_testsByClassName.TryGetValue(className, out var testsInClass))
+                    // Class-level dependency
+                    if (_testsByType.TryGetValue(dependency.ClassType, out var testsInType))
                     {
-                        matchingTests = testsInClass
+                        matchingTests = testsInType
+                            .Where(t => dependency.Matches(t.Metadata, test.Metadata))
+                            .ToList();
+                    }
+                    else
+                    {
+                        var className = dependency.ClassType.FullName ?? dependency.ClassType.Name;
+                        if (_testsByClassName.TryGetValue(className, out var testsInClass))
+                        {
+                            matchingTests = testsInClass
+                                .Where(t => dependency.Matches(t.Metadata, test.Metadata))
+                                .ToList();
+                        }
+                        else
+                        {
+                            matchingTests = new List<AbstractExecutableTest>();
+                        }
+                    }
+                }
+                else if (!string.IsNullOrEmpty(dependency.MethodName))
+                {
+                    // Method-level dependency - use method name index
+                    if (dependency.MethodName != null && _testsByMethodName.TryGetValue(dependency.MethodName, out var testsWithMethod))
+                    {
+                        matchingTests = testsWithMethod
                             .Where(t => dependency.Matches(t.Metadata, test.Metadata))
                             .ToList();
                     }
@@ -104,6 +143,7 @@ internal sealed class TestDependencyResolver
                 }
                 else
                 {
+                    // Fallback for complex dependencies
                     matchingTests = _testsByName.Values
                         .Where(t => dependency.Matches(t.Metadata, test.Metadata))
                         .ToList();

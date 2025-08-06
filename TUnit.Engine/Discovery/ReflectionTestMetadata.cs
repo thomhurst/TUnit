@@ -101,9 +101,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             [
             ]);
 
-            // Apply property values using unified PropertyInjector
-            await PropertyInjectionService.InjectPropertiesAsync(context.Context, instance, metadata.PropertyDataSources, metadata.PropertyInjections, metadata.MethodMetadata, context.Context.TestDetails.TestId);
-
+            // Property injection is handled by SingleTestExecutor after instance creation
             return instance;
         }
 

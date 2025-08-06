@@ -51,11 +51,11 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
-        var beforeDiscoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken);
+        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken);
 #if NET
-        if (beforeDiscoveryContext != null)
+        if (discoveryContext != null)
         {
-            ExecutionContext.Restore(beforeDiscoveryContext);
+            ExecutionContext.Restore(discoveryContext);
         }
 #endif
 
@@ -107,13 +107,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         var contextProvider = _hookOrchestrator.GetContextProvider();
         contextProvider.TestDiscoveryContext.AddTests(tests.Select(t => t.Context));
 
-        var afterDiscoveryContext = await _hookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken);
-#if NET
-        if (afterDiscoveryContext != null)
-        {
-            ExecutionContext.Restore(afterDiscoveryContext);
-        }
-#endif
+        await _hookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken);
 
         // Register the filtered tests to invoke ITestRegisteredEventReceiver
         await _testFilterService.RegisterTestsAsync(filteredTests);

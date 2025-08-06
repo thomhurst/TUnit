@@ -39,11 +39,11 @@ internal static class CodeGenerationHelpers
                     var paramTypesArray = GenerateParameterTypesArray(method);
                     if (paramTypesArray == "null")
                     {
-                        writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethods(BindingFlags.Public | BindingFlags.Instance).FirstOrDefault(m => m.Name == \"{method.Name}\" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]");
+                        writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance).FirstOrDefault(m => m.Name == \"{method.Name}\" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]");
                     }
                     else
                     {
-                        writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", BindingFlags.Public | BindingFlags.Instance, null, {paramTypesArray}, null)!.GetParameters()[{parameterIndex}]");
+                        writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, {paramTypesArray}, null)!.GetParameters()[{parameterIndex}]");
                     }
                 }
             }

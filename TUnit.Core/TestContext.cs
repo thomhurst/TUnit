@@ -144,7 +144,7 @@ public class TestContext : Context
     [
     ];
 
-    public Dictionary<string, object?> Artifacts { get; } = new();
+    public IReadOnlyList<Artifact> Artifacts { get; } = new List<Artifact>();
 
     public string GetDisplayName()
     {
@@ -191,14 +191,9 @@ public class TestContext : Context
 
     public DateTimeOffset TestStart { get; set; } = DateTimeOffset.UtcNow;
 
-    public void AddArtifact(string name, object? value)
-    {
-        Artifacts[name] = value;
-    }
-
     public void AddArtifact(Artifact artifact)
     {
-        Artifacts[artifact.DisplayName ?? artifact.File?.Name ?? "artifact"] = artifact;
+        ((List<Artifact>)Artifacts).Add(artifact);
     }
 
     public void OverrideResult(string reason)
