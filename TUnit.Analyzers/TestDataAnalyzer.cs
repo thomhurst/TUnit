@@ -808,29 +808,18 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        // Get type arguments from the attribute or its base types
+        // Get type arguments from ITypedDataSourceAttribute<T> interface
         var typeArguments = ImmutableArray<ITypeSymbol>.Empty;
         
-        // Look specifically for DataSourceGeneratorAttribute or AsyncDataSourceGeneratorAttribute base types
-        // which contain the actual data type arguments, not the custom attribute's type parameters
-        foreach (var baseType in selfAndBaseTypes)
+        // Use the exact same logic as the source generator
+        if (attribute.AttributeClass?.AllInterfaces.FirstOrDefault(x => x.IsGenericType && 
+                x.ConstructedFrom.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.ITypedDataSourceAttribute.WithGlobalPrefix + "`1") 
+            is { } typedDataSourceInterface)
         {
-            if (baseType.IsGenericType && !baseType.TypeArguments.IsEmpty)
-            {
-                var originalDef = baseType.OriginalDefinition;
-                var metadataName = originalDef?.ToDisplayString();
-                
-                if (metadataName?.Contains("DataSourceGeneratorAttribute") == true ||
-                    metadataName?.Contains("AsyncDataSourceGeneratorAttribute") == true)
-                {
-                    typeArguments = baseType.TypeArguments;
-                    break;
-                }
-            }
+            typeArguments = typedDataSourceInterface.TypeArguments;
         }
-        
-        // Fallback: if no specific data source generator base type found, use the attribute's own type arguments
-        if (typeArguments.IsEmpty && attribute.AttributeClass?.TypeArguments.IsEmpty == false)
+        // Fallback: if no ITypedDataSourceAttribute<T> interface found, use the attribute's own type arguments for backward compatibility
+        else if (attribute.AttributeClass?.TypeArguments.IsEmpty == false)
         {
             typeArguments = attribute.AttributeClass.TypeArguments;
         }
