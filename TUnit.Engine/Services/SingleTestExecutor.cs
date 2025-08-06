@@ -2,7 +2,6 @@ using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
-using TUnit.Core.Data;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
 using TUnit.Engine.Exceptions;
@@ -101,6 +100,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
         await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
 
+        CheckDependenciesAndThrowIfShouldSkip(test);
+
         var classContext = test.Context.ClassContext;
         var assemblyContext = classContext.AssemblyContext;
         var sessionContext = assemblyContext.TestSessionContext;
@@ -119,9 +120,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 return await HandleSkippedTestInternalAsync(test, cancellationToken);
             }
 
-            // Check for failed dependencies and throw exception if test should be skipped
-            CheckDependenciesAndThrowIfShouldSkip(test);
-
             if(test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
             {
                 await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken);
@@ -134,7 +132,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         catch (TestDependencyException e)
         {
             test.Context.SkipReason = e.Message;
-            return await HandleSkippedTestAsync(test, cancellationToken);
+            return await HandleSkippedTestInternalAsync(test, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -462,29 +460,17 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
     private void CheckDependenciesAndThrowIfShouldSkip(AbstractExecutableTest test)
     {
-        if (test.Dependencies.Length == 0)
-        {
-            return; // No dependencies to check
-        }
-
         var failedDependenciesNotAllowingProceed = new List<string>();
 
         foreach (var dependency in test.Dependencies)
         {
-            // Check if the dependency has failed
-            if (dependency.State == TestState.Failed || dependency.State == TestState.Timeout)
+            // Check if the dependency has failed or timed out
+            if (dependency.Test.State == TestState.Failed || dependency.Test.State == TestState.Timeout)
             {
-                // Find the corresponding TestDependency metadata to check ProceedOnFailure
-                var dependencyMetadata = test.Metadata.Dependencies.FirstOrDefault(d => 
-                    DependencyMatches(d, dependency));
-
-                // Get ProceedOnFailure setting (default to false if no metadata found)
-                var proceedOnFailure = dependencyMetadata?.ProceedOnFailure ?? false;
-                
                 // If this dependency doesn't allow proceeding on failure, add it to the list
-                if (!proceedOnFailure)
+                if (!dependency.ProceedOnFailure)
                 {
-                    var dependencyName = GetDependencyDisplayName(dependency);
+                    var dependencyName = GetDependencyDisplayName(dependency.Test);
                     failedDependenciesNotAllowingProceed.Add(dependencyName);
                 }
             }
@@ -498,19 +484,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
     }
 
-    private static bool DependencyMatches(TestDependency dependencyMetadata, AbstractExecutableTest dependencyTest)
+    private string GetDependencyDisplayName(AbstractExecutableTest dependency)
     {
-        // Use the existing Matches method from TestDependency
-        return dependencyMetadata.Matches(dependencyTest.Metadata, null);
-    }
-
-    private static string GetDependencyDisplayName(AbstractExecutableTest dependency)
-    {
-        var testName = dependency.Context.TestDetails.TestName;
-        var className = dependency.Metadata.TestClassType.Name;
-        
-        // If it's a test in the same class, just return the test name
-        // Otherwise, include the class name
-        return testName.Contains(className) ? testName : $"{className}.{dependency.Metadata.TestMethodName}";
+        return dependency.Context?.GetDisplayName() ?? $"{dependency.Context?.TestDetails.ClassType.Name}.{dependency.Context?.TestDetails.TestName}" ?? "Unknown";
     }
 }
