@@ -73,4 +73,11 @@ public static class GenericIsNotExtensions
         return source.RegisterAssertion(new TUnit.Assertions.Assertions.Delegates.Conditions.DelegateNotNullAssertCondition<T>()
             , []);
     }
+
+    // Extension method for nullable Action assertions
+    public static InvokableDelegateAssertionBuilder IsNotNull([NotNull] this IDelegateSource delegateSource)
+    {
+        return delegateSource.RegisterAssertion(new TUnit.Assertions.Assertions.Delegates.Conditions.ActionNotNullAssertCondition()
+            , []);
+    }
 }

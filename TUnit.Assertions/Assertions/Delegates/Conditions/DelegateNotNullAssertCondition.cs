@@ -19,3 +19,21 @@ public class DelegateNotNullAssertCondition<T> : BaseAssertCondition<T>
         return new ValueTask<AssertionResult>(AssertionResult.Passed);
     }
 }
+
+public class ActionNotNullAssertCondition : BaseAssertCondition<object>
+{
+    internal protected override string GetExpectation()
+        => "to not be null";
+
+    protected override ValueTask<AssertionResult> GetResult(object? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        // For Actions, a null reference exception during execution indicates the action was null
+        if (exception is NullReferenceException or ArgumentNullException)
+        {
+            return new ValueTask<AssertionResult>(AssertionResult.FailIf(true, "it was"));
+        }
+
+        // If we have no exception, the action was not null
+        return new ValueTask<AssertionResult>(AssertionResult.Passed);
+    }
+}
