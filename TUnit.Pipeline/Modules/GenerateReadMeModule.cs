@@ -118,8 +118,14 @@ public class GenerateReadMeModule : Module<File>
 
         return fileName.Split("_").Last() switch
         {
-            "BasicTest" => "A single test that completes instantly (including spawning a new process and initialising the test framework)",
-            "RepeatTests" => "A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)",
+            "AssertionTests" => "Tests focused on assertion performance and validation",
+            "AsyncTests" => "Tests running asynchronous operations and async/await patterns",
+            "BasicTests" => "Simple tests with basic operations and assertions",
+            "DataDrivenTests" => "Parameterized tests with multiple test cases using data attributes",
+            "FixtureTests" => "Tests utilizing class fixtures and shared test context",
+            "ParallelTests" => "Tests executing in parallel to test framework parallelization",
+            "RepeatTests" => "A test that takes 50ms to execute, repeated 100 times",
+            "SetupTeardownTests" => "Tests with setup and teardown lifecycle methods",
             _ => throw new ArgumentException($"Unknown class name: {fileName}", nameof(fileName))
         };
     }
