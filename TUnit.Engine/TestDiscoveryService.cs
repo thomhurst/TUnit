@@ -51,7 +51,13 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
-        await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken);
+        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken);
+#if NET
+        if (discoveryContext != null)
+        {
+            ExecutionContext.Restore(discoveryContext);
+        }
+#endif
 
         // Extract types from filter for optimized discovery
         var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
