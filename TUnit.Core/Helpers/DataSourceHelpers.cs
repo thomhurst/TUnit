@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace TUnit.Core.Helpers;
@@ -440,12 +442,54 @@ public static class DataSourceHelpers
     /// Resolves a data source property value at runtime.
     /// This method handles all IDataSourceAttribute implementations generically.
     /// </summary>
-    public static Task<object?> ResolveDataSourceForPropertyAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type containingType, string propertyName, MethodMetadata testInformation, string testSessionId)
+    public static async Task<object?> ResolveDataSourceForPropertyAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type containingType, string propertyName, MethodMetadata testInformation, string testSessionId)
     {
-        // For now, return a default value - the runtime resolution is complex
-        // and would require implementing the full data source resolution logic
-        // In practice, this should be rare since most data sources can be resolved at compile time
-        return Task.FromResult<object?>(null);
+        // Use PropertyInjectionService to resolve the data source attribute
+        var propertyInfo = containingType.GetProperty(propertyName);
+        if (propertyInfo == null)
+        {
+            return null;
+        }
+
+        var dataSourceAttributes = propertyInfo.GetCustomAttributes(typeof(IDataSourceAttribute), true);
+        if (dataSourceAttributes.Length == 0)
+        {
+            return null;
+        }
+
+        var dataSourceAttribute = (IDataSourceAttribute)dataSourceAttributes[0];
+        
+        // Create the data generator metadata with required fields
+        var dataGeneratorMetadata = DataGeneratorMetadataCreator.CreateForPropertyInjection(
+            propertyInfo,
+            containingType,
+            testInformation,
+            dataSourceAttribute,
+            TestContext.Current,
+            TestContext.Current?.TestDetails.ClassInstance,
+            TestContext.Current?.Events,
+            TestContext.Current?.ObjectBag ?? new Dictionary<string, object?>()
+        );
+
+        // Generate the data source value using the attribute's GetDataRowsAsync method
+        var dataRows = dataSourceAttribute.GetDataRowsAsync(dataGeneratorMetadata);
+        
+        // Get the first value from the async enumerable
+        await foreach (var factory in dataRows)
+        {
+            var args = await factory();
+            if (args != null && args.Length > 0)
+            {
+                var value = args[0];
+                
+                // Initialize the value if it implements IAsyncInitializer
+                await ObjectInitializer.InitializeAsync(value);
+                
+                return value;
+            }
+        }
+
+        return null;
     }
     
     /// <summary>
