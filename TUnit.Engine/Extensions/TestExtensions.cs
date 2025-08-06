@@ -47,13 +47,13 @@ internal static class TestExtensions
         return testNode;
     }
 
-    public static IEnumerable<KeyValuePairStringProperty> ExtractProperties(this TestDetails testDetails)
+    public static IEnumerable<TestMetadataProperty> ExtractProperties(this TestDetails testDetails)
     {
         foreach (var propertyGroup in testDetails.CustomProperties)
         {
             foreach (var propertyValue in propertyGroup.Value)
             {
-                yield return new KeyValuePairStringProperty(propertyGroup.Key, propertyValue);
+                yield return new TestMetadataProperty(propertyGroup.Key, propertyValue);
             }
         }
     }
