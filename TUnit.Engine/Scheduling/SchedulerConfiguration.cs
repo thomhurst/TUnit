@@ -32,6 +32,22 @@ public sealed class SchedulerConfiguration
     public ParallelismStrategy Strategy { get; set; } = ParallelismStrategy.Adaptive;
 
     /// <summary>
+    /// Minimum parallelism for adaptive strategy
+    /// </summary>
+    public int AdaptiveMinParallelism { get; set; } = Environment.ProcessorCount;
+
+    /// <summary>
+    /// Maximum parallelism for adaptive strategy
+    /// Default: unlimited unless explicitly set via command-line or environment variable
+    /// </summary>
+    public int AdaptiveMaxParallelism { get; set; } = int.MaxValue;
+
+    /// <summary>
+    /// Enable detailed metrics logging for adaptive strategy
+    /// </summary>
+    public bool EnableAdaptiveMetrics { get; set; } = false;
+
+    /// <summary>
     /// Creates default configuration
     /// </summary>
     public static SchedulerConfiguration Default => new();

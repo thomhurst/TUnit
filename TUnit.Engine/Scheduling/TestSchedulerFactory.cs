@@ -16,11 +16,11 @@ internal static class TestSchedulerFactory
     {
         var groupingService = new TestGroupingService();
 
-        // Use the new clean scheduler
+        // Use the new clean scheduler with configuration
         return new TestScheduler(
             logger,
             groupingService,
             messageBus,
-            configuration.MaxParallelism);
+            configuration);
     }
 }
