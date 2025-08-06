@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Microsoft.Extensions.Logging;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.Extensions;
@@ -45,12 +46,15 @@ public class GenerateReadMeModule : Module<File>
 
         if (latestBenchmark == null)
         {
+            context.Logger.LogWarning("No completed benchmark runs found for the current commit.");
             return null;
         }
 
         var artifacts = await context.GitHub().Client.Actions.Artifacts.ListWorkflowArtifacts(context.GitHub().RepositoryInfo.Owner,
             context.GitHub().RepositoryInfo.RepositoryName,
             latestBenchmark.Id);
+
+        context.Logger.LogInformation("Found {ArtifactCount} artifacts for the latest benchmark run.", artifacts.Artifacts.Count);
 
         var fileContents = new StringBuilder();
 
@@ -64,6 +68,8 @@ public class GenerateReadMeModule : Module<File>
             foreach (var artifact in groupedArtifacts.OrderBy(x => x.Name))
             {
                 var operatingSystem = artifact.Name.Split("_")[0];
+
+                context.Logger.LogInformation("Processing artifact: {ArtifactName} for OS: {OperatingSystem}", artifact.Name, operatingSystem);
 
                 var stream = await context.GitHub().Client.Actions.Artifacts.DownloadArtifact(
                     context.GitHub().RepositoryInfo.Owner,
@@ -85,6 +91,8 @@ public class GenerateReadMeModule : Module<File>
                 fileContents.AppendLine();
                 fileContents.AppendLine(contents);
                 fileContents.AppendLine();
+
+                context.Logger.LogInformation("Added contents from {MarkdownFile} for OS: {OperatingSystem}", markdownFile.Name, operatingSystem);
             }
         }
 
@@ -92,6 +100,7 @@ public class GenerateReadMeModule : Module<File>
 
         if (newContents == await readme.ReadAsync(cancellationToken))
         {
+            context.Logger.LogInformation("No changes to README.md, skipping write.");
             return null;
         }
 
