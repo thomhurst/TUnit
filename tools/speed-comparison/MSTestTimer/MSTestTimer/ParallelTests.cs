@@ -128,7 +128,7 @@ public class ThreadSafeTests
     private static readonly ConcurrentDictionary<int, string> _concurrentData = new();
     private static readonly ConcurrentBag<int> _processedItems = new();
     
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(1)]
     [DataRow(2)]
     [DataRow(3)]
