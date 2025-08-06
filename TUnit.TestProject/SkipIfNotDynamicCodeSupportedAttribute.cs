@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace TUnit.Core;
+namespace TUnit.TestProject;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true)]
 public class SkipIfNotDynamicCodeSupportedAttribute : SkipAttribute
