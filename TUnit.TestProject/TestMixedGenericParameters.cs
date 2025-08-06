@@ -1,6 +1,3 @@
-using TUnit.Core;
-using TUnit.Assertions;
-
 namespace TUnit.TestProject;
 
 public class TestMixedGenericParameters

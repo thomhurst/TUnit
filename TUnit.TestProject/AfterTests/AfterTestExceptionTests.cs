@@ -1,7 +1,3 @@
-using System;
-using System.Threading.Tasks;
-using TUnit.Core;
-
 namespace TUnit.TestProject.AfterTests;
 
 public class AfterTestExceptionTests

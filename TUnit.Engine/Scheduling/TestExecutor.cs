@@ -84,7 +84,11 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
             var executionContext = await _hookOrchestrator.OnTestStartingAsync(test, cancellationToken);
 
 #if NET
-            ExecutionContext.Restore(executionContext);
+            // Restore the accumulated context from all hooks to flow AsyncLocal values to the test
+            if (executionContext != null)
+            {
+                ExecutionContext.Restore(executionContext);
+            }
 #endif
 
             // Execute the test and get the result message

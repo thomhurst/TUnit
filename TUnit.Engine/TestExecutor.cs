@@ -74,13 +74,7 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
             try
             {
                 using var cleanupCts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
-                var afterSessionContext = await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cleanupCts.Token);
-#if NET
-                if (afterSessionContext != null)
-                {
-                    ExecutionContext.Restore(afterSessionContext);
-                }
-#endif
+                await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cleanupCts.Token);
             }
             catch (Exception ex)
             {
@@ -111,13 +105,7 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
     {
         await InitializeStaticPropertiesAsync(cancellationToken);
 
-        var beforeSessionContext = await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
-#if NET
-        if (beforeSessionContext != null)
-        {
-            ExecutionContext.Restore(beforeSessionContext);
-        }
-#endif
+        await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
     }
 
     private async Task InitializeStaticPropertiesAsync(CancellationToken cancellationToken)

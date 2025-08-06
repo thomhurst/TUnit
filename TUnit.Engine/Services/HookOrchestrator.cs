@@ -66,7 +66,7 @@ internal sealed class HookOrchestrator
         });
     }
 
-    public async Task<ExecutionContext?> ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
+    public async Task ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeTestSessionHooksAsync();
 
@@ -83,15 +83,9 @@ internal sealed class HookOrchestrator
                 throw; // Before hooks should prevent execution on failure
             }
         }
-
-#if NET
-        return ExecutionContext.Capture();
-#else
-        return null;
-#endif
     }
 
-    public async Task<ExecutionContext?> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
+    public async Task ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterTestSessionHooksAsync();
         var exceptions = new List<Exception>();
@@ -116,15 +110,9 @@ internal sealed class HookOrchestrator
                 ? new HookFailedException(exceptions[0])
                 : new HookFailedException("Multiple AfterTestSession hooks failed", new AggregateException(exceptions));
         }
-
-#if NET
-        return ExecutionContext.Capture();
-#else
-        return null;
-#endif
     }
 
-    public async Task<ExecutionContext?> ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    public async Task ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeTestDiscoveryHooksAsync();
 
@@ -141,15 +129,9 @@ internal sealed class HookOrchestrator
                 throw;
             }
         }
-
-#if NET
-        return ExecutionContext.Capture();
-#else
-        return null;
-#endif
     }
 
-    public async Task<ExecutionContext?> ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    public async Task ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterTestDiscoveryHooksAsync();
         var exceptions = new List<Exception>();
@@ -174,19 +156,13 @@ internal sealed class HookOrchestrator
                 ? new HookFailedException(exceptions[0])
                 : new HookFailedException("Multiple AfterTestDiscovery hooks failed", new AggregateException(exceptions));
         }
-
-#if NET
-        return ExecutionContext.Capture();
-#else
-        return null;
-#endif
     }
 
-    public async Task<ExecutionContext> OnTestStartingAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public async Task<ExecutionContext?> OnTestStartingAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
         {
-            return ExecutionContext.Capture()!;
+            return null;
         }
 
         var testClassType = test.Metadata.TestClassType;
@@ -210,7 +186,12 @@ internal sealed class HookOrchestrator
         // Execute BeforeEveryTest hooks in the accumulated context
         await ExecuteBeforeEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
 
-        return ExecutionContext.Capture()!;
+#if NET
+        // Capture the final context after all hooks to flow it to the test
+        return ExecutionContext.Capture();
+#else
+        return null;
+#endif
     }
 
     public async Task OnTestCompletedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)

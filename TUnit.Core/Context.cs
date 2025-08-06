@@ -48,7 +48,11 @@ public abstract class Context : IContext, IDisposable
         {
             ExecutionContext.Restore(ExecutionContext);
         }
-        
+        else
+        {
+            Parent?.RestoreExecutionContext();
+        }
+
         RestoreContextAsyncLocal();
 #endif
     }
