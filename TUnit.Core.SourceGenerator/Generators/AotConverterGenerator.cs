@@ -136,9 +136,11 @@ public class AotConverterGenerator : IIncrementalGenerator
             var patternTypeName = sourceTypeName;
             if (conversion.SourceType.IsTupleType && conversion.SourceType is INamedTypeSymbol namedSourceType)
             {
-                // For tuple types, use the underlying ValueTuple type for pattern matching
-                // instead of the literal tuple syntax to avoid positional pattern errors
-                patternTypeName = namedSourceType.TupleUnderlyingType?.GloballyQualified() ?? sourceTypeName;
+                // For tuple types, manually construct the ValueTuple<T1, T2, ...> type name
+                // to avoid positional pattern errors with tuple literal syntax
+                var typeArgs = namedSourceType.TypeArguments;
+                var argTypes = string.Join(", ", typeArgs.Select(t => t.GloballyQualified()));
+                patternTypeName = $"global::System.ValueTuple<{argTypes}>";
             }
             
             writer.AppendLine($"if (value is {patternTypeName} typedValue)");
