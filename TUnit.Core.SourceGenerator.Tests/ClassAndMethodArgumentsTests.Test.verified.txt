@@ -179,7 +179,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
     Name = "arg2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("WithMethodLevel", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("WithMethodLevel", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => 
@@ -326,7 +326,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
     Name = "arg2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("IgnoreParameters", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("IgnoreParameters", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => 

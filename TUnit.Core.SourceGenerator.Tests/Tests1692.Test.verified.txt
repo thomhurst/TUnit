@@ -60,7 +60,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
     Name = "t",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1692.Tests).GetMethod("NullTest", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1692.Tests).GetMethod("NullTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1692.Tests", () => 

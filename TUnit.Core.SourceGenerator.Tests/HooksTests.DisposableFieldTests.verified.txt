@@ -26,7 +26,7 @@ public sealed class GeneratedHookRegistry
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to initialize hook registry: {ex.Message}", ex);
+            throw new global::System.InvalidOperationException($"Failed to initialize hook registry: {ex.Message}", ex);
         }
     }
     private static void PopulateSourcesDictionaries()

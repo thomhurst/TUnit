@@ -73,10 +73,10 @@ return classMetadata;
             TestInvoker = async (instance, args) =>
             {
                 var instanceType = instance.GetType();
-                var method = instanceType.GetMethod("GenericTestMethod", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                var method = instanceType.GetMethod("GenericTestMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance);
                 if (method == null)
                 {
-                    throw new System.InvalidOperationException($"Method 'GenericTestMethod' not found on type {instanceType.FullName}");
+                    throw new global::System.InvalidOperationException($"Method 'GenericTestMethod' not found on type {instanceType.FullName}");
                 }
                 // Make the method generic if it has type parameters
                 if (method.IsGenericMethodDefinition)
@@ -92,7 +92,7 @@ return classMetadata;
                     else
                     {
                         // Fallback: infer type arguments from the actual argument types
-                        var typeArgs = new System.Type[1];
+                        var typeArgs = new global::System.Type[1];
                         for (int i = 0; i < typeArgs.Length && i < args.Length; i++)
                         {
                             typeArgs[i] = args[i]?.GetType() ?? typeof(object);
