@@ -14,6 +14,6 @@ public static class TestInformationGenerator
         var classMetadataExpression = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(typeSymbol, null, writer.IndentLevel);
         var methodMetadataCode = MetadataGenerationHelper.GenerateMethodMetadata(methodSymbol, classMetadataExpression, writer.IndentLevel);
         
-        writer.Append(methodMetadataCode);
+        writer.AppendRaw(methodMetadataCode);
     }
 }

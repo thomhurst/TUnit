@@ -13,7 +13,7 @@ public static class SourceInformationWriter
         var parent = namedTypeSymbol.ContainingType;
         var parentExpression = parent != null ? MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(parent, null, sourceCodeWriter.IndentLevel) : null;
         var classMetadata = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(namedTypeSymbol, parentExpression, sourceCodeWriter.IndentLevel);
-        sourceCodeWriter.Append(classMetadata);
+        sourceCodeWriter.AppendRaw(classMetadata);
         sourceCodeWriter.Append(",");
     }
 
@@ -30,7 +30,26 @@ public static class SourceInformationWriter
     {
         var classMetadataExpression = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(namedTypeSymbol, null, sourceCodeWriter.IndentLevel);
         var methodMetadata = MetadataGenerationHelper.GenerateMethodMetadata(methodSymbol, classMetadataExpression, sourceCodeWriter.IndentLevel);
-        sourceCodeWriter.Append(methodMetadata);
+        
+        // Split the method metadata into lines and handle the first line specially
+        var lines = methodMetadata.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+        
+        if (lines.Length > 0)
+        {
+            // First line continues the current line (the assignment)
+            sourceCodeWriter.Append(lines[0]);
+            
+            // Remaining lines should be properly indented
+            for (int i = 1; i < lines.Length; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(lines[i]) || i < lines.Length - 1)
+                {
+                    sourceCodeWriter.AppendLine();
+                    sourceCodeWriter.Append(lines[i].TrimStart()); // Remove existing indentation, let writer add proper indentation
+                }
+            }
+        }
+        
         sourceCodeWriter.Append($"{suffix}");
         sourceCodeWriter.AppendLine();
     }
