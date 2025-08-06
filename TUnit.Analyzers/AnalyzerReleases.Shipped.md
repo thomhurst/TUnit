@@ -12,6 +12,7 @@ TUnit0014 | Usage | Warning | Public test method missing [Test] attribute - add 
 TUnit0019 | Usage | Error | Test method missing [Test] attribute
 TUnit0048 | Usage | Error | Test methods in non-static classes must not be static
 TUnit0051 | Usage | Error | Test class must be public
+TUnit0052 | Usage | Warning | Multiple constructors found without [TestConstructor] attribute
 
 #### Data Source and Parameter Rules
 Rule ID | Category | Severity | Notes                                          
@@ -60,7 +61,6 @@ Rule ID | Category | Severity | Notes
 --------|----------|----------|------------------------------------------------
 TUnit0015 | Usage | Error | Methods with [Timeout] must have a CancellationToken parameter
 TUnit0031 | Usage | Error | Async void methods not allowed - return Task instead
-TUnit0200 | Usage | Warning | Avoid blocking on async code (.Result, .GetAwaiter().GetResult()) - use await instead
 
 #### AOT Compatibility Rules
 Rule ID | Category | Severity | Notes                                          
