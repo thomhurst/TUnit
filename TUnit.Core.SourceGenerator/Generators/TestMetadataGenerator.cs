@@ -1605,8 +1605,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // Count required parameters (those without default values, excluding CancellationToken)
-            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional);
+            // Count required parameters (those without default values, excluding CancellationToken and params parameters)
+            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional && !p.IsParams);
 
             // Generate runtime logic to handle variable argument counts
             writer.AppendLine("// Invoke with only the arguments that were provided");
@@ -1653,7 +1653,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             writer.AppendLine("default:");
             writer.Indent();
-            if (requiredParamCount == parametersFromArgs.Length)
+            if (requiredParamCount == parametersFromArgs.Length && !hasParams)
             {
                 writer.AppendLine($"throw new global::System.ArgumentException($\"Expected exactly {parametersFromArgs.Length} argument{(parametersFromArgs.Length == 1 ? "" : "s")}, but got {{args.Length}}\");");
             }
@@ -1697,8 +1697,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // Count required parameters (those without default values, excluding CancellationToken)
-            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional);
+            // Count required parameters (those without default values, excluding CancellationToken and params parameters)
+            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional && !p.IsParams);
 
             // Generate runtime logic to handle variable argument counts
             writer.AppendLine("// Invoke with only the arguments that were provided");
@@ -1745,7 +1745,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             writer.AppendLine("default:");
             writer.Indent();
-            if (requiredParamCount == parametersFromArgs.Length)
+            if (requiredParamCount == parametersFromArgs.Length && !hasParams)
             {
                 writer.AppendLine($"throw new global::System.ArgumentException($\"Expected exactly {parametersFromArgs.Length} argument{(parametersFromArgs.Length == 1 ? "" : "s")}, but got {{args.Length}}\");");
             }
