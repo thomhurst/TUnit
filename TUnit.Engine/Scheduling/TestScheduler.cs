@@ -151,22 +151,28 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
         CancellationToken cancellationToken)
     {
-        var tests = new List<AbstractExecutableTest>();
-        while (queue.TryDequeue(out var test, out _))
+        var testsWithPriority = new List<(AbstractExecutableTest Test, TestPriority Priority)>();
+        while (queue.TryDequeue(out var test, out var priority))
         {
-            tests.Add(test);
+            testsWithPriority.Add((test, priority));
         }
 
-        // Sort by execution order from the plan
-        tests.Sort((a, b) =>
+        // Sort by NotInParallel Order first, then by execution order from the plan for dependency resolution
+        testsWithPriority.Sort((a, b) =>
         {
-            var aOrder = plan.ExecutionOrder.TryGetValue(a, out var ao) ? ao : int.MaxValue;
-            var bOrder = plan.ExecutionOrder.TryGetValue(b, out var bo) ? bo : int.MaxValue;
+            // Primary sort: NotInParallel Order (from TestPriority)
+            var priorityComparison = a.Priority.CompareTo(b.Priority);
+            if (priorityComparison != 0)
+                return priorityComparison;
+
+            // Secondary sort: ExecutionPlan order for dependency resolution when NotInParallel orders are equal
+            var aOrder = plan.ExecutionOrder.TryGetValue(a.Test, out var ao) ? ao : int.MaxValue;
+            var bOrder = plan.ExecutionOrder.TryGetValue(b.Test, out var bo) ? bo : int.MaxValue;
             return aOrder.CompareTo(bOrder);
         });
 
         // Execute sequentially
-        foreach (var test in tests)
+        foreach (var (test, _) in testsWithPriority)
         {
             await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
         }
@@ -180,22 +186,28 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
         CancellationToken cancellationToken)
     {
-        var tests = new List<AbstractExecutableTest>();
-        while (queue.TryDequeue(out var test, out _))
+        var testsWithPriority = new List<(AbstractExecutableTest Test, TestPriority Priority)>();
+        while (queue.TryDequeue(out var test, out var priority))
         {
-            tests.Add(test);
+            testsWithPriority.Add((test, priority));
         }
 
-        // Sort by execution order
-        tests.Sort((a, b) =>
+        // Sort by NotInParallel Order first, then by execution order from the plan for dependency resolution
+        testsWithPriority.Sort((a, b) =>
         {
-            var aOrder = plan.ExecutionOrder.TryGetValue(a, out var ao) ? ao : int.MaxValue;
-            var bOrder = plan.ExecutionOrder.TryGetValue(b, out var bo) ? bo : int.MaxValue;
+            // Primary sort: NotInParallel Order (from TestPriority)
+            var priorityComparison = a.Priority.CompareTo(b.Priority);
+            if (priorityComparison != 0)
+                return priorityComparison;
+
+            // Secondary sort: ExecutionPlan order for dependency resolution when NotInParallel orders are equal
+            var aOrder = plan.ExecutionOrder.TryGetValue(a.Test, out var ao) ? ao : int.MaxValue;
+            var bOrder = plan.ExecutionOrder.TryGetValue(b.Test, out var bo) ? bo : int.MaxValue;
             return aOrder.CompareTo(bOrder);
         });
 
         // Execute sequentially within this key
-        foreach (var test in tests)
+        foreach (var (test, _) in testsWithPriority)
         {
             await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
         }
