@@ -154,9 +154,21 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // Tuples implement IEnumerable but should be treated as single values
         else if (methodResult is System.Collections.IEnumerable enumerable and not string && !DataSourceHelpers.IsTuple(methodResult))
         {
-            foreach (var item in enumerable)
+            // Optimize for large enumerables by pre-converting to array and using cached result
+            var items = enumerable.Cast<object?>().ToArray();
+            var objectArrays = new object?[items.Length][];
+            
+            // Pre-compute all ToObjectArray calls to avoid repeated conversion
+            for (int i = 0; i < items.Length; i++)
             {
-                yield return () => Task.FromResult<object?[]?>(item.ToObjectArray());
+                objectArrays[i] = items[i].ToObjectArray();
+            }
+            
+            // Return factory functions that reference pre-computed arrays
+            for (int i = 0; i < objectArrays.Length; i++)
+            {
+                var capturedArray = objectArrays[i];
+                yield return () => Task.FromResult<object?[]?>(capturedArray);
             }
         }
         else
