@@ -131,7 +131,17 @@ public class AotConverterGenerator : IIncrementalGenerator
             writer.Indent();
             
             writer.AppendLine("if (value == null) return null;");
-            writer.AppendLine($"if (value is {sourceTypeName} typedValue)");
+            
+            // Handle tuple types specially to avoid positional pattern issues
+            var patternTypeName = sourceTypeName;
+            if (conversion.SourceType.IsTupleType && conversion.SourceType is INamedTypeSymbol namedSourceType)
+            {
+                // For tuple types, use the underlying ValueTuple type for pattern matching
+                // instead of the literal tuple syntax to avoid positional pattern errors
+                patternTypeName = namedSourceType.TupleUnderlyingType?.GloballyQualified() ?? sourceTypeName;
+            }
+            
+            writer.AppendLine($"if (value is {patternTypeName} typedValue)");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine($"return ({targetTypeName})typedValue;");
