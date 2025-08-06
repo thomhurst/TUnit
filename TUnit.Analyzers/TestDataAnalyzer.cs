@@ -808,20 +808,52 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        // Get type arguments from ITypedDataSourceAttribute<T> interface
+        // Get type arguments from the attribute or its base types
         var typeArguments = ImmutableArray<ITypeSymbol>.Empty;
         
-        // Use the exact same logic as the source generator
-        if (attribute.AttributeClass?.AllInterfaces.FirstOrDefault(x => x.IsGenericType && 
-                x.ConstructedFrom.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.ITypedDataSourceAttribute.WithGlobalPrefix + "`1") 
-            is { } typedDataSourceInterface)
+        // First, try the same approach as the source generator: look for ITypedDataSourceAttribute<T> interface
+        var typedInterface = attribute.AttributeClass?.AllInterfaces
+            .FirstOrDefault(i => i.IsGenericType && 
+                i.ConstructedFrom.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.ITypedDataSourceAttribute.WithGlobalPrefix + "`1");
+                
+        if (typedInterface != null)
         {
-            typeArguments = typedDataSourceInterface.TypeArguments;
+            // If the type is a tuple, extract its elements
+            if (typedInterface.TypeArguments.Length == 1 && 
+                typedInterface.TypeArguments[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+            {
+                typeArguments = ImmutableArray.CreateRange(tupleType.TupleElements.Select(x => x.Type));
+            }
+            else
+            {
+                typeArguments = typedInterface.TypeArguments;
+            }
         }
-        // Fallback: if no ITypedDataSourceAttribute<T> interface found, use the attribute's own type arguments for backward compatibility
-        else if (attribute.AttributeClass?.TypeArguments.IsEmpty == false)
+        else
         {
-            typeArguments = attribute.AttributeClass.TypeArguments;
+            // Fallback: Look specifically for DataSourceGeneratorAttribute or AsyncDataSourceGeneratorAttribute base types
+            // which contain the actual data type arguments, not the custom attribute's type parameters
+            foreach (var baseType in selfAndBaseTypes)
+            {
+                if (baseType.IsGenericType && !baseType.TypeArguments.IsEmpty)
+                {
+                    var originalDef = baseType.OriginalDefinition;
+                    var metadataName = originalDef?.ToDisplayString();
+                    
+                    if (metadataName?.Contains("DataSourceGeneratorAttribute") == true ||
+                        metadataName?.Contains("AsyncDataSourceGeneratorAttribute") == true)
+                    {
+                        typeArguments = baseType.TypeArguments;
+                        break;
+                    }
+                }
+            }
+            
+            // Final fallback: if no specific data source generator base type found, use the attribute's own type arguments
+            if (typeArguments.IsEmpty && attribute.AttributeClass?.TypeArguments.IsEmpty == false)
+            {
+                typeArguments = attribute.AttributeClass.TypeArguments;
+            }
         }
 
         // If still no type arguments (like ArgumentsAttribute which returns object?[]?),

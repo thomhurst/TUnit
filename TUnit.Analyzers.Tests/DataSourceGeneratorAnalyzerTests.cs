@@ -36,6 +36,7 @@ public class DataSourceGeneratorAnalyzerTests
         await Verifier
             .VerifyAnalyzerAsync(
                 """
+                using System;
                 using System.Collections.Generic;
                 using TUnit.Core;
 
@@ -84,6 +85,7 @@ public class DataSourceGeneratorAnalyzerTests
         await Verifier
             .VerifyAnalyzerAsync(
                 """
+                using System;
                 using System.Collections.Generic;
                 using TUnit.Core;
 
@@ -102,15 +104,18 @@ public class DataSourceGeneratorAnalyzerTests
                 // This should produce TUnit0001 error since types don't match:
                 // Attribute produces: string
                 // Constructor expects: int
-                [WrongTypeGenerator<int>]
-                public class TypeMismatchTest(int {|TUnit0001:value|})
+                [{|#0:WrongTypeGenerator<int>|}]
+                public class TypeMismatchTest(int value)
                 {
                     [Test]
                     public void SomeTest()
                     {
                     }
                 }
-                """
+                """,
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("string", "int")
             );
     }
 }
