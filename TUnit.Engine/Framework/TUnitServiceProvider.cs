@@ -59,6 +59,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var loggerFactory = frameworkServiceProvider.GetLoggerFactory();
         var outputDevice = frameworkServiceProvider.GetOutputDevice();
         CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
+        var configuration = frameworkServiceProvider.GetConfiguration();
+        
+        // Initialize TestContext.Configuration with the adapted configuration
+        TestContext.Configuration = new ConfigurationAdapter(configuration);
 
         VerbosityService = Register(new VerbosityService(CommandLineOptions));
         DiscoveryDiagnostics.Initialize(VerbosityService);
