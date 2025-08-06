@@ -69,7 +69,7 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
         object semaphore;
         if (_configuration.Strategy == ParallelismStrategy.Adaptive)
         {
-            var initialParallelism = Environment.ProcessorCount * 4;
+            var initialParallelism = Math.Min(Environment.ProcessorCount * 4, _configuration.AdaptiveMaxParallelism);
             var adaptiveSemaphore = new AdaptiveSemaphore(initialParallelism, _configuration.AdaptiveMaxParallelism);
             _adaptiveController = new AdaptiveParallelismController(
                 adaptiveSemaphore,
