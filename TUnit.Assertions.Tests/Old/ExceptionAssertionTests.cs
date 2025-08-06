@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Throws;
-
-namespace TUnit.Assertions.Tests.Old;
+﻿namespace TUnit.Assertions.Tests.Old;
 
 public class ExceptionAssertionTests
 {

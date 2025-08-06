@@ -9,6 +9,12 @@ public class WebApplicationFactory : WebApplicationFactory<Program>, IAsyncIniti
 {
     private int _configuredWebHostCalled;
 
+    [ClassDataSource<InMemoryKafka>(Shared = SharedType.PerTestSession)]
+    public required InMemoryKafka Kafka { get; init; }
+
+    [ClassDataSource<KafkaUI>(Shared = SharedType.PerTestSession)]
+    public required KafkaUI KafkaUI { get; init; }
+
     [ClassDataSource<InMemoryRedis>(Shared = SharedType.PerTestSession)]
     public required InMemoryRedis Redis { get; init; }
 
@@ -32,8 +38,9 @@ public class WebApplicationFactory : WebApplicationFactory<Program>, IAsyncIniti
         {
             configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                { "Redis:ConnectionString", Redis.PostgreSqlContainer.GetConnectionString() },
-                { "PostgreSql:ConnectionString", PostgreSql.PostgreSqlContainer.GetConnectionString() }
+                { "Redis:ConnectionString", Redis.Container.GetConnectionString() },
+                { "PostgreSql:ConnectionString", PostgreSql.Container.GetConnectionString() },
+                { "Kafka:ConnectionString", Kafka.Container.GetBootstrapAddress() },
             });
         });
     }

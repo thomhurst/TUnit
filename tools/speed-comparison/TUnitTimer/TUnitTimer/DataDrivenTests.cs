@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace TUnitTimer;
 
 public class DataDrivenTests
@@ -7,10 +9,10 @@ public class DataDrivenTests
     [Arguments(10, 20, 30)]
     [Arguments(-5, 5, 0)]
     [Arguments(100, 200, 300)]
-    public void ParameterizedAdditionTest(int a, int b, int expected)
+    public async Task ParameterizedAdditionTest(int a, int b, int expected)
     {
         var result = a + b;
-        Assert.That(result).IsEqualTo(expected);
+        await Assert.That(result).IsEqualTo(expected);
     }
 
     [Test]
@@ -19,32 +21,34 @@ public class DataDrivenTests
     [Arguments("TUnit", "TUNIT")]
     [Arguments("Testing", "TESTING")]
     [Arguments("Framework", "FRAMEWORK")]
-    public void ParameterizedStringTest(string input, string expected)
+    public async Task ParameterizedStringTest(string input, string expected)
     {
         var result = input.ToUpper();
-        Assert.That(result).IsEqualTo(expected);
-        Assert.That(result.Length).IsEqualTo(input.Length);
+        await Assert.That(result).IsEqualTo(expected);
+        await Assert.That(result.Length).IsEqualTo(input.Length);
     }
 
     [Test]
     [MethodDataSource(nameof(ComplexTestData))]
-    public void MethodDataSourceTest(TestData data)
+    public async Task MethodDataSourceTest(TestData data)
     {
         var result = ProcessTestData(data);
-        
-        Assert.That(result.Id).IsEqualTo(data.Id);
-        Assert.That(result.ProcessedValue).IsEqualTo(data.Value * 2);
-        Assert.That(result.IsValid).IsTrue();
+
+        await Assert.That(result.Id).IsEqualTo(data.Id);
+        await Assert.That(result.ProcessedValue).IsEqualTo(data.Value * 2);
+        await Assert.That(result.IsValid).IsTrue();
     }
 
     [Test]
+#pragma warning disable TUnit0001
     [ClassDataSource<TestDataProvider>]
-    public void ClassDataSourceTest(int value, string text, bool flag)
+#pragma warning restore TUnit0001
+    public async Task ClassDataSourceTest(int value, string text, bool flag)
     {
-        Assert.That(value).IsGreaterThan(0);
-        Assert.That(text).IsNotNull();
-        Assert.That(text.Length).IsGreaterThan(0);
-        Assert.That(flag).IsTrue();
+        await Assert.That(value).IsGreaterThan(0);
+        await Assert.That(text).IsNotNull();
+        await Assert.That(text.Length).IsGreaterThan(0);
+        await Assert.That(flag).IsTrue();
     }
 
     [Test]
@@ -52,14 +56,14 @@ public class DataDrivenTests
     [Arguments(new int[] { 10, 20, 30 }, 60)]
     [Arguments(new int[] { -5, 0, 5 }, 0)]
     [Arguments(new int[] { 100 }, 100)]
-    public void ArrayParameterTest(int[] numbers, int expectedSum)
+    public async Task ArrayParameterTest(int[] numbers, int expectedSum)
     {
         var sum = numbers.Sum();
         var average = numbers.Average();
-        
-        Assert.That(sum).IsEqualTo(expectedSum);
-        Assert.That(average).IsEqualTo((double)expectedSum / numbers.Length);
-        Assert.That(numbers).IsNotEmpty();
+
+        await Assert.That(sum).IsEqualTo(expectedSum);
+        await Assert.That(average).IsEqualTo((double) expectedSum / numbers.Length);
+        await Assert.That(numbers).IsNotEmpty();
     }
 
     public static IEnumerable<TestData> ComplexTestData()
@@ -95,15 +99,15 @@ public class DataDrivenTests
         public bool IsValid { get; set; }
     }
 
-    public class TestDataProvider : IDataSourceGenerator<(int, string, bool)>
+    public class TestDataProvider : DataSourceGeneratorAttribute<(int, string, bool)>
     {
-        public IEnumerable<(int, string, bool)> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+        protected override IEnumerable<Func<(int, string, bool)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
-            yield return (1, "First", true);
-            yield return (2, "Second", true);
-            yield return (3, "Third", true);
-            yield return (4, "Fourth", true);
-            yield return (5, "Fifth", true);
+            yield return () => (1, "First", true);
+            yield return () => (2, "Second", true);
+            yield return () => (3, "Third", true);
+            yield return () => (4, "Fourth", true);
+            yield return () => (5, "Fifth", true);
         }
     }
 }

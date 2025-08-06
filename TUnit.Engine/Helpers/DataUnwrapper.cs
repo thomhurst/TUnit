@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using TUnit.Core.Helpers;
+﻿using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Helpers;
 

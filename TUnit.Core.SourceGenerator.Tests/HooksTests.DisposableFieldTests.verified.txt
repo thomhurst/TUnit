@@ -26,7 +26,7 @@ public sealed class GeneratedHookRegistry
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to initialize hook registry: {ex.Message}", ex);
+            throw new global::System.InvalidOperationException($"Failed to initialize hook registry: {ex.Message}", ex);
         }
     }
     private static void PopulateSourcesDictionaries()
@@ -67,8 +67,9 @@ prop.ContainingTypeMetadata = classMetadata;
 return classMetadata;
 })
 },
-                HookExecutor = null!,
+                HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
+                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
                 Body = global_TUnit_TestProject_DisposableFieldTests_Setup_0Params_Body
             }
         );
@@ -108,8 +109,9 @@ prop.ContainingTypeMetadata = classMetadata;
 return classMetadata;
 })
 },
-                HookExecutor = null!,
+                HookExecutor = DefaultExecutor.Instance,
                 Order = 0,
+                RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextAfterTestHookIndex(),
                 Body = global_TUnit_TestProject_DisposableFieldTests_Blah_0Params_Body
             }
         );
@@ -127,7 +129,7 @@ return classMetadata;
 }
 internal static class HookModuleInitializer
 {
-    [ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         _ = new GeneratedHookRegistry();

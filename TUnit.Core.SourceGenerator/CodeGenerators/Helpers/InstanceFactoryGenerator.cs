@@ -89,8 +89,21 @@ public static class InstanceFactoryGenerator
         var constructors = typeSymbol.GetMembers()
             .OfType<IMethodSymbol>()
             .Where(m => m.MethodKind == MethodKind.Constructor && !m.IsStatic)
-            .OrderByDescending(c => c.Parameters.Length)
             .ToList();
+
+        // First, check for constructors marked with [TestConstructor]
+        var testConstructorMarked = constructors
+            .Where(c => c.GetAttributes().Any(a => 
+                a.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix))
+            .ToList();
+
+        if (testConstructorMarked.Count > 0)
+        {
+            return testConstructorMarked[0];
+        }
+
+        // If no [TestConstructor] found, use existing logic
+        constructors = constructors.OrderByDescending(c => c.Parameters.Length).ToList();
 
         if (constructors.Count == 1)
         {

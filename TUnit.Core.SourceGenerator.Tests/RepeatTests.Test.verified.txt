@@ -15,10 +15,6 @@ internal sealed class RepeatTests_One_TestSource_GUID : global::TUnit.Core.Inter
             TestName = "One",
             TestClassType = typeof(global::TUnit.TestProject.RepeatTests),
             TestMethodName = "One",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 1,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -82,12 +78,12 @@ return classMetadata;
                 var typedInstance = (global::TUnit.TestProject.RepeatTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.One();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.One();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -97,7 +93,7 @@ return classMetadata;
 }
 internal static class RepeatTests_One_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.RepeatTests), new RepeatTests_One_TestSource_GUID());
@@ -124,10 +120,6 @@ internal sealed class RepeatTests_Two_TestSource_GUID : global::TUnit.Core.Inter
             TestName = "Two",
             TestClassType = typeof(global::TUnit.TestProject.RepeatTests),
             TestMethodName = "Two",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 2,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -191,12 +183,12 @@ return classMetadata;
                 var typedInstance = (global::TUnit.TestProject.RepeatTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Two();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Two();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -206,7 +198,7 @@ return classMetadata;
 }
 internal static class RepeatTests_Two_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.RepeatTests), new RepeatTests_Two_TestSource_GUID());
@@ -233,10 +225,6 @@ internal sealed class RepeatTests_Three_TestSource_GUID : global::TUnit.Core.Int
             TestName = "Three",
             TestClassType = typeof(global::TUnit.TestProject.RepeatTests),
             TestMethodName = "Three",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 3,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -299,12 +287,12 @@ return classMetadata;
                 var typedInstance = (global::TUnit.TestProject.RepeatTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Three();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Three();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -314,7 +302,7 @@ return classMetadata;
 }
 internal static class RepeatTests_Three_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.RepeatTests), new RepeatTests_Three_TestSource_GUID());

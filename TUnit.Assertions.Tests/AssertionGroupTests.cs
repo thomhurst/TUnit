@@ -1,5 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Throws;
-using TUnit.Assertions.AssertionBuilders.Groups;
+﻿using TUnit.Assertions.AssertionBuilders.Groups;
 
 namespace TUnit.Assertions.Tests;
 

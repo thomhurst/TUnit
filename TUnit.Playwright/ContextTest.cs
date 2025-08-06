@@ -19,6 +19,11 @@ public class ContextTest : BrowserTest
     [Before(HookType.Test, "", 0)]
     public async Task ContextSetup(TestContext testContext)
     {
+        if (Browser == null)
+        {
+            throw new InvalidOperationException($"Browser is not initialized. This may indicate that {nameof(BrowserTest)}.{nameof(BrowserSetup)} did not execute properly.");
+        }
+        
         Context = await NewContext(ContextOptions(testContext)).ConfigureAwait(false);
     }
 }

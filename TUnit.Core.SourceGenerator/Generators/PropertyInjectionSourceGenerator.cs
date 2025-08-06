@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
@@ -31,9 +32,18 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             return false;
         }
 
-        return typeDecl.Members
+        // Include classes with properties that have attributes
+        var hasAttributedProperties = typeDecl.Members
             .OfType<PropertyDeclarationSyntax>()
             .Any(prop => prop.AttributeLists.Count > 0);
+
+        // Also include classes that inherit from data source attributes
+        var inheritsFromDataSource = typeDecl.BaseList?.Types.Any(t =>
+            t.ToString().Contains("DataSourceGeneratorAttribute") ||
+            t.ToString().Contains("AsyncDataSourceGeneratorAttribute") ||
+            t.ToString().Contains("DataSourceAttribute")) == true;
+
+        return hasAttributedProperties || inheritsFromDataSource;
     }
 
     private static ClassWithDataSourceProperties? GetClassWithDataSourceProperties(GeneratorSyntaxContext context)
@@ -53,6 +63,9 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         {
             return null;
         }
+
+        // Check if this type itself implements IDataSourceAttribute (for custom data source classes)
+        var implementsDataSource = typeSymbol.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default);
 
         var currentType = typeSymbol;
         var processedProperties = new HashSet<string>();
@@ -93,7 +106,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             }
         }
 
-        if (propertiesWithDataSources.Count == 0)
+        // Include the class if it has properties with data sources OR if it implements IDataSourceAttribute
+        if (propertiesWithDataSources.Count == 0 && !implementsDataSource)
         {
             return null;
         }
@@ -121,11 +135,19 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
         WriteFileHeader(sourceBuilder);
 
-        GenerateModuleInitializer(sourceBuilder, classes);
+        // Generate all property sources first with stable names
+        var classNameMapping = new Dictionary<INamedTypeSymbol, string>(SymbolEqualityComparer.Default);
+        foreach (var classInfo in classes)
+        {
+            var sourceClassName = GetPropertySourceClassName(classInfo.ClassSymbol);
+            classNameMapping[classInfo.ClassSymbol] = sourceClassName;
+        }
+
+        GenerateModuleInitializer(sourceBuilder, classes, classNameMapping);
 
         foreach (var classInfo in classes)
         {
-            GeneratePropertySource(sourceBuilder, classInfo);
+            GeneratePropertySource(sourceBuilder, classInfo, classNameMapping[classInfo.ClassSymbol]);
         }
 
 
@@ -145,18 +167,19 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine();
     }
 
-    private static void GenerateModuleInitializer(StringBuilder sb, ImmutableArray<ClassWithDataSourceProperties> classes)
+    private static void GenerateModuleInitializer(StringBuilder sb, ImmutableArray<ClassWithDataSourceProperties> classes, Dictionary<INamedTypeSymbol, string> classNameMapping)
     {
         sb.AppendLine("internal static class PropertyInjectionInitializer");
         sb.AppendLine("{");
-        sb.AppendLine("    [System.Runtime.CompilerServices.ModuleInitializer]");
+        sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
         sb.AppendLine("    public static void InitializePropertyInjectionSources()");
         sb.AppendLine("    {");
 
         foreach (var classInfo in classes)
         {
-            var sourceClassName = GetPropertySourceClassName(classInfo.ClassSymbol);
-            sb.AppendLine($"        PropertySourceRegistry.Register(typeof({classInfo.ClassSymbol.ToDisplayString()}), new {sourceClassName}());");
+            var sourceClassName = classNameMapping[classInfo.ClassSymbol];
+            var classTypeName = classInfo.ClassSymbol.GloballyQualified();
+            sb.AppendLine($"        PropertySourceRegistry.Register(typeof({classTypeName}), new {sourceClassName}());");
         }
 
         sb.AppendLine("    }");
@@ -166,9 +189,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine();
     }
 
-    private static void GeneratePropertySource(StringBuilder sb, ClassWithDataSourceProperties classInfo)
+    private static void GeneratePropertySource(StringBuilder sb, ClassWithDataSourceProperties classInfo, string sourceClassName)
     {
-        var sourceClassName = GetPropertySourceClassName(classInfo.ClassSymbol);
         var classTypeName = classInfo.ClassSymbol.GloballyQualified();
 
         sb.AppendLine($"internal sealed class {sourceClassName} : IPropertySource");
@@ -198,7 +220,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 var containingType = propInfo.Property.ContainingType.ToDisplayString();
                 
                 sb.AppendLine("#if NET8_0_OR_GREATER");
-                sb.AppendLine($"    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
+                sb.AppendLine($"    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
                 sb.AppendLine($"    private static extern ref {propertyType} Get{propInfo.Property.Name}BackingField({containingType} instance);");
                 sb.AppendLine("#endif");
                 sb.AppendLine();
@@ -211,9 +233,16 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("    public IEnumerable<PropertyInjectionMetadata> GetPropertyMetadata()");
         sb.AppendLine("    {");
 
-        foreach (var propInfo in classInfo.Properties)
+        if (classInfo.Properties.Length == 0)
         {
-            GeneratePropertyMetadata(sb, propInfo, classInfo.ClassSymbol, classTypeName);
+            sb.AppendLine("        yield break;");
+        }
+        else
+        {
+            foreach (var propInfo in classInfo.Properties)
+            {
+                GeneratePropertyMetadata(sb, propInfo, classInfo.ClassSymbol, classTypeName);
+            }
         }
 
         sb.AppendLine("    }");
@@ -283,7 +312,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             }
             sb.AppendLine("#else");
             sb.AppendLine($"                var backingField = typeof({propInfo.Property.ContainingType.ToDisplayString()}).GetField(\"<{propInfo.Property.Name}>k__BackingField\",");
-            sb.AppendLine("                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");
+            sb.AppendLine("                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
             sb.AppendLine($"                backingField?.SetValue({instanceVariableName}, value);");
             sb.AppendLine("#endif");
         }
@@ -315,9 +344,9 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static string GetPropertySourceClassName(INamedTypeSymbol classSymbol)
     {
-        var typeName = classSymbol.ToDisplayString().Replace(".", "_").Replace("<", "_").Replace(">", "_").Replace("+", "_");
-        var hash = Math.Abs(typeName.GetHashCode()).ToString("x8");
-        return $"{typeName}_PropertyInjectionSource_{hash}";
+        // Use a random GUID for uniqueness
+        var guid = Guid.NewGuid();
+        return $"PropertyInjectionSource_{guid:N}";
     }
 
     private static string FormatTypedConstant(TypedConstant constant)

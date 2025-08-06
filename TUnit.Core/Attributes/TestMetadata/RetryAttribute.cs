@@ -94,7 +94,7 @@ public class RetryAttribute : TUnitAttribute, ITestDiscoveryEventReceiver, IScop
     /// <inheritdoc />
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        context.SetRetryCount(Times, ShouldRetry);
+        context.SetRetryLimit(Times, ShouldRetry);
         return default(ValueTask);
     }
 }

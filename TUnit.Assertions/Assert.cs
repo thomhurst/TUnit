@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Extensions;

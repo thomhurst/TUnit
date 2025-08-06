@@ -190,7 +190,7 @@ public abstract class AssertionBuilder : ISource
 
         var completedTask = await Task.WhenAny(_assertionDataTask.AsTask(), GetMinimumWaitTask(minimumWait.Value, cts.Token));
 
-        await cts.CancelAsync();
+        cts.Cancel();
 
         return await completedTask;
     }

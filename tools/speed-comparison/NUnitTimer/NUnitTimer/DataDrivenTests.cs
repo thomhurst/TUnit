@@ -30,7 +30,7 @@ public class DataDrivenTests
     public void TestCaseSourceTest(TestData data)
     {
         var result = ProcessTestData(data);
-        
+
         Assert.That(result.Id, Is.EqualTo(data.Id));
         Assert.That(result.ProcessedValue, Is.EqualTo(data.Value * 2));
         Assert.That(result.IsValid, Is.True);
@@ -54,15 +54,15 @@ public class DataDrivenTests
     {
         var sum = numbers.Sum();
         var average = numbers.Average();
-        
+
         Assert.That(sum, Is.EqualTo(expectedSum));
         Assert.That(average, Is.EqualTo((double)expectedSum / numbers.Length));
         Assert.That(numbers, Is.Not.Empty);
     }
 
     [Test]
-    [ValueSource(nameof(GetValues))]
-    public void ValueSourceTest(int value)
+    [TestCaseSource(nameof(GetValues))]
+    public void TestCaseSource(int value)
     {
         var squared = value * value;
         Assert.That(squared, Is.GreaterThan(0));

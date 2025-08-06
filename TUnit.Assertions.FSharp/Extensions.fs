@@ -1,7 +1,7 @@
 ﻿namespace TUnit.Assertions.FSharp
 
 open TUnit.Assertions.AssertionBuilders
-open TUnit.Assertions.AssertConditions.Throws
+open TUnit.Assertions.Extensions
 
 module Operations =
     [<CustomOperation(MaintainsVariableSpaceUsingBind = true)>]

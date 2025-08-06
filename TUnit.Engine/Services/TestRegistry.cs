@@ -2,11 +2,9 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
-using TUnit.Engine.Scheduling;
 
 namespace TUnit.Engine.Services;
 
@@ -17,18 +15,18 @@ internal sealed class TestRegistry : ITestRegistry
 {
     private readonly ConcurrentQueue<PendingDynamicTest> _pendingTests = new();
     private readonly TestBuilderPipeline? _testBuilderPipeline;
-    private readonly HookOrchestratingTestExecutorAdapter _hookOrchestratingTestExecutorAdapter;
+    private readonly Scheduling.TestExecutor _testExecutor;
     private readonly CancellationToken _sessionCancellationToken;
     private readonly string? _sessionId;
 
 
     public TestRegistry(TestBuilderPipeline testBuilderPipeline,
-        HookOrchestratingTestExecutorAdapter hookOrchestratingTestExecutorAdapter,
+        Scheduling.TestExecutor testExecutor,
         string sessionId,
         CancellationToken sessionCancellationToken)
     {
         _testBuilderPipeline = testBuilderPipeline;
-        _hookOrchestratingTestExecutorAdapter = hookOrchestratingTestExecutorAdapter;
+        _testExecutor = testExecutor;
         _sessionId = sessionId;
         _sessionCancellationToken = sessionCancellationToken;
     }
@@ -37,7 +35,9 @@ internal sealed class TestRegistry : ITestRegistry
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicFields
+        | DynamicallyAccessedMemberTypes.NonPublicFields)] T>(TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
     {
         // Create a dynamic test discovery result
         var discoveryResult = new DynamicDiscoveryResult
@@ -93,7 +93,7 @@ internal sealed class TestRegistry : ITestRegistry
         foreach (var test in builtTests)
         {
             // The SingleTestExecutor will handle all execution-related message publishing
-            await _hookOrchestratingTestExecutorAdapter.ExecuteTestAsync(test, _sessionCancellationToken);
+            await _testExecutor.ExecuteTestAsync(test, _sessionCancellationToken);
         }
     }
 
@@ -128,12 +128,6 @@ internal sealed class TestRegistry : ITestRegistry
             TestName = testName,
             TestClassType = result.TestClassType,
             TestMethodName = methodInfo.Name,
-            IsSkipped = result.Attributes.OfType<SkipAttribute>().Any(),
-            SkipReason = result.Attributes.OfType<SkipAttribute>().FirstOrDefault()?.Reason,
-            TimeoutMs = (int?)result.Attributes.OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout.TotalMilliseconds,
-            RetryCount = result.Attributes.OfType<RetryAttribute>().FirstOrDefault()?.Times ?? 0,
-            RepeatCount = result.Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0,
-            CanRunInParallel = !result.Attributes.OfType<NotInParallelAttribute>().Any(),
             Dependencies = result.Attributes.OfType<DependsOnAttribute>().Select(a => a.ToTestDependency()).ToArray(),
             DataSources = [],
             ClassDataSources = [],
@@ -150,7 +144,7 @@ internal sealed class TestRegistry : ITestRegistry
             GenericMethodInfo = null,
             GenericMethodTypeArguments = null,
             AttributeFactory = () => result.Attributes.ToArray(),
-            PropertyInjections = PropertyInjector.DiscoverInjectableProperties(result.TestClassType)
+            PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(result.TestClassType)
         });
     }
 

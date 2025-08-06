@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <EnablePolyfill>false</EnablePolyfill>
+    <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
     <NoWarn>$(NoWarn);NU1510</NoWarn>
   </PropertyGroup>
 
@@ -36,4 +36,7 @@
   <ItemGroup Condition="'$(IsPackTarget)' == 'true'">
     <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
   </ItemGroup>
+
+  <Import Project="..\Library.targets" />
+
 </Project>

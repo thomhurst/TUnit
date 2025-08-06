@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace TUnitTimer;
 
 public class SetupTeardownTests : IDisposable
@@ -20,7 +22,7 @@ public class SetupTeardownTests : IDisposable
         _setupCounter++;
         _testData.Clear();
         _testData.AddRange(new[] { "Apple", "Banana", "Cherry", "Date", "Elderberry" });
-        
+
         _cache.Clear();
         for (int i = 0; i < 10; i++)
         {
@@ -36,51 +38,51 @@ public class SetupTeardownTests : IDisposable
     }
 
     [Test]
-    public void TestWithSetupData()
+    public async Task TestWithSetupData()
     {
-        Assert.That(_testData).HasCount(5);
-        Assert.That(_testData[0]).IsEqualTo("Apple");
-        Assert.That(_cache).HasCount(10);
-        Assert.That(_cache[5]).IsEqualTo("Value_5");
-        
+        await Assert.That(_testData).HasCount(5);
+        await Assert.That(_testData[0]).IsEqualTo("Apple");
+        await Assert.That(_cache).HasCount(10);
+        await Assert.That(_cache[5]).IsEqualTo("Value_5");
+
         _testData.Add("Fig");
-        Assert.That(_testData).HasCount(6);
+        await Assert.That(_testData).HasCount(6);
     }
 
     [Test]
-    public void TestDataIsolation()
+    public async Task TestDataIsolation()
     {
-        Assert.That(_testData).HasCount(5);
-        Assert.That(_cache).HasCount(10);
-        
+        await Assert.That(_testData).HasCount(5);
+        await Assert.That(_cache).HasCount(10);
+
         _testData.RemoveAt(0);
         _cache.Remove(0);
-        
-        Assert.That(_testData).HasCount(4);
-        Assert.That(_cache).HasCount(9);
+
+        await Assert.That(_testData).HasCount(4);
+        await Assert.That(_cache).HasCount(9);
     }
 
     [Test]
-    public void TestWithDataManipulation()
+    public async Task TestWithDataManipulation()
     {
         var sorted = _testData.OrderBy(x => x).ToList();
         var reversed = _testData.AsEnumerable().Reverse().ToList();
-        
-        Assert.That(sorted[0]).IsEqualTo("Apple");
-        Assert.That(sorted[4]).IsEqualTo("Elderberry");
-        Assert.That(reversed[0]).IsEqualTo("Elderberry");
-        Assert.That(reversed[4]).IsEqualTo("Apple");
+
+        await Assert.That(sorted[0]).IsEqualTo("Apple");
+        await Assert.That(sorted[4]).IsEqualTo("Elderberry");
+        await Assert.That(reversed[0]).IsEqualTo("Elderberry");
+        await Assert.That(reversed[4]).IsEqualTo("Apple");
     }
 
     [Test]
     [Repeat(5)]
-    public void RepeatedTestWithSetup()
+    public async Task RepeatedTestWithSetup()
     {
-        Assert.That(_testData).HasCount(5);
-        Assert.That(_cache).HasCount(10);
-        
+        await Assert.That(_testData).HasCount(5);
+        await Assert.That(_cache).HasCount(10);
+
         var sum = _cache.Keys.Sum();
-        Assert.That(sum).IsEqualTo(45);
+        await Assert.That(sum).IsEqualTo(45);
     }
 
     public void Dispose()
@@ -90,7 +92,6 @@ public class SetupTeardownTests : IDisposable
     }
 }
 
-[Before(Class)]
 public class ClassSetupTeardownTests
 {
     private static List<int> _sharedData = new();
@@ -111,29 +112,29 @@ public class ClassSetupTeardownTests
     }
 
     [Test]
-    public void TestUsingClassData1()
+    public async Task TestUsingClassData1()
     {
-        Assert.That(_isInitialized).IsTrue();
-        Assert.That(_sharedData).HasCount(100);
-        Assert.That(_sharedData.Sum()).IsEqualTo(5050);
+        await Assert.That(_isInitialized).IsTrue();
+        await Assert.That(_sharedData).HasCount(100);
+        await Assert.That(_sharedData.Sum()).IsEqualTo(5050);
     }
 
     [Test]
-    public void TestUsingClassData2()
+    public async Task TestUsingClassData2()
     {
-        Assert.That(_isInitialized).IsTrue();
+        await Assert.That(_isInitialized).IsTrue();
         var evens = _sharedData.Where(x => x % 2 == 0).ToList();
-        Assert.That(evens).HasCount(50);
-        Assert.That(evens.Sum()).IsEqualTo(2550);
+        await Assert.That(evens).HasCount(50);
+        await Assert.That(evens.Sum()).IsEqualTo(2550);
     }
 
     [Test]
-    public void TestUsingClassData3()
+    public async Task TestUsingClassData3()
     {
-        Assert.That(_isInitialized).IsTrue();
+        await Assert.That(_isInitialized).IsTrue();
         var primes = _sharedData.Where(IsPrime).ToList();
-        Assert.That(primes).HasCount(25);
-        Assert.That(primes.First()).IsEqualTo(2);
+        await Assert.That(primes).HasCount(25);
+        await Assert.That(primes.First()).IsEqualTo(2);
     }
 
     private static bool IsPrime(int n)
@@ -141,7 +142,7 @@ public class ClassSetupTeardownTests
         if (n <= 1) return false;
         if (n <= 3) return true;
         if (n % 2 == 0 || n % 3 == 0) return false;
-        
+
         for (int i = 5; i * i <= n; i += 6)
         {
             if (n % i == 0 || n % (i + 2) == 0)

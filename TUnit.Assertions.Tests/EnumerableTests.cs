@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using TUnit.Assertions.AssertConditions.Throws;
-
 namespace TUnit.Assertions.Tests;
 
 public class EnumerableTests

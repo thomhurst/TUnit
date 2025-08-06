@@ -1,10 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.Assertions.Throws;
+using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.AssertConditions.Throws;
+namespace TUnit.Assertions.Extensions;
 
 public static class ThrowsExtensions
 {

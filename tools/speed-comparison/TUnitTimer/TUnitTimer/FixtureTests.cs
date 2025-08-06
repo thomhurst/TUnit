@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace TUnitTimer;
 
 public interface ITestDatabase
@@ -11,7 +13,7 @@ public interface ITestDatabase
 public class TestDatabase : ITestDatabase, IDisposable
 {
     private readonly Dictionary<string, string> _data = new();
-    
+
     public TestDatabase()
     {
         // Simulate expensive initialization
@@ -20,12 +22,12 @@ public class TestDatabase : ITestDatabase, IDisposable
             _data[$"init_{i}"] = $"value_{i}";
         }
     }
-    
+
     public void Add(string key, string value) => _data[key] = value;
     public string? Get(string key) => _data.TryGetValue(key, out var value) ? value : null;
     public int Count => _data.Count;
     public void Clear() => _data.Clear();
-    
+
     public void Dispose()
     {
         _data.Clear();
@@ -36,13 +38,13 @@ public class FixtureTests : IDisposable
 {
     private readonly ITestDatabase _database;
     private readonly List<string> _testKeys;
-    
+
     public FixtureTests()
     {
         _database = new TestDatabase();
         _testKeys = new List<string>();
     }
-    
+
     [Before(Test)]
     public void SetupTest()
     {
@@ -54,7 +56,7 @@ public class FixtureTests : IDisposable
             _database.Add(key, $"test_value_{i}");
         }
     }
-    
+
     [After(Test)]
     public void CleanupTest()
     {
@@ -64,45 +66,45 @@ public class FixtureTests : IDisposable
         }
         _testKeys.Clear();
     }
-    
+
     [Test]
-    public void TestDatabaseOperations()
+    public async Task TestDatabaseOperations()
     {
-        Assert.That(_database.Count).IsGreaterThanOrEqualTo(110);
-        
+        await Assert.That(_database.Count).IsGreaterThanOrEqualTo(110);
+
         var value = _database.Get("test_5");
-        Assert.That(value).IsEqualTo("test_value_5");
-        
+        await Assert.That(value).IsEqualTo("test_value_5");
+
         _database.Add("custom_key", "custom_value");
-        Assert.That(_database.Get("custom_key")).IsEqualTo("custom_value");
+        await Assert.That(_database.Get("custom_key")).IsEqualTo("custom_value");
     }
-    
+
     [Test]
-    public void TestFixtureIsolation()
+    public async Task TestFixtureIsolation()
     {
         var initialCount = _database.Count;
-        
+
         for (int i = 0; i < 5; i++)
         {
             _database.Add($"isolation_{i}", $"value_{i}");
         }
-        
-        Assert.That(_database.Count).IsEqualTo(initialCount + 5);
-        Assert.That(_database.Get("isolation_2")).IsEqualTo("value_2");
+
+        await Assert.That(_database.Count).IsEqualTo(initialCount + 5);
+        await Assert.That(_database.Get("isolation_2")).IsEqualTo("value_2");
     }
-    
+
     [Test]
     [Repeat(3)]
-    public void TestRepeatedWithFixture()
+    public async Task TestRepeatedWithFixture()
     {
-        Assert.That(_testKeys).HasCount(10);
-        Assert.That(_database.Get("test_0")).IsNotNull();
-        Assert.That(_database.Get("test_9")).IsNotNull();
-        
+        await Assert.That(_testKeys).HasCount(10);
+        await Assert.That(_database.Get("test_0")).IsNotNull();
+        await Assert.That(_database.Get("test_9")).IsNotNull();
+
         var sum = _testKeys.Count + _database.Count;
-        Assert.That(sum).IsGreaterThan(100);
+        await Assert.That(sum).IsGreaterThan(100);
     }
-    
+
     public void Dispose()
     {
         (_database as IDisposable)?.Dispose();
@@ -113,35 +115,35 @@ public class SharedFixtureTests
 {
     private static readonly TestDatabase SharedDatabase = new();
     private readonly string _instanceId = Guid.NewGuid().ToString();
-    
+
     [Test]
-    public void TestWithSharedResource1()
+    public async Task TestWithSharedResource1()
     {
         var key = $"shared_{_instanceId}_1";
         SharedDatabase.Add(key, "value1");
-        
-        Assert.That(SharedDatabase.Get(key)).IsEqualTo("value1");
-        Assert.That(SharedDatabase.Count).IsGreaterThan(100);
+
+        await Assert.That(SharedDatabase.Get(key)).IsEqualTo("value1");
+        await Assert.That(SharedDatabase.Count).IsGreaterThan(100);
     }
-    
+
     [Test]
-    public void TestWithSharedResource2()
+    public async Task TestWithSharedResource2()
     {
         var key = $"shared_{_instanceId}_2";
         SharedDatabase.Add(key, "value2");
-        
-        Assert.That(SharedDatabase.Get(key)).IsEqualTo("value2");
-        Assert.That(SharedDatabase.Count).IsGreaterThan(100);
+
+        await Assert.That(SharedDatabase.Get(key)).IsEqualTo("value2");
+        await Assert.That(SharedDatabase.Count).IsGreaterThan(100);
     }
-    
+
     [Test]
-    public void TestWithSharedResource3()
+    public async Task TestWithSharedResource3()
     {
         var count = SharedDatabase.Count;
         var key = $"shared_{_instanceId}_3";
         SharedDatabase.Add(key, "value3");
-        
-        Assert.That(SharedDatabase.Count).IsEqualTo(count + 1);
-        Assert.That(SharedDatabase.Get(key)).IsNotNull();
+
+        await Assert.That(SharedDatabase.Count).IsEqualTo(count + 1);
+        await Assert.That(SharedDatabase.Get(key)).IsNotNull();
     }
 }

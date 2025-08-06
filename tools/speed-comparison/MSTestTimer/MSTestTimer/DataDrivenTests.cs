@@ -3,7 +3,7 @@ namespace MSTestTimer;
 [TestClass]
 public class DataDrivenTests
 {
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(1, 2, 3)]
     [DataRow(10, 20, 30)]
     [DataRow(-5, 5, 0)]
@@ -14,7 +14,7 @@ public class DataDrivenTests
         Assert.AreEqual(expected, result);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("hello", "HELLO")]
     [DataRow("world", "WORLD")]
     [DataRow("MSTest", "MSTEST")]
@@ -27,7 +27,7 @@ public class DataDrivenTests
         Assert.AreEqual(input.Length, result.Length);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DynamicData(nameof(ComplexTestData), DynamicDataSourceType.Method)]
     public void DynamicDataSourceTest(TestData data)
     {
@@ -38,7 +38,7 @@ public class DataDrivenTests
         Assert.IsTrue(result.IsValid);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DynamicData(nameof(GetTestCases), DynamicDataSourceType.Method)]
     public void ClassDataSourceTest(int value, string text, bool flag)
     {
@@ -48,7 +48,7 @@ public class DataDrivenTests
         Assert.IsTrue(flag);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(new int[] { 1, 2, 3, 4, 5 }, 15)]
     [DataRow(new int[] { 10, 20, 30 }, 60)]
     [DataRow(new int[] { -5, 0, 5 }, 0)]

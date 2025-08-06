@@ -17,6 +17,6 @@ public class EnumDoesNotHaveSameNameAsCondition<TEnum, TExpected>(TExpected expe
     )
     {
         return AssertionResult.FailIf(actualValue is null, "the source enum is null")
-            .OrFailIf(Enum.GetName(typeof(TEnum), actualValue!) == Enum.GetName(typeof(TExpected), expected), "the name was the same");
+            .OrFailIf(actualValue is not null && Enum.GetName(typeof(TEnum), actualValue) == Enum.GetName(typeof(TExpected), expected), "the name was the same");
     }
 }
