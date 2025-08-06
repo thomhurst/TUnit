@@ -41,7 +41,7 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new VerbosityCommandProvider(extension));
 
         testApplicationBuilder.TestHost.AddDataConsumer(_ => githubReporter);
-        testApplicationBuilder.TestHost.AddTestApplicationLifecycleCallbacks(_ => githubReporter);
+        testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => githubReporter);
     }
 
     private static IReadOnlyCollection<ITestFrameworkCapability> CreateCapabilities(IServiceProvider serviceProvider)
