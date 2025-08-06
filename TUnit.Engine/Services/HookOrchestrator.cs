@@ -27,7 +27,9 @@ internal sealed class HookOrchestrator
     private readonly ConcurrentDictionary<Type, int> _classTestCounts = new();
     
     // Store session context to flow to assembly/class hooks
+#if NET
     private ExecutionContext? _sessionExecutionContext;
+#endif
 
     public HookOrchestrator(IHookCollectionService hookCollectionService, TUnitFrameworkLogger logger, IContextProvider contextProvider, TUnitServiceProvider serviceProvider)
     {

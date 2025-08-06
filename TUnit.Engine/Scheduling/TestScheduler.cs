@@ -192,10 +192,20 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 await semaphore.WaitAsync(cancellationToken);
 
-                var task = ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken)
-                    .ContinueWith(_ => semaphore.Release(), cancellationToken);
+                // Create a task that releases semaphore on completion without Task.Run overhead
+                async Task ExecuteWithSemaphoreRelease()
+                {
+                    try
+                    {
+                        await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
+                }
 
-                tasks.Add(task);
+                tasks.Add(ExecuteWithSemaphoreRelease());
             }
 
             // Wait for all tests in this order group to complete
@@ -216,10 +226,20 @@ internal sealed class TestScheduler : ITestScheduler
         {
             await semaphore.WaitAsync(cancellationToken);
 
-            var task = ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken)
-                .ContinueWith(_ => semaphore.Release(), cancellationToken);
+            // Create a task that releases semaphore on completion without Task.Run overhead
+            async Task ExecuteWithSemaphoreRelease()
+            {
+                try
+                {
+                    await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }
 
-            tasks.Add(task);
+            tasks.Add(ExecuteWithSemaphoreRelease());
         }
 
         await Task.WhenAll(tasks);

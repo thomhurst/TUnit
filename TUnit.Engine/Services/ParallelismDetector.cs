@@ -8,6 +8,9 @@ namespace TUnit.Engine.Services;
 /// </summary>
 public static class ParallelismDetector
 {
+    // Cache the detected parallelism value to avoid repeated system calls
+    private static readonly Lazy<int> s_cachedOptimalParallelism = new(DetectOptimalParallelismCore);
+    
     /// <summary>
     /// Detects optimal parallelism for test execution based on system capabilities.
     /// Uses aggressive parallelism by default (2-3x processor count) since most tests
@@ -16,6 +19,11 @@ public static class ParallelismDetector
     /// </summary>
     /// <returns>Optimal number of parallel threads</returns>
     public static int DetectOptimalParallelism()
+    {
+        return s_cachedOptimalParallelism.Value;
+    }
+    
+    private static int DetectOptimalParallelismCore()
     {
         var processorCount = Environment.ProcessorCount;
         var availableMemoryGb = GetAvailableMemoryGB();
