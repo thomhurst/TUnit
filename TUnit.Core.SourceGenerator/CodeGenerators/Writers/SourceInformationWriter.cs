@@ -13,7 +13,41 @@ public static class SourceInformationWriter
         var parent = namedTypeSymbol.ContainingType;
         var parentExpression = parent != null ? MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(parent, null, sourceCodeWriter.IndentLevel) : null;
         var classMetadata = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(namedTypeSymbol, parentExpression, sourceCodeWriter.IndentLevel);
-        sourceCodeWriter.AppendRaw(classMetadata);
+        
+        // Handle multi-line class metadata similar to method metadata
+        var lines = classMetadata.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+        
+        if (lines.Length > 0)
+        {
+            sourceCodeWriter.Append(lines[0].TrimStart());
+            
+            if (lines.Length > 1)
+            {
+                var secondLine = lines[1];
+                var baseIndentSpaces = secondLine.Length - secondLine.TrimStart().Length;
+                
+                for (int i = 1; i < lines.Length; i++)
+                {
+                    if (!string.IsNullOrWhiteSpace(lines[i]) || i < lines.Length - 1)
+                    {
+                        sourceCodeWriter.AppendLine();
+                        
+                        var line = lines[i];
+                        var lineIndentSpaces = line.Length - line.TrimStart().Length;
+                        var relativeIndent = Math.Max(0, lineIndentSpaces - baseIndentSpaces);
+                        var extraIndentLevels = relativeIndent / 4;
+                        
+                        var trimmedLine = line.TrimStart();
+                        for (int j = 0; j < extraIndentLevels; j++)
+                        {
+                            sourceCodeWriter.Append("    ");
+                        }
+                        sourceCodeWriter.Append(trimmedLine);
+                    }
+                }
+            }
+        }
+        
         sourceCodeWriter.Append(",");
     }
 
@@ -36,16 +70,37 @@ public static class SourceInformationWriter
         
         if (lines.Length > 0)
         {
-            // First line continues the current line (the assignment)
-            sourceCodeWriter.Append(lines[0]);
+            // First line continues the current line (the assignment) - no extra indentation
+            var firstLine = lines[0].TrimStart();
+            sourceCodeWriter.Append(firstLine);
             
-            // Remaining lines should be properly indented
-            for (int i = 1; i < lines.Length; i++)
+            // For remaining lines, preserve relative indentation
+            if (lines.Length > 1)
             {
-                if (!string.IsNullOrWhiteSpace(lines[i]) || i < lines.Length - 1)
+                // Find the base indentation of the generated content (from the second line which should be the opening brace)
+                var secondLine = lines[1];
+                var baseIndentSpaces = secondLine.Length - secondLine.TrimStart().Length;
+                
+                // Remaining lines should maintain their relative indentation
+                for (int i = 1; i < lines.Length; i++)
                 {
-                    sourceCodeWriter.AppendLine();
-                    sourceCodeWriter.Append(lines[i].TrimStart()); // Remove existing indentation, let writer add proper indentation
+                    if (!string.IsNullOrWhiteSpace(lines[i]) || i < lines.Length - 1)
+                    {
+                        sourceCodeWriter.AppendLine();
+                        
+                        var line = lines[i];
+                        var lineIndentSpaces = line.Length - line.TrimStart().Length;
+                        var relativeIndent = Math.Max(0, lineIndentSpaces - baseIndentSpaces);
+                        var extraIndentLevels = relativeIndent / 4; // Assuming 4 spaces per level
+                        
+                        // Apply the relative indentation
+                        var trimmedLine = line.TrimStart();
+                        for (int j = 0; j < extraIndentLevels; j++)
+                        {
+                            sourceCodeWriter.Append("    ");
+                        }
+                        sourceCodeWriter.Append(trimmedLine);
+                    }
                 }
             }
         }
