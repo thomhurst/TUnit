@@ -28,6 +28,7 @@ public class TestHooksWriter : BaseHookWriter
 
             sourceBuilder.Append($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
             sourceBuilder.Append($"Order = {model.Order},");
+            sourceBuilder.Append($"RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNext{(model.HookLocationType == HookLocationType.Before ? "Before" : "After")}EveryTestHookIndex(),");
             sourceBuilder.Append($"""FilePath = @"{model.FilePath}",""");
             sourceBuilder.Append($"LineNumber = {model.LineNumber},");
 
@@ -55,6 +56,7 @@ public class TestHooksWriter : BaseHookWriter
 
         sourceBuilder.Append($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
         sourceBuilder.Append($"Order = {model.Order},");
+        sourceBuilder.Append($"RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNext{(model.HookLocationType == HookLocationType.Before ? "Before" : "After")}TestHookIndex(),");
 
         sourceBuilder.Append("},");
     }

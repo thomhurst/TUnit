@@ -15,11 +15,13 @@ public class TestNugetPackageModule : AbstractTestNugetPackageModule
     public override string ProjectName => "TUnit.NugetTester.csproj";
 }
 
+[RunOnWindowsOnly, RunOnLinuxOnly]
 public class TestFSharpNugetPackageModule : AbstractTestNugetPackageModule
 {
     public override string ProjectName => "TUnit.NugetTester.FSharp.fsproj";
 }
 
+[RunOnWindowsOnly, RunOnLinuxOnly]
 public class TestVBNugetPackageModule : AbstractTestNugetPackageModule
 {
     public override string ProjectName => "TUnit.NugetTester.VB.vbproj";
@@ -37,7 +39,6 @@ public abstract class AbstractTestNugetPackageModule : TestBaseModule
         {
             yield return "net9.0";
             yield return "net8.0";
-            yield return "net6.0";
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

@@ -1,6 +1,6 @@
 # AOT Compatibility and Generic Tests
 
-TUnit's AOT-only mode provides compile-time safety and performance benefits, but requires specific patterns for advanced scenarios like generic tests and complex data sources.
+TUnit's source generation mode provides compile-time safety and performance benefits, but requires specific patterns for advanced scenarios like generic tests and complex data sources.
 
 ## Generic Test Instantiation
 
@@ -320,13 +320,13 @@ public class DataSourceDiagnostics
 }
 ```
 
-## Performance Benefits
+## Benefits
 
-The AOT-only mode provides significant performance improvements:
+The source generation mode provides several advantages:
 
-- **2-3x faster test execution** compared to reflection-based approach
+- **Improved test execution performance** compared to reflection-based approaches
 - **Zero runtime type introspection** - all types resolved at compile time
-- **Minimal memory allocations** through strongly-typed delegates
+- **Reduced memory allocations** through strongly-typed delegates
 - **Better code optimization** from the compiler and runtime
 
 ## Configuration Reference
@@ -334,14 +334,9 @@ The AOT-only mode provides significant performance improvements:
 Configure AOT behavior through your `.editorconfig` file:
 
 ```ini
-# TUnit AOT Configuration
-tunit.aot_only_mode = true              # Enable AOT-only mode (default: true)
-tunit.generic_depth_limit = 5           # Max generic nesting depth (default: 5)  
-tunit.enable_property_injection = true  # Enable property DI (default: true)
-tunit.enable_valuetask_hooks = true     # Enable ValueTask hooks (default: true)
+# TUnit Configuration
+# The only configurable option for troubleshooting:
 tunit.enable_verbose_diagnostics = false # Verbose diagnostics (default: false)
-tunit.max_generic_instantiations = 10   # Max generic instantiations (default: 10)
-tunit.enable_auto_generic_discovery = true # Auto-discover generics (default: true)
 ```
 
 These settings help balance compilation time, binary size, and functionality based on your project's needs.

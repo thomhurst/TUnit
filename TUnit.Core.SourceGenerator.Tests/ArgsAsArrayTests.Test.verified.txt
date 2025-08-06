@@ -15,10 +15,6 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
             TestName = "Params",
             TestClassType = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
             TestMethodName = "Params",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -61,7 +57,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string[]))
     Name = "arguments",
     TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"), 1),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Params", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
@@ -115,7 +111,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -143,7 +139,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -153,7 +149,7 @@ return classMetadata;
 }
 internal static class ArgsAsArrayTests_Params_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ArgsAsArrayTests), new ArgsAsArrayTests_Params_TestSource_GUID());
@@ -180,10 +176,6 @@ internal sealed class ArgsAsArrayTests_NonParams_TestSource_GUID : global::TUnit
             TestName = "NonParams",
             TestClassType = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
             TestMethodName = "NonParams",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -226,7 +218,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string[]))
     Name = "arguments",
     TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"), 1),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("NonParams", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("NonParams", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
@@ -265,7 +257,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -278,7 +270,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -288,7 +280,7 @@ return classMetadata;
 }
 internal static class ArgsAsArrayTests_NonParams_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ArgsAsArrayTests), new ArgsAsArrayTests_NonParams_TestSource_GUID());
@@ -315,10 +307,6 @@ internal sealed class ArgsAsArrayTests_ParamsEnumerable_TestSource_GUID : global
             TestName = "ParamsEnumerable",
             TestClassType = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
             TestMethodName = "ParamsEnumerable",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -361,7 +349,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Gener
     Name = "arguments",
     TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib")),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("ParamsEnumerable", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("ParamsEnumerable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
@@ -415,7 +403,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -443,7 +431,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -453,7 +441,7 @@ return classMetadata;
 }
 internal static class ArgsAsArrayTests_ParamsEnumerable_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ArgsAsArrayTests), new ArgsAsArrayTests_ParamsEnumerable_TestSource_GUID());
@@ -480,10 +468,6 @@ internal sealed class ArgsAsArrayTests_Enumerable_TestSource_GUID : global::TUni
             TestName = "Enumerable",
             TestClassType = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
             TestMethodName = "Enumerable",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -526,7 +510,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Gener
     Name = "arguments",
     TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib")),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Enumerable", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Enumerable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
@@ -565,7 +549,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -578,7 +562,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -588,7 +572,7 @@ return classMetadata;
 }
 internal static class ArgsAsArrayTests_Enumerable_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ArgsAsArrayTests), new ArgsAsArrayTests_Enumerable_TestSource_GUID());
@@ -615,10 +599,6 @@ internal sealed class ArgsAsArrayTests_Following_Non_Params_TestSource_GUID : gl
             TestName = "Following_Non_Params",
             TestClassType = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
             TestMethodName = "Following_Non_Params",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -663,14 +643,14 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
     Name = "i",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Generic.IEnumerable<string>))
 {
     Name = "arguments",
     TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib")),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[1]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[1]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
@@ -709,7 +689,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -722,7 +702,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -732,7 +712,7 @@ return classMetadata;
 }
 internal static class ArgsAsArrayTests_Following_Non_Params_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ArgsAsArrayTests), new ArgsAsArrayTests_Following_Non_Params_TestSource_GUID());

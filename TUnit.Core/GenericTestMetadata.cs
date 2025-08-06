@@ -69,15 +69,7 @@ public sealed class GenericTestMetadata : TestMetadata
 
                     if (classInstance != null)
                     {
-                        // Apply property values using unified PropertyInjector
-                        await PropertyInjector.InjectPropertiesAsync(
-                            testContext,
-                            classInstance,
-                            PropertyDataSources,
-                            PropertyInjections,
-                            MethodMetadata,
-                            testContext.TestDetails.TestId);
-
+                        // Property injection is handled by SingleTestExecutor after instance creation
                         return classInstance;
                     }
 
@@ -130,15 +122,7 @@ public sealed class GenericTestMetadata : TestMetadata
 
                     var instance = InstanceFactory(typeArgs, context.ClassArguments ?? Array.Empty<object?>());
 
-                    // Apply property values using unified PropertyInjector
-                    await PropertyInjector.InjectPropertiesAsync(
-                        testContext,
-                        instance,
-                        PropertyDataSources,
-                        PropertyInjections,
-                        MethodMetadata,
-                        testContext.TestDetails.TestId);
-
+                    // Property injection is handled by SingleTestExecutor after instance creation
                     return instance;
                 };
 

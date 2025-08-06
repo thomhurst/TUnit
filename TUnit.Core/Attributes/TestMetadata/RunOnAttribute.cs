@@ -49,17 +49,23 @@ public sealed class RunOnAttribute(OS OperatingSystem) : SkipAttribute($"Test is
     /// <inheritdoc />
     public override Task<bool> ShouldSkip(TestRegisteredContext context)
     {
-        // Check if the current platform matches any of the allowed operating systems
-        var shouldRun =
-            (OperatingSystem.HasFlag(OS.Windows) && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if (OperatingSystem.HasFlag(OS.Windows) && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return Task.FromResult(false);
+        }
 #if NET
-            // Only validate Linux and macOS on .NET 5+ where these OS flags are available
-            || (OperatingSystem.HasFlag(OS.Linux) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            || (OperatingSystem.HasFlag(OS.MacOs) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-#endif
-            ;
+        // Only validate Linux and macOS on .NET 5+ where these OS flags are available
+        if (OperatingSystem.HasFlag(OS.Linux) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return Task.FromResult(false);
+        }
 
-        // Return true if the test should be skipped (opposite of shouldRun)
-        return Task.FromResult(!shouldRun);
+        if (OperatingSystem.HasFlag(OS.MacOs) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return Task.FromResult(false);
+        }
+#endif
+
+        return Task.FromResult(true);
     }
 }

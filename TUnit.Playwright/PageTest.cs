@@ -10,6 +10,11 @@ public class PageTest : ContextTest
     [Before(HookType.Test, "", 0)]
     public async Task PageSetup()
     {
+        if (Context == null)
+        {
+            throw new InvalidOperationException($"Browser context is not initialized. This may indicate that {nameof(ContextTest)}.{nameof(ContextSetup)} did not execute properly.");
+        }
+        
         Page = await Context.NewPageAsync().ConfigureAwait(false);
     }
 }

@@ -426,15 +426,6 @@
     <data name="TUnit0058Title" xml:space="preserve">
         <value>Hook method has unknown parameters</value>
     </data>
-    <data name="TUnit0200Description" xml:space="preserve">
-        <value>Blocking on async code with .Result or GetAwaiter().GetResult() can cause deadlocks. Use await instead.</value>
-    </data>
-    <data name="TUnit0200MessageFormat" xml:space="preserve">
-        <value>Avoid using '{0}' on async operations as it can cause deadlocks. Use 'await' instead.</value>
-    </data>
-    <data name="TUnit0200Title" xml:space="preserve">
-        <value>Avoid blocking async calls</value>
-    </data>
     <data name="TUnit0300Description" xml:space="preserve">
         <value>Generic types and methods may not be AOT-compatible when using dynamic type creation. Consider using concrete types or ensure all generic combinations are known at compile time.</value>
     </data>
@@ -443,6 +434,15 @@
     </data>
     <data name="TUnit0300Title" xml:space="preserve">
         <value>Generic type or method may not be AOT-compatible</value>
+    </data>
+    <data name="TUnit0052Description" xml:space="preserve">
+        <value>When a test class has multiple constructors, one should be marked with [TestConstructor] to avoid ambiguity.</value>
+    </data>
+    <data name="TUnit0052MessageFormat" xml:space="preserve">
+        <value>Class '{0}' has multiple constructors but none are marked with [TestConstructor]. Consider adding [TestConstructor] to specify which constructor to use.</value>
+    </data>
+    <data name="TUnit0052Title" xml:space="preserve">
+        <value>Multiple constructors found without [TestConstructor] attribute</value>
     </data>
     <data name="TUnit0301Description" xml:space="preserve">
         <value>Tuple types require reflection for property/field access which is not AOT-compatible. Consider using concrete types or value deconstruction.</value>

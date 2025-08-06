@@ -18,6 +18,7 @@ public static class GlobalTestHooksWriter
 
         sourceBuilder.Append($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
         sourceBuilder.Append($"Order = {model.Order},");
+        sourceBuilder.Append($"RegistrationIndex = {GetRegistrationIndexMethod(model.HookLevel, model.HookLocationType, model.IsEveryHook)},");
         sourceBuilder.Append($"""FilePath = @"{model.FilePath}",""");
         sourceBuilder.Append($"LineNumber = {model.LineNumber},");
 
@@ -79,5 +80,23 @@ public static class GlobalTestHooksWriter
         }
 
         return string.Join(", ", args);
+    }
+
+    private static string GetRegistrationIndexMethod(string hookType, HookLocationType hookLocationType, bool isEveryHook)
+    {
+        var hookTypeSimple = hookType switch
+        {
+            "TUnit.Core.HookType.Test" => "Test",
+            "TUnit.Core.HookType.Class" => "Class",
+            "TUnit.Core.HookType.Assembly" => "Assembly",
+            "TUnit.Core.HookType.TestSession" => "TestSession",
+            "TUnit.Core.HookType.TestDiscovery" => "TestDiscovery",
+            _ => throw new ArgumentOutOfRangeException(nameof(hookType), hookType, null)
+        };
+
+        var prefix = hookLocationType == HookLocationType.Before ? "Before" : "After";
+        var everyPart = isEveryHook ? "Every" : "";
+        
+        return $"global::TUnit.Core.HookRegistrationIndices.GetNext{prefix}{everyPart}{hookTypeSimple}HookIndex()";
     }
 }

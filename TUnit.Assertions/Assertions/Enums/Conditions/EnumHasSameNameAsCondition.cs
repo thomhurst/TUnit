@@ -17,6 +17,6 @@ public class EnumHasSameNameAsCondition<TEnum, TExpected>(TExpected expected) : 
     )
     {
         return AssertionResult.FailIf(actualValue is null, "the source enum is null")
-            .OrFailIf(Enum.GetName(typeof(TEnum), actualValue!) != Enum.GetName(typeof(TExpected), expected), $"the name was {Enum.GetName(typeof(TEnum), actualValue!)}");
+            .OrFailIf(actualValue is not null && Enum.GetName(typeof(TEnum), actualValue) != Enum.GetName(typeof(TExpected), expected), actualValue is not null ? $"the name was {Enum.GetName(typeof(TEnum), actualValue)}" : "the name was null");
     }
 }

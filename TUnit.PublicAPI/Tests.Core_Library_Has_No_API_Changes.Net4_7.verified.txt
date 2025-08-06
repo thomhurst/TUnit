@@ -3,13 +3,15 @@
 [assembly: .(".NETStandard,Version=v2.0", FrameworkDisplayName=".NET Standard 2.0")]
 namespace 
 {
+    [.DebuggerDisplay("{.Name}.{}")]
     public abstract class AbstractExecutableTest
     {
         protected AbstractExecutableTest() { }
         public required object?[] Arguments { get; init; }
         public object?[] ClassArguments { get; init; }
+        public . CompletionTask { get; }
         public required .TestContext Context { get; init; }
-        public .AbstractExecutableTest[] Dependencies { get; set; }
+        public .ResolvedDependency[] Dependencies { get; set; }
         public ? Duration { get; }
         public ? EndTime { get; set; }
         public virtual .TestMetadata Metadata { get; init; }
@@ -433,12 +435,6 @@ namespace
         Property = 2,
         Parameter = 3,
     }
-    public static class DataSourcePropertyInjectionRegistry
-    {
-        public static .PropertyInjectionData[]? GetInjectionData( dataSourceType) { }
-        public static .PropertyDataSource[]? GetPropertyDataSources( dataSourceType) { }
-        public static void Register( dataSourceType, .PropertyInjectionData[] injectionData, .PropertyDataSource[] propertyDataSources) { }
-    }
     public class DedicatedThreadExecutor : .GenericAbstractExecutor, ., .
     {
         public DedicatedThreadExecutor() { }
@@ -503,12 +499,11 @@ namespace
         public string GetDisplayName() { }
         public void SetDisplayName(string displayName) { }
         public void SetDisplayNameFormatter( formatterType) { }
-        public void SetParallelConstraint(object constraint) { }
+        public void SetParallelConstraint(. constraint) { }
         public void SetPriority(. priority) { }
-        public void SetRetryCount(int retryCount, <.TestContext, , int, .<bool>> shouldRetry) { }
         public void SetRetryLimit(int retryLimit) { }
+        public void SetRetryLimit(int retryCount, <.TestContext, , int, .<bool>> shouldRetry) { }
         public void SetRunOnDiscovery(bool runOnDiscovery) { }
-        public void TransferTo(.TestContext testContext) { }
     }
     public class DiscoveredTest<T> : .DiscoveredTest
         where T :  class
@@ -732,6 +727,25 @@ namespace
         public int Line { get; }
         public int Order { get; init; }
     }
+    public static class HookRegistrationIndices
+    {
+        public static int GetNextAfterAssemblyHookIndex() { }
+        public static int GetNextAfterClassHookIndex() { }
+        public static int GetNextAfterEveryAssemblyHookIndex() { }
+        public static int GetNextAfterEveryClassHookIndex() { }
+        public static int GetNextAfterEveryTestHookIndex() { }
+        public static int GetNextAfterTestDiscoveryHookIndex() { }
+        public static int GetNextAfterTestHookIndex() { }
+        public static int GetNextAfterTestSessionHookIndex() { }
+        public static int GetNextBeforeAssemblyHookIndex() { }
+        public static int GetNextBeforeClassHookIndex() { }
+        public static int GetNextBeforeEveryAssemblyHookIndex() { }
+        public static int GetNextBeforeEveryClassHookIndex() { }
+        public static int GetNextBeforeEveryTestHookIndex() { }
+        public static int GetNextBeforeTestDiscoveryHookIndex() { }
+        public static int GetNextBeforeTestHookIndex() { }
+        public static int GetNextBeforeTestSessionHookIndex() { }
+    }
     public enum HookType
     {
         Test = 0,
@@ -954,15 +968,12 @@ namespace
     public sealed class PropertyInjectionService
     {
         public PropertyInjectionService() { }
-        public static . InjectPropertiesIntoArgumentsAsync(object?[] arguments, .<string, object?> objectBag, .MethodMetadata methodMetadata, .TestContextEvents events) { }
-        public static . InjectPropertiesIntoObjectAsync(object instance, .<string, object?> objectBag, .MethodMetadata methodMetadata, .TestContextEvents events) { }
-    }
-    public static class PropertyInjector
-    {
         public static .PropertyInjectionData CreatePropertyInjection(.PropertyInfo property) { }
         public static <object, object?> CreatePropertySetter(.PropertyInfo property) { }
         public static .PropertyInjectionData[] DiscoverInjectableProperties( type) { }
         public static . InjectPropertiesAsync(.TestContext testContext, object instance, .PropertyDataSource[] propertyDataSources, .PropertyInjectionData[] injectionData, .MethodMetadata testInformation, string testSessionId) { }
+        public static . InjectPropertiesIntoArgumentsAsync(object?[] arguments, .<string, object?> objectBag, .MethodMetadata methodMetadata, .TestContextEvents events) { }
+        public static . InjectPropertiesIntoObjectAsync(object instance, .<string, object?>? objectBag, .MethodMetadata? methodMetadata, .TestContextEvents? events) { }
     }
     [.DebuggerDisplay("{Type} {Name})")]
     public class PropertyMetadata : .MemberMetadata, <.PropertyMetadata>
@@ -978,6 +989,13 @@ namespace
     }
     public static class PropertySourceRegistry
     {
+        public static .PropertyInjectionData[] DiscoverInjectableProperties( type) { }
+        [return: .(new string[] {
+                "Type",
+                "Source"})]
+        public static .<<, ..IPropertySource>> GetAllSources() { }
+        public static .PropertyDataSource[]? GetPropertyDataSources( type) { }
+        public static .PropertyInjectionData[]? GetPropertyInjectionData( type) { }
         public static ..IPropertySource? GetSource( type) { }
         public static void Register( type, ..IPropertySource source) { }
     }
@@ -1008,6 +1026,13 @@ namespace
     {
         public ResettableLazy(string sessionId, .TestBuilderContext testBuilderContext) { }
         public override . ResetLazy() { }
+    }
+    public sealed class ResolvedDependency
+    {
+        public ResolvedDependency() { }
+        public required .TestDependency Metadata { get; init; }
+        public bool ProceedOnFailure { get; }
+        public required .AbstractExecutableTest Test { get; init; }
     }
     [(.Assembly | .Class | .Method)]
     public class RetryAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.RetryAttribute>, ., .
@@ -1078,23 +1103,23 @@ namespace
     }
     public static class Sources
     {
-        public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> AfterAssemblyHooks;
-        public static readonly .<, .<.<.ClassHookContext>>> AfterClassHooks;
-        public static readonly .<.<.AssemblyHookContext>> AfterEveryAssemblyHooks;
-        public static readonly .<.<.ClassHookContext>> AfterEveryClassHooks;
-        public static readonly .<.<.TestContext>> AfterEveryTestHooks;
-        public static readonly .<.<.TestDiscoveryContext>> AfterTestDiscoveryHooks;
+        public static readonly .<.Assembly, .<.>> AfterAssemblyHooks;
+        public static readonly .<, .<.>> AfterClassHooks;
+        public static readonly .<.> AfterEveryAssemblyHooks;
+        public static readonly .<.> AfterEveryClassHooks;
+        public static readonly .<.> AfterEveryTestHooks;
+        public static readonly .<.> AfterTestDiscoveryHooks;
         public static readonly .<, .<.>> AfterTestHooks;
-        public static readonly .<.<.TestSessionContext>> AfterTestSessionHooks;
+        public static readonly .<.> AfterTestSessionHooks;
         public static readonly .<<.Assembly>> AssemblyLoaders;
-        public static readonly .<.Assembly, .<.<.AssemblyHookContext>>> BeforeAssemblyHooks;
-        public static readonly .<, .<.<.ClassHookContext>>> BeforeClassHooks;
-        public static readonly .<.<.AssemblyHookContext>> BeforeEveryAssemblyHooks;
-        public static readonly .<.<.ClassHookContext>> BeforeEveryClassHooks;
-        public static readonly .<.<.TestContext>> BeforeEveryTestHooks;
-        public static readonly .<.<.BeforeTestDiscoveryContext>> BeforeTestDiscoveryHooks;
+        public static readonly .<.Assembly, .<.>> BeforeAssemblyHooks;
+        public static readonly .<, .<.>> BeforeClassHooks;
+        public static readonly .<.> BeforeEveryAssemblyHooks;
+        public static readonly .<.> BeforeEveryClassHooks;
+        public static readonly .<.> BeforeEveryTestHooks;
+        public static readonly .<.> BeforeTestDiscoveryHooks;
         public static readonly .<, .<.>> BeforeTestHooks;
-        public static readonly .<.<.TestSessionContext>> BeforeTestSessionHooks;
+        public static readonly .<.> BeforeTestSessionHooks;
         public static readonly .<.IDynamicTestSource> DynamicTestSources;
         public static readonly .<<.>> GlobalInitializers;
         public static readonly .<..IPropertySource> PropertySources;
@@ -1135,12 +1160,17 @@ namespace
         public .<string, object?> Context { get; set; }
         public .TestMetadata? TestMetadata { get; set; }
     }
+    [(.Constructor)]
+    public sealed class TestConstructorAttribute : .TUnitAttribute
+    {
+        public TestConstructorAttribute() { }
+    }
     [.DebuggerDisplay("{.Name}.{GetDisplayName(),nq}")]
     public class TestContext : .Context
     {
         public TestContext(string testName,  serviceProvider, .ClassHookContext classContext, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
         public .<<object?, string?>> ArgumentDisplayFormatters { get; }
-        public .<string, object?> Artifacts { get; }
+        public .<.Artifact> Artifacts { get; }
         public .CancellationToken CancellationToken { get; set; }
         public .ClassHookContext ClassContext { get; }
         public .<.TestDetails> Dependencies { get; }
@@ -1165,10 +1195,9 @@ namespace
         public static . Configuration { get; }
         public new static .TestContext? Current { get; }
         public static string? OutputDirectory { get; }
-        public static .<string, string> Parameters { get; }
+        public static .<string, .<string>> Parameters { get; }
         public static string WorkingDirectory { get; set; }
         public void AddArtifact(.Artifact artifact) { }
-        public void AddArtifact(string name, object? value) { }
         public void AddLinkedCancellationToken(.CancellationToken cancellationToken) { }
         public string GetDisplayName() { }
         public new string GetErrorOutput() { }
@@ -1232,6 +1261,7 @@ namespace
         public int MethodGenericArity { get; init; }
         public string? MethodName { get; init; }
         public []? MethodParameters { get; init; }
+        public bool ProceedOnFailure { get; init; }
         public bool Equals(.TestDependency? other) { }
         public override bool Equals(object? obj) { }
         public override int GetHashCode() { }
@@ -1292,7 +1322,6 @@ namespace
     {
         protected TestMetadata() { }
         public required <[]> AttributeFactory { get; init; }
-        public bool CanRunInParallel { get; init; }
         public required .IDataSourceAttribute[] ClassDataSources { get; init; }
         public abstract <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
         public required .IDataSourceAttribute[] DataSources { get; init; }
@@ -1302,23 +1331,18 @@ namespace
         public []? GenericMethodTypeArguments { get; init; }
         public .GenericTypeInfo? GenericTypeInfo { get; init; }
         public <[], object?[], object> InstanceFactory { get; init; }
-        public bool IsSkipped { get; init; }
         public int? LineNumber { get; init; }
         public required .MethodMetadata MethodMetadata { get; init; }
         public int ParameterCount { get; init; }
         public [] ParameterTypes { get; init; }
         public required .PropertyDataSource[] PropertyDataSources { get; init; }
         public .PropertyInjectionData[] PropertyInjections { get; init; }
-        public int RepeatCount { get; init; }
-        public int RetryCount { get; init; }
-        public string? SkipReason { get; init; }
         public required  TestClassType { get; init; }
         public <object, object?[], .>? TestInvoker { get; init; }
         public required string TestMethodName { get; init; }
         public string[] TestMethodParameterTypes { get; init; }
         public required string TestName { get; init; }
         public string TestSessionId { get; set; }
-        public int? TimeoutMs { get; init; }
     }
     public class TestMetadata<T> : .TestMetadata, .
         where T :  class
@@ -1818,7 +1842,11 @@ namespace .Helpers
         public static .<object?> ProcessEnumerableDataSource<T>(.<T> enumerable) { }
         public static <.<object?>>[] ProcessTestDataSource<T>(T data, int expectedParameterCount = -1) { }
         public static void RegisterPropertyInitializer<T>(<T, .MethodMetadata, string, .> initializer) { }
+        public static void RegisterTypeCreator<T>(<.MethodMetadata, string, .<T>> creator) { }
+        public static .<object?> ResolveDataSourceForPropertyAsync( containingType, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
+        public static .<object?> ResolveDataSourcePropertyAsync(object instance, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static object?[] ToObjectArray(this object? item) { }
+        public static bool TryCreateWithInitializer( type, .MethodMetadata testInformation, string testSessionId, out object createdInstance) { }
         public static object?[] UnwrapTuple<T1>(<T1> tuple) { }
         public static object?[] UnwrapTuple<T1, T2>(<T1, T2> tuple) { }
         public static object?[] UnwrapTuple<T1, T2, T3>(<T1, T2, T3> tuple) { }
@@ -1953,6 +1981,7 @@ namespace .Hooks
         public required .MethodMetadata MethodInfo { get; init; }
         public string Name { get; }
         public required int Order { get; init; }
+        public required int RegistrationIndex { get; init; }
         public ? Timeout { get; }
         public . ExecuteAsync(.TestContext context, .CancellationToken cancellationToken) { }
         public TAttribute? GetAttribute<TAttribute>()
@@ -1988,6 +2017,7 @@ namespace .Hooks
         public required .MethodMetadata MethodInfo { get; init; }
         public string Name { get; }
         public required int Order { get; init; }
+        public required int RegistrationIndex { get; init; }
         public ? Timeout { get; }
         public TAttribute? GetAttribute<TAttribute>()
             where TAttribute :  { }
