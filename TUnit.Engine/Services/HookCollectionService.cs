@@ -14,6 +14,19 @@ internal sealed class HookCollectionService : IHookCollectionService
     private readonly ConcurrentDictionary<Type, IReadOnlyList<Func<TestContext, CancellationToken, Task>>> _afterEveryTestHooksCache = new();
     private readonly ConcurrentDictionary<Type, IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> _beforeClassHooksCache = new();
     private readonly ConcurrentDictionary<Type, IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> _afterClassHooksCache = new();
+    
+    // Cache for complete hook chains to avoid repeated lookups
+    private readonly ConcurrentDictionary<Type, CompleteHookChain> _completeHookChainCache = new();
+    
+    private sealed class CompleteHookChain
+    {
+        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> BeforeTestHooks { get; init; } = Array.Empty<Func<TestContext, CancellationToken, Task>>();
+        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> AfterTestHooks { get; init; } = Array.Empty<Func<TestContext, CancellationToken, Task>>();
+        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> BeforeEveryTestHooks { get; init; } = Array.Empty<Func<TestContext, CancellationToken, Task>>();
+        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> AfterEveryTestHooks { get; init; } = Array.Empty<Func<TestContext, CancellationToken, Task>>();
+        public IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> BeforeClassHooks { get; init; } = Array.Empty<Func<ClassHookContext, CancellationToken, Task>>();
+        public IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> AfterClassHooks { get; init; } = Array.Empty<Func<ClassHookContext, CancellationToken, Task>>();
+    }
 
     public ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeTestHooksAsync(Type testClassType)
     {

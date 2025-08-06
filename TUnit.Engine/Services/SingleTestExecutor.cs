@@ -213,8 +213,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
     private async Task ExecuteTestWithHooksAsync(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
     {
-        RestoreHookContexts(test.Context);
-
+        // Context restoration is now handled inside ExecuteBeforeTestHooksAsync
         var testClassType = test.Context.TestDetails.ClassType;
         var beforeTestHooks = await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType);
         var afterTestHooks = await _hookCollectionService.CollectAfterTestHooksAsync(testClassType);
@@ -224,6 +223,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             await ExecuteBeforeTestHooksAsync(beforeTestHooks, test.Context, cancellationToken);
 
+            // RestoreExecutionContext only if needed for the test itself
             test.Context.RestoreExecutionContext();
 
             await InvokeTestWithTimeout(test, instance, cancellationToken);
@@ -280,7 +280,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
             try
             {
                 await hook(context, cancellationToken);
-
+                
+                // RestoreExecutionContext after each hook to ensure AsyncLocal values flow correctly
+                // when AddAsyncLocalValues() is called in hooks
                 context.RestoreExecutionContext();
             }
             catch (Exception ex)
@@ -294,13 +296,14 @@ internal class SingleTestExecutor : ISingleTestExecutor
     private async Task ExecuteAfterTestHooksAsync(IReadOnlyList<Func<TestContext, CancellationToken, Task>> hooks, TestContext context, CancellationToken cancellationToken)
     {
         var exceptions = new List<Exception>();
+        
+        // Restore contexts once at the beginning
+        RestoreHookContexts(context);
 
         foreach (var hook in hooks)
         {
             try
             {
-                RestoreHookContexts(context);
-
                 await hook(context, cancellationToken);
             }
             catch (Exception ex)

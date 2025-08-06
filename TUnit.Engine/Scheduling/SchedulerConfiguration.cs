@@ -1,5 +1,3 @@
-using TUnit.Engine.Services;
-
 namespace TUnit.Engine.Scheduling;
 
 /// <summary>
@@ -13,9 +11,10 @@ public sealed class SchedulerConfiguration
     public int MinParallelism { get; set; } = 1;
 
     /// <summary>
-    /// Maximum number of parallel threads (auto-detected based on system resources)
+    /// Maximum number of parallel threads
+    /// Default: 4x processor count for optimal test throughput (most tests are I/O bound)
     /// </summary>
-    public int MaxParallelism { get; set; } = ParallelismDetector.DetectOptimalParallelism();
+    public int MaxParallelism { get; set; } = Environment.ProcessorCount * 4;
 
     /// <summary>
     /// Timeout for individual tests

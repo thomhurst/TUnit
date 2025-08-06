@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using TUnit.Core;
-
 namespace TUnit.TestProject;
 
 public class HookExecutionOrderTest

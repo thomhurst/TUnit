@@ -26,7 +26,7 @@ internal sealed class TestScheduler : ITestScheduler
         _logger = logger;
         _groupingService = groupingService;
         _messageBus = messageBus;
-        _maxParallelism = maxParallelism > 0 ? maxParallelism : ParallelismDetector.DetectOptimalParallelism();
+        _maxParallelism = maxParallelism > 0 ? maxParallelism : Environment.ProcessorCount * 4;
     }
 
     public async Task ScheduleAndExecuteAsync(
@@ -192,10 +192,20 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 await semaphore.WaitAsync(cancellationToken);
 
-                var task = ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken)
-                    .ContinueWith(_ => semaphore.Release(), cancellationToken);
+                // Create a task that releases semaphore on completion without Task.Run overhead
+                async Task ExecuteWithSemaphoreRelease()
+                {
+                    try
+                    {
+                        await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
+                }
 
-                tasks.Add(task);
+                tasks.Add(ExecuteWithSemaphoreRelease());
             }
 
             // Wait for all tests in this order group to complete
@@ -216,10 +226,20 @@ internal sealed class TestScheduler : ITestScheduler
         {
             await semaphore.WaitAsync(cancellationToken);
 
-            var task = ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken)
-                .ContinueWith(_ => semaphore.Release(), cancellationToken);
+            // Create a task that releases semaphore on completion without Task.Run overhead
+            async Task ExecuteWithSemaphoreRelease()
+            {
+                try
+                {
+                    await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }
 
-            tasks.Add(task);
+            tasks.Add(ExecuteWithSemaphoreRelease());
         }
 
         await Task.WhenAll(tasks);
@@ -249,21 +269,22 @@ internal sealed class TestScheduler : ITestScheduler
 
         await Task.WhenAll(test.Dependencies.Select(x => x.Test.CompletionTask));
 
-        // Execute the test
-        var executionTask = Task.Run(async () =>
-        {
-            try
-            {
-                await executor.ExecuteTestAsync(test, cancellationToken);
-            }
-            finally
-            {
-                completedTests[test] = true;
-            }
-        }, cancellationToken);
-
+        // Execute the test directly without Task.Run wrapper
+        var executionTask = ExecuteTestDirectlyAsync(test, executor, completedTests, cancellationToken);
         runningTasks[test] = executionTask;
         await executionTask;
         runningTasks.TryRemove(test, out _);
+    }
+
+    private async Task ExecuteTestDirectlyAsync(AbstractExecutableTest test, ITestExecutor executor, ConcurrentDictionary<AbstractExecutableTest, bool> completedTests, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await executor.ExecuteTestAsync(test, cancellationToken);
+        }
+        finally
+        {
+            completedTests[test] = true;
+        }
     }
 }

@@ -111,11 +111,11 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
     {
         await InitializeStaticPropertiesAsync(cancellationToken);
 
-        var beforeSessionContext = await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
+        var sessionContext = await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
 #if NET
-        if (beforeSessionContext != null)
+        if (sessionContext != null)
         {
-            ExecutionContext.Restore(beforeSessionContext);
+            ExecutionContext.Restore(sessionContext);
         }
 #endif
     }
