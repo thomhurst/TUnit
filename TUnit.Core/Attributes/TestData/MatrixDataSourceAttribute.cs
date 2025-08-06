@@ -38,7 +38,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
 
         foreach (var row in GetMatrixValues(parameterInformation.Select(p => GetAllArguments(dataGeneratorMetadata, p))))
         {
-            if (exclusions.Any(e => e.SequenceEqual(row)))
+            if (exclusions.Any(e => IsExcluded(e, row)))
             {
                 continue;
             }
@@ -47,10 +47,39 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         }
     }
 
+    private bool IsExcluded(object?[] exclusion, IEnumerable<object?> row)
+    {
+        var rowArray = row.ToArray();
+        if (exclusion.Length != rowArray.Length)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < exclusion.Length; i++)
+        {
+            var exclusionValue = exclusion[i];
+            var rowValue = rowArray[i];
+
+            // Handle enum to underlying type conversion
+            if (exclusionValue != null && exclusionValue.GetType().IsEnum && rowValue != null)
+            {
+                exclusionValue = Convert.ChangeType(exclusionValue, Enum.GetUnderlyingType(exclusionValue.GetType()));
+            }
+
+            if (!Equals(exclusionValue, rowValue))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private object?[][] GetExclusions(IEnumerable<Attribute> attributes)
     {
         return attributes
-            .OfType<MatrixExclusionAttribute>()
+            .Where(x => x is MatrixExclusionAttribute)
+            .Cast<MatrixExclusionAttribute>()
             .Select(x => x.Objects)
             .ToArray();
     }

@@ -1,5 +1,3 @@
-using TUnit.Assertions.AssertConditions.Throws;
-
 namespace TUnit.Assertions.Tests.Old;
 
 public class EqualsAssertionTests

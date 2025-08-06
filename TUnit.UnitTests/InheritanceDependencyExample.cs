@@ -3,10 +3,18 @@ namespace TUnit.UnitTests;
 /// <summary>
 /// Example showing how DependsOn works with inheritance
 /// </summary>
+[NotInParallel]
 public abstract class DatabaseTestBase
 {
     // Static dictionary to simulate a "database" that persists across test instances
     protected static readonly Dictionary<string, object> Database = new();
+
+    [Before(Class)]
+    public static async Task CleanDatabase()
+    {
+        Database.Clear();
+        await Task.CompletedTask;
+    }
 
     [Test]
     public async Task InitializeDatabase()
@@ -69,10 +77,18 @@ public class ProductRepositoryTests : DatabaseTestBase
 /// <summary>
 /// Example with generic base classes
 /// </summary>
+[NotInParallel]
 public abstract class RepositoryTestBase<T> where T : class, new()
 {
     // Static dictionary to store entities by type
     protected static readonly Dictionary<Type, object> Entities = new();
+
+    [Before(Class)]
+    public static async Task CleanEntities()
+    {
+        Entities.Clear();
+        await Task.CompletedTask;
+    }
 
     [Test]
     public async Task InitializeEntity()

@@ -19,7 +19,7 @@ public class DisableReflectionScannerGenerator : IIncrementalGenerator
     {
         var sourceBuilder = new CodeWriter();
 
-        sourceBuilder.AppendLine($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(DisableReflectionScannerGenerator).Assembly.GetName().Version}\")]");
+        sourceBuilder.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(DisableReflectionScannerGenerator).Assembly.GetName().Version}\")]");
         using (sourceBuilder.BeginBlock("file static class DisableReflectionScanner_" + Guid.NewGuid().ToString("N")))
         {
             sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");

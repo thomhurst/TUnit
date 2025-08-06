@@ -3,7 +3,7 @@ using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Helpers;
 
-namespace TUnit.Assertions.Assertions.Throws;
+namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsWithinAssertCondition<TActual, TExpectedException>(TimeSpan timeSpan) : DelegateAssertCondition<TActual, TExpectedException>
     where TExpectedException : Exception

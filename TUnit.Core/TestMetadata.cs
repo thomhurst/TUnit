@@ -14,18 +14,6 @@ public abstract class TestMetadata
 
     public required string TestMethodName { get; init; }
 
-    public bool IsSkipped { get; init; }
-
-    public string? SkipReason { get; init; }
-
-    public int? TimeoutMs { get; init; }
-
-    public int RetryCount { get; init; }
-
-    public int RepeatCount { get; init; }
-
-    public bool CanRunInParallel { get; init; } = true;
-
     public TestDependency[] Dependencies { get; init; } = [];
 
     public required IDataSourceAttribute[] DataSources { get; init; } = [];

@@ -15,10 +15,6 @@ internal sealed class PriorityFilteringTests_High_1_TestSource_GUID : global::TU
             TestName = "High_1",
             TestClassType = typeof(global::TUnit.TestProject.PriorityFilteringTests),
             TestMethodName = "High_1",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -93,7 +89,7 @@ return classMetadata;
 }
 internal static class PriorityFilteringTests_High_1_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_High_1_TestSource_GUID());
@@ -120,10 +116,6 @@ internal sealed class PriorityFilteringTests_High_2_TestSource_GUID : global::TU
             TestName = "High_2",
             TestClassType = typeof(global::TUnit.TestProject.PriorityFilteringTests),
             TestMethodName = "High_2",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -198,7 +190,7 @@ return classMetadata;
 }
 internal static class PriorityFilteringTests_High_2_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_High_2_TestSource_GUID());
@@ -225,10 +217,6 @@ internal sealed class PriorityFilteringTests_High_3_TestSource_GUID : global::TU
             TestName = "High_3",
             TestClassType = typeof(global::TUnit.TestProject.PriorityFilteringTests),
             TestMethodName = "High_3",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -303,7 +291,7 @@ return classMetadata;
 }
 internal static class PriorityFilteringTests_High_3_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_High_3_TestSource_GUID());
@@ -330,10 +318,6 @@ internal sealed class PriorityFilteringTests_Medium_1_TestSource_GUID : global::
             TestName = "Medium_1",
             TestClassType = typeof(global::TUnit.TestProject.PriorityFilteringTests),
             TestMethodName = "Medium_1",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -408,7 +392,7 @@ return classMetadata;
 }
 internal static class PriorityFilteringTests_Medium_1_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_Medium_1_TestSource_GUID());
@@ -435,10 +419,6 @@ internal sealed class PriorityFilteringTests_Medium_2_TestSource_GUID : global::
             TestName = "Medium_2",
             TestClassType = typeof(global::TUnit.TestProject.PriorityFilteringTests),
             TestMethodName = "Medium_2",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -513,7 +493,7 @@ return classMetadata;
 }
 internal static class PriorityFilteringTests_Medium_2_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_Medium_2_TestSource_GUID());
@@ -540,10 +520,6 @@ internal sealed class PriorityFilteringTests_Low_1_TestSource_GUID : global::TUn
             TestName = "Low_1",
             TestClassType = typeof(global::TUnit.TestProject.PriorityFilteringTests),
             TestMethodName = "Low_1",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -618,7 +594,7 @@ return classMetadata;
 }
 internal static class PriorityFilteringTests_Low_1_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_Low_1_TestSource_GUID());

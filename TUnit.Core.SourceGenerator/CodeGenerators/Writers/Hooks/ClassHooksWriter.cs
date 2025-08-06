@@ -25,6 +25,7 @@ public static class ClassHooksWriter
 
         sourceBuilder.Append($"HookExecutor = {HookExecutorHelper.GetHookExecutor(model.HookExecutor)},");
         sourceBuilder.Append($"Order = {model.Order},");
+        sourceBuilder.Append($"RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNext{(model.HookLocationType == HookLocationType.Before ? "Before" : "After")}{(model.IsEveryHook ? "Every" : "")}ClassHookIndex(),");
         sourceBuilder.Append($"""FilePath = @"{model.FilePath}",""");
         sourceBuilder.Append($"LineNumber = {model.LineNumber},");
 

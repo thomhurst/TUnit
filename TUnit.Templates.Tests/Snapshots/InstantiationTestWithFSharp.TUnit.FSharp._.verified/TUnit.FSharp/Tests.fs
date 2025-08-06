@@ -38,9 +38,9 @@ type Tests() =
 
     [<Test>]
     [<ClassDataSource(typeof<DataClass>)>]
-    [<ClassDataSource(typeof<DataClass>, Shared = SharedType.PerClass)>]
-    [<ClassDataSource(typeof<DataClass>, Shared = SharedType.PerAssembly)>]
-    [<ClassDataSource(typeof<DataClass>, Shared = SharedType.PerTestSession)>]
+    [<ClassDataSource(typeof<DataClass>, Shared = [|SharedType.PerClass|])>]
+    [<ClassDataSource(typeof<DataClass>, Shared = [|SharedType.PerAssembly|])>]
+    [<ClassDataSource(typeof<DataClass>, Shared = [|SharedType.PerTestSession|])>]
     member _.ClassDataSource(dataClass: DataClass) =
         Console.WriteLine("This test can accept a class, which can also be pre-initialised before being injected in")
         Console.WriteLine("These can also be shared among other tests, or new'd up each time, by using the `Shared` property on the attribute")

@@ -431,7 +431,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
-        writer.AppendLine("throw new ArgumentException($\"Unsupported tuple type: {tupleType.FullName}\", nameof(tuple));");
+        writer.AppendLine("throw new global::System.ArgumentException($\"Unsupported tuple type: {tupleType.FullName}\", nameof(tuple));");
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();

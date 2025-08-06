@@ -1,10 +1,11 @@
 ﻿using System.Runtime.CompilerServices;
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
+using TUnit.Assertions.AssertConditions.Throws;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.AssertConditions.Throws;
+namespace TUnit.Assertions.Extensions;
 
 public class ThrowsException<TActual, TException> where TException : Exception
 {
@@ -73,5 +74,7 @@ public class ThrowsException<TActual, TException> where TException : Exception
 
     internal void RegisterAssertion(Func<Func<Exception?, Exception?>, BaseAssertCondition<TActual>> conditionFunc, string?[] argumentExpressions, [CallerMemberName] string? caller = null) => _source.RegisterAssertion(conditionFunc(_selector), argumentExpressions, caller);
 
-    public static explicit operator Task<TException?>(ThrowsException<TActual, TException> throwsException) => Task.Run(async () => await throwsException);
+    public static explicit operator Task<TException?>(ThrowsException<TActual, TException> throwsException) => GetExceptionTask(throwsException);
+
+    private static async Task<TException?> GetExceptionTask(ThrowsException<TActual, TException> throwsException) => await throwsException;
 }

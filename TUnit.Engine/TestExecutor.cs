@@ -1,11 +1,9 @@
-using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.CommandLine;
-using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
-using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Services;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Interfaces;
@@ -16,16 +14,17 @@ using ITestExecutor = TUnit.Engine.Interfaces.ITestExecutor;
 
 namespace TUnit.Engine;
 
-internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, IAsyncDisposable
+internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposable
 {
     private readonly ISingleTestExecutor _singleTestExecutor;
     private readonly ICommandLineOptions _commandLineOptions;
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestScheduler _testScheduler;
     private readonly ILoggerFactory _loggerFactory;
-    private SessionUid? _sessionUid;
     private readonly TUnitServiceProvider _serviceProvider;
-    private readonly HookOrchestratingTestExecutorAdapter _hookOrchestratingTestExecutorAdapter;
+    private readonly Scheduling.TestExecutor _testExecutor;
+    private readonly IContextProvider _contextProvider;
+    private readonly ITUnitMessageBus _messageBus;
 
     public TestExecutor(
         ISingleTestExecutor singleTestExecutor,
@@ -34,32 +33,23 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         ILoggerFactory? loggerFactory,
         ITestScheduler? testScheduler,
         TUnitServiceProvider serviceProvider,
-        HookOrchestratingTestExecutorAdapter hookOrchestratingTestExecutorAdapter)
+        Scheduling.TestExecutor testExecutor,
+        IContextProvider contextProvider,
+        ITUnitMessageBus messageBus)
     {
         _singleTestExecutor = singleTestExecutor;
         _commandLineOptions = commandLineOptions;
         _logger = logger;
         _loggerFactory = loggerFactory ?? new NullLoggerFactory();
         _serviceProvider = serviceProvider;
-        _hookOrchestratingTestExecutorAdapter = hookOrchestratingTestExecutorAdapter;
+        _testExecutor = testExecutor;
+        _contextProvider = contextProvider;
+        _messageBus = messageBus;
 
-        // Use provided scheduler or create default
         _testScheduler = testScheduler ?? CreateDefaultScheduler();
     }
 
-    // IDataProducer implementation
-    public string Uid => "TUnit.UnifiedTestExecutor";
-    public string Version => "1.0.0";
-    public string DisplayName => "TUnit Test Executor";
-    public string Description => "Unified test executor for TUnit";
-    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage)];
-
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
-
-    public void SetSessionId(SessionUid sessionUid)
-    {
-        _sessionUid = sessionUid;
-    }
 
     public async Task ExecuteTests(
         IEnumerable<AbstractExecutableTest> tests,
@@ -75,17 +65,32 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         try
         {
             await PrepareHookOrchestrator(hookOrchestrator, testList, cancellationToken);
-            await ExecuteTestsCore(testList, _hookOrchestratingTestExecutorAdapter, cancellationToken);
+            await ExecuteTestsCore(testList, _testExecutor, cancellationToken);
         }
         finally
         {
-            var afterSessionContext = await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cancellationToken);
-#if NET
-            if (afterSessionContext != null)
+            // Execute session cleanup hooks with a separate cancellation token to ensure
+            // cleanup executes even when test execution is cancelled
+            try
             {
-                ExecutionContext.Restore(afterSessionContext);
-            }
+                using var cleanupCts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+                var afterSessionContext = await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cleanupCts.Token);
+#if NET
+                if (afterSessionContext != null)
+                {
+                    ExecutionContext.Restore(afterSessionContext);
+                }
 #endif
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in session cleanup hooks: {ex}");
+            }
+
+            foreach (var artifact in _contextProvider.TestSessionContext.Artifacts)
+            {
+                await _messageBus.SessionArtifact(artifact);
+            }
         }
     }
 
@@ -106,11 +111,11 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
     {
         await InitializeStaticPropertiesAsync(cancellationToken);
 
-        var beforeSessionContext = await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
+        var sessionContext = await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
 #if NET
-        if (beforeSessionContext != null)
+        if (sessionContext != null)
         {
-            ExecutionContext.Restore(beforeSessionContext);
+            ExecutionContext.Restore(sessionContext);
         }
 #endif
     }
@@ -156,6 +161,23 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
     {
         var config = SchedulerConfiguration.Default;
 
+        // Check environment variables first (can be overridden by command-line)
+        if (int.TryParse(Environment.GetEnvironmentVariable("TUNIT_ADAPTIVE_MIN_PARALLELISM"), out var envMinParallelism) && envMinParallelism > 0)
+        {
+            config.AdaptiveMinParallelism = envMinParallelism;
+        }
+
+        if (int.TryParse(Environment.GetEnvironmentVariable("TUNIT_ADAPTIVE_MAX_PARALLELISM"), out var envMaxParallelism) && envMaxParallelism > 0)
+        {
+            config.AdaptiveMaxParallelism = envMaxParallelism;
+        }
+
+        if (bool.TryParse(Environment.GetEnvironmentVariable("TUNIT_ADAPTIVE_METRICS"), out var envMetrics))
+        {
+            config.EnableAdaptiveMetrics = envMetrics;
+        }
+
+        // Handle --maximum-parallel-tests (applies to both fixed and adaptive strategies)
         if (_commandLineOptions.TryGetOptionArgumentList(
             MaximumParallelTestsCommandProvider.MaximumParallelTests,
             out var args) && args.Length > 0)
@@ -163,10 +185,29 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
             if (int.TryParse(args[0], out var maxParallelTests) && maxParallelTests > 0)
             {
                 config.MaxParallelism = maxParallelTests;
+                config.AdaptiveMaxParallelism = maxParallelTests;
+                // Don't change strategy - let it be controlled by --parallelism-strategy
             }
         }
 
-        return TestSchedulerFactory.Create(config, _logger, _serviceProvider.CancellationToken);
+        // Handle --parallelism-strategy
+        if (_commandLineOptions.TryGetOptionArgumentList(
+            ParallelismStrategyCommandProvider.ParallelismStrategy,
+            out var strategyArgs) && strategyArgs.Length > 0)
+        {
+            var strategy = strategyArgs[0].ToLowerInvariant();
+            config.Strategy = strategy == "fixed" ? ParallelismStrategy.Fixed : ParallelismStrategy.Adaptive;
+        }
+
+        // Handle --adaptive-metrics
+        if (_commandLineOptions.IsOptionSet(AdaptiveMetricsCommandProvider.AdaptiveMetrics))
+        {
+            config.EnableAdaptiveMetrics = true;
+        }
+
+        var eventReceiverOrchestrator = _serviceProvider.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
+        var hookOrchestrator = _serviceProvider.GetService(typeof(HookOrchestrator)) as HookOrchestrator;
+        return TestSchedulerFactory.Create(config, _logger, _serviceProvider.MessageBus, _serviceProvider.CancellationToken, eventReceiverOrchestrator!, hookOrchestrator!);
     }
 
 
@@ -180,6 +221,9 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         }
 
         _disposed = true;
+        
+        // Dispose the scheduler if it implements IDisposable
+        (_testScheduler as IDisposable)?.Dispose();
     }
 
     public ValueTask DisposeAsync()
@@ -190,6 +234,9 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer, IDisposable, 
         }
 
         _disposed = true;
+        
+        // Dispose the scheduler if it implements IDisposable
+        (_testScheduler as IDisposable)?.Dispose();
 
         return default(ValueTask);
     }

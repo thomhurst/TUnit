@@ -15,10 +15,6 @@ internal sealed class ConfigurationTest_TestWithConfiguration_TestSource_GUID : 
             TestName = "TestWithConfiguration",
             TestClassType = typeof(global::TUnit.TestProject.ConfigurationTest),
             TestMethodName = "TestWithConfiguration",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -79,12 +75,12 @@ return classMetadata;
                 var typedInstance = (global::TUnit.TestProject.ConfigurationTest)instance;
                 var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.TestWithConfiguration();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.TestWithConfiguration();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -94,7 +90,7 @@ return classMetadata;
 }
 internal static class ConfigurationTest_TestWithConfiguration_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConfigurationTest), new ConfigurationTest_TestWithConfiguration_TestSource_GUID());

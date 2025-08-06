@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core.Data;
+using TUnit.Core.Tracking;
 
 namespace TUnit.Core;
 
@@ -124,7 +125,40 @@ internal class ClassDataSources
     {
         try
         {
-            return Activator.CreateInstance(type)!;
+            var instance = Activator.CreateInstance(type)!;
+
+            // Track the created object
+            var trackerEvents2 = dataGeneratorMetadata.TestBuilderContext?.Current.Events;
+
+            if (trackerEvents2 != null)
+            {
+                ObjectTracker.TrackObject(trackerEvents2, instance);
+            }
+
+            // Initialize any data source properties on the created instance
+            if (dataGeneratorMetadata.TestInformation != null)
+            {
+                var initTask = Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(
+                    instance,
+                    dataGeneratorMetadata.TestInformation,
+                    dataGeneratorMetadata.TestSessionId);
+
+                // We need to block here since this method isn't async
+                initTask.GetAwaiter().GetResult();
+
+                // Also try PropertyInjectionService for properties that have data source attributes
+                // This handles cases where the type doesn't have a generated initializer
+                var objectBag = dataGeneratorMetadata.TestBuilderContext?.Current?.ObjectBag ?? new Dictionary<string, object?>();
+                var events = dataGeneratorMetadata.TestBuilderContext?.Current?.Events;
+                var injectionTask = PropertyInjectionService.InjectPropertiesIntoObjectAsync(
+                    instance,
+                    objectBag,
+                    dataGeneratorMetadata.TestInformation,
+                    events);
+                injectionTask.GetAwaiter().GetResult();
+            }
+
+            return instance;
         }
         catch (TargetInvocationException targetInvocationException)
         {

@@ -36,11 +36,7 @@ internal static class TestExtensions
                 ..ExtractProperties(testDetails),
 
                 // Artifacts
-                ..testContext.Artifacts.Where(x => x.Value is FileArtifact).Select(x =>
-                {
-                    var artifact = (FileArtifact)x.Value!;
-                    return new FileArtifactProperty(new FileInfo(artifact.File), artifact.DisplayName, artifact.Description);
-                }),
+                ..testContext.Artifacts.Select(x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)),
 
                 // TRX Report Properties
                 new TrxFullyQualifiedTypeNameProperty(testDetails.MethodMetadata.Class?.Type.FullName ?? testDetails.ClassType?.FullName ?? "UnknownType"),

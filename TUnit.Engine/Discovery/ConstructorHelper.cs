@@ -10,7 +10,7 @@ namespace TUnit.Engine.Discovery;
 internal static class ConstructorHelper
 {
     /// <summary>
-    /// Finds a suitable constructor for a test class, preferring parameterless but handling class data sources
+    /// Finds a suitable constructor for a test class, preferring ones marked with [TestConstructor]
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements",
         Justification = "Constructor discovery is required for test instantiation. AOT scenarios should use source-generated test metadata.")]
@@ -20,7 +20,15 @@ internal static class ConstructorHelper
     {
         var constructors = testClass.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-        // Just return the first instance constructor
+        // First, look for constructors marked with [TestConstructor]
+        var testConstructorMarked = constructors.Where(c => c.GetCustomAttribute<TestConstructorAttribute>() != null).ToArray();
+        
+        if (testConstructorMarked.Length > 0)
+        {
+            return testConstructorMarked[0];
+        }
+
+        // If no [TestConstructor] attribute found, return the first instance constructor
         return constructors.FirstOrDefault();
     }
 
