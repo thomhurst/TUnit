@@ -10,7 +10,7 @@
         Condition="'$(EnableTUnitPolyfills)' != 'false' and '$(TargetFramework)' == 'netstandard2.0'">
         <PackageReference Include="Polyfill"
             VersionOverride="8.7.3"
-            Version="8.7.3">
+            Version="8.7.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
