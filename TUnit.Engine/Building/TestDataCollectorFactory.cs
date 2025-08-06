@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
-using TUnit.Core.Services;
 using TUnit.Engine.Building.Collectors;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Discovery;

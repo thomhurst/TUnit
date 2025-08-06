@@ -36,11 +36,7 @@ internal static class TestExtensions
                 ..ExtractProperties(testDetails),
 
                 // Artifacts
-                ..testContext.Artifacts.Where(x => x.Value is FileArtifact).Select(x =>
-                {
-                    var artifact = (FileArtifact)x.Value!;
-                    return new FileArtifactProperty(new FileInfo(artifact.File), artifact.DisplayName, artifact.Description);
-                }),
+                ..testContext.Artifacts.Select(x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)),
 
                 // TRX Report Properties
                 new TrxFullyQualifiedTypeNameProperty(testDetails.MethodMetadata.Class?.Type.FullName ?? testDetails.ClassType?.FullName ?? "UnknownType"),
@@ -51,13 +47,13 @@ internal static class TestExtensions
         return testNode;
     }
 
-    public static IEnumerable<KeyValuePairStringProperty> ExtractProperties(this TestDetails testDetails)
+    public static IEnumerable<TestMetadataProperty> ExtractProperties(this TestDetails testDetails)
     {
         foreach (var propertyGroup in testDetails.CustomProperties)
         {
             foreach (var propertyValue in propertyGroup.Value)
             {
-                yield return new KeyValuePairStringProperty(propertyGroup.Key, propertyValue);
+                yield return new TestMetadataProperty(propertyGroup.Key, propertyValue);
             }
         }
     }

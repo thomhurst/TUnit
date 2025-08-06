@@ -15,10 +15,6 @@ internal sealed class ClassAndMethodArgumentsTests_Simple_TestSource_GUID : glob
             TestName = "Simple",
             TestClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
             TestMethodName = "Simple",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -108,7 +104,7 @@ return classMetadata;
 }
 internal static class ClassAndMethodArgumentsTests_Simple_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), new ClassAndMethodArgumentsTests_Simple_TestSource_GUID());
@@ -135,10 +131,6 @@ internal sealed class ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_GU
             TestName = "WithMethodLevel",
             TestClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
             TestMethodName = "WithMethodLevel",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -187,7 +179,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
     Name = "arg2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("WithMethodLevel", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("WithMethodLevel", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => 
@@ -259,7 +251,7 @@ return classMetadata;
 }
 internal static class ClassAndMethodArgumentsTests_WithMethodLevel_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), new ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_GUID());
@@ -286,10 +278,6 @@ internal sealed class ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_G
             TestName = "IgnoreParameters",
             TestClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
             TestMethodName = "IgnoreParameters",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -338,7 +326,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
     Name = "arg2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("IgnoreParameters", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests).GetMethod("IgnoreParameters", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassAndMethodArgumentsTests", () => 
@@ -410,7 +398,7 @@ return classMetadata;
 }
 internal static class ClassAndMethodArgumentsTests_IgnoreParameters_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), new ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_GUID());

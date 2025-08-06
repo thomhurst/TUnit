@@ -15,6 +15,8 @@ public sealed class TestDependency : IEquatable<TestDependency>
 
     public int MethodGenericArity { get; init; }
 
+    public bool ProceedOnFailure { get; init; }
+
     public static TestDependency FromMethodName(string methodName)
     {
         return new TestDependency { MethodName = methodName };
@@ -148,6 +150,7 @@ public sealed class TestDependency : IEquatable<TestDependency>
                ClassGenericArity == other.ClassGenericArity &&
                MethodName == other.MethodName &&
                MethodGenericArity == other.MethodGenericArity &&
+               ProceedOnFailure == other.ProceedOnFailure &&
                (MethodParameters?.SequenceEqual(other.MethodParameters ?? [
                    ]) ??
                 other.MethodParameters == null);
@@ -164,6 +167,7 @@ public sealed class TestDependency : IEquatable<TestDependency>
             hash = hash * 31 + ClassGenericArity.GetHashCode();
             hash = hash * 31 + (MethodName?.GetHashCode() ?? 0);
             hash = hash * 31 + MethodGenericArity.GetHashCode();
+            hash = hash * 31 + ProceedOnFailure.GetHashCode();
             if (MethodParameters != null)
             {
                 foreach (var param in MethodParameters)
@@ -197,6 +201,11 @@ public sealed class TestDependency : IEquatable<TestDependency>
             {
                 parts.Add($"Params=[{string.Join(", ", MethodParameters.Select(p => p.Name))}]");
             }
+        }
+
+        if (ProceedOnFailure)
+        {
+            parts.Add("ProceedOnFailure=true");
         }
 
         return $"TestDependency({string.Join(", ", parts)})";

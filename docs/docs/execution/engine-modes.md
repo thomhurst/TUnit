@@ -1,60 +1,97 @@
-# AOT-Only Mode
+# Engine Modes
 
-TUnit now operates exclusively in AOT (Ahead-of-Time) compilation mode, using compile-time source generation for maximum performance and full Native AOT compatibility.
+TUnit supports two execution modes, providing flexibility for different development and deployment scenarios.
 
-## What Changed
+## Execution Modes
 
-Starting with this version, TUnit has **completely removed reflection-based execution** in favor of a fully source-generated approach that provides:
+TUnit can run in two modes:
 
-- **Zero Runtime Reflection**: All test discovery and execution uses compile-time generated code
-- **Native AOT Compatibility**: Full support for Native AOT compilation scenarios
-- **Superior Performance**: 2-3x performance improvement over reflection-based execution
-- **Compile-Time Safety**: Type errors and configuration issues caught at build time
+- **Source Generation Mode** (Default): Uses compile-time source generation for test discovery and execution, providing optimal performance and compile-time safety
+- **Reflection Mode**: Traditional runtime reflection-based test discovery and execution, enabled with the `--reflection` command-line flag
 
-## How It Works
+When publishing with Native AOT, the source generation mode provides additional performance benefits and full AOT compatibility.
 
-TUnit now generates strongly-typed delegates for all test operations at compile time:
+## Source Generation Mode (Default)
+
+By default, TUnit always uses source generation for test discovery and execution:
+
+- **Compile-Time Generation**: All test discovery logic is generated at compile time
+- **Better Performance**: Faster than reflection-based execution
+- **Type Safety**: Compile-time validation of test configurations and data sources
+- **No Runtime Reflection**: Eliminates the overhead of runtime type discovery
+
+This is the standard mode used for all builds, whether debugging, running tests, or publishing. When you publish with Native AOT, you get additional performance benefits, but the underlying source generation logic remains the same.
+
+## Reflection Mode
+
+Reflection mode can be explicitly enabled using the `--reflection` command-line flag:
+
+- **Runtime Discovery**: Tests are discovered at runtime using reflection
+- **Dynamic Execution**: Uses traditional reflection-based test invocation
+- **Compatibility**: Useful for scenarios where source generation may not be suitable
+- **Legacy Support**: Maintains compatibility with reflection-dependent test patterns
+
+Enable reflection mode by running:
+```bash
+dotnet test -- --reflection
+```
+
+## Native AOT Support
+
+When publishing with Native AOT, TUnit's source generation mode provides additional benefits:
+
+- **Full AOT Compatibility**: The source-generated code is fully compatible with Native AOT compilation
+- **Enhanced Performance**: Better performance compared to reflection-based execution
+- **Reduced Binary Size**: No reflection metadata needed, resulting in smaller executables
+- **Faster Startup**: No runtime type discovery overhead
+
+Note: These AOT-specific benefits only apply when actually publishing with Native AOT. Regular builds use the same source generation logic but without the native compilation optimizations.
+
+## How Source Generation Works
+
+TUnit's source generation creates strongly-typed delegates for all test operations at compile time:
 
 - **Test Invocation**: Type-specific delegates instead of generic object arrays
 - **Data Sources**: Specialized factory methods with exact return types
 - **Property Injection**: Generated property setters with dependency resolution
 - **Hook Methods**: Strongly-typed hook delegates with proper async support
 
+## Publishing with Native AOT
+
+To use TUnit with Native AOT:
+
+```xml
+<PropertyGroup>
+    <PublishAot>true</PublishAot>
+</PropertyGroup>
+```
+
+Then publish your project:
+```bash
+dotnet publish -c Release
+```
+
 ## Configuration
 
-You can configure AOT behavior through EditorConfig or MSBuild properties:
+TUnit uses optimized defaults for all features. The only configurable option is verbose diagnostics for troubleshooting source generation issues:
 
 ### EditorConfig (.editorconfig)
 ```ini
-# Enable AOT-only mode (default: true)
-tunit.aot_only_mode = true
-
-# Generic type resolution depth (default: 5)
-tunit.generic_depth_limit = 5
-
-# Property injection support (default: true)
-tunit.enable_property_injection = true
-
-# ValueTask hook support (default: true)
-tunit.enable_valuetask_hooks = true
-
-# Verbose diagnostics (default: false)
+# Enable verbose diagnostics (default: false)
 tunit.enable_verbose_diagnostics = true
 ```
 
-### MSBuild Properties
+### MSBuild Property
 ```xml
 <PropertyGroup>
-    <TUnitAotOnlyMode>true</TUnitAotOnlyMode>
-    <TUnitGenericDepthLimit>10</TUnitGenericDepthLimit>
-    <TUnitEnablePropertyInjection>true</TUnitEnablePropertyInjection>
+    <TUnitEnableVerboseDiagnostics>true</TUnitEnableVerboseDiagnostics>
 </PropertyGroup>
 ```
 
 ## Compatibility
 
 **C# Projects**: Full support with source generation
-**F# Projects**: Limited support - use C# test projects that reference F# libraries
-**VB.NET Projects**: Limited support - use C# test projects that reference VB.NET libraries
+**F# Projects**: Falls back to reflection mode (source generation not supported)
+**VB.NET Projects**: Falls back to reflection mode (source generation not supported)
 
-For cross-language scenarios, create a separate C# test project that references your F#/VB.NET libraries and write tests there.
+For F# and VB.NET projects, TUnit automatically uses reflection mode since source generation is only available for C# projects. For better performance with F# or VB.NET code, create a separate C# test project that references your F#/VB.NET libraries and write tests there.

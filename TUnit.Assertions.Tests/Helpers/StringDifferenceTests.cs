@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Throws;
-
-namespace TUnit.Assertions.Tests.Helpers;
+﻿namespace TUnit.Assertions.Tests.Helpers;
 
 public class StringDifferenceTests
 {

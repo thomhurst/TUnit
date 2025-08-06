@@ -31,12 +31,17 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new ParametersCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new FailFastCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionModeCommandProvider(extension));
-        
+        testApplicationBuilder.CommandLine.AddProvider(() => new DisableLogoCommandProvider(extension));
+
+        // Adaptive parallelism command providers
+        testApplicationBuilder.CommandLine.AddProvider(() => new ParallelismStrategyCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new AdaptiveMetricsCommandProvider(extension));
+
         // Unified verbosity control (replaces HideTestOutput, DisableLogo, DetailedStacktrace)
         testApplicationBuilder.CommandLine.AddProvider(() => new VerbosityCommandProvider(extension));
 
         testApplicationBuilder.TestHost.AddDataConsumer(_ => githubReporter);
-        testApplicationBuilder.TestHost.AddTestApplicationLifecycleCallbacks(_ => githubReporter);
+        testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => githubReporter);
     }
 
     private static IReadOnlyCollection<ITestFrameworkCapability> CreateCapabilities(IServiceProvider serviceProvider)
@@ -44,7 +49,7 @@ public static class TestApplicationBuilderExtensions
         return
         [
             new TrxReportCapability(),
-            new BannerCapability(serviceProvider.GetRequiredService<IPlatformInformation>(), serviceProvider.GetCommandLineOptions()),
+            new BannerCapability(serviceProvider.GetRequiredService<IPlatformInformation>(), serviceProvider.GetCommandLineOptions(), serviceProvider.GetLoggerFactory()),
             new StopExecutionCapability(),
         ];
     }

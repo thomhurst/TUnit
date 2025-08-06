@@ -10,7 +10,7 @@ public class ParametersTests
         using (Assert.Multiple())
         {
             await Assert.That(TestContext.Parameters.ToImmutableDictionary()).ContainsKey("TestParam1");
-            await Assert.That(TestContext.Parameters["TestParam1"]).IsEqualTo("TestParam1Value");
+            await Assert.That(TestContext.Parameters["TestParam1"].First()).IsEqualTo("TestParam1Value");
         }
     }
 }

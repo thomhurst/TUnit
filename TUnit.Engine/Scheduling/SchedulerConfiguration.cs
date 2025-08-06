@@ -1,5 +1,3 @@
-using TUnit.Engine.Services;
-
 namespace TUnit.Engine.Scheduling;
 
 /// <summary>
@@ -13,9 +11,10 @@ public sealed class SchedulerConfiguration
     public int MinParallelism { get; set; } = 1;
 
     /// <summary>
-    /// Maximum number of parallel threads (auto-detected based on system resources)
+    /// Maximum number of parallel threads
+    /// Default: 4x processor count for optimal test throughput (most tests are I/O bound)
     /// </summary>
-    public int MaxParallelism { get; set; } = ParallelismDetector.DetectOptimalParallelism();
+    public int MaxParallelism { get; set; } = Environment.ProcessorCount * 4;
 
     /// <summary>
     /// Timeout for individual tests
@@ -31,6 +30,22 @@ public sealed class SchedulerConfiguration
     /// Parallelism strategy to use
     /// </summary>
     public ParallelismStrategy Strategy { get; set; } = ParallelismStrategy.Adaptive;
+
+    /// <summary>
+    /// Minimum parallelism for adaptive strategy
+    /// </summary>
+    public int AdaptiveMinParallelism { get; set; } = Environment.ProcessorCount;
+
+    /// <summary>
+    /// Maximum parallelism for adaptive strategy
+    /// Default: unlimited unless explicitly set via command-line or environment variable
+    /// </summary>
+    public int AdaptiveMaxParallelism { get; set; } = int.MaxValue;
+
+    /// <summary>
+    /// Enable detailed metrics logging for adaptive strategy
+    /// </summary>
+    public bool EnableAdaptiveMetrics { get; set; } = false;
 
     /// <summary>
     /// Creates default configuration

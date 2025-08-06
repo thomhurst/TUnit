@@ -1,0 +1,4 @@
+<Project>
+    <Import
+        Project="$(MSBuildThisFileDirectory)Polyfill.targets" />
+</Project>

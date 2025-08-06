@@ -15,10 +15,6 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
             TestName = "Test1",
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1899.DerivedTest),
             TestMethodName = "Test1",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -81,12 +77,12 @@ return classMetadata;
                 var typedInstance = (global::TUnit.TestProject.Bugs._1899.DerivedTest)instance;
                 var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Test1();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Test1();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -96,7 +92,7 @@ return classMetadata;
 }
 internal static class DerivedTest_Test1_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1899.DerivedTest), new DerivedTest_Test1_TestSource_GUID());

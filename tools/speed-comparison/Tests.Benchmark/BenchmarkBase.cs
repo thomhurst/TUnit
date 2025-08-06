@@ -1,11 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Jobs;
 
 namespace Tests.Benchmark;
 
-[MarkdownExporterAttribute.GitHub]
-[SimpleJob(RuntimeMoniker.Net90)]
+[Config(typeof(BenchmarkConfig))]
 public class BenchmarkBase
 {
     protected readonly Stream OutputStream = Console.OpenStandardOutput();

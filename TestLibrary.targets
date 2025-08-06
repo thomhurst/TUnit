@@ -1,4 +1,7 @@
 <Project>
+    <Import
+        Project="$(MSBuildThisFileDirectory)Polyfill.targets" />
+
     <Import Project="$(MSBuildThisFileDirectory)TUnit.Core\TUnit.Core.targets" />
 
     <ItemGroup>

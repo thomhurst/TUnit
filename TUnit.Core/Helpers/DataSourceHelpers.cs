@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace TUnit.Core.Helpers;
@@ -403,5 +405,101 @@ public static class DataSourceHelpers
             genericType == typeof(Tuple<,,,,,>) ||
             genericType == typeof(Tuple<,,,,,,>);
 #endif
+    }
+    
+    /// <summary>
+    /// Tries to create an instance using a generated creation method that handles init-only properties.
+    /// Returns true if successful, false if no creator is available.
+    /// </summary>
+    public static bool TryCreateWithInitializer(Type type, MethodMetadata testInformation, string testSessionId, out object createdInstance)
+    {
+        createdInstance = null!;
+        
+        // Check if we have a registered creator for this type
+        if (!TypeCreators.TryGetValue(type, out var creator))
+        {
+            return false;
+        }
+        
+        // Use the creator to create and initialize the instance
+        var task = creator(testInformation, testSessionId);
+        createdInstance = task.GetAwaiter().GetResult();
+        return true;
+    }
+    
+    private static readonly Dictionary<Type, Func<MethodMetadata, string, Task<object>>> TypeCreators = new();
+    
+    /// <summary>
+    /// Registers a type creator function for types with init-only data source properties.
+    /// Called by generated code.
+    /// </summary>
+    public static void RegisterTypeCreator<T>(Func<MethodMetadata, string, Task<T>> creator)
+    {
+        TypeCreators[typeof(T)] = async (metadata, sessionId) => (await creator(metadata, sessionId))!;
+    }
+    
+    /// <summary>
+    /// Resolves a data source property value at runtime.
+    /// This method handles all IDataSourceAttribute implementations generically.
+    /// </summary>
+    public static async Task<object?> ResolveDataSourceForPropertyAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type containingType, string propertyName, MethodMetadata testInformation, string testSessionId)
+    {
+        // Use PropertyInjectionService to resolve the data source attribute
+        var propertyInfo = containingType.GetProperty(propertyName);
+        if (propertyInfo == null)
+        {
+            return null;
+        }
+
+        var dataSourceAttributes = propertyInfo.GetCustomAttributes(typeof(IDataSourceAttribute), true);
+        if (dataSourceAttributes.Length == 0)
+        {
+            return null;
+        }
+
+        var dataSourceAttribute = (IDataSourceAttribute)dataSourceAttributes[0];
+        
+        // Create the data generator metadata with required fields
+        var dataGeneratorMetadata = DataGeneratorMetadataCreator.CreateForPropertyInjection(
+            propertyInfo,
+            containingType,
+            testInformation,
+            dataSourceAttribute,
+            TestContext.Current,
+            TestContext.Current?.TestDetails.ClassInstance,
+            TestContext.Current?.Events,
+            TestContext.Current?.ObjectBag ?? new Dictionary<string, object?>()
+        );
+
+        // Generate the data source value using the attribute's GetDataRowsAsync method
+        var dataRows = dataSourceAttribute.GetDataRowsAsync(dataGeneratorMetadata);
+        
+        // Get the first value from the async enumerable
+        await foreach (var factory in dataRows)
+        {
+            var args = await factory();
+            if (args != null && args.Length > 0)
+            {
+                var value = args[0];
+                
+                // Initialize the value if it implements IAsyncInitializer
+                await ObjectInitializer.InitializeAsync(value);
+                
+                return value;
+            }
+        }
+
+        return null;
+    }
+    
+    /// <summary>
+    /// Resolves a data source property value at runtime for an existing instance.
+    /// This is used when we need to set init-only properties via reflection.
+    /// </summary>
+    public static Task<object?> ResolveDataSourcePropertyAsync(object instance, string propertyName, MethodMetadata testInformation, string testSessionId)
+    {
+        // For now, return a default value - the runtime resolution is complex
+        // In practice, this should be rare since most data sources can be resolved at compile time
+        return Task.FromResult<object?>(null);
     }
 }

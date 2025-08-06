@@ -22,7 +22,7 @@ public class ThrowsWithMessageContainingAssertCondition<TActual, TException>(
         return AssertionResult
             .FailIf(actualException is null,
                 "the exception is null")
-            .OrFailIf(!actualException!.Message.Contains(expected, stringComparison),
-                $"found \"{actualException.Message.ShowNewLines().TruncateWithEllipsis(100)}\"");
+            .OrFailIf(actualException is not null && !actualException.Message.Contains(expected, stringComparison),
+                $"found \"{actualException?.Message.ShowNewLines().TruncateWithEllipsis(100)}\"");
     }
 }

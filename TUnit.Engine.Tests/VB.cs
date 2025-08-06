@@ -1,6 +1,7 @@
 ﻿using CliWrap;
 using CliWrap.Buffered;
 using Shouldly;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
@@ -35,7 +36,7 @@ public class VB
 
         var result = await command.ExecuteBufferedAsync();
 
-        await TrxAsserter.AssertTrx(command, result,
+        await TrxAsserter.AssertTrx(TestMode.Reflection, command, result,
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBeGreaterThanOrEqualTo(9),

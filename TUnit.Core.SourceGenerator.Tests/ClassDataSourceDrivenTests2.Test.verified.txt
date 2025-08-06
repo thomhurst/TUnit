@@ -15,10 +15,6 @@ internal sealed class ClassDataSourceDrivenTests2_Base_Derived1_TestSource_GUID 
             TestName = "Base_Derived1",
             TestClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
             TestMethodName = "Base_Derived1",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -96,12 +92,12 @@ return classMetadata;
                 var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests2)instance;
                 var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Base_Derived1();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Base_Derived1();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -111,7 +107,7 @@ return classMetadata;
 }
 internal static class ClassDataSourceDrivenTests2_Base_Derived1_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2), new ClassDataSourceDrivenTests2_Base_Derived1_TestSource_GUID());
@@ -138,10 +134,6 @@ internal sealed class ClassDataSourceDrivenTests2_Base_Derived2_TestSource_GUID 
             TestName = "Base_Derived2",
             TestClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
             TestMethodName = "Base_Derived2",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -219,12 +211,12 @@ return classMetadata;
                 var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests2)instance;
                 var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Base_Derived2();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Base_Derived2();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -234,7 +226,7 @@ return classMetadata;
 }
 internal static class ClassDataSourceDrivenTests2_Base_Derived2_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2), new ClassDataSourceDrivenTests2_Base_Derived2_TestSource_GUID());

@@ -11,62 +11,6 @@ namespace TUnit.Core.SourceGenerator.Utilities;
 internal static class MetadataGenerationHelper
 {
     /// <summary>
-    /// Generates code for creating a TestMetadata<T> instance
-    /// </summary>
-    public static void GenerateTestMetadata(CodeWriter writer, string metadataTypeParameter, TestMetadataGenerationArgs args)
-    {
-        writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{metadataTypeParameter}>");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine($"TestName = \"{args.TestName}\",");
-        writer.AppendLine($"TestClassType = {args.TestClassTypeReference},");
-        writer.AppendLine($"TestMethodName = \"{args.TestMethodName}\",");
-        writer.AppendLine($"IsSkipped = {args.IsSkipped.ToString().ToLower()},");
-        writer.AppendLine($"SkipReason = {(args.SkipReason != null ? $"\"{args.SkipReason}\"" : "null")},");
-        writer.AppendLine($"TimeoutMs = {args.TimeoutMs?.ToString() ?? "null"},");
-        writer.AppendLine($"RetryCount = {args.RetryCount},");
-        writer.AppendLine($"RepeatCount = {args.RepeatCount},");
-        writer.AppendLine($"CanRunInParallel = {args.CanRunInParallel.ToString().ToLower()},");
-        writer.AppendLine($"Dependencies = {args.Dependencies ?? "global::System.Array.Empty<global::TUnit.Core.TestDependency>()"},");
-        writer.AppendLine($"DataSources = {args.DataSources ?? "global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>()"},");
-        writer.AppendLine($"ClassDataSources = {args.ClassDataSources ?? "global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>()"},");
-        writer.AppendLine($"PropertyDataSources = {args.PropertyDataSources ?? "global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>()"},");
-        writer.AppendLine($"InstanceFactory = {args.InstanceFactory ?? "null"},");
-        writer.AppendLine($"TestInvoker = {args.TestInvoker ?? "null"},");
-        writer.AppendLine($"ParameterCount = {args.ParameterCount},");
-        writer.AppendLine($"ParameterTypes = {args.ParameterTypes ?? "global::System.Array.Empty<global::System.Type>()"},");
-        writer.AppendLine($"TestMethodParameterTypes = {args.TestMethodParameterTypes ?? "global::System.Array.Empty<string>()"},");
-        writer.AppendLine($"Hooks = {args.Hooks ?? "new global::TUnit.Core.TestHooks { BeforeClass = global::System.Array.Empty<global::TUnit.Core.HookMetadata>(), AfterClass = global::System.Array.Empty<global::TUnit.Core.HookMetadata>(), BeforeTest = global::System.Array.Empty<global::TUnit.Core.HookMetadata>(), AfterTest = global::System.Array.Empty<global::TUnit.Core.HookMetadata>() }"},");
-        writer.AppendLine($"FilePath = {(args.FilePath != null ? $"@\"{args.FilePath}\"" : "null")},");
-        writer.AppendLine($"LineNumber = {args.LineNumber?.ToString() ?? "null"},");
-        writer.AppendLine($"MethodMetadata = {args.MethodMetadata},");
-        writer.AppendLine($"GenericTypeInfo = {args.GenericTypeInfo ?? "null"},");
-        writer.AppendLine($"GenericMethodInfo = {args.GenericMethodInfo ?? "null"},");
-        writer.AppendLine($"GenericMethodTypeArguments = {args.GenericMethodTypeArguments ?? "null"},");
-        writer.AppendLine($"AttributeFactory = {args.AttributeFactory},");
-        writer.AppendLine($"PropertyInjections = {args.PropertyInjections ?? "global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>()"},");
-        writer.AppendLine($"TestSessionId = \"{args.TestSessionId}\",");
-
-        // Additional properties specific to TestMetadata<T>
-        if (args.CreateInstance != null)
-        {
-            writer.AppendLine($"CreateInstance = {args.CreateInstance},");
-        }
-        if (args.InvokeTest != null)
-        {
-            writer.AppendLine($"InvokeTest = {args.InvokeTest},");
-        }
-        if (args.InvokeTypedTest != null)
-        {
-            writer.AppendLine($"InvokeTypedTest = {args.InvokeTypedTest},");
-        }
-
-        writer.Unindent();
-        writer.AppendLine("};");
-    }
-
-    /// <summary>
     /// Generates code for creating a MethodMetadata instance
     /// </summary>
     public static string GenerateMethodMetadata(IMethodSymbol methodSymbol, string classMetadataExpression)
@@ -239,12 +183,12 @@ internal static class MetadataGenerationHelper
             if (method.TypeParameters.Length > 0 || method.Parameters.Any(p => CodeGenerationHelpers.ContainsTypeParameter(p.Type)))
             {
                 // For generic methods, use GetMethods and find by name
-                return $@"typeof({containingType}).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == ""{method.Name}"" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]!";
+                return $@"typeof({containingType}).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == ""{method.Name}"" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]!";
             }
             else
             {
                 // For non-generic methods, we can use GetMethod with parameter types
-                var bindingFlags = method.IsStatic ? "System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static" : "System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance";
+                var bindingFlags = method.IsStatic ? "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static" : "global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance";
                 var paramTypes = GenerateParameterTypesArrayForReflection(method);
                 return $@"typeof({containingType}).GetMethod(""{method.Name}"", {bindingFlags}, null, {paramTypes}, null)!.GetParameters()[{parameterIndex}]";
             }
@@ -310,33 +254,6 @@ internal static class MetadataGenerationHelper
         return property.IsStatic
             ? $"_ => {safeTypeName}.{property.Name}"
             : $"o => (({safeTypeName})o).{property.Name}";
-    }
-
-    /// <summary>
-    /// Generates an array of ParameterMetadata objects
-    /// </summary>
-    private static string GenerateParameterMetadataArray(IEnumerable<IParameterSymbol> parameters, IMethodSymbol? containingMethod = null)
-    {
-        var paramList = parameters.ToList();
-        if (!paramList.Any())
-        {
-            return "global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>()";
-        }
-
-        var writer = new CodeWriter("", includeHeader: false);
-        writer.AppendLine("new global::TUnit.Core.ParameterMetadata[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        foreach (var param in paramList)
-        {
-            writer.AppendLine($"{GenerateParameterMetadata(param, containingMethod)},");
-        }
-
-        writer.Unindent();
-        writer.Append("}");
-
-        return writer.ToString();
     }
 
     /// <summary>
@@ -421,59 +338,4 @@ internal static class MetadataGenerationHelper
 
         return writer.ToString();
     }
-
-    /// <summary>
-    /// Generates a string array expression
-    /// </summary>
-    private static string GenerateStringArray(string[]? values)
-    {
-        if (values == null || values.Length == 0)
-        {
-            return "global::System.Array.Empty<string>()";
-        }
-
-        var items = string.Join(", ", values.Select(v => $"\"{v}\""));
-        return $"new string[] {{ {items} }}";
-    }
-}
-
-/// <summary>
-/// Arguments for generating TestMetadata
-/// </summary>
-internal class TestMetadataGenerationArgs
-{
-    public required string TestName { get; init; }
-    public required string TestClassTypeReference { get; init; }
-    public required string TestMethodName { get; init; }
-    public string[]? Categories { get; init; }
-    public bool IsSkipped { get; init; }
-    public string? SkipReason { get; init; }
-    public int? TimeoutMs { get; init; }
-    public int RetryCount { get; init; }
-    public int RepeatCount { get; init; } = 1;
-    public bool CanRunInParallel { get; init; } = true;
-    public string? Dependencies { get; init; }
-    public string? DataSources { get; init; }
-    public string? ClassDataSources { get; init; }
-    public string? PropertyDataSources { get; init; }
-    public string? InstanceFactory { get; init; }
-    public string? TestInvoker { get; init; }
-    public int ParameterCount { get; init; }
-    public string? ParameterTypes { get; init; }
-    public string? TestMethodParameterTypes { get; init; }
-    public string? Hooks { get; init; }
-    public string? FilePath { get; init; }
-    public int? LineNumber { get; init; }
-    public required string MethodMetadata { get; init; }
-    public string? GenericTypeInfo { get; init; }
-    public string? GenericMethodInfo { get; init; }
-    public string? GenericMethodTypeArguments { get; init; }
-    public required string AttributeFactory { get; init; }
-    public string? PropertyInjections { get; init; }
-    public required string TestSessionId { get; init; }
-
-    // Additional properties specific to TestMetadata<T>
-    public string? CreateInstance { get; init; }
-    public string? InvokeTest { get; init; }
-    public string? InvokeTypedTest { get; init; }
 }
