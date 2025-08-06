@@ -10,23 +10,25 @@ namespace TUnit.Engine.Scheduling;
 /// <summary>
 /// A clean, simplified test scheduler that uses an execution plan
 /// </summary>
-internal sealed class TestScheduler : ITestScheduler
+internal sealed class TestScheduler : ITestScheduler, IDisposable
 {
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestGroupingService _groupingService;
     private readonly ITUnitMessageBus _messageBus;
-    private readonly int _maxParallelism;
+    private readonly SchedulerConfiguration _configuration;
+    private AdaptiveParallelismController? _adaptiveController;
+    private IDisposable? _semaphore;
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
         ITestGroupingService groupingService,
         ITUnitMessageBus messageBus,
-        int maxParallelism)
+        SchedulerConfiguration configuration)
     {
         _logger = logger;
         _groupingService = groupingService;
         _messageBus = messageBus;
-        _maxParallelism = maxParallelism > 0 ? maxParallelism : Environment.ProcessorCount * 4;
+        _configuration = configuration;
     }
 
     public async Task ScheduleAndExecuteAsync(
@@ -62,7 +64,30 @@ internal sealed class TestScheduler : ITestScheduler
     {
         var runningTasks = new ConcurrentDictionary<AbstractExecutableTest, Task>();
         var completedTests = new ConcurrentDictionary<AbstractExecutableTest, bool>();
-        var semaphore = new SemaphoreSlim(_maxParallelism, _maxParallelism);
+
+        // Create appropriate semaphore based on strategy
+        object semaphore;
+        if (_configuration.Strategy == ParallelismStrategy.Adaptive)
+        {
+            var initialParallelism = Math.Min(Environment.ProcessorCount * 4, _configuration.AdaptiveMaxParallelism);
+            var adaptiveSemaphore = new AdaptiveSemaphore(initialParallelism, _configuration.AdaptiveMaxParallelism);
+            _adaptiveController = new AdaptiveParallelismController(
+                adaptiveSemaphore,
+                _logger,
+                _configuration.AdaptiveMinParallelism,
+                _configuration.AdaptiveMaxParallelism,
+                initialParallelism,
+                _configuration.EnableAdaptiveMetrics);
+            semaphore = adaptiveSemaphore;
+            _semaphore = adaptiveSemaphore;
+        }
+        else
+        {
+            var maxParallelism = _configuration.MaxParallelism > 0 ? _configuration.MaxParallelism : Environment.ProcessorCount * 4;
+            var fixedSemaphore = new SemaphoreSlim(maxParallelism, maxParallelism);
+            semaphore = fixedSemaphore;
+            _semaphore = fixedSemaphore;
+        }
 
         // Process all test groups
         var allTestTasks = new List<Task>();
@@ -180,7 +205,7 @@ internal sealed class TestScheduler : ITestScheduler
         ITestExecutor executor,
         ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
-        SemaphoreSlim semaphore,
+        object semaphore,
         CancellationToken cancellationToken)
     {
         // Execute order groups sequentially
@@ -190,7 +215,10 @@ internal sealed class TestScheduler : ITestScheduler
 
             foreach (var test in orderGroup.Value)
             {
-                await semaphore.WaitAsync(cancellationToken);
+                if (semaphore is AdaptiveSemaphore adaptive)
+                    await adaptive.WaitAsync(cancellationToken);
+                else
+                    await ((SemaphoreSlim)semaphore).WaitAsync(cancellationToken);
 
                 // Create a task that releases semaphore on completion without Task.Run overhead
                 async Task ExecuteWithSemaphoreRelease()
@@ -201,7 +229,10 @@ internal sealed class TestScheduler : ITestScheduler
                     }
                     finally
                     {
-                        semaphore.Release();
+                        if (semaphore is AdaptiveSemaphore adaptive)
+                            adaptive.Release();
+                        else
+                            ((SemaphoreSlim)semaphore).Release();
                     }
                 }
 
@@ -217,14 +248,17 @@ internal sealed class TestScheduler : ITestScheduler
         ITestExecutor executor,
         ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
-        SemaphoreSlim semaphore,
+        object semaphore,
         CancellationToken cancellationToken)
     {
         var tasks = new List<Task>();
 
         foreach (var test in tests)
         {
-            await semaphore.WaitAsync(cancellationToken);
+            if (semaphore is AdaptiveSemaphore adaptive)
+                await adaptive.WaitAsync(cancellationToken);
+            else
+                await ((SemaphoreSlim)semaphore).WaitAsync(cancellationToken);
 
             // Create a task that releases semaphore on completion without Task.Run overhead
             async Task ExecuteWithSemaphoreRelease()
@@ -235,7 +269,10 @@ internal sealed class TestScheduler : ITestScheduler
                 }
                 finally
                 {
-                    semaphore.Release();
+                    if (semaphore is AdaptiveSemaphore adaptive)
+                        adaptive.Release();
+                    else
+                        ((SemaphoreSlim)semaphore).Release();
                 }
             }
 
@@ -278,6 +315,7 @@ internal sealed class TestScheduler : ITestScheduler
 
     private async Task ExecuteTestDirectlyAsync(AbstractExecutableTest test, ITestExecutor executor, ConcurrentDictionary<AbstractExecutableTest, bool> completedTests, CancellationToken cancellationToken)
     {
+        var startTime = DateTime.UtcNow;
         try
         {
             await executor.ExecuteTestAsync(test, cancellationToken);
@@ -285,6 +323,19 @@ internal sealed class TestScheduler : ITestScheduler
         finally
         {
             completedTests[test] = true;
+
+            // Record completion for adaptive metrics
+            if (_adaptiveController != null)
+            {
+                var executionTime = DateTime.UtcNow - startTime;
+                _adaptiveController.RecordTestCompletion(executionTime);
+            }
         }
+    }
+
+    public void Dispose()
+    {
+        _adaptiveController?.Dispose();
+        _semaphore?.Dispose();
     }
 }
