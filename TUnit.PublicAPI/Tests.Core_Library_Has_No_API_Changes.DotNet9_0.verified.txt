@@ -572,7 +572,7 @@ namespace
         public DiscoveryResult() { }
         public static .DiscoveryResult Empty { get; }
     }
-    [(.Method, Inherited=false)]
+    [(.Class | .Method, Inherited=false)]
     public sealed class DisplayNameAttribute : .DisplayNameFormatterAttribute, .IScopedAttribute, .IScopedAttribute<.DisplayNameAttribute>
     {
         public DisplayNameAttribute(string displayName) { }
