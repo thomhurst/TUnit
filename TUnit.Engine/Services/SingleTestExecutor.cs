@@ -272,7 +272,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
     private async Task ExecuteBeforeTestHooksAsync(IReadOnlyList<Func<TestContext, CancellationToken, Task>> hooks, TestContext context, CancellationToken cancellationToken)
     {
-        // Restore contexts once at the beginning
         RestoreHookContexts(context);
         context.RestoreExecutionContext();
 
@@ -282,8 +281,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 await hook(context, cancellationToken);
                 
-                // Only restore if the context has AsyncLocal values that need flowing
-                // This is already handled by the HookOrchestrator for session/assembly/class hooks
+                // RestoreExecutionContext after each hook to ensure AsyncLocal values flow correctly
+                // when AddAsyncLocalValues() is called in hooks
+                context.RestoreExecutionContext();
             }
             catch (Exception ex)
             {
