@@ -55,10 +55,12 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         Filter = filter;
         TestSessionId = context.Request.Session.SessionUid.Value;
 
-        // Get framework services
         var loggerFactory = frameworkServiceProvider.GetLoggerFactory();
         var outputDevice = frameworkServiceProvider.GetOutputDevice();
         CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
+        var configuration = frameworkServiceProvider.GetConfiguration();
+        
+        TestContext.Configuration = new ConfigurationAdapter(configuration);
 
         VerbosityService = Register(new VerbosityService(CommandLineOptions));
         DiscoveryDiagnostics.Initialize(VerbosityService);
