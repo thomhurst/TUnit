@@ -15,10 +15,6 @@ internal sealed class BasicTests_SynchronousTest_TestSource_GUID : global::TUnit
             TestName = "SynchronousTest",
             TestClassType = typeof(global::TUnit.TestProject.BasicTests),
             TestMethodName = "SynchronousTest",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -121,10 +117,6 @@ internal sealed class BasicTests_AsynchronousTest_TestSource_GUID : global::TUni
             TestName = "AsynchronousTest",
             TestClassType = typeof(global::TUnit.TestProject.BasicTests),
             TestMethodName = "AsynchronousTest",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -225,10 +217,6 @@ internal sealed class BasicTests_ValueTaskAsynchronousTest_TestSource_GUID : glo
             TestName = "ValueTaskAsynchronousTest",
             TestClassType = typeof(global::TUnit.TestProject.BasicTests),
             TestMethodName = "ValueTaskAsynchronousTest",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [

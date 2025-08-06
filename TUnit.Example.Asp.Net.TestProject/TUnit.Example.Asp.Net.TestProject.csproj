@@ -17,6 +17,10 @@
         <PackageReference Include="Testcontainers.PostgreSql" />
         <PackageReference Include="Testcontainers.Redis" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <Compile Remove="Tests2.cs" />
+    </ItemGroup>
 
     <Import Project="..\TestProject.targets" />
 

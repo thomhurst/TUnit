@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Helpers;
 
 namespace TUnit.UnitTests;
 
@@ -128,6 +129,25 @@ public class CustomPropertyDataSourceTests
         await Assert.That(Service!.IsInitialized).IsTrue();
         await Assert.That(Service.GetMessage()).IsEqualTo("Custom service initialized");
     }
+
+    [Test]
+    public async Task PropertyInjection_CustomDataSource_WithNestedProperties_InjectsAndInitializesRecursively()
+    {
+        // Test main service
+        await Assert.That(Service).IsNotNull();
+        await Assert.That(Service!.IsInitialized).IsTrue();
+        await Assert.That(Service.GetMessage()).IsEqualTo("Custom service initialized");
+
+        // Test nested service
+        await Assert.That(Service.NestedService).IsNotNull();
+        await Assert.That(Service.NestedService!.IsInitialized).IsTrue();
+        await Assert.That(Service.NestedService.GetData()).IsEqualTo("Nested service initialized");
+
+        // Test deeply nested service
+        await Assert.That(Service.NestedService.DeeplyNestedService).IsNotNull();
+        await Assert.That(Service.NestedService.DeeplyNestedService!.IsInitialized).IsTrue();
+        await Assert.That(Service.NestedService.DeeplyNestedService.GetDeepData()).IsEqualTo("Deeply nested service initialized");
+    }
 }
 
 // Custom data source attribute that inherits from AsyncDataSourceGeneratorAttribute
@@ -135,7 +155,17 @@ public class CustomDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAc
 {
     protected override async IAsyncEnumerable<Func<Task<T>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        yield return () => Task.FromResult((T)Activator.CreateInstance(typeof(T))!);
+        yield return async () =>
+        {
+            // Use the DataSourceHelpers to create objects with init-only properties properly
+            if (DataSourceHelpers.TryCreateWithInitializer(typeof(T), dataGeneratorMetadata.TestInformation, dataGeneratorMetadata.TestSessionId, out var createdInstance))
+            {
+                return (T)createdInstance;
+            }
+            
+            // Fallback to regular Activator if no specialized creator is available
+            return (T)Activator.CreateInstance(typeof(T))!;
+        };
         await Task.CompletedTask;
     }
 }
@@ -143,6 +173,10 @@ public class CustomDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAc
 public class CustomService : IAsyncInitializer
 {
     public bool IsInitialized { get; private set; }
+
+    // Nested property with its own data source
+    [CustomDataSource<NestedService>]
+    public required NestedService? NestedService { get; set; }
 
     public async Task InitializeAsync()
     {
@@ -155,3 +189,40 @@ public class CustomService : IAsyncInitializer
         return IsInitialized ? "Custom service initialized" : "Not initialized";
     }
 }
+
+public class NestedService : IAsyncInitializer
+{
+    public bool IsInitialized { get; private set; }
+
+    // Deeply nested property with its own data source
+    [CustomDataSource<DeeplyNestedService>]
+    public required DeeplyNestedService? DeeplyNestedService { get; set; }
+
+    public async Task InitializeAsync()
+    {
+        await Task.Delay(1);
+        IsInitialized = true;
+    }
+
+    public string GetData()
+    {
+        return IsInitialized ? "Nested service initialized" : "Nested not initialized";
+    }
+}
+
+public class DeeplyNestedService : IAsyncInitializer
+{
+    public bool IsInitialized { get; private set; }
+
+    public async Task InitializeAsync()
+    {
+        await Task.Delay(1);
+        IsInitialized = true;
+    }
+
+    public string GetDeepData()
+    {
+        return IsInitialized ? "Deeply nested service initialized" : "Deeply nested not initialized";
+    }
+}
+

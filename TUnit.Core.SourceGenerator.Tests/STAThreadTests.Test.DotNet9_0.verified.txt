@@ -15,10 +15,6 @@ internal sealed class STAThreadTests_With_STA_TestSource_GUID : global::TUnit.Co
             TestName = "With_STA",
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "With_STA",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 100,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -124,10 +120,6 @@ internal sealed class STAThreadTests_Without_STA_TestSource_GUID : global::TUnit
             TestName = "Without_STA",
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "Without_STA",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 100,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -232,10 +224,6 @@ internal sealed class STAThreadTests_STA_WithSimpleAwait_TestSource_GUID : globa
             TestName = "STA_WithSimpleAwait",
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithSimpleAwait",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 100,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -341,10 +329,6 @@ internal sealed class STAThreadTests_STA_WithTaskYield_TestSource_GUID : global:
             TestName = "STA_WithTaskYield",
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithTaskYield",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 100,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -450,10 +434,6 @@ internal sealed class STAThreadTests_STA_WithConfigureAwaitTrue_TestSource_GUID 
             TestName = "STA_WithConfigureAwaitTrue",
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithConfigureAwaitTrue",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 100,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -559,10 +539,6 @@ internal sealed class STAThreadTests_STA_WithNestedAsyncCalls_TestSource_GUID : 
             TestName = "STA_WithNestedAsyncCalls",
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithNestedAsyncCalls",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 100,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -668,10 +644,6 @@ internal sealed class STAThreadTests_STA_WithTaskFromResult_TestSource_GUID : gl
             TestName = "STA_WithTaskFromResult",
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithTaskFromResult",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 100,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -777,10 +749,6 @@ internal sealed class STAThreadTests_STA_WithCompletedTask_TestSource_GUID : glo
             TestName = "STA_WithCompletedTask",
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithCompletedTask",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 100,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -886,10 +854,6 @@ internal sealed class STAThreadTests_STA_WithTaskRun_TestSource_GUID : global::T
             TestName = "STA_WithTaskRun",
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithTaskRun",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 100,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -995,10 +959,6 @@ internal sealed class STAThreadTests_STA_WithMultipleAwaits_TestSource_GUID : gl
             TestName = "STA_WithMultipleAwaits",
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithMultipleAwaits",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 100,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -1104,10 +1064,6 @@ internal sealed class STAThreadTests_STA_WithAsyncEnumerable_TestSource_GUID : g
             TestName = "STA_WithAsyncEnumerable",
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithAsyncEnumerable",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 100,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -1213,10 +1169,6 @@ internal sealed class STAThreadTests_STA_WithTaskWhenAll_TestSource_GUID : globa
             TestName = "STA_WithTaskWhenAll",
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithTaskWhenAll",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 100,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -1322,10 +1274,6 @@ internal sealed class STAThreadTests_STA_WithExceptionHandling_TestSource_GUID :
             TestName = "STA_WithExceptionHandling",
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithExceptionHandling",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 100,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [

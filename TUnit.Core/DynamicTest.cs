@@ -22,7 +22,9 @@ public class DynamicDiscoveryResult : DiscoveryResult
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)]
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicFields
+        | DynamicallyAccessedMemberTypes.NonPublicFields)]
     public Type? TestClassType { get; set; }
 }
 
@@ -36,14 +38,18 @@ public abstract class DynamicTest<[DynamicallyAccessedMembers(
     | DynamicallyAccessedMemberTypes.NonPublicConstructors
     | DynamicallyAccessedMemberTypes.PublicProperties
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.NonPublicMethods)] T> : DynamicTest where T : class;
+    | DynamicallyAccessedMemberTypes.NonPublicMethods
+    | DynamicallyAccessedMemberTypes.PublicFields
+    | DynamicallyAccessedMemberTypes.NonPublicFields)] T> : DynamicTest where T : class;
 
 public class DynamicTestInstance<[DynamicallyAccessedMembers(
     DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.NonPublicConstructors
     | DynamicallyAccessedMemberTypes.PublicProperties
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.NonPublicMethods)]T> : DynamicTest<T> where T : class
+    | DynamicallyAccessedMemberTypes.NonPublicMethods
+    | DynamicallyAccessedMemberTypes.PublicFields
+    | DynamicallyAccessedMemberTypes.NonPublicFields)]T> : DynamicTest<T> where T : class
 {
     public Expression<Action<T>>? TestMethod { get; set; }
     public object?[]? TestClassArguments { get; set; }

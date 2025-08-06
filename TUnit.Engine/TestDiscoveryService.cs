@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Engine.Building;
 using TUnit.Engine.Services;
+using TUnit.Engine.Scheduling;
 
 namespace TUnit.Engine;
 
@@ -50,11 +51,11 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
-        var beforeDiscoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken);
+        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken);
 #if NET
-        if (beforeDiscoveryContext != null)
+        if (discoveryContext != null)
         {
-            ExecutionContext.Restore(beforeDiscoveryContext);
+            ExecutionContext.Restore(discoveryContext);
         }
 #endif
 
@@ -74,8 +75,11 @@ internal sealed class TestDiscoveryService : IDataProducer
             _dependencyResolver.TryResolveDependencies(test);
         }
         
-        // Check for circular dependencies after all dependencies are resolved
+        // Check for circular dependencies and mark failed tests
         _dependencyResolver.CheckForCircularDependencies();
+        
+        // Create execution plan for ordering
+        var executionPlan = ExecutionPlan.Create(tests);
         
         // Apply filter first to get the tests we want to run
         var filteredTests = _testFilterService.FilterTests(filter, tests);
@@ -87,8 +91,9 @@ internal sealed class TestDiscoveryService : IDataProducer
         while (queue.Count > 0)
         {
             var test = queue.Dequeue();
-            foreach (var dependency in test.Dependencies)
+            foreach (var resolvedDep in test.Dependencies)
             {
+                var dependency = resolvedDep.Test;
                 if (testsToInclude.Add(dependency))
                 {
                     queue.Enqueue(dependency);
@@ -102,13 +107,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         var contextProvider = _hookOrchestrator.GetContextProvider();
         contextProvider.TestDiscoveryContext.AddTests(tests.Select(t => t.Context));
 
-        var afterDiscoveryContext = await _hookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken);
-#if NET
-        if (afterDiscoveryContext != null)
-        {
-            ExecutionContext.Restore(afterDiscoveryContext);
-        }
-#endif
+        await _hookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken);
 
         // Register the filtered tests to invoke ITestRegisteredEventReceiver
         await _testFilterService.RegisterTestsAsync(filteredTests);

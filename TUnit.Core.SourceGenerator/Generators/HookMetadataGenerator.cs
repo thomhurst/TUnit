@@ -378,7 +378,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("catch (Exception ex)");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("throw new InvalidOperationException($\"Failed to initialize hook registry: {ex.Message}\", ex);");
+            writer.AppendLine("throw new global::System.InvalidOperationException($\"Failed to initialize hook registry: {ex.Message}\", ex);");
             writer.Unindent();
             writer.AppendLine("}");
         }
@@ -593,7 +593,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
                 {
                     // Use reflection instead of dynamic to avoid AOT issues
                     writer.AppendLine("var instanceType = instance.GetType();");
-                    writer.AppendLine($"var method = instanceType.GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance{(isStatic ? " | System.Reflection.BindingFlags.Static" : "")});");
+                    writer.AppendLine($"var method = instanceType.GetMethod(\"{methodName}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance{(isStatic ? " | global::System.Reflection.BindingFlags.Static" : "")});");
                     writer.AppendLine("if (method != null)");
                     writer.AppendLine("{");
                     writer.Indent();
@@ -668,7 +668,32 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
                 if (isOpenGeneric && isStatic)
                 {
-                    writer.AppendLine($"var method = typeof({hook.TypeSymbol.GloballyQualifiedNonGeneric()}).GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);");
+                    // For open generic types, we need to find the closed generic base type that matches
+                    // the open generic definition where the hook was defined
+                    writer.AppendLine($"var openGenericType = typeof({hook.TypeSymbol.GloballyQualified()});");
+                    writer.AppendLine("Type? targetType = context.ClassType;");
+                    writer.AppendLine("MethodInfo? method = null;");
+                    writer.AppendLine();
+                    writer.AppendLine("// Walk up the inheritance chain to find the closed generic type that matches the open generic definition");
+                    writer.AppendLine("while (targetType != null && method == null)");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine("if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == openGenericType)");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"method = targetType.GetMethod(\"{methodName}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.DeclaredOnly);");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                    writer.AppendLine("targetType = targetType.BaseType;");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                    writer.AppendLine();
+                    writer.AppendLine("if (method == null)");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"throw new global::System.InvalidOperationException($\"Could not find static method '{methodName}' on type {{context.ClassType.FullName}} or its base types matching generic definition {{openGenericType.FullName}}\");");
+                    writer.Unindent();
+                    writer.AppendLine("}");
 
                     if (hasCancellationTokenOnly)
                     {
@@ -688,8 +713,8 @@ public class HookMetadataGenerator : IIncrementalGenerator
                     }
 
                     writer.AppendLine(hook.MethodSymbol.ReturnsVoid
-                        ? "method!.Invoke(null, parameters);"
-                        : "await AsyncConvert.ConvertObject(() => method!.Invoke(null, parameters));");
+                        ? "method.Invoke(null, parameters);"
+                        : "await AsyncConvert.ConvertObject(() => method.Invoke(null, parameters));");
                 }
                 else
                 {

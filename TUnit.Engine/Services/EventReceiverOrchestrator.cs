@@ -1,9 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
-using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Events;
 using TUnit.Engine.Extensions;
@@ -86,12 +84,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         // Filter scoped attributes
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
 
-        // Sort by order once
-        if (filteredReceivers.Count > 1)
-        {
-            filteredReceivers.Sort((a, b) => a.Order.CompareTo(b.Order));
-        }
-
         // Batch invocation for multiple receivers
         if (filteredReceivers.Count > 3)
         {
@@ -135,11 +127,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         // Filter scoped attributes
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
 
-        if (filteredReceivers.Count > 1)
-        {
-            filteredReceivers.Sort((a, b) => a.Order.CompareTo(b.Order));
-        }
-
         foreach (var receiver in filteredReceivers)
         {
             try
@@ -173,11 +160,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         // Filter scoped attributes
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
-
-        if (filteredReceivers.Count > 1)
-        {
-            filteredReceivers.Sort((a, b) => a.Order.CompareTo(b.Order));
-        }
 
         foreach (var receiver in filteredReceivers)
         {

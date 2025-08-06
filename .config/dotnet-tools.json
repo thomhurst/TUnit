@@ -3,7 +3,7 @@
   "isRoot": true,
   "tools": {
     "microsoft.templateengine.authoring.cli": {
-      "version": "9.0.302",
+      "version": "9.0.304",
       "commands": [
         "dotnet-template-authoring"
       ],

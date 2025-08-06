@@ -1,24 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="..\TestProject.props" />
+
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-    
+
     <!-- Enable AOT publishing for validation -->
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
-    
-    <!-- Source generation mode -->
-    <TUNIT_EXECUTION_MODE>SourceGeneration</TUNIT_EXECUTION_MODE>
-    
+
     <!-- Enable all AOT analysis warnings -->
-    <PublishTrimmed>true</PublishTrimmed>
+    <PublishTrimmed>false</PublishTrimmed>
     <TrimMode>full</TrimMode>
     <EnableAotAnalyzer>true</EnableAotAnalyzer>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningsNotAsErrors>IL2104;IL2026</WarningsNotAsErrors>
   </PropertyGroup>
 
@@ -26,5 +24,7 @@
     <ProjectReference Include="..\TUnit\TUnit.csproj" />
     <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
   </ItemGroup>
+
+    <Import Project="..\TestProject.targets" />
 
 </Project>

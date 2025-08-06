@@ -7,6 +7,7 @@ using TUnit.Core.Tracking;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
+using TUnit.Engine.Utilities;
 
 namespace TUnit.Engine.Building;
 
@@ -90,6 +91,13 @@ internal sealed class TestBuilder : ITestBuilder
                 }
                 return tests;
             }
+
+
+            // Extract repeat count from attributes
+            var attributes = metadata.AttributeFactory.Invoke();
+            var filteredAttributes = ScopedAttributeFilter.FilterScopedAttributes(attributes);
+            var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
+            var repeatCount = repeatAttr?.Times ?? 0;
 
             var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
             {
@@ -192,7 +200,7 @@ internal sealed class TestBuilder : ITestBuilder
                         {
                             methodDataLoopIndex++;
 
-                            for (var i = 0; i < metadata.RepeatCount + 1; i++)
+                            for (var i = 0; i < repeatCount + 1; i++)
                             {
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
                                 var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
@@ -574,7 +582,7 @@ internal sealed class TestBuilder : ITestBuilder
     {
         var attributes = metadata.AttributeFactory();
         var skipAttributes = attributes.OfType<SkipAttribute>().ToList();
-        
+
         if (skipAttributes.Count == 0)
         {
             return null; // No skip attributes
@@ -599,6 +607,8 @@ internal sealed class TestBuilder : ITestBuilder
 
     private ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
+        var attributes = metadata.AttributeFactory.Invoke();
+
         var testDetails = new TestDetails
         {
             TestId = testId,
@@ -613,9 +623,10 @@ internal sealed class TestBuilder : ITestBuilder
             TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = metadata.MethodMetadata.ReturnType ?? typeof(void),
             MethodMetadata = metadata.MethodMetadata,
-            Attributes =  metadata.AttributeFactory.Invoke(),
+            Attributes = attributes,
             MethodGenericArguments = testData.ResolvedMethodGenericArguments,
             ClassGenericArguments = testData.ResolvedClassGenericArguments
+            // Don't set Timeout and RetryLimit here - let discovery event receivers set them
         };
 
         var context = _contextProvider.CreateTestContext(
@@ -639,8 +650,6 @@ internal sealed class TestBuilder : ITestBuilder
         {
             await _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
         }
-
-        discoveredContext.TransferTo(context);
     }
 
     private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
@@ -744,13 +753,13 @@ internal sealed class TestBuilder : ITestBuilder
     {
         // Get the expected generic types - check both method and class type arguments
         var expectedTypes = metadata.GenericMethodTypeArguments;
-        
+
         // For concrete instantiations of generic classes, check the class type arguments
         if ((expectedTypes == null || expectedTypes.Length == 0) && metadata.TestClassType.IsConstructedGenericType)
         {
             expectedTypes = metadata.TestClassType.GetGenericArguments();
         }
-        
+
         if (expectedTypes == null || expectedTypes.Length == 0)
             return true; // No specific types expected, allow all data
 
@@ -778,7 +787,7 @@ internal sealed class TestBuilder : ITestBuilder
         if (expectedTypes.Length > 0)
         {
             var expectedElementType = expectedTypes[0];
-            
+
             // For simple value types from Arguments attributes, check direct type compatibility
             if (methodData.Length == 1 && sampleData != null)
             {

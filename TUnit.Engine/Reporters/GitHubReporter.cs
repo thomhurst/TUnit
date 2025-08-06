@@ -10,7 +10,7 @@ using TUnit.Engine.Framework;
 
 namespace TUnit.Engine.Reporters;
 
-public class GitHubReporter(IExtension extension) : IDataConsumer, ITestApplicationLifecycleCallbacks, IFilterReceiver
+public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostApplicationLifetime, IFilterReceiver
 {
     private const long MaxFileSizeInBytes = 1 * 1024 * 1024; // 1MB
     private string _outputSummaryFilePath = null!;

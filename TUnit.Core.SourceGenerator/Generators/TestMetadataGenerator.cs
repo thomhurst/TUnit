@@ -501,10 +501,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var methodSymbol = testMethod.MethodSymbol;
 
-        writer.AppendLine("TimeoutMs = null,");
-        writer.AppendLine("RetryCount = 0,");
-        writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(methodSymbol, testMethod.TypeSymbol)},");
-        writer.AppendLine("CanRunInParallel = true,");
 
         // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
@@ -592,10 +588,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var methodSymbol = testMethod.MethodSymbol;
 
-        writer.AppendLine("TimeoutMs = null,");
-        writer.AppendLine("RetryCount = 0,");
-        writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(methodSymbol, testMethod.TypeSymbol)},");
-        writer.AppendLine("CanRunInParallel = true,");
 
         // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
@@ -866,7 +858,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var fullyQualifiedType = targetType.GloballyQualified();
 
         // Generate async enumerable that yields Func<Task<object?[]?>>
-        writer.AppendLine("async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()");
+        writer.AppendLine("async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -946,7 +938,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             writer.AppendLine();
             writer.AppendLine("var taskResult = await result;");
-            writer.AppendLine("if (taskResult is System.Collections.IEnumerable enumerable && !(taskResult is string))");
+            writer.AppendLine("if (taskResult is global::System.Collections.IEnumerable enumerable && !(taskResult is string))");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("foreach (var item in enumerable)");
@@ -989,7 +981,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
             }
             writer.AppendLine();
-            writer.AppendLine("if (result is System.Collections.IEnumerable enumerable && !(result is string))");
+            writer.AppendLine("if (result is global::System.Collections.IEnumerable enumerable && !(result is string))");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("foreach (var item in enumerable)");
@@ -1354,15 +1346,68 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         // Generate setter
                         if (property.SetMethod.IsInitOnly)
                         {
-                            writer.AppendLine("#if NET8_0_OR_GREATER");
-                            writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingFieldNested(({className})instance) = ({propertyType})value,");
-                            writer.AppendLine("#else");
-                            writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
-                            writer.AppendLine("#endif");
+                            // For nested init-only properties with ClassDataSource, create the value if null
+                            if (dataSourceAttr != null && 
+                                dataSourceAttr.AttributeClass?.IsOrInherits("global::TUnit.Core.ClassDataSourceAttribute") == true &&
+                                dataSourceAttr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
+                            {
+                                var dataSourceType = dataSourceAttr.AttributeClass.TypeArguments[0];
+                                var fullyQualifiedType = dataSourceType.GloballyQualified();
+                                
+                                writer.AppendLine("Setter = (instance, value) =>");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine("// If value is null, create it using Activator");
+                                writer.AppendLine("if (value == null)");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine($"value = System.Activator.CreateInstance<{fullyQualifiedType}>();");
+                                writer.Unindent();
+                                writer.AppendLine("}");
+                                writer.AppendLine($"var backingField = instance.GetType().GetField(\"<{property.Name}>k__BackingField\", ");
+                                writer.AppendLine("    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
+                                writer.AppendLine("if (backingField != null)");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine("backingField.SetValue(instance, value);");
+                                writer.Unindent();
+                                writer.AppendLine("}");
+                                writer.AppendLine("else");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine($"throw new global::System.InvalidOperationException(\"Could not find backing field for property {property.Name}\");");
+                                writer.Unindent();
+                                writer.AppendLine("}");
+                                writer.Unindent();
+                                writer.AppendLine("},");
+                            }
+                            else
+                            {
+                                // For other init-only properties, use reflection to set the backing field
+                                writer.AppendLine("Setter = (instance, value) =>");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine($"var backingField = instance.GetType().GetField(\"<{property.Name}>k__BackingField\", ");
+                                writer.AppendLine("    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
+                                writer.AppendLine("if (backingField != null)");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine("backingField.SetValue(instance, value);");
+                                writer.Unindent();
+                                writer.AppendLine("}");
+                                writer.AppendLine("else");
+                                writer.AppendLine("{");
+                                writer.Indent();
+                                writer.AppendLine($"throw new global::System.InvalidOperationException(\"Could not find backing field for property {property.Name}\");");
+                                writer.Unindent();
+                                writer.AppendLine("}");
+                                writer.Unindent();
+                                writer.AppendLine("},");
+                            }
                         }
                         else
                         {
-                            // For regular properties, use direct assignment (tuple conversion happens at runtime)
+                            // For regular properties, use direct assignment
                             writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
                         }
 
@@ -1381,7 +1426,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var currentType = typeSymbol;
         var processedProperties = new HashSet<string>();
-
+        var className = typeSymbol.GloballyQualified();
+        
+        // Generate a single cast check and extract all properties
+        var propertiesWithDataSource = new List<IPropertySymbol>();
+        
         while (currentType != null)
         {
             foreach (var member in currentType.GetMembers())
@@ -1395,18 +1444,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (dataSourceAttr != null)
                     {
                         processedProperties.Add(property.Name);
-                        var className = typeSymbol.GloballyQualified();
-
-                        writer.AppendLine($"if (obj is {className} typedObj)");
-                        writer.AppendLine("{");
-                        writer.Indent();
-                        writer.AppendLine($"nestedValues[\"{property.Name}\"] = typedObj.{property.Name};");
-                        writer.Unindent();
-                        writer.AppendLine("}");
+                        propertiesWithDataSource.Add(property);
                     }
                 }
             }
             currentType = currentType.BaseType;
+        }
+        
+        // Generate a single if statement with all property extractions
+        if (propertiesWithDataSource.Any())
+        {
+            writer.AppendLine($"if (obj is {className} typedObj)");
+            writer.AppendLine("{");
+            writer.Indent();
+            
+            foreach (var property in propertiesWithDataSource)
+            {
+                writer.AppendLine($"nestedValues[\"{property.Name}\"] = typedObj.{property.Name};");
+            }
+            
+            writer.Unindent();
+            writer.AppendLine("}");
         }
     }
 
@@ -1449,11 +1507,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Use reflection to invoke the method on the generic type instance
         writer.AppendLine("var instanceType = instance.GetType();");
-        writer.AppendLine($"var method = instanceType.GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);");
+        writer.AppendLine($"var method = instanceType.GetMethod(\"{methodName}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance);");
         writer.AppendLine("if (method == null)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine($"throw new System.InvalidOperationException($\"Method '{methodName}' not found on type {{instanceType.FullName}}\");");
+        writer.AppendLine($"throw new global::System.InvalidOperationException($\"Method '{methodName}' not found on type {{instanceType.FullName}}\");");
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
@@ -1480,7 +1538,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("// Fallback: infer type arguments from the actual argument types");
-            writer.AppendLine("var typeArgs = new System.Type[" + testMethod.MethodSymbol.TypeParameters.Length + "];");
+            writer.AppendLine("var typeArgs = new global::System.Type[" + testMethod.MethodSymbol.TypeParameters.Length + "];");
             writer.AppendLine("for (int i = 0; i < typeArgs.Length && i < args.Length; i++)");
             writer.AppendLine("{");
             writer.Indent();
@@ -1501,7 +1559,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (hasCancellationToken)
         {
-            writer.AppendLine("methodArgs[args.Length] = global::TUnit.Core.TestContext.Current?.CancellationToken ?? System.Threading.CancellationToken.None;");
+            writer.AppendLine("methodArgs[args.Length] = global::TUnit.Core.TestContext.Current?.CancellationToken ?? global::System.Threading.CancellationToken.None;");
         }
 
         writer.AppendLine();
@@ -1547,8 +1605,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // Count required parameters (those without default values, excluding CancellationToken)
-            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional);
+            // Count required parameters (those without default values, excluding CancellationToken and params parameters)
+            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional && !p.IsParams);
 
             // Generate runtime logic to handle variable argument counts
             writer.AppendLine("// Invoke with only the arguments that were provided");
@@ -1595,7 +1653,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             writer.AppendLine("default:");
             writer.Indent();
-            if (requiredParamCount == parametersFromArgs.Length)
+            if (requiredParamCount == parametersFromArgs.Length && !hasParams)
             {
                 writer.AppendLine($"throw new global::System.ArgumentException($\"Expected exactly {parametersFromArgs.Length} argument{(parametersFromArgs.Length == 1 ? "" : "s")}, but got {{args.Length}}\");");
             }
@@ -1639,8 +1697,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // Count required parameters (those without default values, excluding CancellationToken)
-            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional);
+            // Count required parameters (those without default values, excluding CancellationToken and params parameters)
+            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional && !p.IsParams);
 
             // Generate runtime logic to handle variable argument counts
             writer.AppendLine("// Invoke with only the arguments that were provided");
@@ -1687,7 +1745,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             writer.AppendLine("default:");
             writer.Indent();
-            if (requiredParamCount == parametersFromArgs.Length)
+            if (requiredParamCount == parametersFromArgs.Length && !hasParams)
             {
                 writer.AppendLine($"throw new global::System.ArgumentException($\"Expected exactly {parametersFromArgs.Length} argument{(parametersFromArgs.Length == 1 ? "" : "s")}, but got {{args.Length}}\");");
             }
@@ -1774,6 +1832,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static void GenerateTestDependency(CodeWriter writer, AttributeData attributeData)
     {
         var constructorArgs = attributeData.ConstructorArguments;
+        
+        // Get ProceedOnFailure from named arguments
+        var proceedOnFailure = attributeData.NamedArguments
+            .FirstOrDefault(na => na.Key == "ProceedOnFailure")
+            .Value.Value as bool? ?? false;
 
         // Handle the different constructor overloads of DependsOnAttribute
         if (constructorArgs.Length == 1)
@@ -1783,7 +1846,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 // DependsOnAttribute(string testName) - dependency on test in same class
                 var testName = arg.Value?.ToString() ?? "";
-                writer.AppendLine($"new global::TUnit.Core.TestDependency {{ MethodName = \"{testName}\" }}");
+                writer.AppendLine($"new global::TUnit.Core.TestDependency {{ MethodName = \"{testName}\", ProceedOnFailure = {proceedOnFailure.ToString().ToLower()} }}");
             }
             else if (arg.Type?.TypeKind == TypeKind.Class || arg.Type?.Name == "Type")
             {
@@ -1794,7 +1857,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType
                         ? namedType.Arity
                         : 0;
-                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity} }}");
+                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, ProceedOnFailure = {proceedOnFailure.ToString().ToLower()} }}");
                 }
             }
         }
@@ -1824,10 +1887,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             }
                         }
                     }
-                    writer.AppendLine(" }");
+                    writer.Append(" }");
                 }
 
-                writer.AppendLine(" }");
+                writer.AppendLine($", ProceedOnFailure = {proceedOnFailure.ToString().ToLower()} }}");
             }
             else if (firstArg.Type?.TypeKind == TypeKind.Class || firstArg.Type?.Name == "Type")
             {
@@ -1841,7 +1904,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType
                         ? namedType.Arity
                         : 0;
-                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\" }}");
+                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity}, MethodName = \"{testName}\", ProceedOnFailure = {proceedOnFailure.ToString().ToLower()} }}");
                 }
             }
         }
@@ -1875,10 +1938,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             }
                         }
                     }
-                    writer.AppendLine(" }");
+                    writer.Append(" }");
                 }
 
-                writer.AppendLine(" }");
+                writer.AppendLine($", ProceedOnFailure = {proceedOnFailure.ToString().ToLower()} }}");
             }
         }
     }
@@ -3792,10 +3855,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodSymbol = testMethod.MethodSymbol;
         var typeSymbol = testMethod.TypeSymbol;
 
-        writer.AppendLine("TimeoutMs = null,");
-        writer.AppendLine("RetryCount = 0,");
-        writer.AppendLine("RepeatCount = 0,");
-        writer.AppendLine("CanRunInParallel = true,");
 
         // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
@@ -4142,10 +4201,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Where(a => !DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)));
 
         // Generate metadata
-        writer.AppendLine("TimeoutMs = null,");
-        writer.AppendLine("RetryCount = 0,");
-        writer.AppendLine($"RepeatCount = {CodeGenerationHelpers.ExtractRepeatCount(testMethod.MethodSymbol, testMethod.TypeSymbol)},");
-        writer.AppendLine("CanRunInParallel = true,");
 
         // Generate dependencies
         GenerateDependencies(writer, compilation, testMethod.MethodSymbol);

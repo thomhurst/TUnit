@@ -1,19 +1,16 @@
+using System.Diagnostics;
+
 namespace TUnit.Core;
 
+[DebuggerDisplay("{Metadata.TestClassType.Name}.{Metadata.TestName}")]
 public abstract class AbstractExecutableTest
 {
     public required string TestId { get; init; }
 
     public virtual TestMetadata Metadata { get; init; } = null!;
 
-    /// <summary>
-    /// Empty for parameterless tests
-    /// </summary>
     public required object?[] Arguments { get; init; }
 
-    /// <summary>
-    /// Empty for parameterless constructors
-    /// </summary>
     public object?[] ClassArguments { get; init; } = [];
 
     public abstract Task<object> CreateInstanceAsync();
@@ -30,7 +27,7 @@ public abstract class AbstractExecutableTest
         }
     }
 
-    public AbstractExecutableTest[] Dependencies { get; set; } = [];
+    public ResolvedDependency[] Dependencies { get; set; } = [];
 
     public TestState State { get; set; } = TestState.NotStarted;
 
@@ -45,6 +42,10 @@ public abstract class AbstractExecutableTest
         get => Context.TestStart;
         set => Context.TestStart = value ?? DateTimeOffset.UtcNow;
     }
+
+    public Task CompletionTask => _taskCompletionSource.Task;
+
+    internal readonly TaskCompletionSource _taskCompletionSource = new();
 
     public DateTimeOffset? EndTime { get => Context.TestEnd; set => Context.TestEnd = value; }
 
