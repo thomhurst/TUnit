@@ -2,6 +2,7 @@ using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
@@ -99,6 +100,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
         await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
 
+        CheckDependenciesAndThrowIfShouldSkip(test);
+
         var classContext = test.Context.ClassContext;
         var assemblyContext = classContext.AssemblyContext;
         var sessionContext = assemblyContext.TestSessionContext;
@@ -125,6 +128,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 await ExecuteTestWithHooksAsync(test, instance, cancellationToken);
             }
+        }
+        catch (TestDependencyException e)
+        {
+            test.Context.SkipReason = e.Message;
+            return await HandleSkippedTestInternalAsync(test, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -448,5 +456,36 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
             ClassHookContext.Current = context.ClassContext;
         }
+    }
+
+    private void CheckDependenciesAndThrowIfShouldSkip(AbstractExecutableTest test)
+    {
+        var failedDependenciesNotAllowingProceed = new List<string>();
+
+        foreach (var dependency in test.Dependencies)
+        {
+            // Check if the dependency has failed or timed out
+            if (dependency.Test.State == TestState.Failed || dependency.Test.State == TestState.Timeout)
+            {
+                // If this dependency doesn't allow proceeding on failure, add it to the list
+                if (!dependency.ProceedOnFailure)
+                {
+                    var dependencyName = GetDependencyDisplayName(dependency.Test);
+                    failedDependenciesNotAllowingProceed.Add(dependencyName);
+                }
+            }
+        }
+
+        // Only throw if there are dependencies that don't allow proceeding
+        if (failedDependenciesNotAllowingProceed.Count > 0)
+        {
+            var dependencyNames = string.Join(", ", failedDependenciesNotAllowingProceed);
+            throw new TestDependencyException(dependencyNames, false);
+        }
+    }
+
+    private string GetDependencyDisplayName(AbstractExecutableTest dependency)
+    {
+        return dependency.Context?.GetDisplayName() ?? $"{dependency.Context?.TestDetails.ClassType.Name}.{dependency.Context?.TestDetails.TestName}" ?? "Unknown";
     }
 }

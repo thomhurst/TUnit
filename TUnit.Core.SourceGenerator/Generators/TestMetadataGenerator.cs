@@ -1833,10 +1833,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var constructorArgs = attributeData.ConstructorArguments;
         
-        // Get ProceedOnFailure from named arguments
-        var proceedOnFailure = attributeData.NamedArguments
-            .FirstOrDefault(na => na.Key == "ProceedOnFailure")
-            .Value.Value as bool? ?? false;
+        // Extract ProceedOnFailure property value
+        var proceedOnFailure = GetProceedOnFailureValue(attributeData);
 
         // Handle the different constructor overloads of DependsOnAttribute
         if (constructorArgs.Length == 1)
@@ -1944,6 +1942,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($", ProceedOnFailure = {proceedOnFailure.ToString().ToLower()} }}");
             }
         }
+    }
+
+    private static bool GetProceedOnFailureValue(AttributeData attributeData)
+    {
+        // Look for ProceedOnFailure property in named arguments
+        foreach (var namedArg in attributeData.NamedArguments)
+        {
+            if (namedArg.Key == "ProceedOnFailure" && namedArg.Value.Value is bool proceedOnFailure)
+            {
+                return proceedOnFailure;
+            }
+        }
+        
+        // Default value is false
+        return false;
     }
 
     private static string GetDefaultValueString(IParameterSymbol parameter)
