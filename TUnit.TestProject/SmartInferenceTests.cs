@@ -1,5 +1,3 @@
-using TUnit.Core;
-
 namespace TUnit.TestProject;
 
 // Test scenario: Class has generic type parameter T, but no class-level [Arguments]

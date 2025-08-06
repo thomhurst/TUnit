@@ -21,7 +21,9 @@ public static class TestContextExtensions
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(this TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicFields
+        | DynamicallyAccessedMemberTypes.NonPublicFields)] T>(this TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
     {
         await context.GetService<ITestRegistry>()!.AddDynamicTest(context, dynamicTest);;
     }

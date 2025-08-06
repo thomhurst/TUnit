@@ -13,6 +13,6 @@ type DependencyInjectionClassConstructor() =
             .BuildServiceProvider()
 
     interface IClassConstructor with
-        member _.Create(typ: Type, _: ClassConstructorMetadata) : obj =
+        member _.Create(typ: Type, _: ClassConstructorMetadata) : Threading.Tasks.Task<obj> =
             Console.WriteLine("You can also control how your test classes are new'd up, giving you lots of power and the ability to utilise tools such as dependency injection")
-            ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, typ)
+            Threading.Tasks.Task.FromResult(ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, typ))

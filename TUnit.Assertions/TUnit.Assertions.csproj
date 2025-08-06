@@ -51,4 +51,6 @@
         <PackageReference Include="System.Collections.Immutable" />
     </ItemGroup>
 
+  <Import Project="..\Library.targets" />
+
 </Project>

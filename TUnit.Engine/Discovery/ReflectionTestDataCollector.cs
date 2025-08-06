@@ -3,15 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
-using System.Threading;
 using TUnit.Core;
-using TUnit.Core.Extensions;
 using TUnit.Core.Helpers;
-using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
-using TUnit.Engine.Helpers;
-using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Discovery;
 
@@ -471,12 +466,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 TestName = testName,
                 TestClassType = testClass,
                 TestMethodName = testMethod.Name,
-                IsSkipped = ReflectionAttributeExtractor.IsTestSkipped(testClass, testMethod, out var skipReason),
-                SkipReason = skipReason,
-                TimeoutMs = ReflectionAttributeExtractor.ExtractTimeout(testClass, testMethod),
-                RetryCount = ReflectionAttributeExtractor.ExtractRetryCount(testClass, testMethod),
-                RepeatCount = ReflectionAttributeExtractor.ExtractRepeatCount(testClass, testMethod),
-                CanRunInParallel = ReflectionAttributeExtractor.CanRunInParallel(testClass, testMethod),
                 Dependencies = ReflectionAttributeExtractor.ExtractDependencies(testClass, testMethod),
                 DataSources = ReflectionAttributeExtractor.ExtractDataSources(testMethod),
                 ClassDataSources = classData != null
@@ -495,7 +484,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(testMethod),
                 GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
                 AttributeFactory = () => ReflectionAttributeExtractor.GetAllAttributes(testClass, testMethod),
-                PropertyInjections = PropertyInjector.DiscoverInjectableProperties(testClass)
+                PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(testClass)
             });
         }
         catch (Exception ex)
@@ -1217,12 +1206,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             TestName = testName,
             TestClassType = result.TestClassType,
             TestMethodName = methodInfo.Name,
-            IsSkipped = result.Attributes.OfType<SkipAttribute>().Any(),
-            SkipReason = result.Attributes.OfType<SkipAttribute>().FirstOrDefault()?.Reason,
-            TimeoutMs = (int?)result.Attributes.OfType<TimeoutAttribute>().FirstOrDefault()?.Timeout.TotalMilliseconds,
-            RetryCount = result.Attributes.OfType<RetryAttribute>().FirstOrDefault()?.Times ?? 0,
-            RepeatCount = result.Attributes.OfType<RepeatAttribute>().FirstOrDefault()?.Times ?? 0,
-            CanRunInParallel = !result.Attributes.OfType<NotInParallelAttribute>().Any(),
             Dependencies = result.Attributes.OfType<DependsOnAttribute>().Select(a => a.ToTestDependency()).ToArray(),
             DataSources = [], // Dynamic tests don't use data sources in the same way
             ClassDataSources = [],
@@ -1239,7 +1222,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(methodInfo),
             GenericMethodTypeArguments = methodInfo.IsGenericMethodDefinition ? null : methodInfo.GetGenericArguments(),
             AttributeFactory = () => result.Attributes.ToArray(),
-            PropertyInjections = PropertyInjector.DiscoverInjectableProperties(result.TestClassType)
+            PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(result.TestClassType)
         };
 
         return Task.FromResult<TestMetadata>(metadata);

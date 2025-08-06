@@ -1,5 +1,3 @@
-using TUnit.Core;
-
 namespace TUnit.TestProject;
 
 public class TypedDataSourceTests
@@ -42,7 +40,7 @@ public class TypedDataSourceTests
         
         public override async IAsyncEnumerable<Func<Task<int>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
         {
-            for (int i = _start; i <= _end; i++)
+            for (var i = _start; i <= _end; i++)
             {
                 var value = i;
                 yield return () => Task.FromResult(value);
@@ -92,7 +90,7 @@ public class TypedDataSourceTests
         
         protected override async IAsyncEnumerable<Func<Task<int>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
         {
-            for (int i = 0; i < _count; i++)
+            for (var i = 0; i < _count; i++)
             {
                 await Task.Delay(1); // Simulate async work
                 var value = i * 10;

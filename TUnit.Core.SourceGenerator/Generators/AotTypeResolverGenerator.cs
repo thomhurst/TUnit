@@ -454,7 +454,7 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         writer.Indent();
         
         writer.AppendLine($"if (typeArguments.Length != {genericType.TypeParameters.Length})");
-        writer.AppendLine($"    throw new ArgumentException($\"Expected {genericType.TypeParameters.Length} type arguments, got {{typeArguments.Length}}\");");
+        writer.AppendLine($"    throw new global::System.ArgumentException($\"Expected {genericType.TypeParameters.Length} type arguments, got {{typeArguments.Length}}\");");
         writer.AppendLine();
         
         // Generate specific combinations if we can infer them

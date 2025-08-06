@@ -1,5 +1,8 @@
 using TUnit.Core;
 using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
+using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.AOT.Tests;
 
@@ -43,7 +46,7 @@ public class SimpleAotTests
 
     [Test]
     [ClassDataSource<SimpleDataClass>]
-    public void ClassDataSourceTest_ShouldWork(string data)
+    public void ClassDataSourceTest_ShouldWork(SimpleDataClass data)
     {
         // Test class data sources work in AOT (using source-generated factories)
         Console.WriteLine($"Class data source test with: {data}");
@@ -107,6 +110,104 @@ public class SimpleAotTests
     {
         public string Name { get; set; } = "";
         public int Value { get; set; }
+    }
+}
+
+/// <summary>
+/// AOT compatibility tests for nested property injection
+/// </summary>
+public class NestedPropertyInjectionAotTests
+{
+    [CustomDataSource<CustomService>]
+    public required CustomService? Service { get; set; }
+
+    [Test]
+    public async Task NestedPropertyInjection_ShouldWorkInAot()
+    {
+        // Test that nested property injection works correctly in AOT
+        await Assert.That(Service).IsNotNull();
+        await Assert.That(Service!.IsInitialized).IsTrue();
+        await Assert.That(Service.GetMessage()).IsEqualTo("Custom service initialized");
+
+        // Test nested service
+        await Assert.That(Service.NestedService).IsNotNull();
+        await Assert.That(Service.NestedService!.IsInitialized).IsTrue();
+        await Assert.That(Service.NestedService.GetData()).IsEqualTo("Nested service initialized");
+
+        // Test deeply nested service
+        await Assert.That(Service.NestedService.DeeplyNestedService).IsNotNull();
+        await Assert.That(Service.NestedService.DeeplyNestedService!.IsInitialized).IsTrue();
+        await Assert.That(Service.NestedService.DeeplyNestedService.GetDeepData()).IsEqualTo("Deeply nested service initialized");
+    }
+}
+
+// Custom data source attribute for AOT testing
+public class CustomDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T> : AsyncDataSourceGeneratorAttribute<T>
+{
+    protected override async IAsyncEnumerable<Func<Task<T>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        yield return () =>
+        {
+            // Simple creation - framework should handle init properties and nested injection
+            return Task.FromResult((T)Activator.CreateInstance(typeof(T))!);
+        };
+        await Task.CompletedTask;
+    }
+}
+
+public class CustomService : IAsyncInitializer
+{
+    public bool IsInitialized { get; private set; }
+
+    // Nested property with its own data source
+    [CustomDataSource<NestedService>]
+    public required NestedService? NestedService { get; set; }
+
+    public async Task InitializeAsync()
+    {
+        await Task.Delay(1);
+        IsInitialized = true;
+    }
+
+    public string GetMessage()
+    {
+        return IsInitialized ? "Custom service initialized" : "Not initialized";
+    }
+}
+
+public class NestedService : IAsyncInitializer
+{
+    public bool IsInitialized { get; private set; }
+
+    // Deeply nested property with its own data source
+    [CustomDataSource<DeeplyNestedService>]
+    public required DeeplyNestedService? DeeplyNestedService { get; set; }
+
+    public async Task InitializeAsync()
+    {
+        await Task.Delay(1);
+        IsInitialized = true;
+    }
+
+    public string GetData()
+    {
+        return IsInitialized ? "Nested service initialized" : "Nested not initialized";
+    }
+}
+
+public class DeeplyNestedService : IAsyncInitializer
+{
+    public bool IsInitialized { get; private set; }
+
+    public async Task InitializeAsync()
+    {
+        await Task.Delay(1);
+        IsInitialized = true;
+    }
+
+    public string GetDeepData()
+    {
+        return IsInitialized ? "Deeply nested service initialized" : "Deeply nested not initialized";
     }
 }
 

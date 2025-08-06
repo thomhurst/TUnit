@@ -37,8 +37,6 @@ public abstract class InvokableTestBase(TestMode testMode)
         List<Action<TestRun>> assertions, RunOptions runOptions,
         [CallerArgumentExpression(nameof(assertions))] string assertionExpression = "")
     {
-        Console.WriteLine(@$"Mode: {testMode}");
-
         return testMode switch
         {
             TestMode.SourceGenerated => RunWithoutAot(filter, assertions, runOptions, assertionExpression),
@@ -77,7 +75,7 @@ public abstract class InvokableTestBase(TestMode testMode)
 
         var result = await command.ExecuteBufferedAsync();
 
-        await TrxAsserter.AssertTrx(command, result, assertions, trxFilename, assertionExpression);
+        await TrxAsserter.AssertTrx(testMode, command, result, assertions, trxFilename, assertionExpression);
     }
 
     private async Task RunWithAot(string filter, List<Action<TestRun>> assertions,
@@ -113,7 +111,7 @@ public abstract class InvokableTestBase(TestMode testMode)
 
         var result = await command.ExecuteBufferedAsync();
 
-        await TrxAsserter.AssertTrx(command, result, assertions, trxFilename, assertionExpression: assertionExpression);
+        await TrxAsserter.AssertTrx(testMode, command, result, assertions, trxFilename, assertionExpression: assertionExpression);
     }
 
     private async Task RunWithSingleFile(string filter,
@@ -149,7 +147,7 @@ public abstract class InvokableTestBase(TestMode testMode)
 
         var result = await command.ExecuteBufferedAsync();
 
-        await TrxAsserter.AssertTrx(command, result, assertions, trxFilename, assertionExpression: assertionExpression);
+        await TrxAsserter.AssertTrx(testMode, command, result, assertions, trxFilename, assertionExpression: assertionExpression);
     }
 
     protected static FileInfo? FindFile(Func<FileInfo, bool> predicate)

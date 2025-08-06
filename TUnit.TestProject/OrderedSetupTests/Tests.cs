@@ -1,7 +1,10 @@
-﻿#pragma warning disable
+﻿using TUnit.TestProject.Attributes;
+
+#pragma warning disable
 
 namespace TUnit.TestProject.OrderedSetupTests;
 
+[EngineTest(ExpectedResult.Pass)]
 public class Tests : Base2
 {
     [Test]
