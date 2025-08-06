@@ -811,22 +811,28 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         // Get type arguments from the attribute or its base types
         var typeArguments = ImmutableArray<ITypeSymbol>.Empty;
         
-        // First check if the attribute itself has type arguments
-        if (attribute.AttributeClass?.TypeArguments.IsEmpty == false)
+        // Look specifically for DataSourceGeneratorAttribute or AsyncDataSourceGeneratorAttribute base types
+        // which contain the actual data type arguments, not the custom attribute's type parameters
+        foreach (var baseType in selfAndBaseTypes)
         {
-            typeArguments = attribute.AttributeClass.TypeArguments;
-        }
-        else
-        {
-            // Otherwise, look for type arguments in base types (e.g., DataSourceGeneratorAttribute<T>)
-            foreach (var baseType in selfAndBaseTypes)
+            if (baseType.IsGenericType && !baseType.TypeArguments.IsEmpty)
             {
-                if (!baseType.TypeArguments.IsEmpty)
+                var originalDef = baseType.OriginalDefinition;
+                var metadataName = originalDef?.ToDisplayString();
+                
+                if (metadataName?.Contains("DataSourceGeneratorAttribute") == true ||
+                    metadataName?.Contains("AsyncDataSourceGeneratorAttribute") == true)
                 {
                     typeArguments = baseType.TypeArguments;
                     break;
                 }
             }
+        }
+        
+        // Fallback: if no specific data source generator base type found, use the attribute's own type arguments
+        if (typeArguments.IsEmpty && attribute.AttributeClass?.TypeArguments.IsEmpty == false)
+        {
+            typeArguments = attribute.AttributeClass.TypeArguments;
         }
 
         // If still no type arguments (like ArgumentsAttribute which returns object?[]?),
