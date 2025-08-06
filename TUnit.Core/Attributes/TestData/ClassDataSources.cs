@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core.Data;
+using TUnit.Core.Interfaces;
 using TUnit.Core.Tracking;
 
 namespace TUnit.Core;
@@ -47,7 +48,8 @@ internal class ClassDataSources
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return (T) TestDataContainer.GetGlobalInstance(typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
+            var result = TestDataContainer.GetGlobalInstance(typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
+            return HandleResult<T>(result);
         }
 
         if (sharedType == SharedType.PerClass)
@@ -56,12 +58,14 @@ internal class ClassDataSources
             {
                 throw new InvalidOperationException($"Cannot use SharedType.PerClass without a test class type. This may occur during static property initialization.");
             }
-            return (T) TestDataContainer.GetInstanceForClass(testClassType, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
+            var result = TestDataContainer.GetInstanceForClass(testClassType, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
+            return HandleResult<T>(result);
         }
 
         if (sharedType == SharedType.Keyed)
         {
-            return (T) TestDataContainer.GetInstanceForKey(key, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
+            var result = TestDataContainer.GetInstanceForKey(key, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
+            return HandleResult<T>(result);
         }
 
         if (sharedType == SharedType.PerAssembly)
@@ -70,7 +74,8 @@ internal class ClassDataSources
             {
                 throw new InvalidOperationException($"Cannot use SharedType.PerAssembly without a test class type. This may occur during static property initialization.");
             }
-            return (T) TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
+            var result = TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
+            return HandleResult<T>(result);
         }
 #pragma warning restore CS8603 // Possible null reference return.
 
@@ -86,7 +91,8 @@ internal class ClassDataSources
 
         if (sharedType == SharedType.PerTestSession)
         {
-            return TestDataContainer.GetGlobalInstance(type, () => Create(type, dataGeneratorMetadata));
+            var result = TestDataContainer.GetGlobalInstance(type, () => Create(type, dataGeneratorMetadata));
+            return HandleResult(result, type);
         }
 
         if (sharedType == SharedType.PerClass)
@@ -95,12 +101,14 @@ internal class ClassDataSources
             {
                 throw new InvalidOperationException($"Cannot use SharedType.PerClass without a test class type. This may occur during static property initialization.");
             }
-            return TestDataContainer.GetInstanceForClass(testClassType, type, () => Create(type, dataGeneratorMetadata));
+            var result = TestDataContainer.GetInstanceForClass(testClassType, type, () => Create(type, dataGeneratorMetadata));
+            return HandleResult(result, type);
         }
 
         if (sharedType == SharedType.Keyed)
         {
-            return TestDataContainer.GetInstanceForKey(key!, type, () => Create(type, dataGeneratorMetadata));
+            var result = TestDataContainer.GetInstanceForKey(key!, type, () => Create(type, dataGeneratorMetadata));
+            return HandleResult(result, type);
         }
 
         if (sharedType == SharedType.PerAssembly)
@@ -109,10 +117,41 @@ internal class ClassDataSources
             {
                 throw new InvalidOperationException($"Cannot use SharedType.PerAssembly without a test class type. This may occur during static property initialization.");
             }
-            return TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, type, () => Create(type, dataGeneratorMetadata));
+            var result = TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, type, () => Create(type, dataGeneratorMetadata));
+            return HandleResult(result, type);
         }
 
         throw new ArgumentOutOfRangeException();
+    }
+
+    /// <summary>
+    /// Handles the result from TestDataContainer, which might be a LazyDataSourceWrapper or the actual instance.
+    /// For lazy wrappers, returns the instance without initializing it (for discovery).
+    /// For regular instances, returns them as-is.
+    /// </summary>
+    private static T HandleResult<T>(object result)
+    {
+        if (result is LazyDataSourceWrapper wrapper)
+        {
+            // During test discovery, we want the instance but not initialized
+            return (T)wrapper.GetInstance();
+        }
+        
+        return (T)result;
+    }
+
+    /// <summary>
+    /// Non-generic version of HandleResult.
+    /// </summary>
+    private static object HandleResult(object result, Type expectedType)
+    {
+        if (result is LazyDataSourceWrapper wrapper)
+        {
+            // During test discovery, we want the instance but not initialized
+            return wrapper.GetInstance();
+        }
+        
+        return result;
     }
 
     [return: NotNull]
@@ -135,7 +174,17 @@ internal class ClassDataSources
                 ObjectTracker.TrackObject(trackerEvents2, instance);
             }
 
-            // Initialize any data source properties on the created instance
+            // CRITICAL CHANGE: Only initialize synchronously if the type does NOT require lazy initialization
+            // This prevents eager initialization of expensive resources during test discovery
+            if (typeof(IRequiresLazyInitialization).IsAssignableFrom(type))
+            {
+                // For types that require lazy initialization, we skip the immediate initialization
+                // The LazyDataSourceWrapper will handle initialization when actually needed
+                return instance;
+            }
+
+            // For types that don't require lazy initialization, initialize immediately as before
+            // to maintain backward compatibility
             if (dataGeneratorMetadata.TestInformation != null)
             {
                 var initTask = Helpers.DataSourceHelpers.InitializeDataSourcePropertiesAsync(

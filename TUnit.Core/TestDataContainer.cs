@@ -12,21 +12,21 @@ internal static class TestDataContainer
 
     public static object GetInstanceForClass(Type testClass, Type type, Func<object> func)
     {
-        return _classContainer.GetOrCreate(testClass, type, func);
+        return _classContainer.GetOrCreateWithLazySupport(testClass, type, func);
     }
 
     public static object GetInstanceForAssembly(Assembly assembly, Type type, Func<object> func)
     {
-        return _assemblyContainer.GetOrCreate(assembly, type, func);
+        return _assemblyContainer.GetOrCreateWithLazySupport(assembly, type, func);
     }
 
     public static object GetGlobalInstance(Type type, Func<object> func)
     {
-        return _globalContainer.GetOrCreate(typeof(object).FullName!, type, func);
+        return _globalContainer.GetOrCreateWithLazySupport(typeof(object).FullName!, type, func);
     }
 
     public static object GetInstanceForKey(string key, Type type, Func<object> func)
     {
-        return _keyContainer.GetOrCreate(key, type, func);
+        return _keyContainer.GetOrCreateWithLazySupport(key, type, func);
     }
 }

@@ -1,3 +1,5 @@
+using TUnit.Core.Interfaces;
+
 namespace TUnit.Core.Data;
 
 /// <summary>
@@ -19,6 +21,34 @@ internal class ScopedContainer<TKey> where TKey : notnull
     {
         var container = _containers.GetOrAdd(key, _ => new GetOnlyDictionary<Type, object>());
         return container.GetOrAdd(type, _ => factory());
+    }
+
+    /// <summary>
+    /// Gets or creates an instance for the specified key and type with support for lazy initialization.
+    /// If the type implements IRequiresLazyInitialization, a lazy wrapper is returned instead of 
+    /// immediately creating and initializing the instance.
+    /// </summary>
+    /// <param name="key">The scoping key.</param>
+    /// <param name="type">The type of object to retrieve or create.</param>
+    /// <param name="factory">The factory function to create the instance if it doesn't exist.</param>
+    /// <param name="dataGeneratorMetadata">Metadata for lazy initialization context.</param>
+    /// <returns>The instance or a lazy wrapper.</returns>
+    public object GetOrCreateWithLazySupport(TKey key, Type type, Func<object> factory, DataGeneratorMetadata? dataGeneratorMetadata = null)
+    {
+        var container = _containers.GetOrAdd(key, _ => new GetOnlyDictionary<Type, object>());
+        
+        return container.GetOrAdd(type, _ =>
+        {
+            // Check if this type requires lazy initialization
+            if (typeof(IRequiresLazyInitialization).IsAssignableFrom(type))
+            {
+                // Return a lazy wrapper instead of the actual instance
+                return new LazyDataSourceWrapper(type, factory, dataGeneratorMetadata);
+            }
+            
+            // For types that don't require lazy initialization, create immediately as before
+            return factory();
+        });
     }
 
     /// <summary>
