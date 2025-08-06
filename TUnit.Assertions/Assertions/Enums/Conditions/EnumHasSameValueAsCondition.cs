@@ -17,6 +17,6 @@ public class EnumHasSameValueAsCondition<TEnum, TExpected>(TExpected expected) :
     )
     {
         return AssertionResult.FailIf(actualValue is null, "the source enum is null")
-            .OrFailIf(Convert.ToInt32(actualValue!) != Convert.ToInt32(expected), $"the value was {Convert.ToInt32(actualValue!)}");
+            .OrFailIf(actualValue is not null && Convert.ToInt32(actualValue) != Convert.ToInt32(expected), actualValue is not null ? $"the value was {Convert.ToInt32(actualValue)}" : "the value was null");
     }
 }

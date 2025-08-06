@@ -1,6 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Throws;
-
-namespace TUnit.Assertions.Tests;
+﻿namespace TUnit.Assertions.Tests;
 
 public class ThrowInDelegateValueAssertionTests
 {

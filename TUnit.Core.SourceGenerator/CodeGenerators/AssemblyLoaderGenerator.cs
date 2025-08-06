@@ -53,7 +53,7 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
         }
 
         var sourceBuilder = new CodeWriter();
-        sourceBuilder.AppendLine($"[System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(AssemblyLoaderGenerator).Assembly.GetName().Version}\")]");
+        sourceBuilder.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(AssemblyLoaderGenerator).Assembly.GetName().Version}\")]");
         using (sourceBuilder.BeginBlock("file static class AssemblyLoader" + Guid.NewGuid().ToString("N")))
         {
             sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
@@ -61,21 +61,43 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
             {
                 foreach (var assembly in visitedAssemblies)
                 {
-                    WriteAssemblyLoad(sourceBuilder, assembly);
+                    WriteAssemblyLoad(sourceBuilder, assembly, compilation);
                 }
             }
         }
         context.AddSource("AssemblyLoader.g.cs", sourceBuilder.ToString());
     }
 
-    private static void WriteAssemblyLoad(ICodeWriter sourceBuilder, IAssemblySymbol assembly)
+    private static void WriteAssemblyLoad(ICodeWriter sourceBuilder, IAssemblySymbol assembly, Compilation compilation)
     {
         if (IsSystemAssembly(assembly))
         {
             return;
         }
 
+        // Only emit assembly load code if the assembly has a physical location that exists
+        if (!HasPhysicalLocation(assembly, compilation))
+        {
+            return;
+        }
+
         sourceBuilder.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterAssembly(() => global::System.Reflection.Assembly.Load(\"{GetAssemblyFullName(assembly)}\"));");
+    }
+
+    private static bool HasPhysicalLocation(IAssemblySymbol assembly, Compilation compilation)
+    {
+        // Find the corresponding MetadataReference for this assembly
+        var correspondingReference = compilation.References.FirstOrDefault(r => 
+            SymbolEqualityComparer.Default.Equals(compilation.GetAssemblyOrModuleSymbol(r), assembly));
+
+        // If there's no corresponding reference, the assembly doesn't have a physical location
+        if (correspondingReference is not PortableExecutableReference peRef)
+        {
+            return false;
+        }
+
+        // Check if the file path exists (don't check file system - that's not allowed in source generators)
+        return !string.IsNullOrWhiteSpace(peRef.FilePath);
     }
 
     private static bool IsSystemAssembly(IAssemblySymbol assemblySymbol)

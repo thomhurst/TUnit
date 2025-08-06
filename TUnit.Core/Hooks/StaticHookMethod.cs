@@ -37,6 +37,8 @@ public abstract record StaticHookMethod
     public required IHookExecutor HookExecutor { get; init; }
 
     public required int Order { get; init; }
+    
+    public required int RegistrationIndex { get; init; }
 
     public required string FilePath { get; init; }
 

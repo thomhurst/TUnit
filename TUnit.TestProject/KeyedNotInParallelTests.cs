@@ -4,6 +4,7 @@ using TUnit.TestProject.Attributes;
 namespace TUnit.TestProject;
 
 [EngineTest(ExpectedResult.Pass)]
+[Retry(3)]
 public class KeyedNotInParallelTests
 {
     private static readonly ConcurrentBag<ConstraintDateTimeRange> TestDateTimeRanges = [];

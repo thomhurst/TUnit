@@ -152,7 +152,9 @@
       "Bash(pwsh:*)",
       "Bash(for dir in *.received)",
       "Bash(do rm -rf \"$dir%.received.verified\")",
-      "Bash(done)"
+      "Bash(done)",
+      "WebFetch(domain:github.com)",
+      "Bash(./bin/Debug/net9.0/TUnit.TestProject.exe*)"
     ],
     "deny": []
   },

@@ -15,9 +15,9 @@ Public Class DependencyInjectionClassConstructor
     End Function
 
     ' Explicit interface implementation for IClassConstructor.Create(Type, ClassConstructorMetadata)
-    Private Function IClassConstructor_Create(type As Type, classConstructorMetadata As ClassConstructorMetadata) As Object Implements IClassConstructor.Create
+    Private Function IClassConstructor_Create(type As Type, classConstructorMetadata As ClassConstructorMetadata) As Task(Of Object) Implements IClassConstructor.Create
         If type Is GetType(AndEvenMoreTests) Then
-            Return New AndEvenMoreTests(New DataClass())
+            Return Task.FromResult(Of Object)(New AndEvenMoreTests(New DataClass()))
         End If
 
         Throw New NotImplementedException()

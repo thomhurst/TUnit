@@ -522,15 +522,6 @@
     <data name="TUnit0058Title" xml:space="preserve">
         <value>Hook method has unknown parameters</value>
     </data>
-    <data name="TUnit0200Description" xml:space="preserve">
-        <value>Blocking on async code with .Result or GetAwaiter().GetResult() can cause deadlocks. Use await instead.</value>
-    </data>
-    <data name="TUnit0200MessageFormat" xml:space="preserve">
-        <value>Avoid using '{0}' on async operations as it can cause deadlocks. Use 'await' instead.</value>
-    </data>
-    <data name="TUnit0200Title" xml:space="preserve">
-        <value>Avoid blocking async calls</value>
-    </data>
     <data name="TUnit0300Description" xml:space="preserve">
         <value>Generic types and methods may not be AOT-compatible when using dynamic type creation. Consider using concrete types or ensure all generic combinations are known at compile time.</value>
     </data>

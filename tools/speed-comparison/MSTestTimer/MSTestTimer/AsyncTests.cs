@@ -90,7 +90,7 @@ public class AsyncTests
         Assert.IsTrue(processed.Contains("PROCESSED"));
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(10)]
     [DataRow(20)]
     [DataRow(30)]

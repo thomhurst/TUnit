@@ -1,5 +1,4 @@
-﻿using TUnit.Assertions.AssertConditions.Throws;
-using TUnit.Core.Exceptions;
+﻿using TUnit.Core.Exceptions;
 
 namespace TUnit.Assertions.Tests;
 

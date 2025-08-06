@@ -170,7 +170,7 @@ internal static class DataGeneratorMetadataCreator
     /// </summary>
     public static DataGeneratorMetadata CreateForPropertyInjection(
         PropertyMetadata propertyMetadata,
-        MethodMetadata methodMetadata,
+        MethodMetadata? methodMetadata,
         IDataSourceAttribute dataSource,
         TestContext? testContext = null,
         object? testClassInstance = null,
@@ -179,17 +179,19 @@ internal static class DataGeneratorMetadataCreator
     {
         var testBuilderContext = testContext != null
             ? TestBuilderContext.FromTestContext(testContext, dataSource)
-            : new TestBuilderContext
-            {
-                Events = events ?? new TestContextEvents(),
-                TestMetadata = methodMetadata,
-                DataSourceAttribute = dataSource,
-                ObjectBag = objectBag ?? []
-            };
+            : methodMetadata != null
+                ? new TestBuilderContext
+                {
+                    Events = events ?? new TestContextEvents(),
+                    TestMetadata = methodMetadata,
+                    DataSourceAttribute = dataSource,
+                    ObjectBag = objectBag ?? []
+                }
+                : null;
 
         return new DataGeneratorMetadata
         {
-            TestBuilderContext = new TestBuilderContextAccessor(testBuilderContext),
+            TestBuilderContext = testBuilderContext != null ? new TestBuilderContextAccessor(testBuilderContext) : null,
             MembersToGenerate = [propertyMetadata],
             TestInformation = methodMetadata,
             Type = DataGeneratorType.Property,
@@ -206,7 +208,7 @@ internal static class DataGeneratorMetadataCreator
     public static DataGeneratorMetadata CreateForPropertyInjection(
         PropertyInfo property,
         Type containingType,
-        MethodMetadata methodMetadata,
+        MethodMetadata? methodMetadata,
         IDataSourceAttribute dataSource,
         TestContext? testContext = null,
         object? testClassInstance = null,

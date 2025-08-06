@@ -141,9 +141,6 @@ public static class Rules
     public static readonly DiagnosticDescriptor HookUnknownParameters =
         CreateDescriptor("TUnit0058", UsageCategory, DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor BlockingAsyncCall =
-        CreateDescriptor("TUnit0200", UsageCategory, DiagnosticSeverity.Warning);
-
     public static readonly DiagnosticDescriptor GenericTypeNotAotCompatible =
         CreateDescriptor("TUnit0300", UsageCategory, DiagnosticSeverity.Warning);
 

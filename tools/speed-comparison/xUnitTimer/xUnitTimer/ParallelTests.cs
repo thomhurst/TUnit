@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 namespace xUnitTimer;
 
 public class ParallelTests

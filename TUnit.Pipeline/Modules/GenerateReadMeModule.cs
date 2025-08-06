@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Microsoft.Extensions.Logging;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.Extensions;
@@ -45,12 +46,15 @@ public class GenerateReadMeModule : Module<File>
 
         if (latestBenchmark == null)
         {
+            context.Logger.LogWarning("No completed benchmark runs found for the current commit.");
             return null;
         }
 
         var artifacts = await context.GitHub().Client.Actions.Artifacts.ListWorkflowArtifacts(context.GitHub().RepositoryInfo.Owner,
             context.GitHub().RepositoryInfo.RepositoryName,
             latestBenchmark.Id);
+
+        context.Logger.LogInformation("Found {ArtifactCount} artifacts for the latest benchmark run.", artifacts.Artifacts.Count);
 
         var fileContents = new StringBuilder();
 
@@ -64,6 +68,8 @@ public class GenerateReadMeModule : Module<File>
             foreach (var artifact in groupedArtifacts.OrderBy(x => x.Name))
             {
                 var operatingSystem = artifact.Name.Split("_")[0];
+
+                context.Logger.LogInformation("Processing artifact: {ArtifactName} for OS: {OperatingSystem}", artifact.Name, operatingSystem);
 
                 var stream = await context.GitHub().Client.Actions.Artifacts.DownloadArtifact(
                     context.GitHub().RepositoryInfo.Owner,
@@ -85,6 +91,8 @@ public class GenerateReadMeModule : Module<File>
                 fileContents.AppendLine();
                 fileContents.AppendLine(contents);
                 fileContents.AppendLine();
+
+                context.Logger.LogInformation("Added contents from {MarkdownFile} for OS: {OperatingSystem}", markdownFile.Name, operatingSystem);
             }
         }
 
@@ -92,6 +100,7 @@ public class GenerateReadMeModule : Module<File>
 
         if (newContents == await readme.ReadAsync(cancellationToken))
         {
+            context.Logger.LogInformation("No changes to README.md, skipping write.");
             return null;
         }
 
@@ -109,8 +118,14 @@ public class GenerateReadMeModule : Module<File>
 
         return fileName.Split("_").Last() switch
         {
-            "BasicTest" => "A single test that completes instantly (including spawning a new process and initialising the test framework)",
-            "RepeatTests" => "A test that takes 50ms to execute, repeated 100 times (including spawning a new process and initialising the test framework)",
+            "AssertionTests" => "Tests focused on assertion performance and validation",
+            "AsyncTests" => "Tests running asynchronous operations and async/await patterns",
+            "BasicTests" => "Simple tests with basic operations and assertions",
+            "DataDrivenTests" => "Parameterized tests with multiple test cases using data attributes",
+            "FixtureTests" => "Tests utilizing class fixtures and shared test context",
+            "ParallelTests" => "Tests executing in parallel to test framework parallelization",
+            "RepeatTests" => "A test that takes 50ms to execute, repeated 100 times",
+            "SetupTeardownTests" => "Tests with setup and teardown lifecycle methods",
             _ => throw new ArgumentException($"Unknown class name: {fileName}", nameof(fileName))
         };
     }

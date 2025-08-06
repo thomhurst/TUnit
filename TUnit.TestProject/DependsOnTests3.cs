@@ -5,28 +5,29 @@ namespace TUnit.TestProject;
 [EngineTest(ExpectedResult.Pass)]
 public class DependsOnTests3
 {
-    private static DateTime _test1Start;
-    private static DateTime _test2Start;
     private static DateTime _test3Start;
+
+    private static DateTime _test1End;
+    private static DateTime _test2End;
 
     [Test]
     public async Task Test1()
     {
-        _test1Start = TestContext.Current!.TestStart.DateTime;
-
         await Task.Delay(TimeSpan.FromSeconds(1));
 
-        TestContext.Current.ObjectBag.Add("Test1", "1");
+        TestContext.Current!.ObjectBag.Add("Test1", "1");
+
+        _test1End = DateTime.UtcNow;
     }
 
     [Test]
     public async Task Test2()
     {
-        _test2Start = TestContext.Current!.TestStart.DateTime;
-
         await Task.Delay(TimeSpan.FromSeconds(1));
 
-        TestContext.Current.ObjectBag.Add("Test2", "2");
+        TestContext.Current!.ObjectBag.Add("Test2", "2");
+
+        _test2End = DateTime.UtcNow;
     }
 
     [Test]
@@ -34,10 +35,11 @@ public class DependsOnTests3
     [DependsOn(nameof(Test2))]
     public async Task Test3()
     {
-        _test3Start = TestContext.Current!.TestStart.DateTime;
+        _test3Start = DateTime.UtcNow;
+
         await Task.Delay(TimeSpan.FromSeconds(1));
 
-        var test1 = TestContext.Current.GetTests(nameof(Test1));
+        var test1 = TestContext.Current!.GetTests(nameof(Test1));
         var test2 = TestContext.Current.GetTests(nameof(Test2));
 
         await Assert.That(test1).HasCount().EqualTo(1);
@@ -50,7 +52,7 @@ public class DependsOnTests3
     [After(Class)]
     public static async Task AssertStartTimes()
     {
-        await Assert.That(_test3Start).IsAfterOrEqualTo(_test1Start.AddSeconds(0.9));
-        await Assert.That(_test3Start).IsAfterOrEqualTo(_test2Start.AddSeconds(0.9));
+        await Assert.That(_test3Start).IsAfterOrEqualTo(_test1End);
+        await Assert.That(_test3Start).IsAfterOrEqualTo(_test2End);
     }
 }

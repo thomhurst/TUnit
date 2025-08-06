@@ -12,4 +12,6 @@
       <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
     </ItemGroup>
 
+  <Import Project="..\Library.targets" />
+
 </Project>

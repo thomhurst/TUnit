@@ -42,8 +42,8 @@ public class OrderedTests
         await Wait();
     }
 
-    [Test, NotInParallel(nameof(OrderedTests), Order = 6)]
-    public async Task AssertOrder()
+    [After(Class)]
+    public static async Task AssertOrder()
     {
         await Assert.That(RegisteredOrders)
             .IsEquivalentTo(["First", "Second", "Third", "Fourth", "Fifth"]);

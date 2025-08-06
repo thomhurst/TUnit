@@ -105,6 +105,7 @@ module.exports = {
         'examples/intro',
         'examples/aspnet',
         'examples/playwright',
+        'examples/complex-test-infrastructure',
         'examples/instrumenting-global-test-ids',
         'examples/tunit-ci-pipeline',
         'examples/fsharp-interactive',

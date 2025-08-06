@@ -16,7 +16,6 @@ using TUnit.Engine.Discovery;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
-using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
@@ -56,10 +55,12 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         Filter = filter;
         TestSessionId = context.Request.Session.SessionUid.Value;
 
-        // Get framework services
         var loggerFactory = frameworkServiceProvider.GetLoggerFactory();
         var outputDevice = frameworkServiceProvider.GetOutputDevice();
         CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
+        var configuration = frameworkServiceProvider.GetConfiguration();
+        
+        TestContext.Configuration = new ConfigurationAdapter(configuration);
 
         VerbosityService = Register(new VerbosityService(CommandLineOptions));
         DiscoveryDiagnostics.Initialize(VerbosityService);
@@ -127,7 +128,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create single test executor with ExecutionContext support
         var singleTestExecutor = Register<ISingleTestExecutor>(
-            new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService));
+            new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService, context.Request.Session.SessionUid));
 
         // Create the HookOrchestratingTestExecutorAdapter
         // Note: We'll need to update this to handle dynamic dependencies properly
@@ -136,9 +137,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         FailFastCancellationSource = Register(new CancellationTokenSource());
 
         var hookOrchestratingTestExecutorAdapter = Register(
-            new HookOrchestratingTestExecutorAdapter(
+            new Scheduling.TestExecutor(
                 singleTestExecutor,
                 messageBus,
+                MessageBus,
                 sessionUid,
                 isFailFastEnabled,
                 FailFastCancellationSource,
@@ -152,11 +154,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             loggerFactory,
             testScheduler: null,
             serviceProvider: this,
-            hookOrchestratingTestExecutorAdapter));
-
-        // Set session IDs for proper test reporting
-        singleTestExecutor.SetSessionId(sessionUid);
-        TestExecutor.SetSessionId(sessionUid);
+            hookOrchestratingTestExecutorAdapter,
+            ContextProvider,
+            MessageBus));
 
         Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, hookOrchestratingTestExecutorAdapter, TestSessionId, CancellationToken.Token));
 

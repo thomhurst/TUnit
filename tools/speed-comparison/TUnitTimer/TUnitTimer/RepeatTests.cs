@@ -1,45 +1,47 @@
+using System.Threading.Tasks;
+
 namespace TUnitTimer;
 
 public class RepeatTests
 {
     private static int _counter = 0;
-    
+
     [Test]
     [Repeat(100)]
-    public void RepeatedCalculationTest()
+    public async Task RepeatedCalculationTest()
     {
         var localCounter = Interlocked.Increment(ref _counter);
         var result = PerformCalculation(localCounter);
-        
-        Assert.That(result).IsGreaterThan(0);
-        Assert.That(result % localCounter).IsEqualTo(0);
+
+        await Assert.That(result).IsGreaterThan(0);
+        await Assert.That(result % localCounter).IsEqualTo(0);
     }
-    
+
     [Test]
     [Repeat(50)]
     public async Task RepeatedAsyncTest()
     {
         var taskId = Guid.NewGuid();
         var result = await ProcessDataAsync(taskId);
-        
-        Assert.That(result).IsNotNull();
-        Assert.That(result.Length).IsEqualTo(36); // GUID length
-        Assert.That(result).IsEqualTo(taskId.ToString());
+
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Length).IsEqualTo(36); // GUID length
+        await Assert.That(result).IsEqualTo(taskId.ToString());
     }
-    
+
     [Test]
     [Repeat(25)]
-    public void RepeatedStringOperationTest()
+    public async Task RepeatedStringOperationTest()
     {
         var iteration = Interlocked.Increment(ref _counter);
         var text = $"Iteration_{iteration}";
         var processed = ProcessString(text);
-        
-        Assert.That(processed).Contains("PROCESSED");
-        Assert.That(processed).Contains(iteration.ToString());
-        Assert.That(processed.Length).IsGreaterThan(text.Length);
+
+        await Assert.That(processed).Contains("PROCESSED");
+        await Assert.That(processed).Contains(iteration.ToString());
+        await Assert.That(processed.Length).IsGreaterThan(text.Length);
     }
-    
+
     private int PerformCalculation(int input)
     {
         var result = 0;
@@ -49,13 +51,13 @@ public class RepeatTests
         }
         return result;
     }
-    
+
     private async Task<string> ProcessDataAsync(Guid id)
     {
         await Task.Yield();
         return id.ToString();
     }
-    
+
     private string ProcessString(string input)
     {
         return $"PROCESSED_{input.ToUpper()}_{input.Length}";

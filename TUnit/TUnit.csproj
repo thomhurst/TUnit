@@ -7,4 +7,6 @@
     <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
   </ItemGroup>
 
+  <Import Project="..\Library.targets" />
+
 </Project>

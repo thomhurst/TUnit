@@ -48,5 +48,4 @@ TUnit0056 | Usage | Error | Instance data source methods must use [InstanceMetho
 TUnit0058 | Usage | Error | Generic test methods require [GenerateGenericTest] for AOT compatibility
 TUnit0059 | Usage | Error | Dynamic data sources using reflection are not AOT-compatible - use static sources
 TUnit0060 | Usage | Error | Open generic types are not AOT-compatible - specify concrete type arguments
-TUnit0200 | Usage | Warning | Avoid blocking on async code (.Result, .GetAwaiter().GetResult()) - use await instead
 TUXU0001 | Usage | Info | XUnit code can be migrated to TUnit
