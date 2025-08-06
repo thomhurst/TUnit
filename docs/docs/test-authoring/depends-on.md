@@ -31,7 +31,7 @@ e.g.:
 ```csharp
 public void Test1(string value1, int value2) { ... }
 
-[DependsOn(nameof(Test1), [typeof(string), typeof(int)])]
+[DependsOn(nameof(Test1), new[] { typeof(string), typeof(int) })]
 public void Test2() { ... }
 ```
 

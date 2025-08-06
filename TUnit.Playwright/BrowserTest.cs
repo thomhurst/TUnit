@@ -29,6 +29,11 @@ public class BrowserTest : PlaywrightTest
     [Before(HookType.Test, "", 0)]
     public async Task BrowserSetup()
     {
+        if (BrowserType == null)
+        {
+            throw new InvalidOperationException($"BrowserType is not initialized. This may indicate that {nameof(PlaywrightTest)}.{nameof(Playwright)} is not initialized or {nameof(PlaywrightTest)}.{nameof(PlaywrightSetup)} did not execute properly.");
+        }
+        
         var service = await BrowserService.Register(this, BrowserType, _options).ConfigureAwait(false);
         Browser = service.Browser;
     }

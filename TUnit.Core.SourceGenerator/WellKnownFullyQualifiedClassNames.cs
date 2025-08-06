@@ -14,6 +14,7 @@ public static class WellKnownFullyQualifiedClassNames
     public static readonly FullyQualifiedTypeName MethodDataSourceAttribute = "TUnit.Core.MethodDataSourceAttribute";
     public static readonly FullyQualifiedTypeName InstanceMethodDataSourceAttribute = "TUnit.Core.InstanceMethodDataSourceAttribute";
     public static readonly FullyQualifiedTypeName ClassConstructorAttribute = "TUnit.Core.ClassConstructorAttribute";
+    public static readonly FullyQualifiedTypeName TestConstructorAttribute = "TUnit.Core.TestConstructorAttribute";
 
 
     // Metadata

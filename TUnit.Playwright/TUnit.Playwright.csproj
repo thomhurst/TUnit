@@ -16,5 +16,6 @@
     <ProjectReference Include="..\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj"
       OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
-  
+
+  <Import Project="..\Library.targets" />
 </Project>

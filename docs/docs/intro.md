@@ -7,4 +7,4 @@ It provides you a skeleton framework to write, execute and assert tests, with li
 
 That means you get more control over your setup, execution, and style of tests.
 
-It is also built on top of the newer Microsoft Testing Platform, which was rewritten to make .NET testing simpler, faster and more extensible.
+It is also built on top of the newer Microsoft Testing Platform, which was rewritten to make .NET testing simpler and more extensible.

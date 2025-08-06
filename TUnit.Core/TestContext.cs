@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Enums;
@@ -28,7 +29,7 @@ public class TestContext : Context
 
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
 
-    internal static readonly Dictionary<string, string> InternalParametersDictionary = new();
+    internal static readonly Dictionary<string, List<string>> InternalParametersDictionary = new();
 
     private readonly StringWriter _outputWriter = new();
 
@@ -40,7 +41,7 @@ public class TestContext : Context
         internal set => TestContexts.Value = value;
     }
 
-    public static IReadOnlyDictionary<string, string> Parameters => InternalParametersDictionary;
+    public static IReadOnlyDictionary<string, List<string>> Parameters => InternalParametersDictionary;
 
     public static IConfiguration Configuration { get; internal set; } = null!;
 
@@ -143,7 +144,7 @@ public class TestContext : Context
     [
     ];
 
-    public Dictionary<string, object?> Artifacts { get; } = new();
+    public IReadOnlyList<Artifact> Artifacts { get; } = new List<Artifact>();
 
     public string GetDisplayName()
     {
@@ -190,14 +191,9 @@ public class TestContext : Context
 
     public DateTimeOffset TestStart { get; set; } = DateTimeOffset.UtcNow;
 
-    public void AddArtifact(string name, object? value)
-    {
-        Artifacts[name] = value;
-    }
-
     public void AddArtifact(Artifact artifact)
     {
-        Artifacts[artifact.DisplayName ?? artifact.File?.Name ?? "artifact"] = artifact;
+        ((List<Artifact>)Artifacts).Add(artifact);
     }
 
     public void OverrideResult(string reason)
@@ -257,6 +253,7 @@ public class TestContext : Context
 
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
     public DateTimeOffset? TestEnd { get; set; }
+
 
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
     {

@@ -1,4 +1,5 @@
-﻿using Testcontainers.PostgreSql;
+﻿using System.Diagnostics.CodeAnalysis;
+using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
 using TUnit.Core.Interfaces;
 
@@ -6,9 +7,15 @@ namespace TUnit.Example.Asp.Net.TestProject;
 
 public class InMemoryRedis : IAsyncInitializer, IAsyncDisposable
 {
-    public RedisContainer PostgreSqlContainer { get; } = new RedisBuilder().Build();
+    [ClassDataSource<DockerNetwork>(Shared = SharedType.PerTestSession)]
+    public required DockerNetwork DockerNetwork { get; init; }
 
-    public async Task InitializeAsync() => await PostgreSqlContainer.StartAsync();
+    [field: AllowNull, MaybeNull]
+    public RedisContainer Container => field ??= new RedisBuilder()
+        .WithNetwork(DockerNetwork.Instance)
+        .Build();
 
-    public async ValueTask DisposeAsync() => await PostgreSqlContainer.DisposeAsync();
+    public async Task InitializeAsync() => await Container.StartAsync();
+
+    public async ValueTask DisposeAsync() => await Container.DisposeAsync();
 }

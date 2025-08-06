@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Enums;
@@ -13,14 +14,16 @@ using System.Runtime.CompilerServices;
 namespace TUnit.Engine.Capabilities;
 
 #pragma warning disable TPEXP
-internal class BannerCapability(IPlatformInformation platformInformation, ICommandLineOptions commandLineOptions)
+internal class BannerCapability(IPlatformInformation platformInformation, ICommandLineOptions commandLineOptions,
+    ILoggerFactory loggerFactory)
     : IBannerMessageOwnerCapability
 {
     const string Separator = " | ";
 
     public Task<string?> GetBannerMessageAsync()
     {
-        if (commandLineOptions.IsOptionSet(DisableLogoCommandProvider.DisableLogo))
+        if (commandLineOptions.IsOptionSet(DisableLogoCommandProvider.DisableLogo)
+            || loggerFactory.CreateLogger(nameof(BannerCapability)).IsEnabled(LogLevel.Information))
         {
             return Task.FromResult<string?>(GetRuntimeDetails());
         }

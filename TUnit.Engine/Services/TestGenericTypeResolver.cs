@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Engine.Building;

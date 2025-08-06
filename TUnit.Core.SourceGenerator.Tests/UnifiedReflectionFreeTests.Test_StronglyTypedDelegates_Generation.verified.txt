@@ -15,10 +15,6 @@ internal sealed class TypedDelegateTest_TestWithDelegate_TestSource_GUID : globa
             TestName = "TestWithDelegate",
             TestClassType = typeof(global::TUnit.TestProject.TypedDelegateTest),
             TestMethodName = "TestWithDelegate",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -79,12 +75,12 @@ return classMetadata;
                 var typedInstance = (global::TUnit.TestProject.TypedDelegateTest)instance;
                 var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.TestWithDelegate();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.TestWithDelegate();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -94,7 +90,7 @@ return classMetadata;
 }
 internal static class TypedDelegateTest_TestWithDelegate_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TypedDelegateTest), new TypedDelegateTest_TestWithDelegate_TestSource_GUID());

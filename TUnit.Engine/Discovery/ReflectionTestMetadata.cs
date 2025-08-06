@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Helpers;
-using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Discovery;
 
@@ -102,9 +101,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
             [
             ]);
 
-            // Apply property values using unified PropertyInjector
-            await PropertyInjector.InjectPropertiesAsync(context.Context, instance, metadata.PropertyDataSources, metadata.PropertyInjections, metadata.MethodMetadata, context.Context.TestDetails.TestId);
-
+            // Property injection is handled by SingleTestExecutor after instance creation
             return instance;
         }
 

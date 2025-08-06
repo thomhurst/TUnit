@@ -15,10 +15,6 @@ internal sealed class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Tes
             TestName = "DataSource_Class",
             TestClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
             TestMethodName = "DataSource_Class",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -63,7 +59,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(SomeAsyncDisposableClass))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("SomeAsyncDisposableClass, TestsBase`1"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => 
@@ -102,7 +98,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -115,7 +111,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -125,7 +121,7 @@ return classMetadata;
 }
 internal static class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed), new ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_TestSource_GUID());
@@ -152,10 +148,6 @@ internal sealed class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Gen
             TestName = "DataSource_Class_Generic",
             TestClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
             TestMethodName = "DataSource_Class_Generic",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -200,7 +192,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(SomeAsyncDisposableClass))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("SomeAsyncDisposableClass, TestsBase`1"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class_Generic", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed).GetMethod("DataSource_Class_Generic", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed", () => 
@@ -239,7 +231,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -252,7 +244,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -262,7 +254,7 @@ return classMetadata;
 }
 internal static class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Generic_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed), new ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Generic_TestSource_GUID());

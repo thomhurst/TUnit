@@ -416,7 +416,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
-        writer.AppendLine("throw new InvalidOperationException($\"No invoker found for method key: {methodKey}\");");
+        writer.AppendLine("throw new global::System.InvalidOperationException($\"No invoker found for method key: {methodKey}\");");
 
         writer.Unindent();
         writer.AppendLine("}");
@@ -497,7 +497,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         else
         {
             writer.AppendLine($"if (instance is not {method.ContainingType.GloballyQualified()} typedInstance)");
-            writer.AppendLine($"    throw new InvalidOperationException($\"Expected instance of type {{typeof({method.ContainingType.GloballyQualified()}).FullName}}, got {{instance?.GetType().FullName ?? \"null\"}}\");");
+            writer.AppendLine($"    throw new global::System.InvalidOperationException($\"Expected instance of type {{typeof({method.ContainingType.GloballyQualified()}).FullName}}, got {{instance?.GetType().FullName ?? \"null\"}}\");");
             writer.AppendLine();
 
             writer.Append("var result = ");

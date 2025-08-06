@@ -6,14 +6,37 @@
         <Using Include="TUnit.Core" />
     </ItemGroup>
 
-    <ItemGroup
-        Condition="'$(EnableTUnitPolyfills)' == 'true' and '$(TargetFramework)' == 'netstandard2.0'">
-        <PackageReference Include="Polyfill"
-            VersionOverride="8.7.3"
-            Version="8.7.3">
+    <!-- Auto-include Polyfill package for compile-time type generation -->
+    <PropertyGroup>
+        <_TUnitPolyfillVersion>8.7.4</_TUnitPolyfillVersion>
+        <_TUnitNeedsPolyfill Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFrameworkIdentifier)' == '.NETFramework'">true</_TUnitNeedsPolyfill>
+    </PropertyGroup>
+
+    <!-- Add Polyfill for non-CPM projects -->
+    <ItemGroup Condition="'$(EnableTUnitPolyfills)' != 'false' and '$(_TUnitNeedsPolyfill)' == 'true' and '$(ManagePackageVersionsCentrally)' != 'true'">
+        <PackageReference Include="Polyfill" Version="$(_TUnitPolyfillVersion)">
             <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <IncludeAssets>compile; analyzers</IncludeAssets>
+            <ExcludeAssets>runtime; native; contentfiles; build; buildtransitive</ExcludeAssets>
         </PackageReference>
     </ItemGroup>
+
+    <!-- Add Polyfill for CPM projects (without version) -->
+    <ItemGroup Condition="'$(EnableTUnitPolyfills)' != 'false' and '$(_TUnitNeedsPolyfill)' == 'true' and '$(ManagePackageVersionsCentrally)' == 'true'">
+        <PackageReference Include="Polyfill">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>compile; analyzers</IncludeAssets>
+            <ExcludeAssets>runtime; native; contentfiles; build; buildtransitive</ExcludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <!-- Validate and provide helpful messages for CPM users -->
+    <Target Name="_TUnitEnsurePolyfill" 
+            BeforeTargets="GenerateBuildDependencyFile"
+            Condition="'$(EnableTUnitPolyfills)' != 'false' and '$(_TUnitNeedsPolyfill)' == 'true'">
+        <Warning Condition="'$(ManagePackageVersionsCentrally)' == 'true' and !Exists('$(NuGetPackageRoot)polyfill')"
+                 Code="TUNIT001"
+                 Text="TUnit requires Polyfill package for $(TargetFramework). Add to Directory.Packages.props: &lt;PackageVersion Include='Polyfill' Version='$(_TUnitPolyfillVersion)' /&gt;" />
+    </Target>
 
 </Project>

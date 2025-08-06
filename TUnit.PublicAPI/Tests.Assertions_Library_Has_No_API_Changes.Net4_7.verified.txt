@@ -21,23 +21,23 @@ namespace
             where TException :  { }
         public static TException Throws<TException>(string parameterName,  @delegate, [.("delegate")] string? doNotPopulateThisValue = null)
             where TException :  { }
-        public static ..ThrowsException<object?, > ThrowsAsync(<.> @delegate, [.("delegate")] string? doNotPopulateThisValue = null) { }
-        public static ..ThrowsException<object?, > ThrowsAsync(. @delegate, [.("delegate")] string? doNotPopulateThisValue = null) { }
-        public static ..ThrowsException<object?, > ThrowsAsync(. @delegate, [.("delegate")] string? doNotPopulateThisValue = null) { }
-        public static ..ThrowsException<object?, > ThrowsAsync( type, <.> @delegate, [.("delegate")] string? doNotPopulateThisValue = null) { }
-        public static ..ThrowsException<object?, > ThrowsAsync( type, . @delegate, [.("delegate")] string? doNotPopulateThisValue = null) { }
-        public static ..ThrowsException<object?, > ThrowsAsync( type, . @delegate, [.("delegate")] string? doNotPopulateThisValue = null) { }
-        public static ..ThrowsException<object?, TException> ThrowsAsync<TException>(<.> @delegate, [.("delegate")] string? doNotPopulateThisValue = null)
+        public static .<object?, > ThrowsAsync(<.> @delegate, [.("delegate")] string? doNotPopulateThisValue = null) { }
+        public static .<object?, > ThrowsAsync(. @delegate, [.("delegate")] string? doNotPopulateThisValue = null) { }
+        public static .<object?, > ThrowsAsync(. @delegate, [.("delegate")] string? doNotPopulateThisValue = null) { }
+        public static .<object?, > ThrowsAsync( type, <.> @delegate, [.("delegate")] string? doNotPopulateThisValue = null) { }
+        public static .<object?, > ThrowsAsync( type, . @delegate, [.("delegate")] string? doNotPopulateThisValue = null) { }
+        public static .<object?, > ThrowsAsync( type, . @delegate, [.("delegate")] string? doNotPopulateThisValue = null) { }
+        public static .<object?, TException> ThrowsAsync<TException>(<.> @delegate, [.("delegate")] string? doNotPopulateThisValue = null)
             where TException :  { }
-        public static ..ThrowsException<object?, TException> ThrowsAsync<TException>(. @delegate, [.("delegate")] string? doNotPopulateThisValue = null)
+        public static .<object?, TException> ThrowsAsync<TException>(. @delegate, [.("delegate")] string? doNotPopulateThisValue = null)
             where TException :  { }
-        public static ..ThrowsException<object?, TException> ThrowsAsync<TException>(. @delegate, [.("delegate")] string? doNotPopulateThisValue = null)
+        public static .<object?, TException> ThrowsAsync<TException>(. @delegate, [.("delegate")] string? doNotPopulateThisValue = null)
             where TException :  { }
-        public static ..ThrowsException<object?, TException> ThrowsAsync<TException>(string parameterName, <.> @delegate, [.("delegate")] string? doNotPopulateThisValue = null, [.("parameterName")] string? doNotPopulateThisValue2 = null)
+        public static .<object?, TException> ThrowsAsync<TException>(string parameterName, <.> @delegate, [.("delegate")] string? doNotPopulateThisValue = null, [.("parameterName")] string? doNotPopulateThisValue2 = null)
             where TException :  { }
-        public static ..ThrowsException<object?, TException> ThrowsAsync<TException>(string parameterName, . @delegate, [.("delegate")] string? doNotPopulateThisValue = null, [.("parameterName")] string? doNotPopulateThisValue2 = null)
+        public static .<object?, TException> ThrowsAsync<TException>(string parameterName, . @delegate, [.("delegate")] string? doNotPopulateThisValue = null, [.("parameterName")] string? doNotPopulateThisValue2 = null)
             where TException :  { }
-        public static ..ThrowsException<object?, TException> ThrowsAsync<TException>(string parameterName, . @delegate, [.("delegate")] string? doNotPopulateThisValue = null, [.("parameterName")] string? doNotPopulateThisValue2 = null)
+        public static .<object?, TException> ThrowsAsync<TException>(string parameterName, . @delegate, [.("delegate")] string? doNotPopulateThisValue = null, [.("parameterName")] string? doNotPopulateThisValue2 = null)
             where TException :  { }
     }
     public readonly struct AssertionData : <.AssertionData>
@@ -556,36 +556,6 @@ namespace .
         protected override string GetExpectation() { }
         protected override .<.> GetResult(TActual? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
-    public class ThrowsException<TActual, TException>
-        where TException : 
-    {
-        public ThrowsException(. delegateAssertionBuilder, ..IDelegateSource source, <?, ?> selector) { }
-        public ..ValueAnd<TException> And { get; }
-        public ..DelegateOr<object?> Or { get; }
-        public .<TException?> GetAwaiter() { }
-        public ..ThrowsException<TActual, > WithInnerException() { }
-        public ..ThrowsException<TActual, TException> WithMessage(string expected, [.("expected")] string? doNotPopulateThisValue = null) { }
-        public ..ThrowsException<TActual, TException> WithMessageContaining(string expected, [.("expected")] string? doNotPopulateThisValue = null) { }
-        public ..ThrowsException<TActual, TException> WithMessageContaining(string expected,  stringComparison, [.("expected")] string? doNotPopulateThisValue = null, [.("stringComparison")] string? doNotPopulateThisValue2 = null) { }
-        public ..ThrowsException<TActual, TException> WithMessageMatching(. match, [.("match")] string? doNotPopulateThisValue = null) { }
-        public static .<TException?> op_Explicit(..ThrowsException<TActual, TException> throwsException) { }
-    }
-    public static class ThrowsExtensions
-    {
-        public static ..ThrowsException<object?, > Throws(this ..IDelegateSource delegateSource,  type, [.("type")] string? doNotPopulateThisValue = null) { }
-        public static ..ThrowsException<object?, TException> Throws<TException>(this ..IDelegateSource delegateSource)
-            where TException :  { }
-        public static ..ThrowsException<object?, TException> ThrowsExactly<TException>(this ..IDelegateSource delegateSource)
-            where TException :  { }
-        public static ..ThrowsException<object?, > ThrowsException(this ..IDelegateSource delegateSource) { }
-        public static .<object?, object?> ThrowsNothing(this ..IDelegateSource delegateSource) { }
-        public static .<TActual, TActual> ThrowsNothing<TActual>(this ..IValueDelegateSource<TActual> delegateSource) { }
-        public static ..ThrowsException<object?, > ThrowsWithin(this ..IDelegateSource delegateSource,  timeSpan, [.("timeSpan")] string? doNotPopulateThisValue = null) { }
-        public static ..ThrowsException<object?, TException> ThrowsWithin<TException>(this ..IDelegateSource delegateSource,  timeSpan, [.("timeSpan")] string? doNotPopulateThisValue = null)
-            where TException :  { }
-        public static ..ThrowsException<TActual, TException> WithParameterName<TActual, TException>(this ..ThrowsException<TActual, TException> throwsException, string expected, [.("expected")] string? doNotPopulateThisValue = null)
-            where TException :  { }
-    }
     public class ThrowsNothingAssertCondition<TActual> : .<TActual, >
     {
         public ThrowsNothingAssertCondition() { }
@@ -630,6 +600,14 @@ namespace .
         where TException : 
     {
         public ThrowsWithParamNameAssertCondition(string expectedParamName,  stringComparison, <?, ?> exceptionSelector) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(TActual? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class ThrowsWithinAssertCondition<TActual, TExpectedException> : .<TActual, TExpectedException>
+        where TExpectedException : 
+    {
+        public ThrowsWithinAssertCondition( timeSpan) { }
+        public override ? WaitFor { get; }
         protected override string GetExpectation() { }
         protected override .<.> GetResult(TActual? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
@@ -1090,17 +1068,6 @@ namespace ..Conditions
         protected override .<.> GetResult(string? actualValue, string? expectedValue) { }
     }
 }
-namespace .
-{
-    public class ThrowsWithinAssertCondition<TActual, TExpectedException> : .<TActual, TExpectedException>
-        where TExpectedException : 
-    {
-        public ThrowsWithinAssertCondition( timeSpan) { }
-        public override ? WaitFor { get; }
-        protected override string GetExpectation() { }
-        protected override .<.> GetResult(TActual? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
-    }
-}
 namespace .Enums
 {
     public enum CollectionOrdering
@@ -1469,6 +1436,36 @@ namespace .Extensions
         public .<string> GreaterThanOrEqualTo(int expected, [.("expected")] string? doNotPopulateThisValue = null) { }
         public .<string> LessThan(int expected, [.("expected")] string? doNotPopulateThisValue = null) { }
         public .<string> LessThanOrEqualTo(int expected, [.("expected")] string? doNotPopulateThisValue = null) { }
+    }
+    public class ThrowsException<TActual, TException>
+        where TException : 
+    {
+        public ThrowsException(. delegateAssertionBuilder, ..IDelegateSource source, <?, ?> selector) { }
+        public ..ValueAnd<TException> And { get; }
+        public ..DelegateOr<object?> Or { get; }
+        public .<TException?> GetAwaiter() { }
+        public .<TActual, > WithInnerException() { }
+        public .<TActual, TException> WithMessage(string expected, [.("expected")] string? doNotPopulateThisValue = null) { }
+        public .<TActual, TException> WithMessageContaining(string expected, [.("expected")] string? doNotPopulateThisValue = null) { }
+        public .<TActual, TException> WithMessageContaining(string expected,  stringComparison, [.("expected")] string? doNotPopulateThisValue = null, [.("stringComparison")] string? doNotPopulateThisValue2 = null) { }
+        public .<TActual, TException> WithMessageMatching(. match, [.("match")] string? doNotPopulateThisValue = null) { }
+        public static .<TException?> op_Explicit(.<TActual, TException> throwsException) { }
+    }
+    public static class ThrowsExtensions
+    {
+        public static .<object?, > Throws(this ..IDelegateSource delegateSource,  type, [.("type")] string? doNotPopulateThisValue = null) { }
+        public static .<object?, TException> Throws<TException>(this ..IDelegateSource delegateSource)
+            where TException :  { }
+        public static .<object?, TException> ThrowsExactly<TException>(this ..IDelegateSource delegateSource)
+            where TException :  { }
+        public static .<object?, > ThrowsException(this ..IDelegateSource delegateSource) { }
+        public static .<object?, object?> ThrowsNothing(this ..IDelegateSource delegateSource) { }
+        public static .<TActual, TActual> ThrowsNothing<TActual>(this ..IValueDelegateSource<TActual> delegateSource) { }
+        public static .<object?, > ThrowsWithin(this ..IDelegateSource delegateSource,  timeSpan, [.("timeSpan")] string? doNotPopulateThisValue = null) { }
+        public static .<object?, TException> ThrowsWithin<TException>(this ..IDelegateSource delegateSource,  timeSpan, [.("timeSpan")] string? doNotPopulateThisValue = null)
+            where TException :  { }
+        public static .<TActual, TException> WithParameterName<TActual, TException>(this .<TActual, TException> throwsException, string expected, [.("expected")] string? doNotPopulateThisValue = null)
+            where TException :  { }
     }
     public static class TimeSpanExtensions
     {

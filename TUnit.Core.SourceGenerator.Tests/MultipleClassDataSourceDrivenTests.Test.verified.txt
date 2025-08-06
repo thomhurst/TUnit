@@ -15,10 +15,6 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test1_TestSource_GUID :
             TestName = "Test1",
             TestClassType = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
             TestMethodName = "Test1",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -123,12 +119,12 @@ return classMetadata;
                 var typedInstance = (global::TUnit.TestProject.MultipleClassDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Test1();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Test1();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -138,7 +134,7 @@ return classMetadata;
 }
 internal static class MultipleClassDataSourceDrivenTests_Test1_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests), new MultipleClassDataSourceDrivenTests_Test1_TestSource_GUID());
@@ -165,10 +161,6 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test2_TestSource_GUID :
             TestName = "Test2",
             TestClassType = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
             TestMethodName = "Test2",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -273,12 +265,12 @@ return classMetadata;
                 var typedInstance = (global::TUnit.TestProject.MultipleClassDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Test2();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Test2();
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -288,7 +280,7 @@ return classMetadata;
 }
 internal static class MultipleClassDataSourceDrivenTests_Test2_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests), new MultipleClassDataSourceDrivenTests_Test2_TestSource_GUID());

@@ -16,10 +16,6 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
             TestName = "GenericArgumentsTest",
             TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
             TestMethodName = "GenericArgumentsTest",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -57,14 +53,14 @@ new global::TUnit.Core.ParameterMetadata(typeof(object))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "expected",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
@@ -96,10 +92,10 @@ return classMetadata;
             TestInvoker = async (instance, args) =>
             {
                 var instanceType = instance.GetType();
-                var method = instanceType.GetMethod("GenericArgumentsTest", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                var method = instanceType.GetMethod("GenericArgumentsTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance);
                 if (method == null)
                 {
-                    throw new System.InvalidOperationException($"Method 'GenericArgumentsTest' not found on type {instanceType.FullName}");
+                    throw new global::System.InvalidOperationException($"Method 'GenericArgumentsTest' not found on type {instanceType.FullName}");
                 }
                 // Make the method generic if it has type parameters
                 if (method.IsGenericMethodDefinition)
@@ -115,7 +111,7 @@ return classMetadata;
                     else
                     {
                         // Fallback: infer type arguments from the actual argument types
-                        var typeArgs = new System.Type[1];
+                        var typeArgs = new global::System.Type[1];
                         for (int i = 0; i < typeArgs.Length && i < args.Length; i++)
                         {
                             typeArgs[i] = args[i]?.GetType() ?? typeof(object);
@@ -142,10 +138,6 @@ return classMetadata;
                     TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(bool)},
-                    TimeoutMs = null,
-                    RetryCount = 0,
-                    RepeatCount = 0,
-                    CanRunInParallel = true,
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
                     AttributeFactory = () =>
                     [
@@ -187,14 +179,14 @@ new global::TUnit.Core.ParameterMetadata(typeof(object))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "expected",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
@@ -237,10 +229,6 @@ return classMetadata;
                     TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(int)},
-                    TimeoutMs = null,
-                    RetryCount = 0,
-                    RepeatCount = 0,
-                    CanRunInParallel = true,
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
                     AttributeFactory = () =>
                     [
@@ -282,14 +270,14 @@ new global::TUnit.Core.ParameterMetadata(typeof(object))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "expected",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
@@ -332,10 +320,6 @@ return classMetadata;
                     TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(double)},
-                    TimeoutMs = null,
-                    RetryCount = 0,
-                    RepeatCount = 0,
-                    CanRunInParallel = true,
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
                     AttributeFactory = () =>
                     [
@@ -377,14 +361,14 @@ new global::TUnit.Core.ParameterMetadata(typeof(object))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "expected",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
@@ -427,10 +411,6 @@ return classMetadata;
                     TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(string)},
-                    TimeoutMs = null,
-                    RetryCount = 0,
-                    RepeatCount = 0,
-                    CanRunInParallel = true,
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
                     AttributeFactory = () =>
                     [
@@ -472,14 +452,14 @@ new global::TUnit.Core.ParameterMetadata(typeof(object))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "expected",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
@@ -522,10 +502,6 @@ return classMetadata;
                     TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._2136.MyEnum)},
-                    TimeoutMs = null,
-                    RetryCount = 0,
-                    RepeatCount = 0,
-                    CanRunInParallel = true,
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
                     AttributeFactory = () =>
                     [
@@ -567,14 +543,14 @@ new global::TUnit.Core.ParameterMetadata(typeof(object))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "expected",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
@@ -619,7 +595,7 @@ return classMetadata;
 }
 internal static class Tests_GenericArgumentsTest_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2136.Tests), new Tests_GenericArgumentsTest_TestSource_GUID());

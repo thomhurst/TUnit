@@ -15,10 +15,6 @@ internal sealed class AotDataSourceTest_TestWithDataSource_TestSource_GUID : glo
             TestName = "TestWithDataSource",
             TestClassType = typeof(global::TUnit.TestProject.AotDataSourceTest),
             TestMethodName = "TestWithDataSource",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -67,21 +63,21 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
     Name = "a",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "b",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[1]
+    ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[1]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(int))
 {
     Name = "c",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[2]
+    ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[2]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("UnifiedReflectionFreeTests:global::TUnit.TestProject.AotDataSourceTest", () => 
@@ -120,7 +116,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -133,7 +129,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -143,7 +139,7 @@ return classMetadata;
 }
 internal static class AotDataSourceTest_TestWithDataSource_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.AotDataSourceTest), new AotDataSourceTest_TestWithDataSource_TestSource_GUID());

@@ -2,12 +2,13 @@
 using CliWrap;
 using CliWrap.Buffered;
 using TrxTools.TrxParser;
+using TUnit.Engine.Tests.Enums;
 
 namespace TUnit.Engine.Tests;
 
 public class TrxAsserter
 {
-    public static async Task AssertTrx(Command command, BufferedCommandResult commandResult,
+    public static async Task AssertTrx(TestMode testMode, Command command, BufferedCommandResult commandResult,
         List<Action<TestRun>> assertions,
         string trxFilename, [CallerArgumentExpression("assertions")] string assertionExpression = "")
     {
@@ -23,9 +24,12 @@ public class TrxAsserter
         }
         catch (Exception e)
         {
-            Console.WriteLine(@$"Command Input: {command}");
-            Console.WriteLine(@$"Error: {commandResult.StandardError}");
-            Console.WriteLine(@$"Output: {commandResult.StandardOutput}");
+            ThreadSafeOutput.WriteMultipleLines(
+                $@"Mode: {testMode}",
+                @$"Command Input: {command}",
+                @$"Error: {commandResult.StandardError}",
+                @$"Output: {commandResult.StandardOutput}"
+            );
 
             throw new Exception($"""
                                  Error asserting results for {TestContext.Current!.TestDetails.MethodMetadata.Class.Name}: {e.Message}

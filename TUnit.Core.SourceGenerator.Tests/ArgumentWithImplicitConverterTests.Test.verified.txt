@@ -15,10 +15,6 @@ internal sealed class ArgumentWithImplicitConverterTests_Explicit_TestSource_GUI
             TestName = "Explicit",
             TestClassType = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
             TestMethodName = "Explicit",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -66,7 +62,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Explic
     Name = "integer",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ExplicitInteger, TestsBase`1"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Explicit", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ExplicitInteger) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Explicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ExplicitInteger) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => 
@@ -105,7 +101,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -118,7 +114,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -128,7 +124,7 @@ return classMetadata;
 }
 internal static class ArgumentWithImplicitConverterTests_Explicit_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), new ArgumentWithImplicitConverterTests_Explicit_TestSource_GUID());
@@ -155,10 +151,6 @@ internal sealed class ArgumentWithImplicitConverterTests_Implicit_TestSource_GUI
             TestName = "Implicit",
             TestClassType = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
             TestMethodName = "Implicit",
-            TimeoutMs = null,
-            RetryCount = 0,
-            RepeatCount = 0,
-            CanRunInParallel = true,
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
@@ -206,7 +198,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Implic
     Name = "integer",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ImplicitInteger, TestsBase`1"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Implicit", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ImplicitInteger) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Implicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ImplicitInteger) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => 
@@ -245,7 +237,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -258,7 +250,7 @@ return classMetadata;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await Task.CompletedTask;
+                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -268,7 +260,7 @@ return classMetadata;
 }
 internal static class ArgumentWithImplicitConverterTests_Implicit_ModuleInitializer_GUID
 {
-    [System.Runtime.CompilerServices.ModuleInitializer]
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
         global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), new ArgumentWithImplicitConverterTests_Implicit_TestSource_GUID());

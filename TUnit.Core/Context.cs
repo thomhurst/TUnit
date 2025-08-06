@@ -44,10 +44,6 @@ public abstract class Context : IContext, IDisposable
     public void RestoreExecutionContext()
     {
 #if NET
-        RestoreContextAsyncLocal();
-        
-        Parent?.RestoreExecutionContext();
-
         if (ExecutionContext is not null)
         {
             ExecutionContext.Restore(ExecutionContext);
