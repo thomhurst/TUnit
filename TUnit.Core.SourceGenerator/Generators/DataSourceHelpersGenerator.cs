@@ -42,7 +42,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             {
                 Property = p,
                 DataSourceAttribute = p.GetAttributes()
-                    .First(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+                    .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
+                    ?? throw new InvalidOperationException($"No data source attribute found for property {p.Name}")
             })
             .ToList();
 

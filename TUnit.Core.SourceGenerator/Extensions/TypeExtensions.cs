@@ -35,6 +35,11 @@ public static class TypeExtensions
 
     public static IEnumerable<ISymbol> GetMembersIncludingBase(this ITypeSymbol namedTypeSymbol, bool reverse = true)
     {
+        if (namedTypeSymbol == null)
+        {
+            return [];
+        }
+
         var list = new List<ISymbol>();
 
         var symbol = namedTypeSymbol;
@@ -51,7 +56,15 @@ public static class TypeExtensions
                 break;
             }
 
-            list.AddRange(reverse ? symbol.GetMembers().Reverse() : symbol.GetMembers());
+            try
+            {
+                list.AddRange(reverse ? symbol.GetMembers().Reverse() : symbol.GetMembers());
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error getting members for {symbol.Name}: {ex.Message}", ex);
+            }
+            
             symbol = symbol.BaseType;
         }
 
