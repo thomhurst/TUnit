@@ -858,7 +858,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var fullyQualifiedType = targetType.GloballyQualified();
 
         // Generate async enumerable that yields Func<Task<object?[]?>>
-        writer.AppendLine("async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()");
+        writer.AppendLine("async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -938,7 +938,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             writer.AppendLine();
             writer.AppendLine("var taskResult = await result;");
-            writer.AppendLine("if (taskResult is System.Collections.IEnumerable enumerable && !(taskResult is string))");
+            writer.AppendLine("if (taskResult is global::System.Collections.IEnumerable enumerable && !(taskResult is string))");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("foreach (var item in enumerable)");
@@ -981,7 +981,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
             }
             writer.AppendLine();
-            writer.AppendLine("if (result is System.Collections.IEnumerable enumerable && !(result is string))");
+            writer.AppendLine("if (result is global::System.Collections.IEnumerable enumerable && !(result is string))");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("foreach (var item in enumerable)");
