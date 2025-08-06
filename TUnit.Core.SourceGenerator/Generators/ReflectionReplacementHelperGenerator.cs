@@ -192,7 +192,7 @@ public sealed class ReflectionReplacementHelperGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
-        writer.AppendLine("throw new NotSupportedException(\"Method invocation not supported in AOT mode without source generation.\");");
+        writer.AppendLine("throw new global::System.NotSupportedException(\"Method invocation not supported in AOT mode without source generation.\");");
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
@@ -224,7 +224,7 @@ public sealed class ReflectionReplacementHelperGenerator : IIncrementalGenerator
         writer.AppendLine("}");
         writer.AppendLine();
         writer.AppendLine("// Fallback - requires AOT-safe replacement");
-        writer.AppendLine("throw new NotSupportedException(\"Tuple conversion requires AOT-safe replacement to be registered.\");");
+        writer.AppendLine("throw new global::System.NotSupportedException(\"Tuple conversion requires AOT-safe replacement to be registered.\");");
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();

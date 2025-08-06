@@ -12,11 +12,11 @@ internal static class AsyncDataSourceHelper
     /// </summary>
     public static void GenerateConvertToSyncMethod(CodeWriter writer)
     {
-        writer.AppendLine("private static IEnumerable<object?[]> ConvertToSync(Func<CancellationToken, IAsyncEnumerable<object?[]>> asyncFactory)");
+        writer.AppendLine("private static global::System.Collections.Generic.IEnumerable<object?[]> ConvertToSync(global::System.Func<global::System.Threading.CancellationToken, global::System.Collections.Generic.IAsyncEnumerable<object?[]>> asyncFactory)");
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("var cts = new CancellationTokenSource();");
+        writer.AppendLine("var cts = new global::System.Threading.CancellationTokenSource();");
         writer.AppendLine("var enumerator = asyncFactory(cts.Token).GetAsyncEnumerator(cts.Token);");
         writer.AppendLine("try");
         writer.AppendLine("{");
@@ -27,7 +27,7 @@ internal static class AsyncDataSourceHelper
         writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("if (!enumerator.MoveNextAsync().AsTask().Wait(TimeSpan.FromSeconds(30)))");
+        writer.AppendLine("if (!enumerator.MoveNextAsync().AsTask().Wait(global::System.TimeSpan.FromSeconds(30)))");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine("break;");

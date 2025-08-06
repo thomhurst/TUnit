@@ -378,7 +378,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("catch (Exception ex)");
             writer.AppendLine("{");
             writer.Indent();
-            writer.AppendLine("throw new InvalidOperationException($\"Failed to initialize hook registry: {ex.Message}\", ex);");
+            writer.AppendLine("throw new global::System.InvalidOperationException($\"Failed to initialize hook registry: {ex.Message}\", ex);");
             writer.Unindent();
             writer.AppendLine("}");
         }
@@ -593,7 +593,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
                 {
                     // Use reflection instead of dynamic to avoid AOT issues
                     writer.AppendLine("var instanceType = instance.GetType();");
-                    writer.AppendLine($"var method = instanceType.GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance{(isStatic ? " | System.Reflection.BindingFlags.Static" : "")});");
+                    writer.AppendLine($"var method = instanceType.GetMethod(\"{methodName}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance{(isStatic ? " | global::System.Reflection.BindingFlags.Static" : "")});");
                     writer.AppendLine("if (method != null)");
                     writer.AppendLine("{");
                     writer.Indent();
@@ -681,7 +681,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
                     writer.AppendLine("if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == openGenericType)");
                     writer.AppendLine("{");
                     writer.Indent();
-                    writer.AppendLine($"method = targetType.GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.DeclaredOnly);");
+                    writer.AppendLine($"method = targetType.GetMethod(\"{methodName}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.DeclaredOnly);");
                     writer.Unindent();
                     writer.AppendLine("}");
                     writer.AppendLine("targetType = targetType.BaseType;");
@@ -691,7 +691,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
                     writer.AppendLine("if (method == null)");
                     writer.AppendLine("{");
                     writer.Indent();
-                    writer.AppendLine($"throw new InvalidOperationException($\"Could not find static method '{methodName}' on type {{context.ClassType.FullName}} or its base types matching generic definition {{openGenericType.FullName}}\");");
+                    writer.AppendLine($"throw new global::System.InvalidOperationException($\"Could not find static method '{methodName}' on type {{context.ClassType.FullName}} or its base types matching generic definition {{openGenericType.FullName}}\");");
                     writer.Unindent();
                     writer.AppendLine("}");
 

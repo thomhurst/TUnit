@@ -301,7 +301,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 sb.AppendLine($"            var value = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
                 sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
                 sb.AppendLine($"            var backingField = instance.GetType().GetField(\"<{propertyName}>k__BackingField\", ");
-                sb.AppendLine("                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");
+                sb.AppendLine("                global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
                 sb.AppendLine("            backingField?.SetValue(instance, value);");
                 
                 sb.AppendLine("        }");
