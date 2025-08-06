@@ -65,8 +65,6 @@ TUnit0200 | Usage | Warning | Avoid blocking on async code (.Result, .GetAwaiter
 #### AOT Compatibility Rules
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
-TUnit0059 | Usage | Error | Dynamic data sources using reflection are not AOT-compatible - use static sources
-TUnit0060 | Usage | Error | Open generic types are not AOT-compatible - specify concrete type arguments
 TUnit0300 | Usage | Warning | Generic types may not be AOT-compatible - ensure all combinations are known at compile time
 TUnit0301 | Usage | Warning | Tuple usage may not be AOT-compatible - consider using concrete types
 TUnit0302 | Usage | Warning | Custom conversion operators may not be AOT-compatible - use explicit casting
