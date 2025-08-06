@@ -138,12 +138,12 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
         foreach (var category in test.Context.TestDetails.Categories)
         {
             properties.Add(new TestMetadataProperty(category));
-            properties.Add(new KeyValuePairStringProperty("Category", category));
+            properties.Add(new TestMetadataProperty("Category", category));
         }
 
         foreach (var propertyEntry in test.Context.TestDetails.CustomProperties)
         {
-            properties.AddRange(propertyEntry.Value.Select(value => new KeyValuePairStringProperty(propertyEntry.Key, value)));
+            properties.AddRange(propertyEntry.Value.Select(value => new TestMetadataProperty(propertyEntry.Key, value)));
         }
 
         return new PropertyBag(properties);
