@@ -7,7 +7,7 @@ public class MappableResultAssertionBuilder<TActual, TExpected> : InvokableValue
 {
     private readonly Func<TActual?, TExpected?> _mapper;
 
-    internal MappableResultAssertionBuilder(InvokableAssertionBuilder<TActual> assertionBuilder, Func<TActual?, TExpected?> mapper) : base(assertionBuilder)
+    public MappableResultAssertionBuilder(InvokableAssertionBuilder<TActual> assertionBuilder, Func<TActual?, TExpected?> mapper) : base(assertionBuilder)
     {
         _mapper = mapper;
     }
@@ -33,7 +33,7 @@ public class MappableResultAssertionBuilder<TActual, TAssertCondition, TExpected
     private readonly TAssertCondition _assertCondition;
     private readonly Func<TActual?, TAssertCondition, TExpected?> _mapper;
 
-    internal MappableResultAssertionBuilder(InvokableAssertionBuilder<TActual> assertionBuilder, TAssertCondition assertCondition, Func<TActual?, TAssertCondition, TExpected?> mapper) : base(assertionBuilder)
+    public MappableResultAssertionBuilder(InvokableAssertionBuilder<TActual> assertionBuilder, TAssertCondition assertCondition, Func<TActual?, TAssertCondition, TExpected?> mapper) : base(assertionBuilder)
     {
         _assertCondition = assertCondition;
         _mapper = mapper;
