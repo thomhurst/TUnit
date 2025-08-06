@@ -1246,7 +1246,7 @@ namespace
     {
         public TestContext(string testName,  serviceProvider, .ClassHookContext classContext, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
         public .<<object?, string?>> ArgumentDisplayFormatters { get; }
-        public .<string, object?> Artifacts { get; }
+        public .<.Artifact> Artifacts { get; }
         public .CancellationToken CancellationToken { get; set; }
         public .ClassHookContext ClassContext { get; }
         public .<.TestDetails> Dependencies { get; }
@@ -1275,7 +1275,6 @@ namespace
         public static .<string, .<string>> Parameters { get; }
         public static string WorkingDirectory { get; set; }
         public void AddArtifact(.Artifact artifact) { }
-        public void AddArtifact(string name, object? value) { }
         public void AddLinkedCancellationToken(.CancellationToken cancellationToken) { }
         public string GetDisplayName() { }
         public new string GetErrorOutput() { }
