@@ -26,7 +26,7 @@ internal sealed class TestScheduler : ITestScheduler
         _logger = logger;
         _groupingService = groupingService;
         _messageBus = messageBus;
-        _maxParallelism = maxParallelism > 0 ? maxParallelism : ParallelismDetector.DetectOptimalParallelism();
+        _maxParallelism = maxParallelism > 0 ? maxParallelism : Environment.ProcessorCount * 4;
     }
 
     public async Task ScheduleAndExecuteAsync(
