@@ -13,6 +13,38 @@ public static class TypedConstantParser
     public static string GetTypedConstantValue(SemanticModel semanticModel,
         (TypedConstant typedConstant, AttributeArgumentSyntax a) element, ITypeSymbol? parameterType)
     {
+        // Special case for decimal parameters: always use the original source text to preserve full precision
+        // This is crucial because numeric literals without 'm' suffix are treated as doubles by the compiler,
+        // which lose precision beyond ~15-17 digits. By using the original source text, we preserve
+        // all the digits the user wrote.
+        if (parameterType?.SpecialType == SpecialType.System_Decimal && element.a != null)
+        {
+            // Get the original source text directly from the syntax node
+            var originalText = element.a.Expression.ToString();
+            
+            // Null safety check
+            if (string.IsNullOrEmpty(originalText))
+            {
+                return "0m";
+            }
+            
+            // Check if it's a numeric literal (not an identifier or expression)
+            // We detect numeric literals by checking if they match a numeric pattern
+            var isNumericLiteral = System.Text.RegularExpressions.Regex.IsMatch(originalText, @"^-?\d+(\.\d+)?([eE][+-]?\d+)?[dDfFmMlLuU]?$");
+            
+            if (isNumericLiteral)
+            {
+                // Remove any existing suffix and add 'm' for decimal
+                var withoutSuffix = System.Text.RegularExpressions.Regex.Replace(originalText, @"[dDfFmMlLuU]+$", "");
+                return withoutSuffix + "m";
+            }
+            
+            // For non-literals (identifiers, field references, etc.), process normally
+            var decimalArgExpression = element.a.Expression;
+            var decimalNewExpression = decimalArgExpression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
+            return decimalNewExpression.ToString();
+        }
+        
         // For constant values, use the formatter which handles type conversions properly
         if (element.typedConstant.Kind == TypedConstantKind.Primitive)
         {
@@ -27,22 +59,6 @@ public static class TypedConstantParser
             (newExpression.IsKind(SyntaxKind.UnaryMinusExpression) || newExpression.IsKind(SyntaxKind.UnaryPlusExpression)))
         {
             return $"({parameterType.GloballyQualified()})({newExpression})";
-        }
-
-        if (parameterType?.SpecialType == SpecialType.System_Decimal)
-        {
-            // For decimal types, ensure we preserve precision by not relying on ToString()
-            // which might have already lost precision. Use the original expression text.
-            var expressionText = newExpression.ToString();
-            if (expressionText.EndsWith("d") || expressionText.EndsWith("D"))
-            {
-                return expressionText.Substring(0, expressionText.Length - 1) + "m";
-            }
-            else if (!expressionText.EndsWith("m") && !expressionText.EndsWith("M"))
-            {
-                return expressionText + "m";
-            }
-            return expressionText;
         }
 
         if (parameterType is not null

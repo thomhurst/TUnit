@@ -699,7 +699,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         foreach (var attr in methodDataSources)
         {
-            GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+            GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, typeSymbol);
         }
 
         writer.Unindent();
@@ -712,7 +712,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         foreach (var attr in classDataSources)
         {
-            GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+            GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, typeSymbol);
         }
 
         writer.Unindent();
@@ -722,7 +722,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GeneratePropertyDataSources(writer, compilation, testMethod);
     }
 
-    private static void GenerateDataSourceAttribute(CodeWriter writer, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
+    private static void GenerateDataSourceAttribute(CodeWriter writer, Compilation compilation, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         var attrClass = attr.AttributeClass;
         if (attrClass == null)
@@ -738,10 +738,50 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // Use the generic attribute instantiation method for all other attributes
-            // This properly handles generics on the attribute type
-            var generatedCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
-            writer.AppendLine($"{generatedCode},");
+            // Check if we have syntax available to preserve full precision for decimal literals
+            var syntax = attr.ApplicationSyntaxReference?.GetSyntax();
+            if (syntax is Microsoft.CodeAnalysis.CSharp.Syntax.AttributeSyntax attributeSyntax && 
+                attrName == "global::TUnit.Core.ArgumentsAttribute" &&
+                attributeSyntax.ArgumentList?.Arguments.Any(arg => 
+                    System.Text.RegularExpressions.Regex.IsMatch(arg.Expression.ToString(), @"^\d+\.\d{15,}$")) == true)
+            {
+                // Special handling for ArgumentsAttribute with high-precision decimal literals
+                var semanticModel = compilation.GetSemanticModel(attributeSyntax.SyntaxTree);
+                var rewriter = new FullyQualifiedWithGlobalPrefixRewriter(semanticModel);
+                
+                writer.Append($"new {attrName}(");
+                
+                if (attributeSyntax.ArgumentList?.Arguments.Count > 0)
+                {
+                    var argStrings = new List<string>();
+                    foreach (var arg in attributeSyntax.ArgumentList.Arguments)
+                    {
+                        var exprText = arg.Expression.ToString();
+                        
+                        // Check if this is a high-precision decimal literal
+                        if (System.Text.RegularExpressions.Regex.IsMatch(exprText, @"^\d+\.\d{15,}$"))
+                        {
+                            // Preserve full precision by adding 'm' suffix
+                            argStrings.Add(exprText + "m");
+                        }
+                        else
+                        {
+                            // Process through rewriter to fully qualify identifiers
+                            var rewrittenExpr = arg.Expression.Accept(rewriter);
+                            argStrings.Add(rewrittenExpr?.ToString() ?? exprText);
+                        }
+                    }
+                    writer.Append(string.Join(", ", argStrings));
+                }
+                
+                writer.AppendLine("),");
+            }
+            else
+            {
+                // Fall back to the generic attribute instantiation method
+                var generatedCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
+                writer.AppendLine($"{generatedCode},");
+            }
         }
     }
 
@@ -1240,7 +1280,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         writer.AppendLine($"PropertyName = \"{property.Name}\",");
                         writer.AppendLine($"PropertyType = typeof({property.Type.GloballyQualified()}),");
                         writer.Append("DataSource = ");
-                        GenerateDataSourceAttribute(writer, dataSourceAttr, testMethod.MethodSymbol, typeSymbol);
+                        GenerateDataSourceAttribute(writer, compilation, dataSourceAttr, testMethod.MethodSymbol, typeSymbol);
                         writer.Unindent();
                         writer.AppendLine("},");
                     }
@@ -3936,7 +3976,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         foreach (var attr in methodDataSources)
         {
-            GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+            GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, typeSymbol);
         }
 
         writer.Unindent();
@@ -3949,7 +3989,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         foreach (var attr in classDataSources)
         {
-            GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+            GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, typeSymbol);
         }
 
         writer.Unindent();
@@ -4228,7 +4268,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Add method data source if present
         if (methodDataSourceAttribute != null)
         {
-            GenerateDataSourceAttribute(writer, methodDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
+            GenerateDataSourceAttribute(writer, compilation, methodDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
         }
 
         writer.Unindent();
@@ -4242,7 +4282,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Add class data source if present
         if (classDataSourceAttribute != null)
         {
-            GenerateDataSourceAttribute(writer, classDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
+            GenerateDataSourceAttribute(writer, compilation, classDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
         }
 
         writer.Unindent();

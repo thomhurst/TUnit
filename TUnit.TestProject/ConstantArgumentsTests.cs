@@ -64,9 +64,10 @@ public class ConstantArgumentsTests
     }
 
     [Test]
-    [Arguments(DummyDecimal)]
+    [Arguments(123.456789012345678901234567890)] // Test with full precision
     public async Task Decimal(decimal dummy)
     {
-        await Assert.That(dummy).IsEqualTo(DummyDecimal);
+        // Testing if source generator can preserve the full literal text
+        await Assert.That(dummy).IsEqualTo(123.456789012345678901234567890m);
     }
 }
