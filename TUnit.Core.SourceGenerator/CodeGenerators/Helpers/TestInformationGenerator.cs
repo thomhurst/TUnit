@@ -11,8 +11,8 @@ public static class TestInformationGenerator
         IMethodSymbol methodSymbol,
         INamedTypeSymbol typeSymbol)
     {
-        var classMetadataExpression = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(typeSymbol);
-        var methodMetadataCode = MetadataGenerationHelper.GenerateMethodMetadata(methodSymbol, classMetadataExpression);
+        var classMetadataExpression = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(typeSymbol, null, writer.IndentLevel);
+        var methodMetadataCode = MetadataGenerationHelper.GenerateMethodMetadata(methodSymbol, classMetadataExpression, writer.IndentLevel);
         
         writer.Append(methodMetadataCode);
     }

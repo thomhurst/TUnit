@@ -13,9 +13,9 @@ internal static class MetadataGenerationHelper
     /// <summary>
     /// Generates code for creating a MethodMetadata instance
     /// </summary>
-    public static string GenerateMethodMetadata(IMethodSymbol methodSymbol, string classMetadataExpression)
+    public static string GenerateMethodMetadata(IMethodSymbol methodSymbol, string classMetadataExpression, int currentIndentLevel = 0)
     {
-        var writer = new CodeWriter("", includeHeader: false);
+        var writer = new CodeWriter("", includeHeader: false).SetIndentLevel(currentIndentLevel);
         writer.AppendLine("new global::TUnit.Core.MethodMetadata");
         writer.AppendLine("{");
         writer.Indent();
@@ -29,7 +29,7 @@ internal static class MetadataGenerationHelper
         writer.AppendLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
         writer.AppendLine($"ReturnType = typeof({safeReturnTypeDisplay}),");
         writer.AppendLine($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ReturnType)},");
-        writer.AppendLine($"Parameters = {GenerateParameterMetadataArrayForMethod(methodSymbol)},");
+        writer.AppendLine($"Parameters = {GenerateParameterMetadataArrayForMethod(methodSymbol, writer.IndentLevel)},");
         writer.AppendLine($"Class = {classMetadataExpression}");
 
         writer.Unindent();
@@ -41,10 +41,10 @@ internal static class MetadataGenerationHelper
     /// <summary>
     /// Generates code for creating a ClassMetadata instance with GetOrAdd pattern
     /// </summary>
-    public static string GenerateClassMetadataGetOrAdd(INamedTypeSymbol typeSymbol, string? parentExpression = null)
+    public static string GenerateClassMetadataGetOrAdd(INamedTypeSymbol typeSymbol, string? parentExpression = null, int currentIndentLevel = 0)
     {
         var qualifiedName = $"{typeSymbol.ContainingAssembly.Name}:{typeSymbol.GloballyQualified()}";
-        var writer = new CodeWriter("", includeHeader: false);
+        var writer = new CodeWriter("", includeHeader: false).SetIndentLevel(currentIndentLevel);
         writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", () => ");
         writer.AppendLine("{");
         writer.Indent();
@@ -63,13 +63,13 @@ internal static class MetadataGenerationHelper
         var constructorParams = constructor?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
         if (constructor != null && constructorParams.Length > 0)
         {
-            writer.AppendLine($"Parameters = {GenerateParameterMetadataArrayForConstructor(constructor, typeSymbol)},");
+            writer.AppendLine($"Parameters = {GenerateParameterMetadataArrayForConstructor(constructor, typeSymbol, writer.IndentLevel)},");
         }
         else
         {
             writer.AppendLine("Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
         }
-        writer.AppendLine($"Properties = {GeneratePropertyMetadataArray(typeSymbol)},");
+        writer.AppendLine($"Properties = {GeneratePropertyMetadataArray(typeSymbol, writer.IndentLevel)},");
         writer.AppendLine($"Parent = {parentExpression ?? "null"}");
 
         writer.Unindent();
@@ -259,14 +259,14 @@ internal static class MetadataGenerationHelper
     /// <summary>
     /// Generates an array of ParameterMetadata objects for method parameters with proper reflection info
     /// </summary>
-    private static string GenerateParameterMetadataArrayForMethod(IMethodSymbol method)
+    private static string GenerateParameterMetadataArrayForMethod(IMethodSymbol method, int currentIndentLevel = 0)
     {
         if (method.Parameters.Length == 0)
         {
             return "global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>()";
         }
 
-        var writer = new CodeWriter("", includeHeader: false);
+        var writer = new CodeWriter("", includeHeader: false).SetIndentLevel(currentIndentLevel);
         writer.AppendLine("new global::TUnit.Core.ParameterMetadata[]");
         writer.AppendLine("{");
         writer.Indent();
@@ -285,14 +285,14 @@ internal static class MetadataGenerationHelper
     /// <summary>
     /// Generates an array of ParameterMetadata objects for constructor parameters with proper reflection info
     /// </summary>
-    private static string GenerateParameterMetadataArrayForConstructor(IMethodSymbol constructor, INamedTypeSymbol containingType)
+    private static string GenerateParameterMetadataArrayForConstructor(IMethodSymbol constructor, INamedTypeSymbol containingType, int currentIndentLevel = 0)
     {
         if (constructor.Parameters.Length == 0)
         {
             return "global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>()";
         }
 
-        var writer = new CodeWriter("", includeHeader: false);
+        var writer = new CodeWriter("", includeHeader: false).SetIndentLevel(currentIndentLevel);
         writer.AppendLine("new global::TUnit.Core.ParameterMetadata[]");
         writer.AppendLine("{");
         writer.Indent();
@@ -311,7 +311,7 @@ internal static class MetadataGenerationHelper
     /// <summary>
     /// Generates an array of PropertyMetadata objects
     /// </summary>
-    private static string GeneratePropertyMetadataArray(INamedTypeSymbol typeSymbol)
+    private static string GeneratePropertyMetadataArray(INamedTypeSymbol typeSymbol, int currentIndentLevel = 0)
     {
         var properties = typeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
@@ -323,7 +323,7 @@ internal static class MetadataGenerationHelper
             return "global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>()";
         }
 
-        var writer = new CodeWriter("", includeHeader: false);
+        var writer = new CodeWriter("", includeHeader: false).SetIndentLevel(currentIndentLevel);
         writer.AppendLine("new global::TUnit.Core.PropertyMetadata[]");
         writer.AppendLine("{");
         writer.Indent();

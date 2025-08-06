@@ -11,8 +11,8 @@ public static class SourceInformationWriter
     public static void GenerateClassInformation(ICodeWriter sourceCodeWriter, Compilation compilation, INamedTypeSymbol namedTypeSymbol)
     {
         var parent = namedTypeSymbol.ContainingType;
-        var parentExpression = parent != null ? MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(parent) : null;
-        var classMetadata = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(namedTypeSymbol, parentExpression);
+        var parentExpression = parent != null ? MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(parent, null, sourceCodeWriter.IndentLevel) : null;
+        var classMetadata = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(namedTypeSymbol, parentExpression, sourceCodeWriter.IndentLevel);
         sourceCodeWriter.Append(classMetadata);
         sourceCodeWriter.Append(",");
     }
@@ -28,8 +28,8 @@ public static class SourceInformationWriter
         Compilation compilation, INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol,
         IDictionary<string, string>? genericSubstitutions, char suffix)
     {
-        var classMetadataExpression = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(namedTypeSymbol);
-        var methodMetadata = MetadataGenerationHelper.GenerateMethodMetadata(methodSymbol, classMetadataExpression);
+        var classMetadataExpression = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(namedTypeSymbol, null, sourceCodeWriter.IndentLevel);
+        var methodMetadata = MetadataGenerationHelper.GenerateMethodMetadata(methodSymbol, classMetadataExpression, sourceCodeWriter.IndentLevel);
         sourceCodeWriter.Append(methodMetadata);
         sourceCodeWriter.Append($"{suffix}");
         sourceCodeWriter.AppendLine();
