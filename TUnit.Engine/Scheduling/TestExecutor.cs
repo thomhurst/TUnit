@@ -139,15 +139,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
             test.EndTime = DateTimeOffset.UtcNow;
             
             // Execute cleanup hooks (AfterEveryTest, AfterClass, AfterAssembly)
-            try
-            {
-                await _hookOrchestrator.OnTestCompletedAsync(test, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in cleanup hooks for test {test.TestId}: {ex}");
-                // Don't throw here to avoid masking the original test result
-            }
+            await _hookOrchestrator.OnTestCompletedAsync(test, cancellationToken);
         }
     }
 
