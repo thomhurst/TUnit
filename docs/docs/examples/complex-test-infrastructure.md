@@ -35,7 +35,6 @@ public class InMemoryKafka : IAsyncInitializer, IAsyncDisposable
     [ClassDataSource<DockerNetwork>(Shared = SharedType.PerTestSession)]
     public required DockerNetwork DockerNetwork { get; init; }
 
-    [field: AllowNull, MaybeNull]
     public KafkaContainer Container => field ??= new KafkaBuilder()
         .WithNetwork(DockerNetwork.Instance)  // Uses the injected network
         .Build();
@@ -58,7 +57,6 @@ public class KafkaUI : IAsyncInitializer, IAsyncDisposable
     [ClassDataSource<InMemoryKafka>(Shared = SharedType.PerTestSession)]
     public required InMemoryKafka Kafka { get; init; }
 
-    [field: AllowNull, MaybeNull]
     public IContainer Container => field ??= new ContainerBuilder()
         .WithNetwork(DockerNetwork.Instance)
         .WithImage("provectuslabs/kafka-ui:latest")
@@ -180,7 +178,7 @@ public class InMemoryPostgreSqlDatabase : IAsyncInitializer, IAsyncDisposable
     [ClassDataSource<DockerNetwork>(Shared = SharedType.PerTestSession)]
     public required DockerNetwork DockerNetwork { get; init; }
 
-    [field: AllowNull, MaybeNull]
+
     public PostgreSqlContainer Container => field ??= new PostgreSqlBuilder()
         .WithUsername("User")
         .WithPassword("Password")
@@ -202,25 +200,6 @@ public class InMemoryPostgreSqlDatabase : IAsyncInitializer, IAsyncDisposable
 }
 ```
 
-### Conditional Infrastructure
-```csharp
-public class OptionalRedisCache : IAsyncInitializer
-{
-    [ClassDataSource<TestConfiguration>]
-    public required TestConfiguration Config { get; init; }
-
-    private RedisContainer? _container;
-
-    public async Task InitializeAsync()
-    {
-        if (Config.UseRedisCache)
-        {
-            _container = new RedisBuilder().Build();
-            await _container.StartAsync();
-        }
-    }
-}
-```
 
 ## Comparison with Other Frameworks
 
