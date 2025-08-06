@@ -249,21 +249,22 @@ internal sealed class TestScheduler : ITestScheduler
 
         await Task.WhenAll(test.Dependencies.Select(x => x.Test.CompletionTask));
 
-        // Execute the test
-        var executionTask = Task.Run(async () =>
-        {
-            try
-            {
-                await executor.ExecuteTestAsync(test, cancellationToken);
-            }
-            finally
-            {
-                completedTests[test] = true;
-            }
-        }, cancellationToken);
-
+        // Execute the test directly without Task.Run wrapper
+        var executionTask = ExecuteTestDirectlyAsync(test, executor, completedTests, cancellationToken);
         runningTasks[test] = executionTask;
         await executionTask;
         runningTasks.TryRemove(test, out _);
+    }
+
+    private async Task ExecuteTestDirectlyAsync(AbstractExecutableTest test, ITestExecutor executor, ConcurrentDictionary<AbstractExecutableTest, bool> completedTests, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await executor.ExecuteTestAsync(test, cancellationToken);
+        }
+        finally
+        {
+            completedTests[test] = true;
+        }
     }
 }
