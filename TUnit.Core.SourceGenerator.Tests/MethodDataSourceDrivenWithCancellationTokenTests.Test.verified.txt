@@ -34,7 +34,7 @@ internal sealed class MethodDataSourceDrivenWithCancellationTokenTests_MyTest_Te
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.T();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -46,7 +46,7 @@ internal sealed class MethodDataSourceDrivenWithCancellationTokenTests_MyTest_Te
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.FuncT();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -58,10 +58,10 @@ internal sealed class MethodDataSourceDrivenWithCancellationTokenTests_MyTest_Te
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableT();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
                             {
                                 foreach (var item in enumerable)
                                 {
@@ -80,10 +80,10 @@ internal sealed class MethodDataSourceDrivenWithCancellationTokenTests_MyTest_Te
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableFuncT();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
                             {
                                 foreach (var item in enumerable)
                                 {
@@ -102,10 +102,10 @@ internal sealed class MethodDataSourceDrivenWithCancellationTokenTests_MyTest_Te
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayT();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
                             {
                                 foreach (var item in enumerable)
                                 {
@@ -124,10 +124,10 @@ internal sealed class MethodDataSourceDrivenWithCancellationTokenTests_MyTest_Te
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayFuncT();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
                             {
                                 foreach (var item in enumerable)
                                 {
@@ -177,14 +177,14 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
 {
     Name = "cancellationToken",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.CancellationToken, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
+    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => 

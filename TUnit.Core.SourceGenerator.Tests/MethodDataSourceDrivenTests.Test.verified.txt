@@ -28,7 +28,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_TestSource_G
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -69,7 +69,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 
@@ -171,7 +171,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method2_TestSource_
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -212,7 +212,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method2", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 
@@ -314,7 +314,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_WithAction_T
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeAction();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -355,7 +355,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::System.Action))
     Name = "action",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void System.Action(), System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method_WithAction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Action) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method_WithAction", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Action) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 
@@ -460,7 +460,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method3_TestSource_
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -475,7 +475,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method3_TestSource_
                     {
                         // Capture Arguments from the attribute
                         var arguments = new object[] { 5 };
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -516,7 +516,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method3", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 
@@ -625,7 +625,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -640,7 +640,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
                     {
                         // Capture Arguments from the attribute
                         var arguments = new object[] { "Hello World!", 6, true };
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -652,7 +652,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -667,7 +667,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
                     {
                         // Capture Arguments from the attribute
                         var arguments = new object[] { "Hello World!", 8, true };
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.SomeMethod();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -708,7 +708,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method4", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method4", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 
@@ -810,7 +810,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_WithBaseReturn_Test
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.MethodWithBaseReturn();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -851,7 +851,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Method
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue, TestsBase`1"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_WithBaseReturn", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_WithBaseReturn", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 
@@ -953,10 +953,10 @@ internal sealed class MethodDataSourceDrivenTests_EnumerableFuncArrayTest_TestSo
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.MethodDataSourceDrivenTests.EnumerableFuncArrayTestData();
-                            if (result is System.Collections.IEnumerable enumerable && !(result is string))
+                            if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
                             {
                                 foreach (var item in enumerable)
                                 {
@@ -1004,7 +1004,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string[]))
     Name = "strings",
     TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"), 1),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("EnumerableFuncArrayTest", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("EnumerableFuncArrayTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 

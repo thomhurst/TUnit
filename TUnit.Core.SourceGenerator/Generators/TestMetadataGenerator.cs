@@ -858,7 +858,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var fullyQualifiedType = targetType.GloballyQualified();
 
         // Generate async enumerable that yields Func<Task<object?[]?>>
-        writer.AppendLine("async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()");
+        writer.AppendLine("async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -938,7 +938,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             writer.AppendLine();
             writer.AppendLine("var taskResult = await result;");
-            writer.AppendLine("if (taskResult is System.Collections.IEnumerable enumerable && !(taskResult is string))");
+            writer.AppendLine("if (taskResult is global::System.Collections.IEnumerable enumerable && !(taskResult is string))");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("foreach (var item in enumerable)");
@@ -981,7 +981,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
             }
             writer.AppendLine();
-            writer.AppendLine("if (result is System.Collections.IEnumerable enumerable && !(result is string))");
+            writer.AppendLine("if (result is global::System.Collections.IEnumerable enumerable && !(result is string))");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("foreach (var item in enumerable)");
@@ -1365,7 +1365,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                                 writer.Unindent();
                                 writer.AppendLine("}");
                                 writer.AppendLine($"var backingField = instance.GetType().GetField(\"<{property.Name}>k__BackingField\", ");
-                                writer.AppendLine("    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");
+                                writer.AppendLine("    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
                                 writer.AppendLine("if (backingField != null)");
                                 writer.AppendLine("{");
                                 writer.Indent();
@@ -1375,7 +1375,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                                 writer.AppendLine("else");
                                 writer.AppendLine("{");
                                 writer.Indent();
-                                writer.AppendLine($"throw new System.InvalidOperationException(\"Could not find backing field for property {property.Name}\");");
+                                writer.AppendLine($"throw new global::System.InvalidOperationException(\"Could not find backing field for property {property.Name}\");");
                                 writer.Unindent();
                                 writer.AppendLine("}");
                                 writer.Unindent();
@@ -1388,7 +1388,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                                 writer.AppendLine("{");
                                 writer.Indent();
                                 writer.AppendLine($"var backingField = instance.GetType().GetField(\"<{property.Name}>k__BackingField\", ");
-                                writer.AppendLine("    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);");
+                                writer.AppendLine("    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
                                 writer.AppendLine("if (backingField != null)");
                                 writer.AppendLine("{");
                                 writer.Indent();
@@ -1398,7 +1398,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                                 writer.AppendLine("else");
                                 writer.AppendLine("{");
                                 writer.Indent();
-                                writer.AppendLine($"throw new System.InvalidOperationException(\"Could not find backing field for property {property.Name}\");");
+                                writer.AppendLine($"throw new global::System.InvalidOperationException(\"Could not find backing field for property {property.Name}\");");
                                 writer.Unindent();
                                 writer.AppendLine("}");
                                 writer.Unindent();
@@ -1507,11 +1507,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Use reflection to invoke the method on the generic type instance
         writer.AppendLine("var instanceType = instance.GetType();");
-        writer.AppendLine($"var method = instanceType.GetMethod(\"{methodName}\", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);");
+        writer.AppendLine($"var method = instanceType.GetMethod(\"{methodName}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance);");
         writer.AppendLine("if (method == null)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine($"throw new System.InvalidOperationException($\"Method '{methodName}' not found on type {{instanceType.FullName}}\");");
+        writer.AppendLine($"throw new global::System.InvalidOperationException($\"Method '{methodName}' not found on type {{instanceType.FullName}}\");");
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
@@ -1538,7 +1538,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("// Fallback: infer type arguments from the actual argument types");
-            writer.AppendLine("var typeArgs = new System.Type[" + testMethod.MethodSymbol.TypeParameters.Length + "];");
+            writer.AppendLine("var typeArgs = new global::System.Type[" + testMethod.MethodSymbol.TypeParameters.Length + "];");
             writer.AppendLine("for (int i = 0; i < typeArgs.Length && i < args.Length; i++)");
             writer.AppendLine("{");
             writer.Indent();
@@ -1559,7 +1559,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (hasCancellationToken)
         {
-            writer.AppendLine("methodArgs[args.Length] = global::TUnit.Core.TestContext.Current?.CancellationToken ?? System.Threading.CancellationToken.None;");
+            writer.AppendLine("methodArgs[args.Length] = global::TUnit.Core.TestContext.Current?.CancellationToken ?? global::System.Threading.CancellationToken.None;");
         }
 
         writer.AppendLine();

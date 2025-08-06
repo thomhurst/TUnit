@@ -62,7 +62,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataDrivenTests", () => 
@@ -200,14 +200,14 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(string))
 {
     Name = "value2",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[1]
+    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[1]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataDrivenTests", () => 
@@ -343,7 +343,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.TestEn
     Name = "testEnum",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestEnum, TestsBase`1"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("EnumValue", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.TestEnum) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("EnumValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.TestEnum) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataDrivenTests", () => 
@@ -475,7 +475,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("NullValue", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("NullValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataDrivenTests", () => 
@@ -607,7 +607,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("EmptyString", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("EmptyString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataDrivenTests", () => 
@@ -739,7 +739,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("NonEmptyString", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("NonEmptyString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataDrivenTests", () => 
@@ -875,7 +875,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(bool?))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("T?, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib")),
     IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("BooleanString", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool?) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("BooleanString", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool?) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataDrivenTests", () => 
@@ -1007,7 +1007,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(global::System.Type))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Type, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("Type", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Type) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("Type", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Type) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataDrivenTests", () => 
@@ -1139,7 +1139,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int[]))
     Name = "values",
     TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"), 1),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("IntegerArray", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int[]) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("IntegerArray", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int[]) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataDrivenTests", () => 
@@ -1271,7 +1271,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("IntMaxValue", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.DataDrivenTests).GetMethod("IntMaxValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataDrivenTests", () => 

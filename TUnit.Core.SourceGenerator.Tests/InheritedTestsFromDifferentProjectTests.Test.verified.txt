@@ -163,7 +163,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("GenericMethodDataSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("GenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => 
@@ -266,7 +266,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.TestData.Foo();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -307,7 +307,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("NonGenericMethodDataSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("NonGenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => 
@@ -648,7 +648,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("GenericMethodDataSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("GenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => 
@@ -751,7 +751,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
                 {
                     Factory = (dataGeneratorMetadata) =>
                     {
-                        async IAsyncEnumerable<Func<Task<object?[]?>>> Factory()
+                        async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
                         {
                             var result = global::TUnit.TestProject.TestData.Foo();
                             yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
@@ -792,7 +792,7 @@ new global::TUnit.Core.ParameterMetadata(typeof(string))
     Name = "value",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("NonGenericMethodDataSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests).GetMethod("NonGenericMethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => 

@@ -62,14 +62,14 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
     Name = "a",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(long[]))
 {
     Name = "arr",
     TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("long, System.Private.CoreLib"), 1),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[1]
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[1]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2112.Tests", () => 
@@ -235,14 +235,14 @@ new global::TUnit.Core.ParameterMetadata(typeof(int))
     Name = "a",
     TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test2", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[0]
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[0]
 },
 new global::TUnit.Core.ParameterMetadata(typeof(long[]))
 {
     Name = "arr",
     TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("long, System.Private.CoreLib"), 1),
     IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test2", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[1]
+    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[1]
 },
 },
 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2112.Tests", () => 
