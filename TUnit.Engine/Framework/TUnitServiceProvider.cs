@@ -213,10 +213,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         }
 
         // Check environment variable
-        var envMode = Environment.GetEnvironmentVariable("TUNIT_EXECUTION_MODE");
+        var envMode = EnvironmentVariableCache.Get("TUNIT_EXECUTION_MODE");
         if (!string.IsNullOrEmpty(envMode))
         {
-            var mode = envMode.ToLowerInvariant();
+            var mode = envMode!.ToLowerInvariant();
             if (mode == "sourcegeneration" || mode == "aot")
             {
                 return true;

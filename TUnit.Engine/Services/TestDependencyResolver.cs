@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Concurrent;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
@@ -108,18 +109,30 @@ internal sealed class TestDependencyResolver
                     // Class-level dependency
                     if (_testsByType.TryGetValue(dependency.ClassType, out var testsInType))
                     {
-                        matchingTests = testsInType
-                            .Where(t => dependency.Matches(t.Metadata, test.Metadata))
-                            .ToList();
+                        // Optimize: Manual filtering instead of LINQ Where().ToList()
+                        matchingTests = new List<AbstractExecutableTest>(testsInType.Count);
+                        foreach (var t in testsInType)
+                        {
+                            if (dependency.Matches(t.Metadata, test.Metadata))
+                            {
+                                matchingTests.Add(t);
+                            }
+                        }
                     }
                     else
                     {
                         var className = dependency.ClassType.FullName ?? dependency.ClassType.Name;
                         if (_testsByClassName.TryGetValue(className, out var testsInClass))
                         {
-                            matchingTests = testsInClass
-                                .Where(t => dependency.Matches(t.Metadata, test.Metadata))
-                                .ToList();
+                            // Optimize: Manual filtering instead of LINQ Where().ToList()
+                            matchingTests = new List<AbstractExecutableTest>(testsInClass.Count);
+                            foreach (var t in testsInClass)
+                            {
+                                if (dependency.Matches(t.Metadata, test.Metadata))
+                                {
+                                    matchingTests.Add(t);
+                                }
+                            }
                         }
                         else
                         {
@@ -132,9 +145,15 @@ internal sealed class TestDependencyResolver
                     // Method-level dependency - use method name index
                     if (dependency.MethodName != null && _testsByMethodName.TryGetValue(dependency.MethodName, out var testsWithMethod))
                     {
-                        matchingTests = testsWithMethod
-                            .Where(t => dependency.Matches(t.Metadata, test.Metadata))
-                            .ToList();
+                        // Optimize: Manual filtering instead of LINQ Where().ToList()
+                        matchingTests = new List<AbstractExecutableTest>(testsWithMethod.Count);
+                        foreach (var t in testsWithMethod)
+                        {
+                            if (dependency.Matches(t.Metadata, test.Metadata))
+                            {
+                                matchingTests.Add(t);
+                            }
+                        }
                     }
                     else
                     {
@@ -144,9 +163,15 @@ internal sealed class TestDependencyResolver
                 else
                 {
                     // Fallback for complex dependencies
-                    matchingTests = _testsByName.Values
-                        .Where(t => dependency.Matches(t.Metadata, test.Metadata))
-                        .ToList();
+                    // Optimize: Manual filtering instead of LINQ Where().ToList()
+                    matchingTests = new List<AbstractExecutableTest>(_testsByName.Count);
+                    foreach (var t in _testsByName.Values)
+                    {
+                        if (dependency.Matches(t.Metadata, test.Metadata))
+                        {
+                            matchingTests.Add(t);
+                        }
+                    }
                 }
 
                 if (matchingTests.Count == 0)
@@ -175,16 +200,28 @@ internal sealed class TestDependencyResolver
 
             if (allResolved)
             {
-                var distinctDeps = resolvedDependencies
-                    .GroupBy(d => d.Test.TestId)
-                    .Select(g => g.First())
-                    .Where(d => d.Test.TestId != test.TestId)
-                    .ToList();
+                // Optimize: Use dictionary for deduplication instead of LINQ GroupBy().Select().Where().ToList()
+                var seenIds = new HashSet<string>();
+                var distinctDeps = new List<ResolvedDependency>(resolvedDependencies.Count);
+                
+                foreach (var dep in resolvedDependencies)
+                {
+                    if (dep.Test.TestId != test.TestId && seenIds.Add(dep.Test.TestId))
+                    {
+                        distinctDeps.Add(dep);
+                    }
+                }
 
                 const int MaxDirectDependencies = 1000;
                 if (distinctDeps.Count > MaxDirectDependencies)
                 {
-                    distinctDeps = distinctDeps.Take(MaxDirectDependencies).ToList();
+                    // Optimize: Manual truncation instead of LINQ Take().ToList()
+                    var truncated = new List<ResolvedDependency>(MaxDirectDependencies);
+                    for (int i = 0; i < MaxDirectDependencies && i < distinctDeps.Count; i++)
+                    {
+                        truncated.Add(distinctDeps[i]);
+                    }
+                    distinctDeps = truncated;
                 }
 
                 test.Dependencies = distinctDeps.ToArray();
@@ -253,7 +290,15 @@ internal sealed class TestDependencyResolver
 
         if (sortedCount < _allTests.Count)
         {
-            var testsInCycles = _allTests.Where(t => inDegree[t.TestId] > 0).ToList();
+            // Optimize: Manual filtering instead of LINQ Where().ToList()
+            var testsInCycles = new List<AbstractExecutableTest>(_allTests.Count);
+            foreach (var test in _allTests)
+            {
+                if (inDegree[test.TestId] > 0)
+                {
+                    testsInCycles.Add(test);
+                }
+            }
 
             foreach (var test in testsInCycles)
             {
@@ -278,8 +323,10 @@ internal sealed class TestDependencyResolver
             }
         }
 
-        foreach (var test in _allTests.Where(t => t.State != TestState.Failed))
+        // Optimize: Manual filtering instead of LINQ Where()
+        foreach (var test in _allTests)
         {
+            if (test.State == TestState.Failed) continue;
             test.Context.Dependencies.Clear();
 
             if (_cachedTransitiveDependencies.TryGetValue(test.TestId, out var cachedDeps))
@@ -342,12 +389,49 @@ internal sealed class TestDependencyResolver
 
         if (!visited.Add(test.TestId))
         {
-            var pathList = path.Reverse().ToList();
-            var cycleStartIndex = pathList.FindIndex(t => t.TestId == test.TestId);
-            var cycleTests = pathList.Skip(cycleStartIndex).ToList();
-
-            var testDetailsChain = cycleTests.Select(t => t.Context.TestDetails).ToList();
-            throw new DependencyConflictException(testDetailsChain);
+            // Optimize: Use ArrayPool for temporary storage to reduce allocations
+            var pathCount = path.Count;
+            var pathArray = ArrayPool<AbstractExecutableTest>.Shared.Rent(pathCount);
+            try
+            {
+                var index = 0;
+                foreach (var item in path)
+                {
+                    pathArray[index++] = item;
+                }
+                
+                // Reverse the array
+                Array.Reverse(pathArray, 0, pathCount);
+                
+                var cycleStartIndex = -1;
+                for (int i = 0; i < pathCount; i++)
+                {
+                    if (pathArray[i].TestId == test.TestId)
+                    {
+                        cycleStartIndex = i;
+                        break;
+                    }
+                }
+                
+                var cycleTests = new List<AbstractExecutableTest>(pathCount - cycleStartIndex);
+                for (int i = cycleStartIndex; i < pathCount; i++)
+                {
+                    cycleTests.Add(pathArray[i]);
+                }
+                
+                // Create test details chain from cycle tests
+                var testDetailsChain = new List<TestDetails>(cycleTests.Count);
+                foreach (var cycleTest in cycleTests)
+                {
+                    testDetailsChain.Add(cycleTest.Context.TestDetails);
+                }
+                
+                throw new DependencyConflictException(testDetailsChain);
+            }
+            finally
+            {
+                ArrayPool<AbstractExecutableTest>.Shared.Return(pathArray);
+            }
         }
 
         try

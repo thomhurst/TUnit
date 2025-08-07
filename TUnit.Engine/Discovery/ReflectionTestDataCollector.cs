@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -24,15 +25,24 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     ];
     private static readonly Lock _lock = new();
     private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
+    private static readonly ConcurrentDictionary<Type, MethodInfo[]> _typeMethodsCache = new();
 
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
         // Disable assembly loading event handler to prevent recursive issues
         // This was causing problems when assemblies were loaded during scanning
 
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(ShouldScanAssembly)
-            .ToList();
+        // Optimize: Pre-filter and allocate array instead of LINQ ToList()
+        var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var assembliesList = new List<Assembly>(allAssemblies.Length);
+        foreach (var assembly in allAssemblies)
+        {
+            if (ShouldScanAssembly(assembly))
+            {
+                assembliesList.Add(assembly);
+            }
+        }
+        var assemblies = assembliesList;
 
         Console.WriteLine($"Scanning {assemblies.Count} assemblies for tests...");
 
@@ -69,7 +79,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
                 // Run async method synchronously since we're in parallel processing context
                 var testsInAssembly = DiscoverTestsInAssembly(assembly).ConfigureAwait(false).GetAwaiter().GetResult();
-                resultsByIndex[index] = testsInAssembly.ToList();
+                resultsByIndex[index] = testsInAssembly;
             }
             catch (Exception ex)
             {
@@ -107,16 +117,19 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static IEnumerable<MethodInfo> GetAllTestMethods(Type type)
     {
-        var methods = new List<MethodInfo>();
-        var currentType = type;
-
-        while (currentType != null && currentType != typeof(object))
+        return _typeMethodsCache.GetOrAdd(type, static t =>
         {
-            methods.AddRange(currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly));
-            currentType = currentType.BaseType;
-        }
+            var methods = new List<MethodInfo>();
+            var currentType = t;
 
-        return methods;
+            while (currentType != null && currentType != typeof(object))
+            {
+                methods.AddRange(currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly));
+                currentType = currentType.BaseType;
+            }
+
+            return methods.ToArray();
+        });
     }
 
     private static readonly HashSet<string> ExcludedAssemblyNames =
@@ -259,7 +272,31 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 // Some types might fail to load, but we can still use the ones that loaded successfully
                 Console.WriteLine($"Warning: Some types failed to load from assembly {asm.FullName}: {rtle.Message}");
-                return rtle.Types?.Where(t => t != null).Cast<Type>().ToArray() ?? [];
+                // Optimize: Manual filtering with ArrayPool for better memory efficiency
+                var loadedTypes = rtle.Types;
+                if (loadedTypes == null) return [];
+                
+                // Use ArrayPool for temporary storage to reduce allocations
+                var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
+                try
+                {
+                    var validCount = 0;
+                    foreach (var type in loadedTypes)
+                    {
+                        if (type != null)
+                        {
+                            tempArray[validCount++] = type;
+                        }
+                    }
+                    
+                    var result = new Type[validCount];
+                    Array.Copy(tempArray, result, validCount);
+                    return result;
+                }
+                finally
+                {
+                    ArrayPool<Type>.Shared.Return(tempArray);
+                }
             }
             catch (Exception ex)
             {
@@ -300,16 +337,32 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 if (inheritsTests)
                 {
                     // Get all methods including inherited ones
-                    testMethods = GetAllTestMethods(type)
-                        .Where(m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
-                        .ToArray();
+                    // Optimize: Manual filtering instead of LINQ Where().ToArray()
+                    var allMethods = GetAllTestMethods(type);
+                    var testMethodsList = new List<MethodInfo>();
+                    foreach (var method in allMethods)
+                    {
+                        if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+                        {
+                            testMethodsList.Add(method);
+                        }
+                    }
+                    testMethods = testMethodsList.ToArray();
                 }
                 else
                 {
                     // Only get declared methods
-                    testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
-                        .Where(m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
-                        .ToArray();
+                    // Optimize: Manual filtering instead of LINQ Where().ToArray()
+                    var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                    var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
+                    foreach (var method in declaredMethods)
+                    {
+                        if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+                        {
+                            testMethodsList.Add(method);
+                        }
+                    }
+                    testMethods = testMethodsList.ToArray();
                 }
             }
             catch (Exception ex)
@@ -356,9 +409,17 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         // Get test methods from the generic type definition
-        var testMethods = genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
-            .Where(m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
-            .ToArray();
+        // Optimize: Manual filtering instead of LINQ Where().ToArray()
+        var declaredMethods = genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+        var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
+        foreach (var method in declaredMethods)
+        {
+            if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+            {
+                testMethodsList.Add(method);
+            }
+        }
+        var testMethods = testMethodsList.ToArray();
 
         if (testMethods.Length == 0)
         {
@@ -472,8 +533,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 InstanceFactory = CreateInstanceFactory(testClass)!,
                 TestInvoker = CreateTestInvoker(testClass, testMethod),
                 ParameterCount = GetParametersWithoutCancellationToken(testMethod).Length,
-                ParameterTypes = GetParametersWithoutCancellationToken(testMethod).Select(p => p.ParameterType).ToArray(),
-                TestMethodParameterTypes = GetParametersWithoutCancellationToken(testMethod).Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
+                ParameterTypes = GetParameterTypesOptimized(testMethod),
+                TestMethodParameterTypes = GetParameterTypeNamesOptimized(testMethod),
                 FilePath = ExtractFilePath(testMethod),
                 LineNumber = ExtractLineNumber(testMethod),
                 MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(testClass, testMethod),
@@ -612,10 +673,69 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         // Check if last parameter is CancellationToken and exclude it
         if (parameters.Length > 0 && parameters[^1].ParameterType == typeof(CancellationToken))
         {
-            return parameters.Take(parameters.Length - 1).ToArray();
+            // Optimize: Manual array copy instead of LINQ Take().ToArray()
+            var result = new ParameterInfo[parameters.Length - 1];
+            Array.Copy(parameters, result, parameters.Length - 1);
+            return result;
         }
 
         return parameters;
+    }
+
+    /// <summary>
+    /// Optimized method to get parameter types without LINQ allocations
+    /// </summary>
+    private static Type[] GetParameterTypesOptimized(MethodInfo method)
+    {
+        var parameters = GetParametersWithoutCancellationToken(method);
+        var types = new Type[parameters.Length];
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            types[i] = parameters[i].ParameterType;
+        }
+        return types;
+    }
+
+    /// <summary>
+    /// Optimized method to get parameter type names without LINQ allocations
+    /// </summary>
+    private static string[] GetParameterTypeNamesOptimized(MethodInfo method)
+    {
+        var parameters = GetParametersWithoutCancellationToken(method);
+        var typeNames = new string[parameters.Length];
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            typeNames[i] = parameters[i].ParameterType.FullName ?? parameters[i].ParameterType.Name;
+        }
+        return typeNames;
+    }
+
+    /// <summary>
+    /// Optimized method to get parameter types directly without LINQ allocations
+    /// </summary>
+    private static Type[] GetParameterTypesDirectOptimized(MethodInfo method)
+    {
+        var parameters = method.GetParameters();
+        var types = new Type[parameters.Length];
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            types[i] = parameters[i].ParameterType;
+        }
+        return types;
+    }
+
+    /// <summary>
+    /// Optimized method to get parameter type names directly without LINQ allocations
+    /// </summary>
+    private static string[] GetParameterTypeNamesDirectOptimized(MethodInfo method)
+    {
+        var parameters = method.GetParameters();
+        var typeNames = new string[parameters.Length];
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            typeNames[i] = parameters[i].ParameterType.FullName ?? parameters[i].ParameterType.Name;
+        }
+        return typeNames;
     }
 
     private static string? ExtractFilePath(MethodInfo method)
@@ -1079,9 +1199,17 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         // Also discover dynamic test builder methods via reflection
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(ShouldScanAssembly)
-            .ToList();
+        // Optimize: Pre-filter and allocate array instead of LINQ ToList()
+        var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var assembliesList = new List<Assembly>(allAssemblies.Length);
+        foreach (var assembly in allAssemblies)
+        {
+            if (ShouldScanAssembly(assembly))
+            {
+                assembliesList.Add(assembly);
+            }
+        }
+        var assemblies = assembliesList;
 
         foreach (var assembly in assemblies)
         {
@@ -1099,11 +1227,19 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
             foreach (var type in types.Where(t => t.IsClass && !IsCompilerGenerated(t)))
             {
-                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                // Optimize: Manual filtering instead of LINQ Where().ToArray()
+                var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                var methodsList = new List<MethodInfo>(declaredMethods.Length);
+                foreach (var method in declaredMethods)
+                {
 #pragma warning disable TUnitWIP0001
-                    .Where(m => m.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) && !m.IsAbstract)
+                    if (method.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) && !method.IsAbstract)
 #pragma warning restore TUnitWIP0001
-                    .ToArray();
+                    {
+                        methodsList.Add(method);
+                    }
+                }
+                var methods = methodsList.ToArray();
 
                 foreach (var method in methods)
                 {
@@ -1210,8 +1346,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             InstanceFactory = CreateDynamicInstanceFactory(result.TestClassType, result.TestClassArguments)!,
             TestInvoker = CreateDynamicTestInvoker(result),
             ParameterCount = result.TestMethodArguments?.Length ?? 0,
-            ParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType).ToArray(),
-            TestMethodParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
+            ParameterTypes = GetParameterTypesDirectOptimized(methodInfo),
+            TestMethodParameterTypes = GetParameterTypeNamesDirectOptimized(methodInfo),
             FilePath = null,
             LineNumber = null,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(result.TestClassType, methodInfo),

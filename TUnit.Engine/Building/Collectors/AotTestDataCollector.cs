@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Reflection;
 using TUnit.Core;
 using TUnit.Engine.Building.Interfaces;
 
@@ -103,8 +104,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             MaxDegreeOfParallelism = Environment.ProcessorCount
         };
 
-        Parallel.ForEach(dynamicSourcesList.Select((source, index) => new { source, index }),
-            parallelOptions, item =>
+        await Task.Run(() =>
+        {
+            Parallel.ForEach(dynamicSourcesList.Select((source, index) => new { source, index }),
+                parallelOptions, item =>
             {
                 var index = item.index;
                 var source = item.source;
@@ -128,6 +131,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                     resultsByIndex[index] = [failedTest];
                 }
             });
+        });
 
         // Reassemble results in original order
         for (var i = 0; i < dynamicSourcesList.Count; i++)

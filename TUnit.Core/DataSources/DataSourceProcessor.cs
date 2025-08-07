@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
@@ -38,7 +39,35 @@ public static class DataSourceProcessor
         
         if (data != null)
         {
-            items.Add(data.Cast<object?>().ToArray());
+            // Optimize: Use ArrayPool for large arrays to reduce GC pressure
+            if (data.Length > 100) // Only use ArrayPool for larger arrays
+            {
+                var pooledArray = ArrayPool<object?>.Shared.Rent(data.Length);
+                try
+                {
+                    for (int i = 0; i < data.Length; i++)
+                    {
+                        pooledArray[i] = data[i];
+                    }
+                    var result = new object?[data.Length];
+                    Array.Copy(pooledArray, result, data.Length);
+                    items.Add(result);
+                }
+                finally
+                {
+                    ArrayPool<object?>.Shared.Return(pooledArray);
+                }
+            }
+            else
+            {
+                // For small arrays, direct allocation is more efficient
+                var array = new object?[data.Length];
+                for (int i = 0; i < data.Length; i++)
+                {
+                    array[i] = data[i];
+                }
+                items.Add(array);
+            }
         }
         
         return items;
@@ -269,7 +298,10 @@ public static class DataSourceProcessor
             
             if (items.Count > 0)
             {
-                yield return items.ToArray();
+                // Optimize: Use pre-sized array instead of ToArray()
+                var itemArray = new object?[items.Count];
+                items.CopyTo(itemArray, 0);
+                yield return itemArray;
             }
             yield break;
         }
@@ -296,7 +328,12 @@ public static class DataSourceProcessor
             {
                 var tupleType = item.GetType();
                 var fields = GetTupleFields(tupleType);
-                var values = fields.Select(f => f.GetValue(item)).ToArray();
+                // Optimize: Pre-allocate array instead of LINQ Select().ToArray()
+                var values = new object?[fields.Length];
+                for (int i = 0; i < fields.Length; i++)
+                {
+                    values[i] = fields[i].GetValue(item);
+                }
                 yield return values;
             }
         }
@@ -312,7 +349,13 @@ public static class DataSourceProcessor
     private static object?[] ProcessSingleTuple(object result, Type resultType)
     {
         var fields = GetTupleFields(resultType);
-        return fields.Select(f => f.GetValue(result)).ToArray();
+        // Optimize: Pre-allocate array instead of LINQ Select().ToArray()
+        var values = new object?[fields.Length];
+        for (int i = 0; i < fields.Length; i++)
+        {
+            values[i] = fields[i].GetValue(result);
+        }
+        return values;
     }
 
     #endregion

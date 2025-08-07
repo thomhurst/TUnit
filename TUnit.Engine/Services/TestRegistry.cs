@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
@@ -128,22 +129,22 @@ internal sealed class TestRegistry : ITestRegistry
             TestName = testName,
             TestClassType = result.TestClassType,
             TestMethodName = methodInfo.Name,
-            Dependencies = result.Attributes.OfType<DependsOnAttribute>().Select(a => a.ToTestDependency()).ToArray(),
+            Dependencies = GetDependenciesOptimized(result.Attributes),
             DataSources = [],
             ClassDataSources = [],
             PropertyDataSources = [],
             InstanceFactory = CreateRuntimeInstanceFactory(result.TestClassType, result.TestClassArguments)!,
             TestInvoker = CreateRuntimeTestInvoker(result),
             ParameterCount = result.TestMethodArguments?.Length ?? 0,
-            ParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType).ToArray(),
-            TestMethodParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
+            ParameterTypes = GetParameterTypesOptimized(methodInfo),
+            TestMethodParameterTypes = GetParameterTypeNamesOptimized(methodInfo),
             FilePath = null,
             LineNumber = null,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(result.TestClassType, methodInfo),
             GenericTypeInfo = null,
             GenericMethodInfo = null,
             GenericMethodTypeArguments = null,
-            AttributeFactory = () => result.Attributes.ToArray(),
+            AttributeFactory = () => GetAttributesOptimized(result.Attributes),
             PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(result.TestClassType)
         });
     }
@@ -263,5 +264,63 @@ internal sealed class TestRegistry : ITestRegistry
                 };
             };
         }
+    }
+
+    /// <summary>
+    /// Optimized method to get dependencies without LINQ allocations
+    /// </summary>
+    private static TestDependency[] GetDependenciesOptimized(ICollection<Attribute> attributes)
+    {
+        var dependencies = new List<TestDependency>(attributes.Count);
+        foreach (var attr in attributes)
+        {
+            if (attr is DependsOnAttribute dependsOn)
+            {
+                dependencies.Add(dependsOn.ToTestDependency());
+            }
+        }
+        return dependencies.ToArray();
+    }
+
+    /// <summary>
+    /// Optimized method to get parameter types without LINQ allocations
+    /// </summary>
+    private static Type[] GetParameterTypesOptimized(MethodInfo method)
+    {
+        var parameters = method.GetParameters();
+        var types = new Type[parameters.Length];
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            types[i] = parameters[i].ParameterType;
+        }
+        return types;
+    }
+
+    /// <summary>
+    /// Optimized method to get parameter type names without LINQ allocations
+    /// </summary>
+    private static string[] GetParameterTypeNamesOptimized(MethodInfo method)
+    {
+        var parameters = method.GetParameters();
+        var typeNames = new string[parameters.Length];
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            typeNames[i] = parameters[i].ParameterType.FullName ?? parameters[i].ParameterType.Name;
+        }
+        return typeNames;
+    }
+
+    /// <summary>
+    /// Optimized method to convert attributes to array without LINQ allocations
+    /// </summary>
+    private static Attribute[] GetAttributesOptimized(ICollection<Attribute> attributes)
+    {
+        var result = new Attribute[attributes.Count];
+        var index = 0;
+        foreach (var attr in attributes)
+        {
+            result[index++] = attr;
+        }
+        return result;
     }
 }
