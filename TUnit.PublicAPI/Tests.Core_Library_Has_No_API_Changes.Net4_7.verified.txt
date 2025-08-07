@@ -2211,7 +2211,7 @@ namespace .
     }
     public interface ITestSource
     {
-        .<.<.TestMetadata>> GetTestsAsync(string testSessionId);
+        .<.TestMetadata> GetTestsAsync(string testSessionId, .CancellationToken cancellationToken = default);
     }
     public sealed class PropertyInjectionMetadata
     {
