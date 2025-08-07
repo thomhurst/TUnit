@@ -78,8 +78,15 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
 
         // Report test started
         await _tunitMessageBus.InProgress(test.Context);
+
         try
         {
+            if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
+            {
+                var instance = await test.CreateInstanceAsync();
+                test.Context.TestDetails.ClassInstance = instance;
+            }
+
             // Execute class/assembly hooks on first test
             var executionContext = await _hookOrchestrator.OnTestStartingAsync(test, cancellationToken);
 

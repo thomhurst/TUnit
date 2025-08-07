@@ -74,18 +74,13 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.StartTime = DateTimeOffset.Now;
             test.State = TestState.Running;
 
-        if (!string.IsNullOrEmpty(test.Context.SkipReason))
+        if (!string.IsNullOrEmpty(test.Context.SkipReason)
+            || test.Context.TestDetails.ClassInstance is SkippedTestInstance)
         {
             return await HandleSkippedTestInternalAsync(test, cancellationToken);
         }
 
-        if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
-        {
-            return await HandleSkippedTestInternalAsync(test, cancellationToken);
-        }
-
-        var instance = await test.CreateInstanceAsync();
-        test.Context.TestDetails.ClassInstance = instance;
+        var instance = test.Context.TestDetails.ClassInstance;
 
         await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
         await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
@@ -288,7 +283,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             try
             {
                 await hook(context, cancellationToken);
-                
+
                 // RestoreExecutionContext after each hook to ensure AsyncLocal values flow correctly
                 // when AddAsyncLocalValues() is called in hooks
                 context.RestoreExecutionContext();
@@ -304,7 +299,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
     private async Task ExecuteAfterTestHooksAsync(IReadOnlyList<Func<TestContext, CancellationToken, Task>> hooks, TestContext context, CancellationToken cancellationToken)
     {
         var exceptions = new List<Exception>();
-        
+
         // Restore contexts once at the beginning
         RestoreHookContexts(context);
 
