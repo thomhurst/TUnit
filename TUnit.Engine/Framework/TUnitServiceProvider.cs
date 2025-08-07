@@ -78,6 +78,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         MessageBus = Register(new TUnitMessageBus(
             extension,
             CommandLineOptions,
+            VerbosityService,
             frameworkServiceProvider,
             context));
 
