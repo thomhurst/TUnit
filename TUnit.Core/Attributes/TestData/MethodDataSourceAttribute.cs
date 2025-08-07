@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Reflection;
 using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
@@ -19,6 +21,52 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         | System.Reflection.BindingFlags.Static
         | System.Reflection.BindingFlags.Instance
         | System.Reflection.BindingFlags.FlattenHierarchy;
+
+    // Cache for compiled method delegates to avoid repeated reflection
+    private static readonly ConcurrentDictionary<MethodCacheKey, Func<object?, object?[], object?>> MethodDelegateCache = new();
+    
+    // Struct key for efficient dictionary lookups
+    private readonly struct MethodCacheKey : IEquatable<MethodCacheKey>
+    {
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
+        public readonly Type Type;
+        public readonly string MethodName;
+        public readonly Type[] ArgumentTypes;
+        private readonly int _hashCode;
+
+        public MethodCacheKey(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type, 
+            string methodName, 
+            Type[] argumentTypes)
+        {
+            Type = type;
+            MethodName = methodName;
+            ArgumentTypes = argumentTypes;
+            
+            // Pre-compute hash code for performance
+            unchecked
+            {
+                var hash = 17;
+                hash = hash * 31 + type.GetHashCode();
+                hash = hash * 31 + methodName.GetHashCode();
+                foreach (var argType in argumentTypes)
+                {
+                    hash = hash * 31 + (argType?.GetHashCode() ?? 0);
+                }
+                _hashCode = hash;
+            }
+        }
+
+        public bool Equals(MethodCacheKey other)
+        {
+            return Type == other.Type && 
+                   MethodName == other.MethodName && 
+                   ArgumentTypes.SequenceEqual(other.ArgumentTypes);
+        }
+
+        public override bool Equals(object? obj) => obj is MethodCacheKey key && Equals(key);
+        public override int GetHashCode() => _hashCode;
+    }
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
     public Type? ClassProvidingDataSource { get; }
@@ -89,25 +137,38 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             throw new InvalidOperationException($"Could not determine target type for method '{MethodNameProvidingDataSource}'. This may occur during static property initialization without a test context.");
         }
 
+        // Create cache key for delegate lookup
+        var argumentTypes = Arguments.Select(a => a?.GetType() ?? typeof(object)).ToArray();
+        var cacheKey = new MethodCacheKey(targetType, MethodNameProvidingDataSource, argumentTypes);
+        
+        // Get or create cached delegate
+        var methodDelegate = MethodDelegateCache.GetOrAdd(cacheKey, key => 
+        {
+            var methodInfo = key.Type.GetMethods(BindingFlags).SingleOrDefault(x => x.Name == key.MethodName
+                    && x.GetParameters().Select(p => p.ParameterType).SequenceEqual(key.ArgumentTypes))
+                ?? key.Type.GetMethod(key.MethodName, BindingFlags);
+                
+            if (methodInfo is null)
+            {
+                throw new InvalidOperationException($"Method '{key.MethodName}' not found in class '{key.Type.Name}' with the specified arguments.");
+            }
+            
+            // Compile method to delegate for faster invocation
+            return CompileMethodDelegate(methodInfo);
+        });
+
+        // Determine if it's an instance method (cached in delegate)
+        object? instance = null;
         var methodInfo = targetType.GetMethods(BindingFlags).SingleOrDefault(x => x.Name == MethodNameProvidingDataSource
                 && x.GetParameters().Select(p => p.ParameterType).SequenceEqual(Arguments.Select(a => a?.GetType())))
-            ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags)
-            ?? throw new InvalidOperationException(
-                $"Method '{MethodNameProvidingDataSource}' not found in class '{targetType.Name}' with the specified arguments.");
-
-        if (methodInfo is null)
-        {
-            throw new InvalidOperationException($"Method '{MethodNameProvidingDataSource}' not found in class '{targetType.Name}'.");
-        }
-
-        // Determine if it's an instance method
-        object? instance = null;
-        if (!methodInfo.IsStatic)
+            ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
+            
+        if (methodInfo != null && !methodInfo.IsStatic)
         {
             instance = dataGeneratorMetadata.TestClassInstance ?? Activator.CreateInstance(targetType);
         }
 
-        var methodResult = methodInfo.Invoke(instance, Arguments);
+        var methodResult = methodDelegate(instance, Arguments);
 
         // Handle different return types
         if (methodResult == null)
@@ -217,5 +278,46 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
 
         return null;
+    }
+    
+    // Compile method to delegate for fast invocation without reflection
+    private static Func<object?, object?[], object?> CompileMethodDelegate(MethodInfo methodInfo)
+    {
+        var instanceParam = Expression.Parameter(typeof(object), "instance");
+        var argumentsParam = Expression.Parameter(typeof(object[]), "arguments");
+        
+        var parameters = methodInfo.GetParameters();
+        var parameterExpressions = new Expression[parameters.Length];
+        
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            var arrayAccess = Expression.ArrayIndex(argumentsParam, Expression.Constant(i));
+            parameterExpressions[i] = Expression.Convert(arrayAccess, parameters[i].ParameterType);
+        }
+        
+        Expression methodCall;
+        if (methodInfo.IsStatic)
+        {
+            methodCall = Expression.Call(methodInfo, parameterExpressions);
+        }
+        else
+        {
+            var typedInstance = Expression.Convert(instanceParam, methodInfo.DeclaringType!);
+            methodCall = Expression.Call(typedInstance, methodInfo, parameterExpressions);
+        }
+        
+        // Handle void methods
+        if (methodInfo.ReturnType == typeof(void))
+        {
+            var block = Expression.Block(methodCall, Expression.Constant(null, typeof(object)));
+            return Expression.Lambda<Func<object?, object?[], object?>>(block, instanceParam, argumentsParam).Compile();
+        }
+        
+        // Convert return value to object
+        var returnValue = methodInfo.ReturnType.IsValueType 
+            ? Expression.Convert(methodCall, typeof(object))
+            : (Expression)methodCall;
+            
+        return Expression.Lambda<Func<object?, object?[], object?>>(returnValue, instanceParam, argumentsParam).Compile();
     }
 }

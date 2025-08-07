@@ -58,89 +58,89 @@ internal sealed class TestBuilderPipeline
             {
                 // Check if this is a dynamic test metadata that should bypass normal test building
                 if (metadata is IDynamicTestMetadata)
-                {
-                    // Get attributes first
-                    var attributes = metadata.AttributeFactory?.Invoke() ?? [];
-
-                    // Extract repeat count from attributes
-                    var filteredAttributes = ScopedAttributeFilter.FilterScopedAttributes(attributes);
-                    var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
-                    var repeatCount = repeatAttr?.Times ?? 0;
-
-                    // Dynamic tests need to honor attributes like RepeatCount, RetryCount, etc.
-                    // We'll create multiple test instances based on RepeatCount
-                    for (var repeatIndex = 0; repeatIndex < repeatCount + 1; repeatIndex++)
                     {
-                        // Create a simple TestData for ID generation
-                        var testData = new TestBuilder.TestData
+                        // Get attributes first
+                        var attributes = metadata.AttributeFactory?.Invoke() ?? [];
+
+                        // Extract repeat count from attributes
+                        var filteredAttributes = ScopedAttributeFilter.FilterScopedAttributes(attributes);
+                        var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
+                        var repeatCount = repeatAttr?.Times ?? 0;
+
+                        // Dynamic tests need to honor attributes like RepeatCount, RetryCount, etc.
+                        // We'll create multiple test instances based on RepeatCount
+                        for (var repeatIndex = 0; repeatIndex < repeatCount + 1; repeatIndex++)
                         {
-                            TestClassInstance = null!,
-                            ClassDataSourceAttributeIndex = 0,
-                            ClassDataLoopIndex = 0,
-                            ClassData = [],
-                            MethodDataSourceAttributeIndex = 0,
-                            MethodDataLoopIndex = 0,
-                            MethodData = [],
-                            RepeatIndex = repeatIndex,
-                            ResolvedClassGenericArguments = Type.EmptyTypes,
-                            ResolvedMethodGenericArguments = Type.EmptyTypes
-                        };
+                            // Create a simple TestData for ID generation
+                            var testData = new TestBuilder.TestData
+                            {
+                                TestClassInstance = null!,
+                                ClassDataSourceAttributeIndex = 0,
+                                ClassDataLoopIndex = 0,
+                                ClassData = [],
+                                MethodDataSourceAttributeIndex = 0,
+                                MethodDataLoopIndex = 0,
+                                MethodData = [],
+                                RepeatIndex = repeatIndex,
+                                ResolvedClassGenericArguments = Type.EmptyTypes,
+                                ResolvedMethodGenericArguments = Type.EmptyTypes
+                            };
 
-                        var testId = TestIdentifierService.GenerateTestId(metadata, testData);
-                        var displayName = repeatCount > 0
-                            ? $"{metadata.TestName} (Repeat {repeatIndex + 1}/{repeatCount + 1})"
-                            : metadata.TestName;
+                            var testId = TestIdentifierService.GenerateTestId(metadata, testData);
+                            var displayName = repeatCount > 0
+                                ? $"{metadata.TestName} (Repeat {repeatIndex + 1}/{repeatCount + 1})"
+                                : metadata.TestName;
 
-                        // Create TestDetails for dynamic tests
-                        var testDetails = new TestDetails
-                        {
-                            TestId = testId,
-                            TestName = metadata.TestName,
-                            ClassType = metadata.TestClassType,
-                            MethodName = metadata.TestMethodName,
-                            ClassInstance = null!,
-                            TestMethodArguments = [],
-                            TestClassArguments = [],
-                            TestFilePath = metadata.FilePath ?? "Unknown",
-                            TestLineNumber = metadata.LineNumber ?? 0,
-                            TestMethodParameterTypes = metadata.ParameterTypes,
-                            ReturnType = typeof(Task),
-                            MethodMetadata = metadata.MethodMetadata,
-                            Attributes = attributes
-                            // Don't set Timeout and RetryLimit here - let discovery event receivers set them
-                        };
+                            // Create TestDetails for dynamic tests
+                            var testDetails = new TestDetails
+                            {
+                                TestId = testId,
+                                TestName = metadata.TestName,
+                                ClassType = metadata.TestClassType,
+                                MethodName = metadata.TestMethodName,
+                                ClassInstance = null!,
+                                TestMethodArguments = [],
+                                TestClassArguments = [],
+                                TestFilePath = metadata.FilePath ?? "Unknown",
+                                TestLineNumber = metadata.LineNumber ?? 0,
+                                TestMethodParameterTypes = metadata.ParameterTypes,
+                                ReturnType = typeof(Task),
+                                MethodMetadata = metadata.MethodMetadata,
+                                Attributes = attributes
+                                // Don't set Timeout and RetryLimit here - let discovery event receivers set them
+                            };
 
-                        var context = _contextProvider.CreateTestContext(
-                            metadata.TestName,
-                            metadata.TestClassType,
-                            new TestBuilderContext { TestMetadata = metadata.MethodMetadata },
-                            CancellationToken.None);
+                            var context = _contextProvider.CreateTestContext(
+                                metadata.TestName,
+                                metadata.TestClassType,
+                                new TestBuilderContext { TestMetadata = metadata.MethodMetadata },
+                                CancellationToken.None);
 
-                        // Set the TestDetails on the context
-                        context.TestDetails = testDetails;
+                            // Set the TestDetails on the context
+                            context.TestDetails = testDetails;
 
-                        // Invoke discovery event receivers to properly handle all attribute behaviors
-                        await InvokeDiscoveryEventReceiversAsync(context);
+                            // Invoke discovery event receivers to properly handle all attribute behaviors
+                            await InvokeDiscoveryEventReceiversAsync(context);
 
-                        var executableTestContext = new ExecutableTestCreationContext
-                        {
-                            TestId = testId,
-                            DisplayName = displayName,
-                            Arguments = [],
-                            ClassArguments = [],
-                            Context = context
-                        };
+                            var executableTestContext = new ExecutableTestCreationContext
+                            {
+                                TestId = testId,
+                                DisplayName = displayName,
+                                Arguments = [],
+                                ClassArguments = [],
+                                Context = context
+                            };
 
-                        var executableTest = metadata.CreateExecutableTestFactory(executableTestContext, metadata);
-                        executableTests.Add(executableTest);
+                            var executableTest = metadata.CreateExecutableTestFactory(executableTestContext, metadata);
+                            executableTests.Add(executableTest);
+                        }
                     }
-                }
-                else
-                {
-                    // Normal test metadata goes through the standard test builder
-                    var testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(metadata);
-                    executableTests.AddRange(testsFromMetadata);
-                }
+                    else
+                    {
+                        // Normal test metadata goes through the standard test builder
+                        var testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(metadata);
+                        executableTests.AddRange(testsFromMetadata);
+                    }
             }
             catch (Exception ex)
             {

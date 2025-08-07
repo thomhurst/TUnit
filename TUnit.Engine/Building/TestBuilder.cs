@@ -126,11 +126,11 @@ internal sealed class TestBuilder : ITestBuilder
                                        testClassInstance: null, // Never pass instance for class data sources (circular dependency)
                                        classInstanceArguments: null,
                                        contextAccessor
-                                   )))
+                                   )).ConfigureAwait(false))
                 {
                     classDataLoopIndex++;
 
-                    var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+                    var classData = DataUnwrapper.Unwrap(await classDataFactory().ConfigureAwait(false) ?? []);
 
                     var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
 
@@ -196,14 +196,14 @@ internal sealed class TestBuilder : ITestBuilder
                                                testClassInstance: methodDataSource is IAccessesInstanceData ? instanceForMethodDataSources : null,
                                                classInstanceArguments: classData,
                                                contextAccessor
-                                           )))
+                                           )).ConfigureAwait(false))
                         {
                             methodDataLoopIndex++;
 
                             for (var i = 0; i < repeatCount + 1; i++)
                             {
-                                classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
-                                var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
+                                classData = DataUnwrapper.Unwrap(await classDataFactory().ConfigureAwait(false) ?? []);
+                                var methodData = DataUnwrapper.Unwrap(await methodDataFactory().ConfigureAwait(false) ?? []);
 
                                 // For concrete generic instantiations, check if the data is compatible with the expected types
                                 if (metadata.GenericMethodTypeArguments is { Length: > 0 })

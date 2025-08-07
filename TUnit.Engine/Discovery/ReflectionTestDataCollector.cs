@@ -24,6 +24,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     ];
     private static readonly Lock _lock = new();
     private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
+    private static readonly ConcurrentDictionary<Type, MethodInfo[]> _typeMethodsCache = new();
+    private static readonly ConcurrentDictionary<(Type, string), MethodInfo?> _methodLookupCache = new();
 
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
@@ -110,16 +112,20 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static IEnumerable<MethodInfo> GetAllTestMethods(Type type)
     {
-        var methods = new List<MethodInfo>();
-        var currentType = type;
-
-        while (currentType != null && currentType != typeof(object))
+        // Cache method discovery per type
+        return _typeMethodsCache.GetOrAdd(type, t =>
         {
-            methods.AddRange(currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly));
-            currentType = currentType.BaseType;
-        }
+            var methods = new List<MethodInfo>();
+            var currentType = t;
 
-        return methods;
+            while (currentType != null && currentType != typeof(object))
+            {
+                methods.AddRange(currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly));
+                currentType = currentType.BaseType;
+            }
+
+            return methods.ToArray();
+        });
     }
 
     private static readonly HashSet<string> ExcludedAssemblyNames =

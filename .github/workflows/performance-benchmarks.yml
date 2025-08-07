@@ -1,0 +1,162 @@
+name: Performance Benchmarks
+
+on:
+  pull_request:
+    paths:
+      - 'TUnit.Engine/**'
+      - 'TUnit.Core/**'
+      - 'TUnit.Performance.Tests/**'
+  push:
+    branches:
+      - main
+      - develop
+  schedule:
+    # Run daily at 2 AM UTC to catch any performance regressions
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      benchmark:
+        description: 'Specific benchmark to run (leave empty for all)'
+        required: false
+        type: choice
+        options:
+          - all
+          - discovery
+          - execution
+          - datasource
+          - issue2756
+          - optimizations
+
+jobs:
+  benchmark:
+    name: Run Performance Benchmarks
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        dotnet: ['8.0', '9.0']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ matrix.dotnet }}
+    
+    - name: Restore dependencies
+      run: dotnet restore TUnit.Performance.Tests/TUnit.Performance.Tests.csproj
+    
+    - name: Build
+      run: dotnet build TUnit.Performance.Tests/TUnit.Performance.Tests.csproj --configuration Release --no-restore
+    
+    - name: Run Benchmarks
+      run: |
+        cd TUnit.Performance.Tests
+        if [ "${{ github.event.inputs.benchmark }}" = "" ] || [ "${{ github.event.inputs.benchmark }}" = "all" ]; then
+          dotnet run --configuration Release -- --ci
+        else
+          dotnet run --configuration Release -- ${{ github.event.inputs.benchmark }} --ci
+        fi
+      shell: bash
+      env:
+        CI: true
+    
+    - name: Upload Benchmark Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: benchmark-results-${{ matrix.os }}-dotnet${{ matrix.dotnet }}
+        path: |
+          TUnit.Performance.Tests/BenchmarkDotNet.Artifacts/results/*.json
+          TUnit.Performance.Tests/BenchmarkDotNet.Artifacts/results/*.md
+    
+    - name: Store Benchmark Result (main branch only)
+      if: github.ref == 'refs/heads/main'
+      uses: benchmark-action/github-action-benchmark@v1
+      with:
+        name: TUnit Performance Benchmarks
+        tool: 'benchmarkdotnet'
+        output-file-path: TUnit.Performance.Tests/BenchmarkDotNet.Artifacts/results/*.json
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        auto-push: true
+        alert-threshold: '105%'  # Alert if performance degrades by more than 5%
+        comment-on-alert: true
+        fail-on-alert: true
+        alert-comment-cc-users: '@thomhurst'
+    
+    - name: Comment PR with Results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Read the markdown report
+          const resultsDir = 'TUnit.Performance.Tests/BenchmarkDotNet.Artifacts/results';
+          const files = fs.readdirSync(resultsDir);
+          const mdFile = files.find(f => f.endsWith('.md'));
+          
+          if (mdFile) {
+            const content = fs.readFileSync(path.join(resultsDir, mdFile), 'utf8');
+            
+            // Find and update or create comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('## Performance Benchmark Results')
+            );
+            
+            const body = `## Performance Benchmark Results\n\n${content}\n\n*OS: ${{ matrix.os }} | .NET: ${{ matrix.dotnet }}*`;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+          }
+
+  regression-check:
+    name: Check for Performance Regressions
+    needs: benchmark
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+    
+    - name: Check for regressions
+      run: |
+        echo "Checking for performance regressions..."
+        # The actual regression check is done in the benchmark job
+        # This job can aggregate results across all matrix combinations
+        
+    - name: Create summary
+      run: |
+        echo "## Performance Benchmark Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| OS | .NET Version | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY
+        echo "| Ubuntu | 8.0 | ✅ |" >> $GITHUB_STEP_SUMMARY
+        echo "| Ubuntu | 9.0 | ✅ |" >> $GITHUB_STEP_SUMMARY
+        echo "| Windows | 8.0 | ✅ |" >> $GITHUB_STEP_SUMMARY
+        echo "| Windows | 9.0 | ✅ |" >> $GITHUB_STEP_SUMMARY

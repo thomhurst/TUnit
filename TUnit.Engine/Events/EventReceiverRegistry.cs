@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Interfaces;
 
@@ -25,26 +26,20 @@ internal sealed class EventReceiverRegistry
     }
     
     private volatile EventTypes _registeredEvents = EventTypes.None;
-    private readonly Dictionary<Type, object[]> _receiversByType = new();
-    private readonly ReaderWriterLockSlim _lock = new();
+    // Use ConcurrentDictionary with arrays for lock-free thread-safe access
+    // Arrays are immutable once created, providing thread-safety
+    private readonly ConcurrentDictionary<Type, object[]> _receiversByType = new();
     
     /// <summary>
     /// Register event receivers from a collection of objects
     /// </summary>
     public void RegisterReceivers(IEnumerable<object> objects)
     {
-        _lock.EnterWriteLock();
-        try
+        // Process in parallel for better performance with large collections
+        Parallel.ForEach(objects, obj =>
         {
-            foreach (var obj in objects)
-            {
-                RegisterReceiverInternal(obj);
-            }
-        }
-        finally
-        {
-            _lock.ExitWriteLock();
-        }
+            RegisterReceiverInternal(obj);
+        });
     }
     
     /// <summary>
@@ -52,15 +47,7 @@ internal sealed class EventReceiverRegistry
     /// </summary>
     public void RegisterReceiver(object receiver)
     {
-        _lock.EnterWriteLock();
-        try
-        {
-            RegisterReceiverInternal(receiver);
-        }
-        finally
-        {
-            _lock.ExitWriteLock();
-        }
+        RegisterReceiverInternal(receiver);
     }
     
     private void RegisterReceiverInternal(object receiver)
@@ -86,17 +73,18 @@ internal sealed class EventReceiverRegistry
         if (receiver is T)
         {
             var interfaceType = typeof(T);
-            if (_receiversByType.TryGetValue(interfaceType, out var existing))
-            {
-                var newArray = new object[existing.Length + 1];
-                existing.CopyTo(newArray, 0);
-                newArray[^1] = receiver;
-                _receiversByType[interfaceType] = newArray;
-            }
-            else
-            {
-                _receiversByType[interfaceType] = [receiver];
-            }
+            // Use AddOrUpdate for thread-safe atomic updates
+            _receiversByType.AddOrUpdate(interfaceType,
+                // Add factory: create new array with single item
+                _ => new[] { receiver },
+                // Update factory: create new array with appended item
+                (_, existing) => 
+                {
+                    var newArray = new object[existing.Length + 1];
+                    Array.Copy(existing, newArray, existing.Length);
+                    newArray[existing.Length] = receiver;
+                    return newArray;
+                });
         }
     }
     
@@ -141,26 +129,18 @@ internal sealed class EventReceiverRegistry
     /// </summary>
     public T[] GetReceiversOfType<T>() where T : class
     {
-        _lock.EnterReadLock();
-        try
+        // Lock-free read from ConcurrentDictionary
+        if (_receiversByType.TryGetValue(typeof(T), out var receivers))
         {
-            if (_receiversByType.TryGetValue(typeof(T), out var receivers))
+            // Cast array to specific type array
+            var typedArray = new T[receivers.Length];
+            for (var i = 0; i < receivers.Length; i++)
             {
-                // Cast array to specific type
-                var typedArray = new T[receivers.Length];
-                for (var i = 0; i < receivers.Length; i++)
-                {
-                    typedArray[i] = (T)receivers[i];
-                }
-                return typedArray;
+                typedArray[i] = (T)receivers[i];
             }
-            return [
-            ];
+            return typedArray;
         }
-        finally
-        {
-            _lock.ExitReadLock();
-        }
+        return Array.Empty<T>();
     }
     
     private void UpdateEventFlags(object receiver)
@@ -210,6 +190,6 @@ internal sealed class EventReceiverRegistry
     
     public void Dispose()
     {
-        _lock?.Dispose();
+        // No locks to dispose anymore
     }
 }
