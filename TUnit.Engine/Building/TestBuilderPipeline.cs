@@ -69,11 +69,11 @@ internal sealed class TestBuilderPipeline
 
     private async IAsyncEnumerable<TestMetadata> ToAsyncEnumerable(IEnumerable<TestMetadata> metadata)
     {
+        await Task.Yield(); // Yield control once at the start to maintain async context
         foreach (var item in metadata)
         {
             yield return item;
         }
-        await Task.CompletedTask; // Suppress async warning
     }
 
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(IEnumerable<TestMetadata> testMetadata)

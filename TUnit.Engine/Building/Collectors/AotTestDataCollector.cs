@@ -191,27 +191,29 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
         Justification = "Dynamic tests require dynamic code generation")]
     private static Func<Type[], object?[], object>? CreateAotDynamicInstanceFactory(Type testClass, object?[]? predefinedClassArgs)
     {
-        // For dynamic tests, we always use the predefined args (or empty array if null)
-        var classArgs = predefinedClassArgs ?? [];
+        // Check if we have predefined args to use as defaults
+        var hasPredefinedArgs = predefinedClassArgs != null && predefinedClassArgs.Length > 0;
 
         return (typeArgs, args) =>
         {
-            // Always use the predefined class args, ignoring the args parameter
+            // Use provided args if available, otherwise fall back to predefined args
+            var effectiveArgs = (args != null && args.Length > 0) ? args : (predefinedClassArgs ?? []);
+            
             if (testClass.IsGenericTypeDefinition && typeArgs.Length > 0)
             {
                 var closedType = testClass.MakeGenericType(typeArgs);
-                if (classArgs.Length == 0)
+                if (effectiveArgs.Length == 0)
                 {
                     return Activator.CreateInstance(closedType)!;
                 }
-                return Activator.CreateInstance(closedType, classArgs)!;
+                return Activator.CreateInstance(closedType, effectiveArgs)!;
             }
 
-            if (classArgs.Length == 0)
+            if (effectiveArgs.Length == 0)
             {
                 return Activator.CreateInstance(testClass)!;
             }
-            return Activator.CreateInstance(testClass, classArgs)!;
+            return Activator.CreateInstance(testClass, effectiveArgs)!;
         };
     }
 

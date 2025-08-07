@@ -39,35 +39,13 @@ public static class DataSourceProcessor
         
         if (data != null)
         {
-            // Optimize: Use ArrayPool for large arrays to reduce GC pressure
-            if (data.Length > 100) // Only use ArrayPool for larger arrays
+            // Direct allocation - ArrayPool doesn't help here since we need to keep the array
+            var array = new object?[data.Length];
+            for (int i = 0; i < data.Length; i++)
             {
-                var pooledArray = ArrayPool<object?>.Shared.Rent(data.Length);
-                try
-                {
-                    for (int i = 0; i < data.Length; i++)
-                    {
-                        pooledArray[i] = data[i];
-                    }
-                    var result = new object?[data.Length];
-                    Array.Copy(pooledArray, result, data.Length);
-                    items.Add(result);
-                }
-                finally
-                {
-                    ArrayPool<object?>.Shared.Return(pooledArray);
-                }
+                array[i] = data[i];
             }
-            else
-            {
-                // For small arrays, direct allocation is more efficient
-                var array = new object?[data.Length];
-                for (int i = 0; i < data.Length; i++)
-                {
-                    array[i] = data[i];
-                }
-                items.Add(array);
-            }
+            items.Add(array);
         }
         
         return items;
