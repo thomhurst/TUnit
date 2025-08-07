@@ -659,6 +659,7 @@ namespace
         public required string DisplayName { get; init; }
         public [] ResolvedClassGenericArguments { get; init; }
         public [] ResolvedMethodGenericArguments { get; init; }
+        public <.<object>>? TestClassInstanceFactory { get; init; }
         public required string TestId { get; init; }
     }
     [(.Assembly | .Class | .Method)]

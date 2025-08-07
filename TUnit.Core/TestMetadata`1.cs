@@ -75,6 +75,13 @@ public class TestMetadata<
                     // Create instance delegate that uses context
                     Func<TestContext, Task<object>> createInstance = async testContext =>
                     {
+                        // If we have a factory from discovery, use it (for lazy instance creation)
+                        if (context.TestClassInstanceFactory != null)
+                        {
+                            return await context.TestClassInstanceFactory();
+                        }
+
+                        // Otherwise fall back to creating instance normally
                         // Try to create instance with ClassConstructor attribute
                         var attributes = metadata.AttributeFactory();
                         var instance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
@@ -88,9 +95,7 @@ public class TestMetadata<
                             return instance;
                         }
 
-                        // Fall back to default instance factory
-                        var typeArgs = testContext.TestDetails.MethodMetadata.Class.Parameters.Select(x => x.Type).ToArray();
-                        return typedMetadata.InstanceFactory!(typeArgs, context.ClassArguments);
+                        return typedMetadata.InstanceFactory!(context.ResolvedClassGenericArguments, context.ClassArguments);
                     };
 
                     // Convert InvokeTypedTest to the expected signature

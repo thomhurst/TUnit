@@ -40,6 +40,12 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
             return new ValueTask();
         }
 
+        // If the instance is still a placeholder, we can't execute instance hooks
+        if (context.TestDetails.ClassInstance is PlaceholderInstance)
+        {
+            throw new InvalidOperationException($"Cannot execute instance hook {Name} because the test instance has not been created yet. This is likely a framework bug.");
+        }
+
         return HookExecutor.ExecuteBeforeTestHook(MethodInfo, context,
             () => Body!.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
         );

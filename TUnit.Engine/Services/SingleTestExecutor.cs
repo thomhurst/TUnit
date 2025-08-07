@@ -84,8 +84,27 @@ internal class SingleTestExecutor : ISingleTestExecutor
             return await HandleSkippedTestInternalAsync(test, cancellationToken);
         }
 
-        var instance = await test.CreateInstanceAsync();
-        test.Context.TestDetails.ClassInstance = instance;
+        if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
+        {
+            var createdInstance = await test.CreateInstanceAsync();
+            if (createdInstance == null)
+            {
+                throw new InvalidOperationException($"CreateInstanceAsync returned null for test {test.Context.GetDisplayName()}. This is likely a framework bug.");
+            }
+            test.Context.TestDetails.ClassInstance = createdInstance;
+        }
+
+        var instance = test.Context.TestDetails.ClassInstance;
+        
+        if (instance == null)
+        {
+            throw new InvalidOperationException($"Test instance is null for test {test.Context.GetDisplayName()} after instance creation. ClassInstance type: {test.Context.TestDetails.ClassInstance?.GetType()?.Name ?? "null"}");
+        }
+        
+        if (instance is PlaceholderInstance)
+        {
+            throw new InvalidOperationException($"Test instance is still PlaceholderInstance for test {test.Context.GetDisplayName()}. This should have been replaced.");
+        }
 
         await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
         await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
@@ -288,7 +307,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             try
             {
                 await hook(context, cancellationToken);
-                
+
                 // RestoreExecutionContext after each hook to ensure AsyncLocal values flow correctly
                 // when AddAsyncLocalValues() is called in hooks
                 context.RestoreExecutionContext();
@@ -304,7 +323,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
     private async Task ExecuteAfterTestHooksAsync(IReadOnlyList<Func<TestContext, CancellationToken, Task>> hooks, TestContext context, CancellationToken cancellationToken)
     {
         var exceptions = new List<Exception>();
-        
+
         // Restore contexts once at the beginning
         RestoreHookContexts(context);
 
