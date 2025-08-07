@@ -144,6 +144,9 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
         finally
         {
             test.EndTime = DateTimeOffset.UtcNow;
+            
+            // Execute cleanup hooks (AfterEveryTest, AfterClass, AfterAssembly)
+            await _hookOrchestrator.OnTestCompletedAsync(test, cancellationToken);
         }
     }
 
