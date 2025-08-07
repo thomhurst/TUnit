@@ -74,13 +74,37 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.StartTime = DateTimeOffset.Now;
             test.State = TestState.Running;
 
-        if (!string.IsNullOrEmpty(test.Context.SkipReason)
-            || test.Context.TestDetails.ClassInstance is SkippedTestInstance)
+        if (!string.IsNullOrEmpty(test.Context.SkipReason))
         {
             return await HandleSkippedTestInternalAsync(test, cancellationToken);
         }
 
+        if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
+        {
+            return await HandleSkippedTestInternalAsync(test, cancellationToken);
+        }
+
+        if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
+        {
+            var createdInstance = await test.CreateInstanceAsync();
+            if (createdInstance == null)
+            {
+                throw new InvalidOperationException($"CreateInstanceAsync returned null for test {test.Context.GetDisplayName()}. This is likely a framework bug.");
+            }
+            test.Context.TestDetails.ClassInstance = createdInstance;
+        }
+
         var instance = test.Context.TestDetails.ClassInstance;
+        
+        if (instance == null)
+        {
+            throw new InvalidOperationException($"Test instance is null for test {test.Context.GetDisplayName()} after instance creation. ClassInstance type: {test.Context.TestDetails.ClassInstance?.GetType()?.Name ?? "null"}");
+        }
+        
+        if (instance is PlaceholderInstance)
+        {
+            throw new InvalidOperationException($"Test instance is still PlaceholderInstance for test {test.Context.GetDisplayName()}. This should have been replaced.");
+        }
 
         await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
         await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);

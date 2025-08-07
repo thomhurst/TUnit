@@ -74,7 +74,7 @@ internal sealed class TestBuilderPipeline
                         // Create a simple TestData for ID generation
                         var testData = new TestBuilder.TestData
                         {
-                            TestClassInstanceFactory = () => Task.FromResult<object>(null!),
+                            TestClassInstanceFactory = () => Task.FromResult(metadata.InstanceFactory(Type.EmptyTypes, [])),
                             ClassDataSourceAttributeIndex = 0,
                             ClassDataLoopIndex = 0,
                             ClassData = [],
@@ -98,7 +98,7 @@ internal sealed class TestBuilderPipeline
                             TestName = metadata.TestName,
                             ClassType = metadata.TestClassType,
                             MethodName = metadata.TestMethodName,
-                            ClassInstance = null!,
+                            ClassInstance = PlaceholderInstance.Instance,
                             TestMethodArguments = [],
                             TestClassArguments = [],
                             TestFilePath = metadata.FilePath ?? "Unknown",
@@ -128,7 +128,8 @@ internal sealed class TestBuilderPipeline
                             DisplayName = displayName,
                             Arguments = [],
                             ClassArguments = [],
-                            Context = context
+                            Context = context,
+                            TestClassInstanceFactory = testData.TestClassInstanceFactory
                         };
 
                         var executableTest = metadata.CreateExecutableTestFactory(executableTestContext, metadata);
