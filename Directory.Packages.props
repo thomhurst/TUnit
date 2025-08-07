@@ -83,7 +83,7 @@
     <PackageVersion Include="Testcontainers.Redis" Version="4.6.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
     <PackageVersion Include="Verify" Version="30.6.0" />
-    <PackageVersion Include="Verify.NUnit" Version="30.5.0" />
+    <PackageVersion Include="Verify.NUnit" Version="30.6.0" />
     <PackageVersion Include="TUnit" Version="0.52.49" />
     <PackageVersion Include="TUnit.Core" Version="0.52.49" />
     <PackageVersion Include="TUnit.Assertions" Version="0.52.49" />
