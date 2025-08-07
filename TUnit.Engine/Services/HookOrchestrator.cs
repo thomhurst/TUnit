@@ -4,6 +4,7 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.Services;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Interfaces;
@@ -103,6 +104,9 @@ internal sealed class HookOrchestrator
 
     public async Task<ExecutionContext?> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
+        // Dispose session-scoped objects first
+        await InvokeSessionScopeDisposalEventsAsync();
+        
         var hooks = await _hookCollectionService.CollectAfterTestSessionHooksAsync();
         var exceptions = new List<Exception>();
 
@@ -248,6 +252,9 @@ internal sealed class HookOrchestrator
         var testClassType = test.Metadata.TestClassType;
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";
 
+        // Execute individual test disposal events first (only for test-scoped objects)
+        await InvokeTestScopeDisposalEventsAsync(test.Context);
+
         // Execute AfterEveryTest hooks
         await ExecuteAfterEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
 
@@ -258,6 +265,9 @@ internal sealed class HookOrchestrator
         // Execute AfterClass hooks if last test in class AND BeforeClass hooks were run
         if (classTestsRemaining == 0 && _beforeClassTasks.TryGetValue(testClassType, out _))
         {
+            // Execute class-scope disposal for this class
+            await InvokeClassScopeDisposalEventsAsync(testClassType);
+            
             await ExecuteAfterClassHooksAsync(testClassType, cancellationToken);
             _classTestCounts.TryRemove(testClassType, out _);
         }
@@ -265,8 +275,77 @@ internal sealed class HookOrchestrator
         // Execute AfterAssembly hooks if last test in assembly AND BeforeAssembly hooks were run
         if (assemblyTestsRemaining == 0 && _beforeAssemblyTasks.TryGetValue(assemblyName, out _))
         {
+            // Execute assembly-scope disposal for this assembly
+            await InvokeAssemblyScopeDisposalEventsAsync(test.Context.ClassContext.AssemblyContext.Assembly);
+            
             await ExecuteAfterAssemblyHooksAsync(test.Context.ClassContext.AssemblyContext.Assembly, cancellationToken);
             _assemblyTestCounts.TryRemove(assemblyName, out _);
+        }
+    }
+
+    /// <summary>
+    /// Invokes disposal events for test-scoped objects only
+    /// </summary>
+    private async Task InvokeTestScopeDisposalEventsAsync(TestContext testContext)
+    {
+        if (testContext.Events.OnDispose != null)
+        {
+            try
+            {
+                foreach (var invocation in testContext.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                {
+                    await invocation.InvokeAsync(this, testContext);
+                }
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in test disposal events: {ex}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Invokes disposal for class-scoped objects
+    /// </summary>
+    private async Task InvokeClassScopeDisposalEventsAsync(Type testClassType)
+    {
+        try
+        {
+            await ObjectTracker.DisposeObjectsForScope(SharedType.PerClass, testClassType);
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogErrorAsync($"Error in class disposal events for {testClassType.Name}: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// Invokes disposal for assembly-scoped objects
+    /// </summary>
+    private async Task InvokeAssemblyScopeDisposalEventsAsync(Assembly assembly)
+    {
+        try
+        {
+            await ObjectTracker.DisposeObjectsForScope(SharedType.PerAssembly, assembly);
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogErrorAsync($"Error in assembly disposal events for {assembly.GetName().Name}: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// Invokes disposal for session-scoped objects
+    /// </summary>
+    private async Task InvokeSessionScopeDisposalEventsAsync()
+    {
+        try
+        {
+            await ObjectTracker.DisposeObjectsForScope(SharedType.PerTestSession, "global");
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogErrorAsync($"Error in session disposal events: {ex}");
         }
     }
 

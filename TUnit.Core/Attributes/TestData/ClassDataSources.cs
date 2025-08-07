@@ -127,12 +127,16 @@ internal class ClassDataSources
         {
             var instance = Activator.CreateInstance(type)!;
 
-            // Track the created object
+            // Track the created object with scope information
             var trackerEvents2 = dataGeneratorMetadata.TestBuilderContext?.Current.Events;
 
             if (trackerEvents2 != null)
             {
-                ObjectTracker.TrackObject(trackerEvents2, instance);
+                // Determine scope and scope key based on how the object was created
+                // This is a bit of a hack, but it works without changing the entire creation chain
+                var scope = DetermineObjectScope(instance, dataGeneratorMetadata.TestInformation?.TestClassType);
+                var scopeKey = GetScopeKey(scope, dataGeneratorMetadata.TestInformation?.TestClassType);
+                ObjectTracker.TrackObject(trackerEvents2, instance, scope, scopeKey);
             }
 
             // Initialize any data source properties on the created instance
@@ -169,5 +173,54 @@ internal class ClassDataSources
 
             throw;
         }
+    }
+
+    /// <summary>
+    /// Determines the scope of an object based on where it's stored in the containers
+    /// </summary>
+    private static SharedType DetermineObjectScope(object instance, Type? testClassType)
+    {
+        if (testClassType == null)
+        {
+            return SharedType.None;
+        }
+
+        // Check if the object exists in assembly container
+        if (TestDataContainer.TryGetInstanceForAssembly(testClassType.Assembly, instance.GetType(), out var assemblyInstance) && 
+            ReferenceEquals(instance, assemblyInstance))
+        {
+            return SharedType.PerAssembly;
+        }
+
+        // Check if the object exists in class container
+        if (TestDataContainer.TryGetInstanceForClass(testClassType, instance.GetType(), out var classInstance) && 
+            ReferenceEquals(instance, classInstance))
+        {
+            return SharedType.PerClass;
+        }
+
+        // Check if the object exists in global container
+        if (TestDataContainer.TryGetGlobalInstance(instance.GetType(), out var globalInstance) && 
+            ReferenceEquals(instance, globalInstance))
+        {
+            return SharedType.PerTestSession;
+        }
+
+        // Default to test-scoped
+        return SharedType.None;
+    }
+
+    /// <summary>
+    /// Gets the scope key for an object based on its scope
+    /// </summary>
+    private static object? GetScopeKey(SharedType scope, Type? testClassType)
+    {
+        return scope switch
+        {
+            SharedType.PerClass => testClassType,
+            SharedType.PerAssembly => testClassType?.Assembly,
+            SharedType.PerTestSession => "global",
+            _ => null
+        };
     }
 }
