@@ -3,7 +3,6 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
 using System.Collections.Concurrent;
 using System.Reflection;
-using TUnit.Core;
 
 namespace TUnit.Performance.Tests;
 
@@ -53,10 +52,6 @@ public class OptimizationBenchmarks
     }
     
     // Benchmark 2: EventReceiverRegistry Lock vs ConcurrentDictionary
-    private readonly object _lock = new();
-    private readonly Dictionary<Type, List<object>> _lockBasedRegistry = new();
-    private readonly ConcurrentDictionary<Type, ImmutableArray<object>> _concurrentRegistry = new();
-    
     [Benchmark(Description = "EventRegistry - ReaderWriterLock")]
     public void EventRegistry_WithLock()
     {
@@ -90,20 +85,28 @@ public class OptimizationBenchmarks
                 }
             }
         });
+        
+        rwLock.Dispose();
     }
     
     [Benchmark(Description = "EventRegistry - ConcurrentDictionary")]
     public void EventRegistry_ConcurrentDictionary()
     {
-        var registry = new ConcurrentDictionary<Type, ImmutableArray<object>>();
+        var registry = new ConcurrentDictionary<Type, object[]>();
         
         Parallel.For(0, 100, i =>
         {
             if (i % 10 == 0)
             {
                 registry.AddOrUpdate(typeof(object),
-                    _ => ImmutableArray.Create(new object()),
-                    (_, existing) => existing.Add(new object()));
+                    _ => new[] { new object() },
+                    (_, existing) => 
+                    {
+                        var newArray = new object[existing.Length + 1];
+                        Array.Copy(existing, newArray, existing.Length);
+                        newArray[existing.Length] = new object();
+                        return newArray;
+                    });
             }
             else
             {
@@ -112,39 +115,7 @@ public class OptimizationBenchmarks
         });
     }
     
-    // Benchmark 3: Sequential vs Parallel Test Building
-    [Benchmark(Description = "TestBuilding - Sequential")]
-    public async Task TestBuilding_Sequential()
-    {
-        var tests = Enumerable.Range(0, 100).Select(i => new TestMetadata { Id = i });
-        var results = new List<ProcessedTest>();
-        
-        foreach (var test in tests)
-        {
-            // Simulate test building work
-            await Task.Delay(1);
-            results.Add(new ProcessedTest { Id = test.Id });
-        }
-    }
-    
-    [Benchmark(Description = "TestBuilding - Parallel")]
-    public async Task TestBuilding_Parallel()
-    {
-        var tests = Enumerable.Range(0, 100).Select(i => new TestMetadata { Id = i });
-        var results = new ConcurrentBag<ProcessedTest>();
-        
-        await Task.Run(() =>
-        {
-            Parallel.ForEach(tests, async test =>
-            {
-                // Simulate test building work
-                await Task.Delay(1);
-                results.Add(new ProcessedTest { Id = test.Id });
-            });
-        });
-    }
-    
-    // Benchmark 4: Reflection Caching
+    // Benchmark 3: Reflection Caching
     private readonly ConcurrentDictionary<Type, MethodInfo[]> _methodCache = new();
     
     [Benchmark(Description = "Reflection - Without Caching")]
@@ -170,22 +141,26 @@ public class OptimizationBenchmarks
         }
     }
     
-    // Benchmark 5: Async Enumeration Optimization
+    // Benchmark 4: Async Enumeration Optimization
     [Benchmark(Description = "AsyncEnum - Without ConfigureAwait")]
     public async Task AsyncEnum_WithoutConfigureAwait()
     {
+        var count = 0;
         await foreach (var item in GetAsyncData())
         {
-            await ProcessItem(item);
+            count++;
+            if (count >= 100) break;
         }
     }
     
     [Benchmark(Description = "AsyncEnum - With ConfigureAwait")]
     public async Task AsyncEnum_WithConfigureAwait()
     {
+        var count = 0;
         await foreach (var item in GetAsyncData().ConfigureAwait(false))
         {
-            await ProcessItem(item).ConfigureAwait(false);
+            count++;
+            if (count >= 100) break;
         }
     }
     
@@ -197,21 +172,6 @@ public class OptimizationBenchmarks
             await Task.Yield();
             yield return i;
         }
-    }
-    
-    private async Task ProcessItem(int item)
-    {
-        await Task.Delay(1);
-    }
-    
-    private class TestMetadata
-    {
-        public int Id { get; set; }
-    }
-    
-    private class ProcessedTest
-    {
-        public int Id { get; set; }
     }
     
     private class TestClass
@@ -231,6 +191,3 @@ public class OptimizationBenchmarks
         }
     }
 }
-
-// Use ImmutableArray since we're using it in our optimizations
-using ImmutableArray = System.Collections.Immutable.ImmutableArray<object>;

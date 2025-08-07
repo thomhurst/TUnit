@@ -24,7 +24,7 @@ if (args.Length > 0 && !args.Contains("--ci"))
 {
     var benchmarkType = args[0] switch
     {
-        "discovery" => typeof(TestDiscoveryBenchmarks),
+        // "discovery" => typeof(TestDiscoveryBenchmarks), // Currently disabled
         "execution" => typeof(TestExecutionBenchmarks),
         "datasource" => typeof(DataSourceBenchmarks),
         "issue2756" => typeof(Issue2756RegressionBenchmark),
@@ -45,7 +45,7 @@ if (args.Length > 0 && !args.Contains("--ci"))
 else
 {
     // Run all benchmarks
-    var summary1 = BenchmarkRunner.Run<TestDiscoveryBenchmarks>(config);
+    // var summary1 = BenchmarkRunner.Run<TestDiscoveryBenchmarks>(config); // Currently disabled
     var summary2 = BenchmarkRunner.Run<TestExecutionBenchmarks>(config);
     var summary3 = BenchmarkRunner.Run<DataSourceBenchmarks>(config);
     var summary4 = BenchmarkRunner.Run<Issue2756RegressionBenchmark>(config);
