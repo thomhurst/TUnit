@@ -337,7 +337,7 @@ internal static class MetadataGenerationHelper
             if (method.Parameters.Any(p => CodeGenerationHelpers.ContainsTypeParameter(p.Type)))
             {
                 // For constructors with generic parameters, we need to find it dynamically
-                return $@"typeof({containingType}).GetConstructors().FirstOrDefault(c => c.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]!";
+                return $@"global::System.Linq.Enumerable.FirstOrDefault(typeof({containingType}).GetConstructors(), c => c.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]!";
             }
             else
             {
@@ -352,7 +352,7 @@ internal static class MetadataGenerationHelper
             if (method.TypeParameters.Length > 0 || method.Parameters.Any(p => CodeGenerationHelpers.ContainsTypeParameter(p.Type)))
             {
                 // For generic methods, use GetMethods and find by name
-                return $@"typeof({containingType}).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == ""{method.Name}"" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]!";
+                return $@"global::System.Linq.Enumerable.FirstOrDefault(typeof({containingType}).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == ""{method.Name}"" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]!";
             }
             else
             {
