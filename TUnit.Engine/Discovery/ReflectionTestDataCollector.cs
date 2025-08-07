@@ -15,7 +15,7 @@ namespace TUnit.Engine.Discovery;
 [RequiresUnreferencedCode("Reflection-based test discovery requires unreferenced code")]
 [RequiresDynamicCode("Expression compilation requires dynamic code generation")]
 [SuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The source field does not have matching annotations.")]
-public sealed class ReflectionTestDataCollector : ITestDataCollector
+public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreamingTestDataCollector
 {
     private static readonly HashSet<Assembly> _scannedAssemblies =
     [
@@ -112,6 +112,20 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
 
             return _discoveredTests.ToList();
+        }
+    }
+
+    public async IAsyncEnumerable<TestMetadata> CollectTestsStreamingAsync(
+        string testSessionId,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        // For now, wrap the existing collection-based method
+        // A full refactor would require significant changes to the discovery logic
+        var tests = await CollectTestsAsync(testSessionId);
+        foreach (var test in tests)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return test;
         }
     }
 

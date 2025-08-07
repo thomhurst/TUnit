@@ -959,4 +959,18 @@ internal sealed class TestBuilder : ITestBuilder
         /// </summary>
         public Type[] ResolvedMethodGenericArguments { get; set; } = Type.EmptyTypes;
     }
+
+    public async IAsyncEnumerable<AbstractExecutableTest> BuildTestsStreamingAsync(
+        TestMetadata metadata,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        // For now, convert the existing collection-based method to streaming
+        // This maintains compatibility while we refactor the internals
+        var tests = await BuildTestsFromMetadataAsync(metadata);
+        foreach (var test in tests)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return test;
+        }
+    }
 }

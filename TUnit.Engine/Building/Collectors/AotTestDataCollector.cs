@@ -73,6 +73,8 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
             cancellationToken.ThrowIfCancellationRequested();
             
             IEnumerable<DynamicTest> dynamicTests;
+            TestMetadata? failedMetadata = null;
+            
             try
             {
                 dynamicTests = source.CollectDynamicTests(testSessionId);
@@ -80,7 +82,13 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
             catch (Exception ex)
             {
                 // Create a failed test metadata for this dynamic test source
-                yield return CreateFailedTestMetadataForDynamicSource(source, ex);
+                failedMetadata = CreateFailedTestMetadataForDynamicSource(source, ex);
+                dynamicTests = Enumerable.Empty<DynamicTest>();
+            }
+
+            if (failedMetadata != null)
+            {
+                yield return failedMetadata;
                 continue;
             }
 
