@@ -208,11 +208,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate reflection-based field accessors for init-only properties with data source attributes
         GenerateReflectionFieldAccessors(writer, testMethod.TypeSymbol, className);
 
-        writer.AppendLine("public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)");
+        writer.AppendLine("public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)");
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();");
         writer.AppendLine();
 
         // Check if we have generic types or methods
@@ -267,7 +266,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
         }
 
-        writer.AppendLine("return tests;");
+        writer.AppendLine("yield break;");
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -335,7 +334,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("};");
 
         writer.AppendLine("metadata.TestSessionId = testSessionId;");
-        writer.AppendLine("tests.Add(metadata);");
+        writer.AppendLine("yield return metadata;");
 
         writer.Unindent();
         writer.AppendLine("}");
@@ -494,7 +493,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("metadata.TestSessionId = testSessionId;");
         }
 
-        writer.AppendLine("tests.Add(metadata);");
+        writer.AppendLine("yield return metadata;");
     }
 
     private static void GenerateMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
@@ -2892,7 +2891,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("};");
 
         writer.AppendLine("genericMetadata.TestSessionId = testSessionId;");
-        writer.AppendLine("tests.Add(genericMetadata);");
+        writer.AppendLine("yield return genericMetadata;");
     }
 
     private static bool ValidateClassTypeConstraints(INamedTypeSymbol classSymbol, ITypeSymbol[] typeArguments)
@@ -4366,7 +4365,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("};");
 
-        writer.AppendLine("tests.Add(metadata);");
+        writer.AppendLine("yield return metadata;");
     }
 }
 

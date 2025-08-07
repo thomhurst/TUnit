@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Engine.Building.Interfaces;
 
@@ -11,7 +12,7 @@ namespace TUnit.Engine.Building.Collectors;
 /// AOT-compatible test data collector that uses source-generated test metadata.
 /// Operates without reflection by leveraging pre-compiled test sources.
 /// </summary>
-internal sealed class AotTestDataCollector : ITestDataCollector
+internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestDataCollector
 {
     private readonly HashSet<Type>? _filterTypes;
 
@@ -21,144 +22,93 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     }
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
-        // Get all test sources as a list to enable indexed parallel processing
-        var testSourcesList = Sources.TestSources
-            .Where(kvp => _filterTypes == null || _filterTypes.Contains(kvp.Key))
-            .SelectMany(kvp => kvp.Value)
-            .ToList();
-
-        if (testSourcesList.Count == 0)
+        // Compatibility method - collects all from streaming
+        var tests = new List<TestMetadata>();
+        await foreach (var test in CollectTestsStreamingAsync(testSessionId, CancellationToken.None))
         {
-            return [];
+            tests.Add(test);
         }
+        return tests;
+    }
 
-        // Use indexed collection to maintain order and prevent race conditions
-        var resultsByIndex = new ConcurrentDictionary<int, IEnumerable<TestMetadata>>();
+    public async IAsyncEnumerable<TestMetadata> CollectTestsStreamingAsync(
+        string testSessionId,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        // Stream from all test sources
+        var testSources = Sources.TestSources
+            .Where(kvp => _filterTypes == null || _filterTypes.Contains(kvp.Key))
+            .SelectMany(kvp => kvp.Value);
 
-        // Use true parallel processing with optimal concurrency
-        var parallelOptions = new ParallelOptions
+        // Stream tests from each source
+        foreach (var testSource in testSources)
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount
-        };
-
-        Parallel.ForEach(testSourcesList.Select((source, index) => new { source, index }),
-            parallelOptions, item =>
+            cancellationToken.ThrowIfCancellationRequested();
+            
+            await foreach (var metadata in testSource.GetTestsAsync(testSessionId, cancellationToken))
             {
-                var index = item.index;
-                var testSource = item.source;
-
-                try
-                {
-                    // Run async method synchronously since we're in parallel processing context
-                    var tests = testSource.GetTestsAsync(testSessionId).ConfigureAwait(false).GetAwaiter().GetResult();
-                    resultsByIndex[index] = tests;
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException(
-                        $"Failed to collect tests from source {testSource.GetType().Name}: {ex.Message}", ex);
-                }
-            });
-
-        // Reassemble results in original order
-        var allTests = new List<TestMetadata>();
-        for (var i = 0; i < testSourcesList.Count; i++)
-        {
-            if (resultsByIndex.TryGetValue(i, out var tests))
-            {
-                allTests.AddRange(tests);
+                yield return metadata;
             }
         }
 
-        // Also collect dynamic tests from registered dynamic test sources
-        var dynamicTests = await CollectDynamicTests(testSessionId);
-        allTests.AddRange(dynamicTests);
-
-        if (allTests.Count == 0)
+        // Also stream dynamic tests
+        await foreach (var metadata in CollectDynamicTestsStreaming(testSessionId, cancellationToken))
         {
-            // No generated tests found
-            return [
-            ];
+            yield return metadata;
         }
-
-        return allTests;
     }
 
-    private async Task<List<TestMetadata>> CollectDynamicTests(string testSessionId)
+    private async IAsyncEnumerable<TestMetadata> CollectDynamicTestsStreaming(
+        string testSessionId,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var dynamicTestMetadata = new List<TestMetadata>();
-
         if (Sources.DynamicTestSources.Count == 0)
         {
-            return dynamicTestMetadata;
+            yield break;
         }
 
-        // Convert dynamic test sources to list for parallel processing
-        var dynamicSourcesList = Sources.DynamicTestSources.ToList();
-
-        // Use indexed collection to maintain order
-        var resultsByIndex = new ConcurrentDictionary<int, List<TestMetadata>>();
-
-        var parallelOptions = new ParallelOptions
+        // Stream from each dynamic test source
+        foreach (var source in Sources.DynamicTestSources)
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount
-        };
-
-        await Task.Run(() =>
-        {
-            Parallel.ForEach(dynamicSourcesList.Select((source, index) => new { source, index }),
-                parallelOptions, item =>
+            cancellationToken.ThrowIfCancellationRequested();
+            
+            IEnumerable<DynamicTest> dynamicTests;
+            try
             {
-                var index = item.index;
-                var source = item.source;
-                var testsForSource = new List<TestMetadata>();
-
-                try
-                {
-                    var dynamicTests = source.CollectDynamicTests(testSessionId);
-                    foreach (var dynamicTest in dynamicTests)
-                    {
-                        // Convert each dynamic test to test metadata
-                        var metadataList = ConvertDynamicTestToMetadata(dynamicTest).ConfigureAwait(false).GetAwaiter().GetResult();
-                        testsForSource.AddRange(metadataList);
-                    }
-                    resultsByIndex[index] = testsForSource;
-                }
-                catch (Exception ex)
-                {
-                    // Create a failed test metadata for this dynamic test source
-                    var failedTest = CreateFailedTestMetadataForDynamicSource(source, ex);
-                    resultsByIndex[index] = [failedTest];
-                }
-            });
-        });
-
-        // Reassemble results in original order
-        for (var i = 0; i < dynamicSourcesList.Count; i++)
-        {
-            if (resultsByIndex.TryGetValue(i, out var tests))
+                dynamicTests = source.CollectDynamicTests(testSessionId);
+            }
+            catch (Exception ex)
             {
-                dynamicTestMetadata.AddRange(tests);
+                // Create a failed test metadata for this dynamic test source
+                yield return CreateFailedTestMetadataForDynamicSource(source, ex);
+                continue;
+            }
+
+            foreach (var dynamicTest in dynamicTests)
+            {
+                // Convert each dynamic test to test metadata and stream
+                await foreach (var metadata in ConvertDynamicTestToMetadataStreaming(dynamicTest, cancellationToken))
+                {
+                    yield return metadata;
+                }
             }
         }
-
-        return dynamicTestMetadata;
     }
 
-    private async Task<List<TestMetadata>> ConvertDynamicTestToMetadata(DynamicTest dynamicTest)
+    private async IAsyncEnumerable<TestMetadata> ConvertDynamicTestToMetadataStreaming(
+        DynamicTest dynamicTest,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var testMetadataList = new List<TestMetadata>();
-
         foreach (var discoveryResult in dynamicTest.GetTests())
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            
             if (discoveryResult is DynamicDiscoveryResult { TestMethod: not null } dynamicResult)
             {
                 var testMetadata = await CreateMetadataFromDynamicDiscoveryResult(dynamicResult);
-                testMetadataList.Add(testMetadata);
+                yield return testMetadata;
             }
         }
-
-        return testMetadataList;
     }
 
     private Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
