@@ -611,6 +611,7 @@ namespace
         public required string DisplayName { get; init; }
         public [] ResolvedClassGenericArguments { get; init; }
         public [] ResolvedMethodGenericArguments { get; init; }
+        public <.<object>>? TestClassInstanceFactory { get; init; }
         public required string TestId { get; init; }
     }
     [(.Assembly | .Class | .Method)]
@@ -1267,9 +1268,9 @@ namespace
         public override int GetHashCode() { }
         public bool Matches(.TestMetadata test, .TestMetadata? dependentTest = null) { }
         public override string ToString() { }
-        public static .TestDependency FromClass( classType) { }
-        public static .TestDependency FromClassAndMethod( classType, string methodName) { }
-        public static .TestDependency FromMethodName(string methodName) { }
+        public static .TestDependency FromClass( classType, bool proceedOnFailure = false) { }
+        public static .TestDependency FromClassAndMethod( classType, string methodName, bool proceedOnFailure = false) { }
+        public static .TestDependency FromMethodName(string methodName, bool proceedOnFailure = false) { }
     }
     public class TestDetails
     {
@@ -1682,6 +1683,12 @@ namespace .Exceptions
         public TUnitException() { }
         public TUnitException(string? message) { }
         public TUnitException(string? message, ? innerException) { }
+    }
+    public class TestDependencyException : .
+    {
+        public TestDependencyException(string dependencyName, bool proceedOnFailure) { }
+        public string DependencyName { get; }
+        public bool ProceedOnFailure { get; }
     }
     public class TestFailedInitializationException : 
     {

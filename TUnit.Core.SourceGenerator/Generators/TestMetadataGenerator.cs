@@ -79,6 +79,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
+        var testAttribute = methodSymbol!.GetRequiredTestAttribute();
+
         // Skip abstract classes (cannot be instantiated)
         if (containingType.IsAbstract)
         {
@@ -91,9 +93,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         return new TestMethodMetadata
         {
-            MethodSymbol = methodSymbol ?? throw new global::System.InvalidOperationException("Symbol is not a method"),
+            MethodSymbol = methodSymbol ?? throw new InvalidOperationException("Symbol is not a method"),
             TypeSymbol = containingType,
-            FilePath = methodSyntax.SyntaxTree.FilePath,
+            FilePath = methodSyntax.GetLocation().SourceTree?.FilePath ?? testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? methodSyntax.SyntaxTree.FilePath,
             LineNumber = methodSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
             TestAttribute = context.Attributes.First(),
             Context = context,
@@ -132,7 +134,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
                 TypeSymbol = classInfo.TypeSymbol,
-                FilePath = classInfo.ClassSyntax.SyntaxTree.FilePath,
+                FilePath = classInfo.ClassSyntax.GetLocation().SourceTree?.FilePath ?? testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? classInfo.ClassSyntax.SyntaxTree.FilePath,
                 LineNumber = classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
                 TestAttribute = testAttribute,
                 Context = null, // No context for inherited tests
@@ -1387,13 +1389,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         if (property.SetMethod.IsInitOnly)
                         {
                             // For nested init-only properties with ClassDataSource, create the value if null
-                            if (dataSourceAttr != null && 
+                            if (dataSourceAttr != null &&
                                 dataSourceAttr.AttributeClass?.IsOrInherits("global::TUnit.Core.ClassDataSourceAttribute") == true &&
                                 dataSourceAttr.AttributeClass is { IsGenericType: true, TypeArguments.Length: > 0 })
                             {
                                 var dataSourceType = dataSourceAttr.AttributeClass.TypeArguments[0];
                                 var fullyQualifiedType = dataSourceType.GloballyQualified();
-                                
+
                                 writer.AppendLine("Setter = (instance, value) =>");
                                 writer.AppendLine("{");
                                 writer.Indent();
@@ -1467,10 +1469,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var currentType = typeSymbol;
         var processedProperties = new HashSet<string>();
         var className = typeSymbol.GloballyQualified();
-        
+
         // Generate a single cast check and extract all properties
         var propertiesWithDataSource = new List<IPropertySymbol>();
-        
+
         while (currentType != null)
         {
             foreach (var member in currentType.GetMembers())
@@ -1490,19 +1492,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             currentType = currentType.BaseType;
         }
-        
+
         // Generate a single if statement with all property extractions
         if (propertiesWithDataSource.Any())
         {
             writer.AppendLine($"if (obj is {className} typedObj)");
             writer.AppendLine("{");
             writer.Indent();
-            
+
             foreach (var property in propertiesWithDataSource)
             {
                 writer.AppendLine($"nestedValues[\"{property.Name}\"] = typedObj.{property.Name};");
             }
-            
+
             writer.Unindent();
             writer.AppendLine("}");
         }
@@ -1608,7 +1610,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (isAsync)
         {
-            writer.AppendLine("if (result is Task task)");
+            writer.AppendLine("if (result is global::System.Threading.Tasks.Task task)");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("await task;");
@@ -1872,11 +1874,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static void GenerateTestDependency(CodeWriter writer, AttributeData attributeData)
     {
         var constructorArgs = attributeData.ConstructorArguments;
-        
-        // Get ProceedOnFailure from named arguments
-        var proceedOnFailure = attributeData.NamedArguments
-            .FirstOrDefault(na => na.Key == "ProceedOnFailure")
-            .Value.Value as bool? ?? false;
+
+        // Extract ProceedOnFailure property value
+        var proceedOnFailure = GetProceedOnFailureValue(attributeData);
 
         // Handle the different constructor overloads of DependsOnAttribute
         if (constructorArgs.Length == 1)
@@ -1984,6 +1984,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($", ProceedOnFailure = {proceedOnFailure.ToString().ToLower()} }}");
             }
         }
+    }
+
+    private static bool GetProceedOnFailureValue(AttributeData attributeData)
+    {
+        // Look for ProceedOnFailure property in named arguments
+        foreach (var namedArg in attributeData.NamedArguments)
+        {
+            if (namedArg.Key == "ProceedOnFailure" && namedArg.Value.Value is bool proceedOnFailure)
+            {
+                return proceedOnFailure;
+            }
+        }
+
+        // Default value is false
+        return false;
     }
 
     private static string GetDefaultValueString(IParameterSymbol parameter)

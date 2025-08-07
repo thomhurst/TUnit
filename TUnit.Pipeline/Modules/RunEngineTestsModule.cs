@@ -43,7 +43,7 @@ public class RunEngineTestsModule : Module<CommandResult>
             ],
             EnvironmentVariables = new Dictionary<string, string?>
             {
-                ["DISABLE_GITHUB_REPORTER"] = "true",
+                ["TUNIT_DISABLE_GITHUB_REPORTER"] = "true",
             }
         }, cancellationToken);
     }

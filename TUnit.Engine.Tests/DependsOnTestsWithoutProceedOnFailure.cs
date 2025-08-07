@@ -13,8 +13,8 @@ public class DependsOnTestsWithoutProceedOnFailure(TestMode testMode) : Invokabl
                 result => result.ResultSummary.Outcome.ShouldBe("Failed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(2),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(0),
-                result => result.ResultSummary.Counters.Failed.ShouldBe(2),
-                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(1)
             ]);
     }
 }

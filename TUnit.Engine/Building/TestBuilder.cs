@@ -145,7 +145,7 @@ internal sealed class TestBuilder : ITestBuilder
                             {
                                 var tempTestData = new TestData
                                 {
-                                    TestClassInstance = null!,
+                                    TestClassInstanceFactory = () => Task.FromResult<object>(null!),
                                     ClassDataSourceAttributeIndex = classDataAttributeIndex,
                                     ClassDataLoopIndex = classDataLoopIndex,
                                     ClassData = classData,
@@ -218,7 +218,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                                 var tempTestData = new TestData
                                 {
-                                    TestClassInstance = null!, // Temporary placeholder
+                                    TestClassInstanceFactory = () => Task.FromResult<object>(null!), // Temporary placeholder
                                     ClassDataSourceAttributeIndex = classDataAttributeIndex,
                                     ClassDataLoopIndex = classDataLoopIndex,
                                     ClassData = classData,
@@ -271,24 +271,25 @@ internal sealed class TestBuilder : ITestBuilder
                                     throw new InvalidOperationException($"Cannot create instance of generic type {metadata.TestClassType.Name} with empty type arguments");
                                 }
 
-                                // Check for basic skip attributes that can be evaluated at discovery time
                                 var basicSkipReason = GetBasicSkipReason(metadata);
-                                object instance;
-
-                                if (!string.IsNullOrEmpty(basicSkipReason))
+                                
+                                Func<Task<object>> instanceFactory;
+                                if (basicSkipReason != null && basicSkipReason.Length > 0)
                                 {
-                                    // Use placeholder instance for basic skip attributes to avoid calling constructor
-                                    instance = SkippedTestInstance.Instance;
+                                    instanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance);
                                 }
                                 else
                                 {
-                                    // No skip attributes or custom skip attributes - create instance normally
-                                    instance = await CreateInstance(metadata, resolvedClassGenericArgs, classData, contextAccessor.Current);
+                                    var capturedMetadata = metadata;
+                                    var capturedClassGenericArgs = resolvedClassGenericArgs;
+                                    var capturedClassData = classData;
+                                    var capturedContext = contextAccessor.Current;
+                                    instanceFactory = () => CreateInstance(capturedMetadata, capturedClassGenericArgs, capturedClassData, capturedContext);
                                 }
 
                                 var testData = new TestData
                                 {
-                                    TestClassInstance = instance,
+                                    TestClassInstanceFactory = instanceFactory,
                                     ClassDataSourceAttributeIndex = classDataAttributeIndex,
                                     ClassDataLoopIndex = classDataLoopIndex,
                                     ClassData = classData,
@@ -553,7 +554,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         var context = await CreateTestContextAsync(testId, metadata, testData, testBuilderContext);
 
-        context.TestDetails.ClassInstance = testData.TestClassInstance;
+        context.TestDetails.ClassInstance = PlaceholderInstance.Instance;
 
         TrackDataSourceObjects(context, testData.ClassData, testData.MethodData);
 
@@ -566,6 +567,7 @@ internal sealed class TestBuilder : ITestBuilder
             Arguments = testData.MethodData,
             ClassArguments = testData.ClassData,
             Context = context,
+            TestClassInstanceFactory = testData.TestClassInstanceFactory,
             ResolvedMethodGenericArguments = testData.ResolvedMethodGenericArguments,
             ResolvedClassGenericArguments = testData.ResolvedClassGenericArguments
         };
@@ -615,7 +617,7 @@ internal sealed class TestBuilder : ITestBuilder
             TestName = metadata.TestName,
             ClassType = metadata.TestClassType,
             MethodName = metadata.TestMethodName,
-            ClassInstance = testData.TestClassInstance,
+            ClassInstance = PlaceholderInstance.Instance,
             TestMethodArguments = testData.MethodData,
             TestClassArguments = testData.ClassData,
             TestFilePath = metadata.FilePath ?? "Unknown",
@@ -934,7 +936,7 @@ internal sealed class TestBuilder : ITestBuilder
 
     internal class TestData
     {
-        public required object TestClassInstance { get; init; }
+        public required Func<Task<object>> TestClassInstanceFactory { get; init; }
 
         public required int ClassDataSourceAttributeIndex { get; init; }
         public required int ClassDataLoopIndex { get; init; }

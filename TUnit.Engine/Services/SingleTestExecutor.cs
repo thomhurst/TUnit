@@ -2,6 +2,7 @@ using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
@@ -83,8 +84,27 @@ internal class SingleTestExecutor : ISingleTestExecutor
             return await HandleSkippedTestInternalAsync(test, cancellationToken);
         }
 
-        var instance = await test.CreateInstanceAsync();
-        test.Context.TestDetails.ClassInstance = instance;
+        if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
+        {
+            var createdInstance = await test.CreateInstanceAsync();
+            if (createdInstance == null)
+            {
+                throw new InvalidOperationException($"CreateInstanceAsync returned null for test {test.Context.GetDisplayName()}. This is likely a framework bug.");
+            }
+            test.Context.TestDetails.ClassInstance = createdInstance;
+        }
+
+        var instance = test.Context.TestDetails.ClassInstance;
+        
+        if (instance == null)
+        {
+            throw new InvalidOperationException($"Test instance is null for test {test.Context.GetDisplayName()} after instance creation. ClassInstance type: {test.Context.TestDetails.ClassInstance?.GetType()?.Name ?? "null"}");
+        }
+        
+        if (instance is PlaceholderInstance)
+        {
+            throw new InvalidOperationException($"Test instance is still PlaceholderInstance for test {test.Context.GetDisplayName()}. This should have been replaced.");
+        }
 
         await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
         await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
@@ -98,6 +118,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.Context.TestDetails.TestId);
 
         await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
+
+        CheckDependenciesAndThrowIfShouldSkip(test);
 
         var classContext = test.Context.ClassContext;
         var assemblyContext = classContext.AssemblyContext;
@@ -125,6 +147,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 await ExecuteTestWithHooksAsync(test, instance, cancellationToken);
             }
+        }
+        catch (TestDependencyException e)
+        {
+            test.Context.SkipReason = e.Message;
+            return await HandleSkippedTestInternalAsync(test, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -280,7 +307,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             try
             {
                 await hook(context, cancellationToken);
-                
+
                 // RestoreExecutionContext after each hook to ensure AsyncLocal values flow correctly
                 // when AddAsyncLocalValues() is called in hooks
                 context.RestoreExecutionContext();
@@ -296,7 +323,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
     private async Task ExecuteAfterTestHooksAsync(IReadOnlyList<Func<TestContext, CancellationToken, Task>> hooks, TestContext context, CancellationToken cancellationToken)
     {
         var exceptions = new List<Exception>();
-        
+
         // Restore contexts once at the beginning
         RestoreHookContexts(context);
 
@@ -448,5 +475,36 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
             ClassHookContext.Current = context.ClassContext;
         }
+    }
+
+    private void CheckDependenciesAndThrowIfShouldSkip(AbstractExecutableTest test)
+    {
+        var failedDependenciesNotAllowingProceed = new List<string>();
+
+        foreach (var dependency in test.Dependencies)
+        {
+            // Check if the dependency has failed or timed out
+            if (dependency.Test.State == TestState.Failed || dependency.Test.State == TestState.Timeout)
+            {
+                // If this dependency doesn't allow proceeding on failure, add it to the list
+                if (!dependency.ProceedOnFailure)
+                {
+                    var dependencyName = GetDependencyDisplayName(dependency.Test);
+                    failedDependenciesNotAllowingProceed.Add(dependencyName);
+                }
+            }
+        }
+
+        // Only throw if there are dependencies that don't allow proceeding
+        if (failedDependenciesNotAllowingProceed.Count > 0)
+        {
+            var dependencyNames = string.Join(", ", failedDependenciesNotAllowingProceed);
+            throw new TestDependencyException(dependencyNames, false);
+        }
+    }
+
+    private string GetDependencyDisplayName(AbstractExecutableTest dependency)
+    {
+        return dependency.Context?.GetDisplayName() ?? $"{dependency.Context?.TestDetails.ClassType.Name}.{dependency.Context?.TestDetails.TestName}" ?? "Unknown";
     }
 }
