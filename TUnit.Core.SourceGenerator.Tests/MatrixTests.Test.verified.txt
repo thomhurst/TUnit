@@ -48,59 +48,59 @@ internal sealed class MatrixTests_MatrixTest_One_TestSource_GUID : global::TUnit
                 "bool",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTest_One",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(string))
-{
-    Name = "str",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[0]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "i",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[1]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(bool))
-{
-    Name = "boolean",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[2]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTest_One",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(string))
+                    {
+                        Name = "str",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[0]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "i",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[1]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(bool))
+                    {
+                        Name = "boolean",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_One", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[2]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
+                {
+                var classMetadata = new global::TUnit.Core.ClassMetadata
+                {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTests",
+                Namespace = "TUnit.TestProject",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+                };
+                // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                foreach (var prop in classMetadata.Properties)
+                {
+                prop.ClassMetadata = classMetadata;
+                prop.ContainingTypeMetadata = classMetadata;
+                }
+                return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -198,66 +198,66 @@ internal sealed class MatrixTests_MatrixTest_Two_TestSource_GUID : global::TUnit
                 "bool",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTest_Two",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "i",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[0]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "i2",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[1]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "i3",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[2]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(bool))
-{
-    Name = "boolean",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[3]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTest_Two",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "i",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[0]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "i2",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[1]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "i3",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[2]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(bool))
+                    {
+                        Name = "boolean",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Two", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int), typeof(bool) }, null)!.GetParameters()[3]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
+                {
+                var classMetadata = new global::TUnit.Core.ClassMetadata
+                {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTests",
+                Namespace = "TUnit.TestProject",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+                };
+                // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                foreach (var prop in classMetadata.Properties)
+                {
+                prop.ClassMetadata = classMetadata;
+                prop.ContainingTypeMetadata = classMetadata;
+                }
+                return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -353,59 +353,59 @@ internal sealed class MatrixTests_MatrixTest_Enum_TestSource_GUID : global::TUni
                 "global::TUnit.TestProject.TestEnum?",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTest_Enum",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "i",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[0]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.TestEnum))
-{
-    Name = "testEnum",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestEnum, TestsBase`1"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[1]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.TestEnum?))
-{
-    Name = "testEnum2",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("T?, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestEnum, TestsBase`1")),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[2]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTest_Enum",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "i",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[0]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.TestEnum))
+                    {
+                        Name = "testEnum",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestEnum, TestsBase`1"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[1]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.TestEnum?))
+                    {
+                        Name = "testEnum2",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("T?, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestEnum, TestsBase`1")),
+                        IsNullable = true,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("MatrixTest_Enum", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::TUnit.TestProject.TestEnum), typeof(global::TUnit.TestProject.TestEnum?) }, null)!.GetParameters()[2]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
+                {
+                var classMetadata = new global::TUnit.Core.ClassMetadata
+                {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTests",
+                Namespace = "TUnit.TestProject",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+                };
+                // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                foreach (var prop in classMetadata.Properties)
+                {
+                prop.ClassMetadata = classMetadata;
+                prop.ContainingTypeMetadata = classMetadata;
+                }
+                return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -499,52 +499,52 @@ internal sealed class MatrixTests_AutoGenerateBools_TestSource_GUID : global::TU
                 "bool",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "AutoGenerateBools",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(string))
-{
-    Name = "str",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool) }, null)!.GetParameters()[0]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(bool))
-{
-    Name = "boolean",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool) }, null)!.GetParameters()[1]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "AutoGenerateBools",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(string))
+                    {
+                        Name = "str",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool) }, null)!.GetParameters()[0]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(bool))
+                    {
+                        Name = "boolean",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool) }, null)!.GetParameters()[1]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
+                {
+                var classMetadata = new global::TUnit.Core.ClassMetadata
+                {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTests",
+                Namespace = "TUnit.TestProject",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+                };
+                // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                foreach (var prop in classMetadata.Properties)
+                {
+                prop.ClassMetadata = classMetadata;
+                prop.ContainingTypeMetadata = classMetadata;
+                }
+                return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -638,52 +638,52 @@ internal sealed class MatrixTests_AutoGenerateBools2_TestSource_GUID : global::T
                 "bool?",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "AutoGenerateBools2",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(string))
-{
-    Name = "str",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool?) }, null)!.GetParameters()[0]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(bool?))
-{
-    Name = "boolean",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("T?, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib")),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool?) }, null)!.GetParameters()[1]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "AutoGenerateBools2",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(string))
+                    {
+                        Name = "str",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool?) }, null)!.GetParameters()[0]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(bool?))
+                    {
+                        Name = "boolean",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("T?, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib")),
+                        IsNullable = true,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("AutoGenerateBools2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(bool?) }, null)!.GetParameters()[1]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
+                {
+                var classMetadata = new global::TUnit.Core.ClassMetadata
+                {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTests",
+                Namespace = "TUnit.TestProject",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+                };
+                // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                foreach (var prop in classMetadata.Properties)
+                {
+                prop.ClassMetadata = classMetadata;
+                prop.ContainingTypeMetadata = classMetadata;
+                }
+                return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -777,52 +777,52 @@ internal sealed class MatrixTests_ImplicitConversion_TestSource_GUID : global::T
                 "bool",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "ImplicitConversion",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>))
-{
-    Name = "enum",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("OneOf<, >, TestsBase`1", global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestEnum, TestsBase`1"), global::TUnit.Core.TypeReference.CreateConcrete("TestEnum2, TestsBase`1")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[0]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(bool))
-{
-    Name = "boolean",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[1]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "ImplicitConversion",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>))
+                    {
+                        Name = "enum",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("OneOf<, >, TestsBase`1", global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestEnum, TestsBase`1"), global::TUnit.Core.TypeReference.CreateConcrete("TestEnum2, TestsBase`1")),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[0]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(bool))
+                    {
+                        Name = "boolean",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ImplicitConversion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>), typeof(bool) }, null)!.GetParameters()[1]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
+                {
+                var classMetadata = new global::TUnit.Core.ClassMetadata
+                {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTests",
+                Namespace = "TUnit.TestProject",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+                };
+                // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                foreach (var prop in classMetadata.Properties)
+                {
+                prop.ClassMetadata = classMetadata;
+                prop.ContainingTypeMetadata = classMetadata;
+                }
+                return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -916,52 +916,52 @@ internal sealed class MatrixTests_ExcludingAutoGeneratedMatrixValues_TestSource_
                 "bool",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "ExcludingAutoGeneratedMatrixValues",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum))
-{
-    Name = "enum",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests.CountToTenEnum, TestsBase`1"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ExcludingAutoGeneratedMatrixValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool) }, null)!.GetParameters()[0]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(bool))
-{
-    Name = "boolean",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ExcludingAutoGeneratedMatrixValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool) }, null)!.GetParameters()[1]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "ExcludingAutoGeneratedMatrixValues",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum))
+                    {
+                        Name = "enum",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests.CountToTenEnum, TestsBase`1"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ExcludingAutoGeneratedMatrixValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool) }, null)!.GetParameters()[0]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(bool))
+                    {
+                        Name = "boolean",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("ExcludingAutoGeneratedMatrixValues", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MatrixTests.CountToTenEnum), typeof(bool) }, null)!.GetParameters()[1]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
+                {
+                var classMetadata = new global::TUnit.Core.ClassMetadata
+                {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTests",
+                Namespace = "TUnit.TestProject",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+                };
+                // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                foreach (var prop in classMetadata.Properties)
+                {
+                prop.ClassMetadata = classMetadata;
+                prop.ContainingTypeMetadata = classMetadata;
+                }
+                return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -1053,45 +1053,45 @@ internal sealed class MatrixTests_Method1_TestSource_GUID : global::TUnit.Core.I
                 "int",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "Method1",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "item",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "Method1",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "item",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
+                {
+                var classMetadata = new global::TUnit.Core.ClassMetadata
+                {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTests",
+                Namespace = "TUnit.TestProject",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+                };
+                // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                foreach (var prop in classMetadata.Properties)
+                {
+                prop.ClassMetadata = classMetadata;
+                prop.ContainingTypeMetadata = classMetadata;
+                }
+                return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -1183,45 +1183,45 @@ internal sealed class MatrixTests_Method2_TestSource_GUID : global::TUnit.Core.I
                 "int",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "Method2",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "item",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "Method2",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "item",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
+                {
+                var classMetadata = new global::TUnit.Core.ClassMetadata
+                {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTests",
+                Namespace = "TUnit.TestProject",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+                };
+                // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                foreach (var prop in classMetadata.Properties)
+                {
+                prop.ClassMetadata = classMetadata;
+                prop.ContainingTypeMetadata = classMetadata;
+                }
+                return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -1313,45 +1313,45 @@ internal sealed class MatrixTests_Method3_TestSource_GUID : global::TUnit.Core.I
                 "int",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "Method3",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "item",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "Method3",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "item",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
+                {
+                var classMetadata = new global::TUnit.Core.ClassMetadata
+                {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTests",
+                Namespace = "TUnit.TestProject",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+                };
+                // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                foreach (var prop in classMetadata.Properties)
+                {
+                prop.ClassMetadata = classMetadata;
+                prop.ContainingTypeMetadata = classMetadata;
+                }
+                return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -1443,45 +1443,45 @@ internal sealed class MatrixTests_Method4_TestSource_GUID : global::TUnit.Core.I
                 "int",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "Method4",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "item",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method4", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "Method4",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "item",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Method4", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
+                {
+                var classMetadata = new global::TUnit.Core.ClassMetadata
+                {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTests",
+                Namespace = "TUnit.TestProject",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+                };
+                // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                foreach (var prop in classMetadata.Properties)
+                {
+                prop.ClassMetadata = classMetadata;
+                prop.ContainingTypeMetadata = classMetadata;
+                }
+                return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -1578,52 +1578,52 @@ internal sealed class MatrixTests_Exclusion_TestSource_GUID : global::TUnit.Core
                 "int",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "Exclusion",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "item",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Exclusion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int) }, null)!.GetParameters()[0]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "item2",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Exclusion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int) }, null)!.GetParameters()[1]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.MatrixTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
-Name = "MatrixTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "Exclusion",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "item",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Exclusion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int) }, null)!.GetParameters()[0]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "item2",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MatrixTests).GetMethod("Exclusion", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int) }, null)!.GetParameters()[1]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MatrixTests", () => 
+                {
+                var classMetadata = new global::TUnit.Core.ClassMetadata
+                {
+                Type = typeof(global::TUnit.TestProject.MatrixTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.MatrixTests, TestsBase`1"),
+                Name = "MatrixTests",
+                Namespace = "TUnit.TestProject",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+                };
+                // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                foreach (var prop in classMetadata.Properties)
+                {
+                prop.ClassMetadata = classMetadata;
+                prop.ContainingTypeMetadata = classMetadata;
+                }
+                return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
             TestInvoker = async (instance, args) =>
             {

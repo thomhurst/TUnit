@@ -47,80 +47,80 @@ internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSourc
                 "global::System.Object",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.GenericMethodTests, TestsBase`1"),
-Name = "AggregateBy_HasExpectedOutput",
-GenericTypeCount = 3,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "source",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[0]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "keySelector",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource"), global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[1]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "seedSelector",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[2]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "func",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate"), global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[3]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "comparer",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEqualityComparer<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey")),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[4]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "expected",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.KeyValuePair<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate"))),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[5]!
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericMethodTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.GenericMethodTests, TestsBase`1"),
-Name = "GenericMethodTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.GenericMethodTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.GenericMethodTests, TestsBase`1"),
+                Name = "AggregateBy_HasExpectedOutput",
+                GenericTypeCount = 3,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(object))
+                    {
+                        Name = "source",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource")),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[0]!
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(object))
+                    {
+                        Name = "keySelector",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource"), global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey")),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[1]!
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(object))
+                    {
+                        Name = "seedSelector",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate")),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[2]!
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(object))
+                    {
+                        Name = "func",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate"), global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate")),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[3]!
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(object))
+                    {
+                        Name = "comparer",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEqualityComparer<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey")),
+                        IsNullable = true,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[4]!
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(object))
+                    {
+                        Name = "expected",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.KeyValuePair<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate"))),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[5]!
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericMethodTests", () => 
+                {
+                var classMetadata = new global::TUnit.Core.ClassMetadata
+                {
+                Type = typeof(global::TUnit.TestProject.GenericMethodTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.GenericMethodTests, TestsBase`1"),
+                Name = "GenericMethodTests",
+                Namespace = "TUnit.TestProject",
+                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                Parent = null
+                };
+                // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                foreach (var prop in classMetadata.Properties)
+                {
+                prop.ClassMetadata = classMetadata;
+                prop.ContainingTypeMetadata = classMetadata;
+                }
+                return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.GenericMethodTests();
@@ -245,80 +245,80 @@ return classMetadata;
                     LineNumber = 8,
                     TestSessionId = testSessionId,
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.GenericMethodTests, TestsBase`1"),
-Name = "AggregateBy_HasExpectedOutput",
-GenericTypeCount = 3,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "source",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[0]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "keySelector",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource"), global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[1]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "seedSelector",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[2]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "func",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate"), global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[3]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "comparer",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEqualityComparer<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey")),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[4]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "expected",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.KeyValuePair<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate"))),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[5]!
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericMethodTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.GenericMethodTests, TestsBase`1"),
-Name = "GenericMethodTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+                    {
+                        Type = typeof(global::TUnit.TestProject.GenericMethodTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.GenericMethodTests, TestsBase`1"),
+                        Name = "AggregateBy_HasExpectedOutput",
+                        GenericTypeCount = 3,
+                        ReturnType = typeof(void),
+                        ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                        Parameters = new global::TUnit.Core.ParameterMetadata[]
+                        {
+                            new global::TUnit.Core.ParameterMetadata(typeof(object))
+                            {
+                                Name = "source",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource")),
+                                IsNullable = false,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[0]!
+                            },
+                            new global::TUnit.Core.ParameterMetadata(typeof(object))
+                            {
+                                Name = "keySelector",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource"), global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey")),
+                                IsNullable = false,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[1]!
+                            },
+                            new global::TUnit.Core.ParameterMetadata(typeof(object))
+                            {
+                                Name = "seedSelector",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate")),
+                                IsNullable = false,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[2]!
+                            },
+                            new global::TUnit.Core.ParameterMetadata(typeof(object))
+                            {
+                                Name = "func",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate"), global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate")),
+                                IsNullable = false,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[3]!
+                            },
+                            new global::TUnit.Core.ParameterMetadata(typeof(object))
+                            {
+                                Name = "comparer",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEqualityComparer<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey")),
+                                IsNullable = true,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[4]!
+                            },
+                            new global::TUnit.Core.ParameterMetadata(typeof(object))
+                            {
+                                Name = "expected",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.KeyValuePair<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate"))),
+                                IsNullable = false,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[5]!
+                            }
+                        },
+                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericMethodTests", () => 
+                        {
+                        var classMetadata = new global::TUnit.Core.ClassMetadata
+                        {
+                        Type = typeof(global::TUnit.TestProject.GenericMethodTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.GenericMethodTests, TestsBase`1"),
+                        Name = "GenericMethodTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                        };
+                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                        foreach (var prop in classMetadata.Properties)
+                        {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                        }
+                        return classMetadata;
+                        })
+                    },
                     InstanceFactory = (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.GenericMethodTests();
@@ -412,80 +412,80 @@ return classMetadata;
                     LineNumber = 8,
                     TestSessionId = testSessionId,
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.GenericMethodTests, TestsBase`1"),
-Name = "AggregateBy_HasExpectedOutput",
-GenericTypeCount = 3,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "source",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[0]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "keySelector",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource"), global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[1]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "seedSelector",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[2]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "func",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate"), global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[3]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "comparer",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEqualityComparer<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey")),
-    IsNullable = true,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[4]!
-},
-new global::TUnit.Core.ParameterMetadata(typeof(object))
-{
-    Name = "expected",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.KeyValuePair<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate"))),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[5]!
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericMethodTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.GenericMethodTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.GenericMethodTests, TestsBase`1"),
-Name = "GenericMethodTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+                    {
+                        Type = typeof(global::TUnit.TestProject.GenericMethodTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.GenericMethodTests, TestsBase`1"),
+                        Name = "AggregateBy_HasExpectedOutput",
+                        GenericTypeCount = 3,
+                        ReturnType = typeof(void),
+                        ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                        Parameters = new global::TUnit.Core.ParameterMetadata[]
+                        {
+                            new global::TUnit.Core.ParameterMetadata(typeof(object))
+                            {
+                                Name = "source",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource")),
+                                IsNullable = false,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[0]!
+                            },
+                            new global::TUnit.Core.ParameterMetadata(typeof(object))
+                            {
+                                Name = "keySelector",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource"), global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey")),
+                                IsNullable = false,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[1]!
+                            },
+                            new global::TUnit.Core.ParameterMetadata(typeof(object))
+                            {
+                                Name = "seedSelector",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate")),
+                                IsNullable = false,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[2]!
+                            },
+                            new global::TUnit.Core.ParameterMetadata(typeof(object))
+                            {
+                                Name = "func",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Func<,,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate"), global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "TSource"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate")),
+                                IsNullable = false,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[3]!
+                            },
+                            new global::TUnit.Core.ParameterMetadata(typeof(object))
+                            {
+                                Name = "comparer",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEqualityComparer<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey")),
+                                IsNullable = true,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[4]!
+                            },
+                            new global::TUnit.Core.ParameterMetadata(typeof(object))
+                            {
+                                Name = "expected",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.KeyValuePair<,>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateGenericParameter(1, true, "TKey"), global::TUnit.Core.TypeReference.CreateGenericParameter(2, true, "TAccumulate"))),
+                                IsNullable = false,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[5]!
+                            }
+                        },
+                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericMethodTests", () => 
+                        {
+                        var classMetadata = new global::TUnit.Core.ClassMetadata
+                        {
+                        Type = typeof(global::TUnit.TestProject.GenericMethodTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.GenericMethodTests, TestsBase`1"),
+                        Name = "GenericMethodTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                        };
+                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                        foreach (var prop in classMetadata.Properties)
+                        {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                        }
+                        return classMetadata;
+                        })
+                    },
                     InstanceFactory = (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.GenericMethodTests();
