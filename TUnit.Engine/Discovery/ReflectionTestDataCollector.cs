@@ -45,44 +45,41 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             MaxDegreeOfParallelism = Environment.ProcessorCount
         };
 
-        await Task.Run(() =>
+        Parallel.ForEach(assemblies.Select((assembly, index) => new
         {
-            Parallel.ForEach(assemblies.Select((assembly, index) => new
-            {
-                assembly, index
-            }), parallelOptions, item =>
-            {
-                var assembly = item.assembly;
-                var index = item.index;
+            assembly, index
+        }), parallelOptions, item =>
+        {
+            var assembly = item.assembly;
+            var index = item.index;
 
-                lock (_lock)
+            lock (_lock)
+            {
+                if (!_scannedAssemblies.Add(assembly))
                 {
-                    if (!_scannedAssemblies.Add(assembly))
-                    {
-                        resultsByIndex[index] =
-                        [
-                        ];
-                        return;
-                    }
-                }
-
-                try
-                {
-                    Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
-                    // Run async method synchronously since we're already on thread pool
-                    var testsInAssembly = DiscoverTestsInAssembly(assembly).GetAwaiter().GetResult();
-                    resultsByIndex[index] = testsInAssembly.ToList();
-                }
-                catch (Exception ex)
-                {
-                    // Create a failed test metadata for the assembly that couldn't be scanned
-                    var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
                     resultsByIndex[index] =
                     [
-                        failedTest
                     ];
+                    return;
                 }
-            });
+            }
+
+            try
+            {
+                Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
+                // Run async method synchronously since we're in parallel processing context
+                var testsInAssembly = DiscoverTestsInAssembly(assembly).ConfigureAwait(false).GetAwaiter().GetResult();
+                resultsByIndex[index] = testsInAssembly.ToList();
+            }
+            catch (Exception ex)
+            {
+                // Create a failed test metadata for the assembly that couldn't be scanned
+                var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
+                resultsByIndex[index] =
+                [
+                    failedTest
+                ];
+            }
         });
 
         // Reassemble results in original order

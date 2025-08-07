@@ -40,27 +40,24 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             MaxDegreeOfParallelism = Environment.ProcessorCount
         };
 
-        await Task.Run(() =>
-        {
-            Parallel.ForEach(testSourcesList.Select((source, index) => new { source, index }),
-                parallelOptions, item =>
-                {
-                    var index = item.index;
-                    var testSource = item.source;
+        Parallel.ForEach(testSourcesList.Select((source, index) => new { source, index }),
+            parallelOptions, item =>
+            {
+                var index = item.index;
+                var testSource = item.source;
 
-                    try
-                    {
-                        // Run async method synchronously since we're already on thread pool
-                        var tests = testSource.GetTestsAsync(testSessionId).GetAwaiter().GetResult();
-                        resultsByIndex[index] = tests;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException(
-                            $"Failed to collect tests from source {testSource.GetType().Name}: {ex.Message}", ex);
-                    }
-                });
-        });
+                try
+                {
+                    // Run async method synchronously since we're in parallel processing context
+                    var tests = testSource.GetTestsAsync(testSessionId).ConfigureAwait(false).GetAwaiter().GetResult();
+                    resultsByIndex[index] = tests;
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException(
+                        $"Failed to collect tests from source {testSource.GetType().Name}: {ex.Message}", ex);
+                }
+            });
 
         // Reassemble results in original order
         var allTests = new List<TestMetadata>();
@@ -106,34 +103,31 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             MaxDegreeOfParallelism = Environment.ProcessorCount
         };
 
-        await Task.Run(() =>
-        {
-            Parallel.ForEach(dynamicSourcesList.Select((source, index) => new { source, index }),
-                parallelOptions, item =>
-                {
-                    var index = item.index;
-                    var source = item.source;
-                    var testsForSource = new List<TestMetadata>();
+        Parallel.ForEach(dynamicSourcesList.Select((source, index) => new { source, index }),
+            parallelOptions, item =>
+            {
+                var index = item.index;
+                var source = item.source;
+                var testsForSource = new List<TestMetadata>();
 
-                    try
+                try
+                {
+                    var dynamicTests = source.CollectDynamicTests(testSessionId);
+                    foreach (var dynamicTest in dynamicTests)
                     {
-                        var dynamicTests = source.CollectDynamicTests(testSessionId);
-                        foreach (var dynamicTest in dynamicTests)
-                        {
-                            // Convert each dynamic test to test metadata
-                            var metadataList = ConvertDynamicTestToMetadata(dynamicTest).GetAwaiter().GetResult();
-                            testsForSource.AddRange(metadataList);
-                        }
-                        resultsByIndex[index] = testsForSource;
+                        // Convert each dynamic test to test metadata
+                        var metadataList = ConvertDynamicTestToMetadata(dynamicTest).ConfigureAwait(false).GetAwaiter().GetResult();
+                        testsForSource.AddRange(metadataList);
                     }
-                    catch (Exception ex)
-                    {
-                        // Create a failed test metadata for this dynamic test source
-                        var failedTest = CreateFailedTestMetadataForDynamicSource(source, ex);
-                        resultsByIndex[index] = [failedTest];
-                    }
-                });
-        });
+                    resultsByIndex[index] = testsForSource;
+                }
+                catch (Exception ex)
+                {
+                    // Create a failed test metadata for this dynamic test source
+                    var failedTest = CreateFailedTestMetadataForDynamicSource(source, ex);
+                    resultsByIndex[index] = [failedTest];
+                }
+            });
 
         // Reassemble results in original order
         for (var i = 0; i < dynamicSourcesList.Count; i++)

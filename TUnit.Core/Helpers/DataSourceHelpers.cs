@@ -423,7 +423,7 @@ public static class DataSourceHelpers
         
         // Use the creator to create and initialize the instance
         var task = creator(testInformation, testSessionId);
-        createdInstance = task.GetAwaiter().GetResult();
+        createdInstance = task.ConfigureAwait(false).GetAwaiter().GetResult();
         return true;
     }
     
