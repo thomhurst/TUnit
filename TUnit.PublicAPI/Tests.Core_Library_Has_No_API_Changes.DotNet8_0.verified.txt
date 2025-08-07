@@ -906,7 +906,7 @@ namespace
         public string MethodNameProvidingDataSource { get; }
         [.("AOT", "IL2072:UnrecognizedReflectionPattern", Justification="Data source methods use dynamic patterns")]
         [.("AOT", "IL2075:UnrecognizedReflectionPattern", Justification="Data source methods use dynamic patterns")]
-        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__17))]
+        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__19))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]

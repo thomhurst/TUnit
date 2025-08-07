@@ -844,7 +844,7 @@ namespace
         public ? ClassProvidingDataSource { get; }
         public <.DataGeneratorMetadata, .<<.<object?[]?>>>>? Factory { get; set; }
         public string MethodNameProvidingDataSource { get; }
-        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__17))]
+        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__19))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
