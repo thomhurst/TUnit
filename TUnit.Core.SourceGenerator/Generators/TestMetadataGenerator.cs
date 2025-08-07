@@ -1568,7 +1568,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (isAsync)
         {
-            writer.AppendLine("if (result is Task task)");
+            writer.AppendLine("if (result is global::System.Threading.Tasks.Task task)");
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("await task;");
