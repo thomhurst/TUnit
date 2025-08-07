@@ -889,10 +889,19 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
     [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
     private static Func<object?[], object> CreateReflectionInstanceFactory(ConstructorInfo ctor)
     {
+        var isPrepared = false;
+        
         return args =>
         {
             try
             {
+                // Pre-JIT on first actual invocation for better performance
+                if (!isPrepared)
+                {
+                    System.Runtime.CompilerServices.RuntimeHelpers.PrepareMethod(ctor.MethodHandle);
+                    isPrepared = true;
+                }
+                
                 // Cast arguments to the expected parameter types
                 var parameters = ctor.GetParameters();
                 var castedArgs = new object?[parameters.Length];
@@ -1082,12 +1091,21 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "Reflection mode cannot support AOT")]
     private static Func<object, object?[], Task> CreateReflectionTestInvoker(Type testClass, MethodInfo testMethod)
     {
+        var isPrepared = false;
+        
         return (instance, args) =>
         {
             try
             {
                 // Get the method to invoke - may need to make it concrete if it's generic
                 var methodToInvoke = testMethod;
+                
+                // Pre-JIT on first actual invocation for better performance
+                if (!isPrepared && !testMethod.IsGenericMethodDefinition)
+                {
+                    System.Runtime.CompilerServices.RuntimeHelpers.PrepareMethod(testMethod.MethodHandle);
+                    isPrepared = true;
+                }
 
                 // If the method is a generic method definition, we need to make it concrete
                 if (testMethod.IsGenericMethodDefinition)
@@ -1125,6 +1143,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                     }
 
                     methodToInvoke = testMethod.MakeGenericMethod(typeArguments);
+                    
+                    // Pre-JIT the constructed generic method on first invocation
+                    System.Runtime.CompilerServices.RuntimeHelpers.PrepareMethod(methodToInvoke.MethodHandle);
                 }
 
                 // Cast arguments to the expected parameter types
