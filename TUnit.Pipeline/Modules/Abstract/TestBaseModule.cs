@@ -44,18 +44,8 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 
     private DotNetRunOptions SetDefaults(DotNetRunOptions testOptions)
     {
-        if (testOptions.Arguments?.Any(x => x == "--fail-fast") != true)
-        {
-            testOptions = testOptions with
-            {
-                Arguments =
-                [
-                    ..testOptions.Arguments ?? [],
-                    "--fail-fast",
-                ]
-            };
-        }
-
+        // Removed --fail-fast to allow all tests to run even if some fail
+        
         if (testOptions.EnvironmentVariables?.Any(x => x.Key == "NET_VERSION") != true)
         {
             testOptions = testOptions with
