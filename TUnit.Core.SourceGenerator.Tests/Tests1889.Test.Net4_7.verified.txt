@@ -41,36 +41,36 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
             {
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
-TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("TUnit.TestProject.Library.Bugs._1889.BaseTest<>, TestsBase`1", global::TUnit.Core.TypeReference.CreateConcrete("DummyReferenceTypeClass, TestsBase`1")),
-Name = "Test1",
-GenericTypeCount = 0,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1889.DerivedTest, TestsBase`1"),
-Name = "DerivedTest",
-Namespace = "TUnit.TestProject.Bugs._1889",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("TUnit.TestProject.Library.Bugs._1889.BaseTest<>, TestsBase`1", global::TUnit.Core.TypeReference.CreateConcrete("DummyReferenceTypeClass, TestsBase`1")),
+                Name = "Test1",
+                GenericTypeCount = 0,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1889.DerivedTest, TestsBase`1"),
+                        Name = "DerivedTest",
+                        Namespace = "TUnit.TestProject.Bugs._1889",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1889.DerivedTest(),
             TestInvoker = async (instance, args) =>
             {
@@ -149,45 +149,45 @@ internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Int
                 "bool",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
-TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("TUnit.TestProject.Library.Bugs._1889.BaseTest<>, TestsBase`1", global::TUnit.Core.TypeReference.CreateConcrete("DummyReferenceTypeClass, TestsBase`1")),
-Name = "Test2",
-GenericTypeCount = 0,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(bool))
-{
-    Name = "condition",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1889.DerivedTest, TestsBase`1"),
-Name = "DerivedTest",
-Namespace = "TUnit.TestProject.Bugs._1889",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("TUnit.TestProject.Library.Bugs._1889.BaseTest<>, TestsBase`1", global::TUnit.Core.TypeReference.CreateConcrete("DummyReferenceTypeClass, TestsBase`1")),
+                Name = "Test2",
+                GenericTypeCount = 0,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(bool))
+                    {
+                        Name = "condition",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1889.DerivedTest, TestsBase`1"),
+                        Name = "DerivedTest",
+                        Namespace = "TUnit.TestProject.Bugs._1889",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1889.DerivedTest(),
             TestInvoker = async (instance, args) =>
             {
@@ -284,45 +284,45 @@ internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Int
                 "bool",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
-TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("TUnit.TestProject.Library.Bugs._1889.BaseTest<>, TestsBase`1", global::TUnit.Core.TypeReference.CreateConcrete("DummyReferenceTypeClass, TestsBase`1")),
-Name = "Test3",
-GenericTypeCount = 0,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(bool))
-{
-    Name = "condition",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1889.DerivedTest, TestsBase`1"),
-Name = "DerivedTest",
-Namespace = "TUnit.TestProject.Bugs._1889",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("TUnit.TestProject.Library.Bugs._1889.BaseTest<>, TestsBase`1", global::TUnit.Core.TypeReference.CreateConcrete("DummyReferenceTypeClass, TestsBase`1")),
+                Name = "Test3",
+                GenericTypeCount = 0,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(bool))
+                    {
+                        Name = "condition",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1889.DerivedTest, TestsBase`1"),
+                        Name = "DerivedTest",
+                        Namespace = "TUnit.TestProject.Bugs._1889",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1889.DerivedTest(),
             TestInvoker = async (instance, args) =>
             {
