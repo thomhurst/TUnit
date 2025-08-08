@@ -59,7 +59,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var outputDevice = frameworkServiceProvider.GetOutputDevice();
         CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
         var configuration = frameworkServiceProvider.GetConfiguration();
-        
+
         TestContext.Configuration = new ConfigurationAdapter(configuration);
 
         VerbosityService = Register(new VerbosityService(CommandLineOptions));
@@ -129,7 +129,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create single test executor with ExecutionContext support
         var singleTestExecutor = Register<ISingleTestExecutor>(
-            new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService, context.Request.Session.SessionUid));
+            new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService, CancellationToken, context.Request.Session.SessionUid));
 
         // Create the HookOrchestratingTestExecutorAdapter
         // Note: We'll need to update this to handle dynamic dependencies properly
