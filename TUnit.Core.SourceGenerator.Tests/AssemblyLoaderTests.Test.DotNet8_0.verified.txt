@@ -7,9 +7,8 @@
 namespace TUnit.Generated;
 internal sealed class BasicTests_SynchronousTest_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.BasicTests>
         {
             TestName = "SynchronousTest",
@@ -84,8 +83,8 @@ internal sealed class BasicTests_SynchronousTest_TestSource_GUID : global::TUnit
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class BasicTests_SynchronousTest_ModuleInitializer_GUID
@@ -109,9 +108,8 @@ internal static class BasicTests_SynchronousTest_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class BasicTests_AsynchronousTest_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.BasicTests>
         {
             TestName = "AsynchronousTest",
@@ -184,8 +182,8 @@ internal sealed class BasicTests_AsynchronousTest_TestSource_GUID : global::TUni
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class BasicTests_AsynchronousTest_ModuleInitializer_GUID
@@ -209,9 +207,8 @@ internal static class BasicTests_AsynchronousTest_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class BasicTests_ValueTaskAsynchronousTest_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.BasicTests>
         {
             TestName = "ValueTaskAsynchronousTest",
@@ -284,8 +281,8 @@ internal sealed class BasicTests_ValueTaskAsynchronousTest_TestSource_GUID : glo
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class BasicTests_ValueTaskAsynchronousTest_ModuleInitializer_GUID

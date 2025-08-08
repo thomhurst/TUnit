@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
@@ -38,7 +39,13 @@ public static class DataSourceProcessor
         
         if (data != null)
         {
-            items.Add(data.Cast<object?>().ToArray());
+            // Direct allocation - ArrayPool doesn't help here since we need to keep the array
+            var array = new object?[data.Length];
+            for (int i = 0; i < data.Length; i++)
+            {
+                array[i] = data[i];
+            }
+            items.Add(array);
         }
         
         return items;
@@ -269,7 +276,10 @@ public static class DataSourceProcessor
             
             if (items.Count > 0)
             {
-                yield return items.ToArray();
+                // Optimize: Use pre-sized array instead of ToArray()
+                var itemArray = new object?[items.Count];
+                items.CopyTo(itemArray, 0);
+                yield return itemArray;
             }
             yield break;
         }
@@ -296,7 +306,12 @@ public static class DataSourceProcessor
             {
                 var tupleType = item.GetType();
                 var fields = GetTupleFields(tupleType);
-                var values = fields.Select(f => f.GetValue(item)).ToArray();
+                // Optimize: Pre-allocate array instead of LINQ Select().ToArray()
+                var values = new object?[fields.Length];
+                for (int i = 0; i < fields.Length; i++)
+                {
+                    values[i] = fields[i].GetValue(item);
+                }
                 yield return values;
             }
         }
@@ -312,7 +327,13 @@ public static class DataSourceProcessor
     private static object?[] ProcessSingleTuple(object result, Type resultType)
     {
         var fields = GetTupleFields(resultType);
-        return fields.Select(f => f.GetValue(result)).ToArray();
+        // Optimize: Pre-allocate array instead of LINQ Select().ToArray()
+        var values = new object?[fields.Length];
+        for (int i = 0; i < fields.Length; i++)
+        {
+            values[i] = fields[i].GetValue(result);
+        }
+        return values;
     }
 
     #endregion

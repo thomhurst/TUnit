@@ -1,3 +1,4 @@
+using System.Buffers;
 using TUnit.Core;
 
 namespace TUnit.Engine.Scheduling;
@@ -32,15 +33,24 @@ internal sealed class ExecutionPlan
     public static ExecutionPlan Create(IEnumerable<AbstractExecutableTest> tests)
     {
         var allTests = tests.ToList();
+        var testCount = allTests.Count;
+        
+        // Pre-size collections based on test count to reduce allocations
         var executableTests = new HashSet<AbstractExecutableTest>();
-        var dependencyGraph = new Dictionary<AbstractExecutableTest, List<AbstractExecutableTest>>();
-        var dependentGraph = new Dictionary<AbstractExecutableTest, List<AbstractExecutableTest>>();
-        var executionOrder = new Dictionary<AbstractExecutableTest, int>();
+        var dependencyGraph = new Dictionary<AbstractExecutableTest, List<AbstractExecutableTest>>(testCount);
+        var dependentGraph = new Dictionary<AbstractExecutableTest, List<AbstractExecutableTest>>(testCount);
+        var executionOrder = new Dictionary<AbstractExecutableTest, int>(testCount);
 
         // Build dependency graphs
         foreach (var test in allTests)
         {
-            dependencyGraph[test] = test.Dependencies.Select(rd => rd.Test).ToList();
+            // Pre-allocate list with known size to avoid resizing
+            var dependencies = new List<AbstractExecutableTest>(test.Dependencies.Length);
+            foreach (var resolvedDep in test.Dependencies)
+            {
+                dependencies.Add(resolvedDep.Test);
+            }
+            dependencyGraph[test] = dependencies;
 
             foreach (var resolvedDep in test.Dependencies)
             {
@@ -56,7 +66,7 @@ internal sealed class ExecutionPlan
 
         // Create topological order for execution
         var visited = new HashSet<AbstractExecutableTest>();
-        var topologicalOrder = new List<AbstractExecutableTest>();
+        var topologicalOrder = new List<AbstractExecutableTest>(testCount);
 
         foreach (var test in allTests)
         {

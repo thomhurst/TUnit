@@ -6,6 +6,7 @@ using TUnit.Core;
 using TUnit.Core.Services;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Framework;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
@@ -162,17 +163,17 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
         var config = SchedulerConfiguration.Default;
 
         // Check environment variables first (can be overridden by command-line)
-        if (int.TryParse(Environment.GetEnvironmentVariable("TUNIT_ADAPTIVE_MIN_PARALLELISM"), out var envMinParallelism) && envMinParallelism > 0)
+        if (int.TryParse(EnvironmentVariableCache.Get("TUNIT_ADAPTIVE_MIN_PARALLELISM"), out var envMinParallelism) && envMinParallelism > 0)
         {
             config.AdaptiveMinParallelism = envMinParallelism;
         }
 
-        if (int.TryParse(Environment.GetEnvironmentVariable("TUNIT_ADAPTIVE_MAX_PARALLELISM"), out var envMaxParallelism) && envMaxParallelism > 0)
+        if (int.TryParse(EnvironmentVariableCache.Get("TUNIT_ADAPTIVE_MAX_PARALLELISM"), out var envMaxParallelism) && envMaxParallelism > 0)
         {
             config.AdaptiveMaxParallelism = envMaxParallelism;
         }
 
-        if (bool.TryParse(Environment.GetEnvironmentVariable("TUNIT_ADAPTIVE_METRICS"), out var envMetrics))
+        if (bool.TryParse(EnvironmentVariableCache.Get("TUNIT_ADAPTIVE_METRICS"), out var envMetrics))
         {
             config.EnableAdaptiveMetrics = envMetrics;
         }

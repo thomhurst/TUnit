@@ -14,7 +14,7 @@ internal static class DiscoveryDiagnostics
     ];
     private static VerbosityService? _verbosityService;
 
-    public static bool IsEnabled { get; set; } = Environment.GetEnvironmentVariable("TUNIT_DISCOVERY_DIAGNOSTICS") == "1";
+    public static bool IsEnabled { get; set; } = EnvironmentVariableCache.Get("TUNIT_DISCOVERY_DIAGNOSTICS") == "1";
 
     public static void Initialize(VerbosityService verbosityService)
     {
