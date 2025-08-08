@@ -7,7 +7,6 @@ using TUnit.Core;
 using TUnit.Engine.Building;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Services;
-using TUnit.Engine.Scheduling;
 
 namespace TUnit.Engine;
 
@@ -77,9 +76,6 @@ internal sealed class TestDiscoveryService : IDataProducer
         
         // Check for circular dependencies and mark failed tests
         _dependencyResolver.CheckForCircularDependencies();
-        
-        // Create execution plan for ordering
-        var executionPlan = ExecutionPlan.Create(tests);
         
         // Apply filter first to get the tests we want to run
         var filteredTests = _testFilterService.FilterTests(filter, tests);

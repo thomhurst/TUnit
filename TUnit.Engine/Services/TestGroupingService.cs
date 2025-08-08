@@ -18,8 +18,8 @@ internal sealed class TestGroupingService : ITestGroupingService
     {
         // Use collection directly if already materialized, otherwise create efficient list
         var allTests = tests as IReadOnlyList<AbstractExecutableTest> ?? tests.ToList();
-        var notInParallelQueue = new PriorityQueue<AbstractExecutableTest, TestPriority>();
-        var keyedNotInParallelQueues = new Dictionary<string, PriorityQueue<AbstractExecutableTest, TestPriority>>();
+        var notInParallelList = new List<(AbstractExecutableTest Test, TestPriority Priority)>();
+        var keyedNotInParallelLists = new Dictionary<string, List<(AbstractExecutableTest Test, TestPriority Priority)>>();
         var parallelTests = new List<AbstractExecutableTest>();
         var parallelGroups = new Dictionary<string, SortedDictionary<int, List<AbstractExecutableTest>>>();
 
@@ -30,7 +30,7 @@ internal sealed class TestGroupingService : ITestGroupingService
             switch (constraint)
             {
                 case NotInParallelConstraint notInParallel:
-                    ProcessNotInParallelConstraint(test, notInParallel, notInParallelQueue, keyedNotInParallelQueues);
+                    ProcessNotInParallelConstraint(test, notInParallel, notInParallelList, keyedNotInParallelLists);
                     break;
                     
                 case ParallelGroupConstraint parallelGroup:
@@ -43,12 +43,32 @@ internal sealed class TestGroupingService : ITestGroupingService
             }
         }
 
+        // Sort the NotInParallel tests by priority and extract just the tests
+        notInParallelList.Sort((a, b) => a.Priority.CompareTo(b.Priority));
+        var sortedNotInParallel = notInParallelList.Select(t => t.Test).ToArray();
+        
+        // Sort keyed lists by priority and convert to array of tuples
+        var keyedArrays = keyedNotInParallelLists.Select(kvp =>
+        {
+            kvp.Value.Sort((a, b) => a.Priority.CompareTo(b.Priority));
+            return (kvp.Key, kvp.Value.Select(t => t.Test).ToArray());
+        }).ToArray();
+        
+        // Convert parallel groups to array of tuples
+        var parallelGroupArrays = parallelGroups.Select(kvp =>
+        {
+            var orderedTests = kvp.Value.Select(orderKvp => 
+                (orderKvp.Key, orderKvp.Value.ToArray())
+            ).ToArray();
+            return (kvp.Key, orderedTests);
+        }).ToArray();
+
         var result = new GroupedTests
         {
-            Parallel = parallelTests,
-            NotInParallel = notInParallelQueue,
-            KeyedNotInParallel = keyedNotInParallelQueues,
-            ParallelGroups = parallelGroups
+            Parallel = parallelTests.ToArray(),
+            NotInParallel = sortedNotInParallel,
+            KeyedNotInParallel = keyedArrays,
+            ParallelGroups = parallelGroupArrays
         };
 
         return new ValueTask<GroupedTests>(result);
@@ -57,8 +77,8 @@ internal sealed class TestGroupingService : ITestGroupingService
     private static void ProcessNotInParallelConstraint(
         AbstractExecutableTest test, 
         NotInParallelConstraint constraint,
-        PriorityQueue<AbstractExecutableTest, TestPriority> notInParallelQueue,
-        Dictionary<string, PriorityQueue<AbstractExecutableTest, TestPriority>> keyedQueues)
+        List<(AbstractExecutableTest Test, TestPriority Priority)> notInParallelList,
+        Dictionary<string, List<(AbstractExecutableTest Test, TestPriority Priority)>> keyedLists)
     {
         var order = constraint.Order;
         var priority = test.Context.ExecutionPriority;
@@ -67,18 +87,18 @@ internal sealed class TestGroupingService : ITestGroupingService
         
         if (constraint.NotInParallelConstraintKeys.Count == 0)
         {
-            notInParallelQueue.Enqueue(test, testPriority);
+            notInParallelList.Add((test, testPriority));
         }
         else
         {
             foreach (var key in constraint.NotInParallelConstraintKeys)
             {
-                if (!keyedQueues.TryGetValue(key, out var queue))
+                if (!keyedLists.TryGetValue(key, out var list))
                 {
-                    queue = new PriorityQueue<AbstractExecutableTest, TestPriority>();
-                    keyedQueues[key] = queue;
+                    list = new List<(AbstractExecutableTest Test, TestPriority Priority)>();
+                    keyedLists[key] = list;
                 }
-                queue.Enqueue(test, testPriority);
+                list.Add((test, testPriority));
             }
         }
     }
