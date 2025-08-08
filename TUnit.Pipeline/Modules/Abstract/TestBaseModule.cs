@@ -44,31 +44,16 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 
     private DotNetRunOptions SetDefaults(DotNetRunOptions testOptions)
     {
-        // Add quiet verbosity to reduce output for successful test runs
-        var arguments = testOptions.Arguments?.ToList() ?? [];
-        
-        // Add TUnit verbosity control (only if not already specified)
-        if (!arguments.Any(arg => arg.StartsWith("--verbosity")))
-        {
-            arguments.AddRange(["--verbosity", "minimal"]);
-        }
+        // Removed --fail-fast to allow all tests to run even if some fail
         
         if (testOptions.EnvironmentVariables?.Any(x => x.Key == "NET_VERSION") != true)
         {
             testOptions = testOptions with
             {
-                Arguments = [.. arguments],
                 EnvironmentVariables = new Dictionary<string, string?>
                 {
                     ["NET_VERSION"] = testOptions.Framework,
                 }
-            };
-        }
-        else
-        {
-            testOptions = testOptions with
-            {
-                Arguments = [.. arguments]
             };
         }
 

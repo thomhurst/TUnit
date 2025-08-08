@@ -5,9 +5,18 @@ public class GlobalHooks
     [Before(TestSession)]
     public static async Task BuildTestProject()
     {
-        await CliWrap.Cli.Wrap("dotnet")
+        var result = await CliWrap.Cli.Wrap("dotnet")
             .WithArguments(["build", "-c", "Release"])
             .WithWorkingDirectory(FileSystemHelpers.FindFile(x => x.Name == "TUnit.TestProject.csproj")!.DirectoryName!)
-            .ExecuteAsync();
+            .WithValidation(CliWrap.CommandResultValidation.None)
+            .ExecuteBufferedAsync();
+
+        // Only show output if the command failed
+        if (result.ExitCode != 0)
+        {
+            Console.WriteLine(result.StandardOutput);
+            Console.Error.WriteLine(result.StandardError);
+            throw new InvalidOperationException($"Build failed with exit code {result.ExitCode}");
+        }
     }
 }
