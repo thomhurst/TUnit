@@ -4,6 +4,7 @@ using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using TUnit.Pipeline.Extensions;
 
 namespace TUnit.Pipeline.Modules;
 
@@ -16,28 +17,28 @@ public class TestTemplatePackageModule : Module<CommandResult>
     {
         var version = await GetModule<GenerateVersionModule>();
 
-        await context.DotNet().New(new DotNetNewOptions("uninstall")
+        await context.DotNet().NewQuiet(new DotNetNewOptions("uninstall")
         {
             Arguments = ["TUnit.Templates"],
             ThrowOnNonZeroExitCode = false
         }, cancellationToken);
 
-        await context.DotNet().New(new DotNetNewOptions("install")
+        await context.DotNet().NewQuiet(new DotNetNewOptions("install")
         {
             Arguments = [$"TUnit.Templates::{version.Value!.SemVer}"]
         }, cancellationToken);
 
-        await context.DotNet().New(new DotNetNewOptions("TUnit")
+        await context.DotNet().NewQuiet(new DotNetNewOptions("TUnit")
         {
             Name = "MyTestProject"
         }, cancellationToken);
 
-        await context.DotNet().New(new DotNetNewOptions("TUnit.AspNet")
+        await context.DotNet().NewQuiet(new DotNetNewOptions("TUnit.AspNet")
         {
             Name = "MyTestProject2"
         }, cancellationToken);
 
-        return await context.DotNet().New(new DotNetNewOptions("TUnit.Playwright")
+        return await context.DotNet().NewQuiet(new DotNetNewOptions("TUnit.Playwright")
         {
             Name = "MyTestProject3"
         }, cancellationToken);

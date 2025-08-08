@@ -8,6 +8,7 @@ using ModularPipelines.Git.Attributes;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using TUnit.Pipeline.Extensions;
 
 namespace TUnit.Pipeline.Modules;
 
@@ -40,7 +41,7 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
             .GetFiles(x => x.Extension is ".nupkg");
 
         return await nupkgs.SelectAsync(file =>
-                context.DotNet().Nuget.Push(new DotNetNugetPushOptions(file)
+                context.DotNet().NugetPushQuiet(new DotNetNugetPushOptions(file)
                 {
                     Source = "https://api.nuget.org/v3/index.json",
                     ApiKey = options.Value.ApiKey

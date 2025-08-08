@@ -4,6 +4,7 @@ using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using TUnit.Pipeline.Extensions;
 
 namespace TUnit.Pipeline.Modules;
 
@@ -27,7 +28,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         foreach (var project in projects.Value!)
         {
             await context.DotNet()
-                .Pack(
+                .PackQuiet(
                     new DotNetPackOptions(project)
                     {
                         Properties =

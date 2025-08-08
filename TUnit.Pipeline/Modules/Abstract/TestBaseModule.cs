@@ -4,6 +4,7 @@ using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using TUnit.Pipeline.Extensions;
 
 namespace TUnit.Pipeline.Modules.Abstract;
 
@@ -33,7 +34,7 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
             {
                 var testOptions = SetDefaults(await GetTestOptions(context, framework, cancellationToken));
 
-                return await context.DotNet().Run(testOptions, cancellationToken);
+                return await context.DotNet().RunQuiet(testOptions, cancellationToken);
             });
 
             results.Add(testResult);

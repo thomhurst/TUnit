@@ -17,5 +17,6 @@
     <PackageReference Include="Sourcy.DotNet" />
     <PackageReference Include="Sourcy.Git" />
     <PackageReference Include="System.CommandLine" />
+    <PackageReference Include="CliWrap" />
   </ItemGroup>
 </Project>

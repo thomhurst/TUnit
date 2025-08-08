@@ -6,6 +6,7 @@ using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
+using TUnit.Pipeline.Extensions;
 
 namespace TUnit.Pipeline.Modules;
 
@@ -16,7 +17,7 @@ public class RunAnalyzersTestsModule : Module<CommandResult>
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Analyzers.Tests.csproj").AssertExists();
 
-        return await context.DotNet().Test(new DotNetTestOptions(project)
+        return await context.DotNet().TestQuiet(new DotNetTestOptions(project)
         {
             NoBuild = true,
             Configuration = Configuration.Release,
