@@ -1,4 +1,6 @@
-﻿namespace TUnit.Engine.Tests;
+﻿using CliWrap.Buffered;
+
+namespace TUnit.Engine.Tests;
 
 public class GlobalHooks
 {
@@ -6,7 +8,7 @@ public class GlobalHooks
     public static async Task BuildTestProject()
     {
         var result = await CliWrap.Cli.Wrap("dotnet")
-            .WithArguments(["build", "-c", "Release"])
+            .WithArguments(["build", "-c", GetConfiguration(), "--no-restore"])
             .WithWorkingDirectory(FileSystemHelpers.FindFile(x => x.Name == "TUnit.TestProject.csproj")!.DirectoryName!)
             .WithValidation(CliWrap.CommandResultValidation.None)
             .ExecuteBufferedAsync();
@@ -18,5 +20,13 @@ public class GlobalHooks
             Console.Error.WriteLine(result.StandardError);
             throw new InvalidOperationException($"Build failed with exit code {result.ExitCode}");
         }
+    }
+
+    private static string GetConfiguration()
+    {
+        var isCi = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true" ||
+                   Environment.GetEnvironmentVariable("CI") == "true";
+
+        return isCi ? "Release" : "Debug";
     }
 }
