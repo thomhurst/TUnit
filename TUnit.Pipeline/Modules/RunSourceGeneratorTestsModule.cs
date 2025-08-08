@@ -24,7 +24,6 @@ public class RunSourceGeneratorTestsModule : TestBaseModule
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",
             },
-            Arguments = ["--", "--fail-fast"]
         });
     }
 }
