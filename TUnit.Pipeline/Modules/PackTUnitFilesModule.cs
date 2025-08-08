@@ -39,6 +39,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                         ],
                         IncludeSource = project == Sourcy.DotNet.Projects.TUnit_Templates ? false : true,
                         Configuration = Configuration.Release,
+                        Verbosity = "quiet", // Reduce output for successful packs
                     }, cancellationToken);
 
             packedProjects.Add(new PackedProject(project.NameWithoutExtension, version.SemVer!));

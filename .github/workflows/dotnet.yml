@@ -64,7 +64,7 @@ jobs:
         run: npx playwright install
 
       - name: Build
-        run: dotnet build -c Release
+        run: dotnet build -c Release --verbosity quiet
 
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
