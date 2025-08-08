@@ -2,6 +2,7 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.Enums;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 
@@ -56,6 +57,12 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
                 }
             };
         }
+
+        // Suppress output for successful operations, but show errors and basic info
+        testOptions = testOptions with
+        {
+            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+        };
 
         return testOptions;
     }
