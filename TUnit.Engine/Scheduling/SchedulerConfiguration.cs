@@ -38,9 +38,9 @@ public sealed class SchedulerConfiguration
 
     /// <summary>
     /// Maximum parallelism for adaptive strategy
-    /// Default: unlimited unless explicitly set via command-line or environment variable
+    /// Default: 64x processor count for I/O-bound tests (can be overridden via command-line or environment variable)
     /// </summary>
-    public int AdaptiveMaxParallelism { get; set; } = int.MaxValue;
+    public int AdaptiveMaxParallelism { get; set; } = Environment.ProcessorCount * 64;
 
     /// <summary>
     /// Enable detailed metrics logging for adaptive strategy

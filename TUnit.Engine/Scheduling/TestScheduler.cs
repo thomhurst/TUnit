@@ -64,12 +64,22 @@ internal sealed class TestScheduler : ITestScheduler
         var completedTests = new ConcurrentDictionary<AbstractExecutableTest, bool>();
 
         // Determine parallelism level
-        int? maxParallelism = null;
-        if (_configuration.Strategy != ParallelismStrategy.Adaptive)
+        int? maxParallelism;
+        if (_configuration.Strategy == ParallelismStrategy.Adaptive)
         {
+            // For adaptive strategy, use a sensible default based on processor count
+            // This prevents unlimited concurrency which causes thread pool exhaustion
+            // Use the configured AdaptiveMaxParallelism value
+            maxParallelism = _configuration.AdaptiveMaxParallelism;
+
+            // Ensure we respect the minimum
+            maxParallelism = Math.Max(maxParallelism.Value, _configuration.AdaptiveMinParallelism);
+        }
+        else
+        {
+            // Fixed strategy uses the configured max parallelism
             maxParallelism = _configuration.MaxParallelism > 0 ? _configuration.MaxParallelism : Environment.ProcessorCount * 4;
         }
-        // For adaptive, we pass null to let EnumerableAsyncProcessor manage concurrency
 
         // Process all test groups
         var allTestTasks = new List<Task>();
@@ -223,19 +233,16 @@ internal sealed class TestScheduler : ITestScheduler
         // Execute order groups sequentially
         foreach (var orderGroup in orderGroups.OrderBy(og => og.Key))
         {
-            // Use EnumerableAsyncProcessor to execute tests in parallel
-            if (maxParallelism.HasValue)
+            var processor = orderGroup.Value
+                .ForEachAsync(async test => await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken));
+
+            if (maxParallelism is > 0)
             {
-                await orderGroup.Value
-                    .ForEachAsync(async test => await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken))
-                    .ProcessInParallel(maxParallelism.Value);
+                await processor.ProcessInParallel(maxParallelism.Value);
             }
             else
             {
-                // Adaptive parallelism - no limit specified
-                await orderGroup.Value
-                    .ForEachAsync(async test => await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken))
-                    .ProcessInParallel();
+                await processor.ProcessInParallelUnbounded();
             }
         }
     }
@@ -247,19 +254,16 @@ internal sealed class TestScheduler : ITestScheduler
         int? maxParallelism,
         CancellationToken cancellationToken)
     {
-        // Use EnumerableAsyncProcessor to execute tests in parallel
-        if (maxParallelism.HasValue)
+        var processor = tests
+            .ForEachAsync(async test => await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken));
+
+        if (maxParallelism is > 0)
         {
-            await tests
-                .ForEachAsync(async test => await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken))
-                .ProcessInParallel(maxParallelism.Value);
+            await processor.ProcessInParallel(maxParallelism.Value);
         }
         else
         {
-            // Adaptive parallelism - no limit specified
-            await tests
-                .ForEachAsync(async test => await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken))
-                .ProcessInParallel();
+            await processor.ProcessInParallelUnbounded();
         }
     }
 
