@@ -114,8 +114,17 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
                 // Execute the test and get the result message
                 var updateMessage = await _innerExecutor.ExecuteTestAsync(test, cancellationToken);
 
-                // Route the result to the appropriate ITUnitMessageBus method
-                await RouteTestResult(test, updateMessage);
+                try
+                {
+                    // Execute cleanup hooks (After/AfterEvery for Test/Class/Assembly)
+                    await _hookOrchestrator.OnTestCompletedAsync(test, cancellationToken);
+                }
+                finally
+                {
+                    // Route the result to the appropriate ITUnitMessageBus method
+                    // This must always be called to report test results
+                    await RouteTestResult(test, updateMessage);
+                }
 
                 // Check if we should trigger fail-fast
                 if (_isFailFastEnabled && test.Result?.State == TestState.Failed)
