@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -140,9 +141,7 @@ public class TestContext : Context
 
     public object Lock { get; } = new();
 
-    public List<Timing> Timings { get; } =
-    [
-    ];
+    public ConcurrentBag<Timing> Timings { get; } = new();
 
     public IReadOnlyList<Artifact> Artifacts { get; } = new List<Artifact>();
 

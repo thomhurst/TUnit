@@ -2,5 +2,5 @@
 
 public interface ITestSource
 {
-    ValueTask<List<TestMetadata>> GetTestsAsync(string testSessionId);
+    IAsyncEnumerable<TestMetadata> GetTestsAsync(string testSessionId, CancellationToken cancellationToken = default);
 }

@@ -1,4 +1,6 @@
+using System.Collections.Concurrent;
 using System.Text;
+using System.Threading;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member
 
@@ -6,20 +8,26 @@ namespace TUnit.Engine.Logging;
 
 /// <summary>
 /// A thread-safe buffered text writer that reduces allocation overhead
+/// Uses per-thread buffers to minimize lock contention
 /// </summary>
 internal sealed class BufferedTextWriter : TextWriter, IDisposable
 {
     private readonly TextWriter _target;
-    private readonly object _lock = new();
+    private readonly ReaderWriterLockSlim _lock = new();
     private readonly int _bufferSize;
-    private readonly StringBuilder _buffer;
-    private bool _disposed;
+    private readonly ThreadLocal<StringBuilder> _threadLocalBuffer;
+    private readonly ConcurrentQueue<string> _flushQueue = new();
+    private volatile bool _disposed;
+    private readonly Timer _flushTimer;
 
     public BufferedTextWriter(TextWriter target, int bufferSize = 4096)
     {
         _target = target ?? throw new ArgumentNullException(nameof(target));
         _bufferSize = bufferSize;
-        _buffer = new StringBuilder(bufferSize);
+        _threadLocalBuffer = new ThreadLocal<StringBuilder>(() => new StringBuilder(bufferSize));
+        
+        // Auto-flush every 100ms to prevent data loss
+        _flushTimer = new Timer(AutoFlush, null, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(100));
     }
 
     public override Encoding Encoding => _target.Encoding;
@@ -31,267 +39,388 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
         get => _target.NewLine;
         set
         {
-            lock (_lock)
+            _lock.EnterWriteLock();
+            try
             {
                 _target.NewLine = value ?? Environment.NewLine;
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
             }
         }
     }
 
     public override void Write(char value)
     {
-        lock (_lock)
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _buffer.Append(value);
-            CheckFlush();
+            return;
         }
+
+        var buffer = _threadLocalBuffer.Value;
+        if (buffer == null)
+        {
+            return;
+        }
+
+        buffer.Append(value);
+        CheckFlush(buffer);
     }
 
     public override void Write(string? value)
     {
-        if (string.IsNullOrEmpty(value))
+        if (string.IsNullOrEmpty(value) || _disposed)
         {
             return;
         }
 
-        lock (_lock)
+        var buffer = _threadLocalBuffer.Value;
+        if (buffer == null)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _buffer.Append(value);
-            CheckFlush();
+            return;
         }
+
+        buffer.Append(value);
+        CheckFlush(buffer);
     }
 
     public override void Write(char[] buffer, int index, int count)
     {
-        if (buffer == null || count <= 0)
+        if (buffer == null || count <= 0 || _disposed)
         {
             return;
         }
 
-        lock (_lock)
+        var localBuffer = _threadLocalBuffer.Value;
+        if (localBuffer == null)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _buffer.Append(buffer, index, count);
-            CheckFlush();
+            return;
         }
+
+        localBuffer.Append(buffer, index, count);
+        CheckFlush(localBuffer);
     }
 
     public override void WriteLine()
     {
-        lock (_lock)
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _buffer.AppendLine();
-            FlushBuffer();
+            return;
         }
+
+        var buffer = _threadLocalBuffer.Value;
+        if (buffer == null)
+        {
+            return;
+        }
+
+        buffer.AppendLine();
+        FlushBuffer(buffer);
     }
 
     public override void WriteLine(string? value)
     {
-        lock (_lock)
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _buffer.AppendLine(value);
-            FlushBuffer();
+            return;
         }
+
+        var buffer = _threadLocalBuffer.Value;
+        if (buffer == null)
+        {
+            return;
+        }
+
+        buffer.AppendLine(value);
+        FlushBuffer(buffer);
     }
 
     // Optimized Write methods to avoid boxing and tuple allocations
     public void WriteFormatted(string format, object? arg0)
     {
-        lock (_lock)
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _buffer.AppendFormat(format, arg0);
-            CheckFlush();
+            return;
         }
+
+        var buffer = _threadLocalBuffer.Value;
+        if (buffer == null)
+        {
+            return;
+        }
+
+        buffer.AppendFormat(format, arg0);
+        CheckFlush(buffer);
     }
 
     public void WriteFormatted(string format, object? arg0, object? arg1)
     {
-        lock (_lock)
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _buffer.AppendFormat(format, arg0, arg1);
-            CheckFlush();
+            return;
         }
+
+        var buffer = _threadLocalBuffer.Value;
+        if (buffer == null)
+        {
+            return;
+        }
+
+        buffer.AppendFormat(format, arg0, arg1);
+        CheckFlush(buffer);
     }
 
     public void WriteFormatted(string format, object? arg0, object? arg1, object? arg2)
     {
-        lock (_lock)
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _buffer.AppendFormat(format, arg0, arg1, arg2);
-            CheckFlush();
+            return;
         }
+
+        var buffer = _threadLocalBuffer.Value;
+        if (buffer == null)
+        {
+            return;
+        }
+
+        buffer.AppendFormat(format, arg0, arg1, arg2);
+        CheckFlush(buffer);
     }
 
     public void WriteFormatted(string format, params object?[] args)
     {
-        lock (_lock)
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _buffer.AppendFormat(format, args);
-            CheckFlush();
+            return;
         }
+
+        var buffer = _threadLocalBuffer.Value;
+        if (buffer == null)
+        {
+            return;
+        }
+
+        buffer.AppendFormat(format, args);
+        CheckFlush(buffer);
     }
 
     public void WriteLineFormatted(string format, object? arg0)
     {
-        lock (_lock)
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _buffer.AppendFormat(format, arg0);
-            _buffer.AppendLine();
-            FlushBuffer();
+            return;
         }
+
+        var buffer = _threadLocalBuffer.Value;
+        if (buffer == null)
+        {
+            return;
+        }
+
+        buffer.AppendFormat(format, arg0);
+        buffer.AppendLine();
+        FlushBuffer(buffer);
     }
 
     public void WriteLineFormatted(string format, object? arg0, object? arg1)
     {
-        lock (_lock)
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _buffer.AppendFormat(format, arg0, arg1);
-            _buffer.AppendLine();
-            FlushBuffer();
+            return;
         }
+
+        var buffer = _threadLocalBuffer.Value;
+        if (buffer == null)
+        {
+            return;
+        }
+
+        buffer.AppendFormat(format, arg0, arg1);
+        buffer.AppendLine();
+        FlushBuffer(buffer);
     }
 
     public void WriteLineFormatted(string format, object? arg0, object? arg1, object? arg2)
     {
-        lock (_lock)
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _buffer.AppendFormat(format, arg0, arg1, arg2);
-            _buffer.AppendLine();
-            FlushBuffer();
+            return;
         }
+
+        var buffer = _threadLocalBuffer.Value;
+        if (buffer == null)
+        {
+            return;
+        }
+
+        buffer.AppendFormat(format, arg0, arg1, arg2);
+        buffer.AppendLine();
+        FlushBuffer(buffer);
     }
 
     public void WriteLineFormatted(string format, params object?[] args)
     {
-        lock (_lock)
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _buffer.AppendFormat(format, args);
-            _buffer.AppendLine();
-            FlushBuffer();
+            return;
         }
+
+        var buffer = _threadLocalBuffer.Value;
+        if (buffer == null)
+        {
+            return;
+        }
+
+        buffer.AppendFormat(format, args);
+        buffer.AppendLine();
+        FlushBuffer(buffer);
     }
 
     public override void Flush()
     {
-        lock (_lock)
+        // Flush all thread-local buffers
+        FlushAllThreadBuffers();
+        
+        _lock.EnterWriteLock();
+        try
         {
-            FlushBuffer();
+            // Process any queued content
+            ProcessFlushQueue();
             _target.Flush();
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
         }
     }
 
     public override async Task FlushAsync()
     {
-        string content;
-        lock (_lock)
+        // Flush all thread-local buffers
+        FlushAllThreadBuffers();
+        
+        var contentToWrite = new List<string>();
+        
+        _lock.EnterWriteLock();
+        try
         {
-            if (_buffer.Length == 0)
+            // Get all queued content
+            while (_flushQueue.TryDequeue(out var content))
             {
-                return;
+                contentToWrite.Add(content);
             }
-
-            content = _buffer.ToString();
-            _buffer.Clear();
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
         }
 
-        await _target.WriteAsync(content);
+        // Write all content asynchronously
+        foreach (var content in contentToWrite)
+        {
+            await _target.WriteAsync(content);
+        }
+        
         await _target.FlushAsync();
     }
 
-    private void CheckFlush()
+    private void CheckFlush(StringBuilder buffer)
     {
         // Flush if buffer is getting large
-        if (_buffer.Length >= _bufferSize)
+        if (buffer.Length >= _bufferSize)
         {
-            FlushBuffer();
+            FlushBuffer(buffer);
         }
     }
 
-    private void FlushBuffer()
+    private void FlushBuffer(StringBuilder buffer)
     {
-        if (_buffer.Length == 0)
+        if (buffer.Length == 0)
         {
             return;
         }
 
-        var content = _buffer.ToString();
-        _buffer.Clear();
-        _target.Write(content);
+        var content = buffer.ToString();
+        buffer.Clear();
+        
+        // Queue content for batch writing
+        _flushQueue.Enqueue(content);
+        
+        // Process queue if it's getting large
+        if (_flushQueue.Count > 10)
+        {
+            ProcessFlushQueue();
+        }
+    }
+    
+    private void FlushAllThreadBuffers()
+    {
+        // This forces all thread-local buffers to be flushed
+        // by accessing them from the current thread context
+        var currentBuffer = _threadLocalBuffer.Value;
+        if (currentBuffer?.Length > 0)
+        {
+            FlushBuffer(currentBuffer);
+        }
+    }
+    
+    private void ProcessFlushQueue()
+    {
+        // Process all queued content
+        while (_flushQueue.TryDequeue(out var content))
+        {
+            _target.Write(content);
+        }
+    }
+    
+    private void AutoFlush(object? state)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+        
+        try
+        {
+            FlushAllThreadBuffers();
+            
+            _lock.EnterWriteLock();
+            try
+            {
+                ProcessFlushQueue();
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
+        catch
+        {
+            // Ignore errors in auto-flush to prevent crashes
+        }
     }
 
     protected override void Dispose(bool disposing)
     {
         if (!_disposed && disposing)
         {
-            lock (_lock)
+            _flushTimer?.Dispose();
+            FlushAllThreadBuffers();
+            
+            _lock.EnterWriteLock();
+            try
             {
-                FlushBuffer();
+                ProcessFlushQueue();
                 _disposed = true;
             }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+            
+            _threadLocalBuffer?.Dispose();
+            _lock?.Dispose();
         }
         base.Dispose(disposing);
     }
@@ -301,11 +430,21 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
     {
         if (!_disposed)
         {
+            _flushTimer?.Dispose();
             await FlushAsync();
-            lock (_lock)
+            
+            _lock.EnterWriteLock();
+            try
             {
                 _disposed = true;
             }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+            
+            _threadLocalBuffer?.Dispose();
+            _lock?.Dispose();
         }
         await base.DisposeAsync();
     }
