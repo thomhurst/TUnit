@@ -31,6 +31,13 @@ rootCommand.SetHandler((categories) =>
                 collection.Configure<NuGetOptions>(context.Configuration.GetSection("NuGet"));
                 collection.AddModulesFromAssembly(typeof(Program).Assembly);
             })
+            .ConfigureLogging(logging =>
+            {
+                // Reduce ModularPipelines framework output
+                logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Warning);
+                logging.AddFilter("ModularPipelines", Microsoft.Extensions.Logging.LogLevel.Warning);
+                logging.AddConsole();
+            })
             .ConfigurePipelineOptions((_, options) => options.ExecutionMode = ExecutionMode.WaitForAllModules);
 
         if (categories.Length > 0)
