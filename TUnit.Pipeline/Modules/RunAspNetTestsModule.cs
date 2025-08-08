@@ -2,11 +2,11 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.Enums;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
-using TUnit.Pipeline.Extensions;
 
 namespace TUnit.Pipeline.Modules;
 
@@ -17,7 +17,7 @@ public class RunAspNetTestsModule : Module<CommandResult>
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Example.Asp.Net.TestProject.csproj").AssertExists();
 
-        return await context.DotNet().RunQuiet(new DotNetRunOptions
+        return await context.DotNet().Run(new DotNetRunOptions
         {
             Project = project.Name,
             NoBuild = true,
@@ -28,7 +28,8 @@ public class RunAspNetTestsModule : Module<CommandResult>
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",
-            }
+            },
+            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
         }, cancellationToken);
     }
 }

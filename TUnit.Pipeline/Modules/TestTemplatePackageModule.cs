@@ -2,9 +2,9 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.Enums;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
-using TUnit.Pipeline.Extensions;
 
 namespace TUnit.Pipeline.Modules;
 
@@ -17,30 +17,35 @@ public class TestTemplatePackageModule : Module<CommandResult>
     {
         var version = await GetModule<GenerateVersionModule>();
 
-        await context.DotNet().NewQuiet(new DotNetNewOptions("uninstall")
+        await context.DotNet().New(new DotNetNewOptions("uninstall")
         {
             Arguments = ["TUnit.Templates"],
-            ThrowOnNonZeroExitCode = false
+            ThrowOnNonZeroExitCode = false,
+            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
         }, cancellationToken);
 
-        await context.DotNet().NewQuiet(new DotNetNewOptions("install")
+        await context.DotNet().New(new DotNetNewOptions("install")
         {
-            Arguments = [$"TUnit.Templates::{version.Value!.SemVer}"]
+            Arguments = [$"TUnit.Templates::{version.Value!.SemVer}"],
+            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
         }, cancellationToken);
 
-        await context.DotNet().NewQuiet(new DotNetNewOptions("TUnit")
+        await context.DotNet().New(new DotNetNewOptions("TUnit")
         {
-            Name = "MyTestProject"
+            Name = "MyTestProject",
+            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
         }, cancellationToken);
 
-        await context.DotNet().NewQuiet(new DotNetNewOptions("TUnit.AspNet")
+        await context.DotNet().New(new DotNetNewOptions("TUnit.AspNet")
         {
-            Name = "MyTestProject2"
+            Name = "MyTestProject2",
+            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
         }, cancellationToken);
 
-        return await context.DotNet().NewQuiet(new DotNetNewOptions("TUnit.Playwright")
+        return await context.DotNet().New(new DotNetNewOptions("TUnit.Playwright")
         {
-            Name = "MyTestProject3"
+            Name = "MyTestProject3",
+            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
         }, cancellationToken);
     }
 }

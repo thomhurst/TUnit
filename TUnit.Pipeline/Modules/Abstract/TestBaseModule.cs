@@ -2,9 +2,9 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.Enums;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
-using TUnit.Pipeline.Extensions;
 
 namespace TUnit.Pipeline.Modules.Abstract;
 
@@ -34,7 +34,7 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
             {
                 var testOptions = SetDefaults(await GetTestOptions(context, framework, cancellationToken));
 
-                return await context.DotNet().RunQuiet(testOptions, cancellationToken);
+                return await context.DotNet().Run(testOptions, cancellationToken);
             });
 
             results.Add(testResult);
@@ -57,6 +57,12 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
                 }
             };
         }
+
+        // Suppress output for successful operations, but show errors and basic info
+        testOptions = testOptions with
+        {
+            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+        };
 
         return testOptions;
     }

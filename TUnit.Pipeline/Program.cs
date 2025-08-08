@@ -1,7 +1,6 @@
 ﻿using System.CommandLine;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using ModularPipelines.Extensions;
 using ModularPipelines.Host;
 using ModularPipelines.Options;
@@ -30,13 +29,6 @@ rootCommand.SetHandler((categories) =>
             {
                 collection.Configure<NuGetOptions>(context.Configuration.GetSection("NuGet"));
                 collection.AddModulesFromAssembly(typeof(Program).Assembly);
-            })
-            .ConfigureLogging(logging =>
-            {
-                // Reduce ModularPipelines framework output
-                logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Warning);
-                logging.AddFilter("ModularPipelines", Microsoft.Extensions.Logging.LogLevel.Warning);
-                logging.AddConsole();
             })
             .ConfigurePipelineOptions((_, options) => options.ExecutionMode = ExecutionMode.WaitForAllModules);
 
