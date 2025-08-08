@@ -61,4 +61,19 @@ internal sealed class TestResultFactory : ITestResultFactory
             OverrideReason = $"Test exceeded timeout of {timeoutMs}ms"
         };
     }
+
+    public TestResult? CreateCancelledResult(DateTimeOffset startTime)
+    {
+        var endTime = DateTimeOffset.Now;
+
+        return new TestResult
+        {
+            State = TestState.Cancelled,
+            Start = startTime,
+            End = endTime,
+            Duration = endTime - startTime,
+            Exception = null,
+            ComputerName = Environment.MachineName
+        };
+    }
 }

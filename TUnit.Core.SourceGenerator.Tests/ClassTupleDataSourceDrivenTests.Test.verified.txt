@@ -9,13 +9,13 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
 {
     #if NET8_0_OR_GREATER
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property1>k__BackingField")]
-    private static extern ref (int, string, bool) GetProperty1BackingField(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests instance);
+    private static extern ref global::System.ValueTuple<int, string, bool> GetProperty1BackingField(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests instance);
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property2>k__BackingField")]
-    private static extern ref (int, string, bool) GetProperty2BackingField(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests instance);
+    private static extern ref global::System.ValueTuple<int, string, bool> GetProperty2BackingField(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests instance);
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property3>k__BackingField")]
-    private static extern ref (int Number, string Word, bool Flag) GetProperty3BackingField(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests instance);
+    private static extern ref global::System.ValueTuple<int, string, bool> GetProperty3BackingField(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests instance);
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property4>k__BackingField")]
-    private static extern ref (int Number, string Word, bool Flag) GetProperty4BackingField(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests instance);
+    private static extern ref global::System.ValueTuple<int, string, bool> GetProperty4BackingField(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests instance);
     #endif
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -93,7 +93,7 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                 new global::TUnit.Core.PropertyDataSource
                 {
                     PropertyName = "Property1",
-                    PropertyType = typeof((int, string, bool)),
+                    PropertyType = typeof(global::System.ValueTuple<int, string, bool>),
                     DataSource = new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
                     {
                         Factory = (dataGeneratorMetadata) =>
@@ -110,7 +110,7 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                 new global::TUnit.Core.PropertyDataSource
                 {
                     PropertyName = "Property2",
-                    PropertyType = typeof((int, string, bool)),
+                    PropertyType = typeof(global::System.ValueTuple<int, string, bool>),
                     DataSource = new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
                     {
                         Factory = (dataGeneratorMetadata) =>
@@ -127,7 +127,7 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                 new global::TUnit.Core.PropertyDataSource
                 {
                     PropertyName = "Property3",
-                    PropertyType = typeof((int Number, string Word, bool Flag)),
+                    PropertyType = typeof(global::System.ValueTuple<int, string, bool>),
                     DataSource = new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
                     {
                         Factory = (dataGeneratorMetadata) =>
@@ -144,7 +144,7 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                 new global::TUnit.Core.PropertyDataSource
                 {
                     PropertyName = "Property4",
-                    PropertyType = typeof((int Number, string Word, bool Flag)),
+                    PropertyType = typeof(global::System.ValueTuple<int, string, bool>),
                     DataSource = new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
                     {
                         Factory = (dataGeneratorMetadata) =>
@@ -164,9 +164,9 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                 new global::TUnit.Core.PropertyInjectionData
                 {
                     PropertyName = "Property1",
-                    PropertyType = typeof((int, string, bool)),
+                    PropertyType = typeof(global::System.ValueTuple<int, string, bool>),
                     #if NET8_0_OR_GREATER
-                    Setter = (instance, value) => GetProperty1BackingField((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)instance) = ((int, string, bool))value,
+                    Setter = (instance, value) => GetProperty1BackingField((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)instance) = (global::System.ValueTuple<int, string, bool>)value,
                     #else
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
@@ -182,9 +182,9 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                 new global::TUnit.Core.PropertyInjectionData
                 {
                     PropertyName = "Property2",
-                    PropertyType = typeof((int, string, bool)),
+                    PropertyType = typeof(global::System.ValueTuple<int, string, bool>),
                     #if NET8_0_OR_GREATER
-                    Setter = (instance, value) => GetProperty2BackingField((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)instance) = ((int, string, bool))value,
+                    Setter = (instance, value) => GetProperty2BackingField((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)instance) = (global::System.ValueTuple<int, string, bool>)value,
                     #else
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
@@ -200,9 +200,9 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                 new global::TUnit.Core.PropertyInjectionData
                 {
                     PropertyName = "Property3",
-                    PropertyType = typeof((int Number, string Word, bool Flag)),
+                    PropertyType = typeof(global::System.ValueTuple<int, string, bool>),
                     #if NET8_0_OR_GREATER
-                    Setter = (instance, value) => GetProperty3BackingField((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)instance) = ((int Number, string Word, bool Flag))value,
+                    Setter = (instance, value) => GetProperty3BackingField((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)instance) = (global::System.ValueTuple<int, string, bool>)value,
                     #else
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
@@ -218,9 +218,9 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                 new global::TUnit.Core.PropertyInjectionData
                 {
                     PropertyName = "Property4",
-                    PropertyType = typeof((int Number, string Word, bool Flag)),
+                    PropertyType = typeof(global::System.ValueTuple<int, string, bool>),
                     #if NET8_0_OR_GREATER
-                    Setter = (instance, value) => GetProperty4BackingField((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)instance) = ((int Number, string Word, bool Flag))value,
+                    Setter = (instance, value) => GetProperty4BackingField((global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)instance) = (global::System.ValueTuple<int, string, bool>)value,
                     #else
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
@@ -316,7 +316,7 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                             new global::TUnit.Core.PropertyMetadata
                             {
                                 ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property1"),
-                                Type = typeof((int, string, bool)),
+                                Type = typeof(global::System.ValueTuple<int, string, bool>),
                                 Name = "Property1",
                                 IsStatic = false,
                                 IsNullable = false,
@@ -327,7 +327,7 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                             new global::TUnit.Core.PropertyMetadata
                             {
                                 ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property2"),
-                                Type = typeof((int, string, bool)),
+                                Type = typeof(global::System.ValueTuple<int, string, bool>),
                                 Name = "Property2",
                                 IsStatic = false,
                                 IsNullable = false,
@@ -338,7 +338,7 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                             new global::TUnit.Core.PropertyMetadata
                             {
                                 ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property3"),
-                                Type = typeof((int Number, string Word, bool Flag)),
+                                Type = typeof(global::System.ValueTuple<int, string, bool>),
                                 Name = "Property3",
                                 IsStatic = false,
                                 IsNullable = false,
@@ -349,7 +349,7 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                             new global::TUnit.Core.PropertyMetadata
                             {
                                 ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property4"),
-                                Type = typeof((int Number, string Word, bool Flag)),
+                                Type = typeof(global::System.ValueTuple<int, string, bool>),
                                 Name = "Property4",
                                 IsStatic = false,
                                 IsNullable = false,
@@ -373,10 +373,10 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
             {
                 return new global::TUnit.TestProject.ClassTupleDataSourceDrivenTests(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]))
                 {
-                    Property1 = default((int, string, bool)),
-                    Property2 = default((int, string, bool)),
-                    Property3 = default((int Number, string Word, bool Flag)),
-                    Property4 = default((int Number, string Word, bool Flag)),
+                    Property1 = default(global::System.ValueTuple<int, string, bool>),
+                    Property2 = default(global::System.ValueTuple<int, string, bool>),
+                    Property3 = default(global::System.ValueTuple<int, string, bool>),
+                    Property4 = default(global::System.ValueTuple<int, string, bool>),
                 };
             },
             TestInvoker = async (instance, args) =>

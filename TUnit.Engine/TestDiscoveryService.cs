@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Engine.Building;
+using TUnit.Engine.Configuration;
 using TUnit.Engine.Services;
 using TUnit.Engine.Scheduling;
 
@@ -26,7 +27,6 @@ internal sealed class TestDiscoveryResult
 /// Unified test discovery service using the pipeline architecture with streaming support
 internal sealed class TestDiscoveryService : IDataProducer
 {
-    private const int DiscoveryTimeoutSeconds = 60;
     private readonly HookOrchestrator _hookOrchestrator;
     private readonly TestBuilderPipeline _testBuilderPipeline;
     private readonly TestFilterService _testFilterService;
@@ -148,7 +148,9 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         if (!Debugger.IsAttached)
         {
-            cts.CancelAfter(TimeSpan.FromSeconds(DiscoveryTimeoutSeconds));
+            // Configure from environment if needed
+            DiscoveryConfiguration.ConfigureFromEnvironment();
+            cts.CancelAfter(DiscoveryConfiguration.DiscoveryTimeout);
         }
 
         await foreach (var test in BuildTestsAsync(testSessionId, filterTypes, cts.Token))

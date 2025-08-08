@@ -2,6 +2,7 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.Enums;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
@@ -44,7 +45,8 @@ public class RunEngineTestsModule : Module<CommandResult>
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["TUNIT_DISABLE_GITHUB_REPORTER"] = "true",
-            }
+            },
+            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
         }, cancellationToken);
     }
 }

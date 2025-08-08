@@ -18,13 +18,19 @@ internal class SingleTestExecutor : ISingleTestExecutor
     private readonly ITestResultFactory _resultFactory;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private readonly IHookCollectionService _hookCollectionService;
+    private readonly EngineCancellationToken _engineCancellationToken;
     private SessionUid _sessionUid;
 
-    public SingleTestExecutor(TUnitFrameworkLogger logger, EventReceiverOrchestrator eventReceiverOrchestrator, IHookCollectionService hookCollectionService, SessionUid sessionUid)
+    public SingleTestExecutor(TUnitFrameworkLogger logger,
+        EventReceiverOrchestrator eventReceiverOrchestrator,
+        IHookCollectionService hookCollectionService,
+        EngineCancellationToken engineCancellationToken,
+        SessionUid sessionUid)
     {
         _logger = logger;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _hookCollectionService = hookCollectionService;
+        _engineCancellationToken = engineCancellationToken;
         _sessionUid = sessionUid;
         _resultFactory = new TestResultFactory();
     }
@@ -74,95 +80,102 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.StartTime = DateTimeOffset.Now;
             test.State = TestState.Running;
 
-        if (!string.IsNullOrEmpty(test.Context.SkipReason))
-        {
-            return await HandleSkippedTestInternalAsync(test, cancellationToken);
-        }
-
-        if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
-        {
-            return await HandleSkippedTestInternalAsync(test, cancellationToken);
-        }
-
-        if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
-        {
-            var createdInstance = await test.CreateInstanceAsync();
-            if (createdInstance == null)
-            {
-                throw new InvalidOperationException($"CreateInstanceAsync returned null for test {test.Context.GetDisplayName()}. This is likely a framework bug.");
-            }
-            test.Context.TestDetails.ClassInstance = createdInstance;
-        }
-
-        var instance = test.Context.TestDetails.ClassInstance;
-        
-        if (instance == null)
-        {
-            throw new InvalidOperationException($"Test instance is null for test {test.Context.GetDisplayName()} after instance creation. ClassInstance type: {test.Context.TestDetails.ClassInstance?.GetType()?.Name ?? "null"}");
-        }
-        
-        if (instance is PlaceholderInstance)
-        {
-            throw new InvalidOperationException($"Test instance is still PlaceholderInstance for test {test.Context.GetDisplayName()}. This should have been replaced.");
-        }
-
-        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
-        await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events);
-
-        await PropertyInjectionService.InjectPropertiesAsync(
-            test.Context,
-            instance,
-            test.Metadata.PropertyDataSources,
-            test.Metadata.PropertyInjections,
-            test.Metadata.MethodMetadata,
-            test.Context.TestDetails.TestId);
-
-        await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
-
-        CheckDependenciesAndThrowIfShouldSkip(test);
-
-        var classContext = test.Context.ClassContext;
-        var assemblyContext = classContext.AssemblyContext;
-        var sessionContext = assemblyContext.TestSessionContext;
-
-        await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
-
-        await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
-
-        await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
-        await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken);
-
-        try
-        {
             if (!string.IsNullOrEmpty(test.Context.SkipReason))
             {
                 return await HandleSkippedTestInternalAsync(test, cancellationToken);
             }
 
-            if(test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
+            if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
             {
-                await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken);
+                return await HandleSkippedTestInternalAsync(test, cancellationToken);
             }
-            else
-            {
-                await ExecuteTestWithHooksAsync(test, instance, cancellationToken);
-            }
-        }
-        catch (TestDependencyException e)
-        {
-            test.Context.SkipReason = e.Message;
-            return await HandleSkippedTestInternalAsync(test, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            HandleTestFailure(test, ex);
-        }
-        finally
-        {
-            test.EndTime = DateTimeOffset.Now;
 
-            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
-        }
+            if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
+            {
+                var createdInstance = await test.CreateInstanceAsync();
+                if (createdInstance == null)
+                {
+                    throw new InvalidOperationException($"CreateInstanceAsync returned null for test {test.Context.GetDisplayName()}. This is likely a framework bug.");
+                }
+                test.Context.TestDetails.ClassInstance = createdInstance;
+            }
+
+            var instance = test.Context.TestDetails.ClassInstance;
+
+            if (instance == null)
+            {
+                throw new InvalidOperationException(
+                    $"Test instance is null for test {test.Context.GetDisplayName()} after instance creation. ClassInstance type: {test.Context.TestDetails.ClassInstance?.GetType()?.Name ?? "null"}");
+            }
+
+            if (instance is PlaceholderInstance)
+            {
+                throw new InvalidOperationException($"Test instance is still PlaceholderInstance for test {test.Context.GetDisplayName()}. This should have been replaced.");
+            }
+
+            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata,
+                test.Context.Events);
+            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata,
+                test.Context.Events);
+
+            await PropertyInjectionService.InjectPropertiesAsync(
+                test.Context,
+                instance,
+                test.Metadata.PropertyDataSources,
+                test.Metadata.PropertyInjections,
+                test.Metadata.MethodMetadata,
+                test.Context.TestDetails.TestId);
+
+            await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
+
+            CheckDependenciesAndThrowIfShouldSkip(test);
+
+            var classContext = test.Context.ClassContext;
+            var assemblyContext = classContext.AssemblyContext;
+            var sessionContext = assemblyContext.TestSessionContext;
+
+            await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
+
+            await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
+
+            await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
+            await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken);
+
+            try
+            {
+                if (!string.IsNullOrEmpty(test.Context.SkipReason))
+                {
+                    return await HandleSkippedTestInternalAsync(test, cancellationToken);
+                }
+
+                if (test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
+                {
+                    await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken);
+                }
+                else
+                {
+                    await ExecuteTestWithHooksAsync(test, instance, cancellationToken);
+                }
+            }
+            catch (TestDependencyException e)
+            {
+                test.Context.SkipReason = e.Message;
+                return await HandleSkippedTestInternalAsync(test, cancellationToken);
+            }
+            catch (Exception exception) when (_engineCancellationToken.Token.IsCancellationRequested && exception is OperationCanceledException or TaskCanceledException)
+            {
+                HandleCancellation(test);
+            }
+            catch (Exception ex)
+            {
+                HandleTestFailure(test, ex);
+            }
+            finally
+            {
+                test.EndTime = DateTimeOffset.Now;
+
+                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
+            }
 
             if (test.Result == null)
             {
@@ -371,6 +384,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
     }
 
+    private void HandleCancellation(AbstractExecutableTest test)
+    {
+        test.State = TestState.Cancelled;
+        test.Result = _resultFactory.CreateCancelledResult(test.StartTime!.Value);
+    }
 
     private TestNodeUpdateMessage CreateUpdateMessage(AbstractExecutableTest test)
     {

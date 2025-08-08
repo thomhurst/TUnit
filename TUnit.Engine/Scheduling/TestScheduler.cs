@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using EnumerableAsyncProcessor.Extensions;
 using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.Logging;
@@ -10,14 +11,12 @@ namespace TUnit.Engine.Scheduling;
 /// <summary>
 /// A clean, simplified test scheduler that uses an execution plan
 /// </summary>
-internal sealed class TestScheduler : ITestScheduler, IDisposable
+internal sealed class TestScheduler : ITestScheduler
 {
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestGroupingService _groupingService;
     private readonly ITUnitMessageBus _messageBus;
     private readonly SchedulerConfiguration _configuration;
-    private AdaptiveParallelismController? _adaptiveController;
-    private IDisposable? _semaphore;
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
@@ -42,7 +41,6 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
         // Create execution plan upfront
         var plan = ExecutionPlan.Create(tests);
 
-
         if (plan.ExecutableTests.Count == 0)
         {
             await _logger.LogDebugAsync("No executable tests found");
@@ -65,29 +63,13 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
         var runningTasks = new ConcurrentDictionary<AbstractExecutableTest, Task>();
         var completedTests = new ConcurrentDictionary<AbstractExecutableTest, bool>();
 
-        // Create appropriate semaphore based on strategy
-        object semaphore;
-        if (_configuration.Strategy == ParallelismStrategy.Adaptive)
+        // Determine parallelism level
+        int? maxParallelism = null;
+        if (_configuration.Strategy != ParallelismStrategy.Adaptive)
         {
-            var initialParallelism = Math.Min(Environment.ProcessorCount * 4, _configuration.AdaptiveMaxParallelism);
-            var adaptiveSemaphore = new AdaptiveSemaphore(initialParallelism, _configuration.AdaptiveMaxParallelism);
-            _adaptiveController = new AdaptiveParallelismController(
-                adaptiveSemaphore,
-                _logger,
-                _configuration.AdaptiveMinParallelism,
-                _configuration.AdaptiveMaxParallelism,
-                initialParallelism,
-                _configuration.EnableAdaptiveMetrics);
-            semaphore = adaptiveSemaphore;
-            _semaphore = adaptiveSemaphore;
+            maxParallelism = _configuration.MaxParallelism > 0 ? _configuration.MaxParallelism : Environment.ProcessorCount * 4;
         }
-        else
-        {
-            var maxParallelism = _configuration.MaxParallelism > 0 ? _configuration.MaxParallelism : Environment.ProcessorCount * 4;
-            var fixedSemaphore = new SemaphoreSlim(maxParallelism, maxParallelism);
-            semaphore = fixedSemaphore;
-            _semaphore = fixedSemaphore;
-        }
+        // For adaptive, we pass null to let EnumerableAsyncProcessor manage concurrency
 
         // Process all test groups
         var allTestTasks = new List<Task>();
@@ -125,7 +107,7 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
                 executor,
                 runningTasks,
                 completedTests,
-                semaphore,
+                maxParallelism,
                 cancellationToken);
             allTestTasks.Add(groupTask);
         }
@@ -135,7 +117,7 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
             executor,
             runningTasks,
             completedTests,
-            semaphore,
+            maxParallelism,
             cancellationToken);
         allTestTasks.Add(parallelTask);
 
@@ -157,24 +139,33 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
             testsWithPriority.Add((test, priority));
         }
 
-        // Sort by NotInParallel Order first, then by execution order from the plan for dependency resolution
-        testsWithPriority.Sort((a, b) =>
-        {
-            // Primary sort: NotInParallel Order (from TestPriority)
-            var priorityComparison = a.Priority.CompareTo(b.Priority);
-            if (priorityComparison != 0)
-                return priorityComparison;
+        // Group tests by class
+        var testsByClass = testsWithPriority
+            .GroupBy(t => t.Test.Context.TestDetails.ClassType)
+            .ToList();
 
-            // Secondary sort: ExecutionPlan order for dependency resolution when NotInParallel orders are equal
-            var aOrder = plan.ExecutionOrder.TryGetValue(a.Test, out var ao) ? ao : int.MaxValue;
-            var bOrder = plan.ExecutionOrder.TryGetValue(b.Test, out var bo) ? bo : int.MaxValue;
-            return aOrder.CompareTo(bOrder);
+        // Sort classes by their minimum test Order
+        testsByClass.Sort((a, b) =>
+        {
+            var aMinOrder = a.Min(t => t.Priority.Order);
+            var bMinOrder = b.Min(t => t.Priority.Order);
+            return aMinOrder.CompareTo(bMinOrder);
         });
 
-        // Execute sequentially
-        foreach (var (test, _) in testsWithPriority)
+        // Execute class by class
+        foreach (var classGroup in testsByClass)
         {
-            await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+            // Sort tests within the class by Order, then by execution plan order
+            var classTests = classGroup.OrderBy(t => t.Priority.Order)
+                .ThenBy(t => plan.ExecutionOrder.TryGetValue(t.Test, out var order) ? order : int.MaxValue)
+                .Select(t => t.Test)
+                .ToList();
+
+            // Execute all tests from this class sequentially
+            foreach (var test in classTests)
+            {
+                await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+            }
         }
     }
 
@@ -192,24 +183,33 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
             testsWithPriority.Add((test, priority));
         }
 
-        // Sort by NotInParallel Order first, then by execution order from the plan for dependency resolution
-        testsWithPriority.Sort((a, b) =>
-        {
-            // Primary sort: NotInParallel Order (from TestPriority)
-            var priorityComparison = a.Priority.CompareTo(b.Priority);
-            if (priorityComparison != 0)
-                return priorityComparison;
+        // Group tests by class
+        var testsByClass = testsWithPriority
+            .GroupBy(t => t.Test.Context.TestDetails.ClassType)
+            .ToList();
 
-            // Secondary sort: ExecutionPlan order for dependency resolution when NotInParallel orders are equal
-            var aOrder = plan.ExecutionOrder.TryGetValue(a.Test, out var ao) ? ao : int.MaxValue;
-            var bOrder = plan.ExecutionOrder.TryGetValue(b.Test, out var bo) ? bo : int.MaxValue;
-            return aOrder.CompareTo(bOrder);
+        // Sort classes by their minimum test Order
+        testsByClass.Sort((a, b) =>
+        {
+            var aMinOrder = a.Min(t => t.Priority.Order);
+            var bMinOrder = b.Min(t => t.Priority.Order);
+            return aMinOrder.CompareTo(bMinOrder);
         });
 
-        // Execute sequentially within this key
-        foreach (var (test, _) in testsWithPriority)
+        // Execute class by class within this key
+        foreach (var classGroup in testsByClass)
         {
-            await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+            // Sort tests within the class by Order, then by execution plan order
+            var classTests = classGroup.OrderBy(t => t.Priority.Order)
+                .ThenBy(t => plan.ExecutionOrder.TryGetValue(t.Test, out var order) ? order : int.MaxValue)
+                .Select(t => t.Test)
+                .ToList();
+
+            // Execute all tests from this class sequentially
+            foreach (var test in classTests)
+            {
+                await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+            }
         }
     }
 
@@ -217,42 +217,26 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
         ITestExecutor executor,
         ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
-        object semaphore,
+        int? maxParallelism,
         CancellationToken cancellationToken)
     {
         // Execute order groups sequentially
         foreach (var orderGroup in orderGroups.OrderBy(og => og.Key))
         {
-            var tasks = new List<Task>();
-
-            foreach (var test in orderGroup.Value)
+            // Use EnumerableAsyncProcessor to execute tests in parallel
+            if (maxParallelism.HasValue)
             {
-                if (semaphore is AdaptiveSemaphore adaptive)
-                    await adaptive.WaitAsync(cancellationToken);
-                else
-                    await ((SemaphoreSlim)semaphore).WaitAsync(cancellationToken);
-
-                // Create a task that releases semaphore on completion without Task.Run overhead
-                async Task ExecuteWithSemaphoreRelease()
-                {
-                    try
-                    {
-                        await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
-                    }
-                    finally
-                    {
-                        if (semaphore is AdaptiveSemaphore adaptive)
-                            adaptive.Release();
-                        else
-                            ((SemaphoreSlim)semaphore).Release();
-                    }
-                }
-
-                tasks.Add(ExecuteWithSemaphoreRelease());
+                await orderGroup.Value
+                    .ForEachAsync(async test => await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken))
+                    .ProcessInParallel(maxParallelism.Value);
             }
-
-            // Wait for all tests in this order group to complete
-            await Task.WhenAll(tasks);
+            else
+            {
+                // Adaptive parallelism - no limit specified
+                await orderGroup.Value
+                    .ForEachAsync(async test => await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken))
+                    .ProcessInParallel();
+            }
         }
     }
 
@@ -260,38 +244,23 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
         ITestExecutor executor,
         ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
-        object semaphore,
+        int? maxParallelism,
         CancellationToken cancellationToken)
     {
-        var tasks = new List<Task>();
-
-        foreach (var test in tests)
+        // Use EnumerableAsyncProcessor to execute tests in parallel
+        if (maxParallelism.HasValue)
         {
-            if (semaphore is AdaptiveSemaphore adaptive)
-                await adaptive.WaitAsync(cancellationToken);
-            else
-                await ((SemaphoreSlim)semaphore).WaitAsync(cancellationToken);
-
-            // Create a task that releases semaphore on completion without Task.Run overhead
-            async Task ExecuteWithSemaphoreRelease()
-            {
-                try
-                {
-                    await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
-                }
-                finally
-                {
-                    if (semaphore is AdaptiveSemaphore adaptive)
-                        adaptive.Release();
-                    else
-                        ((SemaphoreSlim)semaphore).Release();
-                }
-            }
-
-            tasks.Add(ExecuteWithSemaphoreRelease());
+            await tests
+                .ForEachAsync(async test => await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken))
+                .ProcessInParallel(maxParallelism.Value);
         }
-
-        await Task.WhenAll(tasks);
+        else
+        {
+            // Adaptive parallelism - no limit specified
+            await tests
+                .ForEachAsync(async test => await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken))
+                .ProcessInParallel();
+        }
     }
 
     private async Task ExecuteTestWhenReadyAsync(AbstractExecutableTest test,
@@ -327,7 +296,6 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
 
     private async Task ExecuteTestDirectlyAsync(AbstractExecutableTest test, ITestExecutor executor, ConcurrentDictionary<AbstractExecutableTest, bool> completedTests, CancellationToken cancellationToken)
     {
-        var startTime = DateTime.UtcNow;
         try
         {
             await executor.ExecuteTestAsync(test, cancellationToken);
@@ -335,19 +303,6 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
         finally
         {
             completedTests[test] = true;
-
-            // Record completion for adaptive metrics
-            if (_adaptiveController != null)
-            {
-                var executionTime = DateTime.UtcNow - startTime;
-                _adaptiveController.RecordTestCompletion(executionTime);
-            }
         }
-    }
-
-    public void Dispose()
-    {
-        _adaptiveController?.Dispose();
-        _semaphore?.Dispose();
     }
 }

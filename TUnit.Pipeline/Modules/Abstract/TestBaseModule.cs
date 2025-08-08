@@ -2,6 +2,7 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.Enums;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 
@@ -44,18 +45,8 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 
     private DotNetRunOptions SetDefaults(DotNetRunOptions testOptions)
     {
-        if (testOptions.Arguments?.Any(x => x == "--fail-fast") != true)
-        {
-            testOptions = testOptions with
-            {
-                Arguments =
-                [
-                    ..testOptions.Arguments ?? [],
-                    "--fail-fast",
-                ]
-            };
-        }
-
+        // Removed --fail-fast to allow all tests to run even if some fail
+        
         if (testOptions.EnvironmentVariables?.Any(x => x.Key == "NET_VERSION") != true)
         {
             testOptions = testOptions with
@@ -66,6 +57,12 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
                 }
             };
         }
+
+        // Suppress output for successful operations, but show errors and basic info
+        testOptions = testOptions with
+        {
+            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+        };
 
         return testOptions;
     }

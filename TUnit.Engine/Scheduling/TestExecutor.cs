@@ -20,6 +20,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
     private readonly CancellationTokenSource _failFastCancellationSource;
     private readonly TUnitFrameworkLogger _logger;
     private readonly HookOrchestrator _hookOrchestrator;
+    private readonly ParallelLimitLockProvider _parallelLimitLockProvider;
 
     // IDataProducer implementation
     public string Uid => "TUnit.TestExecutor";
@@ -37,7 +38,8 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
         bool isFailFastEnabled,
         CancellationTokenSource failFastCancellationSource,
         TUnitFrameworkLogger logger,
-        HookOrchestrator hookOrchestrator)
+        HookOrchestrator hookOrchestrator,
+        ParallelLimitLockProvider parallelLimitLockProvider)
     {
         _innerExecutor = innerExecutor;
         _messageBus = messageBus;
@@ -47,6 +49,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
         _failFastCancellationSource = failFastCancellationSource;
         _logger = logger;
         _hookOrchestrator = hookOrchestrator;
+        _parallelLimitLockProvider = parallelLimitLockProvider;
     }
 
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
@@ -72,23 +75,33 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
             return;
         }
 
-        // Simple state management - scheduler ensures we only get here for executable tests
-        test.State = TestState.Running;
-        test.StartTime = DateTimeOffset.UtcNow;
-
-        // Report test started
-        await _tunitMessageBus.InProgress(test.Context);
+        // Acquire semaphore for parallel limit if configured
+        SemaphoreSlim? parallelLimitSemaphore = null;
+        if (test.Context.ParallelLimiter != null)
+        {
+            parallelLimitSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
+            await parallelLimitSemaphore.WaitAsync(cancellationToken);
+        }
 
         try
         {
-            if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
-            {
-                var instance = await test.CreateInstanceAsync();
-                test.Context.TestDetails.ClassInstance = instance;
-            }
+            // Simple state management - scheduler ensures we only get here for executable tests
+            test.State = TestState.Running;
+            test.StartTime = DateTimeOffset.UtcNow;
 
-            // Execute class/assembly hooks on first test
-            var executionContext = await _hookOrchestrator.OnTestStartingAsync(test, cancellationToken);
+            // Report test started
+            await _tunitMessageBus.InProgress(test.Context);
+
+            try
+            {
+                if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
+                {
+                    var instance = await test.CreateInstanceAsync();
+                    test.Context.TestDetails.ClassInstance = instance;
+                }
+
+                // Execute class/assembly hooks on first test
+                var executionContext = await _hookOrchestrator.OnTestStartingAsync(test, cancellationToken);
 
 #if NET
             // Restore the accumulated context from all hooks to flow AsyncLocal values to the test
@@ -98,52 +111,58 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
             }
 #endif
 
-            // Execute the test and get the result message
-            var updateMessage = await _innerExecutor.ExecuteTestAsync(test, cancellationToken);
+                // Execute the test and get the result message
+                var updateMessage = await _innerExecutor.ExecuteTestAsync(test, cancellationToken);
 
-            // Route the result to the appropriate ITUnitMessageBus method
-            await RouteTestResult(test, updateMessage);
+                // Route the result to the appropriate ITUnitMessageBus method
+                await RouteTestResult(test, updateMessage);
 
-            // Check if we should trigger fail-fast
-            if (_isFailFastEnabled && test.Result?.State == TestState.Failed)
-            {
-                await _logger.LogErrorAsync($"Test {test.TestId} failed. Triggering fail-fast cancellation.");
-                _failFastCancellationSource.Cancel();
+                // Check if we should trigger fail-fast
+                if (_isFailFastEnabled && test.Result?.State == TestState.Failed)
+                {
+                    await _logger.LogErrorAsync($"Test {test.TestId} failed. Triggering fail-fast cancellation.");
+                    _failFastCancellationSource.Cancel();
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            // Set test state
-            test.State = TestState.Failed;
-            test.Result = new TestResult
+            catch (Exception ex)
             {
-                State = TestState.Failed,
-                Start = test.StartTime,
-                End = DateTimeOffset.Now,
-                Duration = DateTimeOffset.Now - test.StartTime.GetValueOrDefault(),
-                Exception = ex,
-                ComputerName = Environment.MachineName
-            };
+                // Set test state
+                test.State = TestState.Failed;
+                test.Result = new TestResult
+                {
+                    State = TestState.Failed,
+                    Start = test.StartTime,
+                    End = DateTimeOffset.Now,
+                    Duration = DateTimeOffset.Now - test.StartTime.GetValueOrDefault(),
+                    Exception = ex,
+                    ComputerName = Environment.MachineName
+                };
 
-            // Report the failure
-            await _tunitMessageBus.Failed(test.Context, ex, test.StartTime.GetValueOrDefault());
+                // Report the failure
+                await _tunitMessageBus.Failed(test.Context, ex, test.StartTime.GetValueOrDefault());
 
-            // Log the exception
-            await _logger.LogErrorAsync($"Unhandled exception in test {test.TestId}: {ex}");
+                // Log the exception
+                await _logger.LogErrorAsync($"Unhandled exception in test {test.TestId}: {ex}");
 
-            // If fail-fast is enabled, cancel all remaining tests
-            if (_isFailFastEnabled)
-            {
-                await _logger.LogErrorAsync("Unhandled exception occurred. Triggering fail-fast cancellation.");
-                _failFastCancellationSource.Cancel();
+                // If fail-fast is enabled, cancel all remaining tests
+                if (_isFailFastEnabled)
+                {
+                    await _logger.LogErrorAsync("Unhandled exception occurred. Triggering fail-fast cancellation.");
+                    _failFastCancellationSource.Cancel();
+                }
+
+                // Re-throw to maintain existing behavior
+                throw;
             }
-
-            // Re-throw to maintain existing behavior
-            throw;
+            finally
+            {
+                test.EndTime = DateTimeOffset.UtcNow;
+            }
         }
         finally
         {
-            test.EndTime = DateTimeOffset.UtcNow;
+            // Release semaphore if we acquired one
+            parallelLimitSemaphore?.Release();
         }
     }
 
