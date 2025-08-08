@@ -16,6 +16,7 @@ using TUnit.Engine.Discovery;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
@@ -44,6 +45,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public ITestFinder TestFinder { get; }
     public TUnitInitializer Initializer { get; }
     public CancellationTokenSource FailFastCancellationSource { get; }
+    public ParallelLimitLockProvider ParallelLimitLockProvider { get; }
 
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
@@ -59,7 +61,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var outputDevice = frameworkServiceProvider.GetOutputDevice();
         CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
         var configuration = frameworkServiceProvider.GetConfiguration();
-        
+
         TestContext.Configuration = new ConfigurationAdapter(configuration);
 
         VerbosityService = Register(new VerbosityService(CommandLineOptions));
@@ -85,6 +87,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         CancellationToken = Register(new EngineCancellationToken());
 
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
+
+        ParallelLimitLockProvider = Register(new ParallelLimitLockProvider());
 
         ContextProvider = Register(new ContextProvider(this, TestSessionId, Filter?.ToString()));
 
@@ -129,7 +133,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create single test executor with ExecutionContext support
         var singleTestExecutor = Register<ISingleTestExecutor>(
-            new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService, context.Request.Session.SessionUid));
+            new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService, CancellationToken, context.Request.Session.SessionUid));
 
         // Create the HookOrchestratingTestExecutorAdapter
         // Note: We'll need to update this to handle dynamic dependencies properly
@@ -146,14 +150,24 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 isFailFastEnabled,
                 FailFastCancellationSource,
                 Logger,
-                HookOrchestrator));
+                HookOrchestrator,
+                ParallelLimitLockProvider));
+
+        // Create scheduler configuration from command line options
+        var schedulerConfig = GetSchedulerConfiguration();
+        var testGroupingService = Register<ITestGroupingService>(new TestGroupingService());
+        var testScheduler = Register<ITestScheduler>(new Scheduling.TestScheduler(
+            Logger,
+            testGroupingService,
+            MessageBus,
+            schedulerConfig));
 
         TestExecutor = Register(new TestExecutor(
             singleTestExecutor,
             CommandLineOptions,
             Logger,
             loggerFactory,
-            testScheduler: null,
+            testScheduler,
             serviceProvider: this,
             hookOrchestratingTestExecutorAdapter,
             ContextProvider,
@@ -228,6 +242,40 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         }
 
         return SourceRegistrar.IsEnabled;
+    }
+
+    private SchedulerConfiguration GetSchedulerConfiguration()
+    {
+        var config = new SchedulerConfiguration();
+
+        // Handle --maximum-parallel-tests
+        if (CommandLineOptions.TryGetOptionArgumentList(
+            MaximumParallelTestsCommandProvider.MaximumParallelTests,
+            out var args) && args.Length > 0)
+        {
+            if (int.TryParse(args[0], out var maxParallelTests) && maxParallelTests > 0)
+            {
+                config.MaxParallelism = maxParallelTests;
+                config.AdaptiveMaxParallelism = maxParallelTests;
+            }
+        }
+
+        // Handle --parallelism-strategy
+        if (CommandLineOptions.TryGetOptionArgumentList(
+            ParallelismStrategyCommandProvider.ParallelismStrategy,
+            out var strategyArgs) && strategyArgs.Length > 0)
+        {
+            var strategy = strategyArgs[0].ToLowerInvariant();
+            config.Strategy = strategy == "fixed" ? ParallelismStrategy.Fixed : ParallelismStrategy.Adaptive;
+        }
+
+        // Handle --adaptive-metrics
+        if (CommandLineOptions.IsOptionSet(AdaptiveMetricsCommandProvider.AdaptiveMetrics))
+        {
+            config.EnableAdaptiveMetrics = true;
+        }
+
+        return config;
     }
 
     public async ValueTask DisposeAsync()

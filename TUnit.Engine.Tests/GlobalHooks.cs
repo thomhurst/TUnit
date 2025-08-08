@@ -8,7 +8,7 @@ public class GlobalHooks
     public static async Task BuildTestProject()
     {
         var result = await CliWrap.Cli.Wrap("dotnet")
-            .WithArguments(["build", "-c", GetConfiguration(), "--no-restore"])
+            .WithArguments(["build", "-c", GetConfiguration()])
             .WithWorkingDirectory(FileSystemHelpers.FindFile(x => x.Name == "TUnit.TestProject.csproj")!.DirectoryName!)
             .WithValidation(CliWrap.CommandResultValidation.None)
             .ExecuteBufferedAsync();
