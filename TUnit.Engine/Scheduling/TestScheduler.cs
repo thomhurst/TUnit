@@ -139,24 +139,33 @@ internal sealed class TestScheduler : ITestScheduler
             testsWithPriority.Add((test, priority));
         }
 
-        // Sort by NotInParallel Order first, then by execution order from the plan for dependency resolution
-        testsWithPriority.Sort((a, b) =>
-        {
-            // Primary sort: NotInParallel Order (from TestPriority)
-            var priorityComparison = a.Priority.CompareTo(b.Priority);
-            if (priorityComparison != 0)
-                return priorityComparison;
+        // Group tests by class
+        var testsByClass = testsWithPriority
+            .GroupBy(t => t.Test.Context.TestDetails.ClassType)
+            .ToList();
 
-            // Secondary sort: ExecutionPlan order for dependency resolution when NotInParallel orders are equal
-            var aOrder = plan.ExecutionOrder.TryGetValue(a.Test, out var ao) ? ao : int.MaxValue;
-            var bOrder = plan.ExecutionOrder.TryGetValue(b.Test, out var bo) ? bo : int.MaxValue;
-            return aOrder.CompareTo(bOrder);
+        // Sort classes by their minimum test Order
+        testsByClass.Sort((a, b) =>
+        {
+            var aMinOrder = a.Min(t => t.Priority.Order);
+            var bMinOrder = b.Min(t => t.Priority.Order);
+            return aMinOrder.CompareTo(bMinOrder);
         });
 
-        // Execute sequentially
-        foreach (var (test, _) in testsWithPriority)
+        // Execute class by class
+        foreach (var classGroup in testsByClass)
         {
-            await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+            // Sort tests within the class by Order, then by execution plan order
+            var classTests = classGroup.OrderBy(t => t.Priority.Order)
+                .ThenBy(t => plan.ExecutionOrder.TryGetValue(t.Test, out var order) ? order : int.MaxValue)
+                .Select(t => t.Test)
+                .ToList();
+
+            // Execute all tests from this class sequentially
+            foreach (var test in classTests)
+            {
+                await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+            }
         }
     }
 
@@ -174,24 +183,33 @@ internal sealed class TestScheduler : ITestScheduler
             testsWithPriority.Add((test, priority));
         }
 
-        // Sort by NotInParallel Order first, then by execution order from the plan for dependency resolution
-        testsWithPriority.Sort((a, b) =>
-        {
-            // Primary sort: NotInParallel Order (from TestPriority)
-            var priorityComparison = a.Priority.CompareTo(b.Priority);
-            if (priorityComparison != 0)
-                return priorityComparison;
+        // Group tests by class
+        var testsByClass = testsWithPriority
+            .GroupBy(t => t.Test.Context.TestDetails.ClassType)
+            .ToList();
 
-            // Secondary sort: ExecutionPlan order for dependency resolution when NotInParallel orders are equal
-            var aOrder = plan.ExecutionOrder.TryGetValue(a.Test, out var ao) ? ao : int.MaxValue;
-            var bOrder = plan.ExecutionOrder.TryGetValue(b.Test, out var bo) ? bo : int.MaxValue;
-            return aOrder.CompareTo(bOrder);
+        // Sort classes by their minimum test Order
+        testsByClass.Sort((a, b) =>
+        {
+            var aMinOrder = a.Min(t => t.Priority.Order);
+            var bMinOrder = b.Min(t => t.Priority.Order);
+            return aMinOrder.CompareTo(bMinOrder);
         });
 
-        // Execute sequentially within this key
-        foreach (var (test, _) in testsWithPriority)
+        // Execute class by class within this key
+        foreach (var classGroup in testsByClass)
         {
-            await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+            // Sort tests within the class by Order, then by execution plan order
+            var classTests = classGroup.OrderBy(t => t.Priority.Order)
+                .ThenBy(t => plan.ExecutionOrder.TryGetValue(t.Test, out var order) ? order : int.MaxValue)
+                .Select(t => t.Test)
+                .ToList();
+
+            // Execute all tests from this class sequentially
+            foreach (var test in classTests)
+            {
+                await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+            }
         }
     }
 
