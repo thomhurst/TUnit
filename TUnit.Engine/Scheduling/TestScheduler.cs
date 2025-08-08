@@ -1,7 +1,10 @@
 using System.Collections.Concurrent;
 using EnumerableAsyncProcessor.Extensions;
+using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Extensions.CommandLine;
 using TUnit.Core;
 using TUnit.Core.Logging;
+using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 using TUnit.Engine.Services;
@@ -16,18 +19,18 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestGroupingService _groupingService;
     private readonly ITUnitMessageBus _messageBus;
-    private readonly SchedulerConfiguration _configuration;
+    private readonly ICommandLineOptions _commandLineOptions;
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
         ITestGroupingService groupingService,
         ITUnitMessageBus messageBus,
-        SchedulerConfiguration configuration)
+        ICommandLineOptions commandLineOptions)
     {
         _logger = logger;
         _groupingService = groupingService;
         _messageBus = messageBus;
-        _configuration = configuration;
+        _commandLineOptions = commandLineOptions;
     }
 
     public async Task ScheduleAndExecuteAsync(
@@ -61,21 +64,15 @@ internal sealed class TestScheduler : ITestScheduler
         var completedTests = new ConcurrentDictionary<AbstractExecutableTest, bool>();
 
         // Determine parallelism level
-        int? maxParallelism;
-        if (_configuration.Strategy == ParallelismStrategy.Adaptive)
+        int? maxParallelism = null;
+        if (_commandLineOptions.TryGetOptionArgumentList(
+                MaximumParallelTestsCommandProvider.MaximumParallelTests,
+                out var args) && args.Length > 0)
         {
-            // For adaptive strategy, use a sensible default based on processor count
-            // This prevents unlimited concurrency which causes thread pool exhaustion
-            // Use the configured AdaptiveMaxParallelism value
-            maxParallelism = _configuration.AdaptiveMaxParallelism;
-
-            // Ensure we respect the minimum
-            maxParallelism = Math.Max(maxParallelism.Value, _configuration.AdaptiveMinParallelism);
-        }
-        else
-        {
-            // Fixed strategy uses the configured max parallelism
-            maxParallelism = _configuration.MaxParallelism > 0 ? _configuration.MaxParallelism : Environment.ProcessorCount * 4;
+            if (int.TryParse(args[0], out var maxParallelTests) && maxParallelTests > 0)
+            {
+                maxParallelism = maxParallelTests;
+            }
         }
 
         // Process all test groups

@@ -4,7 +4,6 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Services;
-using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -31,7 +30,7 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
         ICommandLineOptions commandLineOptions,
         TUnitFrameworkLogger logger,
         ILoggerFactory? loggerFactory,
-        ITestScheduler? testScheduler,
+        ITestScheduler testScheduler,
         TUnitServiceProvider serviceProvider,
         Scheduling.TestExecutor testExecutor,
         IContextProvider contextProvider,
@@ -45,8 +44,7 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
         _testExecutor = testExecutor;
         _contextProvider = contextProvider;
         _messageBus = messageBus;
-
-        _testScheduler = testScheduler ?? CreateDefaultScheduler();
+        _testScheduler = testScheduler;
     }
 
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
@@ -157,60 +155,6 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
     }
 
 
-    private ITestScheduler CreateDefaultScheduler()
-    {
-        var config = SchedulerConfiguration.Default;
-
-        // Check environment variables first (can be overridden by command-line)
-        if (int.TryParse(Environment.GetEnvironmentVariable("TUNIT_ADAPTIVE_MIN_PARALLELISM"), out var envMinParallelism) && envMinParallelism > 0)
-        {
-            config.AdaptiveMinParallelism = envMinParallelism;
-        }
-
-        if (int.TryParse(Environment.GetEnvironmentVariable("TUNIT_ADAPTIVE_MAX_PARALLELISM"), out var envMaxParallelism) && envMaxParallelism > 0)
-        {
-            config.AdaptiveMaxParallelism = envMaxParallelism;
-        }
-
-        if (bool.TryParse(Environment.GetEnvironmentVariable("TUNIT_ADAPTIVE_METRICS"), out var envMetrics))
-        {
-            config.EnableAdaptiveMetrics = envMetrics;
-        }
-
-        // Handle --maximum-parallel-tests (applies to both fixed and adaptive strategies)
-        if (_commandLineOptions.TryGetOptionArgumentList(
-            MaximumParallelTestsCommandProvider.MaximumParallelTests,
-            out var args) && args.Length > 0)
-        {
-            if (int.TryParse(args[0], out var maxParallelTests) && maxParallelTests > 0)
-            {
-                config.MaxParallelism = maxParallelTests;
-                config.AdaptiveMaxParallelism = maxParallelTests;
-                // Don't change strategy - let it be controlled by --parallelism-strategy
-            }
-        }
-
-        // Handle --parallelism-strategy
-        if (_commandLineOptions.TryGetOptionArgumentList(
-            ParallelismStrategyCommandProvider.ParallelismStrategy,
-            out var strategyArgs) && strategyArgs.Length > 0)
-        {
-            var strategy = strategyArgs[0].ToLowerInvariant();
-            config.Strategy = strategy == "fixed" ? ParallelismStrategy.Fixed : ParallelismStrategy.Adaptive;
-        }
-
-        // Handle --adaptive-metrics
-        if (_commandLineOptions.IsOptionSet(AdaptiveMetricsCommandProvider.AdaptiveMetrics))
-        {
-            config.EnableAdaptiveMetrics = true;
-        }
-
-        var eventReceiverOrchestrator = _serviceProvider.GetService(typeof(EventReceiverOrchestrator)) as EventReceiverOrchestrator;
-        var hookOrchestrator = _serviceProvider.GetService(typeof(HookOrchestrator)) as HookOrchestrator;
-        return TestSchedulerFactory.Create(config, _logger, _serviceProvider.MessageBus, _serviceProvider.CancellationToken, eventReceiverOrchestrator!, hookOrchestrator!);
-    }
-
-
     private bool _disposed;
 
     public void Dispose()
@@ -221,9 +165,6 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
         }
 
         _disposed = true;
-        
-        // Dispose the scheduler if it implements IDisposable
-        (_testScheduler as IDisposable)?.Dispose();
     }
 
     public ValueTask DisposeAsync()
@@ -234,7 +175,7 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
         }
 
         _disposed = true;
-        
+
         // Dispose the scheduler if it implements IDisposable
         (_testScheduler as IDisposable)?.Dispose();
 
