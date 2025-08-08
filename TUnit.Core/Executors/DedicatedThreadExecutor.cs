@@ -73,7 +73,10 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                 }
 
                 // Pump messages until the task completes with optimized waiting
+                var deadline = DateTime.UtcNow.AddMinutes(5);
                 var spinWait = new SpinWait();
+                var lastTimeCheck = DateTime.UtcNow;
+                const int TimeCheckIntervalMs = 100;
                 
                 while (!task.IsCompleted)
                 {
@@ -103,6 +106,18 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                     {
                         // Had work, reset spin counter
                         spinWait.Reset();
+                    }
+
+                    // Check timeout periodically instead of every iteration
+                    var now = DateTime.UtcNow;
+                    if ((now - lastTimeCheck).TotalMilliseconds >= TimeCheckIntervalMs)
+                    {
+                        if (now >= deadline)
+                        {
+                            tcs.SetException(new TimeoutException("Async operation timed out after 5 minutes"));
+                            return;
+                        }
+                        lastTimeCheck = now;
                     }
                 }
 
