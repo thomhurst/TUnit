@@ -5,6 +5,7 @@ using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Services;
 using TUnit.Engine.Framework;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
@@ -153,7 +154,6 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
         // Schedule and execute tests (batch approach to preserve ExecutionContext)
         await _testScheduler.ScheduleAndExecuteAsync(testList, executorAdapter, linkedCts.Token);
     }
-
 
     private bool _disposed;
 
