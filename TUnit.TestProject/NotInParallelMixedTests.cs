@@ -186,10 +186,6 @@ public class NotInParallelMixedTests
     [After(Class)]
     public static async Task ValidateFinalResults()
     {
-        // Skip validation - there seems to be a race condition in the NotInParallel implementation
-        // that's causing tests to run in parallel when they shouldn't. This is a pre-existing issue
-        // not related to our hook fixes.
-        return;
         
         // Validate that tests without keys didn't run in parallel
         if (ExecutionsByGroup.TryGetValue("NoKey", out var noKeyExecutions))
