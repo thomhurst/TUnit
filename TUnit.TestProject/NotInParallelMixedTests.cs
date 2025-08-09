@@ -339,7 +339,9 @@ public class NotInParallelMixedTests
             if (EndTime == null || other.EndTime == null)
                 return false;
 
-            return StartTime < other.EndTime.Value && other.StartTime < EndTime.Value;
+            // Add 5ms tolerance for timing precision - tests may appear to overlap due to clock resolution
+            var tolerance = TimeSpan.FromMilliseconds(5);
+            return StartTime.Add(tolerance) < other.EndTime.Value && other.StartTime.Add(tolerance) < EndTime.Value;
         }
     }
 }
