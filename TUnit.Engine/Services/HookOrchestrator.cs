@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Data;
+using TUnit.Core.Helpers;
 using TUnit.Core.Services;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Framework;
@@ -23,8 +24,8 @@ internal sealed class HookOrchestrator
     private readonly GetOnlyDictionary<Type, Task<ExecutionContext?>> _beforeClassTasks = new();
 
     // Track active test counts for cleanup
-    private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
-    private readonly ConcurrentDictionary<Type, int> _classTestCounts = new();
+    private readonly ConcurrentDictionary<string, Counter> _assemblyTestCounts = new();
+    private readonly ConcurrentDictionary<Type, Counter> _classTestCounts = new();
     
     // Store session context to flow to assembly/class hooks
 #if NET
@@ -206,8 +207,8 @@ internal sealed class HookOrchestrator
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";
 
         // Track test counts
-        _assemblyTestCounts.AddOrUpdate(assemblyName, 1, (_, count) => count + 1);
-        _classTestCounts.AddOrUpdate(testClassType, 1, (_, count) => count + 1);
+        _assemblyTestCounts.GetOrAdd(assemblyName, _ => new Counter()).Increment();
+        _classTestCounts.GetOrAdd(testClassType, _ => new Counter()).Increment();
 
         await GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken);
 
@@ -252,8 +253,10 @@ internal sealed class HookOrchestrator
         await ExecuteAfterEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
 
         // Decrement test counts
-        var classTestsRemaining = _classTestCounts.AddOrUpdate(testClassType, 0, (_, count) => count - 1);
-        var assemblyTestsRemaining = _assemblyTestCounts.AddOrUpdate(assemblyName, 0, (_, count) => count - 1);
+        var classCounter = _classTestCounts.GetOrAdd(testClassType, _ => new Counter());
+        var classTestsRemaining = classCounter.Decrement();
+        var assemblyCounter = _assemblyTestCounts.GetOrAdd(assemblyName, _ => new Counter());
+        var assemblyTestsRemaining = assemblyCounter.Decrement();
 
         // Execute AfterClass hooks if last test in class AND BeforeClass hooks were run
         if (classTestsRemaining == 0 && _beforeClassTasks.TryGetValue(testClassType, out _))
