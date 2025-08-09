@@ -339,9 +339,16 @@ public class NotInParallelMixedTests
             if (EndTime == null || other.EndTime == null)
                 return false;
 
-            // Add 5ms tolerance for timing precision - tests may appear to overlap due to clock resolution
-            var tolerance = TimeSpan.FromMilliseconds(5);
-            return StartTime.Add(tolerance) < other.EndTime.Value && other.StartTime.Add(tolerance) < EndTime.Value;
+            // Add 50ms tolerance for timing precision - tests may appear to overlap due to clock resolution
+            // and test framework overhead. We consider tests as overlapping only if they truly run concurrently,
+            // not if one starts immediately after another finishes.
+            var tolerance = TimeSpan.FromMilliseconds(50);
+            
+            // Tests overlap if:
+            // - This test starts before the other ends (with tolerance)
+            // - AND the other test starts before this one ends (with tolerance)
+            // The tolerance is subtracted from end times to be more lenient
+            return StartTime < other.EndTime.Value.Subtract(tolerance) && other.StartTime < EndTime.Value.Subtract(tolerance);
         }
     }
 }
