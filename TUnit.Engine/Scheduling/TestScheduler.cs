@@ -17,8 +17,8 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly ITestGroupingService _groupingService;
     private readonly ITUnitMessageBus _messageBus;
     private readonly SchedulerConfiguration _configuration;
-
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _constraintSemaphores = new();
+
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
@@ -168,123 +168,86 @@ internal sealed class TestScheduler : ITestScheduler
         int? maxParallelism,
         CancellationToken cancellationToken)
     {
-        var allKeyedTests = new List<(AbstractExecutableTest Test, TestPriority Priority)>();
-
-        foreach (var queue in keyedQueues.Values)
+        // Process each keyed queue sequentially within the key
+        // Different keys can run in parallel
+        var keyedTasks = new List<Task>();
+        var processedTests = new ConcurrentDictionary<AbstractExecutableTest, bool>();
+        
+        foreach (var kvp in keyedQueues)
         {
-            while (queue.TryDequeue(out var test, out var priority))
-            {
-                allKeyedTests.Add((test, priority));
-            }
-        }
-
-        allKeyedTests.Sort((a, b) =>
-        {
-            var priorityComp = a.Priority.Priority.CompareTo(b.Priority.Priority);
-            if (priorityComp != 0) return priorityComp;
-
-            var orderComp = a.Priority.Order.CompareTo(b.Priority.Order);
-            if (orderComp != 0) return orderComp;
-
-            return plan.ExecutionOrder.TryGetValue(a.Test, out var aOrder) &&
-                   plan.ExecutionOrder.TryGetValue(b.Test, out var bOrder)
-                   ? aOrder.CompareTo(bOrder) : 0;
-        });
-
-        if (maxParallelism.HasValue)
-        {
-            await allKeyedTests
-                .Select(t => t.Test)
-                .ForEachAsync(async test => await ExecuteTestWithSemaphoreAsync(test, executor, runningTasks, completedTests, cancellationToken))
-                .ProcessInParallel(maxParallelism.Value);
-        }
-        else
-        {
-            await allKeyedTests
-                .Select(t => t.Test)
-                .ForEachAsync(async test => await ExecuteTestWithSemaphoreAsync(test, executor, runningTasks, completedTests, cancellationToken))
-                .ProcessInParallel();
-        }
-    }
-
-    private async Task ExecuteTestWithSemaphoreAsync(
-        AbstractExecutableTest test,
-        ITestExecutor executor,
-        ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
-        ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
-        CancellationToken cancellationToken)
-    {
-        var constraintKeys = GetConstraintKeys(test);
-
-        if (constraintKeys.Count == 0)
-        {
-            await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
-            return;
-        }
-
-        var semaphores = new List<SemaphoreSlim>();
-        foreach (var key in constraintKeys)
-        {
-            var semaphore = _constraintSemaphores.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
-            semaphores.Add(semaphore);
-        }
-
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            var acquired = new List<SemaphoreSlim>();
-            var allAcquired = true;
+            var key = kvp.Key;
+            var queue = kvp.Value;
             
-            try
+            var keyTask = Task.Run(async () =>
             {
-                foreach (var semaphore in semaphores)
+                var testsWithPriority = new List<(AbstractExecutableTest Test, TestPriority Priority)>();
+                while (queue.TryDequeue(out var test, out var priority))
                 {
-                    if (await semaphore.WaitAsync(0, cancellationToken))
+                    testsWithPriority.Add((test, priority));
+                }
+                
+                // Sort tests within this key by priority and order
+                testsWithPriority.Sort((a, b) =>
+                {
+                    var priorityComp = a.Priority.Priority.CompareTo(b.Priority.Priority);
+                    if (priorityComp != 0) return priorityComp;
+                    
+                    var orderComp = a.Priority.Order.CompareTo(b.Priority.Order);
+                    if (orderComp != 0) return orderComp;
+                    
+                    return plan.ExecutionOrder.TryGetValue(a.Test, out var aOrder) && 
+                           plan.ExecutionOrder.TryGetValue(b.Test, out var bOrder) 
+                           ? aOrder.CompareTo(bOrder) : 0;
+                });
+                
+                // Execute tests for this key sequentially
+                foreach (var (test, _) in testsWithPriority)
+                {
+                    // Only execute if not already processed by another key
+                    // This handles tests with multiple constraint keys
+                    if (!processedTests.TryAdd(test, true))
                     {
-                        acquired.Add(semaphore);
+                        continue; // Already processed by another key
                     }
-                    else
+                    
+                    // Get ALL constraint keys for this test (may be more than just this queue's key)
+                    var constraintKeys = GetConstraintKeys(test);
+                    var semaphores = new List<SemaphoreSlim>();
+                    
+                    // Collect all semaphores for this test's constraint keys (sorted to prevent deadlock)
+                    foreach (var constraintKey in constraintKeys.OrderBy(k => k))
                     {
-                        allAcquired = false;
-                        foreach (var acquiredSemaphore in acquired)
+                        semaphores.Add(_constraintSemaphores.GetOrAdd(constraintKey, _ => new SemaphoreSlim(1, 1)));
+                    }
+                    
+                    // Acquire all semaphores
+                    foreach (var sem in semaphores)
+                    {
+                        await sem.WaitAsync(cancellationToken);
+                    }
+                    
+                    try
+                    {
+                        await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+                    }
+                    finally
+                    {
+                        // Release all semaphores
+                        foreach (var sem in semaphores)
                         {
-                            acquiredSemaphore.Release();
+                            sem.Release();
                         }
-                        acquired.Clear();
-                        break;
                     }
                 }
-
-                if (allAcquired)
-                {
-                    await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
-                    break;
-                }
-                else
-                {
-                    await Task.Delay(10, cancellationToken);
-                }
-            }
-            catch
-            {
-                foreach (var semaphore in acquired)
-                {
-                    semaphore.Release();
-                }
-                throw;
-            }
-            finally
-            {
-                if (allAcquired && acquired.Count == semaphores.Count)
-                {
-                    foreach (var semaphore in acquired)
-                    {
-                        semaphore.Release();
-                    }
-                }
-            }
+            }, cancellationToken);
+            
+            keyedTasks.Add(keyTask);
         }
+        
+        // Wait for all keyed queues to complete
+        await Task.WhenAll(keyedTasks);
     }
-
+    
     private List<string> GetConstraintKeys(AbstractExecutableTest test)
     {
         if (test.Context.ParallelConstraint is NotInParallelConstraint notInParallel)
@@ -293,6 +256,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
         return new List<string>();
     }
+
 
     private async Task ExecuteParallelGroupAsync(SortedDictionary<int, List<AbstractExecutableTest>> orderGroups,
         ITestExecutor executor,
