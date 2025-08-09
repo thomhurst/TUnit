@@ -8,7 +8,6 @@ using TUnit.Core;
 using TUnit.Engine.Building;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Services;
-using TUnit.Engine.Scheduling;
 
 namespace TUnit.Engine;
 
@@ -98,9 +97,6 @@ internal sealed class TestDiscoveryService : IDataProducer
         var tests = new List<AbstractExecutableTest>(independentTests.Count + dependentTests.Count);
         tests.AddRange(independentTests);
         tests.AddRange(dependentTests);
-        
-        // Create execution plan for ordering
-        var executionPlan = ExecutionPlan.Create(tests);
         
         // Apply filter first to get the tests we want to run
         var filteredTests = _testFilterService.FilterTests(filter, tests);

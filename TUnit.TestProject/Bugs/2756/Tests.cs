@@ -8,6 +8,7 @@ public class Tests
     [MethodDataSource(nameof(Ints))]
     public async Task Test1(int i)
     {
+        await Task.Delay(100);
         await Assert.That(i).IsGreaterThan(0);
     }
 

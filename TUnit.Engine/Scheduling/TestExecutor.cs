@@ -168,48 +168,30 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
 
     private async Task RouteTestResult(AbstractExecutableTest test, TestNodeUpdateMessage updateMessage)
     {
-        // Find the state property to determine which ITUnitMessageBus method to call
-        IProperty? stateProperty = null;
-        foreach (var property in updateMessage.TestNode.Properties)
+        // Optimized: Use test state directly instead of searching through properties
+        var testState = test.State;
+        var startTime = test.StartTime.GetValueOrDefault();
+        
+        switch (testState)
         {
-            if (property is PassedTestNodeStateProperty or
-                FailedTestNodeStateProperty or
-                ErrorTestNodeStateProperty or
-                TimeoutTestNodeStateProperty or
-                CancelledTestNodeStateProperty or
-                SkippedTestNodeStateProperty)
-            {
-                stateProperty = property;
-                break;
-            }
-        }
-
-        switch (stateProperty)
-        {
-            case PassedTestNodeStateProperty:
-                await _tunitMessageBus.Passed(test.Context, test.StartTime.GetValueOrDefault());
+            case TestState.Passed:
+                await _tunitMessageBus.Passed(test.Context, startTime);
                 break;
 
-            case FailedTestNodeStateProperty failedProperty:
-                var failedException = failedProperty.Exception ?? new InvalidOperationException("Test failed but no exception was provided");
-                await _tunitMessageBus.Failed(test.Context, failedException, test.StartTime.GetValueOrDefault());
+            case TestState.Failed when test.Result?.Exception != null:
+                await _tunitMessageBus.Failed(test.Context, test.Result.Exception, startTime);
                 break;
 
-            case ErrorTestNodeStateProperty errorProperty:
-                var errorException = errorProperty.Exception ?? new InvalidOperationException("Test errored but no exception was provided");
-                await _tunitMessageBus.Failed(test.Context, errorException, test.StartTime.GetValueOrDefault());
+            case TestState.Timeout:
+                var timeoutException = test.Result?.Exception ?? new System.TimeoutException("Test timed out");
+                await _tunitMessageBus.Failed(test.Context, timeoutException, startTime);
                 break;
 
-            case TimeoutTestNodeStateProperty timeoutProperty:
-                var timeoutException = new System.TimeoutException(timeoutProperty.Explanation ?? "Test timed out");
-                await _tunitMessageBus.Failed(test.Context, timeoutException, test.StartTime.GetValueOrDefault());
+            case TestState.Cancelled:
+                await _tunitMessageBus.Cancelled(test.Context, startTime);
                 break;
 
-            case CancelledTestNodeStateProperty:
-                await _tunitMessageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault());
-                break;
-
-            case SkippedTestNodeStateProperty:
+            case TestState.Skipped:
                 var skipReason = test.Result?.OverrideReason ?? test.Context.SkipReason ?? "Test skipped";
                 await _tunitMessageBus.Skipped(test.Context, skipReason);
                 break;

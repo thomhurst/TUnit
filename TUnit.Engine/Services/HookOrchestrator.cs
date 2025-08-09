@@ -26,6 +26,10 @@ internal sealed class HookOrchestrator
     private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
     private readonly ConcurrentDictionary<Type, int> _classTestCounts = new();
     
+    // Cache whether hooks exist to avoid unnecessary collection
+    private readonly GetOnlyDictionary<Type, Task<bool>> _hasBeforeEveryTestHooks = new();
+    private readonly GetOnlyDictionary<Type, Task<bool>> _hasAfterEveryTestHooks = new();
+    
     // Store session context to flow to assembly/class hooks
 #if NET
     private ExecutionContext? _sessionExecutionContext;
@@ -209,14 +213,21 @@ internal sealed class HookOrchestrator
         _assemblyTestCounts.AddOrUpdate(assemblyName, 1, (_, count) => count + 1);
         _classTestCounts.AddOrUpdate(testClassType, 1, (_, count) => count + 1);
 
+        // Fast path: check if we need to run hooks at all
+        var hasHooks = await _hasBeforeEveryTestHooks.GetOrAdd(testClassType, async _ => 
+        {
+            var hooks = await _hookCollectionService.CollectBeforeEveryTestHooksAsync(testClassType);
+            return hooks.Count > 0;
+        });
+
         await GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken);
 
         // Get the cached class context (includes assembly context)
         var classContext = await GetOrCreateBeforeClassTask(testClassType, testClassType.Assembly, cancellationToken);
 
 #if NET
-        // Only restore if there's actually a context to restore
-        if (classContext != null)
+        // Batch context restoration - only restore once if we have hooks to run
+        if (classContext != null && hasHooks)
         {
             ExecutionContext.Restore(classContext);
         }
@@ -224,8 +235,11 @@ internal sealed class HookOrchestrator
 
         var classContextObject = _contextProvider.GetOrCreateClassContext(testClassType);
 
-        // Execute BeforeEveryTest hooks in the accumulated context
-        await ExecuteBeforeEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
+        // Execute BeforeEveryTest hooks only if they exist
+        if (hasHooks)
+        {
+            await ExecuteBeforeEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
+        }
 
         // Return whichever context has AsyncLocal values:
         // 1. If test context has it (from BeforeTest hooks), use that
@@ -248,8 +262,18 @@ internal sealed class HookOrchestrator
         var testClassType = test.Metadata.TestClassType;
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";
 
-        // Execute AfterEveryTest hooks
-        await ExecuteAfterEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
+        // Fast path: check if we have hooks to execute
+        var hasHooks = await _hasAfterEveryTestHooks.GetOrAdd(testClassType, async _ =>
+        {
+            var hooks = await _hookCollectionService.CollectAfterEveryTestHooksAsync(testClassType);
+            return hooks.Count > 0;
+        });
+
+        // Execute AfterEveryTest hooks only if they exist
+        if (hasHooks)
+        {
+            await ExecuteAfterEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
+        }
 
         // Decrement test counts
         var classTestsRemaining = _classTestCounts.AddOrUpdate(testClassType, 0, (_, count) => count - 1);

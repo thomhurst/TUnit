@@ -154,13 +154,12 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 ParallelLimitLockProvider));
 
         // Create scheduler configuration from command line options
-        var schedulerConfig = GetSchedulerConfiguration();
         var testGroupingService = Register<ITestGroupingService>(new TestGroupingService());
-        var testScheduler = Register<ITestScheduler>(new Scheduling.TestScheduler(
+        var testScheduler = Register<ITestScheduler>(new TestScheduler(
             Logger,
             testGroupingService,
             MessageBus,
-            schedulerConfig));
+            CommandLineOptions));
 
         TestExecutor = Register(new TestExecutor(
             singleTestExecutor,
@@ -242,40 +241,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         }
 
         return SourceRegistrar.IsEnabled;
-    }
-
-    private SchedulerConfiguration GetSchedulerConfiguration()
-    {
-        var config = new SchedulerConfiguration();
-
-        // Handle --maximum-parallel-tests
-        if (CommandLineOptions.TryGetOptionArgumentList(
-            MaximumParallelTestsCommandProvider.MaximumParallelTests,
-            out var args) && args.Length > 0)
-        {
-            if (int.TryParse(args[0], out var maxParallelTests) && maxParallelTests > 0)
-            {
-                config.MaxParallelism = maxParallelTests;
-                config.AdaptiveMaxParallelism = maxParallelTests;
-            }
-        }
-
-        // Handle --parallelism-strategy
-        if (CommandLineOptions.TryGetOptionArgumentList(
-            ParallelismStrategyCommandProvider.ParallelismStrategy,
-            out var strategyArgs) && strategyArgs.Length > 0)
-        {
-            var strategy = strategyArgs[0].ToLowerInvariant();
-            config.Strategy = strategy == "fixed" ? ParallelismStrategy.Fixed : ParallelismStrategy.Adaptive;
-        }
-
-        // Handle --adaptive-metrics
-        if (CommandLineOptions.IsOptionSet(AdaptiveMetricsCommandProvider.AdaptiveMetrics))
-        {
-            config.EnableAdaptiveMetrics = true;
-        }
-
-        return config;
     }
 
     public async ValueTask DisposeAsync()

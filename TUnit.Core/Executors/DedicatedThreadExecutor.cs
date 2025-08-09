@@ -65,38 +65,63 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                     await action();
                 }, CancellationToken.None, TaskCreationOptions.None, taskScheduler).Unwrap();
 
-                // Pump messages until the task completes
-                var deadline = DateTime.UtcNow.AddMinutes(5);
-
-                while (!task.IsCompleted && DateTime.UtcNow < deadline)
+                // Try fast path first - many tests complete quickly
+                if (task.Wait(10))
                 {
-                    dedicatedContext.ProcessPendingWork();
-
-                    taskScheduler.ProcessPendingTasks();
-
-                    Thread.Sleep(1);
-                }
-
-                if (!task.IsCompleted)
-                {
-                    tcs.SetException(new TimeoutException("Async operation timed out after 5 minutes"));
+                    HandleTaskCompletion(task, tcs);
                     return;
                 }
 
-                if (task.IsFaulted)
+                // Pump messages until the task completes with optimized waiting
+                var deadline = DateTime.UtcNow.AddMinutes(5);
+                var spinWait = new SpinWait();
+                var lastTimeCheck = DateTime.UtcNow;
+                const int TimeCheckIntervalMs = 100;
+                
+                while (!task.IsCompleted)
                 {
-                    tcs.SetException(task.Exception!.InnerExceptions.Count == 1 
-                        ? task.Exception.InnerException! 
-                        : task.Exception);
+                    bool hadWork = dedicatedContext.ProcessPendingWork();
+                    hadWork |= taskScheduler.ProcessPendingTasks();
+
+                    if (!hadWork)
+                    {
+                        // No work available, use efficient waiting
+                        if (spinWait.Count < 10)
+                        {
+                            spinWait.SpinOnce();
+                        }
+                        else
+                        {
+                            // After initial spins, yield to other threads
+                            Thread.Yield();
+                            if (spinWait.Count > 100)
+                            {
+                                // After many iterations, do a brief sleep
+                                Thread.Sleep(0);
+                                spinWait.Reset();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Had work, reset spin counter
+                        spinWait.Reset();
+                    }
+
+                    // Check timeout periodically instead of every iteration
+                    var now = DateTime.UtcNow;
+                    if ((now - lastTimeCheck).TotalMilliseconds >= TimeCheckIntervalMs)
+                    {
+                        if (now >= deadline)
+                        {
+                            tcs.SetException(new TimeoutException("Async operation timed out after 5 minutes"));
+                            return;
+                        }
+                        lastTimeCheck = now;
+                    }
                 }
-                else if (task.IsCanceled)
-                {
-                    tcs.SetCanceled();
-                }
-                else
-                {
-                    tcs.SetResult(null);
-                }
+
+                HandleTaskCompletion(task, tcs);
             }
             finally
             {
@@ -106,6 +131,24 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         catch (Exception ex)
         {
             tcs.SetException(ex);
+        }
+    }
+
+    private static void HandleTaskCompletion(Task task, TaskCompletionSource<object?> tcs)
+    {
+        if (task.IsFaulted)
+        {
+            tcs.SetException(task.Exception!.InnerExceptions.Count == 1 
+                ? task.Exception.InnerException! 
+                : task.Exception);
+        }
+        else if (task.IsCanceled)
+        {
+            tcs.SetCanceled();
+        }
+        else
+        {
+            tcs.SetResult(null);
         }
     }
 
@@ -178,13 +221,14 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
             }
         }
 
-        public void ProcessPendingTasks()
+        public bool ProcessPendingTasks()
         {
             if (Thread.CurrentThread != _dedicatedThread)
             {
                 throw new InvalidOperationException("ProcessPendingTasks can only be called from the dedicated thread.");
             }
 
+            bool hadWork = false;
             while (true)
             {
                 Task? task;
@@ -198,10 +242,12 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
                     task = _taskQueue[0];
                     _taskQueue.RemoveAt(0);
+                    hadWork = true;
                 }
 
                 TryExecuteTask(task);
             }
+            return hadWork;
         }
 
         public override int MaximumConcurrencyLevel => 1;
@@ -260,14 +306,15 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
             }
         }
 
-        public void ProcessPendingWork()
+        public bool ProcessPendingWork()
         {
             // Only the dedicated thread should call this
             if (Thread.CurrentThread != _dedicatedThread)
             {
-                return;
+                return false;
             }
 
+            bool hadWork = false;
             while (true)
             {
                 (SendOrPostCallback callback, object? state) workItem;
@@ -280,6 +327,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                     }
 
                     workItem = _workQueue.Dequeue();
+                    hadWork = true;
                 }
 
                 try
@@ -292,6 +340,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                     // The exception will be handled by the async machinery
                 }
             }
+            return hadWork;
         }
 
         public override SynchronizationContext CreateCopy()

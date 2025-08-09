@@ -7,12 +7,23 @@ using TUnit.Core.Enums;
 using TUnit.Core.Services;
 using TUnit.Core.Helpers;
 using System.Reflection;
+using System.Collections.Concurrent;
 
 namespace TUnit.Core;
+
+internal sealed class PropertyInjectionPlan
+{
+    public required Type Type { get; init; }
+    public required PropertyInjectionMetadata[] SourceGeneratedProperties { get; init; }
+    public required (PropertyInfo Property, IDataSourceAttribute DataSource)[] ReflectionProperties { get; init; }
+    public required bool HasProperties { get; init; }
+}
 
 public sealed class PropertyInjectionService
 {
     private static readonly GetOnlyDictionary<object, Task> _injectionTasks = new();
+    private static readonly GetOnlyDictionary<Type, PropertyInjectionPlan> _injectionPlans = new();
+    private static readonly GetOnlyDictionary<Type, bool> _shouldInjectCache = new();
 
     /// <summary>
     /// Injects properties with data sources into argument objects just before test execution.
@@ -26,9 +37,18 @@ public sealed class PropertyInjectionService
             return;
         }
 
-        // Process arguments in parallel
-        var argumentTasks = arguments
+        // Fast path: check if any arguments need injection
+        var injectableArgs = arguments
             .Where(argument => argument != null && ShouldInjectProperties(argument))
+            .ToArray();
+            
+        if (injectableArgs.Length == 0)
+        {
+            return;
+        }
+
+        // Process arguments in parallel
+        var argumentTasks = injectableArgs
             .Select(argument => InjectPropertiesIntoObjectAsync(argument!, objectBag, methodMetadata, events))
             .ToArray();
 
@@ -46,23 +66,27 @@ public sealed class PropertyInjectionService
         }
 
         var type = obj.GetType();
-
-        if (type.IsPrimitive || type == typeof(string) || type.IsEnum || type.IsValueType)
+        
+        // Use cached result for better performance
+        return _shouldInjectCache.GetOrAdd(type, _ =>
         {
-            return false;
-        }
+            if (type.IsPrimitive || type == typeof(string) || type.IsEnum || type.IsValueType)
+            {
+                return false;
+            }
 
-        if (type.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(type))
-        {
-            return false;
-        }
+            if (type.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(type))
+            {
+                return false;
+            }
 
-        if (type.Assembly == typeof(object).Assembly)
-        {
-            return false;
-        }
+            if (type.Assembly == typeof(object).Assembly)
+            {
+                return false;
+            }
 
-        return true;
+            return true;
+        });
     }
 
     /// <summary>
@@ -89,13 +113,22 @@ public sealed class PropertyInjectionService
         {
             await _injectionTasks.GetOrAdd(instance, async _ =>
             {
+                var plan = GetOrCreateInjectionPlan(instance.GetType());
+                
+                // Fast path: skip if no properties to inject
+                if (!plan.HasProperties)
+                {
+                    await ObjectInitializer.InitializeAsync(instance);
+                    return;
+                }
+                
                 if (SourceRegistrar.IsEnabled)
                 {
-                    await InjectPropertiesUsingSourceGenerationAsync(instance, objectBag, methodMetadata, events);
+                    await InjectPropertiesUsingPlanAsync(instance, plan.SourceGeneratedProperties, objectBag, methodMetadata, events);
                 }
                 else
                 {
-                    await InjectPropertiesUsingReflectionAsync(instance, objectBag, methodMetadata, events);
+                    await InjectPropertiesUsingReflectionPlanAsync(instance, plan.ReflectionProperties, objectBag, methodMetadata, events);
                 }
                 
                 // Initialize the object AFTER all its properties have been injected and initialized
@@ -109,55 +142,89 @@ public sealed class PropertyInjectionService
     }
 
     /// <summary>
-    /// Injects properties using source-generated metadata (AOT-safe mode).
-    /// Properties at the same level are initialized in parallel for better performance.
+    /// Creates or retrieves a cached injection plan for a type.
     /// </summary>
-    private static async Task InjectPropertiesUsingSourceGenerationAsync(object instance, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "This method is part of the optimization and handles both AOT and non-AOT scenarios")]
+    private static PropertyInjectionPlan GetOrCreateInjectionPlan(Type type)
     {
-        var type = instance.GetType();
-        var propertySource = PropertySourceRegistry.GetSource(type);
-
-        if (propertySource?.ShouldInitialize == true)
+        return _injectionPlans.GetOrAdd(type, _ =>
         {
-            var propertyMetadata = propertySource.GetPropertyMetadata();
+            if (SourceRegistrar.IsEnabled)
+            {
+                var propertySource = PropertySourceRegistry.GetSource(type);
+                var sourceGenProps = propertySource?.ShouldInitialize == true 
+                    ? propertySource.GetPropertyMetadata().ToArray() 
+                    : Array.Empty<PropertyInjectionMetadata>();
+                    
+                return new PropertyInjectionPlan
+                {
+                    Type = type,
+                    SourceGeneratedProperties = sourceGenProps,
+                    ReflectionProperties = Array.Empty<(PropertyInfo, IDataSourceAttribute)>(),
+                    HasProperties = sourceGenProps.Length > 0
+                };
+            }
+            else
+            {
+                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
+                    .Where(p => p.CanWrite || p.SetMethod?.IsPublic == false);  // Include init-only properties
 
-            // Process all properties at the same level in parallel
-            var propertyTasks = propertyMetadata.Select(metadata => 
-                ProcessPropertyMetadata(instance, metadata, objectBag, methodMetadata, events, TestContext.Current)
-            ).ToArray();
-
-            await Task.WhenAll(propertyTasks);
+                var propertyDataSourcePairs = new List<(PropertyInfo property, IDataSourceAttribute dataSource)>();
+                
+                foreach (var property in properties)
+                {
+                    foreach (var attr in property.GetCustomAttributes())
+                    {
+                        if (attr is IDataSourceAttribute dataSourceAttr)
+                        {
+                            propertyDataSourcePairs.Add((property, dataSourceAttr));
+                        }
+                    }
+                }
+                
+                return new PropertyInjectionPlan
+                {
+                    Type = type,
+                    SourceGeneratedProperties = Array.Empty<PropertyInjectionMetadata>(),
+                    ReflectionProperties = propertyDataSourcePairs.ToArray(),
+                    HasProperties = propertyDataSourcePairs.Count > 0
+                };
+            }
+        });
+    }
+    
+    /// <summary>
+    /// Injects properties using a cached source-generated plan.
+    /// </summary>
+    private static async Task InjectPropertiesUsingPlanAsync(object instance, PropertyInjectionMetadata[] properties, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
+    {
+        if (properties.Length == 0)
+        {
+            return;
         }
+
+        // Process all properties at the same level in parallel
+        var propertyTasks = properties.Select(metadata => 
+            ProcessPropertyMetadata(instance, metadata, objectBag, methodMetadata, events, TestContext.Current)
+        ).ToArray();
+
+        await Task.WhenAll(propertyTasks);
     }
 
     /// <summary>
-    /// Injects properties using runtime reflection (full feature mode).
-    /// Properties at the same level are initialized in parallel for better performance.
+    /// Injects properties using a cached reflection plan.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static async Task InjectPropertiesUsingReflectionAsync(object instance, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
+    private static async Task InjectPropertiesUsingReflectionPlanAsync(object instance, (PropertyInfo Property, IDataSourceAttribute DataSource)[] properties, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
     {
-        var type = instance.GetType();
-        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-            .Where(p => p.CanWrite || p.SetMethod?.IsPublic == false);  // Include init-only properties
-
-        // Collect all property-datasource pairs
-        var propertyDataSourcePairs = new List<(PropertyInfo property, IDataSourceAttribute dataSource)>();
-        
-        foreach (var property in properties)
+        if (properties.Length == 0)
         {
-            foreach (var attr in property.GetCustomAttributes())
-            {
-                if (attr is IDataSourceAttribute dataSourceAttr)
-                {
-                    propertyDataSourcePairs.Add((property, dataSourceAttr));
-                }
-            }
+            return;
         }
 
         // Process all properties in parallel
-        var propertyTasks = propertyDataSourcePairs.Select(pair => 
-            ProcessReflectionPropertyDataSource(instance, pair.property, pair.dataSource, objectBag, methodMetadata, events, TestContext.Current)
+        var propertyTasks = properties.Select(pair => 
+            ProcessReflectionPropertyDataSource(instance, pair.Property, pair.DataSource, objectBag, methodMetadata, events, TestContext.Current)
         ).ToArray();
 
         await Task.WhenAll(propertyTasks);

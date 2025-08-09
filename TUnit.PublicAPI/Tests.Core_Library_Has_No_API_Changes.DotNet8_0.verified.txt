@@ -1611,7 +1611,7 @@ namespace .Converters
 }
 namespace .Data
 {
-    public class GetOnlyDictionary<TKey, TValue>
+    public class GetOnlyDictionary<TKey, [.(..PublicParameterlessConstructor)]  TValue>
         where TKey :  notnull
     {
         public GetOnlyDictionary() { }
