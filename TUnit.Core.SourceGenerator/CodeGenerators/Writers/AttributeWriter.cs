@@ -187,12 +187,60 @@ public class AttributeWriter
 
     private static string FormatConstructorArgument(Compilation compilation, AttributeArgumentSyntax attributeArgumentSyntax)
     {
+        // Special handling for numeric literals that might need decimal precision
+        // Check if this is a numeric literal expression
+        var expression = attributeArgumentSyntax.Expression;
+        var expressionText = expression.ToString();
+        
+        // For numeric literals with many decimal places (likely intended as decimal),
+        // preserve the full precision by adding 'm' suffix
+        // This regex matches decimal numbers with more than 15 digits after the decimal point
+        // (beyond double's precision)
+        if (System.Text.RegularExpressions.Regex.IsMatch(expressionText, @"^\d+\.\d{15,}$"))
+        {
+            // This is a high-precision decimal literal - add 'm' suffix
+            return expressionText + "m";
+        }
+        
+        // Check if this looks like a numeric literal (not an identifier or complex expression)
+        var isNumericLiteral = System.Text.RegularExpressions.Regex.IsMatch(expressionText, @"^-?\d+(\.\d+)?([eE][+-]?\d+)?[dDfFmMlLuU]?$");
+        
+        if (isNumericLiteral)
+        {
+            // Check if the target parameter expects a decimal type
+            var semanticModel = compilation.GetSemanticModel(attributeArgumentSyntax.SyntaxTree);
+            if (attributeArgumentSyntax.Parent?.Parent is AttributeSyntax attributeSyntax)
+            {
+                var symbolInfo = semanticModel.GetSymbolInfo(attributeSyntax);
+                if (symbolInfo.Symbol is IMethodSymbol constructorSymbol)
+                {
+                    // Find which parameter this argument corresponds to
+                    var argumentList = attributeArgumentSyntax.Parent as AttributeArgumentListSyntax;
+                    var argumentIndex = argumentList?.Arguments.IndexOf(attributeArgumentSyntax) ?? -1;
+                    
+                    if (argumentIndex >= 0 && argumentIndex < constructorSymbol.Parameters.Length)
+                    {
+                        var parameterType = constructorSymbol.Parameters[argumentIndex].Type;
+                        if (parameterType.SpecialType == SpecialType.System_Decimal)
+                        {
+                            // This is a numeric literal for a decimal parameter
+                            // Preserve the full precision by using the original text with 'm' suffix
+                            var withoutSuffix = System.Text.RegularExpressions.Regex.Replace(expressionText, @"[dDfFmMlLuU]+$", "");
+                            return withoutSuffix + "m";
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Default behavior for non-decimal or non-numeric cases
+        var defaultSemanticModel = compilation.GetSemanticModel(attributeArgumentSyntax.SyntaxTree);
         if (attributeArgumentSyntax.NameColon is not null)
         {
-            return $"{attributeArgumentSyntax.NameColon!.Name}: {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(compilation.GetSemanticModel(attributeArgumentSyntax.SyntaxTree)))!.ToFullString()}";
+            return $"{attributeArgumentSyntax.NameColon!.Name}: {expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(defaultSemanticModel))!.ToFullString()}";
         }
 
-        return attributeArgumentSyntax.Accept(new FullyQualifiedWithGlobalPrefixRewriter(compilation.GetSemanticModel(attributeArgumentSyntax.SyntaxTree)))!.ToFullString();
+        return attributeArgumentSyntax.Accept(new FullyQualifiedWithGlobalPrefixRewriter(defaultSemanticModel))!.ToFullString();
     }
 
     private static string FormatProperty(Compilation compilation, AttributeArgumentSyntax attributeArgumentSyntax)
