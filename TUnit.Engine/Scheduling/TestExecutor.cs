@@ -92,6 +92,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
             // Report test started
             await _tunitMessageBus.InProgress(test.Context);
 
+            bool hookStarted = false;
             try
             {
                 if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
@@ -102,6 +103,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
 
                 // Execute class/assembly hooks on first test
                 var executionContext = await _hookOrchestrator.OnTestStartingAsync(test, cancellationToken);
+                hookStarted = true;
 
 #if NET
             // Restore the accumulated context from all hooks to flow AsyncLocal values to the test
@@ -135,6 +137,20 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
             }
             catch (Exception ex)
             {
+                // If hooks were started, we MUST call OnTestCompletedAsync to decrement counters
+                if (hookStarted)
+                {
+                    try
+                    {
+                        await _hookOrchestrator.OnTestCompletedAsync(test, cancellationToken);
+                    }
+                    catch (Exception hookEx)
+                    {
+                        // Log but don't throw - we want to preserve the original exception
+                        await _logger.LogErrorAsync($"Error executing cleanup hooks for test {test.TestId}: {hookEx}");
+                    }
+                }
+
                 // Set test state
                 test.State = TestState.Failed;
                 test.Result = new TestResult
