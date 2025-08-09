@@ -248,11 +248,20 @@ internal sealed class HookOrchestrator
 
         var testClassType = test.Metadata.TestClassType;
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";
+        var exceptions = new List<Exception>();
 
-        // Execute AfterEveryTest hooks
-        await ExecuteAfterEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
+        // Execute AfterEveryTest hooks - collect exception but continue
+        try
+        {
+            await ExecuteAfterEveryTestHooksAsync(testClassType, test.Context, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            await _logger.LogErrorAsync($"AfterEveryTest hooks failed: {ex.Message}");
+            exceptions.Add(ex);
+        }
 
-        // Decrement test counts
+        // ALWAYS decrement test counts, even if hooks failed
         var classCounter = _classTestCounts.GetOrAdd(testClassType, _ => new Counter());
         var classTestsRemaining = classCounter.Decrement();
         var assemblyCounter = _assemblyTestCounts.GetOrAdd(assemblyName, _ => new Counter());
@@ -261,15 +270,47 @@ internal sealed class HookOrchestrator
         // Execute AfterClass hooks if last test in class AND BeforeClass hooks were run
         if (classTestsRemaining == 0 && _beforeClassTasks.TryGetValue(testClassType, out _))
         {
-            await ExecuteAfterClassHooksAsync(testClassType, cancellationToken);
-            _classTestCounts.TryRemove(testClassType, out _);
+            try
+            {
+                await ExecuteAfterClassHooksAsync(testClassType, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"AfterClass hooks failed: {ex.Message}");
+                exceptions.Add(ex);
+            }
+            finally
+            {
+                // Always remove from dictionary to prevent memory leaks
+                _classTestCounts.TryRemove(testClassType, out _);
+            }
         }
 
         // Execute AfterAssembly hooks if last test in assembly AND BeforeAssembly hooks were run
         if (assemblyTestsRemaining == 0 && _beforeAssemblyTasks.TryGetValue(assemblyName, out _))
         {
-            await ExecuteAfterAssemblyHooksAsync(test.Context.ClassContext.AssemblyContext.Assembly, cancellationToken);
-            _assemblyTestCounts.TryRemove(assemblyName, out _);
+            try
+            {
+                await ExecuteAfterAssemblyHooksAsync(test.Context.ClassContext.AssemblyContext.Assembly, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"AfterAssembly hooks failed: {ex.Message}");
+                exceptions.Add(ex);
+            }
+            finally
+            {
+                // Always remove from dictionary to prevent memory leaks
+                _assemblyTestCounts.TryRemove(assemblyName, out _);
+            }
+        }
+
+        // If any hooks failed, throw an aggregate exception
+        if (exceptions.Count > 0)
+        {
+            throw exceptions.Count == 1
+                ? new HookFailedException(exceptions[0])
+                : new HookFailedException("Multiple hook levels failed during test cleanup", new AggregateException(exceptions));
         }
     }
 
