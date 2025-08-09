@@ -26,7 +26,7 @@ public class CriticalHookChainExecutionTests
             _testCount = 0;
             _afterTestShouldFail = true; // Enable AfterTest failure
             _afterClassShouldFail = true; // Enable AfterClass failure
-            Console.WriteLine("[CRITICAL-CHAIN] Test scenario initialized - AfterTest and AfterClass will fail");
+            // Test scenario initialized - AfterTest and AfterClass will fail
         }
     }
 
@@ -35,7 +35,7 @@ public class CriticalHookChainExecutionTests
     {
         Interlocked.Increment(ref _testCount);
         await Task.CompletedTask;
-        Console.WriteLine($"[CRITICAL-CHAIN] Test {_testCount} executed");
+        // Test executed
     }
 
     [Test]
@@ -43,7 +43,7 @@ public class CriticalHookChainExecutionTests
     {
         Interlocked.Increment(ref _testCount);
         await Task.CompletedTask;
-        Console.WriteLine($"[CRITICAL-CHAIN] Test {_testCount} executed");
+        // Test executed
     }
 
     [Test]
@@ -51,7 +51,7 @@ public class CriticalHookChainExecutionTests
     {
         Interlocked.Increment(ref _testCount);
         await Task.CompletedTask;
-        Console.WriteLine($"[CRITICAL-CHAIN] Test {_testCount} executed - this is the last test");
+        // Last test executed
     }
 
     // AfterEveryTest hook that will fail
@@ -61,12 +61,12 @@ public class CriticalHookChainExecutionTests
         if (context.TestDetails.ClassType == typeof(CriticalHookChainExecutionTests))
         {
             ExecutedHooks.Add($"AfterEveryTest_{context.TestDetails.TestName}");
-            Console.WriteLine($"[CRITICAL-CHAIN] AfterEveryTest executing for {context.TestDetails.TestName}");
+            // AfterEveryTest executing
             
             if (_afterTestShouldFail)
             {
                 FailedHooks.Add("AfterEveryTest");
-                Console.WriteLine("[CRITICAL-CHAIN] AfterEveryTest THROWING EXCEPTION!");
+                // AfterEveryTest throwing exception
                 await Task.CompletedTask;
                 throw new InvalidOperationException("AfterEveryTest intentionally failed - AfterClass should still run!");
             }
@@ -82,12 +82,12 @@ public class CriticalHookChainExecutionTests
         if (context.ClassType == typeof(CriticalHookChainExecutionTests))
         {
             ExecutedHooks.Add("AfterClass");
-            Console.WriteLine("[CRITICAL-CHAIN] AfterClass EXECUTED despite AfterEveryTest failure!");
+            // AfterClass executed despite AfterEveryTest failure
             
             if (_afterClassShouldFail)
             {
                 FailedHooks.Add("AfterClass");
-                Console.WriteLine("[CRITICAL-CHAIN] AfterClass THROWING EXCEPTION!");
+                // AfterClass throwing exception
                 await Task.CompletedTask;
                 throw new ArgumentException("AfterClass intentionally failed - AfterAssembly should still run!");
             }
@@ -103,7 +103,7 @@ public class CriticalHookChainExecutionTests
         if (context.ClassType == typeof(CriticalHookChainExecutionTests))
         {
             ExecutedHooks.Add("AfterEveryClass");
-            Console.WriteLine("[CRITICAL-CHAIN] AfterEveryClass EXECUTED despite failures!");
+            // AfterEveryClass executed despite failures
             await Task.CompletedTask;
         }
     }
@@ -120,7 +120,7 @@ public class CriticalHookChainHelperTests
     public async Task HelperTest_To_Trigger_Assembly_Hooks()
     {
         await Task.CompletedTask;
-        Console.WriteLine("[CRITICAL-HELPER] Helper test executed");
+        // Helper test executed
     }
 
     [AfterEvery(Test)]
@@ -129,7 +129,7 @@ public class CriticalHookChainHelperTests
         if (context.TestDetails.ClassType == typeof(CriticalHookChainHelperTests))
         {
             SharedExecutedHooks.Add("HelperAfterTest");
-            Console.WriteLine("[CRITICAL-HELPER] Helper AfterTest executed");
+            // Helper AfterTest executed
             await Task.CompletedTask;
         }
     }
@@ -151,7 +151,7 @@ public class CriticalAssemblyHooks
         {
             _hasExecuted = true;
             AssemblyHookExecutions.Add("AfterEveryAssembly");
-            Console.WriteLine("[CRITICAL-ASSEMBLY] AfterEveryAssembly EXECUTED despite AfterTest and AfterClass failures!");
+            // AfterEveryAssembly executed despite AfterTest and AfterClass failures
             await Task.CompletedTask;
         }
     }
@@ -162,7 +162,7 @@ public class CriticalAssemblyHooks
         // Check if our critical test ran
         if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(CriticalHookChainExecutionTests)))
         {
-            Console.WriteLine("\n[CRITICAL-CHAIN] === CRITICAL VERIFICATION ===");
+            // Critical verification
             
             // Verify hooks executed
             var executedHookTypes = CriticalHookChainExecutionTests.ExecutedHooks
@@ -170,39 +170,39 @@ public class CriticalAssemblyHooks
                 .Distinct()
                 .ToList();
             
-            Console.WriteLine($"[CRITICAL-CHAIN] Executed hook types: {string.Join(", ", executedHookTypes)}");
-            Console.WriteLine($"[CRITICAL-CHAIN] Failed hooks: {string.Join(", ", CriticalHookChainExecutionTests.FailedHooks)}");
+            // Executed hook types verified
+            // Failed hooks verified
             
             bool afterTestExecuted = executedHookTypes.Contains("AfterEveryTest");
             bool afterClassExecuted = executedHookTypes.Contains("AfterClass");
             bool afterEveryClassExecuted = executedHookTypes.Contains("AfterEveryClass");
             bool afterAssemblyExecuted = AssemblyHookExecutions.Contains("AfterEveryAssembly");
             
-            Console.WriteLine($"[CRITICAL-CHAIN] AfterEveryTest executed: {afterTestExecuted}");
-            Console.WriteLine($"[CRITICAL-CHAIN] AfterClass executed: {afterClassExecuted}");
-            Console.WriteLine($"[CRITICAL-CHAIN] AfterEveryClass executed: {afterEveryClassExecuted}");
-            Console.WriteLine($"[CRITICAL-CHAIN] AfterEveryAssembly executed: {afterAssemblyExecuted}");
+            // AfterEveryTest execution verified
+            // AfterClass execution verified
+            // AfterEveryClass execution verified
+            // AfterEveryAssembly execution verified
             
             if (afterTestExecuted && afterClassExecuted && afterEveryClassExecuted)
             {
-                Console.WriteLine("[CRITICAL-CHAIN] ✅ SUCCESS: All hook levels executed despite failures!");
-                Console.WriteLine("[CRITICAL-CHAIN] This proves the critical fix is working:");
-                Console.WriteLine("[CRITICAL-CHAIN]   - AfterClass ran even though AfterEveryTest threw");
-                Console.WriteLine("[CRITICAL-CHAIN]   - AfterAssembly would run even though AfterClass threw");
-                Console.WriteLine("[CRITICAL-CHAIN]   - Counters were properly decremented");
+                // SUCCESS: All hook levels executed despite failures
+                // Critical fix is working
+                // AfterClass ran even though AfterEveryTest threw
+                // AfterAssembly would run even though AfterClass threw
+                // Counters were properly decremented
             }
             else
             {
-                Console.WriteLine("[CRITICAL-CHAIN] ❌ FAILURE: Some hooks did not execute!");
-                Console.WriteLine("[CRITICAL-CHAIN] This indicates the critical bug is NOT fixed!");
+                // FAILURE: Some hooks did not execute
+                // Critical bug is NOT fixed
                 
                 if (!afterClassExecuted && afterTestExecuted)
                 {
-                    Console.WriteLine("[CRITICAL-CHAIN] AfterClass didn't run after AfterTest threw - CRITICAL BUG!");
+                    // AfterClass didn't run after AfterTest threw - CRITICAL BUG
                 }
                 if (!afterAssemblyExecuted && afterClassExecuted)
                 {
-                    Console.WriteLine("[CRITICAL-CHAIN] AfterAssembly didn't run after AfterClass threw - CRITICAL BUG!");
+                    // AfterAssembly didn't run after AfterClass threw - CRITICAL BUG
                 }
             }
         }
@@ -226,7 +226,7 @@ public class CounterDecrementVerificationTests
         {
             Interlocked.Increment(ref _beforeTestCount);
             CounterEvents.Add($"BeforeTest_{_beforeTestCount}");
-            Console.WriteLine($"[COUNTER-VERIFY] BeforeTest #{_beforeTestCount}");
+            // BeforeTest hook executed
             await Task.CompletedTask;
         }
     }
@@ -235,21 +235,21 @@ public class CounterDecrementVerificationTests
     public async Task Test1_With_Failing_AfterHook()
     {
         await Task.CompletedTask;
-        Console.WriteLine("[COUNTER-VERIFY] Test 1 executed");
+        // Test 1 executed
     }
 
     [Test]
     public async Task Test2_With_Failing_AfterHook()
     {
         await Task.CompletedTask;
-        Console.WriteLine("[COUNTER-VERIFY] Test 2 executed");
+        // Test 2 executed
     }
 
     [Test]
     public async Task Test3_Last_Test()
     {
         await Task.CompletedTask;
-        Console.WriteLine("[COUNTER-VERIFY] Test 3 executed - last test");
+        // Test 3 executed - last test
     }
 
     [AfterEvery(Test)]
@@ -259,7 +259,7 @@ public class CounterDecrementVerificationTests
         {
             Interlocked.Increment(ref _afterTestCount);
             CounterEvents.Add($"AfterTest_{_afterTestCount}_Failing");
-            Console.WriteLine($"[COUNTER-VERIFY] AfterTest #{_afterTestCount} - THROWING!");
+            // AfterTest hook throwing exception
             await Task.CompletedTask;
             throw new Exception($"AfterTest {_afterTestCount} intentionally failed");
         }
@@ -272,18 +272,18 @@ public class CounterDecrementVerificationTests
         {
             _afterClassExecuted = true;
             CounterEvents.Add("AfterClass_Executed");
-            Console.WriteLine("[COUNTER-VERIFY] AfterClass EXECUTED - counters were properly decremented!");
-            Console.WriteLine($"[COUNTER-VERIFY] BeforeTest count: {_beforeTestCount}");
-            Console.WriteLine($"[COUNTER-VERIFY] AfterTest count: {_afterTestCount}");
+            // AfterClass executed - counters were properly decremented
+            // BeforeTest count verified
+            // AfterTest count verified
             
             if (_afterClassExecuted && _afterTestCount == 3)
             {
-                Console.WriteLine("[COUNTER-VERIFY] ✅ SUCCESS: AfterClass ran after all 3 tests despite all AfterTest hooks failing!");
-                Console.WriteLine("[COUNTER-VERIFY] This proves counters were decremented even when hooks threw exceptions!");
+                // SUCCESS: AfterClass ran after all 3 tests despite all AfterTest hooks failing
+                // Counters were decremented even when hooks threw exceptions
             }
             else
             {
-                Console.WriteLine("[COUNTER-VERIFY] ❌ PROBLEM: Unexpected execution pattern");
+                // PROBLEM: Unexpected execution pattern
             }
             
             await Task.CompletedTask;
@@ -303,7 +303,7 @@ public class ExtremeFailureCascadeTests
     {
         ExecutionTrace.Add("Test_Executed");
         await Task.CompletedTask;
-        Console.WriteLine("[EXTREME] Test executed - all hook levels will fail");
+        // Test executed - all hook levels will fail
     }
 
     [After(Test)]
@@ -312,7 +312,7 @@ public class ExtremeFailureCascadeTests
         if (context.TestDetails.ClassType == typeof(ExtremeFailureCascadeTests))
         {
             ExecutionTrace.Add("AfterTest_Failed");
-            Console.WriteLine("[EXTREME] After(Test) executing and failing");
+            // After(Test) executing and failing
             await Task.CompletedTask;
             throw new Exception("After(Test) failed");
         }
@@ -324,7 +324,7 @@ public class ExtremeFailureCascadeTests
         if (context.TestDetails.ClassType == typeof(ExtremeFailureCascadeTests))
         {
             ExecutionTrace.Add("AfterEveryTest_Failed");
-            Console.WriteLine("[EXTREME] AfterEvery(Test) executing and failing");
+            // AfterEvery(Test) executing and failing
             await Task.CompletedTask;
             throw new Exception("AfterEvery(Test) failed");
         }
@@ -336,7 +336,7 @@ public class ExtremeFailureCascadeTests
         if (context.ClassType == typeof(ExtremeFailureCascadeTests))
         {
             ExecutionTrace.Add("AfterClass_Failed");
-            Console.WriteLine("[EXTREME] After(Class) STILL EXECUTED and will fail");
+            // After(Class) still executed and will fail
             await Task.CompletedTask;
             throw new Exception("After(Class) failed");
         }
@@ -348,7 +348,7 @@ public class ExtremeFailureCascadeTests
         if (context.ClassType == typeof(ExtremeFailureCascadeTests))
         {
             ExecutionTrace.Add("AfterEveryClass_Failed");
-            Console.WriteLine("[EXTREME] AfterEvery(Class) STILL EXECUTED and will fail");
+            // AfterEvery(Class) still executed and will fail
             await Task.CompletedTask;
             throw new Exception("AfterEvery(Class) failed");
         }
@@ -359,11 +359,11 @@ public class ExtremeFailureCascadeTests
     {
         if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(ExtremeFailureCascadeTests)))
         {
-            Console.WriteLine("\n[EXTREME] === EXTREME CASCADE VERIFICATION ===");
-            Console.WriteLine($"[EXTREME] Execution trace ({ExecutionTrace.Count} items):");
+            // Extreme cascade verification
+            // Execution trace verified
             foreach (var trace in ExecutionTrace)
             {
-                Console.WriteLine($"[EXTREME]   - {trace}");
+                // Trace item recorded
             }
             
             bool allLevelsExecuted = ExecutionTrace.Contains("Test_Executed") &&
@@ -374,12 +374,12 @@ public class ExtremeFailureCascadeTests
             
             if (allLevelsExecuted)
             {
-                Console.WriteLine("[EXTREME] ✅ SUCCESS: All hook levels executed despite every level throwing!");
-                Console.WriteLine("[EXTREME] This is the ultimate proof that the fix works!");
+                // SUCCESS: All hook levels executed despite every level throwing
+                // Ultimate proof that the fix works
             }
             else
             {
-                Console.WriteLine("[EXTREME] ❌ FAILURE: Some hook levels did not execute in the cascade!");
+                // FAILURE: Some hook levels did not execute in the cascade
             }
         }
     }

@@ -19,7 +19,7 @@ public class HookExceptionHandlingTests
         if (context.ClassType == typeof(HookExceptionHandlingTests))
         {
             ExecutionLog.Add("BeforeClass:Started");
-            Console.WriteLine("[HOOK-EXCEPTION] BeforeClass started");
+            // Hook executed("[HOOK-EXCEPTION] BeforeClass started");
             
             // Simulate a hook that sometimes fails
             if (_hookExceptionTestCount == 0)
@@ -27,7 +27,7 @@ public class HookExceptionHandlingTests
                 _hookExceptionTestCount++;
                 // First time through, let it succeed
                 ExecutionLog.Add("BeforeClass:Completed");
-                Console.WriteLine("[HOOK-EXCEPTION] BeforeClass completed successfully");
+                // Hook executed("[HOOK-EXCEPTION] BeforeClass completed successfully");
             }
             else
             {
@@ -44,7 +44,7 @@ public class HookExceptionHandlingTests
         {
             _afterClassExecuted = true;
             ExecutionLog.Add("AfterClass:Executed");
-            Console.WriteLine("[HOOK-EXCEPTION] AfterClass executed - cleanup successful!");
+            // Hook executed("[HOOK-EXCEPTION] AfterClass executed - cleanup successful!");
         }
     }
 
@@ -54,12 +54,12 @@ public class HookExceptionHandlingTests
         if (context.TestDetails.ClassType == typeof(HookExceptionHandlingTests))
         {
             ExecutionLog.Add($"BeforeEveryTest:{context.TestDetails.TestName}");
-            Console.WriteLine($"[HOOK-EXCEPTION] BeforeEveryTest for {context.TestDetails.TestName}");
+            // Hook executed($"[HOOK-EXCEPTION] BeforeEveryTest for {context.TestDetails.TestName}");
             
             // Simulate a hook that fails for a specific test
             if (context.TestDetails.TestName.Contains("HookFailure"))
             {
-                Console.WriteLine($"[HOOK-EXCEPTION] BeforeEveryTest throwing exception for {context.TestDetails.TestName}");
+                // Hook executed($"[HOOK-EXCEPTION] BeforeEveryTest throwing exception for {context.TestDetails.TestName}");
                 throw new Exception($"BeforeEveryTest intentionally failed for {context.TestDetails.TestName}");
             }
         }
@@ -71,7 +71,7 @@ public class HookExceptionHandlingTests
         if (context.TestDetails.ClassType == typeof(HookExceptionHandlingTests))
         {
             ExecutionLog.Add($"AfterEveryTest:{context.TestDetails.TestName}");
-            Console.WriteLine($"[HOOK-EXCEPTION] AfterEveryTest executed for {context.TestDetails.TestName}");
+            // Hook executed($"[HOOK-EXCEPTION] AfterEveryTest executed for {context.TestDetails.TestName}");
         }
     }
 
@@ -80,7 +80,7 @@ public class HookExceptionHandlingTests
     {
         await Task.CompletedTask;
         ExecutionLog.Add("Test_With_Normal_Hooks:Executed");
-        Console.WriteLine("[HOOK-EXCEPTION] Test_With_Normal_Hooks executed");
+        // Output removed("[HOOK-EXCEPTION] Test_With_Normal_Hooks executed");
     }
 
     [Test]
@@ -90,7 +90,7 @@ public class HookExceptionHandlingTests
         // The test itself should not execute, but AfterEveryTest should still run
         await Task.CompletedTask;
         ExecutionLog.Add("Test_With_HookFailure_In_Before:Executed");
-        Console.WriteLine("[HOOK-EXCEPTION] Test_With_HookFailure_In_Before executed (shouldn't happen if hook failed)");
+        // Output removed("[HOOK-EXCEPTION] Test_With_HookFailure_In_Before executed (shouldn't happen if hook failed)");
     }
 
     [Test]
@@ -98,7 +98,7 @@ public class HookExceptionHandlingTests
     {
         await Task.CompletedTask;
         ExecutionLog.Add("Test_That_Fails_After_Successful_Hook:Executed");
-        Console.WriteLine("[HOOK-EXCEPTION] Test_That_Fails_After_Successful_Hook about to fail");
+        // Output removed("[HOOK-EXCEPTION] Test_That_Fails_After_Successful_Hook about to fail");
         throw new Exception("Test fails after hooks succeeded");
     }
 
@@ -108,26 +108,26 @@ public class HookExceptionHandlingTests
         // Only verify if our tests ran
         if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(HookExceptionHandlingTests)))
         {
-            Console.WriteLine("\n[HOOK-EXCEPTION] === VERIFICATION ===");
-            Console.WriteLine($"[HOOK-EXCEPTION] AfterClass executed: {_afterClassExecuted}");
-            Console.WriteLine($"[HOOK-EXCEPTION] Execution log entries: {ExecutionLog.Count}");
+            // Hook executed("\n[HOOK-EXCEPTION] === VERIFICATION ===");
+            // Hook executed($"[HOOK-EXCEPTION] AfterClass executed: {_afterClassExecuted}");
+            // Hook executed($"[HOOK-EXCEPTION] Execution log entries: {ExecutionLog.Count}");
             
             foreach (var log in ExecutionLog.OrderBy(x => x))
             {
-                Console.WriteLine($"[HOOK-EXCEPTION]   - {log}");
+                // Hook executed($"[HOOK-EXCEPTION]   - {log}");
             }
             
             // Check that AfterEveryTest was called for each test attempt
             var afterEveryTestCount = ExecutionLog.Count(l => l.StartsWith("AfterEveryTest:"));
-            Console.WriteLine($"[HOOK-EXCEPTION] AfterEveryTest called {afterEveryTestCount} times");
+            // Hook executed($"[HOOK-EXCEPTION] AfterEveryTest called {afterEveryTestCount} times");
             
             if (!_afterClassExecuted)
             {
-                Console.WriteLine("[HOOK-EXCEPTION] ERROR: AfterClass was not executed - cleanup did not occur!");
+                // Hook executed("[HOOK-EXCEPTION] ERROR: AfterClass was not executed - cleanup did not occur!");
             }
             else
             {
-                Console.WriteLine("[HOOK-EXCEPTION] SUCCESS: All cleanup hooks executed despite failures");
+                // Hook executed("[HOOK-EXCEPTION] SUCCESS: All cleanup hooks executed despite failures");
             }
         }
     }
@@ -148,13 +148,13 @@ public class CriticalCounterScenarioTests
         if (context.ClassType == typeof(CriticalCounterScenarioTests))
         {
             Interlocked.Increment(ref _criticalBeforeClassCount);
-            Console.WriteLine($"[CRITICAL] BeforeClass executed (count: {_criticalBeforeClassCount})");
+            // Hook executed($"[CRITICAL] BeforeClass executed (count: {_criticalBeforeClassCount})");
             
             // Simulate a failure AFTER the counter was incremented
             // This is the exact scenario that caused the hang
             if (_simulateHookFailure)
             {
-                Console.WriteLine("[CRITICAL] BeforeClass throwing AFTER counter increment!");
+                // Hook executed("[CRITICAL] BeforeClass throwing AFTER counter increment!");
                 throw new Exception("Critical: Hook fails after counter increment");
             }
         }
@@ -166,15 +166,15 @@ public class CriticalCounterScenarioTests
         if (context.ClassType == typeof(CriticalCounterScenarioTests))
         {
             Interlocked.Increment(ref _criticalAfterClassCount);
-            Console.WriteLine($"[CRITICAL] AfterClass executed (count: {_criticalAfterClassCount})");
-            Console.WriteLine($"[CRITICAL] Counter balance - Before: {_criticalBeforeClassCount}, After: {_criticalAfterClassCount}");
+            // Hook executed($"[CRITICAL] AfterClass executed (count: {_criticalAfterClassCount})");
+            // Hook executed($"[CRITICAL] Counter balance - Before: {_criticalBeforeClassCount}, After: {_criticalAfterClassCount}");
         }
     }
 
     [Test]
     public void Critical_Test_1()
     {
-        Console.WriteLine("[CRITICAL] Test 1 executed");
+        // Output removed("[CRITICAL] Test 1 executed");
     }
 
     [Test]
@@ -182,7 +182,7 @@ public class CriticalCounterScenarioTests
     {
         // Enable hook failure for next test
         _simulateHookFailure = true;
-        Console.WriteLine("[CRITICAL] Test 2 executed - hook failure enabled for next test");
+        // Output removed("[CRITICAL] Test 2 executed - hook failure enabled for next test");
     }
 
     [Test]
@@ -190,7 +190,7 @@ public class CriticalCounterScenarioTests
     {
         // This test runs after a hook failure
         _simulateHookFailure = false; // Reset
-        Console.WriteLine("[CRITICAL] Test 3 executed after hook failure");
+        // Output removed("[CRITICAL] Test 3 executed after hook failure");
     }
 
     [After(TestSession)]
@@ -198,18 +198,18 @@ public class CriticalCounterScenarioTests
     {
         if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(CriticalCounterScenarioTests)))
         {
-            Console.WriteLine("\n[CRITICAL] === CRITICAL SCENARIO VERIFICATION ===");
-            Console.WriteLine($"[CRITICAL] BeforeClass count: {_criticalBeforeClassCount}");
-            Console.WriteLine($"[CRITICAL] AfterClass count: {_criticalAfterClassCount}");
+            // Hook executed("\n[CRITICAL] === CRITICAL SCENARIO VERIFICATION ===");
+            // Hook executed($"[CRITICAL] BeforeClass count: {_criticalBeforeClassCount}");
+            // Hook executed($"[CRITICAL] AfterClass count: {_criticalAfterClassCount}");
             
             // The counts might not match if a hook failed, but AfterClass should still execute
             if (_criticalAfterClassCount > 0)
             {
-                Console.WriteLine("[CRITICAL] SUCCESS: AfterClass executed despite hook failures");
+                // Hook executed("[CRITICAL] SUCCESS: AfterClass executed despite hook failures");
             }
             else
             {
-                Console.WriteLine("[CRITICAL] WARNING: AfterClass may not have executed - potential hang scenario!");
+                // Hook executed("[CRITICAL] WARNING: AfterClass may not have executed - potential hang scenario!");
             }
         }
     }

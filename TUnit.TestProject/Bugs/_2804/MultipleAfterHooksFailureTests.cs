@@ -22,7 +22,7 @@ public class MultipleAfterHooksFailureTests
             ExecutedHooks.Clear();
             FailedHooks.Clear();
             _testNumber = 0;
-            Console.WriteLine("[MULTI-AFTER] State reset for test class");
+            // Hook executed("[MULTI-AFTER] State reset for test class");
         }
     }
 
@@ -31,7 +31,7 @@ public class MultipleAfterHooksFailureTests
     {
         Interlocked.Increment(ref _testNumber);
         await Task.CompletedTask;
-        Console.WriteLine($"[MULTI-AFTER] Test {_testNumber} executed");
+        // Test executed($"[MULTI-AFTER] Test {_testNumber} executed");
     }
 
     [Test]
@@ -39,7 +39,7 @@ public class MultipleAfterHooksFailureTests
     {
         Interlocked.Increment(ref _testNumber);
         await Task.CompletedTask;
-        Console.WriteLine($"[MULTI-AFTER] Test {_testNumber} executed");
+        // Test executed($"[MULTI-AFTER] Test {_testNumber} executed");
     }
 }
 
@@ -56,7 +56,7 @@ public class MultipleAfterEveryTestHooks
         if (context.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
         {
             TestHookExecutions.Add("AfterEveryTest_Hook1");
-            Console.WriteLine("[AFTER-TEST] Hook 1 executing successfully");
+            // Hook executed("[AFTER-TEST] Hook 1 executing successfully");
             await Task.CompletedTask;
         }
     }
@@ -67,7 +67,7 @@ public class MultipleAfterEveryTestHooks
         if (context.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
         {
             TestHookExecutions.Add("AfterEveryTest_Hook2");
-            Console.WriteLine("[AFTER-TEST] Hook 2 executing and will fail");
+            // Hook executed("[AFTER-TEST] Hook 2 executing and will fail");
             await Task.CompletedTask;
             throw new InvalidOperationException("AfterEveryTest Hook 2 intentionally failed");
         }
@@ -79,7 +79,7 @@ public class MultipleAfterEveryTestHooks
         if (context.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
         {
             TestHookExecutions.Add("AfterEveryTest_Hook3");
-            Console.WriteLine("[AFTER-TEST] Hook 3 executing successfully (after Hook 2 failed)");
+            // Hook executed("[AFTER-TEST] Hook 3 executing successfully (after Hook 2 failed)");
             await Task.CompletedTask;
         }
     }
@@ -90,7 +90,7 @@ public class MultipleAfterEveryTestHooks
         if (context.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
         {
             TestHookExecutions.Add("AfterEveryTest_Hook4");
-            Console.WriteLine("[AFTER-TEST] Hook 4 executing and will also fail");
+            // Hook executed("[AFTER-TEST] Hook 4 executing and will also fail");
             await Task.CompletedTask;
             throw new ArgumentException("AfterEveryTest Hook 4 also intentionally failed");
         }
@@ -102,14 +102,14 @@ public class MultipleAfterEveryTestHooks
         if (context.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
         {
             TestHookExecutions.Add("AfterEveryTest_Hook5");
-            Console.WriteLine("[AFTER-TEST] Hook 5 still executing (after Hooks 2 and 4 failed)");
+            // Hook executed("[AFTER-TEST] Hook 5 still executing (after Hooks 2 and 4 failed)");
             await Task.CompletedTask;
             
             // Verify all hooks executed
-            Console.WriteLine($"[AFTER-TEST] Total hooks executed: {TestHookExecutions.Count}");
+            // Hook executed($"[AFTER-TEST] Total hooks executed: {TestHookExecutions.Count}");
             if (TestHookExecutions.Count >= 5)
             {
-                Console.WriteLine("[AFTER-TEST] SUCCESS: All 5 AfterEveryTest hooks executed despite failures!");
+                // Hook executed("[AFTER-TEST] SUCCESS: All 5 AfterEveryTest hooks executed despite failures!");
             }
         }
     }
@@ -127,14 +127,14 @@ public class MultipleAfterClassHooksTests
     public void SimpleTest1()
     {
         _testsExecuted = true;
-        Console.WriteLine("[CLASS-HOOKS] Test 1 in class executed");
+        // Test executed("[CLASS-HOOKS] Test 1 in class executed");
     }
 
     [Test]
     public void SimpleTest2()
     {
         _testsExecuted = true;
-        Console.WriteLine("[CLASS-HOOKS] Test 2 in class executed");
+        // Test executed("[CLASS-HOOKS] Test 2 in class executed");
     }
 }
 
@@ -151,7 +151,7 @@ public class MultipleClassLevelAfterHooks
         if (context.ClassType == typeof(MultipleAfterClassHooksTests))
         {
             ClassHookExecutions.Add("AfterEveryClass_Hook1");
-            Console.WriteLine("[AFTER-CLASS] AfterEveryClass Hook 1 executing successfully");
+            // Hook executed("[AFTER-CLASS] AfterEveryClass Hook 1 executing successfully");
             await Task.CompletedTask;
         }
     }
@@ -162,7 +162,7 @@ public class MultipleClassLevelAfterHooks
         if (context.ClassType == typeof(MultipleAfterClassHooksTests))
         {
             ClassHookExecutions.Add("AfterEveryClass_Hook2");
-            Console.WriteLine("[AFTER-CLASS] AfterEveryClass Hook 2 executing and will fail");
+            // Hook executed("[AFTER-CLASS] AfterEveryClass Hook 2 executing and will fail");
             await Task.CompletedTask;
             throw new InvalidOperationException("AfterEveryClass Hook 2 intentionally failed");
         }
@@ -174,7 +174,7 @@ public class MultipleClassLevelAfterHooks
         if (context.ClassType == typeof(MultipleAfterClassHooksTests))
         {
             ClassHookExecutions.Add("AfterEveryClass_Hook3");
-            Console.WriteLine("[AFTER-CLASS] AfterEveryClass Hook 3 still executing after Hook 2 failed");
+            // Hook executed("[AFTER-CLASS] AfterEveryClass Hook 3 still executing after Hook 2 failed");
             await Task.CompletedTask;
         }
     }
@@ -185,7 +185,7 @@ public class MultipleClassLevelAfterHooks
         if (context.ClassType == typeof(MultipleAfterClassHooksTests))
         {
             ClassHookExecutions.Add("AfterClass_Hook1");
-            Console.WriteLine("[AFTER-CLASS] After(Class) Hook 1 executing successfully");
+            // Hook executed("[AFTER-CLASS] After(Class) Hook 1 executing successfully");
             await Task.CompletedTask;
         }
     }
@@ -196,7 +196,7 @@ public class MultipleClassLevelAfterHooks
         if (context.ClassType == typeof(MultipleAfterClassHooksTests))
         {
             ClassHookExecutions.Add("AfterClass_Hook2");
-            Console.WriteLine("[AFTER-CLASS] After(Class) Hook 2 executing and will fail");
+            // Hook executed("[AFTER-CLASS] After(Class) Hook 2 executing and will fail");
             await Task.CompletedTask;
             throw new ArgumentException("After(Class) Hook 2 intentionally failed");
         }
@@ -208,14 +208,14 @@ public class MultipleClassLevelAfterHooks
         if (context.ClassType == typeof(MultipleAfterClassHooksTests))
         {
             ClassHookExecutions.Add("AfterClass_Hook3");
-            Console.WriteLine("[AFTER-CLASS] After(Class) Hook 3 still executing");
+            // Hook executed("[AFTER-CLASS] After(Class) Hook 3 still executing");
             await Task.CompletedTask;
             
             // Verify all hooks executed
-            Console.WriteLine($"[AFTER-CLASS] Total class hooks executed: {ClassHookExecutions.Count}");
+            // Hook executed($"[AFTER-CLASS] Total class hooks executed: {ClassHookExecutions.Count}");
             if (ClassHookExecutions.Count >= 6)
             {
-                Console.WriteLine("[AFTER-CLASS] SUCCESS: All 6 class-level after hooks executed despite failures!");
+                // Hook executed("[AFTER-CLASS] SUCCESS: All 6 class-level after hooks executed despite failures!");
             }
         }
     }
@@ -231,7 +231,7 @@ public class MultipleAfterAssemblyHooksTests
     [Test]
     public void TestToTriggerAssemblyHooks()
     {
-        Console.WriteLine("[ASSEMBLY-HOOKS] Test executed to trigger assembly hooks");
+        // Test executed("[ASSEMBLY-HOOKS] Test executed to trigger assembly hooks");
     }
 }
 
@@ -250,7 +250,7 @@ public class MultipleAssemblyLevelAfterHooks
         if (!_hooksTriggered && context.Assembly.GetName().Name == "TUnit.TestProject")
         {
             AssemblyHookExecutions.Add("AfterEveryAssembly_Hook1");
-            Console.WriteLine("[AFTER-ASSEMBLY] AfterEveryAssembly Hook 1 executing successfully");
+            // Hook executed("[AFTER-ASSEMBLY] AfterEveryAssembly Hook 1 executing successfully");
             await Task.CompletedTask;
         }
     }
@@ -261,7 +261,7 @@ public class MultipleAssemblyLevelAfterHooks
         if (!_hooksTriggered && context.Assembly.GetName().Name == "TUnit.TestProject")
         {
             AssemblyHookExecutions.Add("AfterEveryAssembly_Hook2");
-            Console.WriteLine("[AFTER-ASSEMBLY] AfterEveryAssembly Hook 2 executing and will fail");
+            // Hook executed("[AFTER-ASSEMBLY] AfterEveryAssembly Hook 2 executing and will fail");
             await Task.CompletedTask;
             throw new InvalidOperationException("AfterEveryAssembly Hook 2 intentionally failed");
         }
@@ -273,14 +273,14 @@ public class MultipleAssemblyLevelAfterHooks
         if (!_hooksTriggered && context.Assembly.GetName().Name == "TUnit.TestProject")
         {
             AssemblyHookExecutions.Add("AfterEveryAssembly_Hook3");
-            Console.WriteLine("[AFTER-ASSEMBLY] AfterEveryAssembly Hook 3 still executing");
+            // Hook executed("[AFTER-ASSEMBLY] AfterEveryAssembly Hook 3 still executing");
             await Task.CompletedTask;
             _hooksTriggered = true;
 
             // Verify hooks executed
             if (AssemblyHookExecutions.Count >= 3)
             {
-                Console.WriteLine("[AFTER-ASSEMBLY] SUCCESS: Multiple assembly hooks executed despite failures!");
+                // Hook executed("[AFTER-ASSEMBLY] SUCCESS: Multiple assembly hooks executed despite failures!");
             }
         }
     }
@@ -297,7 +297,7 @@ public class AggregateExceptionVerificationTests
     public async Task Test_That_Triggers_Multiple_Hook_Failures()
     {
         await Task.CompletedTask;
-        Console.WriteLine("[AGGREGATE] Test executed - multiple after hooks will fail");
+        // Test executed("[AGGREGATE] Test executed - multiple after hooks will fail");
     }
 
     [AfterEvery(Test)]
@@ -305,7 +305,7 @@ public class AggregateExceptionVerificationTests
     {
         if (context.TestDetails.ClassType == typeof(AggregateExceptionVerificationTests))
         {
-            Console.WriteLine("[AGGREGATE] Hook 1 failing with InvalidOperationException");
+            // Hook executed("[AGGREGATE] Hook 1 failing with InvalidOperationException");
             await Task.CompletedTask;
             throw new InvalidOperationException("First hook failure");
         }
@@ -316,7 +316,7 @@ public class AggregateExceptionVerificationTests
     {
         if (context.TestDetails.ClassType == typeof(AggregateExceptionVerificationTests))
         {
-            Console.WriteLine("[AGGREGATE] Hook 2 failing with ArgumentException");
+            // Hook executed("[AGGREGATE] Hook 2 failing with ArgumentException");
             await Task.CompletedTask;
             throw new ArgumentException("Second hook failure");
         }
@@ -327,7 +327,7 @@ public class AggregateExceptionVerificationTests
     {
         if (context.TestDetails.ClassType == typeof(AggregateExceptionVerificationTests))
         {
-            Console.WriteLine("[AGGREGATE] Hook 3 failing with NotImplementedException");
+            // Hook executed("[AGGREGATE] Hook 3 failing with NotImplementedException");
             await Task.CompletedTask;
             throw new NotImplementedException("Third hook failure");
         }
@@ -341,7 +341,7 @@ public class AggregateExceptionVerificationTests
         // an AggregateException being thrown by the framework
         if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(AggregateExceptionVerificationTests)))
         {
-            Console.WriteLine("[AGGREGATE] Test scenario completed - framework should have thrown AggregateException with 3 inner exceptions");
+            // Hook executed("[AGGREGATE] Test scenario completed - framework should have thrown AggregateException with 3 inner exceptions");
         }
     }
 }
@@ -357,7 +357,7 @@ public class ComprehensiveMultiLevelHookFailureTests
     public async Task Test_With_Hooks_At_All_Levels()
     {
         await Task.CompletedTask;
-        Console.WriteLine("[COMPREHENSIVE] Test executed - hooks at all levels will execute");
+        // Test executed("[COMPREHENSIVE] Test executed - hooks at all levels will execute");
     }
 
     // Test-level hooks
@@ -367,7 +367,7 @@ public class ComprehensiveMultiLevelHookFailureTests
         if (context.TestDetails.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests))
         {
             AllHookExecutions.Add("TestLevel_Hook1");
-            Console.WriteLine("[COMPREHENSIVE-TEST] Test-level Hook 1 success");
+            // Hook executed("[COMPREHENSIVE-TEST] Test-level Hook 1 success");
             await Task.CompletedTask;
         }
     }
@@ -378,7 +378,7 @@ public class ComprehensiveMultiLevelHookFailureTests
         if (context.TestDetails.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests))
         {
             AllHookExecutions.Add("TestLevel_Hook2");
-            Console.WriteLine("[COMPREHENSIVE-TEST] Test-level Hook 2 fails");
+            // Hook executed("[COMPREHENSIVE-TEST] Test-level Hook 2 fails");
             await Task.CompletedTask;
             throw new Exception("Test-level hook failure");
         }
@@ -390,7 +390,7 @@ public class ComprehensiveMultiLevelHookFailureTests
         if (context.TestDetails.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests))
         {
             AllHookExecutions.Add("TestLevel_Hook3");
-            Console.WriteLine("[COMPREHENSIVE-TEST] Test-level Hook 3 success (after failure)");
+            // Hook executed("[COMPREHENSIVE-TEST] Test-level Hook 3 success (after failure)");
             await Task.CompletedTask;
         }
     }
@@ -402,7 +402,7 @@ public class ComprehensiveMultiLevelHookFailureTests
         if (context.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests))
         {
             AllHookExecutions.Add("ClassLevel_Hook1");
-            Console.WriteLine("[COMPREHENSIVE-CLASS] Class-level Hook 1 success");
+            // Hook executed("[COMPREHENSIVE-CLASS] Class-level Hook 1 success");
             await Task.CompletedTask;
         }
     }
@@ -413,7 +413,7 @@ public class ComprehensiveMultiLevelHookFailureTests
         if (context.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests))
         {
             AllHookExecutions.Add("ClassLevel_Hook2");
-            Console.WriteLine("[COMPREHENSIVE-CLASS] Class-level Hook 2 fails");
+            // Hook executed("[COMPREHENSIVE-CLASS] Class-level Hook 2 fails");
             await Task.CompletedTask;
             throw new Exception("Class-level hook failure");
         }
@@ -425,7 +425,7 @@ public class ComprehensiveMultiLevelHookFailureTests
         if (context.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests))
         {
             AllHookExecutions.Add("ClassLevel_Hook3");
-            Console.WriteLine("[COMPREHENSIVE-CLASS] Class-level Hook 3 success (after failure)");
+            // Hook executed("[COMPREHENSIVE-CLASS] Class-level Hook 3 success (after failure)");
             await Task.CompletedTask;
         }
     }
@@ -435,28 +435,28 @@ public class ComprehensiveMultiLevelHookFailureTests
     {
         if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests)))
         {
-            Console.WriteLine("\n[COMPREHENSIVE] === VERIFICATION ===");
-            Console.WriteLine($"[COMPREHENSIVE] Total hooks executed across all levels: {AllHookExecutions.Count}");
+            // Hook executed("\n[COMPREHENSIVE] === VERIFICATION ===");
+            // Hook executed($"[COMPREHENSIVE] Total hooks executed across all levels: {AllHookExecutions.Count}");
             
             var testLevelCount = AllHookExecutions.Count(h => h.StartsWith("TestLevel"));
             var classLevelCount = AllHookExecutions.Count(h => h.StartsWith("ClassLevel"));
             
-            Console.WriteLine($"[COMPREHENSIVE] Test-level hooks: {testLevelCount}");
-            Console.WriteLine($"[COMPREHENSIVE] Class-level hooks: {classLevelCount}");
+            // Hook executed($"[COMPREHENSIVE] Test-level hooks: {testLevelCount}");
+            // Hook executed($"[COMPREHENSIVE] Class-level hooks: {classLevelCount}");
             
             if (testLevelCount >= 3 && classLevelCount >= 3)
             {
-                Console.WriteLine("[COMPREHENSIVE] SUCCESS: All hooks at all levels executed despite failures!");
+                // Hook executed("[COMPREHENSIVE] SUCCESS: All hooks at all levels executed despite failures!");
             }
             else
             {
-                Console.WriteLine("[COMPREHENSIVE] WARNING: Some hooks may not have executed");
+                // Hook executed("[COMPREHENSIVE] WARNING: Some hooks may not have executed");
             }
             
-            Console.WriteLine("[COMPREHENSIVE] Hook execution order:");
+            // Hook executed("[COMPREHENSIVE] Hook execution order:");
             foreach (var hook in AllHookExecutions)
             {
-                Console.WriteLine($"  - {hook}");
+                // Hook executed($"  - {hook}");
             }
         }
     }

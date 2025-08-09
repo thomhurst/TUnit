@@ -23,7 +23,7 @@ public class HookCleanupOnFailureTests
         {
             Interlocked.Increment(ref _beforeClassCount);
             ExecutedHooks.Add($"BeforeClass:{context.ClassType.Name}");
-            Console.WriteLine($"[HOOK] BeforeEveryClass executed for {context.ClassType.Name} (count: {_beforeClassCount})");
+            // Hook executed($"[HOOK] BeforeEveryClass executed for {context.ClassType.Name} (count: {_beforeClassCount})");
         }
     }
 
@@ -34,7 +34,7 @@ public class HookCleanupOnFailureTests
         {
             Interlocked.Increment(ref _afterClassCount);
             ExecutedHooks.Add($"AfterClass:{context.ClassType.Name}");
-            Console.WriteLine($"[HOOK] AfterEveryClass executed for {context.ClassType.Name} (count: {_afterClassCount})");
+            // Hook executed($"[HOOK] AfterEveryClass executed for {context.ClassType.Name} (count: {_afterClassCount})");
             
             // Verify that Before and After are balanced
             if (_beforeClassCount != _afterClassCount)
@@ -49,7 +49,7 @@ public class HookCleanupOnFailureTests
     {
         Interlocked.Increment(ref _testExecutionCount);
         await Task.CompletedTask;
-        Console.WriteLine("Test_That_Passes executed successfully");
+        // Output removed("Test_That_Passes executed successfully");
     }
 
     [Test]
@@ -57,7 +57,7 @@ public class HookCleanupOnFailureTests
     {
         Interlocked.Increment(ref _testExecutionCount);
         await Task.CompletedTask;
-        Console.WriteLine("Test_That_Fails_During_Execution about to throw");
+        // Output removed("Test_That_Fails_During_Execution about to throw");
         throw new InvalidOperationException("This test intentionally fails during execution");
     }
 
@@ -65,7 +65,7 @@ public class HookCleanupOnFailureTests
     public void Test_That_Fails_Immediately()
     {
         Interlocked.Increment(ref _testExecutionCount);
-        Console.WriteLine("Test_That_Fails_Immediately about to throw");
+        // Output removed("Test_That_Fails_Immediately about to throw");
         throw new ArgumentException("This test intentionally fails immediately");
     }
 
@@ -78,14 +78,14 @@ public class HookCleanupOnFailureTests
         Interlocked.Increment(ref _testExecutionCount);
         await Task.Delay(10); // Small delay to ensure parallel execution
         
-        Console.WriteLine($"Parameterized_Test_With_Mixed_Results({value}) executing");
+        // Output removed($"Parameterized_Test_With_Mixed_Results({value}) executing");
         
         if (value == 2)
         {
             throw new Exception($"Test with value {value} intentionally fails");
         }
         
-        Console.WriteLine($"Parameterized_Test_With_Mixed_Results({value}) passed");
+        // Output removed($"Parameterized_Test_With_Mixed_Results({value}) passed");
     }
 }
 
@@ -105,7 +105,7 @@ public class ParallelHookCleanupTests
         {
             var count = Interlocked.Increment(ref _parallelBeforeClassCount);
             ParallelExecutedHooks.Add($"BeforeClass:{context.ClassType.Name}:{count}");
-            Console.WriteLine($"[PARALLEL] BeforeEveryClass executed (count: {count})");
+            // Hook executed($"[PARALLEL] BeforeEveryClass executed (count: {count})");
         }
     }
 
@@ -116,7 +116,7 @@ public class ParallelHookCleanupTests
         {
             var count = Interlocked.Increment(ref _parallelAfterClassCount);
             ParallelExecutedHooks.Add($"AfterClass:{context.ClassType.Name}:{count}");
-            Console.WriteLine($"[PARALLEL] AfterEveryClass executed (count: {count})");
+            // Hook executed($"[PARALLEL] AfterEveryClass executed (count: {count})");
         }
     }
 
@@ -129,17 +129,17 @@ public class ParallelHookCleanupTests
     [NotInParallel] // Run sequentially to make hook counting predictable
     public async Task Sequential_Tests_With_Failures(int testNumber)
     {
-        Console.WriteLine($"[PARALLEL] Test {testNumber} starting");
+        // Output removed($"[PARALLEL] Test {testNumber} starting");
         await Task.Delay(new Random().Next(10, 50)); // Random delay
         
         // Fail odd-numbered tests
         if (testNumber % 2 == 1)
         {
-            Console.WriteLine($"[PARALLEL] Test {testNumber} failing");
+            // Hook executed($"[PARALLEL] Test {testNumber} failing");
             throw new Exception($"Test {testNumber} intentionally failed");
         }
         
-        Console.WriteLine($"[PARALLEL] Test {testNumber} passed");
+        // Output removed($"[PARALLEL] Test {testNumber} passed");
     }
 
     [After(Class)]
@@ -147,7 +147,7 @@ public class ParallelHookCleanupTests
     {
         if (context.ClassType == typeof(ParallelHookCleanupTests))
         {
-            Console.WriteLine($"[PARALLEL] Final hook counts - Before: {_parallelBeforeClassCount}, After: {_parallelAfterClassCount}");
+            // Hook executed($"[PARALLEL] Final hook counts - Before: {_parallelBeforeClassCount}, After: {_parallelAfterClassCount}");
             
             // Note: BeforeEvery and AfterEvery are called for each test, but Before/After(Class) are called once
             // So we're just checking that AfterEvery was called at least once, indicating cleanup occurred
@@ -171,7 +171,7 @@ public class AssemblyHookCleanupTests
     public static void BeforeEveryAssembly(AssemblyHookContext context)
     {
         AssemblyHooks.Add("BeforeEveryAssembly");
-        Console.WriteLine("[ASSEMBLY] BeforeEveryAssembly executed");
+        // Output removed("[ASSEMBLY] BeforeEveryAssembly executed");
     }
 
     [AfterEvery(Assembly)]
@@ -179,20 +179,20 @@ public class AssemblyHookCleanupTests
     {
         _assemblyHookExecuted = true;
         AssemblyHooks.Add("AfterEveryAssembly");
-        Console.WriteLine("[ASSEMBLY] AfterEveryAssembly executed");
+        // Output removed("[ASSEMBLY] AfterEveryAssembly executed");
     }
 
     [Test]
     public void Test_With_Assembly_Hooks_That_Fails()
     {
-        Console.WriteLine("[ASSEMBLY] Test executing and will fail");
+        // Output removed("[ASSEMBLY] Test executing and will fail");
         throw new Exception("This test fails to verify assembly hooks still clean up");
     }
 
     [Test]
     public void Test_With_Assembly_Hooks_That_Passes()
     {
-        Console.WriteLine("[ASSEMBLY] Test executing and will pass");
+        // Output removed("[ASSEMBLY] Test executing and will pass");
         // This test passes
     }
 
@@ -202,12 +202,12 @@ public class AssemblyHookCleanupTests
         // Only check if we're in the context of these specific tests
         if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(AssemblyHookCleanupTests)))
         {
-            Console.WriteLine($"[ASSEMBLY] Verification - Assembly hooks executed: {_assemblyHookExecuted}");
-            Console.WriteLine($"[ASSEMBLY] Total hooks recorded: {AssemblyHooks.Count}");
+            // Hook executed($"[ASSEMBLY] Verification - Assembly hooks executed: {_assemblyHookExecuted}");
+            // Hook executed($"[ASSEMBLY] Total hooks recorded: {AssemblyHooks.Count}");
             
             if (!_assemblyHookExecuted)
             {
-                Console.WriteLine("[ASSEMBLY] WARNING: Assembly cleanup hooks may not have executed properly!");
+                // Hook executed("[ASSEMBLY] WARNING: Assembly cleanup hooks may not have executed properly!");
             }
         }
     }

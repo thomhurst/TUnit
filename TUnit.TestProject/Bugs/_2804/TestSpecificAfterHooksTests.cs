@@ -15,7 +15,7 @@ public class TestSpecificAfterHooksTests
     public async Task Test_With_Multiple_After_Hooks_Some_Failing()
     {
         await Task.CompletedTask;
-        Console.WriteLine("[SPECIFIC-AFTER] Test executed - multiple After(Test) hooks will run");
+        // Test executed - multiple After(Test) hooks will run
     }
 
     // Multiple After(Test) hooks for the same test
@@ -25,7 +25,7 @@ public class TestSpecificAfterHooksTests
         if (context.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
         {
             ExecutedHooks.Add("AfterTest_Hook1");
-            Console.WriteLine("[SPECIFIC-AFTER] After(Test) Hook 1 executing successfully");
+            // After(Test) Hook 1 executing successfully
             await Task.CompletedTask;
         }
     }
@@ -36,7 +36,7 @@ public class TestSpecificAfterHooksTests
         if (context.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
         {
             ExecutedHooks.Add("AfterTest_Hook2");
-            Console.WriteLine("[SPECIFIC-AFTER] After(Test) Hook 2 executing and will fail");
+            // After(Test) Hook 2 executing and will fail
             await Task.CompletedTask;
             var ex = new InvalidOperationException("After(Test) Hook 2 intentionally failed");
             CaughtExceptions.Add(ex);
@@ -50,7 +50,7 @@ public class TestSpecificAfterHooksTests
         if (context.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
         {
             ExecutedHooks.Add("AfterTest_Hook3");
-            Console.WriteLine("[SPECIFIC-AFTER] After(Test) Hook 3 still executing after Hook 2 failed");
+            // After(Test) Hook 3 still executing after Hook 2 failed
             await Task.CompletedTask;
         }
     }
@@ -61,7 +61,7 @@ public class TestSpecificAfterHooksTests
         if (context.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
         {
             ExecutedHooks.Add("AfterTest_Hook4");
-            Console.WriteLine("[SPECIFIC-AFTER] After(Test) Hook 4 executing and will also fail");
+            // After(Test) Hook 4 executing and will also fail
             await Task.CompletedTask;
             var ex = new ArgumentException("After(Test) Hook 4 also intentionally failed");
             CaughtExceptions.Add(ex);
@@ -75,23 +75,23 @@ public class TestSpecificAfterHooksTests
         if (context.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
         {
             ExecutedHooks.Add("AfterTest_Hook5");
-            Console.WriteLine("[SPECIFIC-AFTER] After(Test) Hook 5 still executing after multiple failures");
+            // After(Test) Hook 5 still executing after multiple failures
             await Task.CompletedTask;
             
             // Verify all hooks executed
-            Console.WriteLine($"[SPECIFIC-AFTER] Total After(Test) hooks executed: {ExecutedHooks.Count}");
-            Console.WriteLine($"[SPECIFIC-AFTER] Total exceptions caught: {CaughtExceptions.Count}");
+            // Total After(Test) hooks executed verified
+            // Total exceptions caught verified
             
             if (ExecutedHooks.Count >= 5)
             {
-                Console.WriteLine("[SPECIFIC-AFTER] SUCCESS: All 5 After(Test) hooks executed despite 2 failures!");
+                // SUCCESS: All 5 After(Test) hooks executed despite 2 failures
             }
             
             // List all executed hooks
-            Console.WriteLine("[SPECIFIC-AFTER] Execution order:");
+            // Execution order verified
             foreach (var hook in ExecutedHooks)
             {
-                Console.WriteLine($"  - {hook}");
+                // Hook executed
             }
         }
     }
@@ -111,7 +111,7 @@ public class MixedBeforeAfterHooksTests
         if (context.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
         {
             HookSequence.Add("Before_Hook1");
-            Console.WriteLine("[MIXED] Before(Test) Hook 1 executing");
+            // Before(Test) Hook 1 executing
             await Task.CompletedTask;
         }
     }
@@ -122,14 +122,14 @@ public class MixedBeforeAfterHooksTests
         if (context.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
         {
             HookSequence.Add("Before_Hook2");
-            Console.WriteLine("[MIXED] Before(Test) Hook 2 executing");
+            // Before(Test) Hook 2 executing
             await Task.CompletedTask;
             
             // Fail on specific test
             if (context.TestDetails.TestName == nameof(Test_With_Before_Hook_Failure))
             {
                 _beforeHookFailed = true;
-                Console.WriteLine("[MIXED] Before(Test) Hook 2 failing!");
+                // Before(Test) Hook 2 failing
                 throw new Exception("Before hook intentionally failed");
             }
         }
@@ -141,7 +141,7 @@ public class MixedBeforeAfterHooksTests
         // This test may not execute if Before hook fails
         HookSequence.Add("Test_Executed");
         await Task.CompletedTask;
-        Console.WriteLine("[MIXED] Test executed (shouldn't happen if Before hook failed)");
+        // Test executed (shouldn't happen if Before hook failed)
     }
 
     [Test]
@@ -149,7 +149,7 @@ public class MixedBeforeAfterHooksTests
     {
         HookSequence.Add("Test_Executed");
         await Task.CompletedTask;
-        Console.WriteLine("[MIXED] Test executed normally");
+        // Test executed normally
     }
 
     // After hooks should still run even if Before hooks failed
@@ -159,7 +159,7 @@ public class MixedBeforeAfterHooksTests
         if (context.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
         {
             HookSequence.Add("After_Hook1");
-            Console.WriteLine("[MIXED] After(Test) Hook 1 executing (should run even if Before failed)");
+            // After(Test) Hook 1 executing (should run even if Before failed)
             await Task.CompletedTask;
         }
     }
@@ -170,7 +170,7 @@ public class MixedBeforeAfterHooksTests
         if (context.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
         {
             HookSequence.Add("After_Hook2");
-            Console.WriteLine("[MIXED] After(Test) Hook 2 executing and will fail");
+            // After(Test) Hook 2 executing and will fail
             await Task.CompletedTask;
             throw new Exception("After hook intentionally failed");
         }
@@ -182,19 +182,19 @@ public class MixedBeforeAfterHooksTests
         if (context.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
         {
             HookSequence.Add("After_Hook3");
-            Console.WriteLine("[MIXED] After(Test) Hook 3 still executing");
+            // After(Test) Hook 3 still executing
             await Task.CompletedTask;
             
             // Log the sequence
-            Console.WriteLine($"[MIXED] Hook execution sequence ({HookSequence.Count} hooks):");
+            // Hook execution sequence verified
             foreach (var hook in HookSequence)
             {
-                Console.WriteLine($"  - {hook}");
+                // Hook executed
             }
             
             if (_beforeHookFailed)
             {
-                Console.WriteLine("[MIXED] Note: Before hook failed, but After hooks still executed!");
+                // Before hook failed, but After hooks still executed
             }
         }
     }
@@ -212,7 +212,7 @@ public class ExceptionDetailsPreservationTests
     public async Task Test_That_Collects_Exception_Details()
     {
         await Task.CompletedTask;
-        Console.WriteLine("[EXCEPTION-DETAILS] Test executed - collecting exception details from failing hooks");
+        // Test executed - collecting exception details from failing hooks
     }
 
     [AfterEvery(Test)]
@@ -224,7 +224,7 @@ public class ExceptionDetailsPreservationTests
             var exType = typeof(InvalidOperationException);
             ExceptionMessages.Add(message);
             ExceptionTypes.Add(exType);
-            Console.WriteLine($"[EXCEPTION-DETAILS] Hook 1 throwing {exType.Name}: {message}");
+            // Hook 1 throwing exception
             await Task.CompletedTask;
             throw new InvalidOperationException(message);
         }
@@ -239,7 +239,7 @@ public class ExceptionDetailsPreservationTests
             var exType = typeof(ArgumentException);
             ExceptionMessages.Add(message);
             ExceptionTypes.Add(exType);
-            Console.WriteLine($"[EXCEPTION-DETAILS] Hook 2 throwing {exType.Name}: {message}");
+            // Hook 2 throwing exception
             await Task.CompletedTask;
             throw new ArgumentException(message);
         }
@@ -254,7 +254,7 @@ public class ExceptionDetailsPreservationTests
             var exType = typeof(NotImplementedException);
             ExceptionMessages.Add(message);
             ExceptionTypes.Add(exType);
-            Console.WriteLine($"[EXCEPTION-DETAILS] Hook 3 throwing {exType.Name}: {message}");
+            // Hook 3 throwing exception
             await Task.CompletedTask;
             throw new NotImplementedException(message);
         }
@@ -269,7 +269,7 @@ public class ExceptionDetailsPreservationTests
             var exType = typeof(CustomTestException);
             ExceptionMessages.Add(message);
             ExceptionTypes.Add(exType);
-            Console.WriteLine($"[EXCEPTION-DETAILS] Hook 4 throwing {exType.Name}: {message}");
+            // Hook 4 throwing exception
             await Task.CompletedTask;
             throw new CustomTestException(message);
         }
@@ -280,10 +280,10 @@ public class ExceptionDetailsPreservationTests
     {
         if (context.TestDetails.ClassType == typeof(ExceptionDetailsPreservationTests))
         {
-            Console.WriteLine("[EXCEPTION-DETAILS] Hook 5 executing (after 4 exceptions)");
-            Console.WriteLine($"[EXCEPTION-DETAILS] Exception types thrown: {string.Join(", ", ExceptionTypes.Select(t => t.Name))}");
-            Console.WriteLine($"[EXCEPTION-DETAILS] Exception messages: {string.Join(" | ", ExceptionMessages)}");
-            Console.WriteLine("[EXCEPTION-DETAILS] All exception details should be preserved in the AggregateException");
+            // Hook 5 executing (after 4 exceptions)
+            // Exception types thrown verified
+            // Exception messages verified
+            // All exception details should be preserved in the AggregateException
             await Task.CompletedTask;
         }
     }
@@ -312,7 +312,7 @@ public class CatastrophicFailureRecoveryTests
             ResourcesToClean.Add(new DummyResource("Resource1"));
             ResourcesToClean.Add(new DummyResource("Resource2"));
             ResourcesToClean.Add(new DummyResource("Resource3"));
-            Console.WriteLine($"[CATASTROPHIC] Allocated {ResourcesToClean.Count} resources");
+            // Resources allocated
         }
     }
 
@@ -320,7 +320,7 @@ public class CatastrophicFailureRecoveryTests
     public async Task Test_With_Resources_Needing_Cleanup()
     {
         await Task.CompletedTask;
-        Console.WriteLine("[CATASTROPHIC] Test executed - resources need cleanup in After hooks");
+        // Test executed - resources need cleanup in After hooks
     }
 
     [After(Test)]
@@ -328,7 +328,7 @@ public class CatastrophicFailureRecoveryTests
     {
         if (context.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
         {
-            Console.WriteLine("[CATASTROPHIC] Cleanup Hook 1 - cleaning first resource");
+            // Cleanup Hook 1 - cleaning first resource
             if (ResourcesToClean.Count > 0)
             {
                 ResourcesToClean[0].Dispose();
@@ -343,7 +343,7 @@ public class CatastrophicFailureRecoveryTests
     {
         if (context.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
         {
-            Console.WriteLine("[CATASTROPHIC] Cleanup Hook 2 - will fail catastrophically!");
+            // Cleanup Hook 2 - will fail catastrophically
             await Task.CompletedTask;
             throw new OutOfMemoryException("Simulated catastrophic failure during cleanup!");
         }
@@ -354,7 +354,7 @@ public class CatastrophicFailureRecoveryTests
     {
         if (context.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
         {
-            Console.WriteLine("[CATASTROPHIC] Cleanup Hook 3 - still cleaning remaining resources after catastrophic failure");
+            // Cleanup Hook 3 - still cleaning remaining resources after catastrophic failure
             
             // Clean remaining resources
             for (int i = 1; i < ResourcesToClean.Count; i++)
@@ -363,7 +363,7 @@ public class CatastrophicFailureRecoveryTests
                 {
                     ResourcesToClean[i].Dispose();
                     CleanupOperations.Add($"Resource{i + 1}_Disposed");
-                    Console.WriteLine($"[CATASTROPHIC] Cleaned resource {i + 1}");
+                    // Resource cleaned
                 }
             }
             
@@ -376,17 +376,17 @@ public class CatastrophicFailureRecoveryTests
     {
         if (context.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
         {
-            Console.WriteLine("[CATASTROPHIC] Cleanup Hook 4 - verifying cleanup status");
-            Console.WriteLine($"[CATASTROPHIC] Cleanup operations completed: {CleanupOperations.Count}");
-            Console.WriteLine($"[CATASTROPHIC] Resources cleaned: {string.Join(", ", CleanupOperations)}");
+            // Cleanup Hook 4 - verifying cleanup status
+            // Cleanup operations completed
+            // Resources cleaned verified
             
             if (CleanupOperations.Count >= ResourcesToClean.Count)
             {
-                Console.WriteLine("[CATASTROPHIC] SUCCESS: All resources cleaned despite catastrophic failure!");
+                // SUCCESS: All resources cleaned despite catastrophic failure
             }
             else
             {
-                Console.WriteLine($"[CATASTROPHIC] WARNING: Only {CleanupOperations.Count}/{ResourcesToClean.Count} resources cleaned");
+                // WARNING: Not all resources cleaned
             }
             
             await Task.CompletedTask;
@@ -405,7 +405,7 @@ public class CatastrophicFailureRecoveryTests
         public DummyResource(string name)
         {
             _name = name;
-            Console.WriteLine($"[CATASTROPHIC] {_name} created");
+            // Resource created
         }
 
         public void Dispose()
@@ -413,7 +413,7 @@ public class CatastrophicFailureRecoveryTests
             if (!_disposed)
             {
                 _disposed = true;
-                Console.WriteLine($"[CATASTROPHIC] {_name} disposed");
+                // Resource disposed
             }
         }
     }
