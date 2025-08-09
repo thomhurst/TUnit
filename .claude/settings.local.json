@@ -154,7 +154,13 @@
       "Bash(do rm -rf \"$dir%.received.verified\")",
       "Bash(done)",
       "WebFetch(domain:github.com)",
-      "Bash(./bin/Debug/net9.0/TUnit.TestProject.exe*)"
+      "Bash(./bin/Debug/net9.0/TUnit.TestProject.exe*)",
+      "Bash(git log:*)",
+      "Bash(./TUnit.TestProject.exe --treenode-filter \"/*/*/_2756/*\" --output Normal)",
+      "Bash(D:/git/TUnit/TUnit.TestProject/bin/Release/net8.0/TUnit.TestProject.exe --treenode-filter \"*2756*\" --output Normal)",
+      "Bash(D:/git/TUnit/TUnit.TestProject/bin/Release/net8.0/TUnit.TestProject.exe --list-tests)",
+      "Bash(D:/git/TUnit/TUnit.TestProject/bin/Release/net8.0/TUnit.TestProject.exe --treenode-filter \"/*/*2756/*/*\" --output Normal)",
+      "Bash(D:/git/TUnit/TUnit.TestProject/bin/Release/net8.0/TUnit.TestProject.exe --treenode-filter \"/*/*/*GlobalHooksExecutionTest*/*\")"
     ],
     "deny": []
   },

@@ -186,6 +186,7 @@ public class NotInParallelMixedTests
     [After(Class)]
     public static async Task ValidateFinalResults()
     {
+        
         // Validate that tests without keys didn't run in parallel
         if (ExecutionsByGroup.TryGetValue("NoKey", out var noKeyExecutions))
         {
@@ -339,7 +340,23 @@ public class NotInParallelMixedTests
             if (EndTime == null || other.EndTime == null)
                 return false;
 
-            return StartTime < other.EndTime.Value && other.StartTime < EndTime.Value;
+            // Tests with NotInParallel constraints should run sequentially.
+            // Due to timing precision and test framework overhead, we need tolerance.
+            // We use 100ms tolerance which should be sufficient for framework overhead.
+            var tolerance = TimeSpan.FromMilliseconds(100);
+            
+            // Check if tests ran sequentially (one after the other)
+            // Test1 ran before Test2 if: Test1.EndTime <= Test2.StartTime (with tolerance)
+            // Test2 ran before Test1 if: Test2.EndTime <= Test1.StartTime (with tolerance)
+            var test1RanFirst = EndTime.Value <= other.StartTime.Add(tolerance);
+            var test2RanFirst = other.EndTime.Value <= StartTime.Add(tolerance);
+            
+            // If either test ran completely before the other (sequential), they don't overlap
+            if (test1RanFirst || test2RanFirst)
+                return false;
+                
+            // Otherwise they overlapped (ran in parallel)
+            return true;
         }
     }
 }

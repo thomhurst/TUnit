@@ -92,6 +92,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
             // Report test started
             await _tunitMessageBus.InProgress(test.Context);
 
+            bool hookStarted = false;
             try
             {
                 if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
@@ -102,6 +103,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
 
                 // Execute class/assembly hooks on first test
                 var executionContext = await _hookOrchestrator.OnTestStartingAsync(test, cancellationToken);
+                hookStarted = true;
 
 #if NET
             // Restore the accumulated context from all hooks to flow AsyncLocal values to the test
@@ -114,8 +116,17 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
                 // Execute the test and get the result message
                 var updateMessage = await _innerExecutor.ExecuteTestAsync(test, cancellationToken);
 
-                // Route the result to the appropriate ITUnitMessageBus method
-                await RouteTestResult(test, updateMessage);
+                try
+                {
+                    // Execute cleanup hooks (After/AfterEvery for Test/Class/Assembly)
+                    await _hookOrchestrator.OnTestCompletedAsync(test, cancellationToken);
+                }
+                finally
+                {
+                    // Route the result to the appropriate ITUnitMessageBus method
+                    // This must always be called to report test results
+                    await RouteTestResult(test, updateMessage);
+                }
 
                 // Check if we should trigger fail-fast
                 if (_isFailFastEnabled && test.Result?.State == TestState.Failed)
@@ -126,6 +137,20 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
             }
             catch (Exception ex)
             {
+                // If hooks were started, we MUST call OnTestCompletedAsync to decrement counters
+                if (hookStarted)
+                {
+                    try
+                    {
+                        await _hookOrchestrator.OnTestCompletedAsync(test, cancellationToken);
+                    }
+                    catch (Exception hookEx)
+                    {
+                        // Log but don't throw - we want to preserve the original exception
+                        await _logger.LogErrorAsync($"Error executing cleanup hooks for test {test.TestId}: {hookEx}");
+                    }
+                }
+
                 // Set test state
                 test.State = TestState.Failed;
                 test.Result = new TestResult
