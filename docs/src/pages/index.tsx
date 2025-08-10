@@ -64,15 +64,17 @@ public async Task MyTest()
             <div className={styles.heroButtons}>
               <Link
                 className={styles.primaryButton}
-                to="/docs/getting-started/installation">
+                to="/docs/getting-started/installation"
+                aria-label="Get started with TUnit installation guide">
                 Get Started
-                <span className={styles.buttonIcon}>→</span>
+                <span className={styles.buttonIcon} aria-hidden="true">→</span>
               </Link>
               <Link
                 className={styles.secondaryButton}
-                to="/docs/intro">
+                to="/docs/intro"
+                aria-label="View TUnit tutorial and documentation">
                 View Tutorial
-                <span className={styles.buttonIcon}>📚</span>
+                <span className={styles.buttonIcon} aria-hidden="true">📚</span>
               </Link>
             </div>
           </div>
@@ -90,14 +92,14 @@ public async Task MyTest()
                 {codeExample}
               </CodeBlock>
             </div>
-            <div className={styles.testOutput}>
+            <div className={styles.testOutput} role="region" aria-label="Test execution results">
               <div className={styles.testOutputHeader}>
-                <span className={styles.testOutputIcon}>✓</span>
+                <span className={styles.testOutputIcon} aria-hidden="true">✓</span>
                 Test Results
               </div>
               <div className={styles.testOutputContent}>
                 <div className={styles.testSuccess}>
-                  <span>✓</span> MyTest <span className={styles.testTime}>2ms</span>
+                  <span aria-label="Test passed">✓</span> MyTest <span className={styles.testTime}>2ms</span>
                 </div>
                 <div className={styles.testSummary}>
                   1 test passed • 0 failed • 2ms total

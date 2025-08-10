@@ -16,13 +16,32 @@
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(102, 126, 234, 0.1);
   
-  /* Custom variables for our design */
+  /* Custom Design System Variables */
   --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --gradient-secondary: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
   --bg-dark: #0a0e27;
   --bg-dark-secondary: #1a1f3a;
+  --bg-surface: #1e293b;
+  --bg-code: #0f172a;
+  
+  /* Text Colors */
+  --text-primary: #f1f5f9;
+  --text-secondary: #e2e8f0;
   --text-muted: #94a3b8;
+  --text-body: #cbd5e1;
+  
+  /* Borders and Effects */
   --border-color: rgba(148, 163, 184, 0.1);
+  --shadow-primary: 0 4px 15px rgba(102, 126, 234, 0.3);
+  --shadow-hover: 0 10px 30px rgba(102, 126, 234, 0.2);
+  
+  /* Syntax Highlighting */
+  --syntax-keyword: #e879f9;
+  --syntax-string: #4ade80;
+  --syntax-function: #fcd34d;
+  --syntax-class: #38bdf8;
+  --syntax-number: #fb7185;
+  --syntax-comment: #cbd5e1;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -64,11 +83,11 @@ body {
 
 /* Ensure better text contrast globally */
 [data-theme='dark'] .hero__subtitle {
-  color: #e2e8f0 !important;
+  color: var(--text-secondary) !important;
 }
 
 [data-theme='dark'] p {
-  color: #cbd5e1;
+  color: var(--text-body);
 }
 
 /* Better code block contrast */
@@ -84,12 +103,12 @@ body {
 
 /* Global fix for all CodeBlock components */
 [data-theme='dark'] .theme-code-block pre {
-  background: #0f172a !important;
-  color: #f8fafc !important;
+  background: var(--bg-code) !important;
+  color: var(--text-primary) !important;
 }
 
 [data-theme='dark'] .theme-code-block code {
-  color: #f8fafc !important;
+  color: var(--text-primary) !important;
 }
 
 [data-theme='dark'] .token.keyword,
@@ -192,12 +211,12 @@ pre code {
 
 /* Navbar text colors */
 .navbar__title {
-  color: #f1f5f9 !important;
+  color: var(--text-primary) !important;
   font-weight: 600;
 }
 
 .navbar__link {
-  color: #cbd5e1 !important;
+  color: var(--text-body) !important;
   font-weight: 500;
   transition: all 0.2s ease;
 }
@@ -217,7 +236,7 @@ pre code {
 
 /* Navbar brand/logo text */
 .navbar__brand {
-  color: #f1f5f9 !important;
+  color: var(--text-primary) !important;
   font-weight: 700;
   transition: all 0.2s ease;
 }
@@ -229,7 +248,7 @@ pre code {
 
 /* Navbar items */
 .navbar__item {
-  color: #cbd5e1 !important;
+  color: var(--text-body) !important;
 }
 
 /* Mobile menu toggle */
@@ -485,7 +504,7 @@ pre code {
   color: #cbd5e1 !important;
 }
 
-/* Button hover effects */
+/* Button hover and focus effects */
 .button {
   transition: all 0.3s ease;
 }
@@ -493,6 +512,11 @@ pre code {
 .button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.button:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
 }
 
 /* Custom scrollbar */

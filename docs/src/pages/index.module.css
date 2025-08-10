@@ -228,6 +228,11 @@
   color: white !important;
 }
 
+.primaryButton:focus-visible {
+  outline: 3px solid #a78bfa;
+  outline-offset: 3px;
+}
+
 .secondaryButton {
   display: inline-flex;
   align-items: center;
@@ -246,6 +251,11 @@
   background: rgba(99, 102, 241, 0.2);
   transform: translateY(-2px);
   color: #667eea !important;
+}
+
+.secondaryButton:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 3px;
 }
 
 .buttonIcon {
@@ -885,6 +895,46 @@
 
   .heroStats {
     justify-content: space-around;
+  }
+}
+
+/* Accessibility: Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .codePattern {
+    animation: none !important;
+  }
+  
+  .titleMain {
+    animation: none !important;
+  }
+  
+  .badge {
+    animation: none !important;
+  }
+  
+  .heroText,
+  .heroCode {
+    animation: none !important;
+  }
+  
+  .featureBox:hover {
+    transform: none !important;
+  }
+  
+  .primaryButton:hover,
+  .secondaryButton:hover {
+    transform: none !important;
+  }
+  
+  .step:hover {
+    transform: none !important;
   }
 }
 
