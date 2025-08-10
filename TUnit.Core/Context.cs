@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
@@ -20,17 +21,15 @@ public abstract class Context : IContext, IDisposable
         ?? BeforeTestDiscoveryContext.Current as Context
         ?? GlobalContext.Current;
 
-    private StringBuilder? _outputStringBuilder;
-    private StringBuilder? _errorOutputStringBuilder;
+    private readonly ConcurrentQueue<string> _outputSegments = new();
+    private readonly ConcurrentQueue<string> _errorOutputSegments = new();
     private DefaultLogger? _defaultLogger;
-    private readonly Lock _outputLock = new();
-    private readonly Lock _errorLock = new();
 
     [field: AllowNull, MaybeNull]
-    public TextWriter OutputWriter => field ??= new SynchronizedStringWriter(_outputStringBuilder ??= new StringBuilder(), _outputLock);
+    public TextWriter OutputWriter => field ??= new LockFreeStringWriter(_outputSegments);
 
     [field: AllowNull, MaybeNull]
-    public TextWriter ErrorOutputWriter => field ??= new SynchronizedStringWriter(_errorOutputStringBuilder ??= new StringBuilder(), _errorLock);
+    public TextWriter ErrorOutputWriter => field ??= new LockFreeStringWriter(_errorOutputSegments);
 
     internal Context(Context? parent)
     {
@@ -69,18 +68,28 @@ public abstract class Context : IContext, IDisposable
 
     public string GetStandardOutput()
     {
-        lock (_outputLock)
+        if (_outputSegments.IsEmpty)
+            return string.Empty;
+            
+        var sb = new StringBuilder();
+        foreach (var segment in _outputSegments)
         {
-            return _outputStringBuilder?.ToString().Trim() ?? string.Empty;
+            sb.Append(segment);
         }
+        return sb.ToString().Trim();
     }
 
     public string GetErrorOutput()
     {
-        lock (_errorLock)
+        if (_errorOutputSegments.IsEmpty)
+            return string.Empty;
+            
+        var sb = new StringBuilder();
+        foreach (var segment in _errorOutputSegments)
         {
-            return _errorOutputStringBuilder?.ToString().Trim() ?? string.Empty;
+            sb.Append(segment);
         }
+        return sb.ToString().Trim();
     }
 
     public DefaultLogger GetDefaultLogger()
@@ -97,75 +106,108 @@ public abstract class Context : IContext, IDisposable
 }
 
 /// <summary>
-/// A TextWriter wrapper that provides thread-safe access to a StringBuilder
+/// A lock-free TextWriter that uses a ConcurrentQueue for thread-safe writes without locks
 /// </summary>
-internal sealed class SynchronizedStringWriter : TextWriter
+internal sealed class LockFreeStringWriter : TextWriter
 {
-    private readonly StringBuilder _stringBuilder;
-    private readonly Lock _lock;
+    private readonly ConcurrentQueue<string> _segments;
 
-    public SynchronizedStringWriter(StringBuilder stringBuilder, Lock lockObject)
+    public LockFreeStringWriter(ConcurrentQueue<string> segments)
     {
-        _stringBuilder = stringBuilder;
-        _lock = lockObject;
+        _segments = segments;
     }
 
     public override Encoding Encoding => Encoding.UTF8;
 
     public override void Write(char value)
     {
-        lock (_lock)
-        {
-            _stringBuilder.Append(value);
-        }
+        _segments.Enqueue(value.ToString());
     }
 
     public override void Write(string? value)
     {
         if (value != null)
         {
-            lock (_lock)
-            {
-                _stringBuilder.Append(value);
-            }
+            _segments.Enqueue(value);
         }
     }
 
     public override void Write(char[] buffer, int index, int count)
     {
-        lock (_lock)
+        if (buffer != null && count > 0)
         {
-            _stringBuilder.Append(buffer, index, count);
+            _segments.Enqueue(new string(buffer, index, count));
         }
     }
 
     public override void WriteLine()
     {
-        lock (_lock)
-        {
-            _stringBuilder.AppendLine();
-        }
+        _segments.Enqueue(Environment.NewLine);
     }
 
     public override void WriteLine(string? value)
     {
-        lock (_lock)
+        _segments.Enqueue((value ?? string.Empty) + Environment.NewLine);
+    }
+
+    public override void Write(char[]? buffer)
+    {
+        if (buffer != null)
         {
-            _stringBuilder.AppendLine(value);
+            _segments.Enqueue(new string(buffer));
         }
     }
 
-    public override string ToString()
+    public override void Write(bool value)
     {
-        lock (_lock)
+        _segments.Enqueue(value.ToString());
+    }
+
+    public override void Write(int value)
+    {
+        _segments.Enqueue(value.ToString());
+    }
+
+    public override void Write(uint value)
+    {
+        _segments.Enqueue(value.ToString());
+    }
+
+    public override void Write(long value)
+    {
+        _segments.Enqueue(value.ToString());
+    }
+
+    public override void Write(ulong value)
+    {
+        _segments.Enqueue(value.ToString());
+    }
+
+    public override void Write(float value)
+    {
+        _segments.Enqueue(value.ToString());
+    }
+
+    public override void Write(double value)
+    {
+        _segments.Enqueue(value.ToString());
+    }
+
+    public override void Write(decimal value)
+    {
+        _segments.Enqueue(value.ToString());
+    }
+
+    public override void Write(object? value)
+    {
+        if (value != null)
         {
-            return _stringBuilder.ToString();
+            _segments.Enqueue(value.ToString() ?? string.Empty);
         }
     }
 
     protected override void Dispose(bool disposing)
     {
-        // Nothing to dispose, StringBuilder doesn't implement IDisposable
         base.Dispose(disposing);
     }
 }
