@@ -89,26 +89,30 @@
 }
 
 .featureCode {
-  background: #0f172a;
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  border-radius: 0.5rem;
-  overflow: hidden;
   margin-top: auto;
+  overflow: hidden;
+}
+
+/* Style the CodeBlock container */
+.featureCode :global(.theme-code-block) {
+  background: #0f172a !important;
+  border: 1px solid rgba(148, 163, 184, 0.1) !important;
+  border-radius: 0.5rem !important;
+  margin: 0 !important;
 }
 
 .featureCode pre {
-  margin: 0;
-  padding: 1rem;
-  background: transparent;
-  overflow-x: auto;
+  margin: 0 !important;
+  padding: 1rem !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
 }
 
 .featureCode code {
-  color: #f8fafc;
-  font-size: 0.875rem;
-  font-family: 'Monaco', 'Courier New', monospace;
-  line-height: 1.5;
-  font-weight: 500;
+  color: #f8fafc !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
 }
 
 /* Bright syntax highlighting for feature code blocks */

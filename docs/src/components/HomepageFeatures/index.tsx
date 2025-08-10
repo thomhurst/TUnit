@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
+import CodeBlock from '@theme/CodeBlock';
 import styles from './styles.module.css';
 
 type FeatureItem = {
@@ -18,7 +19,13 @@ const FeatureList: FeatureItem[] = [
         Multiple ways to write, inject data, and control tests. Support for data-driven testing, matrix tests, and custom data sources.
       </>
     ),
-    codeExample: '[Test]\n[Arguments(1, 2, 3)]\n[Arguments(4, 5, 9)]\npublic void TestAdd(int a, int b, int expected)\n{\n    Assert.That(a + b).IsEqualTo(expected);\n}'
+    codeExample: `[Test]
+[Arguments(1, 2, 3)]
+[Arguments(4, 5, 9)]
+public void TestAdd(int a, int b, int expected)
+{
+    Assert.That(a + b).IsEqualTo(expected);
+}`
   },
   {
     title: 'Intuitive Syntax',
@@ -28,7 +35,14 @@ const FeatureList: FeatureItem[] = [
         Clean attribute-based syntax that's easy to read and write. Fluent assertions make tests expressive and self-documenting.
       </>
     ),
-    codeExample: '[Test]\npublic async Task TestAsync()\n{\n    var result = await GetDataAsync();\n    await Assert.That(result)\n        .IsNotNull()\n        .And.HasCount(5);\n}'
+    codeExample: `[Test]
+public async Task TestAsync()
+{
+    var result = await GetDataAsync();
+    await Assert.That(result)
+        .IsNotNull()
+        .And.HasCount(5);
+}`
   },
   {
     title: 'Performance Optimized',
@@ -38,7 +52,14 @@ const FeatureList: FeatureItem[] = [
         Source generated tests with Native AOT support. Built on Microsoft Testing Platform to reduce overhead and improve efficiency.
       </>
     ),
-    codeExample: '// AOT Compatible\n[Test]\npublic void PerformantTest()\n{\n    // Source generated\n    // No reflection overhead\n    Assert.That(true).IsTrue();\n}'
+    codeExample: `// AOT Compatible
+[Test]
+public void PerformantTest()
+{
+    // Source generated
+    // No reflection overhead
+    Assert.That(true).IsTrue();
+}`
   },
 ];
 
@@ -53,9 +74,9 @@ function Feature({title, icon, description, codeExample}: FeatureItem) {
         <p className={styles.featureDescription}>{description}</p>
         {codeExample && (
           <div className={styles.featureCode}>
-            <pre>
-              <code>{codeExample}</code>
-            </pre>
+            <CodeBlock language="csharp">
+              {codeExample}
+            </CodeBlock>
           </div>
         )}
       </div>
