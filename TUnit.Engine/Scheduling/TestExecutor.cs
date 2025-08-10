@@ -196,7 +196,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
         // Optimized: Use test state directly instead of searching through properties
         var testState = test.State;
         var startTime = test.StartTime.GetValueOrDefault();
-        
+
         switch (testState)
         {
             case TestState.Passed:
@@ -222,7 +222,13 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
                 break;
 
             default:
-                // Fallback: publish the raw message if we can't route it
+                // Fallback: ensure TaskCompletionSource is always set to prevent hanging
+                await _logger.LogErrorAsync($"Unexpected test state '{testState}' for test '{test.TestId}'. Marking as failed .");
+
+                var unexpectedStateException = new InvalidOperationException($"Test ended in unexpected state: {testState}");
+                await _tunitMessageBus.Failed(test.Context, unexpectedStateException, startTime);
+
+                // Still publish the raw message for debugging
                 await _messageBus.PublishAsync(this, updateMessage);
                 break;
         }

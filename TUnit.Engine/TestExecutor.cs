@@ -110,7 +110,7 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
     {
         // Register all tests upfront so hook orchestrator knows total counts per class/assembly
         hookOrchestrator.RegisterTests(testList);
-        
+
         await InitializeStaticPropertiesAsync(cancellationToken);
 
         var sessionContext = await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
@@ -178,9 +178,6 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
         }
 
         _disposed = true;
-
-        // Dispose the scheduler if it implements IDisposable
-        (_testScheduler as IDisposable)?.Dispose();
 
         return default(ValueTask);
     }
