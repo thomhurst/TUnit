@@ -39,7 +39,6 @@ public class RunEngineTestsModule : Module<CommandResult>
             WorkingDirectory = project.Folder!,
             Arguments = [
                 "--hangdump", "--hangdump-filename", "hangdump.engine-tests.txt", "--hangdump-timeout", "20m",
-                "--maximum-parallel-tests", $"{Environment.ProcessorCount}",
                 "--fail-fast"
             ],
             EnvironmentVariables = new Dictionary<string, string?>
