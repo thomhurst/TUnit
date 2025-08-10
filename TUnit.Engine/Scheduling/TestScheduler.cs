@@ -62,6 +62,7 @@ internal sealed class TestScheduler : ITestScheduler
     {
         var runningTasks = new ConcurrentDictionary<AbstractExecutableTest, Task>();
         var completedTests = new ConcurrentDictionary<AbstractExecutableTest, bool>();
+        var keyedConstraintManager = new KeyedConstraintManager();
 
         int? maxParallelism = null;
         if (_commandLineOptions.TryGetOptionArgumentList(
@@ -88,14 +89,15 @@ internal sealed class TestScheduler : ITestScheduler
             allTestTasks.Add(globalNotInParallelTask);
         }
 
-        // 2. Keyed NotInParallel tests - can run in parallel with other keys
-        foreach (var (key, tests) in groupedTests.KeyedNotInParallel)
+        // 2. Keyed NotInParallel tests - handle tests with overlapping constraint keys
+        if (groupedTests.KeyedNotInParallel.Length > 0)
         {
-            var keyedTask = ExecuteKeyedNotInParallelTestsAsync(
-                tests,
+            var keyedTask = ExecuteAllKeyedNotInParallelTestsAsync(
+                groupedTests.KeyedNotInParallel,
                 executor,
                 runningTasks,
                 completedTests,
+                keyedConstraintManager,
                 maxParallelism,
                 cancellationToken);
             allTestTasks.Add(keyedTask);
@@ -150,31 +152,80 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    private async Task ExecuteKeyedNotInParallelTestsAsync(
-        AbstractExecutableTest[] tests,
+    private async Task ExecuteAllKeyedNotInParallelTestsAsync(
+        (string Key, AbstractExecutableTest[] Tests)[] keyedTests,
         ITestExecutor executor,
         ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
+        KeyedConstraintManager constraintManager,
         int? maxParallelism,
         CancellationToken cancellationToken)
     {
-        // Tests are already sorted by priority from TestGroupingService
-        // Group tests by class for execution
-        var testsByClass = tests
-            .GroupBy(t => t.Context.TestDetails.ClassType)
+        // Get all unique tests (some tests may appear in multiple keys)
+        var allTests = new HashSet<AbstractExecutableTest>();
+        var testToKeys = new Dictionary<AbstractExecutableTest, List<string>>();
+        
+        foreach (var (key, tests) in keyedTests)
+        {
+            foreach (var test in tests)
+            {
+                allTests.Add(test);
+                if (!testToKeys.TryGetValue(test, out var keys))
+                {
+                    keys = new List<string>();
+                    testToKeys[test] = keys;
+                }
+                keys.Add(key);
+            }
+        }
+
+        // Sort all unique tests by priority (Critical=5 comes first, Low=1 comes last)
+        // Then by NotInParallel order attribute
+        var sortedTests = allTests
+            .OrderByDescending(t => t.Context.ExecutionPriority)
+            .ThenBy(t => {
+                var constraint = t.Context.ParallelConstraint as NotInParallelConstraint;
+                return constraint?.Order ?? int.MaxValue / 2;
+            })
             .ToList();
 
-        // Execute class by class within this key
-        foreach (var classGroup in testsByClass)
+        // Execute tests with constraint checking
+        foreach (var test in sortedTests)
         {
-            // Tests are already in priority order, just execute them
-            var classTests = classGroup.ToList();
+            var testKeys = testToKeys[test];
+            
+            // Wait for any running tests that share any of our constraint keys
+            await constraintManager.WaitForKeysAsync(testKeys, cancellationToken);
+            
+            // Mark our keys as in use
+            constraintManager.AcquireKeys(testKeys, test);
+            
+            // Execute the test
+            var task = ExecuteTestAndReleaseKeysAsync(test, executor, runningTasks, completedTests, constraintManager, testKeys, cancellationToken);
+            
+            // Don't await the task - let it run in parallel with other non-conflicting tests
+        }
 
-            // Execute all tests from this class sequentially
-            foreach (var test in classTests)
-            {
-                await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
-            }
+        // Wait for all tests to complete
+        await constraintManager.WaitForAllTestsAsync();
+    }
+
+    private async Task ExecuteTestAndReleaseKeysAsync(
+        AbstractExecutableTest test,
+        ITestExecutor executor,
+        ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
+        ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
+        KeyedConstraintManager constraintManager,
+        List<string> testKeys,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+        }
+        finally
+        {
+            constraintManager.ReleaseKeys(testKeys, test);
         }
     }
 
@@ -261,6 +312,80 @@ internal sealed class TestScheduler : ITestScheduler
         finally
         {
             completedTests[test] = true;
+        }
+    }
+
+    /// <summary>
+    /// Manages constraint keys to ensure tests with overlapping keys don't run in parallel
+    /// </summary>
+    private class KeyedConstraintManager
+    {
+        private readonly Dictionary<string, TaskCompletionSource<bool>> _keyLocks = new();
+        private readonly List<Task> _allTestTasks = new();
+        private readonly object _lockObject = new();
+
+        public async Task WaitForKeysAsync(List<string> keys, CancellationToken cancellationToken)
+        {
+            List<Task> tasksToWait = new();
+            
+            lock (_lockObject)
+            {
+                foreach (var key in keys)
+                {
+                    if (_keyLocks.TryGetValue(key, out var tcs))
+                    {
+                        tasksToWait.Add(tcs.Task);
+                    }
+                }
+            }
+
+            if (tasksToWait.Count > 0)
+            {
+                await Task.WhenAll(tasksToWait).ConfigureAwait(false);
+            }
+        }
+
+        public void AcquireKeys(List<string> keys, AbstractExecutableTest test)
+        {
+            lock (_lockObject)
+            {
+                var tcs = new TaskCompletionSource<bool>();
+                _allTestTasks.Add(tcs.Task);
+                
+                foreach (var key in keys)
+                {
+                    _keyLocks[key] = tcs;
+                }
+            }
+        }
+
+        public void ReleaseKeys(List<string> keys, AbstractExecutableTest test)
+        {
+            lock (_lockObject)
+            {
+                foreach (var key in keys)
+                {
+                    if (_keyLocks.TryGetValue(key, out var tcs))
+                    {
+                        _keyLocks.Remove(key);
+                        tcs.TrySetResult(true);
+                    }
+                }
+            }
+        }
+
+        public async Task WaitForAllTestsAsync()
+        {
+            List<Task> tasks;
+            lock (_lockObject)
+            {
+                tasks = new List<Task>(_allTestTasks);
+            }
+            
+            if (tasks.Count > 0)
+            {
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+            }
         }
     }
 }
