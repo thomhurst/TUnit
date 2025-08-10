@@ -95,7 +95,6 @@ internal sealed class TestDependencyResolver
 
         try
         {
-
             var resolvedDependencies = new List<ResolvedDependency>();
             var allResolved = true;
 
@@ -239,7 +238,6 @@ internal sealed class TestDependencyResolver
 
     public void CheckForCircularDependencies()
     {
-
         var inDegree = new Dictionary<string, int>();
         var adjacencyList = new Dictionary<string, List<string>>();
 
@@ -319,6 +317,10 @@ internal sealed class TestDependencyResolver
                         TestContext = test.Context
                     };
                     test.State = TestState.Failed;
+                    // IMPORTANT: Set the TaskCompletionSource immediately so dependent tests don't deadlock
+                    // This must be done here because the test may be referenced as a dependency
+                    // before it's processed by the scheduler
+                    test._taskCompletionSource.TrySetResult();
                 }
             }
         }
