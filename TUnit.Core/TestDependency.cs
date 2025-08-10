@@ -111,8 +111,7 @@ public sealed class TestDependency : IEquatable<TestDependency>
 
             if (MethodParameters != null)
             {
-                var testParams = test.TestMethodParameterTypes ?? [
-                ];
+                var testParams = test.MethodMetadata.Parameters;
                 if (testParams.Length != MethodParameters.Length)
                 {
                     return false;
@@ -120,7 +119,10 @@ public sealed class TestDependency : IEquatable<TestDependency>
 
                 for (var i = 0; i < MethodParameters.Length; i++)
                 {
-                    if (testParams[i] != MethodParameters[i].FullName)
+                    var testParamType = testParams[i].Type;
+                    var expectedType = MethodParameters[i];
+                    
+                    if (testParamType != expectedType)
                     {
                         return false;
                     }
