@@ -189,6 +189,9 @@ internal sealed class TestScheduler : ITestScheduler
             })
             .ToList();
 
+        // Track all test execution tasks
+        var testTasks = new List<Task>();
+
         // Execute tests with constraint checking
         foreach (var test in sortedTests)
         {
@@ -200,14 +203,15 @@ internal sealed class TestScheduler : ITestScheduler
             // Mark our keys as in use
             constraintManager.AcquireKeys(testKeys, test);
             
-            // Execute the test
+            // Execute the test and track the task
             var task = ExecuteTestAndReleaseKeysAsync(test, executor, runningTasks, completedTests, constraintManager, testKeys, cancellationToken);
+            testTasks.Add(task);
             
             // Don't await the task - let it run in parallel with other non-conflicting tests
         }
 
-        // Wait for all tests to complete
-        await constraintManager.WaitForAllTestsAsync();
+        // Wait for all test execution tasks to complete
+        await Task.WhenAll(testTasks);
     }
 
     private async Task ExecuteTestAndReleaseKeysAsync(
@@ -321,7 +325,6 @@ internal sealed class TestScheduler : ITestScheduler
     private class KeyedConstraintManager
     {
         private readonly Dictionary<string, TaskCompletionSource<bool>> _keyLocks = new();
-        private readonly List<Task> _allTestTasks = new();
         private readonly object _lockObject = new();
 
         public async Task WaitForKeysAsync(List<string> keys, CancellationToken cancellationToken)
@@ -350,7 +353,6 @@ internal sealed class TestScheduler : ITestScheduler
             lock (_lockObject)
             {
                 var tcs = new TaskCompletionSource<bool>();
-                _allTestTasks.Add(tcs.Task);
                 
                 foreach (var key in keys)
                 {
@@ -371,20 +373,6 @@ internal sealed class TestScheduler : ITestScheduler
                         tcs.TrySetResult(true);
                     }
                 }
-            }
-        }
-
-        public async Task WaitForAllTestsAsync()
-        {
-            List<Task> tasks;
-            lock (_lockObject)
-            {
-                tasks = new List<Task>(_allTestTasks);
-            }
-            
-            if (tasks.Count > 0)
-            {
-                await Task.WhenAll(tasks).ConfigureAwait(false);
             }
         }
     }

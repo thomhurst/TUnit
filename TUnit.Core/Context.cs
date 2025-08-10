@@ -1,6 +1,6 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using System.Threading;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 
@@ -21,15 +21,17 @@ public abstract class Context : IContext, IDisposable
         ?? BeforeTestDiscoveryContext.Current as Context
         ?? GlobalContext.Current;
 
-    private readonly ConcurrentQueue<string> _outputSegments = new();
-    private readonly ConcurrentQueue<string> _errorOutputSegments = new();
+    private readonly StringBuilder _outputBuilder = new();
+    private readonly StringBuilder _errorOutputBuilder = new();
+    private readonly ReaderWriterLockSlim _outputLock = new(LockRecursionPolicy.NoRecursion);
+    private readonly ReaderWriterLockSlim _errorOutputLock = new(LockRecursionPolicy.NoRecursion);
     private DefaultLogger? _defaultLogger;
 
     [field: AllowNull, MaybeNull]
-    public TextWriter OutputWriter => field ??= new LockFreeStringWriter(_outputSegments);
+    public TextWriter OutputWriter => field ??= new ConcurrentStringWriter(_outputBuilder, _outputLock);
 
     [field: AllowNull, MaybeNull]
-    public TextWriter ErrorOutputWriter => field ??= new LockFreeStringWriter(_errorOutputSegments);
+    public TextWriter ErrorOutputWriter => field ??= new ConcurrentStringWriter(_errorOutputBuilder, _errorOutputLock);
 
     internal Context(Context? parent)
     {
@@ -68,28 +70,28 @@ public abstract class Context : IContext, IDisposable
 
     public string GetStandardOutput()
     {
-        if (_outputSegments.IsEmpty)
-            return string.Empty;
-            
-        var sb = new StringBuilder();
-        foreach (var segment in _outputSegments)
+        _outputLock.EnterReadLock();
+        try
         {
-            sb.Append(segment);
+            return _outputBuilder.ToString().Trim();
         }
-        return sb.ToString().Trim();
+        finally
+        {
+            _outputLock.ExitReadLock();
+        }
     }
 
     public string GetErrorOutput()
     {
-        if (_errorOutputSegments.IsEmpty)
-            return string.Empty;
-            
-        var sb = new StringBuilder();
-        foreach (var segment in _errorOutputSegments)
+        _errorOutputLock.EnterReadLock();
+        try
         {
-            sb.Append(segment);
+            return _errorOutputBuilder.ToString().Trim();
         }
-        return sb.ToString().Trim();
+        finally
+        {
+            _errorOutputLock.ExitReadLock();
+        }
     }
 
     public DefaultLogger GetDefaultLogger()
@@ -102,33 +104,53 @@ public abstract class Context : IContext, IDisposable
 #if NET
         ExecutionContext?.Dispose();
 #endif
+        _outputLock?.Dispose();
+        _errorOutputLock?.Dispose();
     }
 }
 
 /// <summary>
-/// A lock-free TextWriter that uses a ConcurrentQueue for thread-safe writes without locks
+/// A concurrent TextWriter implementation that provides thread-safe access to a StringBuilder
 /// </summary>
-internal sealed class LockFreeStringWriter : TextWriter
+internal sealed class ConcurrentStringWriter : TextWriter
 {
-    private readonly ConcurrentQueue<string> _segments;
+    private readonly StringBuilder _builder;
+    private readonly ReaderWriterLockSlim _lock;
 
-    public LockFreeStringWriter(ConcurrentQueue<string> segments)
+    public ConcurrentStringWriter(StringBuilder builder, ReaderWriterLockSlim lockSlim)
     {
-        _segments = segments;
+        _builder = builder;
+        _lock = lockSlim;
     }
 
     public override Encoding Encoding => Encoding.UTF8;
 
     public override void Write(char value)
     {
-        _segments.Enqueue(value.ToString());
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public override void Write(string? value)
     {
         if (value != null)
         {
-            _segments.Enqueue(value);
+            _lock.EnterWriteLock();
+            try
+            {
+                _builder.Append(value);
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
     }
 
@@ -136,78 +158,188 @@ internal sealed class LockFreeStringWriter : TextWriter
     {
         if (buffer != null && count > 0)
         {
-            _segments.Enqueue(new string(buffer, index, count));
+            _lock.EnterWriteLock();
+            try
+            {
+                _builder.Append(buffer, index, count);
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
     }
 
     public override void WriteLine()
     {
-        _segments.Enqueue(Environment.NewLine);
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.AppendLine();
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public override void WriteLine(string? value)
     {
-        _segments.Enqueue((value ?? string.Empty) + Environment.NewLine);
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.AppendLine(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public override void Write(char[]? buffer)
     {
         if (buffer != null)
         {
-            _segments.Enqueue(new string(buffer));
+            _lock.EnterWriteLock();
+            try
+            {
+                _builder.Append(buffer);
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
     }
 
     public override void Write(bool value)
     {
-        _segments.Enqueue(value.ToString());
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public override void Write(int value)
     {
-        _segments.Enqueue(value.ToString());
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public override void Write(uint value)
     {
-        _segments.Enqueue(value.ToString());
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public override void Write(long value)
     {
-        _segments.Enqueue(value.ToString());
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public override void Write(ulong value)
     {
-        _segments.Enqueue(value.ToString());
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public override void Write(float value)
     {
-        _segments.Enqueue(value.ToString());
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public override void Write(double value)
     {
-        _segments.Enqueue(value.ToString());
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public override void Write(decimal value)
     {
-        _segments.Enqueue(value.ToString());
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
     }
 
     public override void Write(object? value)
     {
         if (value != null)
         {
-            _segments.Enqueue(value.ToString() ?? string.Empty);
+            _lock.EnterWriteLock();
+            try
+            {
+                _builder.Append(value);
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
+    }
+
+    public override void Flush()
+    {
+        // StringBuilder doesn't need flushing
     }
 
     protected override void Dispose(bool disposing)
     {
+        // Don't dispose the lock or builder - they're owned by Context
         base.Dispose(disposing);
     }
 }
