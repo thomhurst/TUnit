@@ -472,13 +472,13 @@
 
 /* Quick Start Section */
 .quickStart {
-  padding: 5rem 0;
+  padding: 3rem 0;
   background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
 }
 
 .sectionHeader {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .sectionTitle {
@@ -606,7 +606,7 @@
 
 /* Why Section */
 .whySection {
-  padding: 5rem 0;
+  padding: 3rem 0;
   background: #0f172a;
 }
 
@@ -678,6 +678,14 @@
   .heroBanner {
     padding: 2rem 0;
     min-height: auto;
+  }
+  
+  .quickStart {
+    padding: 2rem 0;
+  }
+  
+  .whySection {
+    padding: 2rem 0;
   }
 
   .heroContent {

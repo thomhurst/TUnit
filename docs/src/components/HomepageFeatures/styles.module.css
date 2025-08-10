@@ -1,14 +1,14 @@
 .features {
   display: flex;
   align-items: center;
-  padding: 5rem 0;
+  padding: 3rem 0;
   width: 100%;
   background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
 }
 
 .featuresHeader {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .featuresTitle {
@@ -175,7 +175,7 @@
 
 @media screen and (max-width: 996px) {
   .features {
-    padding: 3rem 0;
+    padding: 2rem 0;
   }
 
   .featureBox {
