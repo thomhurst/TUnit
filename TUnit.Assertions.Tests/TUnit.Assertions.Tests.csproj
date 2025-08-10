@@ -9,6 +9,10 @@
   <ItemGroup>
     <Compile Remove="ThrowTests.cs" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+  </ItemGroup>
 
   <Import Project="..\TestProject.targets" />
 </Project>
