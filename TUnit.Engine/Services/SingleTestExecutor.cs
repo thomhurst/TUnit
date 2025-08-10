@@ -446,19 +446,18 @@ internal class SingleTestExecutor : ISingleTestExecutor
         return async () =>
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter((int)test.Context.TestDetails.Timeout!.Value.TotalMilliseconds);
+            var timeoutMs = (int)test.Context.TestDetails.Timeout!.Value.TotalMilliseconds;
+            cts.CancelAfter(timeoutMs);
 
-            var testTask = test.InvokeTestAsync(instance, cts.Token);
-            var timeoutTask = Task.Delay((int)test.Context.TestDetails.Timeout!.Value.TotalMilliseconds, cancellationToken);
-            var completedTask = await Task.WhenAny(testTask, timeoutTask);
-
-            if (completedTask == timeoutTask)
+            try
             {
-                cts.Cancel();
-                throw new OperationCanceledException($"Test '{test.Context.GetDisplayName()}' exceeded timeout of {(int)test.Context.TestDetails.Timeout!.Value.TotalMilliseconds}ms");
+                await test.InvokeTestAsync(instance, cts.Token);
             }
-
-            await testTask;
+            catch (OperationCanceledException) when (cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+            {
+                // This was our timeout, not an external cancellation
+                throw new System.TimeoutException($"Test '{test.Context.GetDisplayName()}' exceeded timeout of {timeoutMs}ms");
+            }
         };
     }
 

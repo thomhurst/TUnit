@@ -46,60 +46,48 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
 
         Console.WriteLine($"Scanning {assemblies.Count} assemblies for tests...");
 
-        // Use indexed collection to maintain order
-        var resultsByIndex = new ConcurrentDictionary<int, List<TestMetadata>>();
-
-        // Use true parallel processing with thread pool threads
-        var parallelOptions = new ParallelOptions
+        // Use async parallel processing with proper task-based approach
+        var tasks = new Task<List<TestMetadata>>[assemblies.Count];
+        
+        for (var i = 0; i < assemblies.Count; i++)
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount
-        };
-
-        Parallel.ForEach(assemblies.Select((assembly, index) => new
-        {
-            assembly, index
-        }), parallelOptions, item =>
-        {
-            var assembly = item.assembly;
-            var index = item.index;
-
-            lock (_lock)
+            var assembly = assemblies[i];
+            var index = i;
+            
+            tasks[index] = Task.Run(async () =>
             {
-                if (!_scannedAssemblies.Add(assembly))
+                lock (_lock)
                 {
-                    resultsByIndex[index] =
-                    [
-                    ];
-                    return;
+                    if (!_scannedAssemblies.Add(assembly))
+                    {
+                        return new List<TestMetadata>();
+                    }
                 }
-            }
 
-            try
-            {
-                Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
-                // Run async method synchronously since we're in parallel processing context
-                var testsInAssembly = DiscoverTestsInAssembly(assembly).ConfigureAwait(false).GetAwaiter().GetResult();
-                resultsByIndex[index] = testsInAssembly;
-            }
-            catch (Exception ex)
-            {
-                // Create a failed test metadata for the assembly that couldn't be scanned
-                var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
-                resultsByIndex[index] =
-                [
-                    failedTest
-                ];
-            }
-        });
+                try
+                {
+                    Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
+                    // Now we can properly await the async method
+                    var testsInAssembly = await DiscoverTestsInAssembly(assembly).ConfigureAwait(false);
+                    return testsInAssembly;
+                }
+                catch (Exception ex)
+                {
+                    // Create a failed test metadata for the assembly that couldn't be scanned
+                    var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
+                    return new List<TestMetadata> { failedTest };
+                }
+            });
+        }
+
+        // Wait for all tasks to complete
+        var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
         // Reassemble results in original order
         var newTests = new List<TestMetadata>();
-        for (var i = 0; i < assemblies.Count; i++)
+        foreach (var tests in results)
         {
-            if (resultsByIndex.TryGetValue(i, out var tests))
-            {
-                newTests.AddRange(tests);
-            }
+            newTests.AddRange(tests);
         }
 
         // Discover dynamic tests from DynamicTestBuilderAttribute methods

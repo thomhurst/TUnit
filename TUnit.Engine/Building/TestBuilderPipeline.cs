@@ -149,8 +149,9 @@ internal sealed class TestBuilderPipeline
                 TestLineNumber = metadata.LineNumber ?? 0,
                 ReturnType = typeof(Task),
                 MethodMetadata = metadata.MethodMetadata,
-                Attributes = attributes
-                // Don't set Timeout and RetryLimit here - let discovery event receivers set them
+                Attributes = attributes,
+                Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
+                // Don't set RetryLimit here - let discovery event receivers set it
             };
 
             var context = _contextProvider.CreateTestContext(
@@ -265,7 +266,8 @@ internal sealed class TestBuilderPipeline
                         TestLineNumber = resolvedMetadata.LineNumber ?? 0,
                         ReturnType = typeof(Task),
                         MethodMetadata = resolvedMetadata.MethodMetadata,
-                        Attributes = attributes
+                        Attributes = attributes,
+                        Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
                         // Don't set Timeout and RetryLimit here - let discovery event receivers set them
                     };
 
@@ -339,6 +341,7 @@ internal sealed class TestBuilderPipeline
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = [],
+            Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout
         };
 
         var context = _contextProvider.CreateTestContext(
@@ -393,6 +396,7 @@ internal sealed class TestBuilderPipeline
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = [],
+            Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout
         };
 
         var context = _contextProvider.CreateTestContext(
