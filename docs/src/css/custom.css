@@ -6,25 +6,284 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-color-primary: #667eea;
+  --ifm-color-primary-dark: #5469e8;
+  --ifm-color-primary-darker: #4a5fe6;
+  --ifm-color-primary-darkest: #2d42d4;
+  --ifm-color-primary-light: #7891ed;
+  --ifm-color-primary-lighter: #829aef;
+  --ifm-color-primary-lightest: #a4b5f3;
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --docusaurus-highlighted-code-line-bg: rgba(102, 126, 234, 0.1);
+  
+  /* Custom variables for our design */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  --bg-dark: #0a0e27;
+  --bg-dark-secondary: #1a1f3a;
+  --text-muted: #94a3b8;
+  --border-color: rgba(148, 163, 184, 0.1);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-color-primary: #667eea;
+  --ifm-color-primary-dark: #5469e8;
+  --ifm-color-primary-darker: #4a5fe6;
+  --ifm-color-primary-darkest: #2d42d4;
+  --ifm-color-primary-light: #7891ed;
+  --ifm-color-primary-lighter: #829aef;
+  --ifm-color-primary-lightest: #a4b5f3;
+  --docusaurus-highlighted-code-line-bg: rgba(102, 126, 234, 0.2);
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-color: #1e293b;
+  --ifm-navbar-background-color: transparent;
+  --ifm-footer-background-color: #0a0e27;
+}
+
+/* Global Enhancements */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Ensure better text contrast globally */
+[data-theme='dark'] .hero__subtitle {
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] p {
+  color: #cbd5e1;
+}
+
+/* Better code block contrast */
+[data-theme='dark'] code {
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: #67e8f9 !important;
+}
+
+/* Enhanced syntax highlighting for all code blocks */
+[data-theme='dark'] .prism-code {
+  background: #1e293b !important;
+}
+
+[data-theme='dark'] .token.keyword,
+[data-theme='dark'] .token.tag {
+  color: #c084fc !important;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .token.string,
+[data-theme='dark'] .token.attr-value {
+  color: #86efac !important;
+}
+
+[data-theme='dark'] .token.function,
+[data-theme='dark'] .token.method {
+  color: #fbbf24 !important;
+}
+
+[data-theme='dark'] .token.class-name,
+[data-theme='dark'] .token.type,
+[data-theme='dark'] .token.builtin {
+  color: #67e8f9 !important;
+}
+
+[data-theme='dark'] .token.comment,
+[data-theme='dark'] .token.prolog,
+[data-theme='dark'] .token.doctype,
+[data-theme='dark'] .token.cdata {
+  color: #cbd5e1 !important;
+  font-style: italic;
+}
+
+[data-theme='dark'] .token.number,
+[data-theme='dark'] .token.boolean {
+  color: #f87171 !important;
+}
+
+[data-theme='dark'] .token.operator,
+[data-theme='dark'] .token.entity,
+[data-theme='dark'] .token.url {
+  color: #fbbf24 !important;
+}
+
+[data-theme='dark'] .token.punctuation,
+[data-theme='dark'] .token.attr-name {
+  color: #e2e8f0 !important;
+}
+
+/* Ensure variables and plain text are bright */
+[data-theme='dark'] .token.plain,
+[data-theme='dark'] .token.variable,
+[data-theme='dark'] .token.parameter {
+  color: #f1f5f9 !important;
+}
+
+[data-theme='dark'] .token.property,
+[data-theme='dark'] .token.constant {
+  color: #a78bfa !important;
+}
+
+[data-theme='dark'] .token.namespace {
+  color: #f472b6 !important;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better code blocks */
+pre code {
+  background: transparent !important;
+}
+
+/* Force all code text to be visible */
+[data-theme='dark'] pre,
+[data-theme='dark'] code {
+  color: #f8fafc !important;
+}
+
+/* Ensure all code block text is readable */
+[data-theme='dark'] pre *,
+[data-theme='dark'] code * {
+  opacity: 1 !important;
+}
+
+/* Fix low contrast text in code blocks */
+[data-theme='dark'] pre span {
+  color: inherit !important;
+  opacity: 1 !important;
+}
+
+/* Navbar enhancements - Dark theme by default */
+.navbar {
+  backdrop-filter: blur(10px);
+  background: linear-gradient(90deg, rgba(10, 14, 39, 0.98) 0%, rgba(26, 31, 58, 0.98) 100%) !important;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Navbar text colors */
+.navbar__title {
+  color: #f1f5f9 !important;
+  font-weight: 600;
+}
+
+.navbar__link {
+  color: #cbd5e1 !important;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.navbar__link:hover {
+  color: #818cf8 !important;
+  text-shadow: 0 0 8px rgba(129, 140, 248, 0.5);
+}
+
+.navbar__link--active {
+  color: #818cf8 !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Navbar brand/logo text */
+.navbar__brand {
+  color: #f1f5f9 !important;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.navbar__brand:hover {
+  color: #818cf8 !important;
+  text-decoration: none !important;
+}
+
+/* Navbar items */
+.navbar__item {
+  color: #cbd5e1 !important;
+}
+
+/* Mobile menu toggle */
+.navbar__toggle {
+  color: #f1f5f9 !important;
+}
+
+/* Theme toggle button */
+[data-theme='dark'] .navbar__toggle {
+  color: #f1f5f9 !important;
+}
+
+/* Search box styling */
+.DocSearch-Button {
+  background: rgba(99, 102, 241, 0.1) !important;
+  border: 1px solid rgba(99, 102, 241, 0.2) !important;
+  color: #cbd5e1 !important;
+}
+
+.DocSearch-Button:hover {
+  background: rgba(99, 102, 241, 0.15) !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.DocSearch-Button-Placeholder {
+  color: #94a3b8 !important;
+}
+
+.DocSearch-Button-Key {
+  background: rgba(99, 102, 241, 0.2) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  color: #cbd5e1 !important;
+  box-shadow: none !important;
+}
+
+/* Ensure all navbar elements inherit the dark theme */
+.navbar * {
+  color: #cbd5e1;
+}
+
+/* Light/dark mode toggle button styling */
+.navbar__items--right button[class*="toggle"] {
+  color: #cbd5e1 !important;
+}
+
+.navbar__items--right button[class*="toggle"]:hover {
+  background: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Footer enhancements */
+.footer {
+  background: linear-gradient(180deg, #0f172a 0%, #0a0e27 100%) !important;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Button hover effects */
+.button {
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ifm-background-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ifm-color-primary);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ifm-color-primary-dark);
 }
