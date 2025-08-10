@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Background -->
+  <defs>
+    <linearGradient id="gradTU" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6d28d9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="#0f172a"/>
+  
+  <!-- TU letters in monospace -->
+  <text x="12" y="42" font-family="Consolas, 'Fira Code', monospace" font-size="32" font-weight="700" fill="url(#gradTU)"  transform="scale(1.5) translate(-10.5, -10)">
+    T
+  </text>
+  
+  <text x="30" y="42" font-family="Consolas, 'Fira Code', monospace" font-size="32" font-weight="700" fill="url(#gradTU)" transform="scale(1.5) translate(-10.5, -10)">
+    U
+  </text>
+</svg>

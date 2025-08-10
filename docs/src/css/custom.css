@@ -6,25 +6,670 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-color-primary: #667eea;
+  --ifm-color-primary-dark: #5469e8;
+  --ifm-color-primary-darker: #4a5fe6;
+  --ifm-color-primary-darkest: #2d42d4;
+  --ifm-color-primary-light: #7891ed;
+  --ifm-color-primary-lighter: #829aef;
+  --ifm-color-primary-lightest: #a4b5f3;
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --docusaurus-highlighted-code-line-bg: rgba(102, 126, 234, 0.1);
+  
+  /* Custom Design System Variables */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  --bg-dark: #0a0e27;
+  --bg-dark-secondary: #1a1f3a;
+  --bg-surface: #1e293b;
+  --bg-code: #0f172a;
+  
+  /* Text Colors */
+  --text-primary: #f1f5f9;
+  --text-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-body: #cbd5e1;
+  
+  /* Borders and Effects */
+  --border-color: rgba(148, 163, 184, 0.1);
+  --shadow-primary: 0 4px 15px rgba(102, 126, 234, 0.3);
+  --shadow-hover: 0 10px 30px rgba(102, 126, 234, 0.2);
+  
+  /* Syntax Highlighting */
+  --syntax-keyword: #e879f9;
+  --syntax-string: #4ade80;
+  --syntax-function: #fcd34d;
+  --syntax-class: #38bdf8;
+  --syntax-number: #fb7185;
+  --syntax-comment: #cbd5e1;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-color-primary: #667eea;
+  --ifm-color-primary-dark: #5469e8;
+  --ifm-color-primary-darker: #4a5fe6;
+  --ifm-color-primary-darkest: #2d42d4;
+  --ifm-color-primary-light: #7891ed;
+  --ifm-color-primary-lighter: #829aef;
+  --ifm-color-primary-lightest: #a4b5f3;
+  --docusaurus-highlighted-code-line-bg: rgba(102, 126, 234, 0.2);
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-color: #1e293b;
+  --ifm-navbar-background-color: transparent;
+  --ifm-footer-background-color: #0a0e27;
+}
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@600;700&family=Russo+One&display=swap');
+
+/* Global Enhancements */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure better text contrast globally */
+[data-theme='dark'] .hero__subtitle {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme='dark'] p {
+  color: var(--text-body);
+}
+
+/* Better code block contrast */
+[data-theme='dark'] code {
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: #67e8f9 !important;
+}
+
+/* Enhanced syntax highlighting for all code blocks */
+[data-theme='dark'] .prism-code {
+  background: #1e293b !important;
+}
+
+/* Global fix for all CodeBlock components */
+[data-theme='dark'] .theme-code-block pre {
+  background: var(--bg-code) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme='dark'] .theme-code-block code {
+  color: var(--text-primary) !important;
+}
+
+[data-theme='dark'] .token.keyword,
+[data-theme='dark'] .token.tag {
+  color: #c084fc !important;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .token.string,
+[data-theme='dark'] .token.attr-value {
+  color: #86efac !important;
+}
+
+[data-theme='dark'] .token.function,
+[data-theme='dark'] .token.method {
+  color: #fbbf24 !important;
+}
+
+[data-theme='dark'] .token.class-name,
+[data-theme='dark'] .token.type,
+[data-theme='dark'] .token.builtin {
+  color: #67e8f9 !important;
+}
+
+[data-theme='dark'] .token.comment,
+[data-theme='dark'] .token.prolog,
+[data-theme='dark'] .token.doctype,
+[data-theme='dark'] .token.cdata {
+  color: #cbd5e1 !important;
+  font-style: italic;
+}
+
+[data-theme='dark'] .token.number,
+[data-theme='dark'] .token.boolean {
+  color: #f87171 !important;
+}
+
+[data-theme='dark'] .token.operator,
+[data-theme='dark'] .token.entity,
+[data-theme='dark'] .token.url {
+  color: #fbbf24 !important;
+}
+
+[data-theme='dark'] .token.punctuation,
+[data-theme='dark'] .token.attr-name {
+  color: #e2e8f0 !important;
+}
+
+/* Ensure variables and plain text are bright */
+[data-theme='dark'] .token.plain,
+[data-theme='dark'] .token.variable,
+[data-theme='dark'] .token.parameter {
+  color: #f1f5f9 !important;
+}
+
+[data-theme='dark'] .token.property,
+[data-theme='dark'] .token.constant {
+  color: #a78bfa !important;
+}
+
+[data-theme='dark'] .token.namespace {
+  color: #f472b6 !important;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better code blocks */
+pre code {
+  background: transparent !important;
+}
+
+/* Force all code text to be visible */
+[data-theme='dark'] pre,
+[data-theme='dark'] code {
+  color: #f8fafc !important;
+}
+
+/* Ensure all code block text is readable */
+[data-theme='dark'] pre *,
+[data-theme='dark'] code * {
+  opacity: 1 !important;
+}
+
+/* Fix low contrast text in code blocks */
+[data-theme='dark'] pre span {
+  color: inherit !important;
+  opacity: 1 !important;
+}
+
+/* Navbar enhancements - Dark theme by default */
+.navbar {
+  backdrop-filter: blur(10px);
+  background: linear-gradient(90deg, rgba(10, 14, 39, 0.98) 0%, rgba(26, 31, 58, 0.98) 100%) !important;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Navbar text colors */
+.navbar__title {
+  color: var(--text-primary) !important;
+  font-weight: 600;
+}
+
+.navbar__link {
+  color: var(--text-body) !important;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.navbar__link:hover {
+  color: #818cf8 !important;
+  text-shadow: 0 0 8px rgba(129, 140, 248, 0.5);
+}
+
+.navbar__link--active {
+  color: #818cf8 !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Navbar brand/logo text */
+.navbar__brand {
+  color: var(--text-primary) !important;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.navbar__brand:hover {
+  color: #818cf8 !important;
+  text-decoration: none !important;
+}
+
+/* Navbar items */
+.navbar__item {
+  color: var(--text-body) !important;
+}
+
+/* Mobile menu toggle */
+.navbar__toggle {
+  color: #f1f5f9 !important;
+}
+
+/* Theme toggle button */
+[data-theme='dark'] .navbar__toggle {
+  color: #f1f5f9 !important;
+}
+
+/* Search box styling */
+.DocSearch-Button {
+  background: rgba(99, 102, 241, 0.1) !important;
+  border: 1px solid rgba(99, 102, 241, 0.2) !important;
+  color: #cbd5e1 !important;
+}
+
+.DocSearch-Button:hover {
+  background: rgba(99, 102, 241, 0.15) !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.DocSearch-Button-Placeholder {
+  color: #94a3b8 !important;
+}
+
+.DocSearch-Button-Key {
+  background: rgba(99, 102, 241, 0.2) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  color: #cbd5e1 !important;
+  box-shadow: none !important;
+}
+
+/* Ensure all navbar elements inherit the dark theme */
+.navbar * {
+  color: #cbd5e1;
+}
+
+/* Light/dark mode toggle button styling */
+.navbar__items--right button[class*="toggle"] {
+  color: #cbd5e1 !important;
+}
+
+.navbar__items--right button[class*="toggle"]:hover {
+  background: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Footer enhancements */
+.footer {
+  background: linear-gradient(180deg, #0f172a 0%, #0a0e27 100%) !important;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Documentation page styling */
+[data-theme='dark'] {
+  /* Main content area */
+  --ifm-background-color: #0f172a !important;
+  --ifm-background-surface-color: #1e293b !important;
+  
+  /* Sidebar */
+  --ifm-sidebar-background: linear-gradient(180deg, #1a1f3a 0%, #0f172a 100%) !important;
+  --ifm-menu-color: #cbd5e1 !important;
+  --ifm-menu-color-active: #818cf8 !important;
+  --ifm-menu-color-background-active: rgba(99, 102, 241, 0.1) !important;
+  --ifm-menu-color-background-hover: rgba(99, 102, 241, 0.05) !important;
+  
+  /* Breadcrumbs */
+  --ifm-breadcrumb-color-active: #818cf8 !important;
+  --ifm-breadcrumb-item-background-active: transparent !important;
+  
+  /* Table of contents */
+  --ifm-toc-border-color: rgba(99, 102, 241, 0.1) !important;
+  --ifm-toc-link-color: #94a3b8 !important;
+  
+  /* Links */
+  --ifm-link-color: #818cf8 !important;
+  --ifm-link-hover-color: #a78bfa !important;
+  
+  /* Cards and surfaces */
+  --ifm-card-background-color: #1e293b !important;
+  --ifm-card-border-radius: 0.75rem !important;
+  
+  /* Headings */
+  --ifm-heading-color: #f1f5f9 !important;
+  --ifm-heading-font-weight: 600 !important;
+  
+  /* Pagination */
+  --ifm-pagination-nav-color-hover: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Sidebar styling */
+[data-theme='dark'] .theme-doc-sidebar-container {
+  background: linear-gradient(180deg, #1a1f3a 0%, #0f172a 100%) !important;
+  border-right: 1px solid rgba(99, 102, 241, 0.1) !important;
+}
+
+[data-theme='dark'] .menu__link {
+  color: #cbd5e1 !important;
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .menu__link:hover {
+  color: #f1f5f9 !important;
+  background: rgba(99, 102, 241, 0.05) !important;
+}
+
+[data-theme='dark'] .menu__link--active {
+  color: #818cf8 !important;
+  background: rgba(99, 102, 241, 0.1) !important;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .menu__link--sublist-caret:after {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="%23cbd5e1" d="M6 4l4 4-4 4z"/></svg>') !important;
+}
+
+/* Breadcrumbs styling */
+[data-theme='dark'] .breadcrumbs__link {
+  color: #94a3b8 !important;
+  transition: color 0.2s ease;
+}
+
+[data-theme='dark'] .breadcrumbs__link:hover {
+  color: #818cf8 !important;
+}
+
+[data-theme='dark'] .breadcrumbs__item--active .breadcrumbs__link {
+  color: #818cf8 !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Main content area */
+[data-theme='dark'] .theme-doc-markdown {
+  background: transparent !important;
+}
+
+[data-theme='dark'] article {
+  color: #cbd5e1 !important;
+}
+
+[data-theme='dark'] article h1 {
+  color: #f1f5f9 !important;
+  font-size: 2.5rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+[data-theme='dark'] article h2 {
+  color: #e2e8f0 !important;
+  font-size: 1.875rem !important;
+  font-weight: 600 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+  padding-bottom: 0.5rem !important;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.1) !important;
+}
+
+[data-theme='dark'] article h3 {
+  color: #e2e8f0 !important;
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+}
+
+/* Table of contents on the right */
+[data-theme='dark'] .table-of-contents {
+  border-left: 1px solid rgba(99, 102, 241, 0.1) !important;
+}
+
+[data-theme='dark'] .table-of-contents__link {
+  color: #94a3b8 !important;
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .table-of-contents__link:hover {
+  color: #cbd5e1 !important;
+}
+
+[data-theme='dark'] .table-of-contents__link--active {
+  color: #818cf8 !important;
+  font-weight: 600;
+}
+
+/* Pagination (Next/Previous) */
+[data-theme='dark'] .pagination-nav__link {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%) !important;
+  border: 1px solid rgba(99, 102, 241, 0.1) !important;
+  transition: all 0.3s ease;
+}
+
+[data-theme='dark'] .pagination-nav__link:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
+  border-color: #667eea !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+[data-theme='dark'] .pagination-nav__label {
+  color: #94a3b8 !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+[data-theme='dark'] .pagination-nav__sublabel {
+  color: #e2e8f0 !important;
+  font-weight: 600 !important;
+}
+
+/* Code blocks in docs */
+[data-theme='dark'] article pre {
+  background: #1e293b !important;
+  border: 1px solid rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Inline code */
+[data-theme='dark'] article code {
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: #a5f3fc !important;
+  padding: 0.2rem 0.4rem !important;
+  border-radius: 0.25rem !important;
+  font-weight: 500 !important;
+}
+
+/* Blockquotes */
+[data-theme='dark'] blockquote {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%) !important;
+  border-left: 4px solid #667eea !important;
+  color: #cbd5e1 !important;
+}
+
+/* Tables */
+[data-theme='dark'] table {
+  border: 1px solid rgba(99, 102, 241, 0.1) !important;
+}
+
+[data-theme='dark'] table thead {
+  background: rgba(99, 102, 241, 0.05) !important;
+}
+
+[data-theme='dark'] table th {
+  border-color: rgba(99, 102, 241, 0.1) !important;
+  color: #e2e8f0 !important;
+  font-weight: 600 !important;
+}
+
+[data-theme='dark'] table td {
+  border-color: rgba(99, 102, 241, 0.1) !important;
+  color: #cbd5e1 !important;
+}
+
+/* Button hover and focus effects */
+.button {
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.button:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ifm-background-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ifm-color-primary);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ifm-color-primary-dark);
+}
+
+/* Mobile Responsive Improvements */
+@media screen and (max-width: 996px) {
+  /* Fix viewport overflow */
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+  
+  /* Ensure proper container padding on mobile */
+  .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Fix main wrapper */
+  main {
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+  
+  /* Fix navbar on mobile */
+  .navbar {
+    padding: 0.5rem 1rem;
+    width: 100% !important;
+  }
+  
+  .navbar__toggle {
+    margin-right: 0;
+  }
+  
+  /* Ensure code blocks don't overflow */
+  pre {
+    overflow-x: auto !important;
+    max-width: calc(100vw - 2rem) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  /* Fix code blocks in containers */
+  .theme-code-block {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+  
+  /* Fix table overflow on mobile */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: calc(100vw - 2rem) !important;
+  }
+  
+  /* Improve readability on mobile */
+  article {
+    padding: 0 1rem;
+    max-width: 100% !important;
+  }
+  
+  /* Fix sidebar on mobile */
+  .theme-doc-sidebar-container {
+    padding: 1rem;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  /* Fix Docusaurus layout wrapper */
+  #__docusaurus {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  /* Further mobile adjustments for smaller screens */
+  .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Prevent horizontal scroll */
+  html {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  body {
+    font-size: 14px;
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  h3 {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Ensure navbar items wrap properly */
+  .navbar__items {
+    flex-wrap: wrap;
+  }
+  
+  /* Fix search box on mobile */
+  .DocSearch-Button {
+    width: 40px;
+    padding: 0;
+  }
+  
+  .DocSearch-Button-Placeholder {
+    display: none;
+  }
+  
+  /* Improve code block display */
+  pre code {
+    font-size: 0.85rem !important;
+  }
+  
+  /* Fix pagination buttons */
+  .pagination-nav__link {
+    padding: 0.75rem;
+  }
 }
