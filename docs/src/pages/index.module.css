@@ -548,6 +548,62 @@
   border: 1px solid rgba(148, 163, 184, 0.1);
 }
 
+/* Fix Quick Start code block colors */
+.stepContent :global(.theme-code-block) {
+  background: #0f172a !important;
+}
+
+.stepContent pre code {
+  color: #f8fafc !important;
+}
+
+.stepContent :global(.token.comment) {
+  color: #cbd5e1 !important;
+  font-style: italic !important;
+}
+
+.stepContent :global(.token.keyword) {
+  color: #e879f9 !important;
+  font-weight: 600 !important;
+}
+
+.stepContent :global(.token.string) {
+  color: #4ade80 !important;
+}
+
+.stepContent :global(.token.function) {
+  color: #fcd34d !important;
+}
+
+.stepContent :global(.token.class-name) {
+  color: #38bdf8 !important;
+}
+
+.stepContent :global(.token.number) {
+  color: #fb7185 !important;
+}
+
+.stepContent :global(.token.operator) {
+  color: #fcd34d !important;
+}
+
+.stepContent :global(.token.punctuation) {
+  color: #e2e8f0 !important;
+}
+
+.stepContent :global(.token.plain) {
+  color: #f8fafc !important;
+}
+
+.stepContent :global(.plain) {
+  color: #f8fafc !important;
+}
+
+/* Ensure all text in step content is bright */
+.stepContent span {
+  color: #f8fafc !important;
+}
+
 /* Why Section */
 .whySection {
   padding: 5rem 0;

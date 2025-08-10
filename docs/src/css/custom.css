@@ -66,6 +66,16 @@ body {
   background: #1e293b !important;
 }
 
+/* Global fix for all CodeBlock components */
+[data-theme='dark'] .theme-code-block pre {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+[data-theme='dark'] .theme-code-block code {
+  color: #f8fafc !important;
+}
+
 [data-theme='dark'] .token.keyword,
 [data-theme='dark'] .token.tag {
   color: #c084fc !important;
