@@ -33,11 +33,13 @@ public async Task MyTest()
       <div className="container">
         <div className={styles.heroContent}>
           <div className={styles.heroText}>
-            <div className={styles.badge}>Modern .NET Testing</div>
-            <Heading as="h1" className={styles.heroTitle}>
-              <span className={styles.titleMain}>TUnit</span>
-              <span className={styles.titleAccent}>Testing Reimagined</span>
-            </Heading>
+            <div className={styles.titleRow}>
+              <Heading as="h1" className={styles.heroTitle}>
+                <span className={styles.titleMain}>TUnit</span>
+                <span className={styles.titleAccent}>Testing Reimagined</span>
+              </Heading>
+              <div className={styles.badge}>Modern .NET Testing</div>
+            </div>
             <p className={styles.heroSubtitle}>
               A modern testing framework for .NET built with performance in mind.
               Leveraging source generation and AOT compilation for efficient test execution.
