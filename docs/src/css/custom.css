@@ -45,8 +45,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@600;700&family=Russo+One&display=swap');
 
 /* Global Enhancements */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 /* Ensure better text contrast globally */
@@ -499,4 +512,140 @@ pre code {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--ifm-color-primary-dark);
+}
+
+/* Mobile Responsive Improvements */
+@media screen and (max-width: 996px) {
+  /* Fix viewport overflow */
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+  
+  /* Ensure proper container padding on mobile */
+  .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Fix main wrapper */
+  main {
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+  
+  /* Fix navbar on mobile */
+  .navbar {
+    padding: 0.5rem 1rem;
+    width: 100% !important;
+  }
+  
+  .navbar__toggle {
+    margin-right: 0;
+  }
+  
+  /* Ensure code blocks don't overflow */
+  pre {
+    overflow-x: auto !important;
+    max-width: calc(100vw - 2rem) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  /* Fix code blocks in containers */
+  .theme-code-block {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+  
+  /* Fix table overflow on mobile */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: calc(100vw - 2rem) !important;
+  }
+  
+  /* Improve readability on mobile */
+  article {
+    padding: 0 1rem;
+    max-width: 100% !important;
+  }
+  
+  /* Fix sidebar on mobile */
+  .theme-doc-sidebar-container {
+    padding: 1rem;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  /* Fix Docusaurus layout wrapper */
+  #__docusaurus {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  /* Further mobile adjustments for smaller screens */
+  .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Prevent horizontal scroll */
+  html {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  body {
+    font-size: 14px;
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  h3 {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Ensure navbar items wrap properly */
+  .navbar__items {
+    flex-wrap: wrap;
+  }
+  
+  /* Fix search box on mobile */
+  .DocSearch-Button {
+    width: 40px;
+    padding: 0;
+  }
+  
+  .DocSearch-Button-Placeholder {
+    display: none;
+  }
+  
+  /* Improve code block display */
+  pre code {
+    font-size: 0.85rem !important;
+  }
+  
+  /* Fix pagination buttons */
+  .pagination-nav__link {
+    padding: 0.75rem;
+  }
 }

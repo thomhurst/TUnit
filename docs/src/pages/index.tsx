@@ -114,7 +114,7 @@ public async Task MyTest()
 function QuickStartSection() {
   return (
     <section className={styles.quickStart}>
-      <div className="container">
+      <div className={styles.quickStartContainer}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Quick Start</h2>
           <p className={styles.sectionSubtitle}>Get up and running in seconds</p>
@@ -193,7 +193,7 @@ function WhyTUnit() {
 
   return (
     <section className={styles.whySection}>
-      <div className="container">
+      <div className={styles.whyContainer}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Why TUnit?</h2>
           <p className={styles.sectionSubtitle}>Built for modern .NET development</p>
