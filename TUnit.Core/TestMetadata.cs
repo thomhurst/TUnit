@@ -35,12 +35,6 @@ public abstract class TestMetadata
     /// </summary>
     public Func<object, object?[], Task>? TestInvoker { get; init; }
 
-    public int ParameterCount { get; init; }
-
-    public Type[] ParameterTypes { get; init; } = [];
-
-    public string[] TestMethodParameterTypes { get; init; } = [];
-
     public string? FilePath { get; init; }
 
     public int? LineNumber { get; init; }

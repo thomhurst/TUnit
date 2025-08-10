@@ -33,12 +33,6 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1899.BaseClass<DummyReferenceTypeClass>),

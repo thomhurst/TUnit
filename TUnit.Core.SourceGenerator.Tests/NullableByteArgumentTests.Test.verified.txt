@@ -36,14 +36,6 @@ internal sealed class NullableByteArgumentTests_Test_TestSource_GUID : global::T
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(byte?),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "byte?",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
@@ -168,16 +160,6 @@ internal sealed class NullableByteArgumentTests_Test2_TestSource_GUID : global::
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(byte),
-                typeof(byte?),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "byte",
-                "byte?",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

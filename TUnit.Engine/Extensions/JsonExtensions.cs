@@ -59,7 +59,7 @@ public static class JsonExtensions
             TestLineNumber = testDetails.TestLineNumber,
             TestMethodArguments = testDetails.TestMethodArguments,
             TestClassParameterTypes = testDetails.TestClassParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? [],
-            TestMethodParameterTypes = testDetails.TestMethodParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? [],
+            TestMethodParameterTypes = testDetails.MethodMetadata.Parameters.Select(p => p.Type.FullName ?? "Unknown").ToArray(),
         };
     }
 

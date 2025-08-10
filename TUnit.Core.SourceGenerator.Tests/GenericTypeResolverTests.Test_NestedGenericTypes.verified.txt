@@ -28,12 +28,6 @@ internal sealed class NestedGenericTestClass_TestMethod_TestSource_GUID : global
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.NestedGenericTestClass<>),
@@ -114,9 +108,6 @@ internal sealed class NestedGenericTestClass_TestMethod_TestSource_GUID : global
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
                     {
                     },
-                    ParameterTypes = new global::System.Type[]
-                    {
-                    },
                     FilePath = @"",
                     LineNumber = 10,
                     TestSessionId = testSessionId,
@@ -183,9 +174,6 @@ internal sealed class NestedGenericTestClass_TestMethod_TestSource_GUID : global
                     },
                     PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
-                    ParameterTypes = new global::System.Type[]
                     {
                     },
                     FilePath = @"",

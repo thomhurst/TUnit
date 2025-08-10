@@ -35,18 +35,6 @@ internal sealed class AotDataSourceTest_TestWithDataSource_TestSource_GUID : glo
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(int),
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "int",
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AotDataSourceTest),

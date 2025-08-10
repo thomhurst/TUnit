@@ -36,14 +36,6 @@ internal sealed class Tests_NullTest_TestSource_GUID : global::TUnit.Core.Interf
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1692.Tests),

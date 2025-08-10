@@ -60,15 +60,9 @@ public class PriorityTests
         await Task.Delay(100);
     }
 
-    [Test, ExecutionPriority(Priority.Low)]
-    public async Task VerifyPriorityOrder()
+    [After(Class)]
+    public static async Task VerifyPriorityOrder()
     {
-        await Task.Delay(500);
-        
-        lock (Lock)
-        {
-        }
-        
         await Assert.That(ExecutionOrder.First()).IsEqualTo(nameof(CriticalPriority_Test));
         
         var highPriorityIndex1 = ExecutionOrder.IndexOf(nameof(HighPriority_Test1));

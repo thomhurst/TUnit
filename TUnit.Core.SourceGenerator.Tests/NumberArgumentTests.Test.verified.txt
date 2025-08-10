@@ -34,14 +34,6 @@ internal sealed class NumberArgumentTests_Int_TestSource_GUID : global::TUnit.Co
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
@@ -164,14 +156,6 @@ internal sealed class NumberArgumentTests_Double_TestSource_GUID : global::TUnit
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(double),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "double",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -296,14 +280,6 @@ internal sealed class NumberArgumentTests_Float_TestSource_GUID : global::TUnit.
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(float),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "float",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
@@ -426,14 +402,6 @@ internal sealed class NumberArgumentTests_Long_TestSource_GUID : global::TUnit.C
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(long),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "long",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -558,14 +526,6 @@ internal sealed class NumberArgumentTests_ULong_TestSource_GUID : global::TUnit.
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(ulong),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "ulong",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
@@ -688,14 +648,6 @@ internal sealed class NumberArgumentTests_UInt_TestSource_GUID : global::TUnit.C
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(uint),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "uint",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

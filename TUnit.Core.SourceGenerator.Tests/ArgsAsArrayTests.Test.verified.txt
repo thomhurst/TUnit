@@ -33,14 +33,6 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string[]),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string[]",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
@@ -199,14 +191,6 @@ internal sealed class ArgsAsArrayTests_NonParams_TestSource_GUID : global::TUnit
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string[]),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string[]",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
@@ -328,14 +312,6 @@ internal sealed class ArgsAsArrayTests_ParamsEnumerable_TestSource_GUID : global
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::System.Collections.Generic.IEnumerable<string>),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::System.Collections.Generic.IEnumerable<string>",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -495,14 +471,6 @@ internal sealed class ArgsAsArrayTests_Enumerable_TestSource_GUID : global::TUni
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::System.Collections.Generic.IEnumerable<string>),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::System.Collections.Generic.IEnumerable<string>",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
@@ -624,16 +592,6 @@ internal sealed class ArgsAsArrayTests_Following_Non_Params_TestSource_GUID : gl
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(global::System.Collections.Generic.IEnumerable<string>),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "global::System.Collections.Generic.IEnumerable<string>",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

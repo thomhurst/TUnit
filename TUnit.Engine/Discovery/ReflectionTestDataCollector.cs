@@ -859,9 +859,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                 PropertyDataSources = ReflectionAttributeExtractor.ExtractPropertyDataSources(testClass),
                 InstanceFactory = CreateInstanceFactory(testClass)!,
                 TestInvoker = CreateTestInvoker(testClass, testMethod),
-                ParameterCount = GetParametersWithoutCancellationToken(testMethod).Length,
-                ParameterTypes = GetParameterTypesOptimized(testMethod),
-                TestMethodParameterTypes = GetParameterTypeNamesOptimized(testMethod),
                 FilePath = ExtractFilePath(testMethod),
                 LineNumber = ExtractLineNumber(testMethod),
                 MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(testClass, testMethod),
@@ -1009,61 +1006,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         return parameters;
     }
 
-    /// <summary>
-    /// Optimized method to get parameter types without LINQ allocations
-    /// </summary>
-    private static Type[] GetParameterTypesOptimized(MethodInfo method)
-    {
-        var parameters = GetParametersWithoutCancellationToken(method);
-        var types = new Type[parameters.Length];
-        for (int i = 0; i < parameters.Length; i++)
-        {
-            types[i] = parameters[i].ParameterType;
-        }
-        return types;
-    }
 
-    /// <summary>
-    /// Optimized method to get parameter type names without LINQ allocations
-    /// </summary>
-    private static string[] GetParameterTypeNamesOptimized(MethodInfo method)
-    {
-        var parameters = GetParametersWithoutCancellationToken(method);
-        var typeNames = new string[parameters.Length];
-        for (int i = 0; i < parameters.Length; i++)
-        {
-            typeNames[i] = parameters[i].ParameterType.FullName ?? parameters[i].ParameterType.Name;
-        }
-        return typeNames;
-    }
 
-    /// <summary>
-    /// Optimized method to get parameter types directly without LINQ allocations
-    /// </summary>
-    private static Type[] GetParameterTypesDirectOptimized(MethodInfo method)
-    {
-        var parameters = method.GetParameters();
-        var types = new Type[parameters.Length];
-        for (int i = 0; i < parameters.Length; i++)
-        {
-            types[i] = parameters[i].ParameterType;
-        }
-        return types;
-    }
 
-    /// <summary>
-    /// Optimized method to get parameter type names directly without LINQ allocations
-    /// </summary>
-    private static string[] GetParameterTypeNamesDirectOptimized(MethodInfo method)
-    {
-        var parameters = method.GetParameters();
-        var typeNames = new string[parameters.Length];
-        for (int i = 0; i < parameters.Length; i++)
-        {
-            typeNames[i] = parameters[i].ParameterType.FullName ?? parameters[i].ParameterType.Name;
-        }
-        return typeNames;
-    }
 
     private static string? ExtractFilePath(MethodInfo method)
     {
@@ -1824,9 +1769,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             PropertyDataSources = [],
             InstanceFactory = CreateDynamicInstanceFactory(result.TestClassType, result.TestClassArguments)!,
             TestInvoker = CreateDynamicTestInvoker(result),
-            ParameterCount = result.TestMethodArguments?.Length ?? 0,
-            ParameterTypes = GetParameterTypesDirectOptimized(methodInfo),
-            TestMethodParameterTypes = GetParameterTypeNamesDirectOptimized(methodInfo),
             FilePath = null,
             LineNumber = null,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(result.TestClassType, methodInfo),

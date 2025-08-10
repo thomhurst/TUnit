@@ -110,14 +110,6 @@ internal sealed class DataSourceClassCombinedWithDataSourceMethod_DataSourceClas
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),

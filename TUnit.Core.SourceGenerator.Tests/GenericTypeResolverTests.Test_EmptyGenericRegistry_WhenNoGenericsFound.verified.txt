@@ -31,12 +31,6 @@ internal sealed class SimpleTestClass_NonGenericTest_TestSource_GUID : global::T
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.SimpleTestClass),

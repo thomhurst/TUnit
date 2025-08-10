@@ -26,7 +26,7 @@ internal static class TestExtensions
                     AssemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.GetName().FullName!,
                     TypeName: testContext.GetClassTypeName(),
                     MethodName: testDetails.TestName,
-                    ParameterTypeFullNames: CreateParameterTypeArray(testDetails.TestMethodParameterTypes),
+                    ParameterTypeFullNames: CreateParameterTypeArray(testDetails.MethodMetadata.Parameters.Select(p => p.Type).ToArray()),
                     ReturnTypeFullName: testDetails.ReturnType.FullName ?? "void",
                     MethodArity: testDetails.MethodMetadata.GenericTypeCount
                     ),

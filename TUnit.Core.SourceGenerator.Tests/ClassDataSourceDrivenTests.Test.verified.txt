@@ -34,14 +34,6 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_TestSource_GUI
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
@@ -164,14 +156,6 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_Generic_TestSo
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -296,14 +280,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataS
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(InitializableClass),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "InitializableClass",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
@@ -424,16 +400,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataS
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(InitializableClass),
-                typeof(InitializableClass),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "InitializableClass",
-                "InitializableClass",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -562,18 +528,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataS
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(InitializableClass),
-                typeof(InitializableClass),
-                typeof(InitializableClass),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "InitializableClass",
-                "InitializableClass",
-                "InitializableClass",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -709,20 +663,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataS
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(InitializableClass),
-                typeof(InitializableClass),
-                typeof(InitializableClass),
-                typeof(InitializableClass),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "InitializableClass",
-                "InitializableClass",
-                "InitializableClass",
-                "InitializableClass",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -865,22 +805,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataS
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(InitializableClass),
-                typeof(InitializableClass),
-                typeof(InitializableClass),
-                typeof(InitializableClass),
-                typeof(InitializableClass),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "InitializableClass",
-                "InitializableClass",
-                "InitializableClass",
-                "InitializableClass",
-                "InitializableClass",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

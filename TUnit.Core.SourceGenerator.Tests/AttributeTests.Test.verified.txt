@@ -43,12 +43,6 @@ internal sealed class AttributeTests_MyTest_TestSource_GUID : global::TUnit.Core
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AttributeTests),

@@ -17,6 +17,8 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly ITestGroupingService _groupingService;
     private readonly ITUnitMessageBus _messageBus;
     private readonly SchedulerConfiguration _configuration;
+    private readonly ConcurrentDictionary<string, SemaphoreSlim> _constraintSemaphores = new();
+
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
@@ -63,18 +65,14 @@ internal sealed class TestScheduler : ITestScheduler
         var runningTasks = new ConcurrentDictionary<AbstractExecutableTest, Task>();
         var completedTests = new ConcurrentDictionary<AbstractExecutableTest, bool>();
 
-        // Determine parallelism level
         int? maxParallelism = null;
         if (_configuration.Strategy != ParallelismStrategy.Adaptive)
         {
             maxParallelism = _configuration.MaxParallelism > 0 ? _configuration.MaxParallelism : Environment.ProcessorCount * 4;
         }
-        // For adaptive, we pass null to let EnumerableAsyncProcessor manage concurrency
 
-        // Process all test groups
         var allTestTasks = new List<Task>();
 
-        // 1. NotInParallel tests (global) - must run one at a time
         if (groupedTests.NotInParallel.Count > 0)
         {
             var globalNotInParallelTask = ExecuteNotInParallelTestsAsync(
@@ -87,20 +85,19 @@ internal sealed class TestScheduler : ITestScheduler
             allTestTasks.Add(globalNotInParallelTask);
         }
 
-        // 2. Keyed NotInParallel tests - can run in parallel with other keys
-        foreach (var kvp in groupedTests.KeyedNotInParallel)
+        if (groupedTests.KeyedNotInParallel.Count > 0)
         {
-            var keyedTask = ExecuteKeyedNotInParallelTestsAsync(
+            var keyedTask = ExecuteAllKeyedNotInParallelTestsAsync(
                 plan,
-                kvp.Value,
+                groupedTests.KeyedNotInParallel,
                 executor,
                 runningTasks,
                 completedTests,
+                maxParallelism,
                 cancellationToken);
             allTestTasks.Add(keyedTask);
         }
 
-        // 3. Parallel groups - can run in parallel within constraints
         foreach (var group in groupedTests.ParallelGroups)
         {
             var groupTask = ExecuteParallelGroupAsync(group.Value,
@@ -112,7 +109,6 @@ internal sealed class TestScheduler : ITestScheduler
             allTestTasks.Add(groupTask);
         }
 
-        // 4. Fully parallel tests
         var parallelTask = ExecuteParallelTestsAsync(groupedTests.Parallel,
             executor,
             runningTasks,
@@ -121,7 +117,6 @@ internal sealed class TestScheduler : ITestScheduler
             cancellationToken);
         allTestTasks.Add(parallelTask);
 
-        // Wait for all tests to complete
         await Task.WhenAll(allTestTasks);
     }
 
@@ -139,12 +134,10 @@ internal sealed class TestScheduler : ITestScheduler
             testsWithPriority.Add((test, priority));
         }
 
-        // Group tests by class
         var testsByClass = testsWithPriority
             .GroupBy(t => t.Test.Context.TestDetails.ClassType)
             .ToList();
 
-        // Sort classes by their minimum test Order
         testsByClass.Sort((a, b) =>
         {
             var aMinOrder = a.Min(t => t.Priority.Order);
@@ -152,16 +145,13 @@ internal sealed class TestScheduler : ITestScheduler
             return aMinOrder.CompareTo(bMinOrder);
         });
 
-        // Execute class by class
         foreach (var classGroup in testsByClass)
         {
-            // Sort tests within the class by Order, then by execution plan order
             var classTests = classGroup.OrderBy(t => t.Priority.Order)
                 .ThenBy(t => plan.ExecutionOrder.TryGetValue(t.Test, out var order) ? order : int.MaxValue)
                 .Select(t => t.Test)
                 .ToList();
 
-            // Execute all tests from this class sequentially
             foreach (var test in classTests)
             {
                 await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
@@ -169,49 +159,104 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    private async Task ExecuteKeyedNotInParallelTestsAsync(
+    private async Task ExecuteAllKeyedNotInParallelTestsAsync(
         ExecutionPlan plan,
-        PriorityQueue<AbstractExecutableTest, TestPriority> queue,
+        IDictionary<string, PriorityQueue<AbstractExecutableTest, TestPriority>> keyedQueues,
         ITestExecutor executor,
         ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
+        int? maxParallelism,
         CancellationToken cancellationToken)
     {
-        var testsWithPriority = new List<(AbstractExecutableTest Test, TestPriority Priority)>();
-        while (queue.TryDequeue(out var test, out var priority))
+        // Process each keyed queue sequentially within the key
+        // Different keys can run in parallel
+        var keyedTasks = new List<Task>();
+        var processedTests = new ConcurrentDictionary<AbstractExecutableTest, bool>();
+        
+        foreach (var kvp in keyedQueues)
         {
-            testsWithPriority.Add((test, priority));
-        }
-
-        // Group tests by class
-        var testsByClass = testsWithPriority
-            .GroupBy(t => t.Test.Context.TestDetails.ClassType)
-            .ToList();
-
-        // Sort classes by their minimum test Order
-        testsByClass.Sort((a, b) =>
-        {
-            var aMinOrder = a.Min(t => t.Priority.Order);
-            var bMinOrder = b.Min(t => t.Priority.Order);
-            return aMinOrder.CompareTo(bMinOrder);
-        });
-
-        // Execute class by class within this key
-        foreach (var classGroup in testsByClass)
-        {
-            // Sort tests within the class by Order, then by execution plan order
-            var classTests = classGroup.OrderBy(t => t.Priority.Order)
-                .ThenBy(t => plan.ExecutionOrder.TryGetValue(t.Test, out var order) ? order : int.MaxValue)
-                .Select(t => t.Test)
-                .ToList();
-
-            // Execute all tests from this class sequentially
-            foreach (var test in classTests)
+            var key = kvp.Key;
+            var queue = kvp.Value;
+            
+            var keyTask = Task.Run(async () =>
             {
-                await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
-            }
+                var testsWithPriority = new List<(AbstractExecutableTest Test, TestPriority Priority)>();
+                while (queue.TryDequeue(out var test, out var priority))
+                {
+                    testsWithPriority.Add((test, priority));
+                }
+                
+                // Sort tests within this key by priority and order
+                testsWithPriority.Sort((a, b) =>
+                {
+                    var priorityComp = b.Priority.Priority.CompareTo(a.Priority.Priority);
+                    if (priorityComp != 0) return priorityComp;
+                    
+                    var orderComp = a.Priority.Order.CompareTo(b.Priority.Order);
+                    if (orderComp != 0) return orderComp;
+                    
+                    return plan.ExecutionOrder.TryGetValue(a.Test, out var aOrder) && 
+                           plan.ExecutionOrder.TryGetValue(b.Test, out var bOrder) 
+                           ? aOrder.CompareTo(bOrder) : 0;
+                });
+                
+                // Execute tests for this key sequentially
+                foreach (var (test, _) in testsWithPriority)
+                {
+                    // Only execute if not already processed by another key
+                    // This handles tests with multiple constraint keys
+                    if (!processedTests.TryAdd(test, true))
+                    {
+                        continue; // Already processed by another key
+                    }
+                    
+                    // Get ALL constraint keys for this test (may be more than just this queue's key)
+                    var constraintKeys = GetConstraintKeys(test);
+                    var semaphores = new List<SemaphoreSlim>();
+                    
+                    // Collect all semaphores for this test's constraint keys (sorted to prevent deadlock)
+                    foreach (var constraintKey in constraintKeys.OrderBy(k => k))
+                    {
+                        semaphores.Add(_constraintSemaphores.GetOrAdd(constraintKey, _ => new SemaphoreSlim(1, 1)));
+                    }
+                    
+                    // Acquire all semaphores
+                    foreach (var sem in semaphores)
+                    {
+                        await sem.WaitAsync(cancellationToken);
+                    }
+                    
+                    try
+                    {
+                        await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+                    }
+                    finally
+                    {
+                        // Release all semaphores
+                        foreach (var sem in semaphores)
+                        {
+                            sem.Release();
+                        }
+                    }
+                }
+            }, cancellationToken);
+            
+            keyedTasks.Add(keyTask);
         }
+        
+        // Wait for all keyed queues to complete
+        await Task.WhenAll(keyedTasks);
     }
+    
+    private List<string> GetConstraintKeys(AbstractExecutableTest test)
+    {
+        if (test.Context.ParallelConstraint is NotInParallelConstraint notInParallel)
+        {
+            return notInParallel.NotInParallelConstraintKeys.ToList();
+        }
+        return new List<string>();
+    }
+
 
     private async Task ExecuteParallelGroupAsync(SortedDictionary<int, List<AbstractExecutableTest>> orderGroups,
         ITestExecutor executor,
@@ -220,10 +265,8 @@ internal sealed class TestScheduler : ITestScheduler
         int? maxParallelism,
         CancellationToken cancellationToken)
     {
-        // Execute order groups sequentially
         foreach (var orderGroup in orderGroups.OrderBy(og => og.Key))
         {
-            // Use EnumerableAsyncProcessor to execute tests in parallel
             if (maxParallelism.HasValue)
             {
                 await orderGroup.Value
@@ -232,7 +275,6 @@ internal sealed class TestScheduler : ITestScheduler
             }
             else
             {
-                // Adaptive parallelism - no limit specified
                 await orderGroup.Value
                     .ForEachAsync(async test => await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken))
                     .ProcessInParallel();
@@ -269,7 +311,6 @@ internal sealed class TestScheduler : ITestScheduler
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
         CancellationToken cancellationToken)
     {
-        // If test is already failed (e.g., due to circular dependencies), report the pre-failure
         if (test.State == TestState.Failed)
         {
             await _messageBus.Failed(test.Context,
@@ -287,7 +328,6 @@ internal sealed class TestScheduler : ITestScheduler
 
         await Task.WhenAll(test.Dependencies.Select(x => x.Test.CompletionTask));
 
-        // Execute the test directly without Task.Run wrapper
         var executionTask = ExecuteTestDirectlyAsync(test, executor, completedTests, cancellationToken);
         runningTasks[test] = executionTask;
         await executionTask;

@@ -55,14 +55,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Sin
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
@@ -204,16 +196,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Tup
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "string",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -364,14 +346,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Enu
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
@@ -513,14 +487,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Fun
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -665,14 +631,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Wit
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
@@ -815,14 +773,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Ext
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
@@ -964,14 +914,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_ValueTaskMethodDataSource
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
