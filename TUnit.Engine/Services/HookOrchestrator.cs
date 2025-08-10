@@ -43,6 +43,33 @@ internal sealed class HookOrchestrator
     public IContextProvider GetContextProvider() => _contextProvider;
 
     /// <summary>
+    /// Pre-registers all tests so we know the total count per class/assembly
+    /// This must be called before any tests start executing
+    /// </summary>
+    public void RegisterTests(IEnumerable<AbstractExecutableTest> tests)
+    {
+        // Group tests by class and assembly to get counts
+        var testsByClass = tests.GroupBy(t => t.Metadata.TestClassType);
+        var testsByAssembly = tests.GroupBy(t => t.Metadata.TestClassType.Assembly.GetName().Name ?? "Unknown");
+        
+        // Initialize counters with the total count for each class
+        foreach (var classGroup in testsByClass)
+        {
+            var classType = classGroup.Key;
+            var count = classGroup.Count();
+            _classTestCounts.GetOrAdd(classType, _ => new Counter()).Add(count);
+        }
+        
+        // Initialize counters with the total count for each assembly  
+        foreach (var assemblyGroup in testsByAssembly)
+        {
+            var assemblyName = assemblyGroup.Key;
+            var count = assemblyGroup.Count();
+            _assemblyTestCounts.GetOrAdd(assemblyName, _ => new Counter()).Add(count);
+        }
+    }
+
+    /// <summary>
     /// Gets or creates a cached task for BeforeAssembly hooks.
     /// This ensures the hooks only run once and all tests await the same result.
     /// </summary>
@@ -206,9 +233,7 @@ internal sealed class HookOrchestrator
         var testClassType = test.Metadata.TestClassType;
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";
 
-        // Track test counts
-        _assemblyTestCounts.GetOrAdd(assemblyName, _ => new Counter()).Increment();
-        _classTestCounts.GetOrAdd(testClassType, _ => new Counter()).Increment();
+        // Note: Test counts are pre-registered in RegisterTests(), no increment here
 
         await GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken);
 
