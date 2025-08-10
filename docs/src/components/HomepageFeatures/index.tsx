@@ -65,7 +65,7 @@ public void PerformantTest()
 
 function Feature({title, icon, description, codeExample}: FeatureItem) {
   return (
-    <div className={clsx('col col--4')}>
+    <div className={styles.featureColumn}>
       <div className={styles.featureBox}>
         <div className={styles.featureHeader}>
           <span className={styles.featureIcon}>{icon}</span>
@@ -92,7 +92,7 @@ export default function HomepageFeatures(): JSX.Element {
           <h2 className={styles.featuresTitle}>Core Features</h2>
           <p className={styles.featuresSubtitle}>Everything you need for modern test development</p>
         </div>
-        <div className="row">
+        <div className={styles.featureRow}>
           {FeatureList.map((props, idx) => (
             <Feature key={idx} {...props} />
           ))}

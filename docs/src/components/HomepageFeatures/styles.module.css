@@ -1,9 +1,11 @@
 .features {
   display: flex;
   align-items: center;
-  padding: 3rem 0;
+  padding: 3rem 1rem;
   width: 100%;
   background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .featuresHeader {
@@ -27,6 +29,21 @@
   font-weight: 400;
 }
 
+.featureRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.featureColumn {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 .featureBox {
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
   border: 1px solid rgba(148, 163, 184, 0.1);
@@ -36,6 +53,15 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.featureBox * {
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .featureBox::before {
@@ -48,6 +74,7 @@
   background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
   transform: scaleX(0);
   transition: transform 0.3s ease;
+  z-index: 1;
 }
 
 .featureBox:hover::before {
@@ -66,6 +93,8 @@
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .featureIcon {
@@ -86,11 +115,21 @@
   line-height: 1.6;
   margin-bottom: 1.5rem;
   font-weight: 400;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  white-space: normal;
 }
 
 .featureCode {
   margin-top: auto;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Style the CodeBlock container */
@@ -107,6 +146,11 @@
   background: transparent !important;
   border: none !important;
   border-radius: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .featureCode code {
@@ -178,18 +222,32 @@
     padding: 2rem 0;
   }
 
+  .featureRow {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
   .featureBox {
-    margin-bottom: 2rem;
+    margin-bottom: 0;
   }
 }
 
 @media screen and (max-width: 640px) {
+  .features {
+    padding: 2rem 1rem;
+  }
+
   .featuresTitle {
     font-size: 2rem;
   }
 
   .featuresSubtitle {
     font-size: 1rem;
+  }
+
+  .featureRow {
+    gap: 1.25rem;
+    margin-top: 2rem;
   }
 
   .featureHeader {
@@ -199,5 +257,9 @@
 
   .featureTitle {
     text-align: center;
+  }
+  
+  .featureBox {
+    padding: 1.5rem;
   }
 }
