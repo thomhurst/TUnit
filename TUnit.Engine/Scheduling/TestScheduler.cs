@@ -189,7 +189,7 @@ internal sealed class TestScheduler : ITestScheduler
                 // Sort tests within this key by priority and order
                 testsWithPriority.Sort((a, b) =>
                 {
-                    var priorityComp = a.Priority.Priority.CompareTo(b.Priority.Priority);
+                    var priorityComp = b.Priority.Priority.CompareTo(a.Priority.Priority);
                     if (priorityComp != 0) return priorityComp;
                     
                     var orderComp = a.Priority.Order.CompareTo(b.Priority.Order);
