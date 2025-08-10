@@ -10,6 +10,15 @@ public class DependsOnTests
             parameterTypeNames = parameterCount == 1 ? ["System.String"] : ["System.String", "System.Int32"];
         }
 
+        var parameters = parameterTypes?.Select((type, index) => 
+            new ParameterMetadata(type)
+            {
+                Name = $"param{index}",
+                TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
+                ReflectionInfo = null!,
+                IsNullable = false
+            }).ToArray() ?? [];
+
         return new TestMetadata<T>
         {
             TestClassType = typeof(T),
@@ -35,9 +44,7 @@ public class DependsOnTests
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
                 ReturnTypeReference = TypeReference.CreateConcrete(typeof(void).AssemblyQualifiedName ?? "System.Void"),
-                Parameters =
-                [
-                ],
+                Parameters = parameters,
                 Class = new ClassMetadata
                 {
                     Type = typeof(T),

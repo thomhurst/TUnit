@@ -272,7 +272,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 }
 
                                 var basicSkipReason = GetBasicSkipReason(metadata);
-                                
+
                                 Func<Task<object>> instanceFactory;
                                 if (basicSkipReason != null && basicSkipReason.Length > 0)
                                 {
@@ -429,30 +429,27 @@ internal sealed class TestBuilder : ITestBuilder
             // Look at the test method parameters to find attributes that can help with generic type inference
             foreach (var param in metadata.MethodMetadata.Parameters)
             {
-                if (param.ReflectionInfo != null)
+                // Get the actual parameter type from reflection
+                var actualParamType = param.Type;
+
+                // Check if the actual parameter type is a generic parameter of the class
+                if (actualParamType.IsGenericParameter &&
+                    genericParameters.Contains(actualParamType))
                 {
-                    // Get the actual parameter type from reflection
-                    var actualParamType = param.ReflectionInfo.ParameterType;
+                    // Check for Matrix attributes using reflection
+                    var attrs = param.ReflectionInfo.GetCustomAttributes(false);
 
-                    // Check if the actual parameter type is a generic parameter of the class
-                    if (actualParamType.IsGenericParameter &&
-                        genericParameters.Contains(actualParamType))
+                    foreach (var attr in attrs)
                     {
-                        // Check for Matrix attributes using reflection
-                        var attrs = param.ReflectionInfo.GetCustomAttributes(false);
+                        var attrType = attr.GetType();
 
-                        foreach (var attr in attrs)
+                        // Check if it's a generic Matrix attribute
+                        if (attrType.IsGenericType &&
+                            attrType.GetGenericTypeDefinition().Name.StartsWith("Matrix"))
                         {
-                            var attrType = attr.GetType();
-
-                            // Check if it's a generic Matrix attribute
-                            if (attrType.IsGenericType &&
-                                attrType.GetGenericTypeDefinition().Name.StartsWith("Matrix"))
-                            {
-                                var matrixTypeArg = attrType.GetGenericArguments()[0];
-                                typeMapping[actualParamType] = matrixTypeArg;
-                                break;
-                            }
+                            var matrixTypeArg = attrType.GetGenericArguments()[0];
+                            typeMapping[actualParamType] = matrixTypeArg;
+                            break;
                         }
                     }
                 }
@@ -1016,7 +1013,7 @@ internal sealed class TestBuilder : ITestBuilder
                 classDataLoopIndex++;
 
                 var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
-                
+
                 // Handle instance creation for method data sources
                 var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
                 object? instanceForMethodDataSources = null;
@@ -1025,7 +1022,7 @@ internal sealed class TestBuilder : ITestBuilder
                 {
                     instanceForMethodDataSources = await CreateInstanceForMethodDataSources(
                         metadata, classDataAttributeIndex, classDataLoopIndex, classData);
-                    
+
                     if (instanceForMethodDataSources == null)
                     {
                         continue; // Skip if instance creation failed
@@ -1055,14 +1052,14 @@ internal sealed class TestBuilder : ITestBuilder
                         for (var i = 0; i < repeatCount + 1; i++)
                         {
                             cancellationToken.ThrowIfCancellationRequested();
-                            
+
                             // Build and yield single test
                             var test = await BuildSingleTestAsync(
-                                metadata, classDataFactory, methodDataFactory, 
+                                metadata, classDataFactory, methodDataFactory,
                                 classDataAttributeIndex, classDataLoopIndex,
                                 methodDataAttributeIndex, methodDataLoopIndex,
                                 i, contextAccessor);
-                            
+
                             if (test != null)
                             {
                                 yield return test;
@@ -1190,7 +1187,7 @@ internal sealed class TestBuilder : ITestBuilder
             // Create instance factory
             var basicSkipReason = GetBasicSkipReason(metadata);
             Func<Task<object>> instanceFactory;
-            
+
             if (basicSkipReason != null && basicSkipReason.Length > 0)
             {
                 instanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance);
