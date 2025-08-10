@@ -337,9 +337,11 @@ internal sealed class TestBuilder : ITestBuilder
         var typeMapping = new Dictionary<Type, Type>();
 
         // Try to match method parameter types with actual data types
-        for (var i = 0; i < Math.Min(metadata.ParameterTypes.Length, methodData.Length); i++)
+        var methodParameters = metadata.MethodMetadata.Parameters;
+        for (var i = 0; i < Math.Min(methodParameters.Length, methodData.Length); i++)
         {
-            var paramType = metadata.ParameterTypes[i];
+            var methodParam = methodParameters[i];
+            var paramType = methodParam.Type;
             var argValue = methodData[i];
 
             if (argValue != null)
@@ -352,7 +354,6 @@ internal sealed class TestBuilder : ITestBuilder
                 {
                     // Check if this corresponds to a class generic parameter
                     // by looking at the method metadata
-                    var methodParam = metadata.MethodMetadata.Parameters[i];
 
                     if (methodParam.TypeReference is { IsGenericParameter: true, IsMethodGenericParameter: false })
                     {
@@ -497,9 +498,9 @@ internal sealed class TestBuilder : ITestBuilder
 
                             // Now try to match this element type with method parameters
                             // that use the class generic parameter
-                            for (var i = 0; i < metadata.ParameterTypes.Length; i++)
+                            for (var i = 0; i < metadata.MethodMetadata.Parameters.Length; i++)
                             {
-                                var paramType = metadata.ParameterTypes[i];
+                                var paramType = metadata.MethodMetadata.Parameters[i].Type;
                                 if (paramType == typeof(object)) // Placeholder for generic parameter
                                 {
                                     var methodParam = metadata.MethodMetadata.Parameters[i];
@@ -619,7 +620,6 @@ internal sealed class TestBuilder : ITestBuilder
             TestClassArguments = testData.ClassData,
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
-            TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = metadata.MethodMetadata.ReturnType ?? typeof(void),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = attributes,
@@ -688,7 +688,6 @@ internal sealed class TestBuilder : ITestBuilder
             TestClassArguments = [],
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
-            TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = metadata.AttributeFactory.Invoke(),

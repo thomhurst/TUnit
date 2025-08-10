@@ -526,59 +526,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate property injections
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
 
-        // Parameter types
-        writer.AppendLine("ParameterTypes = new global::System.Type[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // For generic methods, always use placeholders
-        if (methodSymbol.IsGenericMethod)
-        {
-            foreach (var param in methodSymbol.Parameters)
-            {
-                writer.AppendLine("typeof(global::System.Object),");
-            }
-        }
-        else
-        {
-            foreach (var param in methodSymbol.Parameters)
-            {
-                var paramType = param.Type;
-                if (IsGenericTypeParameter(paramType) || ContainsGenericTypeParameter(paramType))
-                {
-                    // Use object as placeholder for generic type parameters
-                    writer.AppendLine("typeof(global::System.Object),");
-                }
-                else
-                {
-                    writer.AppendLine($"typeof({paramType.GloballyQualified()}),");
-                }
-            }
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        // String parameter types
-        writer.AppendLine("TestMethodParameterTypes = new string[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var param in methodSymbol.Parameters)
-        {
-            // For generic types or when we have generic method, use placeholder
-            if (methodSymbol.IsGenericMethod ||
-                IsGenericTypeParameter(param.Type) ||
-                ContainsGenericTypeParameter(param.Type))
-            {
-                writer.AppendLine("\"global::System.Object\",");
-            }
-            else
-            {
-                var paramType = param.Type.GloballyQualified();
-                writer.AppendLine($"\"{paramType}\",");
-            }
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
 
         // Method metadata
         writer.Append("MethodMetadata = ");
@@ -617,59 +564,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate property injections
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
 
-        // Parameter types
-        writer.AppendLine("ParameterTypes = new global::System.Type[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // For generic methods, always use placeholders
-        if (methodSymbol.IsGenericMethod)
-        {
-            foreach (var param in methodSymbol.Parameters)
-            {
-                writer.AppendLine("typeof(global::System.Object),");
-            }
-        }
-        else
-        {
-            foreach (var param in methodSymbol.Parameters)
-            {
-                var paramType = param.Type;
-                if (IsGenericTypeParameter(paramType) || ContainsGenericTypeParameter(paramType))
-                {
-                    // Use object as placeholder for generic type parameters
-                    writer.AppendLine("typeof(global::System.Object),");
-                }
-                else
-                {
-                    writer.AppendLine($"typeof({paramType.GloballyQualified()}),");
-                }
-            }
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        // String parameter types
-        writer.AppendLine("TestMethodParameterTypes = new string[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var param in methodSymbol.Parameters)
-        {
-            // For generic types or when we have generic method, use placeholder
-            if (methodSymbol.IsGenericMethod ||
-                IsGenericTypeParameter(param.Type) ||
-                ContainsGenericTypeParameter(param.Type))
-            {
-                writer.AppendLine("\"global::System.Object\",");
-            }
-            else
-            {
-                var paramType = param.Type.GloballyQualified();
-                writer.AppendLine($"\"{paramType}\",");
-            }
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
 
         // Method metadata
         writer.Append("MethodMetadata = ");
@@ -3975,39 +3869,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate property injections
         GeneratePropertyInjections(writer, typeSymbol, typeSymbol.GloballyQualified());
 
-        // Parameter types
-        writer.AppendLine("ParameterTypes = new global::System.Type[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // For generic methods, always use placeholders
-        if (methodSymbol.IsGenericMethod)
-        {
-            foreach (var param in methodSymbol.Parameters)
-            {
-                writer.AppendLine("typeof(global::System.Object),");
-            }
-        }
-        else
-        {
-            foreach (var param in methodSymbol.Parameters)
-            {
-                var paramType = param.Type;
-                if (IsGenericTypeParameter(paramType) || ContainsGenericTypeParameter(paramType))
-                {
-                    // Use object as placeholder for generic type parameters
-                    writer.AppendLine("typeof(global::System.Object),");
-                }
-                else
-                {
-                    writer.AppendLine($"typeof({paramType.GloballyQualified()}),");
-                }
-            }
-        }
-
-        writer.Unindent();
-        writer.AppendLine("},");
-
         // Other metadata
         writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
@@ -4266,28 +4127,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GeneratePropertyDataSources(writer, compilation, testMethod);
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, className);
 
-        // Parameter types
-        writer.AppendLine("ParameterTypes = new global::System.Type[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var param in testMethod.MethodSymbol.Parameters)
-        {
-            writer.AppendLine($"typeof({param.Type.GloballyQualified()}),");
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        // String parameter types
-        writer.AppendLine("TestMethodParameterTypes = new string[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var param in testMethod.MethodSymbol.Parameters)
-        {
-            var paramType = param.Type.GloballyQualified();
-            writer.AppendLine($"\"{paramType}\",");
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
 
         // Method metadata
         writer.Append("MethodMetadata = ");

@@ -78,18 +78,6 @@ internal sealed class EnumerableTupleDataSourceDrivenTests_DataSource_TupleMetho
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(string),
-                typeof(bool),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "string",
-                "bool",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),

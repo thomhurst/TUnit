@@ -146,7 +146,6 @@ internal sealed class TestBuilderPipeline
                             TestClassArguments = [],
                             TestFilePath = metadata.FilePath ?? "Unknown",
                             TestLineNumber = metadata.LineNumber ?? 0,
-                            TestMethodParameterTypes = metadata.ParameterTypes,
                             ReturnType = typeof(Task),
                             MethodMetadata = metadata.MethodMetadata,
                             Attributes = attributes
@@ -274,7 +273,6 @@ internal sealed class TestBuilderPipeline
                         TestClassArguments = [],
                         TestFilePath = resolvedMetadata.FilePath ?? "Unknown",
                         TestLineNumber = resolvedMetadata.LineNumber ?? 0,
-                        TestMethodParameterTypes = resolvedMetadata.ParameterTypes,
                         ReturnType = typeof(Task),
                         MethodMetadata = resolvedMetadata.MethodMetadata,
                         Attributes = attributes
@@ -348,7 +346,6 @@ internal sealed class TestBuilderPipeline
             TestClassArguments = [],
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
-            TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = [],
@@ -403,7 +400,6 @@ internal sealed class TestBuilderPipeline
             TestClassArguments = [],
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
-            TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = [],

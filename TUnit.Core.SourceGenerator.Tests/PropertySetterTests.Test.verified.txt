@@ -202,12 +202,6 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
                     }
                 },
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.PropertySetterTests),

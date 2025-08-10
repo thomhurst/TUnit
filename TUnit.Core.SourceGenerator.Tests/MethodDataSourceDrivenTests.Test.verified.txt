@@ -45,14 +45,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_TestSource_G
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -187,14 +179,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method2_TestSource_
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -328,14 +312,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_WithAction_T
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::System.Action),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::System.Action",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -488,14 +464,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method3_TestSource_
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -680,14 +648,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -821,14 +781,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_WithBaseReturn_Test
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -973,14 +925,6 @@ internal sealed class MethodDataSourceDrivenTests_EnumerableFuncArrayTest_TestSo
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string[]),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string[]",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

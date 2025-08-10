@@ -1371,7 +1371,6 @@ namespace
         public required string TestId { get; init; }
         public int TestLineNumber { get; set; }
         public required object?[] TestMethodArguments { get; set; }
-        public []? TestMethodParameterTypes { get; set; }
         public required string TestName { get; init; }
         public ? Timeout { get; set; }
     }
@@ -1411,15 +1410,12 @@ namespace
         public <[], object?[], object> InstanceFactory { get; init; }
         public int? LineNumber { get; init; }
         public required .MethodMetadata MethodMetadata { get; init; }
-        public int ParameterCount { get; init; }
-        public [] ParameterTypes { get; init; }
         public required .PropertyDataSource[] PropertyDataSources { get; init; }
         public .PropertyInjectionData[] PropertyInjections { get; init; }
         [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]
         public required  TestClassType { get; init; }
         public <object, object?[], .>? TestInvoker { get; init; }
         public required string TestMethodName { get; init; }
-        public string[] TestMethodParameterTypes { get; init; }
         public required string TestName { get; init; }
         public string TestSessionId { get; set; }
     }
@@ -1906,6 +1902,7 @@ namespace .Helpers
         public <int>? OnCountChanged;
         public Counter() { }
         public int CurrentCount { get; }
+        public int Add(int value) { }
         public int Decrement() { }
         public int Increment() { }
     }

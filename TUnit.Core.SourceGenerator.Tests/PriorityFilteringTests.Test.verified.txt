@@ -32,12 +32,6 @@ internal sealed class PriorityFilteringTests_High_1_TestSource_GUID : global::TU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
@@ -130,12 +124,6 @@ internal sealed class PriorityFilteringTests_High_2_TestSource_GUID : global::TU
             {
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
             {
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
@@ -232,12 +220,6 @@ internal sealed class PriorityFilteringTests_High_3_TestSource_GUID : global::TU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
@@ -330,12 +312,6 @@ internal sealed class PriorityFilteringTests_Medium_1_TestSource_GUID : global::
             {
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
             {
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
@@ -432,12 +408,6 @@ internal sealed class PriorityFilteringTests_Medium_2_TestSource_GUID : global::
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
@@ -530,12 +500,6 @@ internal sealed class PriorityFilteringTests_Low_1_TestSource_GUID : global::TUn
             {
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
             {
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata

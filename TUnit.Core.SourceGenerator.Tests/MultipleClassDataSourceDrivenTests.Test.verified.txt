@@ -35,12 +35,6 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test1_TestSource_GUID :
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
@@ -178,12 +172,6 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test2_TestSource_GUID :
             {
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
             {
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata

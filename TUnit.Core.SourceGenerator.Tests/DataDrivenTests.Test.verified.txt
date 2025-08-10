@@ -38,14 +38,6 @@ internal sealed class DataDrivenTests_DataSource_Method_TestSource_GUID : global
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -172,16 +164,6 @@ internal sealed class DataDrivenTests_DataSource_Method_TestSource_GUID : global
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "string",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -317,14 +299,6 @@ internal sealed class DataDrivenTests_EnumValue_TestSource_GUID : global::TUnit.
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::TUnit.TestProject.TestEnum),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::TUnit.TestProject.TestEnum",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -447,14 +421,6 @@ internal sealed class DataDrivenTests_NullValue_TestSource_GUID : global::TUnit.
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -579,14 +545,6 @@ internal sealed class DataDrivenTests_EmptyString_TestSource_GUID : global::TUni
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -709,14 +667,6 @@ internal sealed class DataDrivenTests_NonEmptyString_TestSource_GUID : global::T
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -845,14 +795,6 @@ internal sealed class DataDrivenTests_BooleanString_TestSource_GUID : global::TU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(bool?),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "bool?",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -975,14 +917,6 @@ internal sealed class DataDrivenTests_Type_TestSource_GUID : global::TUnit.Core.
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::System.Type),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::System.Type",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -1107,14 +1041,6 @@ internal sealed class DataDrivenTests_IntegerArray_TestSource_GUID : global::TUn
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int[]),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int[]",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DataDrivenTests),
@@ -1237,14 +1163,6 @@ internal sealed class DataDrivenTests_IntMaxValue_TestSource_GUID : global::TUni
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

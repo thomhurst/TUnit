@@ -33,20 +33,6 @@ internal sealed class AutoDataTests_Test1_TestSource_GUID : global::TUnit.Core.I
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-                typeof(int),
-                typeof(double),
-                typeof(bool),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
-                "int",
-                "double",
-                "bool",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AutoDataTests),

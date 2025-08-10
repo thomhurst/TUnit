@@ -36,16 +36,6 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(long[]),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "long[]",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._2112.Tests),
@@ -213,16 +203,6 @@ internal sealed class Tests_Test2_TestSource_GUID : global::TUnit.Core.Interface
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(long[]),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "long[]",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

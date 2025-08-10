@@ -38,14 +38,6 @@ internal sealed class ArgumentWithImplicitConverterTests_Explicit_TestSource_GUI
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::TUnit.TestProject.ExplicitInteger),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::TUnit.TestProject.ExplicitInteger",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests),
@@ -172,14 +164,6 @@ internal sealed class ArgumentWithImplicitConverterTests_Implicit_TestSource_GUI
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::TUnit.TestProject.ImplicitInteger),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::TUnit.TestProject.ImplicitInteger",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

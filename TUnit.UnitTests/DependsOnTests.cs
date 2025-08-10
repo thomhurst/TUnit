@@ -2,12 +2,11 @@ namespace TUnit.UnitTests;
 
 public class DependsOnTests
 {
-    private static TestMetadata<T> CreateTestMetadata<T>(string testId, string methodName, int parameterCount = 0, Type[]? parameterTypes = null, string[]? parameterTypeNames = null) where T : class
+    private static TestMetadata<T> CreateTestMetadata<T>(string testId, string methodName, int parameterCount = 0, Type[]? parameterTypes = null) where T : class
     {
         if (parameterTypes == null && parameterCount > 0)
         {
             parameterTypes = parameterCount == 1 ? [typeof(string)] : [typeof(string), typeof(int)];
-            parameterTypeNames = parameterCount == 1 ? ["System.String"] : ["System.String", "System.Int32"];
         }
 
         var parameters = parameterTypes?.Select((type, index) => 
@@ -24,15 +23,6 @@ public class DependsOnTests
             TestClassType = typeof(T),
             TestMethodName = methodName,
             TestName = methodName,
-            ParameterCount = parameterCount,
-            ParameterTypes = parameterTypes
-                ??
-                [
-                ],
-            TestMethodParameterTypes = parameterTypeNames
-                ??
-                [
-                ],
             AttributeFactory = () =>
             [
             ],
