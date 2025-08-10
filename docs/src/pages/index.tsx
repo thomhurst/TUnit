@@ -10,16 +10,16 @@ import styles from './index.module.css';
 
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
-  
+
   const codeExample = `[Test]
 public async Task MyTest()
 {
     // Arrange
     var calculator = new Calculator();
-    
+
     // Act
     var result = calculator.Add(2, 3);
-    
+
     // Assert
     await Assert.That(result).IsEqualTo(5);
 }`;
@@ -35,7 +35,10 @@ public async Task MyTest()
           <div className={styles.heroText}>
             <div className={styles.titleRow}>
               <Heading as="h1" className={styles.heroTitle}>
-                <span className={styles.titleMain}>TUnit</span>
+                <span className={styles.titleMain}>
+                  <span className={styles.titleLarge}>TU</span>
+                  <span className={styles.titleSmall}>NIT</span>
+                </span>
                 <span className={styles.titleAccent}>Testing Reimagined</span>
               </Heading>
               <div className={styles.badge}>Modern .NET Testing</div>

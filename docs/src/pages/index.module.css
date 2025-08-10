@@ -27,7 +27,7 @@
   position: absolute;
   width: 120%;
   height: 120%;
-  background-image: 
+  background-image:
     repeating-linear-gradient(
       0deg,
       transparent,
@@ -107,21 +107,58 @@
 }
 
 .titleMain {
-  display: block;
-  font-size: 4.5rem;
-  font-weight: 900;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: inline-block;
+  position: relative;
+  font-weight: 700;
+  font-family: 'Oswald', 'Bebas Neue', sans-serif;
+  margin-bottom: 0.25rem;
+  line-height: 0.9;
+  background: linear-gradient(90deg,
+    #667eea 0%,
+    #a78bfa 25%,
+    #764ba2 50%,
+    #a78bfa 75%,
+    #667eea 100%);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 0.5rem;
+  text-shadow: 0 0 40px rgba(102, 126, 234, 0.5);
+  animation: shimmer 4s linear infinite;
+}
+
+.titleLarge {
+  font-size: 6rem;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.titleSmall {
+  font-size: 4rem;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin-left: 0;
+  vertical-align: baseline;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
 }
 
 .titleAccent {
   display: block;
-  font-size: 2.5rem;
+  font-size: 1.75rem;
   font-weight: 300;
+  font-family: 'Inter', -apple-system, sans-serif;
   color: #cbd5e1;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.9;
 }
 
 .heroSubtitle {
@@ -688,11 +725,11 @@
     padding: 2rem 0;
     min-height: auto;
   }
-  
+
   .quickStart {
     padding: 2rem 0;
   }
-  
+
   .whySection {
     padding: 2rem 0;
   }
@@ -703,19 +740,23 @@
     padding: 2rem 0;
   }
 
-  .titleMain {
+  .titleLarge {
+    font-size: 4.5rem;
+  }
+
+  .titleSmall {
     font-size: 3rem;
   }
 
   .titleAccent {
-    font-size: 1.75rem;
+    font-size: 1.25rem;
   }
-  
+
   .titleRow {
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .badge {
     margin-top: 0;
   }
@@ -738,12 +779,17 @@
 }
 
 @media screen and (max-width: 640px) {
-  .titleMain {
+  .titleLarge {
+    font-size: 3.5rem;
+  }
+
+  .titleSmall {
     font-size: 2.5rem;
   }
 
   .titleAccent {
-    font-size: 1.5rem;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
   }
 
   .heroSubtitle {

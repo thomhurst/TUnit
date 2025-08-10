@@ -41,6 +41,9 @@
   --ifm-footer-background-color: #0a0e27;
 }
 
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@600;700&family=Russo+One&display=swap');
+
 /* Global Enhancements */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
