@@ -58,9 +58,17 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
             };
         }
 
+        // Add hangdump flags with 20 minute timeout
+        var arguments = testOptions.Arguments?.ToList() ?? new List<string>();
+        if (!arguments.Contains("--hangdump"))
+        {
+            arguments.AddRange(["--hangdump", "--hangdump-filename", $"hangdump.{GetType().Name}.txt", "--hangdump-timeout", "20m"]);
+        }
+
         // Suppress output for successful operations, but show errors and basic info
         testOptions = testOptions with
         {
+            Arguments = arguments,
             CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
         };
 

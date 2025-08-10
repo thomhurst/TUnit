@@ -24,7 +24,7 @@ public class RunAspNetTestsModule : Module<CommandResult>
             Configuration = Configuration.Release,
             Framework = "net9.0",
             WorkingDirectory = project.Folder!,
-            Arguments = ["--ignore-exit-code", "8"],
+            Arguments = ["--ignore-exit-code", "8", "--hangdump", "--hangdump-filename", "hangdump.aspnet-tests.txt", "--hangdump-timeout", "20m"],
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",
