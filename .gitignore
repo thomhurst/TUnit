@@ -421,3 +421,6 @@ TESTPROJECT_AOT
 TESTPROJECT_SINGLEFILE
 
 nul
+
+# Claude Code settings
+.claude/settings.local.json

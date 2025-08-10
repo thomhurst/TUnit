@@ -55,14 +55,6 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method_TestSour
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
@@ -205,14 +197,6 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method2_TestSou
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
@@ -354,14 +338,6 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_WithBaseReturn_
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests.BaseValue),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::TUnit.TestProject.EnumerableDataSourceDrivenTests.BaseValue",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

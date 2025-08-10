@@ -135,9 +135,6 @@ internal sealed class TestRegistry : ITestRegistry
             PropertyDataSources = [],
             InstanceFactory = CreateRuntimeInstanceFactory(result.TestClassType, result.TestClassArguments)!,
             TestInvoker = CreateRuntimeTestInvoker(result),
-            ParameterCount = result.TestMethodArguments?.Length ?? 0,
-            ParameterTypes = GetParameterTypesOptimized(methodInfo),
-            TestMethodParameterTypes = GetParameterTypeNamesOptimized(methodInfo),
             FilePath = null,
             LineNumber = null,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(result.TestClassType, methodInfo),
@@ -282,33 +279,7 @@ internal sealed class TestRegistry : ITestRegistry
         return dependencies.ToArray();
     }
 
-    /// <summary>
-    /// Optimized method to get parameter types without LINQ allocations
-    /// </summary>
-    private static Type[] GetParameterTypesOptimized(MethodInfo method)
-    {
-        var parameters = method.GetParameters();
-        var types = new Type[parameters.Length];
-        for (int i = 0; i < parameters.Length; i++)
-        {
-            types[i] = parameters[i].ParameterType;
-        }
-        return types;
-    }
 
-    /// <summary>
-    /// Optimized method to get parameter type names without LINQ allocations
-    /// </summary>
-    private static string[] GetParameterTypeNamesOptimized(MethodInfo method)
-    {
-        var parameters = method.GetParameters();
-        var typeNames = new string[parameters.Length];
-        for (int i = 0; i < parameters.Length; i++)
-        {
-            typeNames[i] = parameters[i].ParameterType.FullName ?? parameters[i].ParameterType.Name;
-        }
-        return typeNames;
-    }
 
     /// <summary>
     /// Optimized method to convert attributes to array without LINQ allocations

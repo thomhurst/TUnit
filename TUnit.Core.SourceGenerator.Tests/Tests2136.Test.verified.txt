@@ -27,16 +27,6 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::System.Object),
-                typeof(global::System.Object),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::System.Object",
-                "global::System.Object",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
@@ -155,11 +145,6 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
                     {
                     },
-                    ParameterTypes = new global::System.Type[]
-                    {
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                    },
                     FilePath = @"",
                     LineNumber = 8,
                     TestSessionId = testSessionId,
@@ -245,11 +230,6 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                     PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
                     {
-                    },
-                    ParameterTypes = new global::System.Type[]
-                    {
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
                     },
                     FilePath = @"",
                     LineNumber = 8,
@@ -337,11 +317,6 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
                     {
                     },
-                    ParameterTypes = new global::System.Type[]
-                    {
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                    },
                     FilePath = @"",
                     LineNumber = 8,
                     TestSessionId = testSessionId,
@@ -428,11 +403,6 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
                     {
                     },
-                    ParameterTypes = new global::System.Type[]
-                    {
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                    },
                     FilePath = @"",
                     LineNumber = 8,
                     TestSessionId = testSessionId,
@@ -518,11 +488,6 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                     PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
                     {
-                    },
-                    ParameterTypes = new global::System.Type[]
-                    {
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
                     },
                     FilePath = @"",
                     LineNumber = 8,

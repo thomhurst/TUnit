@@ -151,16 +151,6 @@ internal sealed class MethodDataSourceDrivenWithCancellationTokenTests_MyTest_Te
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(global::System.Threading.CancellationToken),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "global::System.Threading.CancellationToken",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),

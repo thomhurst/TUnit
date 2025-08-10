@@ -67,14 +67,6 @@ internal sealed class BaseClass_Test_TestSource_GUID : global::TUnit.Core.Interf
                     }
                 },
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass),
@@ -246,14 +238,6 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
                     }
                 },
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass),
@@ -412,14 +396,6 @@ internal sealed class Tests2_Test_TestSource_GUID : global::TUnit.Core.Interface
                     }
                 },
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass),
@@ -577,14 +553,6 @@ internal sealed class Tests3_Test_TestSource_GUID : global::TUnit.Core.Interface
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
                     }
                 },
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

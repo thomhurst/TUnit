@@ -55,28 +55,6 @@ internal sealed class Tests_Eight_Args_TestSource_GUID : global::TUnit.Core.Inte
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(bool),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "bool",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1538.Tests),
@@ -269,44 +247,6 @@ internal sealed class Tests_SixteenArgs_TestSource_GUID : global::TUnit.Core.Int
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(bool),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "bool",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
-                "string",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

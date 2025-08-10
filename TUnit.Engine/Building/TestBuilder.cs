@@ -272,7 +272,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 }
 
                                 var basicSkipReason = GetBasicSkipReason(metadata);
-                                
+
                                 Func<Task<object>> instanceFactory;
                                 if (basicSkipReason != null && basicSkipReason.Length > 0)
                                 {
@@ -337,9 +337,11 @@ internal sealed class TestBuilder : ITestBuilder
         var typeMapping = new Dictionary<Type, Type>();
 
         // Try to match method parameter types with actual data types
-        for (var i = 0; i < Math.Min(metadata.ParameterTypes.Length, methodData.Length); i++)
+        var methodParameters = metadata.MethodMetadata.Parameters;
+        for (var i = 0; i < Math.Min(methodParameters.Length, methodData.Length); i++)
         {
-            var paramType = metadata.ParameterTypes[i];
+            var methodParam = methodParameters[i];
+            var paramType = methodParam.Type;
             var argValue = methodData[i];
 
             if (argValue != null)
@@ -352,7 +354,6 @@ internal sealed class TestBuilder : ITestBuilder
                 {
                     // Check if this corresponds to a class generic parameter
                     // by looking at the method metadata
-                    var methodParam = metadata.MethodMetadata.Parameters[i];
 
                     if (methodParam.TypeReference is { IsGenericParameter: true, IsMethodGenericParameter: false })
                     {
@@ -429,30 +430,27 @@ internal sealed class TestBuilder : ITestBuilder
             // Look at the test method parameters to find attributes that can help with generic type inference
             foreach (var param in metadata.MethodMetadata.Parameters)
             {
-                if (param.ReflectionInfo != null)
+                // Get the actual parameter type from reflection
+                var actualParamType = param.Type;
+
+                // Check if the actual parameter type is a generic parameter of the class
+                if (actualParamType.IsGenericParameter &&
+                    genericParameters.Contains(actualParamType))
                 {
-                    // Get the actual parameter type from reflection
-                    var actualParamType = param.ReflectionInfo.ParameterType;
+                    // Check for Matrix attributes using reflection
+                    var attrs = param.ReflectionInfo.GetCustomAttributes(false);
 
-                    // Check if the actual parameter type is a generic parameter of the class
-                    if (actualParamType.IsGenericParameter &&
-                        genericParameters.Contains(actualParamType))
+                    foreach (var attr in attrs)
                     {
-                        // Check for Matrix attributes using reflection
-                        var attrs = param.ReflectionInfo.GetCustomAttributes(false);
+                        var attrType = attr.GetType();
 
-                        foreach (var attr in attrs)
+                        // Check if it's a generic Matrix attribute
+                        if (attrType.IsGenericType &&
+                            attrType.GetGenericTypeDefinition().Name.StartsWith("Matrix"))
                         {
-                            var attrType = attr.GetType();
-
-                            // Check if it's a generic Matrix attribute
-                            if (attrType.IsGenericType &&
-                                attrType.GetGenericTypeDefinition().Name.StartsWith("Matrix"))
-                            {
-                                var matrixTypeArg = attrType.GetGenericArguments()[0];
-                                typeMapping[actualParamType] = matrixTypeArg;
-                                break;
-                            }
+                            var matrixTypeArg = attrType.GetGenericArguments()[0];
+                            typeMapping[actualParamType] = matrixTypeArg;
+                            break;
                         }
                     }
                 }
@@ -500,9 +498,9 @@ internal sealed class TestBuilder : ITestBuilder
 
                             // Now try to match this element type with method parameters
                             // that use the class generic parameter
-                            for (var i = 0; i < metadata.ParameterTypes.Length; i++)
+                            for (var i = 0; i < metadata.MethodMetadata.Parameters.Length; i++)
                             {
-                                var paramType = metadata.ParameterTypes[i];
+                                var paramType = metadata.MethodMetadata.Parameters[i].Type;
                                 if (paramType == typeof(object)) // Placeholder for generic parameter
                                 {
                                     var methodParam = metadata.MethodMetadata.Parameters[i];
@@ -622,7 +620,6 @@ internal sealed class TestBuilder : ITestBuilder
             TestClassArguments = testData.ClassData,
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
-            TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = metadata.MethodMetadata.ReturnType ?? typeof(void),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = attributes,
@@ -691,7 +688,6 @@ internal sealed class TestBuilder : ITestBuilder
             TestClassArguments = [],
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber ?? 0,
-            TestMethodParameterTypes = metadata.ParameterTypes,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = metadata.AttributeFactory.Invoke(),
@@ -1016,7 +1012,7 @@ internal sealed class TestBuilder : ITestBuilder
                 classDataLoopIndex++;
 
                 var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
-                
+
                 // Handle instance creation for method data sources
                 var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
                 object? instanceForMethodDataSources = null;
@@ -1025,7 +1021,7 @@ internal sealed class TestBuilder : ITestBuilder
                 {
                     instanceForMethodDataSources = await CreateInstanceForMethodDataSources(
                         metadata, classDataAttributeIndex, classDataLoopIndex, classData);
-                    
+
                     if (instanceForMethodDataSources == null)
                     {
                         continue; // Skip if instance creation failed
@@ -1055,14 +1051,14 @@ internal sealed class TestBuilder : ITestBuilder
                         for (var i = 0; i < repeatCount + 1; i++)
                         {
                             cancellationToken.ThrowIfCancellationRequested();
-                            
+
                             // Build and yield single test
                             var test = await BuildSingleTestAsync(
-                                metadata, classDataFactory, methodDataFactory, 
+                                metadata, classDataFactory, methodDataFactory,
                                 classDataAttributeIndex, classDataLoopIndex,
                                 methodDataAttributeIndex, methodDataLoopIndex,
                                 i, contextAccessor);
-                            
+
                             if (test != null)
                             {
                                 yield return test;
@@ -1190,7 +1186,7 @@ internal sealed class TestBuilder : ITestBuilder
             // Create instance factory
             var basicSkipReason = GetBasicSkipReason(metadata);
             Func<Task<object>> instanceFactory;
-            
+
             if (basicSkipReason != null && basicSkipReason.Length > 0)
             {
                 instanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance);

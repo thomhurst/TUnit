@@ -35,14 +35,6 @@ internal sealed class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Tes
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(SomeAsyncDisposableClass),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "SomeAsyncDisposableClass",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
@@ -166,14 +158,6 @@ internal sealed class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Gen
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(SomeAsyncDisposableClass),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "SomeAsyncDisposableClass",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

@@ -63,7 +63,6 @@ internal sealed class TestScheduler : ITestScheduler
         var runningTasks = new ConcurrentDictionary<AbstractExecutableTest, Task>();
         var completedTests = new ConcurrentDictionary<AbstractExecutableTest, bool>();
 
-        // Determine parallelism level
         int? maxParallelism = null;
         if (_commandLineOptions.TryGetOptionArgumentList(
                 MaximumParallelTestsCommandProvider.MaximumParallelTests,
@@ -75,7 +74,6 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
 
-        // Process all test groups
         var allTestTasks = new List<Task>();
 
         // 1. NotInParallel tests (global) - must run one at a time
@@ -98,6 +96,7 @@ internal sealed class TestScheduler : ITestScheduler
                 executor,
                 runningTasks,
                 completedTests,
+                maxParallelism,
                 cancellationToken);
             allTestTasks.Add(keyedTask);
         }
@@ -114,7 +113,6 @@ internal sealed class TestScheduler : ITestScheduler
             allTestTasks.Add(groupTask);
         }
 
-        // 4. Fully parallel tests
         var parallelTask = ExecuteParallelTestsAsync(groupedTests.Parallel,
             executor,
             runningTasks,
@@ -123,7 +121,6 @@ internal sealed class TestScheduler : ITestScheduler
             cancellationToken);
         allTestTasks.Add(parallelTask);
 
-        // Wait for all tests to complete
         await Task.WhenAll(allTestTasks);
     }
 
@@ -146,7 +143,6 @@ internal sealed class TestScheduler : ITestScheduler
             // Tests are already in priority order, just execute them
             var classTests = classGroup.ToList();
 
-            // Execute all tests from this class sequentially
             foreach (var test in classTests)
             {
                 await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
@@ -159,6 +155,7 @@ internal sealed class TestScheduler : ITestScheduler
         ITestExecutor executor,
         ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
+        int? maxParallelism,
         CancellationToken cancellationToken)
     {
         // Tests are already sorted by priority from TestGroupingService
@@ -180,6 +177,7 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
     }
+
 
     private async Task ExecuteParallelGroupAsync((int Order, AbstractExecutableTest[] Tests)[] orderedTests,
         ITestExecutor executor,
@@ -231,7 +229,6 @@ internal sealed class TestScheduler : ITestScheduler
         ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
         CancellationToken cancellationToken)
     {
-        // If test is already failed (e.g., due to circular dependencies), report the pre-failure
         if (test.State == TestState.Failed)
         {
             await _messageBus.Failed(test.Context,
@@ -249,7 +246,6 @@ internal sealed class TestScheduler : ITestScheduler
 
         await Task.WhenAll(test.Dependencies.Select(x => x.Test.CompletionTask));
 
-        // Execute the test directly without Task.Run wrapper
         var executionTask = ExecuteTestDirectlyAsync(test, executor, completedTests, cancellationToken);
         runningTasks[test] = executionTask;
         await executionTask;

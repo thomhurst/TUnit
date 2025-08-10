@@ -27,24 +27,6 @@ internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSourc
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::System.Object),
-                typeof(global::System.Object),
-                typeof(global::System.Object),
-                typeof(global::System.Object),
-                typeof(global::System.Object),
-                typeof(global::System.Object),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::System.Object",
-                "global::System.Object",
-                "global::System.Object",
-                "global::System.Object",
-                "global::System.Object",
-                "global::System.Object",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.GenericMethodTests),
@@ -231,15 +213,6 @@ internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSourc
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
                     {
                     },
-                    ParameterTypes = new global::System.Type[]
-                    {
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                    },
                     FilePath = @"",
                     LineNumber = 8,
                     TestSessionId = testSessionId,
@@ -397,15 +370,6 @@ internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSourc
                     PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
                     {
-                    },
-                    ParameterTypes = new global::System.Type[]
-                    {
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
                     },
                     FilePath = @"",
                     LineNumber = 8,

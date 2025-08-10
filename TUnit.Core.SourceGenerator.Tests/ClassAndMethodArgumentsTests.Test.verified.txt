@@ -35,12 +35,6 @@ internal sealed class ClassAndMethodArgumentsTests_Simple_TestSource_GUID : glob
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
@@ -153,14 +147,6 @@ internal sealed class ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_GU
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -299,14 +285,6 @@ internal sealed class ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_G
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

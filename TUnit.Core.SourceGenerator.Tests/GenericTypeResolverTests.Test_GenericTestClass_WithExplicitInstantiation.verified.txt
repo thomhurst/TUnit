@@ -28,12 +28,6 @@ internal sealed class GenericTestClass_TestMethod_TestSource_GUID : global::TUni
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.GenericTestClass<>),
@@ -114,9 +108,6 @@ internal sealed class GenericTestClass_TestMethod_TestSource_GUID : global::TUni
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
                     {
                     },
-                    ParameterTypes = new global::System.Type[]
-                    {
-                    },
                     FilePath = @"",
                     LineNumber = 9,
                     TestSessionId = testSessionId,
@@ -183,9 +174,6 @@ internal sealed class GenericTestClass_TestMethod_TestSource_GUID : global::TUni
                     },
                     PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
-                    ParameterTypes = new global::System.Type[]
                     {
                     },
                     FilePath = @"",

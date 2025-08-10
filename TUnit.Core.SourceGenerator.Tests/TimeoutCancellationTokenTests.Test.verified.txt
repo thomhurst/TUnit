@@ -56,14 +56,6 @@ internal sealed class TimeoutCancellationTokenTests_DefaultTest_TestSource_GUID 
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::System.Threading.CancellationToken),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::System.Threading.CancellationToken",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -205,14 +197,6 @@ internal sealed class TimeoutCancellationTokenTests_BasicTest_TestSource_GUID : 
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::System.Threading.CancellationToken),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::System.Threading.CancellationToken",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -352,14 +336,6 @@ internal sealed class TimeoutCancellationTokenTests_InheritedTimeoutAttribute_Te
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::System.Threading.CancellationToken),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::System.Threading.CancellationToken",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -502,16 +478,6 @@ internal sealed class TimeoutCancellationTokenTests_DataTest_TestSource_GUID : g
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(global::System.Threading.CancellationToken),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "global::System.Threading.CancellationToken",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -699,16 +665,6 @@ internal sealed class TimeoutCancellationTokenTests_DataSourceTest_TestSource_GU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(global::System.Threading.CancellationToken),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "global::System.Threading.CancellationToken",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests),
@@ -874,16 +830,6 @@ internal sealed class TimeoutCancellationTokenTests_MatrixTest_TestSource_GUID :
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(global::System.Threading.CancellationToken),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "global::System.Threading.CancellationToken",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

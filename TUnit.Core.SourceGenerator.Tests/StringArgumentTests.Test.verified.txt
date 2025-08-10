@@ -52,14 +52,6 @@ internal sealed class StringArgumentTests_Normal_TestSource_GUID : global::TUnit
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.StringArgumentTests),
@@ -196,14 +188,6 @@ internal sealed class StringArgumentTests_Nullable_TestSource_GUID : global::TUn
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

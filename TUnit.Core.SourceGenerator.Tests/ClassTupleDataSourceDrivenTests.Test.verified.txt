@@ -234,18 +234,6 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                     }
                 },
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(string),
-                typeof(bool),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "string",
-                "bool",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),

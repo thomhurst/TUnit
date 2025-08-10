@@ -33,12 +33,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_Test_TestSource_GU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -137,14 +131,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -280,14 +266,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -411,12 +389,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTest_TestSourc
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.BaseTests),
@@ -512,12 +484,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_Test_TestSource_GU
             {
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
             {
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
@@ -618,14 +584,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
@@ -761,14 +719,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {

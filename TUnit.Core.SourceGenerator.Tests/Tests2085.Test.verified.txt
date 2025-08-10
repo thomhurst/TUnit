@@ -34,14 +34,6 @@ internal sealed class Tests_Double_SpecialConsts_TestSource_GUID : global::TUnit
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(double),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "double",
-            },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._2085.Tests),
@@ -162,14 +154,6 @@ internal sealed class Tests_Float_SpecialConsts_TestSource_GUID : global::TUnit.
             },
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
-            },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(float),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "float",
             },
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
