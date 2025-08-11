@@ -5,20 +5,11 @@ namespace TUnit.Engine.Services;
 
 internal sealed class TestDependencyResolver
 {
-    // Primary storage - all tests registered in the system
     private readonly List<AbstractExecutableTest> _allTests = new();
-    
-    // Indices for efficient lookup by Type and MethodName (still needed for initial matching)
     private readonly Dictionary<Type, List<AbstractExecutableTest>> _testsByType = new();
     private readonly Dictionary<string, List<AbstractExecutableTest>> _testsByMethodName = new();
-    
-    // Track tests with unresolved dependencies (using object references, not strings)
     private readonly List<AbstractExecutableTest> _testsWithPendingDependencies = new();
-    
-    // Prevent circular resolution attempts
     private readonly HashSet<AbstractExecutableTest> _testsBeingResolved = new();
-    
-    // Lock for thread-safe registration and resolution
     private readonly object _resolutionLock = new();
 
     public void RegisterTest(AbstractExecutableTest test)
@@ -27,7 +18,6 @@ internal sealed class TestDependencyResolver
         {
             _allTests.Add(test);
             
-            // Index by type for class-level dependency lookups
             var testType = test.Metadata.TestClassType;
             if (!_testsByType.TryGetValue(testType, out var testsForType))
             {
@@ -36,7 +26,6 @@ internal sealed class TestDependencyResolver
             }
             testsForType.Add(test);
             
-            // Index by method name for method-level dependency lookups
             var methodName = test.Metadata.TestMethodName;
             if (!_testsByMethodName.TryGetValue(methodName, out var testsForMethod))
             {
@@ -45,7 +34,6 @@ internal sealed class TestDependencyResolver
             }
             testsForMethod.Add(test);
             
-            // Try to resolve any pending dependencies that might now be satisfiable
             ResolvePendingDependencies();
         }
     }
@@ -54,7 +42,6 @@ internal sealed class TestDependencyResolver
     {
         lock (_resolutionLock)
         {
-            // Already resolved?
             if (test.Dependencies.Length > 0)
             {
                 return true;
@@ -66,7 +53,6 @@ internal sealed class TestDependencyResolver
 
     private bool ResolveDependenciesForTest(AbstractExecutableTest test)
     {
-        // Prevent circular resolution
         if (_testsBeingResolved.Contains(test))
         {
             return false;
@@ -85,7 +71,6 @@ internal sealed class TestDependencyResolver
                 
                 if (matchingTests.Count == 0)
                 {
-                    // No matches found yet - mark this test as pending
                     if (!_testsWithPendingDependencies.Contains(test))
                     {
                         _testsWithPendingDependencies.Add(test);
@@ -94,7 +79,6 @@ internal sealed class TestDependencyResolver
                 }
                 else
                 {
-                    // Add all matching tests as resolved dependencies
                     foreach (var matchingTest in matchingTests)
                     {
                         resolvedDependencies.Add(new ResolvedDependency
@@ -108,17 +92,14 @@ internal sealed class TestDependencyResolver
             
             if (allResolved)
             {
-                // Remove duplicates and self-dependencies
                 var uniqueDependencies = new Dictionary<AbstractExecutableTest, ResolvedDependency>();
                 foreach (var dep in resolvedDependencies)
                 {
-                    // Skip self-dependencies
                     if (dep.Test == test)
                     {
                         continue;
                     }
                     
-                    // Keep first occurrence of each test
                     if (!uniqueDependencies.ContainsKey(dep.Test))
                     {
                         uniqueDependencies[dep.Test] = dep;
@@ -127,7 +108,6 @@ internal sealed class TestDependencyResolver
                 
                 test.Dependencies = uniqueDependencies.Values.ToArray();
                 
-                // Remove from pending list if it was there
                 _testsWithPendingDependencies.Remove(test);
                 
                 return true;
@@ -145,40 +125,35 @@ internal sealed class TestDependencyResolver
     {
         var matches = new List<AbstractExecutableTest>();
         
-        // Determine the search scope based on dependency type
         IEnumerable<AbstractExecutableTest> searchScope;
         
         if (dependency.ClassType != null && string.IsNullOrEmpty(dependency.MethodName))
         {
-            // Class-level dependency - search only in the specified type
             if (_testsByType.TryGetValue(dependency.ClassType, out var testsInType))
             {
                 searchScope = testsInType;
             }
             else
             {
-                return matches; // No tests in that type
+                return matches;
             }
         }
         else if (!string.IsNullOrEmpty(dependency.MethodName))
         {
-            // Method-level dependency - search in tests with that method name
             if (dependency.MethodName != null && _testsByMethodName.TryGetValue(dependency.MethodName, out var testsWithMethod))
             {
                 searchScope = testsWithMethod;
             }
             else
             {
-                return matches; // No tests with that method name
+                return matches;
             }
         }
         else
         {
-            // General dependency - search all tests
             searchScope = _allTests;
         }
         
-        // Filter using the Matches logic
         foreach (var test in searchScope)
         {
             if (dependency.Matches(test.Metadata, dependentTest.Metadata))
@@ -192,20 +167,16 @@ internal sealed class TestDependencyResolver
     
     private void ResolvePendingDependencies()
     {
-        // Try to resolve any tests that previously had unresolved dependencies
-        // Use a copy to avoid modification during iteration
         var pendingTests = _testsWithPendingDependencies.ToList();
         
         foreach (var test in pendingTests)
         {
-            // Skip if already resolved (defensive check)
             if (test.Dependencies.Length > 0)
             {
                 _testsWithPendingDependencies.Remove(test);
                 continue;
             }
             
-            // Try to resolve again
             ResolveDependenciesForTest(test);
         }
     }
@@ -214,7 +185,6 @@ internal sealed class TestDependencyResolver
     {
         lock (_resolutionLock)
         {
-            // First pass - try to resolve all tests
             foreach (var test in _allTests)
             {
                 if (test.Dependencies.Length == 0 && test.Metadata.Dependencies.Length > 0)
@@ -223,19 +193,16 @@ internal sealed class TestDependencyResolver
                 }
             }
             
-            // Second pass - retry any that failed (in case of forward dependencies)
             var maxRetries = 3;
             for (int retry = 0; retry < maxRetries && _testsWithPendingDependencies.Count > 0; retry++)
             {
                 ResolvePendingDependencies();
             }
             
-            // Log any remaining unresolved dependencies
             if (_testsWithPendingDependencies.Count > 0)
             {
                 foreach (var test in _testsWithPendingDependencies)
                 {
-                    // Mark test as having failed dependency resolution
                     test.State = TestState.Failed;
                     test.Result = new TestResult
                     {
@@ -254,7 +221,6 @@ internal sealed class TestDependencyResolver
     
     public void CheckForCircularDependencies()
     {
-        // Check for circular dependencies in all tests
         foreach (var test in _allTests)
         {
             if (test.Dependencies.Length > 0)
@@ -296,7 +262,7 @@ internal sealed class TestDependencyResolver
             }
             else if (recursionStack.Contains(dependency.Test))
             {
-                return true; // Found a cycle
+                return true;
             }
         }
         
@@ -313,10 +279,9 @@ internal sealed class TestDependencyResolver
         {
             if (!visited.Add(current))
             {
-                return; // Already visited
+                return;
             }
             
-            // Find the actual test object
             var test = _allTests.FirstOrDefault(t => 
                 t.Metadata.TestClassType == current.ClassType &&
                 t.Metadata.TestMethodName == current.TestName);

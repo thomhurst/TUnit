@@ -128,7 +128,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
             await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
 
-            // Populate TestContext.Dependencies from resolved dependencies
             PopulateTestContextDependencies(test);
 
             CheckDependenciesAndThrowIfShouldSkip(test);
@@ -256,7 +255,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
     private async Task ExecuteTestWithHooksAsync(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
     {
-        // Context restoration is now handled inside ExecuteBeforeTestHooksAsync
         var testClassType = test.Context.TestDetails.ClassType;
         var beforeTestHooks = await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType);
         var afterTestHooks = await _hookCollectionService.CollectAfterTestHooksAsync(testClassType);
@@ -266,7 +264,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             await ExecuteBeforeTestHooksAsync(beforeTestHooks, test.Context, cancellationToken);
 
-            // RestoreExecutionContext only if needed for the test itself
             test.Context.RestoreExecutionContext();
 
             await InvokeTestWithTimeout(test, instance, cancellationToken);
@@ -324,8 +321,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 await hook(context, cancellationToken);
 
-                // RestoreExecutionContext after each hook to ensure AsyncLocal values flow correctly
-                // when AddAsyncLocalValues() is called in hooks
                 context.RestoreExecutionContext();
             }
             catch (Exception ex)
@@ -340,7 +335,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         var exceptions = new List<Exception>();
 
-        // Restore contexts once at the beginning
         RestoreHookContexts(context);
 
         foreach (var hook in hooks)
@@ -458,7 +452,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
             }
             catch (OperationCanceledException) when (cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
             {
-                // This was our timeout, not an external cancellation
                 throw new System.TimeoutException($"Test '{test.Context.GetDisplayName()}' exceeded timeout of {timeoutMs}ms");
             }
         };
@@ -499,28 +492,19 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
     private void PopulateTestContextDependencies(AbstractExecutableTest test)
     {
-        // Clear any existing dependencies first
         test.Context.Dependencies.Clear();
-        
-        // Use a HashSet to avoid duplicates when collecting transitive dependencies
         var allDependencies = new HashSet<TestDetails>();
-        
-        // Recursively collect all transitive dependencies
         CollectTransitiveDependencies(test, allDependencies, new HashSet<AbstractExecutableTest>());
-        
-        // Add all collected dependencies to the TestContext
         test.Context.Dependencies.AddRange(allDependencies);
     }
     
     private void CollectTransitiveDependencies(AbstractExecutableTest test, HashSet<TestDetails> collected, HashSet<AbstractExecutableTest> visited)
     {
-        // Avoid infinite recursion in case of circular dependencies
         if (!visited.Add(test))
         {
             return;
         }
         
-        // Add all direct dependencies and their transitive dependencies
         foreach (var resolvedDependency in test.Dependencies)
         {
             var dependencyTest = resolvedDependency.Test;
@@ -528,7 +512,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 collected.Add(dependencyTest.Context.TestDetails);
                 
-                // Recursively collect transitive dependencies
                 CollectTransitiveDependencies(dependencyTest, collected, visited);
             }
         }
@@ -540,10 +523,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
         foreach (var dependency in test.Dependencies)
         {
-            // Check if the dependency has failed or timed out
             if (dependency.Test.State == TestState.Failed || dependency.Test.State == TestState.Timeout)
             {
-                // If this dependency doesn't allow proceeding on failure, add it to the list
                 if (!dependency.ProceedOnFailure)
                 {
                     var dependencyName = GetDependencyDisplayName(dependency.Test);
@@ -552,7 +533,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
             }
         }
 
-        // Only throw if there are dependencies that don't allow proceeding
         if (failedDependenciesNotAllowingProceed.Count > 0)
         {
             var dependencyNames = string.Join(", ", failedDependenciesNotAllowingProceed);
