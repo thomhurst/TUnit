@@ -159,7 +159,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             Logger,
             testGroupingService,
             MessageBus,
-            CommandLineOptions));
+            CommandLineOptions,
+            ParallelLimitLockProvider));
 
         TestExecutor = Register(new TestExecutor(
             singleTestExecutor,
