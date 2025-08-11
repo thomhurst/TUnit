@@ -24,7 +24,7 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         }
     }
 
-    protected override sealed async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+    protected sealed override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var results = new List<CommandResult>();
 
