@@ -74,9 +74,11 @@ function Feature({title, icon, description, codeExample}: FeatureItem) {
         <p className={styles.featureDescription}>{description}</p>
         {codeExample && (
           <div className={styles.featureCode}>
-            <CodeBlock language="csharp">
-              {codeExample}
-            </CodeBlock>
+            <div className={styles.codeScrollWrapper}>
+              <CodeBlock language="csharp" className={styles.codeBlock}>
+                {codeExample}
+              </CodeBlock>
+            </div>
           </div>
         )}
       </div>

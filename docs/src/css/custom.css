@@ -192,6 +192,21 @@ code {
   text-align: left !important;
 }
 
+/* Fix for homepage feature code blocks */
+div[class*="codeScrollWrapper"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Allow inner content to be wider than container for scrolling */
+div[class*="codeScrollWrapper"] > div {
+  width: max-content !important;
+  min-width: 100% !important;
+}
+
 /* Ensure code tokens are properly aligned */
 .token {
   text-align: left !important;
@@ -855,6 +870,23 @@ code {
 }
 
 @media screen and (max-width: 640px) {
+  /* Force feature code blocks to behave on mobile */
+  div[class*="featureCode"] {
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+  
+  div[class*="featureCode"] pre {
+    width: 100% !important;
+    overflow-x: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  div[class*="featureCode"] code {
+    width: max-content !important;
+    min-width: 0 !important;
+  }
+  
   /* Ensure scrollbar remains hidden on smaller mobile devices */
   * {
     scrollbar-width: none; /* Firefox */
