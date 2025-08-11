@@ -37,6 +37,8 @@ internal sealed class STAThreadTests_With_STA_TestSource_GUID : global::TUnit.Co
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 14,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.STAThreadTests),
@@ -135,6 +137,8 @@ internal sealed class STAThreadTests_Without_STA_TestSource_GUID : global::TUnit
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 20,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.STAThreadTests),
@@ -234,6 +238,8 @@ internal sealed class STAThreadTests_STA_WithSimpleAwait_TestSource_GUID : globa
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 26,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.STAThreadTests),
@@ -333,6 +339,8 @@ internal sealed class STAThreadTests_STA_WithTaskYield_TestSource_GUID : global:
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 36,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.STAThreadTests),
@@ -432,6 +440,8 @@ internal sealed class STAThreadTests_STA_WithConfigureAwaitTrue_TestSource_GUID 
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 45,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.STAThreadTests),
@@ -531,6 +541,8 @@ internal sealed class STAThreadTests_STA_WithNestedAsyncCalls_TestSource_GUID : 
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 54,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.STAThreadTests),
@@ -630,6 +642,8 @@ internal sealed class STAThreadTests_STA_WithTaskFromResult_TestSource_GUID : gl
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 64,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.STAThreadTests),
@@ -729,6 +743,8 @@ internal sealed class STAThreadTests_STA_WithCompletedTask_TestSource_GUID : glo
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 74,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.STAThreadTests),
@@ -828,6 +844,8 @@ internal sealed class STAThreadTests_STA_WithTaskRun_TestSource_GUID : global::T
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 83,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.STAThreadTests),
@@ -927,6 +945,8 @@ internal sealed class STAThreadTests_STA_WithMultipleAwaits_TestSource_GUID : gl
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 98,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.STAThreadTests),
@@ -1026,6 +1046,8 @@ internal sealed class STAThreadTests_STA_WithAsyncEnumerable_TestSource_GUID : g
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 116,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.STAThreadTests),
@@ -1125,6 +1147,8 @@ internal sealed class STAThreadTests_STA_WithTaskWhenAll_TestSource_GUID : globa
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 130,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.STAThreadTests),
@@ -1224,6 +1248,8 @@ internal sealed class STAThreadTests_STA_WithExceptionHandling_TestSource_GUID :
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 147,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.STAThreadTests),
