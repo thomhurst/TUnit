@@ -28,6 +28,7 @@ internal sealed class ConstrainedGenericTestClass_TestMethod_TestSource_GUID : g
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ConstrainedGenericTestClass<>),
@@ -110,6 +111,7 @@ internal sealed class ConstrainedGenericTestClass_TestMethod_TestSource_GUID : g
                     },
                     FilePath = @"",
                     LineNumber = 10,
+                    InheritanceDepth = 0,
                     TestSessionId = testSessionId,
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
                     {
@@ -178,6 +180,7 @@ internal sealed class ConstrainedGenericTestClass_TestMethod_TestSource_GUID : g
                     },
                     FilePath = @"",
                     LineNumber = 10,
+                    InheritanceDepth = 0,
                     TestSessionId = testSessionId,
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
                     {

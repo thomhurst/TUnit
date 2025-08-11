@@ -35,6 +35,7 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test1_TestSource_GUID :
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
@@ -174,6 +175,7 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test2_TestSource_GUID :
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),

@@ -67,6 +67,7 @@ internal sealed class BaseClass_Test_TestSource_GUID : global::TUnit.Core.Interf
                     }
                 },
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass),
@@ -238,6 +239,7 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
                     }
                 },
             },
+            InheritanceDepth = 1,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass),
@@ -396,6 +398,7 @@ internal sealed class Tests2_Test_TestSource_GUID : global::TUnit.Core.Interface
                     }
                 },
             },
+            InheritanceDepth = 1,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass),
@@ -554,6 +557,7 @@ internal sealed class Tests3_Test_TestSource_GUID : global::TUnit.Core.Interface
                     }
                 },
             },
+            InheritanceDepth = 1,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass),

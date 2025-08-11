@@ -28,6 +28,7 @@ internal sealed class TestClass_GenericTestMethod_TestSource_GUID : global::TUni
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.TestClass),
@@ -127,6 +128,7 @@ internal sealed class TestClass_GenericTestMethod_TestSource_GUID : global::TUni
                     },
                     FilePath = @"",
                     LineNumber = 7,
+                    InheritanceDepth = 0,
                     TestSessionId = testSessionId,
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
                     {
@@ -196,6 +198,7 @@ internal sealed class TestClass_GenericTestMethod_TestSource_GUID : global::TUni
                     },
                     FilePath = @"",
                     LineNumber = 7,
+                    InheritanceDepth = 0,
                     TestSessionId = testSessionId,
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
                     {

@@ -33,6 +33,7 @@ internal sealed class CustomDisplayNameTests_Test_TestSource_GUID : global::TUni
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
@@ -141,6 +142,7 @@ internal sealed class CustomDisplayNameTests_Test2_TestSource_GUID : global::TUn
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
@@ -253,6 +255,7 @@ internal sealed class CustomDisplayNameTests_Test3_TestSource_GUID : global::TUn
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
@@ -413,6 +416,7 @@ internal sealed class CustomDisplayNameTests_MethodDataSourceTest_TestSource_GUI
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
@@ -547,6 +551,7 @@ internal sealed class CustomDisplayNameTests_PasswordTest_TestSource_GUID : glob
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
@@ -680,6 +685,7 @@ internal sealed class CustomDisplayNameTests_SameClassConstantTest_TestSource_GU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
@@ -788,6 +794,7 @@ internal sealed class CustomDisplayNameTests_DifferentClassConstantTest_TestSour
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
@@ -896,6 +903,7 @@ internal sealed class CustomDisplayNameTests_NestedClassConstantTest_TestSource_
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),

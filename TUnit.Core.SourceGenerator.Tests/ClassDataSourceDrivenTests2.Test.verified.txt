@@ -36,6 +36,7 @@ internal sealed class ClassDataSourceDrivenTests2_Base_Derived1_TestSource_GUID 
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
@@ -148,6 +149,7 @@ internal sealed class ClassDataSourceDrivenTests2_Base_Derived2_TestSource_GUID 
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),

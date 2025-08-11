@@ -33,6 +33,7 @@ internal sealed class AutoDataTests_Test1_TestSource_GUID : global::TUnit.Core.I
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AutoDataTests),

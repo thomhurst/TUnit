@@ -32,6 +32,7 @@ internal sealed class ConcreteClass1_AssertClassName_TestSource_GUID : global::T
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 1,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AbstractTests.AbstractBaseClass),
