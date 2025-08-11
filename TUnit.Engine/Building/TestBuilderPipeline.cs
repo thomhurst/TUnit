@@ -97,7 +97,7 @@ internal sealed class TestBuilderPipeline
                     return [failedTest];
                 }
             })
-            .ProcessInParallelUnbounded();
+            .ProcessInParallel(Environment.ProcessorCount);
 
         return testGroups.SelectMany(x => x);
     }
@@ -182,7 +182,7 @@ internal sealed class TestBuilderPipeline
 
             return metadata.CreateExecutableTestFactory(executableTestContext, metadata);
         })
-            .ProcessInParallelUnbounded();
+            .ProcessInParallel(Environment.ProcessorCount);
     }
 
     /// <summary>
