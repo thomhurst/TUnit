@@ -46,10 +46,8 @@
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.8.1" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.8.1" />
     <PackageVersion Include="Microsoft.Testing.Platform" Version="1.8.1" />
-    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.8.1" />
-    <PackageVersion Include="System.Collections.Immutable" Version="9.0.8" />
-    <PackageVersion Include="System.Text.Json" Version="9.0.8" />
-    <PackageVersion Include="System.Threading.Channels" Version="9.0.8" />
+      <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.4.3" />
+      <PackageVersion Include="System.Threading.Channels" Version="9.0.0" />
     <PackageVersion Include="ModularPipelines.DotNet" Version="2.47.8" />
     <PackageVersion Include="ModularPipelines.Git" Version="2.47.8" />
     <PackageVersion Include="ModularPipelines.GitHub" Version="2.47.8" />
