@@ -70,7 +70,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken))
         {
             allTests.Add(test);
-            
+
             // Check if this test has dependencies based on metadata
             if (test.Metadata.Dependencies.Length > 0)
             {
@@ -89,19 +89,19 @@ internal sealed class TestDiscoveryService : IDataProducer
         {
             _dependencyResolver.TryResolveDependencies(test);
         }
-        
+
         // Combine independent and dependent tests
         var tests = new List<AbstractExecutableTest>(independentTests.Count + dependentTests.Count);
         tests.AddRange(independentTests);
         tests.AddRange(dependentTests);
-        
+
         // Apply filter first to get the tests we want to run
         var filteredTests = _testFilterService.FilterTests(filter, tests);
 
         // Now find all dependencies of filtered tests and add them
         var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
         var queue = new Queue<AbstractExecutableTest>(filteredTests);
-        
+
         while (queue.Count > 0)
         {
             var test = queue.Dequeue();
@@ -146,25 +146,15 @@ internal sealed class TestDiscoveryService : IDataProducer
             cts.CancelAfter(DiscoveryConfiguration.DiscoveryTimeout);
         }
 
-        await foreach (var test in BuildTestsAsync(testSessionId, filterTypes, cts.Token))
+        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, filterTypes, cancellationToken);
+
+        foreach (var test in tests)
         {
             _dependencyResolver.RegisterTest(test);
 
             // Cache for backward compatibility
             _cachedTests.Add(test);
 
-            yield return test;
-        }
-    }
-
-
-    private async IAsyncEnumerable<AbstractExecutableTest> BuildTestsAsync(string testSessionId,
-        HashSet<Type>? filterTypes,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        // Always use streaming version now that it's implemented
-        await foreach (var test in _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, filterTypes, cancellationToken))
-        {
             yield return test;
         }
     }
