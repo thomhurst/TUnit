@@ -293,6 +293,15 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         finally
         {
+            // Trigger disposal of tracked objects (injected properties) before disposing the test instance
+            if (test.Context.Events.OnDispose != null)
+            {
+                foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                {
+                    await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
+                }
+            }
+            
             if (instance is IAsyncDisposable asyncDisposableInstance)
             {
                 await asyncDisposableInstance.DisposeAsync().ConfigureAwait(false);
