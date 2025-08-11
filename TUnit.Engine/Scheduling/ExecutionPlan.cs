@@ -64,34 +64,13 @@ internal sealed class ExecutionPlan
             }
         }
 
-        // Detect circular dependencies first
-        var circularDependencyTests = DetectCircularDependencies(allTests, dependencyGraph);
-        
-        // Mark tests with circular dependencies as failed
-        foreach (var test in circularDependencyTests)
-        {
-            test.State = TestState.Failed;
-            test.Result = new TestResult
-            {
-                State = TestState.Failed,
-                Exception = new InvalidOperationException($"Test '{test.TestId}' has circular dependencies and cannot be executed"),
-                ComputerName = Environment.MachineName,
-                Start = DateTimeOffset.UtcNow,
-                End = DateTimeOffset.UtcNow,
-                Duration = TimeSpan.Zero
-            };
-            
-            // Complete the test's task to prevent waiting forever
-            test.Context.InternalExecutableTest._taskCompletionSource?.TrySetResult();
-        }
-
-        // Create topological order for execution (only for non-circular tests)
+        // Create topological order for execution
         var visited = new HashSet<AbstractExecutableTest>();
         var topologicalOrder = new List<AbstractExecutableTest>(testCount);
 
         foreach (var test in allTests)
         {
-            if (!visited.Contains(test) && !circularDependencyTests.Contains(test))
+            if (!visited.Contains(test))
             {
                 TopologicalSort(test, visited, topologicalOrder, dependencyGraph);
             }
@@ -103,89 +82,13 @@ internal sealed class ExecutionPlan
             executionOrder[topologicalOrder[i]] = i;
         }
 
-        // Only non-circular tests are executable
+        // All tests are executable (pre-failed tests will be handled by scheduler)
         foreach (var test in allTests)
         {
-            if (!circularDependencyTests.Contains(test))
-            {
-                executableTests.Add(test);
-            }
+            executableTests.Add(test);
         }
 
         return new ExecutionPlan(allTests, executableTests, dependencyGraph, dependentGraph, executionOrder);
-    }
-
-    private static HashSet<AbstractExecutableTest> DetectCircularDependencies(
-        List<AbstractExecutableTest> allTests,
-        Dictionary<AbstractExecutableTest, List<AbstractExecutableTest>> dependencyGraph)
-    {
-        var circularTests = new HashSet<AbstractExecutableTest>();
-        var visitState = new Dictionary<AbstractExecutableTest, VisitState>();
-        
-        foreach (var test in allTests)
-        {
-            if (!visitState.ContainsKey(test))
-            {
-                var cycle = new List<AbstractExecutableTest>();
-                if (HasCycle(test, dependencyGraph, visitState, cycle))
-                {
-                    // Add all tests in the cycle to the circular tests set
-                    foreach (var cycleTest in cycle)
-                    {
-                        circularTests.Add(cycleTest);
-                    }
-                }
-            }
-        }
-        
-        return circularTests;
-    }
-    
-    private static bool HasCycle(
-        AbstractExecutableTest test,
-        Dictionary<AbstractExecutableTest, List<AbstractExecutableTest>> dependencyGraph,
-        Dictionary<AbstractExecutableTest, VisitState> visitState,
-        List<AbstractExecutableTest> currentPath)
-    {
-        visitState[test] = VisitState.Visiting;
-        currentPath.Add(test);
-        
-        if (dependencyGraph.TryGetValue(test, out var dependencies))
-        {
-            foreach (var dependency in dependencies)
-            {
-                if (!visitState.TryGetValue(dependency, out var state))
-                {
-                    // Not visited yet, recurse
-                    if (HasCycle(dependency, dependencyGraph, visitState, currentPath))
-                    {
-                        return true;
-                    }
-                }
-                else if (state == VisitState.Visiting)
-                {
-                    // Found a cycle - the dependency is in the current path
-                    // Trim the path to only include the cycle
-                    var cycleStartIndex = currentPath.IndexOf(dependency);
-                    if (cycleStartIndex >= 0)
-                    {
-                        currentPath.RemoveRange(0, cycleStartIndex);
-                    }
-                    return true;
-                }
-                // If state == VisitState.Visited, this dependency was already fully processed
-            }
-        }
-        
-        visitState[test] = VisitState.Visited;
-        currentPath.Remove(test);
-        return false;
-    }
-    
-    private enum VisitState
-    {
-        Visiting,
-        Visited
     }
 
     private static void TopologicalSort(

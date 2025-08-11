@@ -43,15 +43,6 @@ internal sealed class TestScheduler : ITestScheduler
         // Create execution plan upfront
         var plan = ExecutionPlan.Create(tests);
 
-        // Report any tests that were marked as failed during planning
-        foreach (var test in plan.AllTests)
-        {
-            if (test.State == TestState.Failed && test.Result != null)
-            {
-                await _messageBus.Failed(test.Context, test.Result.Exception ?? new InvalidOperationException("Test failed during planning"), test.Result.Start ?? DateTimeOffset.UtcNow);
-            }
-        }
-
         if (plan.ExecutableTests.Count == 0)
         {
             await _logger.LogDebugAsync("No executable tests found");
