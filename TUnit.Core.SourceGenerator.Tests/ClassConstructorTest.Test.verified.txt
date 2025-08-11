@@ -33,6 +33,8 @@ internal sealed class ClassConstructorTest_Test_TestSource_GUID : global::TUnit.
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 8,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassConstructorTest),

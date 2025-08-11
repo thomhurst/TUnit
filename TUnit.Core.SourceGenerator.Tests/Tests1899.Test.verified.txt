@@ -34,6 +34,8 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
             {
             },
             InheritanceDepth = 1,
+            FilePath = @"",
+            LineNumber = 6,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1899.BaseClass<DummyReferenceTypeClass>),

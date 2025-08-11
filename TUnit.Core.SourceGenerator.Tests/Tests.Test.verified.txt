@@ -43,6 +43,8 @@ internal sealed class Tests_TryParse_InvalidString_ReturnsFailure_TestSource_GUI
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 9,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
@@ -180,6 +182,8 @@ internal sealed class Tests_Parse_InvalidString_ThrowsException_TestSource_GUID 
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 26,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
@@ -304,6 +308,8 @@ internal sealed class Tests_TryParse_ValidString_ReturnsAccountId_TestSource_GUI
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 38,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1304.Tests),

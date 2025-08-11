@@ -9,7 +9,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Scheduling;
 
-/// Test executor adapter with hook orchestration, fail-fast support, and class/assembly lifecycle management
+
 internal sealed class TestExecutor : ITestExecutor, IDataProducer
 {
     private readonly ISingleTestExecutor _innerExecutor;
@@ -22,7 +22,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
     private readonly HookOrchestrator _hookOrchestrator;
     private readonly ParallelLimitLockProvider _parallelLimitLockProvider;
 
-    // IDataProducer implementation
+
     public string Uid => "TUnit.TestExecutor";
     public string Version => "1.0.0";
     public string DisplayName => "Hook Orchestrating Test Executor Adapter";
@@ -54,10 +54,10 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
 
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        // Check if any dependencies failed without ProceedOnFailure flag
+
         if (test.Dependencies.Any(dep => dep.Test.State == TestState.Failed && !dep.ProceedOnFailure))
         {
-            // If any dependencies have failed without ProceedOnFailure, skip this test
+
             test.State = TestState.Skipped;
             test.Result = new TestResult
             {
@@ -69,19 +69,19 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
                 Exception = new SkipTestException("Skipped due to failed dependencies")
             };
 
-            // Report the skipped state
+
             await _tunitMessageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
 
             return;
         }
 
-        // Note: Semaphore acquisition has been moved to TestScheduler to prevent deadlocks
+
         
-        // Simple state management - scheduler ensures we only get here for executable tests
+
         test.State = TestState.Running;
         test.StartTime = DateTimeOffset.UtcNow;
 
-        // Report test started
+
         await _tunitMessageBus.InProgress(test.Context).ConfigureAwait(false);
 
         bool hookStarted = false;
@@ -93,34 +93,34 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
                 test.Context.TestDetails.ClassInstance = instance;
             }
 
-            // Execute class/assembly hooks on first test
+
             var executionContext = await _hookOrchestrator.OnTestStartingAsync(test, cancellationToken).ConfigureAwait(false);
             hookStarted = true;
 
 #if NET
-            // Restore the accumulated context from all hooks to flow AsyncLocal values to the test
+
             if (executionContext != null)
             {
                 ExecutionContext.Restore(executionContext);
             }
 #endif
 
-            // Execute the test and get the result message
+
             var updateMessage = await _innerExecutor.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
 
             try
             {
-                // Execute cleanup hooks (After/AfterEvery for Test/Class/Assembly)
+
                 await _hookOrchestrator.OnTestCompletedAsync(test, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
-                // Route the result to the appropriate ITUnitMessageBus method
-                // This must always be called to report test results
+
+
                 await RouteTestResult(test, updateMessage).ConfigureAwait(false);
             }
 
-            // Check if we should trigger fail-fast
+
             if (_isFailFastEnabled && test.Result?.State == TestState.Failed)
             {
                 await _logger.LogErrorAsync($"Test {test.TestId} failed. Triggering fail-fast cancellation.").ConfigureAwait(false);
@@ -129,7 +129,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
         }
         catch (Exception ex)
         {
-            // If hooks were started, we MUST call OnTestCompletedAsync to decrement counters
+
             if (hookStarted)
             {
                 try
@@ -138,12 +138,12 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
                 }
                 catch (Exception hookEx)
                 {
-                    // Log but don't throw - we want to preserve the original exception
+
                     await _logger.LogErrorAsync($"Error executing cleanup hooks for test {test.TestId}: {hookEx}").ConfigureAwait(false);
                 }
             }
 
-            // Set test state
+
             test.State = TestState.Failed;
             test.Result = new TestResult
             {
@@ -155,32 +155,26 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
                 ComputerName = Environment.MachineName
             };
 
-            // Report the failure
+
             await _tunitMessageBus.Failed(test.Context, ex, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
 
-            // Log the exception
+
             await _logger.LogErrorAsync($"Unhandled exception in test {test.TestId}: {ex}").ConfigureAwait(false);
 
-            // If fail-fast is enabled, cancel all remaining tests
+
             if (_isFailFastEnabled)
             {
                 await _logger.LogErrorAsync("Unhandled exception occurred. Triggering fail-fast cancellation.").ConfigureAwait(false);
                 _failFastCancellationSource.Cancel();
             }
 
-            // DO NOT re-throw - we've already reported the failure and set the result
-            // Re-throwing here causes the exception to be unobserved which leads to hangs
+
+            throw;
         }
         finally
         {
             test.EndTime = DateTimeOffset.UtcNow;
-            
-            // CRITICAL: Ensure the test is marked as complete even if routing fails
-            // This prevents hanging when tests are waiting on dependencies
-            if (!test.Context.InternalExecutableTest._taskCompletionSource.Task.IsCompleted)
-            {
-                test.Context.InternalExecutableTest._taskCompletionSource.TrySetResult();
-            }
+
         }
     }
 
@@ -188,7 +182,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
     {
         try
         {
-            // Optimized: Use test state directly instead of searching through properties
+
             var testState = test.State;
             var startTime = test.StartTime.GetValueOrDefault();
 
@@ -217,44 +211,24 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
                     break;
 
                 default:
-                    // Fallback: ensure TaskCompletionSource is always set to prevent hanging
+
                     await _logger.LogErrorAsync($"Unexpected test state '{testState}' for test '{test.TestId}'. Marking as failed .").ConfigureAwait(false);
 
                     var unexpectedStateException = new InvalidOperationException($"Test ended in unexpected state: {testState}");
                     await _tunitMessageBus.Failed(test.Context, unexpectedStateException, startTime).ConfigureAwait(false);
 
-                    // Still publish the raw message for debugging
+
                     await _messageBus.PublishAsync(this, updateMessage).ConfigureAwait(false);
                     break;
             }
         }
         catch (Exception ex)
         {
-            // Log the error but don't rethrow - we need to ensure the test completes
             await _logger.LogErrorAsync($"Error routing test result for test {test.TestId}: {ex}").ConfigureAwait(false);
-            
-            // Try to mark as failed if we haven't already
-            if (test.Context.InternalExecutableTest._taskCompletionSource.Task.IsCompleted == false)
-            {
-                try
-                {
-                    await _tunitMessageBus.Failed(test.Context, ex, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
-                }
-                catch
-                {
-                    // If even that fails, just set the completion directly
-                    test.Context.InternalExecutableTest._taskCompletionSource.TrySetResult();
-                }
-            }
         }
         finally
         {
-            // CRITICAL: Always ensure the TaskCompletionSource is set to prevent hanging
-            // This is a safety net - normally the TUnitMessageBus methods should set it
-            if (!test.Context.InternalExecutableTest._taskCompletionSource.Task.IsCompleted)
-            {
-                test.Context.InternalExecutableTest._taskCompletionSource.TrySetResult();
-            }
+
         }
     }
 }

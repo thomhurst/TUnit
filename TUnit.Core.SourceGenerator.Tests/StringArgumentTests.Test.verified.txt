@@ -53,6 +53,8 @@ internal sealed class StringArgumentTests_Normal_TestSource_GUID : global::TUnit
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 8,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.StringArgumentTests),
@@ -191,6 +193,8 @@ internal sealed class StringArgumentTests_Nullable_TestSource_GUID : global::TUn
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 27,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.StringArgumentTests),

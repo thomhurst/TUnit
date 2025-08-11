@@ -46,6 +46,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_TestSource_G
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 12,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -181,6 +183,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method2_TestSource_
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 19,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -316,6 +320,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_WithAction_T
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 26,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -469,6 +475,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method3_TestSource_
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 33,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -653,6 +661,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 42,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -788,6 +798,8 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_WithBaseReturn_Test
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 53,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -933,6 +945,8 @@ internal sealed class MethodDataSourceDrivenTests_EnumerableFuncArrayTest_TestSo
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 59,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),

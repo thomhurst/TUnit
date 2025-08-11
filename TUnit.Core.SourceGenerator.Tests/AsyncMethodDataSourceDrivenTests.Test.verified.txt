@@ -56,6 +56,8 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Sin
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 8,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
@@ -199,6 +201,8 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Tup
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 15,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
@@ -349,6 +353,8 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Enu
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 23,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
@@ -492,6 +498,8 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Fun
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 30,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
@@ -636,6 +644,8 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Wit
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 37,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
@@ -779,6 +789,8 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Ext
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 44,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),
@@ -922,6 +934,8 @@ internal sealed class AsyncMethodDataSourceDrivenTests_ValueTaskMethodDataSource
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 51,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests),

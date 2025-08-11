@@ -32,6 +32,8 @@ internal sealed class ModuleInitializerTest_TestWithModuleInit_TestSource_GUID :
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 8,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ModuleInitializerTest),

@@ -36,6 +36,8 @@ internal sealed class MyTests_Test1_TestSource_GUID : global::TUnit.Core.Interfa
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 15,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1589.MyTests),

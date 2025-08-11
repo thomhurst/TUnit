@@ -32,6 +32,8 @@ internal sealed class ConfigurationTest_TestWithConfiguration_TestSource_GUID : 
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 7,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ConfigurationTest),

@@ -235,6 +235,8 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                 },
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 27,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),

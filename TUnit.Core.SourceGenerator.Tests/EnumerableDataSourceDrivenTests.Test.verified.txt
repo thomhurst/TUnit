@@ -56,6 +56,8 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method_TestSour
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 8,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
@@ -199,6 +201,8 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method2_TestSou
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 15,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),
@@ -342,6 +346,8 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_WithBaseReturn_
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 22,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests),

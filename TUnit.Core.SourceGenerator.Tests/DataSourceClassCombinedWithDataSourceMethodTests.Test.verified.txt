@@ -111,6 +111,8 @@ internal sealed class DataSourceClassCombinedWithDataSourceMethod_DataSourceClas
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 13,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod),

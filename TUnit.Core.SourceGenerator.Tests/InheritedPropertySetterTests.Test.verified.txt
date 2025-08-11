@@ -203,6 +203,8 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
                 },
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 69,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.PropertySetterTests),
@@ -557,6 +559,8 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
                 },
             },
             InheritanceDepth = 1,
+            FilePath = @"",
+            LineNumber = 3,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.PropertySetterTests),

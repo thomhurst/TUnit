@@ -32,6 +32,8 @@ internal sealed class TypedDelegateTest_TestWithDelegate_TestSource_GUID : globa
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 7,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.TypedDelegateTest),

@@ -79,6 +79,8 @@ internal sealed class EnumerableTupleDataSourceDrivenTests_DataSource_TupleMetho
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 8,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests),

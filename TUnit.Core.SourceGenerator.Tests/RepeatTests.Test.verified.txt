@@ -35,6 +35,8 @@ internal sealed class RepeatTests_One_TestSource_GUID : global::TUnit.Core.Inter
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 9,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.RepeatTests),
@@ -134,6 +136,8 @@ internal sealed class RepeatTests_Two_TestSource_GUID : global::TUnit.Core.Inter
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 16,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.RepeatTests),
@@ -232,6 +236,8 @@ internal sealed class RepeatTests_Three_TestSource_GUID : global::TUnit.Core.Int
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 23,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.RepeatTests),

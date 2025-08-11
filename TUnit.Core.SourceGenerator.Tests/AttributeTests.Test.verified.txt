@@ -44,6 +44,8 @@ internal sealed class AttributeTests_MyTest_TestSource_GUID : global::TUnit.Core
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 7,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AttributeTests),

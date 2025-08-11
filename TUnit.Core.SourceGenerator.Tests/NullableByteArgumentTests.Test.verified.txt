@@ -37,6 +37,8 @@ internal sealed class NullableByteArgumentTests_Test_TestSource_GUID : global::T
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 8,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
@@ -163,6 +165,8 @@ internal sealed class NullableByteArgumentTests_Test2_TestSource_GUID : global::
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 15,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.NullableByteArgumentTests),

@@ -29,6 +29,8 @@ internal sealed class MultiGenericTestClass_TestMethod_TestSource_GUID : global:
             {
             },
             InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 9,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MultiGenericTestClass<,>),
