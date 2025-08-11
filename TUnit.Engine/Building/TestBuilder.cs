@@ -152,7 +152,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     MethodDataSourceAttributeIndex = 0,
                                     MethodDataLoopIndex = 0,
                                     MethodData = [],
-                                    RepeatIndex = 0
+                                    RepeatIndex = 0,
+                                    InheritanceDepth = metadata.InheritanceDepth
                                 };
 
                                 try
@@ -225,7 +226,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     MethodDataSourceAttributeIndex = methodDataAttributeIndex,
                                     MethodDataLoopIndex = methodDataLoopIndex,
                                     MethodData = methodData,
-                                    RepeatIndex = i
+                                    RepeatIndex = i,
+                                    InheritanceDepth = metadata.InheritanceDepth
                                 };
 
                                 Type[] resolvedClassGenericArgs;
@@ -297,6 +299,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     MethodDataLoopIndex = methodDataLoopIndex,
                                     MethodData = methodData,
                                     RepeatIndex = i,
+                                    InheritanceDepth = metadata.InheritanceDepth,
                                     ResolvedClassGenericArguments = resolvedClassGenericArgs,
                                     ResolvedMethodGenericArguments = resolvedMethodGenericArgs
                                 };
@@ -944,6 +947,14 @@ internal sealed class TestBuilder : ITestBuilder
         public required int MethodDataLoopIndex { get; init; }
         public required object?[] MethodData { get; init; }
         public required int RepeatIndex { get; init; }
+        
+        /// <summary>
+        /// The depth of inheritance for this test method.
+        /// 0 = method is defined directly in the test class
+        /// 1 = method is inherited from immediate base class
+        /// 2 = method is inherited from base's base class, etc.
+        /// </summary>
+        public int InheritanceDepth { get; set; } = 0;
 
         /// <summary>
         /// Resolved generic type arguments for the test class.
@@ -1088,7 +1099,8 @@ internal sealed class TestBuilder : ITestBuilder
                     MethodDataSourceAttributeIndex = 0,
                     MethodDataLoopIndex = 0,
                     MethodData = [],
-                    RepeatIndex = 0
+                    RepeatIndex = 0,
+                    InheritanceDepth = metadata.InheritanceDepth
                 };
 
                 try
@@ -1147,7 +1159,8 @@ internal sealed class TestBuilder : ITestBuilder
                 MethodDataSourceAttributeIndex = methodDataAttributeIndex,
                 MethodDataLoopIndex = methodDataLoopIndex,
                 MethodData = methodData,
-                RepeatIndex = repeatIndex
+                RepeatIndex = repeatIndex,
+                InheritanceDepth = metadata.InheritanceDepth
             };
 
             // Resolve generic types
@@ -1213,6 +1226,7 @@ internal sealed class TestBuilder : ITestBuilder
                 MethodDataLoopIndex = methodDataLoopIndex,
                 MethodData = methodData,
                 RepeatIndex = repeatIndex,
+                InheritanceDepth = metadata.InheritanceDepth,
                 ResolvedClassGenericArguments = resolvedClassGenericArgs,
                 ResolvedMethodGenericArguments = resolvedMethodGenericArgs
             };

@@ -96,7 +96,15 @@ public sealed class TestDependency : IEquatable<TestDependency>
         }
         else if (dependentTest != null)
         {
-            if (test.TestClassType != dependentTest.TestClassType)
+            // When no explicit ClassType is specified in the dependency,
+            // we're looking for tests in the same class
+            var testType = test.TestClassType;
+            var dependentType = dependentTest.TestClassType;
+            
+            // For inherited tests, both tests should be in the same concrete class
+            // E.g., UserRepositoryTests.CreateSchema depends on UserRepositoryTests.InitializeDatabase
+            // NOT ProductRepositoryTests.InitializeDatabase
+            if (testType != dependentType)
             {
                 return false;
             }

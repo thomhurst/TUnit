@@ -182,6 +182,13 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
             finally
             {
                 test.EndTime = DateTimeOffset.UtcNow;
+                
+                // CRITICAL: Ensure the test is marked as complete even if routing fails
+                // This prevents hanging when tests are waiting on dependencies
+                if (!test.Context.InternalExecutableTest._taskCompletionSource.Task.IsCompleted)
+                {
+                    test.Context.InternalExecutableTest._taskCompletionSource.TrySetResult();
+                }
             }
         }
         finally
@@ -193,44 +200,75 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
 
     private async Task RouteTestResult(AbstractExecutableTest test, TestNodeUpdateMessage updateMessage)
     {
-        // Optimized: Use test state directly instead of searching through properties
-        var testState = test.State;
-        var startTime = test.StartTime.GetValueOrDefault();
-
-        switch (testState)
+        try
         {
-            case TestState.Passed:
-                await _tunitMessageBus.Passed(test.Context, startTime);
-                break;
+            // Optimized: Use test state directly instead of searching through properties
+            var testState = test.State;
+            var startTime = test.StartTime.GetValueOrDefault();
 
-            case TestState.Failed when test.Result?.Exception != null:
-                await _tunitMessageBus.Failed(test.Context, test.Result.Exception, startTime);
-                break;
+            switch (testState)
+            {
+                case TestState.Passed:
+                    await _tunitMessageBus.Passed(test.Context, startTime);
+                    break;
 
-            case TestState.Timeout:
-                var timeoutException = test.Result?.Exception ?? new System.TimeoutException("Test timed out");
-                await _tunitMessageBus.Failed(test.Context, timeoutException, startTime);
-                break;
+                case TestState.Failed when test.Result?.Exception != null:
+                    await _tunitMessageBus.Failed(test.Context, test.Result.Exception, startTime);
+                    break;
 
-            case TestState.Cancelled:
-                await _tunitMessageBus.Cancelled(test.Context, startTime);
-                break;
+                case TestState.Timeout:
+                    var timeoutException = test.Result?.Exception ?? new System.TimeoutException("Test timed out");
+                    await _tunitMessageBus.Failed(test.Context, timeoutException, startTime);
+                    break;
 
-            case TestState.Skipped:
-                var skipReason = test.Result?.OverrideReason ?? test.Context.SkipReason ?? "Test skipped";
-                await _tunitMessageBus.Skipped(test.Context, skipReason);
-                break;
+                case TestState.Cancelled:
+                    await _tunitMessageBus.Cancelled(test.Context, startTime);
+                    break;
 
-            default:
-                // Fallback: ensure TaskCompletionSource is always set to prevent hanging
-                await _logger.LogErrorAsync($"Unexpected test state '{testState}' for test '{test.TestId}'. Marking as failed .");
+                case TestState.Skipped:
+                    var skipReason = test.Result?.OverrideReason ?? test.Context.SkipReason ?? "Test skipped";
+                    await _tunitMessageBus.Skipped(test.Context, skipReason);
+                    break;
 
-                var unexpectedStateException = new InvalidOperationException($"Test ended in unexpected state: {testState}");
-                await _tunitMessageBus.Failed(test.Context, unexpectedStateException, startTime);
+                default:
+                    // Fallback: ensure TaskCompletionSource is always set to prevent hanging
+                    await _logger.LogErrorAsync($"Unexpected test state '{testState}' for test '{test.TestId}'. Marking as failed .");
 
-                // Still publish the raw message for debugging
-                await _messageBus.PublishAsync(this, updateMessage);
-                break;
+                    var unexpectedStateException = new InvalidOperationException($"Test ended in unexpected state: {testState}");
+                    await _tunitMessageBus.Failed(test.Context, unexpectedStateException, startTime);
+
+                    // Still publish the raw message for debugging
+                    await _messageBus.PublishAsync(this, updateMessage);
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the error but don't rethrow - we need to ensure the test completes
+            await _logger.LogErrorAsync($"Error routing test result for test {test.TestId}: {ex}");
+            
+            // Try to mark as failed if we haven't already
+            if (test.Context.InternalExecutableTest._taskCompletionSource.Task.IsCompleted == false)
+            {
+                try
+                {
+                    await _tunitMessageBus.Failed(test.Context, ex, test.StartTime.GetValueOrDefault());
+                }
+                catch
+                {
+                    // If even that fails, just set the completion directly
+                    test.Context.InternalExecutableTest._taskCompletionSource.TrySetResult();
+                }
+            }
+        }
+        finally
+        {
+            // CRITICAL: Always ensure the TaskCompletionSource is set to prevent hanging
+            // This is a safety net - normally the TUnitMessageBus methods should set it
+            if (!test.Context.InternalExecutableTest._taskCompletionSource.Task.IsCompleted)
+            {
+                test.Context.InternalExecutableTest._taskCompletionSource.TrySetResult();
+            }
         }
     }
 }

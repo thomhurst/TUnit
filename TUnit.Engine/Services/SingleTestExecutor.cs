@@ -44,7 +44,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
         AbstractExecutableTest test,
         CancellationToken cancellationToken)
     {
+        Console.WriteLine($"[DEBUG {DateTime.Now:HH:mm:ss.fff}] SingleTestExecutor.ExecuteTestAsync: Starting {test.TestId}");
         await ExecuteTestInternalAsync(test, cancellationToken);
+        Console.WriteLine($"[DEBUG {DateTime.Now:HH:mm:ss.fff}] SingleTestExecutor.ExecuteTestAsync: Completed {test.TestId}");
 
         if (test.State == TestState.Running)
         {

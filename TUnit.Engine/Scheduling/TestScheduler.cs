@@ -115,14 +115,29 @@ internal sealed class TestScheduler : ITestScheduler
             allTestTasks.Add(groupTask);
         }
 
-        var parallelTask = ExecuteParallelTestsAsync(groupedTests.Parallel,
-            executor,
-            runningTasks,
-            completedTests,
-            maxParallelism,
-            cancellationToken);
-        allTestTasks.Add(parallelTask);
+        // 4. Parallel tests - can all run in parallel
+        if (groupedTests.Parallel.Length > 0)
+        {
+            var parallelTask = ExecuteParallelTestsAsync(groupedTests.Parallel,
+                executor,
+                runningTasks,
+                completedTests,
+                maxParallelism,
+                cancellationToken);
+            allTestTasks.Add(parallelTask);
+        }
 
+        // Log which task groups were created
+        var taskGroupInfo = new List<string>();
+        if (groupedTests.NotInParallel.Length > 0)
+            taskGroupInfo.Add($"NotInParallel({groupedTests.NotInParallel.Length})");
+        if (groupedTests.KeyedNotInParallel.Length > 0)
+            taskGroupInfo.Add($"KeyedNotInParallel({groupedTests.KeyedNotInParallel.Length})");
+        foreach (var (groupName, _) in groupedTests.ParallelGroups)
+            taskGroupInfo.Add($"ParallelGroup({groupName})");
+        if (groupedTests.Parallel.Length > 0)
+            taskGroupInfo.Add($"Parallel({groupedTests.Parallel.Length})");
+            
         await Task.WhenAll(allTestTasks);
     }
 
@@ -140,15 +155,20 @@ internal sealed class TestScheduler : ITestScheduler
             .ToList();
 
         // Execute class by class
+        int classIndex = 0;
         foreach (var classGroup in testsByClass)
         {
-            // Tests are already in priority order, just execute them
-            var classTests = classGroup.ToList();
+            var className = classGroup.Key.FullName ?? classGroup.Key.Name;
+            var classTestsList = classGroup.ToList();
+            
+            // Sort tests within the class based on dependencies (topological sort)
+            var classTests = SortTestsByDependencies(classTestsList);
 
             foreach (var test in classTests)
             {
                 await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
             }
+            classIndex++;
         }
     }
 
@@ -300,7 +320,6 @@ internal sealed class TestScheduler : ITestScheduler
         }
 
         await Task.WhenAll(test.Dependencies.Select(x => x.Test.CompletionTask));
-
         var executionTask = ExecuteTestDirectlyAsync(test, executor, completedTests, cancellationToken);
         runningTasks[test] = executionTask;
         await executionTask;
@@ -316,7 +335,81 @@ internal sealed class TestScheduler : ITestScheduler
         finally
         {
             completedTests[test] = true;
+            
+            // CRITICAL: Ensure TaskCompletionSource is set even if executor throws
+            // This is a last-resort safety net
+            if (!test.Context.InternalExecutableTest._taskCompletionSource.Task.IsCompleted)
+            {
+                test.Context.InternalExecutableTest._taskCompletionSource.TrySetResult();
+            }
         }
+    }
+
+    /// <summary>
+    /// Sorts tests based on their dependencies using topological sort
+    /// </summary>
+    private List<AbstractExecutableTest> SortTestsByDependencies(List<AbstractExecutableTest> tests)
+    {
+        // If no tests have dependencies, return original order
+        if (!tests.Any(t => t.Dependencies.Length > 0))
+        {
+            return tests;
+        }
+
+        var sorted = new List<AbstractExecutableTest>();
+        var visited = new HashSet<string>();
+        var visiting = new HashSet<string>();
+        
+        // Build a map of test IDs to tests, handling potential duplicates gracefully
+        var testMap = new Dictionary<string, AbstractExecutableTest>();
+        var seenTests = new HashSet<string>();
+        
+        foreach (var test in tests)
+        {
+            if (!seenTests.Add(test.TestId))
+            {
+                // Skip duplicate - this shouldn't happen but let's be defensive
+                continue;
+            }
+            testMap[test.TestId] = test;
+        }
+
+        void Visit(AbstractExecutableTest test)
+        {
+            if (visited.Contains(test.TestId))
+            {
+                return;
+            }
+
+            if (visiting.Contains(test.TestId))
+            {
+                // Circular dependency detected - just add it to avoid infinite loop
+                return;
+            }
+
+            visiting.Add(test.TestId);
+
+            // Visit dependencies first (only if they're in the same class group)
+            foreach (var dependency in test.Dependencies)
+            {
+                if (testMap.TryGetValue(dependency.Test.TestId, out var depTest))
+                {
+                    Visit(depTest);
+                }
+            }
+
+            visiting.Remove(test.TestId);
+            visited.Add(test.TestId);
+            sorted.Add(test);
+        }
+
+        // Visit all tests that are in our map (skipping any duplicates)
+        foreach (var test in testMap.Values)
+        {
+            Visit(test);
+        }
+
+        return sorted;
     }
 
     /// <summary>

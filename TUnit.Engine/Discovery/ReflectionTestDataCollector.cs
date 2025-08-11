@@ -44,7 +44,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         }
         var assemblies = assembliesList;
 
-        Console.WriteLine($"Scanning {assemblies.Count} assemblies for tests...");
 
         // Use async parallel processing with proper task-based approach
         var tasks = new Task<List<TestMetadata>>[assemblies.Count];
@@ -66,7 +65,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
 
                 try
                 {
-                    Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
                     // Now we can properly await the async method
                     var testsInAssembly = await DiscoverTestsInAssembly(assembly).ConfigureAwait(false);
                     return testsInAssembly;
@@ -118,7 +116,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             }
         }
 
-        Console.WriteLine($"Scanning {assemblies.Count} assemblies for tests...");
 
         // Stream tests from each assembly
         foreach (var assembly in assemblies)
@@ -311,7 +308,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             catch (ReflectionTypeLoadException rtle)
             {
                 // Some types might fail to load, but we can still use the ones that loaded successfully
-                Console.WriteLine($"Warning: Some types failed to load from assembly {asm.FullName}: {rtle.Message}");
                 // Optimize: Manual filtering with ArrayPool for better memory efficiency
                 var loadedTypes = rtle.Types;
                 if (loadedTypes == null) return [];
@@ -338,9 +334,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                     ArrayPool<Type>.Shared.Return(tempArray);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Warning: Failed to get types from assembly {asm.FullName}: {ex.Message}");
                 return [];
             }
         });
@@ -405,9 +400,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                     testMethods = testMethodsList.ToArray();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Warning: Failed to get methods from type {type.FullName}: {ex.Message}");
                 continue;
             }
 
@@ -439,7 +433,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         Assembly assembly,
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
         
         var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
         {
@@ -452,7 +445,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             catch (ReflectionTypeLoadException rtle)
             {
                 // Some types might fail to load, but we can still use the ones that loaded successfully
-                Console.WriteLine($"Warning: Some types failed to load from assembly {asm.FullName}: {rtle.Message}");
                 // Optimize: Manual filtering with ArrayPool for better memory efficiency
                 var loadedTypes = rtle.Types;
                 if (loadedTypes == null) return [];
@@ -479,9 +471,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                     ArrayPool<Type>.Shared.Return(tempArray);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Warning: Failed to get types from assembly {asm.FullName}: {ex.Message}");
                 return [];
             }
         });
@@ -534,9 +525,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                         .ToArray();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Warning: Failed to get test methods from type {type.FullName}: {ex.Message}");
                 continue;
             }
 
@@ -827,10 +817,39 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         return await Task.FromResult(data);
     }
 
+    private static int CalculateInheritanceDepth(Type testClass, MethodInfo testMethod)
+    {
+        // If the method is declared directly in the test class, depth is 0
+        if (testMethod.DeclaringType == testClass)
+        {
+            return 0;
+        }
+        
+        // Count how many levels up the inheritance chain the method is declared
+        int depth = 0;
+        Type? currentType = testClass.BaseType;
+        
+        while (currentType != null && currentType != typeof(object))
+        {
+            depth++;
+            if (testMethod.DeclaringType == currentType)
+            {
+                return depth;
+            }
+            currentType = currentType.BaseType;
+        }
+        
+        // This shouldn't happen in normal cases, but return the depth anyway
+        return depth;
+    }
+    
     private static Task<TestMetadata> BuildTestMetadata(Type testClass, MethodInfo testMethod, object?[]? classData = null)
     {
         // Create a base ReflectionTestMetadata instance
         var testName = GenerateTestName(testClass, testMethod);
+        
+        // Calculate inheritance depth
+        int inheritanceDepth = CalculateInheritanceDepth(testClass, testMethod);
 
         try
         {
@@ -854,7 +873,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                 GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(testMethod),
                 GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
                 AttributeFactory = () => ReflectionAttributeExtractor.GetAllAttributes(testClass, testMethod),
-                PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(testClass)
+                PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(testClass),
+                InheritanceDepth = inheritanceDepth
             });
         }
         catch (Exception ex)

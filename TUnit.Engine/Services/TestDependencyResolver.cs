@@ -95,6 +95,8 @@ internal sealed class TestDependencyResolver
 
         try
         {
+            Console.WriteLine($"[DEBUG RESOLVE] Resolving dependencies for {test.TestId} (has {test.Metadata.Dependencies.Length} metadata dependencies)");
+            
             var resolvedDependencies = new List<ResolvedDependency>();
             var allResolved = true;
 
@@ -176,6 +178,7 @@ internal sealed class TestDependencyResolver
                 if (matchingTests.Count == 0)
                 {
                     var depKey = dependency.ToString();
+                    Console.WriteLine($"[DEBUG RESOLVE] No matches found for dependency {depKey} of test {test.TestId}");
                     _pendingDependents.AddOrUpdate(depKey,
                         _ =>
                         [
@@ -186,8 +189,10 @@ internal sealed class TestDependencyResolver
                 }
                 else
                 {
+                    Console.WriteLine($"[DEBUG RESOLVE] Found {matchingTests.Count} matches for dependency {dependency} of test {test.TestId}");
                     foreach (var matchingTest in matchingTests)
                     {
+                        Console.WriteLine($"[DEBUG RESOLVE]   - Adding dependency: {matchingTest.TestId}");
                         resolvedDependencies.Add(new ResolvedDependency
                         {
                             Test = matchingTest,
@@ -224,7 +229,11 @@ internal sealed class TestDependencyResolver
                 }
 
                 test.Dependencies = distinctDeps.ToArray();
-
+                Console.WriteLine($"[DEBUG RESOLVE] Successfully resolved {test.Dependencies.Length} dependencies for {test.TestId}");
+            }
+            else
+            {
+                Console.WriteLine($"[DEBUG RESOLVE] Failed to resolve all dependencies for {test.TestId}");
             }
 
             return allResolved;

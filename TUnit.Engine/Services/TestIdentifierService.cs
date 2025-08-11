@@ -46,6 +46,12 @@ internal static class TestIdentifierService
           .Append(combination.MethodDataLoopIndex)
           .Append('.')
           .Append(combination.RepeatIndex);
+        
+        // Add inheritance depth if the method is inherited
+        if (combination.InheritanceDepth > 0)
+        {
+            sb.Append("_inherited").Append(combination.InheritanceDepth);
+        }
 
         return sb.ToString();
     }

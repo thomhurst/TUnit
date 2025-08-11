@@ -126,6 +126,7 @@ internal sealed class TestBuilderPipeline
                 MethodDataLoopIndex = 0,
                 MethodData = [],
                 RepeatIndex = repeatIndex,
+                InheritanceDepth = metadata.InheritanceDepth,
                 ResolvedClassGenericArguments = Type.EmptyTypes,
                 ResolvedMethodGenericArguments = Type.EmptyTypes
             };
@@ -243,6 +244,7 @@ internal sealed class TestBuilderPipeline
                         MethodDataLoopIndex = 0,
                         MethodData = [],
                         RepeatIndex = repeatIndex,
+                        InheritanceDepth = resolvedMetadata.InheritanceDepth,
                         ResolvedClassGenericArguments = Type.EmptyTypes,
                         ResolvedMethodGenericArguments = Type.EmptyTypes
                     };
