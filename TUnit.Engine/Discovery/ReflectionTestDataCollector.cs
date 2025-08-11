@@ -15,7 +15,7 @@ namespace TUnit.Engine.Discovery;
 [RequiresUnreferencedCode("Reflection-based test discovery requires unreferenced code")]
 [RequiresDynamicCode("Expression compilation requires dynamic code generation")]
 [SuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The source field does not have matching annotations.")]
-public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTestDataCollector
+public sealed class ReflectionTestDataCollector : ITestDataCollector
 {
     private static readonly HashSet<Assembly> _scannedAssemblies =
     [
@@ -47,12 +47,12 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
 
         // Use async parallel processing with proper task-based approach
         var tasks = new Task<List<TestMetadata>>[assemblies.Count];
-        
+
         for (var i = 0; i < assemblies.Count; i++)
         {
             var assembly = assemblies[i];
             var index = i;
-            
+
             tasks[index] = Task.Run(async () =>
             {
                 lock (_lock)
@@ -126,7 +126,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
         foreach (var assembly in assemblies)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             lock (_lock)
             {
                 if (!_scannedAssemblies.Add(assembly))
@@ -316,7 +316,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
                 // Optimize: Manual filtering with ArrayPool for better memory efficiency
                 var loadedTypes = rtle.Types;
                 if (loadedTypes == null) return [];
-                
+
                 // Use ArrayPool for temporary storage to reduce allocations
                 var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
                 try
@@ -329,7 +329,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
                             tempArray[validCount++] = type;
                         }
                     }
-                    
+
                     var result = new Type[validCount];
                     Array.Copy(tempArray, result, validCount);
                     return result;
@@ -438,7 +438,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
         Assembly assembly,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        
+
         var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
         {
             try
@@ -453,7 +453,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
                 // Optimize: Manual filtering with ArrayPool for better memory efficiency
                 var loadedTypes = rtle.Types;
                 if (loadedTypes == null) return [];
-                
+
                 // Use ArrayPool for temporary storage to reduce allocations
                 var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
                 try
@@ -466,7 +466,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
                             tempArray[validCount++] = type;
                         }
                     }
-                    
+
                     var result = new Type[validCount];
                     Array.Copy(tempArray, result, validCount);
                     return result;
@@ -492,7 +492,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
         foreach (var type in filteredTypes)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             // Skip abstract types - they can't be instantiated
             if (type.IsAbstract)
             {
@@ -538,10 +538,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
             foreach (var method in testMethods)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 TestMetadata? testMetadata = null;
                 TestMetadata? failedMetadata = null;
-                
+
                 try
                 {
                     // Prevent duplicate test metadata for inherited tests
@@ -554,10 +554,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
                 }
                 catch (Exception ex)
                 {
-                    // Create a failed test metadata for discovery failures  
+                    // Create a failed test metadata for discovery failures
                     failedMetadata = CreateFailedTestMetadata(type, method, ex);
                 }
-                
+
                 if (testMetadata != null)
                 {
                     yield return testMetadata;
@@ -705,13 +705,13 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
         foreach (var dataSource in classDataSources)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             var dataItems = await GetDataFromSourceAsync(dataSource, null!); // TODO
 
             foreach (var dataRow in dataItems)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 if (dataRow == null || dataRow.Length == 0)
                 {
                     continue;
@@ -726,7 +726,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
 
                 TestMetadata? failedMetadata = null;
                 List<TestMetadata>? successfulTests = null;
-                
+
                 try
                 {
                     // Create concrete type with validation
@@ -788,7 +788,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
                         yield return test;
                     }
                 }
-                
+
                 // Then yield failed metadata if any
                 if (failedMetadata != null)
                 {
@@ -834,11 +834,11 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
         {
             return 0;
         }
-        
+
         // Count how many levels up the inheritance chain the method is declared
         int depth = 0;
         Type? currentType = testClass.BaseType;
-        
+
         while (currentType != null && currentType != typeof(object))
         {
             depth++;
@@ -848,16 +848,16 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
             }
             currentType = currentType.BaseType;
         }
-        
+
         // This shouldn't happen in normal cases, but return the depth anyway
         return depth;
     }
-    
+
     private static Task<TestMetadata> BuildTestMetadata(Type testClass, MethodInfo testMethod, object?[]? classData = null)
     {
         // Create a base ReflectionTestMetadata instance
         var testName = GenerateTestName(testClass, testMethod);
-        
+
         // Calculate inheritance depth
         int inheritanceDepth = CalculateInheritanceDepth(testClass, testMethod);
 
@@ -1170,7 +1170,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
     private static Func<object?[], object> CreateReflectionInstanceFactory(ConstructorInfo ctor)
     {
         var isPrepared = false;
-        
+
         return args =>
         {
             try
@@ -1181,7 +1181,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
                     RuntimeHelpers.PrepareMethod(ctor.MethodHandle);
                     isPrepared = true;
                 }
-                
+
                 // Cast arguments to the expected parameter types
                 var parameters = ctor.GetParameters();
                 var castedArgs = new object?[parameters.Length];
@@ -1372,14 +1372,14 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
     private static Func<object, object?[], Task> CreateReflectionTestInvoker(Type testClass, MethodInfo testMethod)
     {
         var isPrepared = false;
-        
+
         return (instance, args) =>
         {
             try
             {
                 // Get the method to invoke - may need to make it concrete if it's generic
                 var methodToInvoke = testMethod;
-                
+
                 // Pre-JIT on first actual invocation for better performance
                 if (!isPrepared && !testMethod.IsGenericMethodDefinition)
                 {
@@ -1423,7 +1423,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
                     }
 
                     methodToInvoke = testMethod.MakeGenericMethod(typeArguments);
-                    
+
                     // Pre-JIT the constructed generic method on first invocation
                     RuntimeHelpers.PrepareMethod(methodToInvoke.MethodHandle);
                 }
@@ -1587,7 +1587,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
         foreach (var assembly in assemblies)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
             {
                 try
@@ -1619,7 +1619,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
                 foreach (var method in methods)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    
+
                     // Stream tests from this dynamic builder
                     await foreach (var test in ExecuteDynamicTestBuilderStreamingAsync(type, method, testSessionId, cancellationToken))
                     {
@@ -1683,7 +1683,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
     {
         TestMetadata? failedMetadata = null;
         List<TestMetadata>? successfulTests = null;
-        
+
         try
         {
             // Extract file path and line number from the DynamicTestBuilderAttribute if possible
@@ -1707,7 +1707,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
             foreach (var discoveryResult in context.Tests.SelectMany(t => t.GetTests()))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 if (discoveryResult is DynamicDiscoveryResult dynamicResult)
                 {
                     try
@@ -1741,7 +1741,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
             // Create a failed test metadata for this dynamic test builder
             failedMetadata = CreateFailedTestMetadataForDynamicBuilder(testClass, builderMethod, ex);
         }
-        
+
         // Yield successful tests
         if (successfulTests != null)
         {
@@ -1750,7 +1750,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IAsyncTest
                 yield return test;
             }
         }
-        
+
         // Yield failed metadata if any
         if (failedMetadata != null)
         {
