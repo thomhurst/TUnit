@@ -615,6 +615,20 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (isTuples)
             {
+                // Check if any test method parameters are tuple types when data source returns tuples
+                // This causes a runtime mismatch: data source provides separate arguments, but method expects tuple parameter
+                var tupleParameters = testParameterTypes.Where(p => p is INamedTypeSymbol { IsTupleType: true }).ToArray();
+                if (tupleParameters.Any())
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        Rules.WrongArgumentTypeTestData,
+                        attribute.GetLocation(),
+                        string.Join(", ", unwrappedTypes),
+                        string.Join(", ", testParameterTypes))
+                    );
+                    return;
+                }
+
                 if (unwrappedTypes.Length != testParameterTypes.Length)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
