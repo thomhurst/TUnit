@@ -162,12 +162,18 @@ internal sealed class EventBatcher<TEvent> : IAsyncDisposable, IDisposable where
         
         try
         {
-            // Properly await the task instead of blocking
+            // Properly await the task with timeout
 #if NET6_0_OR_GREATER
             await _processingTask.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
 #else
+            // For .NET Framework, use Task.WhenAny to implement timeout
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            await _processingTask.ConfigureAwait(false);
+            var completedTask = await Task.WhenAny(_processingTask, Task.Delay(Timeout.Infinite, cts.Token)).ConfigureAwait(false);
+            if (completedTask == _processingTask)
+            {
+                await _processingTask.ConfigureAwait(false);
+            }
+            // If timeout occurred, we just continue without waiting
 #endif
         }
         catch

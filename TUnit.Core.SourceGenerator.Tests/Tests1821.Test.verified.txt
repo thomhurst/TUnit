@@ -36,6 +36,9 @@ internal sealed class Tests_MethodDataSource_TestSource_GUID : global::TUnit.Cor
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 9,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
@@ -171,6 +174,9 @@ internal sealed class Tests_MatrixDataSource_TestSource_GUID : global::TUnit.Cor
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 16,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),

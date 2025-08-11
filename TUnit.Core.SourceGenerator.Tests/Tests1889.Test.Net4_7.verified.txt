@@ -33,6 +33,9 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 1,
+            FilePath = @"",
+            LineNumber = 6,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
@@ -132,6 +135,9 @@ internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Int
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 1,
+            FilePath = @"",
+            LineNumber = 6,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
@@ -258,6 +264,9 @@ internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Int
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 1,
+            FilePath = @"",
+            LineNumber = 6,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),

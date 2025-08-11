@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 
@@ -176,11 +177,11 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     }
 
     [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", Justification = "Data source methods may use dynamic patterns")]
-    private static async IAsyncEnumerable<object?> ConvertToAsyncEnumerable(object asyncEnumerable)
+    private static async IAsyncEnumerable<object?> ConvertToAsyncEnumerable(object asyncEnumerable, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var type = asyncEnumerable.GetType();
         var enumeratorMethod = type.GetMethod("GetAsyncEnumerator");
-        var enumerator = enumeratorMethod!.Invoke(asyncEnumerable, [CancellationToken.None]);
+        var enumerator = enumeratorMethod!.Invoke(asyncEnumerable, [cancellationToken]);
 
         var moveNextMethod = enumerator!.GetType().GetMethod("MoveNextAsync");
         var currentProperty = enumerator.GetType().GetProperty("Current");

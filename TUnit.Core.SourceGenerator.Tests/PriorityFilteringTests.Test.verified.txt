@@ -32,6 +32,9 @@ internal sealed class PriorityFilteringTests_High_1_TestSource_GUID : global::TU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 12,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
@@ -126,6 +129,9 @@ internal sealed class PriorityFilteringTests_High_2_TestSource_GUID : global::TU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 18,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
@@ -220,6 +226,9 @@ internal sealed class PriorityFilteringTests_High_3_TestSource_GUID : global::TU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 24,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
@@ -314,6 +323,9 @@ internal sealed class PriorityFilteringTests_Medium_1_TestSource_GUID : global::
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 30,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
@@ -408,6 +420,9 @@ internal sealed class PriorityFilteringTests_Medium_2_TestSource_GUID : global::
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 36,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
@@ -502,6 +517,9 @@ internal sealed class PriorityFilteringTests_Low_1_TestSource_GUID : global::TUn
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 42,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),

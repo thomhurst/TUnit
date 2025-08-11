@@ -14,6 +14,7 @@ namespace
         public .ResolvedDependency[] Dependencies { get; set; }
         public ? Duration { get; }
         public ? EndTime { get; set; }
+        public . ExecutionTask { get; }
         public virtual .TestMetadata Metadata { get; init; }
         public .TestResult? Result { get; set; }
         public ? StartTime { get; set; }
@@ -544,6 +545,8 @@ namespace
     {
         public DynamicDiscoveryResult() { }
         public .<> Attributes { get; set; }
+        public string? CreatorFilePath { get; set; }
+        public int? CreatorLineNumber { get; set; }
         public object?[]? TestClassArguments { get; set; }
         public ? TestClassType { get; set; }
         public .? TestMethod { get; set; }
@@ -570,11 +573,13 @@ namespace
     {
         public static T Argument<T>() { }
     }
-    public class DynamicTestInstance<T> : .DynamicTest<T>
+    public class DynamicTestInstance<T> : .DynamicTest<T>, .IDynamicTestCreatorLocation
         where T :  class
     {
         public DynamicTestInstance() { }
         public .<> Attributes { get; set; }
+        public string? CreatorFilePath { get; set; }
+        public int? CreatorLineNumber { get; set; }
         public object?[]? TestClassArguments { get; set; }
         public .<<T>>? TestMethod { get; set; }
         public object?[]? TestMethodArguments { get; set; }
@@ -759,6 +764,11 @@ namespace
     public interface IDataSourceAttribute
     {
         .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
+    }
+    public interface IDynamicTestCreatorLocation
+    {
+        string? CreatorFilePath { get; set; }
+        int? CreatorLineNumber { get; set; }
     }
     public interface IDynamicTestMetadata { }
     public interface IDynamicTestSource
@@ -1326,12 +1336,13 @@ namespace
         public abstract <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
         public required .IDataSourceAttribute[] DataSources { get; init; }
         public .TestDependency[] Dependencies { get; init; }
-        public string? FilePath { get; init; }
+        public required string FilePath { get; init; }
         public .GenericMethodInfo? GenericMethodInfo { get; init; }
         public []? GenericMethodTypeArguments { get; init; }
         public .GenericTypeInfo? GenericTypeInfo { get; init; }
+        public int InheritanceDepth { get; set; }
         public <[], object?[], object> InstanceFactory { get; init; }
-        public int? LineNumber { get; init; }
+        public required int LineNumber { get; init; }
         public required .MethodMetadata MethodMetadata { get; init; }
         public required .PropertyDataSource[] PropertyDataSources { get; init; }
         public .PropertyInjectionData[] PropertyInjections { get; init; }
@@ -1850,7 +1861,10 @@ namespace .Helpers
         public static .<object?> ResolveDataSourceForPropertyAsync( containingType, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static .<object?> ResolveDataSourcePropertyAsync(object instance, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static object?[] ToObjectArray(this object? item) { }
-        public static bool TryCreateWithInitializer( type, .MethodMetadata testInformation, string testSessionId, out object createdInstance) { }
+        [return: .(new string[] {
+                "success",
+                "createdInstance"})]
+        public static .<<bool, object?>> TryCreateWithInitializerAsync( type, .MethodMetadata testInformation, string testSessionId) { }
         public static object?[] UnwrapTuple<T1>(<T1> tuple) { }
         public static object?[] UnwrapTuple<T1, T2>(<T1, T2> tuple) { }
         public static object?[] UnwrapTuple<T1, T2, T3>(<T1, T2, T3> tuple) { }

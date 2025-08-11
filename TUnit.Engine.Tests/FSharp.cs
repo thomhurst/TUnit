@@ -26,7 +26,7 @@ public class FSharp
                     "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}_",
                     "--timeout", "5m",
-                    // "--hangdump", "--hangdump-filename", $"hangdump.tests-{guid}.txt", "--hangdump-timeout", "3m",
+                    // "--hangdump", "--hangdump-filename", $"hangdump.tests-{guid}.dmp", "--hangdump-timeout", "3m",
 
                     ..runOptions.AdditionalArguments
                 ]

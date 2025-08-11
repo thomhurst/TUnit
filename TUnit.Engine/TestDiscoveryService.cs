@@ -8,7 +8,6 @@ using TUnit.Core;
 using TUnit.Engine.Building;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Services;
-using TUnit.Engine.Scheduling;
 
 namespace TUnit.Engine;
 
@@ -91,16 +90,10 @@ internal sealed class TestDiscoveryService : IDataProducer
             _dependencyResolver.TryResolveDependencies(test);
         }
         
-        // Check for circular dependencies and mark failed tests
-        _dependencyResolver.CheckForCircularDependencies();
-        
         // Combine independent and dependent tests
         var tests = new List<AbstractExecutableTest>(independentTests.Count + dependentTests.Count);
         tests.AddRange(independentTests);
         tests.AddRange(dependentTests);
-        
-        // Create execution plan for ordering
-        var executionPlan = ExecutionPlan.Create(tests);
         
         // Apply filter first to get the tests we want to run
         var filteredTests = _testFilterService.FilterTests(filter, tests);
@@ -230,9 +223,6 @@ internal sealed class TestDiscoveryService : IDataProducer
                 {
                     _dependencyResolver.TryResolveDependencies(test);
                 }
-
-                // Check for circular dependencies
-                _dependencyResolver.CheckForCircularDependencies();
 
                 // Queue tests whose dependencies are already satisfied
                 foreach (var test in pendingDependentTests.Values.ToList())

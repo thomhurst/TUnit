@@ -45,6 +45,9 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_TestSource_G
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 12,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -179,6 +182,9 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method2_TestSource_
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 19,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -313,6 +319,9 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_WithAction_T
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 26,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -465,6 +474,9 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method3_TestSource_
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 33,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -648,6 +660,9 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 42,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -782,6 +797,9 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_WithBaseReturn_Test
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 53,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
@@ -926,6 +944,9 @@ internal sealed class MethodDataSourceDrivenTests_EnumerableFuncArrayTest_TestSo
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 59,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),

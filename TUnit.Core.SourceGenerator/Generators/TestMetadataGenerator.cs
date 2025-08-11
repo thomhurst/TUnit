@@ -129,6 +129,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Find the concrete implementation of this method in the derived class
             var concreteMethod = FindConcreteMethodImplementation(classInfo.TypeSymbol, method);
+            
+            // Calculate inheritance depth for this test
+            int inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
 
             var testMethodMetadata = new TestMethodMetadata
             {
@@ -142,10 +145,37 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 IsGenericType = classInfo.TypeSymbol.IsGenericType,
                 IsGenericMethod = (concreteMethod ?? method).IsGenericMethod,
                 MethodAttributes = (concreteMethod ?? method).GetAttributes(), // Use concrete method attributes
+                InheritanceDepth = inheritanceDepth
             };
 
             GenerateTestMethodSource(context, compilation, testMethodMetadata);
         }
+    }
+
+    private static int CalculateInheritanceDepth(INamedTypeSymbol testClass, IMethodSymbol testMethod)
+    {
+        // If the method is declared directly in the test class, depth is 0
+        if (testMethod.ContainingType.Equals(testClass, SymbolEqualityComparer.Default))
+        {
+            return 0;
+        }
+        
+        // Count how many levels up the inheritance chain the method is declared
+        int depth = 0;
+        INamedTypeSymbol? currentType = testClass.BaseType;
+        
+        while (currentType != null)
+        {
+            depth++;
+            if (testMethod.ContainingType.Equals(currentType, SymbolEqualityComparer.Default))
+            {
+                return depth;
+            }
+            currentType = currentType.BaseType;
+        }
+        
+        // This shouldn't happen in normal cases, but return the depth anyway
+        return depth;
     }
 
     private static void GenerateTestMethodSource(SourceProductionContext context, Compilation compilation, TestMethodMetadata? testMethod)
@@ -331,6 +361,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate AOT-friendly invokers that use the specific types
         GenerateAotFriendlyInvokers(writer, testMethod, className, typeArguments);
+        
+        // Add file location metadata
+        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         writer.Unindent();
         writer.AppendLine("};");
@@ -526,6 +560,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate property injections
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
 
+        // Inheritance depth
+        writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
+        
+        // File location metadata
+        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         // Method metadata
         writer.Append("MethodMetadata = ");
@@ -564,6 +604,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate property injections
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
 
+        // Inheritance depth
+        writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
+        
+        // File location metadata
+        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         // Method metadata
         writer.Append("MethodMetadata = ");
@@ -3872,6 +3918,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Other metadata
         writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
+        writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
         writer.AppendLine($"TestSessionId = testSessionId,");
 
         // Method metadata
@@ -4202,6 +4249,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate typed invoker
         GenerateTypedInvokers(writer, testMethod, className);
+        
+        // Add file location metadata
+        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         writer.Unindent();
         writer.AppendLine("};");

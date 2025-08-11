@@ -34,6 +34,9 @@ internal sealed class NumberArgumentTests_Int_TestSource_GUID : global::TUnit.Co
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 8,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
@@ -157,6 +160,9 @@ internal sealed class NumberArgumentTests_Double_TestSource_GUID : global::TUnit
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 15,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
@@ -280,6 +286,9 @@ internal sealed class NumberArgumentTests_Float_TestSource_GUID : global::TUnit.
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 22,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
@@ -403,6 +412,9 @@ internal sealed class NumberArgumentTests_Long_TestSource_GUID : global::TUnit.C
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 29,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
@@ -526,6 +538,9 @@ internal sealed class NumberArgumentTests_ULong_TestSource_GUID : global::TUnit.
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 36,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.NumberArgumentTests),
@@ -649,6 +664,9 @@ internal sealed class NumberArgumentTests_UInt_TestSource_GUID : global::TUnit.C
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 43,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.NumberArgumentTests),

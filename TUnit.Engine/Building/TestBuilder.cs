@@ -152,7 +152,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     MethodDataSourceAttributeIndex = 0,
                                     MethodDataLoopIndex = 0,
                                     MethodData = [],
-                                    RepeatIndex = 0
+                                    RepeatIndex = 0,
+                                    InheritanceDepth = metadata.InheritanceDepth
                                 };
 
                                 try
@@ -225,7 +226,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     MethodDataSourceAttributeIndex = methodDataAttributeIndex,
                                     MethodDataLoopIndex = methodDataLoopIndex,
                                     MethodData = methodData,
-                                    RepeatIndex = i
+                                    RepeatIndex = i,
+                                    InheritanceDepth = metadata.InheritanceDepth
                                 };
 
                                 Type[] resolvedClassGenericArgs;
@@ -297,6 +299,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     MethodDataLoopIndex = methodDataLoopIndex,
                                     MethodData = methodData,
                                     RepeatIndex = i,
+                                    InheritanceDepth = metadata.InheritanceDepth,
                                     ResolvedClassGenericArguments = resolvedClassGenericArgs,
                                     ResolvedMethodGenericArguments = resolvedMethodGenericArgs
                                 };
@@ -618,14 +621,15 @@ internal sealed class TestBuilder : ITestBuilder
             ClassInstance = PlaceholderInstance.Instance,
             TestMethodArguments = testData.MethodData,
             TestClassArguments = testData.ClassData,
-            TestFilePath = metadata.FilePath ?? "Unknown",
-            TestLineNumber = metadata.LineNumber ?? 0,
+            TestFilePath = metadata.FilePath,
+            TestLineNumber = metadata.LineNumber,
             ReturnType = metadata.MethodMetadata.ReturnType ?? typeof(void),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = attributes,
             MethodGenericArguments = testData.ResolvedMethodGenericArguments,
-            ClassGenericArguments = testData.ResolvedClassGenericArguments
-            // Don't set Timeout and RetryLimit here - let discovery event receivers set them
+            ClassGenericArguments = testData.ResolvedClassGenericArguments,
+            Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
+            // Don't set RetryLimit here - let discovery event receivers set it
         };
 
         var context = _contextProvider.CreateTestContext(
@@ -687,10 +691,11 @@ internal sealed class TestBuilder : ITestBuilder
             TestMethodArguments = [],
             TestClassArguments = [],
             TestFilePath = metadata.FilePath ?? "Unknown",
-            TestLineNumber = metadata.LineNumber ?? 0,
+            TestLineNumber = metadata.LineNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = metadata.AttributeFactory.Invoke(),
+            Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
         };
     }
 
@@ -944,6 +949,14 @@ internal sealed class TestBuilder : ITestBuilder
         public required int RepeatIndex { get; init; }
 
         /// <summary>
+        /// The depth of inheritance for this test method.
+        /// 0 = method is defined directly in the test class
+        /// 1 = method is inherited from immediate base class
+        /// 2 = method is inherited from base's base class, etc.
+        /// </summary>
+        public int InheritanceDepth { get; set; } = 0;
+
+        /// <summary>
         /// Resolved generic type arguments for the test class.
         /// Will be Type.EmptyTypes if the class is not generic.
         /// </summary>
@@ -1086,7 +1099,8 @@ internal sealed class TestBuilder : ITestBuilder
                     MethodDataSourceAttributeIndex = 0,
                     MethodDataLoopIndex = 0,
                     MethodData = [],
-                    RepeatIndex = 0
+                    RepeatIndex = 0,
+                    InheritanceDepth = metadata.InheritanceDepth
                 };
 
                 try
@@ -1145,7 +1159,8 @@ internal sealed class TestBuilder : ITestBuilder
                 MethodDataSourceAttributeIndex = methodDataAttributeIndex,
                 MethodDataLoopIndex = methodDataLoopIndex,
                 MethodData = methodData,
-                RepeatIndex = repeatIndex
+                RepeatIndex = repeatIndex,
+                InheritanceDepth = metadata.InheritanceDepth
             };
 
             // Resolve generic types
@@ -1211,6 +1226,7 @@ internal sealed class TestBuilder : ITestBuilder
                 MethodDataLoopIndex = methodDataLoopIndex,
                 MethodData = methodData,
                 RepeatIndex = repeatIndex,
+                InheritanceDepth = metadata.InheritanceDepth,
                 ResolvedClassGenericArguments = resolvedClassGenericArgs,
                 ResolvedMethodGenericArguments = resolvedMethodGenericArgs
             };

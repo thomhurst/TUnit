@@ -44,62 +44,48 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         }
         var assemblies = assembliesList;
 
-        Console.WriteLine($"Scanning {assemblies.Count} assemblies for tests...");
 
-        // Use indexed collection to maintain order
-        var resultsByIndex = new ConcurrentDictionary<int, List<TestMetadata>>();
-
-        // Use true parallel processing with thread pool threads
-        var parallelOptions = new ParallelOptions
+        // Use async parallel processing with proper task-based approach
+        var tasks = new Task<List<TestMetadata>>[assemblies.Count];
+        
+        for (var i = 0; i < assemblies.Count; i++)
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount
-        };
-
-        Parallel.ForEach(assemblies.Select((assembly, index) => new
-        {
-            assembly, index
-        }), parallelOptions, item =>
-        {
-            var assembly = item.assembly;
-            var index = item.index;
-
-            lock (_lock)
+            var assembly = assemblies[i];
+            var index = i;
+            
+            tasks[index] = Task.Run(async () =>
             {
-                if (!_scannedAssemblies.Add(assembly))
+                lock (_lock)
                 {
-                    resultsByIndex[index] =
-                    [
-                    ];
-                    return;
+                    if (!_scannedAssemblies.Add(assembly))
+                    {
+                        return new List<TestMetadata>();
+                    }
                 }
-            }
 
-            try
-            {
-                Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
-                // Run async method synchronously since we're in parallel processing context
-                var testsInAssembly = DiscoverTestsInAssembly(assembly).ConfigureAwait(false).GetAwaiter().GetResult();
-                resultsByIndex[index] = testsInAssembly;
-            }
-            catch (Exception ex)
-            {
-                // Create a failed test metadata for the assembly that couldn't be scanned
-                var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
-                resultsByIndex[index] =
-                [
-                    failedTest
-                ];
-            }
-        });
+                try
+                {
+                    // Now we can properly await the async method
+                    var testsInAssembly = await DiscoverTestsInAssembly(assembly).ConfigureAwait(false);
+                    return testsInAssembly;
+                }
+                catch (Exception ex)
+                {
+                    // Create a failed test metadata for the assembly that couldn't be scanned
+                    var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
+                    return new List<TestMetadata> { failedTest };
+                }
+            });
+        }
+
+        // Wait for all tasks to complete
+        var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
         // Reassemble results in original order
         var newTests = new List<TestMetadata>();
-        for (var i = 0; i < assemblies.Count; i++)
+        foreach (var tests in results)
         {
-            if (resultsByIndex.TryGetValue(i, out var tests))
-            {
-                newTests.AddRange(tests);
-            }
+            newTests.AddRange(tests);
         }
 
         // Discover dynamic tests from DynamicTestBuilderAttribute methods
@@ -130,7 +116,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             }
         }
 
-        Console.WriteLine($"Scanning {assemblies.Count} assemblies for tests...");
 
         // Stream tests from each assembly
         foreach (var assembly in assemblies)
@@ -323,7 +308,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             catch (ReflectionTypeLoadException rtle)
             {
                 // Some types might fail to load, but we can still use the ones that loaded successfully
-                Console.WriteLine($"Warning: Some types failed to load from assembly {asm.FullName}: {rtle.Message}");
                 // Optimize: Manual filtering with ArrayPool for better memory efficiency
                 var loadedTypes = rtle.Types;
                 if (loadedTypes == null) return [];
@@ -350,9 +334,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                     ArrayPool<Type>.Shared.Return(tempArray);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Warning: Failed to get types from assembly {asm.FullName}: {ex.Message}");
                 return [];
             }
         });
@@ -417,9 +400,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                     testMethods = testMethodsList.ToArray();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Warning: Failed to get methods from type {type.FullName}: {ex.Message}");
                 continue;
             }
 
@@ -451,7 +433,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         Assembly assembly,
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
         
         var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
         {
@@ -464,7 +445,6 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             catch (ReflectionTypeLoadException rtle)
             {
                 // Some types might fail to load, but we can still use the ones that loaded successfully
-                Console.WriteLine($"Warning: Some types failed to load from assembly {asm.FullName}: {rtle.Message}");
                 // Optimize: Manual filtering with ArrayPool for better memory efficiency
                 var loadedTypes = rtle.Types;
                 if (loadedTypes == null) return [];
@@ -491,9 +471,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                     ArrayPool<Type>.Shared.Return(tempArray);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Warning: Failed to get types from assembly {asm.FullName}: {ex.Message}");
                 return [];
             }
         });
@@ -546,9 +525,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                         .ToArray();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Warning: Failed to get test methods from type {type.FullName}: {ex.Message}");
                 continue;
             }
 
@@ -784,6 +762,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                         TestName = $"[GENERIC TYPE CREATION FAILED] {genericTypeDefinition.Name}",
                         TestClassType = genericTypeDefinition,
                         TestMethodName = "GenericTypeCreationFailed",
+                        FilePath = "Unknown",
+                        LineNumber = 0,
                         MethodMetadata = CreateDummyMethodMetadata(genericTypeDefinition, "GenericTypeCreationFailed"),
                         AttributeFactory = () => [],
                         DataSources = [],
@@ -839,10 +819,39 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         return await Task.FromResult(data);
     }
 
+    private static int CalculateInheritanceDepth(Type testClass, MethodInfo testMethod)
+    {
+        // If the method is declared directly in the test class, depth is 0
+        if (testMethod.DeclaringType == testClass)
+        {
+            return 0;
+        }
+        
+        // Count how many levels up the inheritance chain the method is declared
+        int depth = 0;
+        Type? currentType = testClass.BaseType;
+        
+        while (currentType != null && currentType != typeof(object))
+        {
+            depth++;
+            if (testMethod.DeclaringType == currentType)
+            {
+                return depth;
+            }
+            currentType = currentType.BaseType;
+        }
+        
+        // This shouldn't happen in normal cases, but return the depth anyway
+        return depth;
+    }
+    
     private static Task<TestMetadata> BuildTestMetadata(Type testClass, MethodInfo testMethod, object?[]? classData = null)
     {
         // Create a base ReflectionTestMetadata instance
         var testName = GenerateTestName(testClass, testMethod);
+        
+        // Calculate inheritance depth
+        int inheritanceDepth = CalculateInheritanceDepth(testClass, testMethod);
 
         try
         {
@@ -859,14 +868,15 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                 PropertyDataSources = ReflectionAttributeExtractor.ExtractPropertyDataSources(testClass),
                 InstanceFactory = CreateInstanceFactory(testClass)!,
                 TestInvoker = CreateTestInvoker(testClass, testMethod),
-                FilePath = ExtractFilePath(testMethod),
-                LineNumber = ExtractLineNumber(testMethod),
+                FilePath = ExtractFilePath(testMethod) ?? "Unknown",
+                LineNumber = ExtractLineNumber(testMethod) ?? 0,
                 MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(testClass, testMethod),
                 GenericTypeInfo = ReflectionGenericTypeResolver.ExtractGenericTypeInfo(testClass),
                 GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(testMethod),
                 GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
                 AttributeFactory = () => ReflectionAttributeExtractor.GetAllAttributes(testClass, testMethod),
-                PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(testClass)
+                PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(testClass),
+                InheritanceDepth = inheritanceDepth
             });
         }
         catch (Exception ex)
@@ -1038,6 +1048,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             TestName = testName,
             TestClassType = testClass,
             TestMethodName = "AssemblyScanFailed",
+            FilePath = "Unknown",
+            LineNumber = 0,
             MethodMetadata = CreateDummyMethodMetadata(testClass,
                 "AssemblyScanFailed"),
             AttributeFactory = () =>
@@ -1066,6 +1078,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             TestName = testName,
             TestClassType = type,
             TestMethodName = method.Name,
+            FilePath = ExtractFilePath(method) ?? "Unknown",
+            LineNumber = ExtractLineNumber(method) ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
             AttributeFactory = () => method.GetCustomAttributes()
                 .ToArray(),
@@ -1769,8 +1783,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             PropertyDataSources = [],
             InstanceFactory = CreateDynamicInstanceFactory(result.TestClassType, result.TestClassArguments)!,
             TestInvoker = CreateDynamicTestInvoker(result),
-            FilePath = null,
-            LineNumber = null,
+            FilePath = result.CreatorFilePath ?? "Unknown",
+            LineNumber = result.CreatorLineNumber ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(result.TestClassType, methodInfo),
             GenericTypeInfo = ReflectionGenericTypeResolver.ExtractGenericTypeInfo(result.TestClassType),
             GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(methodInfo),
@@ -1861,6 +1875,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             TestName = testName,
             TestClassType = source.GetType(),
             TestMethodName = "CollectDynamicTests",
+            FilePath = "Unknown",
+            LineNumber = 0,
             MethodMetadata = CreateDummyMethodMetadata(source.GetType(), "CollectDynamicTests"),
             AttributeFactory = () => [],
             DataSources = [],
@@ -1879,6 +1895,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             TestName = testName,
             TestClassType = type,
             TestMethodName = method.Name,
+            FilePath = ExtractFilePath(method) ?? "Unknown",
+            LineNumber = ExtractLineNumber(method) ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
             AttributeFactory = () => method.GetCustomAttributes().ToArray(),
             DataSources = [],
@@ -1897,6 +1915,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             TestName = testName,
             TestClassType = result.TestClassType ?? typeof(object),
             TestMethodName = "DynamicTestFailed",
+            FilePath = result.CreatorFilePath ?? "Unknown",
+            LineNumber = result.CreatorLineNumber ?? 0,
             MethodMetadata = CreateDummyMethodMetadata(result.TestClassType ?? typeof(object), "DynamicTestFailed"),
             AttributeFactory = () => result.Attributes?.ToArray() ?? [],
             DataSources = [],

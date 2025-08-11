@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
     <PackageReference Include="NuGet.Protocol" />
     <PackageReference Include="Sourcy.DotNet">
       <PrivateAssets>all</PrivateAssets>

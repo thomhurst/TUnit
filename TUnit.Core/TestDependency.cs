@@ -96,7 +96,10 @@ public sealed class TestDependency : IEquatable<TestDependency>
         }
         else if (dependentTest != null)
         {
-            if (test.TestClassType != dependentTest.TestClassType)
+            var testType = test.TestClassType;
+            var dependentType = dependentTest.TestClassType;
+            
+            if (testType != dependentType)
             {
                 return false;
             }
