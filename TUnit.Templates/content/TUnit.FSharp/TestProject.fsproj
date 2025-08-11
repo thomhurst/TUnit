@@ -12,7 +12,6 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
 		<PackageReference Include="TUnit" Version="0.55.0" />
 		<PackageReference Include="TUnit.Assertions.FSharp" Version="0.55.0" />	
-		<PackageReference Update="TUnit.Assertions.FSharp" Version="0.55.0" />	
 	</ItemGroup>
 
 	<ItemGroup>
