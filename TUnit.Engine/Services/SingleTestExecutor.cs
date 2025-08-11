@@ -298,7 +298,28 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
                 {
-                    await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
+                    try
+                    {
+                        // Add a reasonable timeout for disposal operations (5 seconds)
+                        var disposeTask = invocation.InvokeAsync(test.Context, test.Context).AsTask();
+                        var timeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
+                        var completedTask = await Task.WhenAny(disposeTask, timeoutTask).ConfigureAwait(false);
+                        
+                        if (completedTask == timeoutTask)
+                        {
+                            await _logger.LogWarningAsync("OnDispose event timed out after 5 seconds").ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            // Ensure any exceptions from the dispose task are observed
+                            await disposeTask.ConfigureAwait(false);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log but don't throw - we still need to dispose other objects and the test instance
+                        await _logger.LogErrorAsync($"Error during OnDispose event: {ex.Message}").ConfigureAwait(false);
+                    }
                 }
             }
             
