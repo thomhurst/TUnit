@@ -219,56 +219,6 @@ internal sealed class TestDependencyResolver
         }
     }
     
-    public void CheckForCircularDependencies()
-    {
-        foreach (var test in _allTests)
-        {
-            if (test.Dependencies.Length > 0)
-            {
-                var visited = new HashSet<AbstractExecutableTest>();
-                var recursionStack = new HashSet<AbstractExecutableTest>();
-                
-                if (HasCircularDependency(test, visited, recursionStack))
-                {
-                    test.State = TestState.Failed;
-                    test.Result = new TestResult
-                    {
-                        State = TestState.Failed,
-                        Start = DateTimeOffset.UtcNow,
-                        End = DateTimeOffset.UtcNow,
-                        Duration = TimeSpan.Zero,
-                        Exception = new InvalidOperationException(
-                            $"Circular dependency detected for test {test.Metadata.TestClassType.Name}.{test.Metadata.TestMethodName}"),
-                        ComputerName = Environment.MachineName
-                    };
-                }
-            }
-        }
-    }
-    
-    private bool HasCircularDependency(AbstractExecutableTest test, HashSet<AbstractExecutableTest> visited, HashSet<AbstractExecutableTest> recursionStack)
-    {
-        visited.Add(test);
-        recursionStack.Add(test);
-        
-        foreach (var dependency in test.Dependencies)
-        {
-            if (!visited.Contains(dependency.Test))
-            {
-                if (HasCircularDependency(dependency.Test, visited, recursionStack))
-                {
-                    return true;
-                }
-            }
-            else if (recursionStack.Contains(dependency.Test))
-            {
-                return true;
-            }
-        }
-        
-        recursionStack.Remove(test);
-        return false;
-    }
     
     public IReadOnlyList<TestDetails> GetTransitiveDependencies(TestDetails testDetails)
     {

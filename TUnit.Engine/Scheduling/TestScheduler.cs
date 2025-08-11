@@ -51,8 +51,38 @@ internal sealed class TestScheduler : ITestScheduler
             return;
         }
 
+        // Detect and handle circular dependencies
+        var circularTests = DetectCircularDependencies(testList);
+        foreach (var test in circularTests)
+        {
+            test.State = TestState.Failed;
+            test.Result = new TestResult
+            {
+                State = TestState.Failed,
+                Exception = new InvalidOperationException($"Test '{test.TestId}' has circular dependencies and cannot be executed"),
+                ComputerName = Environment.MachineName,
+                Start = DateTimeOffset.UtcNow,
+                End = DateTimeOffset.UtcNow,
+                Duration = TimeSpan.Zero
+            };
+            
+            // Complete the test's task to prevent waiting forever
+            test.Context.InternalExecutableTest._taskCompletionSource?.TrySetResult();
+            
+            // Report the failure
+            await _messageBus.Failed(test.Context, test.Result.Exception, test.Result.Start ?? DateTimeOffset.UtcNow);
+        }
+
+        // Remove circular tests from the list
+        var executableTests = testList.Where(t => !circularTests.Contains(t)).ToList();
+        if (executableTests.Count == 0)
+        {
+            await _logger.LogDebugAsync("No executable tests found after removing circular dependencies");
+            return;
+        }
+
         // Group tests by constraints
-        var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(testList);
+        var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests);
 
         // Execute tests
         await ExecuteGroupedTestsAsync(groupedTests, executor, cancellationToken);
@@ -509,6 +539,95 @@ internal sealed class TestScheduler : ITestScheduler
         }
 
         return sorted;
+    }
+
+    private HashSet<AbstractExecutableTest> DetectCircularDependencies(IList<AbstractExecutableTest> tests)
+    {
+        var circularTests = new HashSet<AbstractExecutableTest>();
+        var visitState = new Dictionary<string, VisitState>();
+        
+        // Build test map, handling potential duplicates by keeping the first occurrence
+        var testMap = new Dictionary<string, AbstractExecutableTest>();
+        foreach (var test in tests)
+        {
+            if (!testMap.ContainsKey(test.TestId))
+            {
+                testMap[test.TestId] = test;
+            }
+            else
+            {
+                // Log warning about duplicate test ID
+                _logger.LogWarningAsync($"Duplicate test ID detected: {test.TestId}. This indicates a bug in test ID generation.").GetAwaiter().GetResult();
+            }
+        }
+        
+        foreach (var test in tests)
+        {
+            if (!visitState.ContainsKey(test.TestId))
+            {
+                var cycle = new List<AbstractExecutableTest>();
+                if (HasCycle(test, testMap, visitState, cycle))
+                {
+                    // Add all tests in the cycle to the circular tests set
+                    foreach (var cycleTest in cycle)
+                    {
+                        circularTests.Add(cycleTest);
+                    }
+                }
+            }
+        }
+        
+        return circularTests;
+    }
+    
+    private bool HasCycle(
+        AbstractExecutableTest test,
+        Dictionary<string, AbstractExecutableTest> testMap,
+        Dictionary<string, VisitState> visitState,
+        List<AbstractExecutableTest> currentPath)
+    {
+        visitState[test.TestId] = VisitState.Visiting;
+        currentPath.Add(test);
+        
+        foreach (var dependency in test.Dependencies)
+        {
+            var depTestId = dependency.Test.TestId;
+            
+            // Only check dependencies that are in our test set
+            if (!testMap.ContainsKey(depTestId))
+                continue;
+                
+            if (!visitState.TryGetValue(depTestId, out var state))
+            {
+                // Not visited yet, recurse
+                if (HasCycle(testMap[depTestId], testMap, visitState, currentPath))
+                {
+                    return true;
+                }
+            }
+            else if (state == VisitState.Visiting)
+            {
+                // Found a cycle - the dependency is in the current path
+                // Trim the path to only include the cycle
+                var cycleStartIndex = currentPath.FindIndex(t => t.TestId == depTestId);
+                if (cycleStartIndex >= 0)
+                {
+                    currentPath.RemoveRange(0, cycleStartIndex);
+                }
+                return true;
+            }
+            // If state == VisitState.Visited, this dependency was already fully processed
+        }
+        
+        visitState[test.TestId] = VisitState.Visited;
+        currentPath.Remove(test);
+        return false;
+    }
+    
+    private enum VisitState
+    {
+        Visiting,
+        Visited
     }
 
 }

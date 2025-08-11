@@ -90,9 +90,6 @@ internal sealed class TestDiscoveryService : IDataProducer
             _dependencyResolver.TryResolveDependencies(test);
         }
         
-        // Check for circular dependencies and mark failed tests
-        _dependencyResolver.CheckForCircularDependencies();
-        
         // Combine independent and dependent tests
         var tests = new List<AbstractExecutableTest>(independentTests.Count + dependentTests.Count);
         tests.AddRange(independentTests);
@@ -226,9 +223,6 @@ internal sealed class TestDiscoveryService : IDataProducer
                 {
                     _dependencyResolver.TryResolveDependencies(test);
                 }
-
-                // Check for circular dependencies
-                _dependencyResolver.CheckForCircularDependencies();
 
                 // Queue tests whose dependencies are already satisfied
                 foreach (var test in pendingDependentTests.Values.ToList())
