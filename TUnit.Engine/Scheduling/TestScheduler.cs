@@ -1,8 +1,6 @@
-using System.Collections.Concurrent;
-using EnumerableAsyncProcessor.Extensions;
 using Microsoft.Testing.Platform.CommandLine;
-using Microsoft.Testing.Platform.Extensions.CommandLine;
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Logging;
@@ -48,24 +46,26 @@ internal sealed class TestScheduler : ITestScheduler
             return;
         }
 
-        var circularTests = DetectCircularDependencies(testList);
-        foreach (var test in circularTests)
+        var circularDependencies = DetectCircularDependencies(testList);
+
+        foreach (var (test, dependencyChain) in circularDependencies)
         {
             test.State = TestState.Failed;
+            var exception = new DependencyConflictException(dependencyChain);
             test.Result = new TestResult
             {
                 State = TestState.Failed,
-                Exception = new InvalidOperationException($"Test '{test.TestId}' has circular dependencies and cannot be executed"),
+                Exception = exception,
                 ComputerName = Environment.MachineName,
                 Start = DateTimeOffset.UtcNow,
                 End = DateTimeOffset.UtcNow,
                 Duration = TimeSpan.Zero
             };
-            
-            await _messageBus.Failed(test.Context, test.Result.Exception, test.Result.Start ?? DateTimeOffset.UtcNow).ConfigureAwait(false);
+
+            await _messageBus.Failed(test.Context, exception, test.Result.Start ?? DateTimeOffset.UtcNow).ConfigureAwait(false);
         }
 
-        var executableTests = testList.Where(t => !circularTests.Contains(t)).ToList();
+        var executableTests = testList.Where(t => !circularDependencies.Any(cd => cd.test == t)).ToList();
         if (executableTests.Count == 0)
         {
             await _logger.LogDebugAsync("No executable tests found after removing circular dependencies").ConfigureAwait(false);
@@ -93,7 +93,7 @@ internal sealed class TestScheduler : ITestScheduler
                 try
                 {
                     await dependency.Test.ExecutionTask.ConfigureAwait(false);
-                    
+
                     // Check if dependency failed and we should skip
                     if (dependency.Test.State == TestState.Failed && !dependency.ProceedOnFailure)
                     {
@@ -114,7 +114,7 @@ internal sealed class TestScheduler : ITestScheduler
                 catch (Exception ex)
                 {
                     await _logger.LogErrorAsync($"Error waiting for dependency {dependency.Test.TestId}: {ex}").ConfigureAwait(false);
-                    
+
                     if (!dependency.ProceedOnFailure)
                     {
                         test.State = TestState.Skipped;
@@ -167,7 +167,7 @@ internal sealed class TestScheduler : ITestScheduler
                 maxParallelism = maxParallelTests;
             }
         }
-        
+
         // If no explicit limit is set, use a sensible default to prevent thread pool exhaustion
         if (!maxParallelism.HasValue)
         {
@@ -228,7 +228,7 @@ internal sealed class TestScheduler : ITestScheduler
         foreach (var classGroup in testsByClass)
         {
             var classTests = classGroup
-                .OrderBy(t => 
+                .OrderBy(t =>
                 {
                     var constraint = t.Context.ParallelConstraint as NotInParallelConstraint;
                     return constraint?.Order ?? int.MaxValue / 2;
@@ -275,7 +275,7 @@ internal sealed class TestScheduler : ITestScheduler
 
         // Track running tasks by key
         var runningKeyedTasks = new Dictionary<string, Task>();
-        
+
         foreach (var test in sortedTests)
         {
             var testKeys = testToKeys[test];
@@ -289,7 +289,7 @@ internal sealed class TestScheduler : ITestScheduler
                     conflictingTasks.Add(runningTask);
                 }
             }
-            
+
             if (conflictingTasks.Count > 0)
             {
                 await Task.WhenAll(conflictingTasks).ConfigureAwait(false);
@@ -297,7 +297,7 @@ internal sealed class TestScheduler : ITestScheduler
 
             // Start the test execution
             var task = test.ExecutionTask;
-            
+
             // Track this task for all its keys
             foreach (var key in testKeys)
             {
@@ -321,7 +321,7 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 // Use semaphore to limit parallelism
                 using var semaphore = new SemaphoreSlim(maxParallelism.Value, maxParallelism.Value);
-                
+
                 var tasks = tests.Select(async test =>
                 {
                     await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -334,7 +334,7 @@ internal sealed class TestScheduler : ITestScheduler
                         semaphore.Release();
                     }
                 });
-                
+
                 await Task.WhenAll(tasks).ConfigureAwait(false);
             }
             else
@@ -354,7 +354,7 @@ internal sealed class TestScheduler : ITestScheduler
         {
             // Use semaphore to limit parallelism
             using var semaphore = new SemaphoreSlim(maxParallelism.Value, maxParallelism.Value);
-            
+
             var tasks = tests.Select(async test =>
             {
                 await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -367,7 +367,7 @@ internal sealed class TestScheduler : ITestScheduler
                     semaphore.Release();
                 }
             });
-            
+
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
         else
@@ -377,11 +377,12 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    private HashSet<AbstractExecutableTest> DetectCircularDependencies(IList<AbstractExecutableTest> tests)
+    private List<(AbstractExecutableTest test, List<TestDetails> dependencyChain)> DetectCircularDependencies(IList<AbstractExecutableTest> tests)
     {
-        var circularTests = new HashSet<AbstractExecutableTest>();
+        var circularDependencies = new List<(AbstractExecutableTest, List<TestDetails>)>();
         var visitState = new Dictionary<string, VisitState>();
-        
+        var processedCycles = new HashSet<string>();
+
         // Build test map
         var testMap = new Dictionary<string, AbstractExecutableTest>();
         foreach (var test in tests)
@@ -391,25 +392,59 @@ internal sealed class TestScheduler : ITestScheduler
                 testMap[test.TestId] = test;
             }
         }
-        
+
         foreach (var test in tests)
         {
             if (!visitState.ContainsKey(test.TestId))
             {
-                var cycle = new List<AbstractExecutableTest>();
-                if (HasCycle(test, testMap, visitState, cycle))
+                var currentPath = new List<AbstractExecutableTest>();
+                if (HasCycle(test, testMap, visitState, currentPath))
                 {
-                    foreach (var cycleTest in cycle)
+                    // Extract the cycle from the path
+                    if (currentPath.Count > 0)
                     {
-                        circularTests.Add(cycleTest);
+                        // The last element in currentPath is the test that completes the cycle
+                        var lastTest = currentPath[currentPath.Count - 1];
+
+                        // Find where the cycle starts (the first occurrence of the repeated element)
+                        var cycleStartIndex = -1;
+                        for (int i = 0; i < currentPath.Count - 1; i++)
+                        {
+                            if (currentPath[i].TestId == lastTest.TestId)
+                            {
+                                cycleStartIndex = i;
+                                break;
+                            }
+                        }
+
+                        if (cycleStartIndex >= 0)
+                        {
+                            // Build the dependency chain for the cycle (from start to end, inclusive)
+                            var cycleTests = currentPath.Skip(cycleStartIndex).ToList();
+                            var dependencyChain = cycleTests.Select(t => t.Context.TestDetails).ToList();
+
+                            // Create a unique key for this cycle to avoid duplicates
+                            var cycleKey = string.Join("->", cycleTests.Take(cycleTests.Count - 1).Select(t => t.TestId).OrderBy(id => id));
+
+                            if (!processedCycles.Contains(cycleKey))
+                            {
+                                processedCycles.Add(cycleKey);
+
+                                // Add all tests that are part of the cycle (excluding the duplicate at the end)
+                                foreach (var cycleTest in cycleTests.Take(cycleTests.Count - 1))
+                                {
+                                    circularDependencies.Add((cycleTest, dependencyChain));
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-        
-        return circularTests;
+
+        return circularDependencies;
     }
-    
+
     private bool HasCycle(
         AbstractExecutableTest test,
         Dictionary<string, AbstractExecutableTest> testMap,
@@ -418,14 +453,14 @@ internal sealed class TestScheduler : ITestScheduler
     {
         visitState[test.TestId] = VisitState.Visiting;
         currentPath.Add(test);
-        
+
         foreach (var dependency in test.Dependencies)
         {
             var depTestId = dependency.Test.TestId;
-            
+
             if (!testMap.ContainsKey(depTestId))
                 continue;
-                
+
             if (!visitState.TryGetValue(depTestId, out var state))
             {
                 if (HasCycle(testMap[depTestId], testMap, visitState, currentPath))
@@ -435,20 +470,17 @@ internal sealed class TestScheduler : ITestScheduler
             }
             else if (state == VisitState.Visiting)
             {
-                var cycleStartIndex = currentPath.FindIndex(t => t.TestId == depTestId);
-                if (cycleStartIndex >= 0)
-                {
-                    currentPath.RemoveRange(0, cycleStartIndex);
-                }
+                // We found a cycle - add the dependency to complete the cycle
+                currentPath.Add(testMap[depTestId]);
                 return true;
             }
         }
-        
+
         visitState[test.TestId] = VisitState.Visited;
-        currentPath.Remove(test);
+        currentPath.RemoveAt(currentPath.Count - 1);
         return false;
     }
-    
+
     private enum VisitState
     {
         Visiting,
