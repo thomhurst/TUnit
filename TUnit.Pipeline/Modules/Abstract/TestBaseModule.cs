@@ -46,7 +46,7 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
     private DotNetRunOptions SetDefaults(DotNetRunOptions testOptions)
     {
         // Removed --fail-fast to allow all tests to run even if some fail
-        
+
         if (testOptions.EnvironmentVariables?.Any(x => x.Key == "NET_VERSION") != true)
         {
             testOptions = testOptions with
@@ -62,7 +62,7 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         var arguments = testOptions.Arguments?.ToList() ?? new List<string>();
         if (!arguments.Contains("--hangdump"))
         {
-            arguments.AddRange(["--hangdump", "--hangdump-filename", $"hangdump.{GetType().Name}.txt", "--hangdump-timeout", "20m"]);
+            arguments.AddRange(["--hangdump", "--hangdump-filename", $"hangdump.{GetType().Name}.dmp", "--hangdump-timeout", "20m"]);
         }
 
         // Suppress output for successful operations, but show errors and basic info

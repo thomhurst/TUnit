@@ -229,7 +229,6 @@ internal sealed class HookOrchestrator
 
     public async Task<ExecutionContext?> OnTestStartingAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"[DEBUG {DateTime.Now:HH:mm:ss.fff}] HookOrchestrator.OnTestStartingAsync: Test={test.TestId}");
         if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
         {
             return null;
@@ -281,7 +280,6 @@ internal sealed class HookOrchestrator
 
     public async Task OnTestCompletedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"[DEBUG {DateTime.Now:HH:mm:ss.fff}] HookOrchestrator.OnTestCompletedAsync: Test={test.TestId}");
         if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
         {
             return;

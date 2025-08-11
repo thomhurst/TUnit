@@ -44,9 +44,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         AbstractExecutableTest test,
         CancellationToken cancellationToken)
     {
-        Console.WriteLine($"[DEBUG {DateTime.Now:HH:mm:ss.fff}] SingleTestExecutor.ExecuteTestAsync: Starting {test.TestId}");
         await ExecuteTestInternalAsync(test, cancellationToken);
-        Console.WriteLine($"[DEBUG {DateTime.Now:HH:mm:ss.fff}] SingleTestExecutor.ExecuteTestAsync: Completed {test.TestId}");
 
         if (test.State == TestState.Running)
         {
@@ -129,6 +127,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 test.Context.TestDetails.TestId);
 
             await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
+
+            // Populate TestContext.Dependencies from resolved dependencies
+            PopulateTestContextDependencies(test);
 
             CheckDependenciesAndThrowIfShouldSkip(test);
 
@@ -493,6 +494,43 @@ internal class SingleTestExecutor : ISingleTestExecutor
             AssemblyHookContext.Current = assemblyContext;
 
             ClassHookContext.Current = context.ClassContext;
+        }
+    }
+
+    private void PopulateTestContextDependencies(AbstractExecutableTest test)
+    {
+        // Clear any existing dependencies first
+        test.Context.Dependencies.Clear();
+        
+        // Use a HashSet to avoid duplicates when collecting transitive dependencies
+        var allDependencies = new HashSet<TestDetails>();
+        
+        // Recursively collect all transitive dependencies
+        CollectTransitiveDependencies(test, allDependencies, new HashSet<AbstractExecutableTest>());
+        
+        // Add all collected dependencies to the TestContext
+        test.Context.Dependencies.AddRange(allDependencies);
+    }
+    
+    private void CollectTransitiveDependencies(AbstractExecutableTest test, HashSet<TestDetails> collected, HashSet<AbstractExecutableTest> visited)
+    {
+        // Avoid infinite recursion in case of circular dependencies
+        if (!visited.Add(test))
+        {
+            return;
+        }
+        
+        // Add all direct dependencies and their transitive dependencies
+        foreach (var resolvedDependency in test.Dependencies)
+        {
+            var dependencyTest = resolvedDependency.Test;
+            if (dependencyTest.Context?.TestDetails != null)
+            {
+                collected.Add(dependencyTest.Context.TestDetails);
+                
+                // Recursively collect transitive dependencies
+                CollectTransitiveDependencies(dependencyTest, collected, visited);
+            }
         }
     }
 

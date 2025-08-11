@@ -22,7 +22,7 @@ public class RunTemplateTestsModule : Module<CommandResult>
             NoBuild = true,
             Configuration = Configuration.Release,
             Framework = "net9.0",
-            Arguments = ["--", "--hangdump", "--hangdump-filename", "hangdump.template-tests.txt", "--hangdump-timeout", "20m"],
+            Arguments = ["--", "--hangdump", "--hangdump-filename", "hangdump.template-tests.dmp", "--hangdump-timeout", "20m"],
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",
