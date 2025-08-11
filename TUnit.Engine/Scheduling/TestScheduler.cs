@@ -375,6 +375,17 @@ internal sealed class TestScheduler : ITestScheduler
             // Wait for the original tests in this order group to complete
             var originalTestTasks = tests.Select(t => t.CompletionTask).ToArray();
             await Task.WhenAll(originalTestTasks).ConfigureAwait(false);
+            
+            // Also ensure all background tasks are observed to prevent unobserved exceptions
+            try
+            {
+                await Task.WhenAll(groupTasks).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Exceptions are already handled and logged in ExecuteTestDirectlyAsync
+                // We just need to observe them to prevent unobserved task exceptions
+            }
         }
     }
 
@@ -443,6 +454,17 @@ internal sealed class TestScheduler : ITestScheduler
         // Only wait for the originally requested tests (not dependencies from other groups)
         var originalTestTasks = tests.Select(t => t.CompletionTask).ToArray();
         await Task.WhenAll(originalTestTasks).ConfigureAwait(false);
+        
+        // Also ensure all background tasks are observed to prevent unobserved exceptions
+        try
+        {
+            await Task.WhenAll(allTasks).ConfigureAwait(false);
+        }
+        catch
+        {
+            // Exceptions are already handled and logged in ExecuteTestDirectlyAsync
+            // We just need to observe them to prevent unobserved task exceptions
+        }
     }
 
     private async Task ExecuteTestWhenReadyAsync(AbstractExecutableTest test,
@@ -516,6 +538,26 @@ internal sealed class TestScheduler : ITestScheduler
         try
         {
             await executor.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception but don't rethrow - the executor should have already handled it
+            await _logger.LogErrorAsync($"Test execution failed for {test.TestId}: {ex.Message}").ConfigureAwait(false);
+            
+            // Ensure test is marked as failed if not already set
+            if (test.State == TestState.Running || test.State == TestState.NotStarted)
+            {
+                test.State = TestState.Failed;
+                test.Result ??= new TestResult
+                {
+                    State = TestState.Failed,
+                    Exception = ex,
+                    Start = test.StartTime ?? DateTimeOffset.UtcNow,
+                    End = DateTimeOffset.UtcNow,
+                    Duration = TimeSpan.Zero,
+                    ComputerName = Environment.MachineName
+                };
+            }
         }
         finally
         {

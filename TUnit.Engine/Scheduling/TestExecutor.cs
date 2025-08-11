@@ -168,8 +168,8 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
                 _failFastCancellationSource.Cancel();
             }
 
-            // Re-throw to maintain existing behavior
-            throw;
+            // DO NOT re-throw - we've already reported the failure and set the result
+            // Re-throwing here causes the exception to be unobserved which leads to hangs
         }
         finally
         {
