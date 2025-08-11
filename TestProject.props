@@ -20,6 +20,10 @@
 
         <IsTestProject>true</IsTestProject>
 
+        <!-- Enable VSCode test discovery in editor gutter -->
+        <UseTestingPlatformProtocol>true</UseTestingPlatformProtocol>
+        <EnableMSTestRunner>true</EnableMSTestRunner>
+
     </PropertyGroup>
 
     <Target Name="CleanSourceGeneratedViewer" BeforeTargets="BeforeBuild">

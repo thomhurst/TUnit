@@ -8,6 +8,9 @@
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
         <OutputType>Exe</OutputType>
+        <!-- Enable VSCode test discovery in editor gutter -->
+        <UseTestingPlatformProtocol>true</UseTestingPlatformProtocol>
+        <EnableMSTestRunner>true</EnableMSTestRunner>
     </PropertyGroup>
 
     <PropertyGroup>
