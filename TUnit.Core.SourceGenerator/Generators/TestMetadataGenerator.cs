@@ -361,6 +361,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate AOT-friendly invokers that use the specific types
         GenerateAotFriendlyInvokers(writer, testMethod, className, typeArguments);
+        
+        // Add file location metadata
+        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         writer.Unindent();
         writer.AppendLine("};");
@@ -558,6 +562,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Inheritance depth
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
+        
+        // File location metadata
+        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         // Method metadata
         writer.Append("MethodMetadata = ");
@@ -598,6 +606,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Inheritance depth
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
+        
+        // File location metadata
+        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         // Method metadata
         writer.Append("MethodMetadata = ");
@@ -4237,6 +4249,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate typed invoker
         GenerateTypedInvokers(writer, testMethod, className);
+        
+        // Add file location metadata
+        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         writer.Unindent();
         writer.AppendLine("};");

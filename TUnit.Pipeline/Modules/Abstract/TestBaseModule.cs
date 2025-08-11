@@ -62,7 +62,7 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         var arguments = testOptions.Arguments?.ToList() ?? new List<string>();
         if (!arguments.Contains("--hangdump"))
         {
-            arguments.AddRange(["--hangdump", "--hangdump-filename", $"hangdump.{Environment.OSVersion.Platform}.{GetType().Name}.dmp", "--hangdump-timeout", "20m"]);
+            arguments.AddRange(["--hangdump", "--hangdump-filename", $"hangdump.{Environment.OSVersion.Platform}.{GetType().Name}.dmp", "--hangdump-timeout", "5m"]);
         }
 
         // Suppress output for successful operations, but show errors and basic info

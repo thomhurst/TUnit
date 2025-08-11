@@ -44,7 +44,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
         foreach (var testSource in testSources)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             await foreach (var metadata in testSource.GetTestsAsync(testSessionId, cancellationToken))
             {
                 yield return metadata;
@@ -71,10 +71,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
         foreach (var source in Sources.DynamicTestSources)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             IEnumerable<DynamicTest> dynamicTests;
             TestMetadata? failedMetadata = null;
-            
+
             try
             {
                 dynamicTests = source.CollectDynamicTests(testSessionId);
@@ -110,7 +110,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
         foreach (var discoveryResult in dynamicTest.GetTests())
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             if (discoveryResult is DynamicDiscoveryResult { TestMethod: not null } dynamicResult)
             {
                 var testMetadata = await CreateMetadataFromDynamicDiscoveryResult(dynamicResult);
@@ -158,8 +158,8 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
             PropertyDataSources = [],
             InstanceFactory = CreateAotDynamicInstanceFactory(result.TestClassType, result.TestClassArguments)!,
             TestInvoker = CreateAotDynamicTestInvoker(result),
-            FilePath = null,
-            LineNumber = null,
+            FilePath = result.CreatorFilePath ?? "Unknown",
+            LineNumber = result.CreatorLineNumber ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(result.TestClassType, methodInfo),
             GenericTypeInfo = null,
             GenericMethodInfo = null,
@@ -195,7 +195,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
         {
             // Use provided args if available, otherwise fall back to predefined args
             var effectiveArgs = (args != null && args.Length > 0) ? args : (predefinedClassArgs ?? []);
-            
+
             if (testClass.IsGenericTypeDefinition && typeArgs.Length > 0)
             {
                 var closedType = testClass.MakeGenericType(typeArgs);
@@ -269,6 +269,8 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
             TestName = testName,
             TestClassType = source.GetType(),
             TestMethodName = "CollectDynamicTests",
+            FilePath = "Unknown",
+            LineNumber = 0,
             MethodMetadata = CreateDummyMethodMetadata(source.GetType(), "CollectDynamicTests"),
             AttributeFactory = () => [],
             DataSources = [],

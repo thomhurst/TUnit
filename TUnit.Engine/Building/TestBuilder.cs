@@ -621,8 +621,8 @@ internal sealed class TestBuilder : ITestBuilder
             ClassInstance = PlaceholderInstance.Instance,
             TestMethodArguments = testData.MethodData,
             TestClassArguments = testData.ClassData,
-            TestFilePath = metadata.FilePath ?? "Unknown",
-            TestLineNumber = metadata.LineNumber ?? 0,
+            TestFilePath = metadata.FilePath,
+            TestLineNumber = metadata.LineNumber,
             ReturnType = metadata.MethodMetadata.ReturnType ?? typeof(void),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = attributes,
@@ -691,7 +691,7 @@ internal sealed class TestBuilder : ITestBuilder
             TestMethodArguments = [],
             TestClassArguments = [],
             TestFilePath = metadata.FilePath ?? "Unknown",
-            TestLineNumber = metadata.LineNumber ?? 0,
+            TestLineNumber = metadata.LineNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = metadata.AttributeFactory.Invoke(),
@@ -947,7 +947,7 @@ internal sealed class TestBuilder : ITestBuilder
         public required int MethodDataLoopIndex { get; init; }
         public required object?[] MethodData { get; init; }
         public required int RepeatIndex { get; init; }
-        
+
         /// <summary>
         /// The depth of inheritance for this test method.
         /// 0 = method is defined directly in the test class
