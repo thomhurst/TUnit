@@ -1330,6 +1330,7 @@ namespace
         public .GenericMethodInfo? GenericMethodInfo { get; init; }
         public []? GenericMethodTypeArguments { get; init; }
         public .GenericTypeInfo? GenericTypeInfo { get; init; }
+        public int InheritanceDepth { get; set; }
         public <[], object?[], object> InstanceFactory { get; init; }
         public int? LineNumber { get; init; }
         public required .MethodMetadata MethodMetadata { get; init; }
