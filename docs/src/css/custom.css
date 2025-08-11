@@ -181,6 +181,35 @@ html {
 /* Better code blocks */
 pre code {
   background: transparent !important;
+  text-align: left !important;
+}
+
+/* Ensure all code blocks are left-aligned */
+.prism-code,
+.theme-code-block,
+pre,
+code {
+  text-align: left !important;
+}
+
+/* Fix for homepage feature code blocks */
+div[class*="codeScrollWrapper"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Allow inner content to be wider than container for scrolling */
+div[class*="codeScrollWrapper"] > div {
+  width: max-content !important;
+  min-width: 100% !important;
+}
+
+/* Ensure code tokens are properly aligned */
+.token {
+  text-align: left !important;
 }
 
 /* Force all code text to be visible */
@@ -259,6 +288,177 @@ pre code {
 /* Theme toggle button */
 [data-theme='dark'] .navbar__toggle {
   color: #f1f5f9 !important;
+}
+
+/* Mobile Navbar Sidebar Fix */
+.navbar-sidebar {
+  background: linear-gradient(180deg, #1a1f3a 0%, #0f172a 100%) !important;
+  color: #f1f5f9 !important;
+  height: 100vh !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 999 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.navbar-sidebar__backdrop {
+  background: rgba(0, 0, 0, 0.8) !important;
+}
+
+.navbar-sidebar__brand {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1) !important;
+  padding: 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.navbar-sidebar__close {
+  color: #f1f5f9 !important;
+  background: transparent !important;
+  border: none !important;
+  font-size: 1.5rem !important;
+  cursor: pointer !important;
+  padding: 0.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.navbar-sidebar__close:hover {
+  background: rgba(99, 102, 241, 0.1) !important;
+  border-radius: 0.5rem !important;
+}
+
+/* Hide the duplicate pseudo-element since SVG is already there */
+.navbar-sidebar__close::after,
+.navbar-sidebar__close::before {
+  content: none !important;
+  display: none !important;
+}
+
+.navbar-sidebar__items {
+  padding: 1rem !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  max-height: calc(100vh - 80px) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.navbar-sidebar__item {
+  margin: 0.5rem 0 !important;
+}
+
+/* Clean up navbar items in mobile sidebar */
+.navbar-sidebar .navbar__items {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.navbar-sidebar .navbar__items--right {
+  margin-top: 2rem !important;
+  padding-top: 1rem !important;
+  border-top: 1px solid rgba(102, 126, 234, 0.1) !important;
+}
+
+.navbar-sidebar .navbar__item {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.navbar-sidebar .navbar__link {
+  color: #cbd5e1 !important;
+  text-decoration: none !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 0.5rem !important;
+  transition: all 0.2s ease !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  width: 100% !important;
+}
+
+.navbar-sidebar .navbar__link:hover {
+  background: rgba(99, 102, 241, 0.1) !important;
+  color: #818cf8 !important;
+  text-decoration: none !important;
+}
+
+.navbar-sidebar .navbar__link--active {
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: #818cf8 !important;
+  font-weight: 600 !important;
+}
+
+/* Hide external link icons but not the close button */
+.navbar-sidebar .navbar__link svg,
+.navbar-sidebar .navbar__link [class*="icon"],
+.navbar-sidebar .iconExternalLink,
+.navbar-sidebar [class*="Icon"]:not(.navbar-sidebar__close),
+.navbar-sidebar img[alt*="external"],
+.navbar-sidebar span[aria-label*="external"] {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+}
+
+/* Ensure only one close button SVG is visible */
+.navbar-sidebar__close svg {
+  display: block !important;
+  visibility: visible !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  opacity: 1 !important;
+  fill: #f1f5f9 !important;
+}
+
+/* Hide any duplicate close elements */
+.navbar-sidebar__close > *:not(:first-child) {
+  display: none !important;
+}
+
+/* Hide Docusaurus default external link indicator */
+.navbar-sidebar .navbar__link > span:last-child:not(:first-child) {
+  display: none !important;
+}
+
+/* Clean external link styling without icons */
+.navbar-sidebar .navbar__link[href^="http"] {
+  position: relative !important;
+  padding-right: 2rem !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Add simple text indicator for external links */
+.navbar-sidebar .navbar__link[href^="http"]::after {
+  content: "↗" !important;
+  position: absolute !important;
+  right: 1rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-size: 1rem !important;
+  opacity: 0.4 !important;
+  font-weight: normal !important;
+  display: block !important;
 }
 
 /* Search box styling */
@@ -540,6 +740,17 @@ pre code {
 
 /* Mobile Responsive Improvements */
 @media screen and (max-width: 996px) {
+  /* Hide scrollbar on mobile while keeping scroll functionality */
+  html {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
   /* Fix viewport overflow */
   html, body {
     overflow-x: hidden !important;
@@ -571,12 +782,65 @@ pre code {
     margin-right: 0;
   }
   
-  /* Ensure code blocks don't overflow */
+  /* Additional mobile sidebar fixes */
+  .navbar-sidebar {
+    display: block !important;
+  }
+  
+  /* Ensure proper logo display */
+  .navbar-sidebar .navbar__logo {
+    height: 2rem !important;
+    width: auto !important;
+  }
+  
+  .navbar-sidebar .navbar__title {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: #f1f5f9 !important;
+  }
+  
+  /* Fix dark mode toggle in mobile menu */
+  .navbar-sidebar [class*="colorModeToggle"] {
+    margin: 1rem 0 !important;
+  }
+  
+  /* Handle back navigation / breadcrumbs in mobile */
+  .navbar-sidebar .menu__list-item--collapsed .menu__link--sublist-caret:after,
+  .navbar-sidebar .menu__link--sublist-caret:after {
+    display: none !important;
+  }
+  
+  /* Hide the "Back" arrow and text in the upper right */
+  .navbar-sidebar [class*="collapseSidebarButton"],
+  .navbar-sidebar [aria-label*="collapse"],
+  .navbar-sidebar button[class*="back"] {
+    display: none !important;
+  }
+  
+  /* Ensure Tutorial link is visible */
+  .navbar-sidebar .navbar__link[href*="docs"] {
+    display: flex !important;
+  }
+  
+  /* Ensure text doesn't get cut off */
+  .navbar-sidebar .navbar__link {
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+  
+  /* Ensure code blocks don't overflow and are properly aligned */
   pre {
     overflow-x: auto !important;
     max-width: calc(100vw - 2rem) !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
+    text-align: left !important;
+  }
+  
+  pre code {
+    text-align: left !important;
+    display: block !important;
   }
   
   /* Fix code blocks in containers */
@@ -606,6 +870,33 @@ pre code {
 }
 
 @media screen and (max-width: 640px) {
+  /* Force feature code blocks to behave on mobile */
+  div[class*="featureCode"] {
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+  
+  div[class*="featureCode"] pre {
+    width: 100% !important;
+    overflow-x: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  div[class*="featureCode"] code {
+    width: max-content !important;
+    min-width: 0 !important;
+  }
+  
+  /* Ensure scrollbar remains hidden on smaller mobile devices */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
   /* Fix Docusaurus layout wrapper */
   #__docusaurus {
     overflow-x: hidden !important;

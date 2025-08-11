@@ -57,9 +57,11 @@
   flex-direction: column;
   box-sizing: border-box;
   width: 100%;
+  min-width: 0;
 }
 
-.featureBox * {
+/* Don't apply max-width to code elements */
+.featureBox > *:not(.featureCode) {
   box-sizing: border-box;
   max-width: 100%;
 }
@@ -127,36 +129,68 @@
 
 .featureCode {
   margin-top: auto;
-  overflow: hidden;
   width: 100%;
+  position: relative;
+}
+
+.codeScrollWrapper {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 0.5rem;
   box-sizing: border-box;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Style the CodeBlock container */
-.featureCode :global(.theme-code-block) {
-  background: #0f172a !important;
-  border: 1px solid rgba(148, 163, 184, 0.1) !important;
-  border-radius: 0.5rem !important;
+/* Reset all inner widths */
+.codeScrollWrapper * {
+  max-width: none !important;
+}
+
+.codeScrollWrapper > div {
+  display: table !important;
+  width: auto !important;
+  min-width: 100% !important;
+}
+
+.codeBlock {
   margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  display: block !important;
+  width: max-content !important;
+  min-width: 100% !important;
 }
 
-.featureCode pre {
+.codeScrollWrapper :global(.theme-code-block) {
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  width: max-content !important;
+  min-width: 100% !important;
+}
+
+.codeScrollWrapper :global(pre) {
   margin: 0 !important;
   padding: 1rem !important;
   background: transparent !important;
   border: none !important;
-  border-radius: 0 !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  max-width: 100% !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
+  overflow: visible !important;
+  text-align: left !important;
+  width: max-content !important;
+  min-width: 100% !important;
 }
 
-.featureCode code {
-  color: #f8fafc !important;
+.codeScrollWrapper :global(code) {
+  text-align: left !important;
   font-size: 0.875rem !important;
-  line-height: 1.5 !important;
+  white-space: pre !important;
+  display: inline-block !important;
 }
 
 /* Bright syntax highlighting for feature code blocks */
@@ -261,5 +295,11 @@
   
   .featureBox {
     padding: 1.5rem;
+  }
+  
+  /* Ensure code blocks remain left-aligned on mobile */
+  .featureCode pre,
+  .featureCode code {
+    text-align: left !important;
   }
 }
