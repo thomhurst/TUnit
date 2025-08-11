@@ -12,6 +12,7 @@
         <!-- Enable VSCode test discovery in editor gutter -->
         <UseTestingPlatformProtocol>true</UseTestingPlatformProtocol>
         <EnableMSTestRunner>true</EnableMSTestRunner>
+        <IsTestingPlatformEnabled>true</IsTestingPlatformEnabled>
     </PropertyGroup>
 
     <PropertyGroup>

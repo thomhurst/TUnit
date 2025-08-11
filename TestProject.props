@@ -23,6 +23,7 @@
         <!-- Enable VSCode test discovery in editor gutter -->
         <UseTestingPlatformProtocol>true</UseTestingPlatformProtocol>
         <EnableMSTestRunner>true</EnableMSTestRunner>
+        <IsTestingPlatformEnabled>true</IsTestingPlatformEnabled>
 
     </PropertyGroup>
 
@@ -42,6 +43,11 @@
     <ItemGroup>
         <Compile Remove="SourceGeneratedViewer\**" />
         <None Include="SourceGeneratedViewer\**" />
+    </ItemGroup>
+
+    <!-- Enable VSCode test discovery integration -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
     </ItemGroup>
 
 </Project>

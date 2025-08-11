@@ -3,14 +3,16 @@ using TUnit.Core;
 namespace TUnit.TestProject;
 
 /// <summary>
-/// Simple test class to verify VSCode test discovery
+/// Test class to verify VSCode test discovery works correctly
+/// This file can be used to manually test that VSCode shows play buttons in the editor gutter
 /// </summary>
-public class VSCodeTest
+public class VSCodeIntegrationTest
 {
     [Test]
     public void SimpleTest()
     {
-        // This test should appear with a play button in VSCode
+        // This test should appear with a play button in VSCode editor gutter
+        // after implementing the VSCode test discovery fix
         Assert.That(true).IsTrue();
     }
 
@@ -18,7 +20,7 @@ public class VSCodeTest
     public async Task AsyncTest()
     {
         await Task.Delay(1);
-        // This async test should also appear with a play button in VSCode
+        // This async test should also show a play button
         Assert.That(2 + 2).IsEqualTo(4);
     }
 
@@ -27,7 +29,7 @@ public class VSCodeTest
     [Arguments(4, 5, 9)]
     public void ParameterizedTest(int a, int b, int expected)
     {
-        // Parameterized tests should also show play buttons
+        // Parameterized tests should show play buttons for each argument set
         Assert.That(a + b).IsEqualTo(expected);
     }
 }
