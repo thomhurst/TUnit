@@ -207,7 +207,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     private static bool GetUseSourceGeneration(ICommandLineOptions commandLineOptions)
     {
-        if (commandLineOptions.TryGetOptionArgumentList(CommandLineProviders.ReflectionModeCommandProvider.ReflectionMode, out _))
+        if (commandLineOptions.TryGetOptionArgumentList(ReflectionModeCommandProvider.ReflectionMode, out _))
         {
             return false; // Reflection mode explicitly requested
         }

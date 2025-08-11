@@ -95,7 +95,9 @@ internal sealed class TestGroupingService : ITestGroupingService
             {
                 if (!keyedLists.TryGetValue(key, out var list))
                 {
-                    list = new List<(AbstractExecutableTest Test, TestPriority Priority)>();
+                    list =
+                    [
+                    ];
                     keyedLists[key] = list;
                 }
                 list.Add((test, testPriority));

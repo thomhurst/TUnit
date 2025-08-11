@@ -5,11 +5,17 @@ namespace TUnit.Engine.Services;
 
 internal sealed class TestDependencyResolver
 {
-    private readonly List<AbstractExecutableTest> _allTests = new();
+    private readonly List<AbstractExecutableTest> _allTests =
+    [
+    ];
     private readonly Dictionary<Type, List<AbstractExecutableTest>> _testsByType = new();
     private readonly Dictionary<string, List<AbstractExecutableTest>> _testsByMethodName = new();
-    private readonly List<AbstractExecutableTest> _testsWithPendingDependencies = new();
-    private readonly HashSet<AbstractExecutableTest> _testsBeingResolved = new();
+    private readonly List<AbstractExecutableTest> _testsWithPendingDependencies =
+    [
+    ];
+    private readonly HashSet<AbstractExecutableTest> _testsBeingResolved =
+    [
+    ];
     private readonly object _resolutionLock = new();
 
     public void RegisterTest(AbstractExecutableTest test)
@@ -21,7 +27,9 @@ internal sealed class TestDependencyResolver
             var testType = test.Metadata.TestClassType;
             if (!_testsByType.TryGetValue(testType, out var testsForType))
             {
-                testsForType = new List<AbstractExecutableTest>();
+                testsForType =
+                [
+                ];
                 _testsByType[testType] = testsForType;
             }
             testsForType.Add(test);
@@ -29,7 +37,9 @@ internal sealed class TestDependencyResolver
             var methodName = test.Metadata.TestMethodName;
             if (!_testsByMethodName.TryGetValue(methodName, out var testsForMethod))
             {
-                testsForMethod = new List<AbstractExecutableTest>();
+                testsForMethod =
+                [
+                ];
                 _testsByMethodName[methodName] = testsForMethod;
             }
             testsForMethod.Add(test);

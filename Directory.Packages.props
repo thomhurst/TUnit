@@ -11,7 +11,7 @@
     <PackageVersion Include="BenchmarkDotNet.Annotations" Version="0.15.2" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="CliWrap" Version="3.9.0" />
-    <PackageVersion Include="EnumerableAsyncProcessor" Version="3.8.2" />
+    <PackageVersion Include="EnumerableAsyncProcessor" Version="3.8.4" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
     <PackageVersion Include="FSharp.Core" Version="9.0.303" />
     <PackageVersion Include="Humanizer" Version="2.14.1" />
@@ -19,18 +19,21 @@
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.8" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.14.8" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.7.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
+    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" Version="1.1.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing" Version="1.1.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" Version="1.1.2" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.7.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
@@ -43,8 +46,10 @@
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.8.1" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.8.1" />
     <PackageVersion Include="Microsoft.Testing.Platform" Version="1.8.1" />
-    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.4.3" />
-    <PackageVersion Include="System.Threading.Channels" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.8.1" />
+    <PackageVersion Include="System.Collections.Immutable" Version="9.0.8" />
+    <PackageVersion Include="System.Text.Json" Version="9.0.8" />
+    <PackageVersion Include="System.Threading.Channels" Version="9.0.8" />
     <PackageVersion Include="ModularPipelines.DotNet" Version="2.47.8" />
     <PackageVersion Include="ModularPipelines.Git" Version="2.47.8" />
     <PackageVersion Include="ModularPipelines.GitHub" Version="2.47.8" />

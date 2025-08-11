@@ -257,7 +257,9 @@ internal sealed class TestScheduler : ITestScheduler
                 allTests.Add(test);
                 if (!testToKeys.TryGetValue(test, out var keys))
                 {
-                    keys = new List<string>();
+                    keys =
+                    [
+                    ];
                     testToKeys[test] = keys;
                 }
                 keys.Add(key);

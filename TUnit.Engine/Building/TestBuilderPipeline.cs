@@ -47,7 +47,7 @@ internal sealed class TestBuilderPipeline
 
         // Get metadata streaming if supported
         IAsyncEnumerable<TestMetadata>? streamingMetadata = null;
-        if (dataCollector is IStreamingTestDataCollector streamingCollector)
+        if (dataCollector is IAsyncTestDataCollector streamingCollector)
         {
             streamingMetadata = streamingCollector.CollectTestsStreamingAsync(testSessionId, cancellationToken);
         }

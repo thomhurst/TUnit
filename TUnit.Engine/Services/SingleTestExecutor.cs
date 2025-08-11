@@ -494,7 +494,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         test.Context.Dependencies.Clear();
         var allDependencies = new HashSet<TestDetails>();
-        CollectTransitiveDependencies(test, allDependencies, new HashSet<AbstractExecutableTest>());
+        CollectTransitiveDependencies(test, allDependencies, [
+        ]);
         test.Context.Dependencies.AddRange(allDependencies);
     }
     
