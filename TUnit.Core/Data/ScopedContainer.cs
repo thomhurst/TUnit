@@ -35,23 +35,4 @@ internal class ScopedContainer<TKey> where TKey : notnull
                container.TryGetValue(type, out instance);
     }
 
-    /// <summary>
-    /// Checks if the specified instance is contained in any of the scoped containers.
-    /// </summary>
-    /// <param name="instance">The instance to check for.</param>
-    /// <returns>True if the instance is managed by this container; otherwise, false.</returns>
-    public bool ContainsInstance(object instance)
-    {
-        foreach (var containerPair in _containers)
-        {
-            foreach (var typePair in containerPair.Value)
-            {
-                if (ReferenceEquals(typePair.Value, instance))
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 }

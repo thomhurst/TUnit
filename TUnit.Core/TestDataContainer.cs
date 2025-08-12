@@ -30,15 +30,4 @@ internal static class TestDataContainer
         return _keyContainer.GetOrCreate(key, type, func);
     }
 
-    /// <summary>
-    /// Checks if an object is managed by any of the scoped containers.
-    /// Objects managed by containers should not be disposed by ObjectTracker.
-    /// </summary>
-    public static bool IsObjectManaged(object obj)
-    {
-        return _globalContainer.ContainsInstance(obj) ||
-               _classContainer.ContainsInstance(obj) ||
-               _assemblyContainer.ContainsInstance(obj) ||
-               _keyContainer.ContainsInstance(obj);
-    }
 }
