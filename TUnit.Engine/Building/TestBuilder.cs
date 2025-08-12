@@ -717,15 +717,9 @@ internal sealed class TestBuilder : ITestBuilder
 
     private static void TrackDataSourceObjects(TestContext context, object?[] classArguments, object?[] methodArguments)
     {
-        foreach (var arg in classArguments)
-        {
-            ObjectTracker.TrackObject(context.Events, arg);
-        }
-
-        foreach (var arg in methodArguments)
-        {
-            ObjectTracker.TrackObject(context.Events, arg);
-        }
+        // Track all objects at once with a single disposal handler
+        var allObjects = classArguments.Concat(methodArguments);
+        ObjectTracker.TrackObjectsForContext(context.Events, allObjects);
     }
 
     private async Task<AbstractExecutableTest> CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)

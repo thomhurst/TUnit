@@ -10,14 +10,31 @@ namespace TUnit.Core.Tracking;
 internal static class ObjectTracker
 {
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
-    private static readonly ConcurrentDictionary<(object obj, TestContextEvents events), bool> _registeredHandlers = new();
+    private static readonly ConcurrentDictionary<TestContextEvents, HashSet<object>> _contextTrackedObjects = new();
+    private static readonly ConcurrentDictionary<(TestContextEvents context, object obj), bool> _incrementTracker = new();
 
     /// <summary>
-    /// Tracks an object and increments its reference count.
+    /// Tracks multiple objects for a test context and registers a single disposal handler.
+    /// Each object's reference count is incremented once.
+    /// </summary>
+    /// <param name="events">Events for the test instance</param>
+    /// <param name="objects">The objects to track (constructor args, method args, injected properties)</param>
+    public static void TrackObjectsForContext(TestContextEvents events, IEnumerable<object?> objects)
+    {
+        // Simply delegate to TrackObject for each object
+        // The safety mechanism in TrackObject will prevent duplicates
+        foreach (var obj in objects)
+        {
+            TrackObject(events, obj);
+        }
+    }
+
+    /// <summary>
+    /// Tracks a single object for a test context. 
+    /// For backward compatibility - adds to existing tracked objects for the context.
     /// </summary>
     /// <param name="events">Events for the test instance</param>
     /// <param name="obj">The object to track</param>
-    /// <returns>The tracked object (same instance)</returns>
     public static void TrackObject(TestContextEvents events, object? obj)
     {
         if (obj == null || ShouldSkipTracking(obj))
@@ -25,19 +42,41 @@ internal static class ObjectTracker
             return;
         }
 
+        // Safety check: Only increment once per context-object pair
+        var incrementKey = (events, obj);
+        if (!_incrementTracker.TryAdd(incrementKey, true))
+        {
+            // Already incremented for this context-object pair
+            return;
+        }
+
+        // Increment the reference count
         var counter = _trackedObjects.GetOrAdd(obj, _ => new Counter());
         counter.Increment();
 
-        // Only register the decrement handler once per object per test context
-        var handlerKey = (obj, events);
-        if (_registeredHandlers.TryAdd(handlerKey, true))
+        // Add to the context's tracked objects or create new tracking
+        // Use a factory delegate to ensure disposal handler is registered only once
+        var contextObjects = _contextTrackedObjects.GetOrAdd(events, e =>
         {
-            events.OnDispose = events.OnDispose + new Func<object, TestContext, ValueTask>(async (sender, testContext) =>
+            // Register disposal handler only once when creating the HashSet
+            e.OnDispose = e.OnDispose + new Func<object, TestContext, ValueTask>(async (sender, testContext) =>
             {
-                await DecrementAndDisposeIfNeededAsync(obj).ConfigureAwait(false);
-                // Clean up the handler registration tracking
-                _registeredHandlers.TryRemove(handlerKey, out _);
+                if (_contextTrackedObjects.TryRemove(e, out var trackedObjects))
+                {
+                    foreach (var trackedObj in trackedObjects)
+                    {
+                        await DecrementAndDisposeIfNeededAsync(trackedObj).ConfigureAwait(false);
+                        // Clean up the increment tracker
+                        _incrementTracker.TryRemove((e, trackedObj), out _);
+                    }
+                }
             });
+            return new HashSet<object>();
+        });
+
+        lock (contextObjects)
+        {
+            contextObjects.Add(obj);
         }
     }
 
@@ -138,6 +177,8 @@ internal static class ObjectTracker
     public static void Clear()
     {
         _trackedObjects.Clear();
+        _contextTrackedObjects.Clear();
+        _incrementTracker.Clear();
     }
 
     /// <summary>

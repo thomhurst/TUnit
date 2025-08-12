@@ -126,6 +126,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 test.Metadata.MethodMetadata,
                 test.Context.TestDetails.TestId).ConfigureAwait(false);
 
+            // Note: Property-injected values are already tracked within PropertyInjectionService
+            // No need to track them again here
+
             await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken).ConfigureAwait(false);
 
             PopulateTestContextDependencies(test);
