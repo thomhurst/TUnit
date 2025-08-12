@@ -31,6 +31,9 @@ internal sealed class CleanupTests_Test1_TestSource_GUID : global::TUnit.Core.In
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 98,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AfterTests.CleanupTests),
@@ -124,6 +127,9 @@ internal sealed class CleanupTests_Test2_TestSource_GUID : global::TUnit.Core.In
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 104,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AfterTests.CleanupTests),

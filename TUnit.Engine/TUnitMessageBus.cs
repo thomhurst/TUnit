@@ -44,7 +44,6 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
     {
         if (!testContext.ReportResult)
         {
-            testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
             return;
         }
 
@@ -62,15 +61,12 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
                 .WithProperty(GetTimingProperty(testContext, start))
                 .WithProperty(new TrxMessagesProperty(trxMessages))
         ));
-
-        testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
     }
 
     public async ValueTask Failed(TestContext testContext, Exception exception, DateTimeOffset start)
     {
         if (!testContext.ReportResult)
         {
-            testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
             return;
         }
 
@@ -96,8 +92,6 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
                 .WithProperty(new TrxExceptionProperty(exception.Message, exception.StackTrace))
                 .WithProperty(new TrxMessagesProperty(trxMessages))
         ));
-
-        testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
     }
 
     private Exception SimplifyStacktrace(Exception exception)
@@ -134,8 +128,6 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
                 .WithProperty(new StandardErrorProperty(standardError))
                 .WithProperty(new TrxMessagesProperty(trxMessages))
         ));
-
-        testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
     }
 
     public async ValueTask Cancelled(TestContext testContext, DateTimeOffset start)
@@ -156,8 +148,6 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
                 .WithProperty(new StandardErrorProperty(standardError))
                 .WithProperty(new TrxMessagesProperty(trxMessages))
         ));
-
-        testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
     }
 
     public async ValueTask SessionArtifact(Artifact artifact)

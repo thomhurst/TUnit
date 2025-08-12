@@ -44,7 +44,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         AbstractExecutableTest test,
         CancellationToken cancellationToken)
     {
-        await ExecuteTestInternalAsync(test, cancellationToken);
+        await ExecuteTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
 
         if (test.State == TestState.Running)
         {
@@ -82,17 +82,17 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
             if (!string.IsNullOrEmpty(test.Context.SkipReason))
             {
-                return await HandleSkippedTestInternalAsync(test, cancellationToken);
+                return await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
             }
 
             if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
             {
-                return await HandleSkippedTestInternalAsync(test, cancellationToken);
+                return await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
             }
 
             if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
             {
-                var createdInstance = await test.CreateInstanceAsync();
+                var createdInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
                 if (createdInstance == null)
                 {
                     throw new InvalidOperationException($"CreateInstanceAsync returned null for test {test.Context.GetDisplayName()}. This is likely a framework bug.");
@@ -114,9 +114,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
             }
 
             await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata,
-                test.Context.Events);
+                test.Context.Events).ConfigureAwait(false);
             await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata,
-                test.Context.Events);
+                test.Context.Events).ConfigureAwait(false);
 
             await PropertyInjectionService.InjectPropertiesAsync(
                 test.Context,
@@ -124,9 +124,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 test.Metadata.PropertyDataSources,
                 test.Metadata.PropertyInjections,
                 test.Metadata.MethodMetadata,
-                test.Context.TestDetails.TestId);
+                test.Context.TestDetails.TestId).ConfigureAwait(false);
 
-            await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken);
+            await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+            PopulateTestContextDependencies(test);
 
             CheckDependenciesAndThrowIfShouldSkip(test);
 
@@ -134,33 +136,33 @@ internal class SingleTestExecutor : ISingleTestExecutor
             var assemblyContext = classContext.AssemblyContext;
             var sessionContext = assemblyContext.TestSessionContext;
 
-            await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken);
+            await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken).ConfigureAwait(false);
 
-            await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken);
+            await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken).ConfigureAwait(false);
 
-            await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken);
-            await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken);
+            await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken).ConfigureAwait(false);
+            await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
 
             try
             {
                 if (!string.IsNullOrEmpty(test.Context.SkipReason))
                 {
-                    return await HandleSkippedTestInternalAsync(test, cancellationToken);
+                    return await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
                 }
 
                 if (test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
                 {
-                    await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken);
+                    await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    await ExecuteTestWithHooksAsync(test, instance, cancellationToken);
+                    await ExecuteTestWithHooksAsync(test, instance, cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (TestDependencyException e)
             {
                 test.Context.SkipReason = e.Message;
-                return await HandleSkippedTestInternalAsync(test, cancellationToken);
+                return await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception exception) when (_engineCancellationToken.Token.IsCancellationRequested && exception is OperationCanceledException or TaskCanceledException)
             {
@@ -174,7 +176,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 test.EndTime = DateTimeOffset.Now;
 
-                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken);
+                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken).ConfigureAwait(false);
             }
 
             if (test.Result == null)
@@ -221,17 +223,17 @@ internal class SingleTestExecutor : ISingleTestExecutor
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await testDelegate();
+                await testDelegate().ConfigureAwait(false);
                 return;
             }
             catch (Exception ex) when (i < retryLimit)
             {
-                if (!await retryFunc(testContext, ex, i + 1))
+                if (!await retryFunc(testContext, ex, i + 1).ConfigureAwait(false))
                 {
                     throw;
                 }
 
-                await _logger.LogWarningAsync($"Retrying test due to exception: {ex.Message}. Attempt {i} of {retryLimit}.");
+                await _logger.LogWarningAsync($"Retrying test due to exception: {ex.Message}. Attempt {i} of {retryLimit}.").ConfigureAwait(false);
             }
         }
     }
@@ -245,7 +247,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.Context.SkipReason ?? "Test skipped");
 
         test.EndTime = DateTimeOffset.Now;
-        await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
+        await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
 
         return test.Result;
     }
@@ -253,20 +255,18 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
     private async Task ExecuteTestWithHooksAsync(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
     {
-        // Context restoration is now handled inside ExecuteBeforeTestHooksAsync
         var testClassType = test.Context.TestDetails.ClassType;
-        var beforeTestHooks = await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType);
-        var afterTestHooks = await _hookCollectionService.CollectAfterTestHooksAsync(testClassType);
+        var beforeTestHooks = await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType).ConfigureAwait(false);
+        var afterTestHooks = await _hookCollectionService.CollectAfterTestHooksAsync(testClassType).ConfigureAwait(false);
 
         Exception? testException = null;
         try
         {
-            await ExecuteBeforeTestHooksAsync(beforeTestHooks, test.Context, cancellationToken);
+            await ExecuteBeforeTestHooksAsync(beforeTestHooks, test.Context, cancellationToken).ConfigureAwait(false);
 
-            // RestoreExecutionContext only if needed for the test itself
             test.Context.RestoreExecutionContext();
 
-            await InvokeTestWithTimeout(test, instance, cancellationToken);
+            await InvokeTestWithTimeout(test, instance, cancellationToken).ConfigureAwait(false);
 
             test.State = TestState.Passed;
             test.Result = _resultFactory.CreatePassedResult(test.StartTime!.Value);
@@ -279,7 +279,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
         try
         {
-            await ExecuteAfterTestHooksAsync(afterTestHooks, test.Context, cancellationToken);
+            await ExecuteAfterTestHooksAsync(afterTestHooks, test.Context, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception afterHookEx)
         {
@@ -295,7 +295,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             if (instance is IAsyncDisposable asyncDisposableInstance)
             {
-                await asyncDisposableInstance.DisposeAsync();
+                await asyncDisposableInstance.DisposeAsync().ConfigureAwait(false);
             }
             else if (instance is IDisposable disposableInstance)
             {
@@ -319,15 +319,13 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             try
             {
-                await hook(context, cancellationToken);
+                await hook(context, cancellationToken).ConfigureAwait(false);
 
-                // RestoreExecutionContext after each hook to ensure AsyncLocal values flow correctly
-                // when AddAsyncLocalValues() is called in hooks
                 context.RestoreExecutionContext();
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync($"Error in before test hook: {ex.Message}");
+                await _logger.LogErrorAsync($"Error in before test hook: {ex.Message}").ConfigureAwait(false);
                 throw;
             }
         }
@@ -337,18 +335,17 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         var exceptions = new List<Exception>();
 
-        // Restore contexts once at the beginning
         RestoreHookContexts(context);
 
         foreach (var hook in hooks)
         {
             try
             {
-                await hook(context, cancellationToken);
+                await hook(context, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync($"Error in after test hook: {ex.Message}");
+                await _logger.LogErrorAsync($"Error in after test hook: {ex.Message}").ConfigureAwait(false);
                 exceptions.Add(ex);
             }
         }
@@ -438,7 +435,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             ? CreateTimeoutTestAction(test, instance, cancellationToken)
             : CreateNormalTestAction(test, instance, cancellationToken);
 
-        await InvokeWithTestExecutor(discoveredTest, test.Context, testAction);
+        await InvokeWithTestExecutor(discoveredTest, test.Context, testAction).ConfigureAwait(false);
     }
 
     private Func<ValueTask> CreateTimeoutTestAction(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
@@ -446,19 +443,17 @@ internal class SingleTestExecutor : ISingleTestExecutor
         return async () =>
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter((int)test.Context.TestDetails.Timeout!.Value.TotalMilliseconds);
+            var timeoutMs = (int)test.Context.TestDetails.Timeout!.Value.TotalMilliseconds;
+            cts.CancelAfter(timeoutMs);
 
-            var testTask = test.InvokeTestAsync(instance, cts.Token);
-            var timeoutTask = Task.Delay((int)test.Context.TestDetails.Timeout!.Value.TotalMilliseconds, cancellationToken);
-            var completedTask = await Task.WhenAny(testTask, timeoutTask);
-
-            if (completedTask == timeoutTask)
+            try
             {
-                cts.Cancel();
-                throw new OperationCanceledException($"Test '{test.Context.GetDisplayName()}' exceeded timeout of {(int)test.Context.TestDetails.Timeout!.Value.TotalMilliseconds}ms");
+                await test.InvokeTestAsync(instance, cts.Token).ConfigureAwait(false);
             }
-
-            await testTask;
+            catch (OperationCanceledException) when (cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+            {
+                throw new System.TimeoutException($"Test '{test.Context.GetDisplayName()}' exceeded timeout of {timeoutMs}ms");
+            }
         };
     }
 
@@ -466,7 +461,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         return async () =>
         {
-            await test.InvokeTestAsync(instance, cancellationToken);
+            await test.InvokeTestAsync(instance, cancellationToken).ConfigureAwait(false);
         };
     }
 
@@ -474,11 +469,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         if (discoveredTest?.TestExecutor != null)
         {
-            await discoveredTest.TestExecutor.ExecuteTest(context, testAction);
+            await discoveredTest.TestExecutor.ExecuteTest(context, testAction).ConfigureAwait(false);
         }
         else
         {
-            await testAction();
+            await testAction().ConfigureAwait(false);
         }
     }
 
@@ -495,16 +490,42 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
     }
 
+    private void PopulateTestContextDependencies(AbstractExecutableTest test)
+    {
+        test.Context.Dependencies.Clear();
+        var allDependencies = new HashSet<TestDetails>();
+        CollectTransitiveDependencies(test, allDependencies, [
+        ]);
+        test.Context.Dependencies.AddRange(allDependencies);
+    }
+    
+    private void CollectTransitiveDependencies(AbstractExecutableTest test, HashSet<TestDetails> collected, HashSet<AbstractExecutableTest> visited)
+    {
+        if (!visited.Add(test))
+        {
+            return;
+        }
+        
+        foreach (var resolvedDependency in test.Dependencies)
+        {
+            var dependencyTest = resolvedDependency.Test;
+            if (dependencyTest.Context?.TestDetails != null)
+            {
+                collected.Add(dependencyTest.Context.TestDetails);
+                
+                CollectTransitiveDependencies(dependencyTest, collected, visited);
+            }
+        }
+    }
+
     private void CheckDependenciesAndThrowIfShouldSkip(AbstractExecutableTest test)
     {
         var failedDependenciesNotAllowingProceed = new List<string>();
 
         foreach (var dependency in test.Dependencies)
         {
-            // Check if the dependency has failed or timed out
             if (dependency.Test.State == TestState.Failed || dependency.Test.State == TestState.Timeout)
             {
-                // If this dependency doesn't allow proceeding on failure, add it to the list
                 if (!dependency.ProceedOnFailure)
                 {
                     var dependencyName = GetDependencyDisplayName(dependency.Test);
@@ -513,7 +534,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
             }
         }
 
-        // Only throw if there are dependencies that don't allow proceeding
         if (failedDependenciesNotAllowingProceed.Count > 0)
         {
             var dependencyNames = string.Join(", ", failedDependenciesNotAllowingProceed);

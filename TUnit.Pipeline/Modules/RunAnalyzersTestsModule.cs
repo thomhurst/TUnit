@@ -22,6 +22,7 @@ public class RunAnalyzersTestsModule : Module<CommandResult>
             NoBuild = true,
             Configuration = Configuration.Release,
             Framework = "net8.0",
+            Arguments = ["--", "--hangdump", "--hangdump-filename", "hangdump.analyzers-tests.dmp", "--hangdump-timeout", "5m"],
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",

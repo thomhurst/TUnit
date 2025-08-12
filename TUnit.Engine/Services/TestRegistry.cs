@@ -47,7 +47,9 @@ internal sealed class TestRegistry : ITestRegistry
             TestClassArguments = dynamicTest.TestClassArguments,
             TestMethodArguments = dynamicTest.TestMethodArguments,
             TestMethod = dynamicTest.TestMethod,
-            Attributes = dynamicTest.Attributes
+            Attributes = dynamicTest.Attributes,
+            CreatorFilePath = dynamicTest.CreatorFilePath,
+            CreatorLineNumber = dynamicTest.CreatorLineNumber
         };
 
         // Queue the test for processing
@@ -135,8 +137,8 @@ internal sealed class TestRegistry : ITestRegistry
             PropertyDataSources = [],
             InstanceFactory = CreateRuntimeInstanceFactory(result.TestClassType, result.TestClassArguments)!,
             TestInvoker = CreateRuntimeTestInvoker(result),
-            FilePath = null,
-            LineNumber = null,
+            FilePath = result.CreatorFilePath ?? "Unknown",
+            LineNumber = result.CreatorLineNumber ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(result.TestClassType, methodInfo),
             GenericTypeInfo = null,
             GenericMethodInfo = null,
@@ -185,7 +187,7 @@ internal sealed class TestRegistry : ITestRegistry
             var testInstance = instance ?? throw new InvalidOperationException("Test instance is null");
 
             var invokeMethod = compiledExpression.GetType().GetMethod("Invoke")!;
-            var invokeResult = invokeMethod.Invoke(compiledExpression, new[] { testInstance });
+            var invokeResult = invokeMethod.Invoke(compiledExpression, [testInstance]);
 
             if (invokeResult is Task task)
             {

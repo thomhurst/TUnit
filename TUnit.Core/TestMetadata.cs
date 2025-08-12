@@ -35,9 +35,9 @@ public abstract class TestMetadata
     /// </summary>
     public Func<object, object?[], Task>? TestInvoker { get; init; }
 
-    public string? FilePath { get; init; }
+    public required string FilePath { get; init; }
 
-    public int? LineNumber { get; init; }
+    public required int LineNumber { get; init; }
 
     public required MethodMetadata MethodMetadata { get; init; }
 
@@ -55,6 +55,14 @@ public abstract class TestMetadata
     /// Test session ID used for data generation
     /// </summary>
     public string TestSessionId { get; set; } = Guid.NewGuid().ToString();
+
+    /// <summary>
+    /// The depth of inheritance for this test method.
+    /// 0 = method is defined directly in the test class
+    /// 1 = method is inherited from immediate base class
+    /// 2 = method is inherited from base's base class, etc.
+    /// </summary>
+    public int InheritanceDepth { get; set; } = 0;
 
     /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.

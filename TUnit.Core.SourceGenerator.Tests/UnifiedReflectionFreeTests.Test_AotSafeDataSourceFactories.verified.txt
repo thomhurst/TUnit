@@ -35,6 +35,9 @@ internal sealed class AotDataSourceTest_TestWithDataSource_TestSource_GUID : glo
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 7,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AotDataSourceTest),

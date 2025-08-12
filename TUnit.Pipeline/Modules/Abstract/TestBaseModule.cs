@@ -24,7 +24,7 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         }
     }
 
-    protected override sealed async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
+    protected sealed override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var results = new List<CommandResult>();
 
@@ -46,7 +46,7 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
     private DotNetRunOptions SetDefaults(DotNetRunOptions testOptions)
     {
         // Removed --fail-fast to allow all tests to run even if some fail
-        
+
         if (testOptions.EnvironmentVariables?.Any(x => x.Key == "NET_VERSION") != true)
         {
             testOptions = testOptions with
@@ -58,9 +58,17 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
             };
         }
 
+        // Add hangdump flags with 20 minute timeout
+        var arguments = testOptions.Arguments?.ToList() ?? new List<string>();
+        if (!arguments.Contains("--hangdump"))
+        {
+            arguments.AddRange(["--hangdump", "--hangdump-filename", $"hangdump.{Environment.OSVersion.Platform}.{GetType().Name}.dmp", "--hangdump-timeout", "5m"]);
+        }
+
         // Suppress output for successful operations, but show errors and basic info
         testOptions = testOptions with
         {
+            Arguments = arguments,
             CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
         };
 

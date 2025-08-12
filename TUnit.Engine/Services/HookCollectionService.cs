@@ -20,12 +20,18 @@ internal sealed class HookCollectionService : IHookCollectionService
     
     private sealed class CompleteHookChain
     {
-        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> BeforeTestHooks { get; init; } = Array.Empty<Func<TestContext, CancellationToken, Task>>();
-        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> AfterTestHooks { get; init; } = Array.Empty<Func<TestContext, CancellationToken, Task>>();
-        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> BeforeEveryTestHooks { get; init; } = Array.Empty<Func<TestContext, CancellationToken, Task>>();
-        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> AfterEveryTestHooks { get; init; } = Array.Empty<Func<TestContext, CancellationToken, Task>>();
-        public IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> BeforeClassHooks { get; init; } = Array.Empty<Func<ClassHookContext, CancellationToken, Task>>();
-        public IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> AfterClassHooks { get; init; } = Array.Empty<Func<ClassHookContext, CancellationToken, Task>>();
+        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> BeforeTestHooks { get; init; } = [
+        ];
+        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> AfterTestHooks { get; init; } = [
+        ];
+        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> BeforeEveryTestHooks { get; init; } = [
+        ];
+        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> AfterEveryTestHooks { get; init; } = [
+        ];
+        public IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> BeforeClassHooks { get; init; } = [
+        ];
+        public IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> AfterClassHooks { get; init; } = [
+        ];
     }
 
     public ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeTestHooksAsync(Type testClassType)
