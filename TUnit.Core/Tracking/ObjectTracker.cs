@@ -43,8 +43,7 @@ internal static class ObjectTracker
 
     /// <summary>
     /// Decrements the reference count for an object.
-    /// Only disposes objects when count reaches zero AND they are not shared objects.
-    /// Shared objects are disposed by their respective lifecycle managers.
+    /// Disposes objects when count reaches zero.
     /// </summary>
     /// <param name="obj">The object to release</param>
     /// <returns>Task representing the disposal operation</returns>
@@ -60,42 +59,35 @@ internal static class ObjectTracker
             return;
         }
 
-        // For shared objects, only decrement the count but don't dispose
-        // They will be disposed by their respective lifecycle managers
         var count = counter.Decrement();
 
-        // Only dispose when reference count reaches zero AND it's not a shared object
+        // Dispose when reference count reaches zero
         if (count <= 0)
         {
             _trackedObjects.TryRemove(obj, out _);
 
-            // Don't dispose shared objects here - they are managed by TestDataContainer lifecycle
-            // Check if this object is in any shared container by trying to access TestDataContainer
-            if (IsNonSharedObject(obj))
+            // Dispose object with timeout to prevent hanging
+            try
             {
-                // Dispose non-shared objects with timeout to prevent hanging
-                try
+                var disposeTask = DisposeObjectAsync(obj);
+                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
+                var completedTask = await Task.WhenAny(disposeTask, timeoutTask).ConfigureAwait(false);
+                
+                if (completedTask == timeoutTask)
                 {
-                    var disposeTask = DisposeObjectAsync(obj);
-                    var timeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
-                    var completedTask = await Task.WhenAny(disposeTask, timeoutTask).ConfigureAwait(false);
-                    
-                    if (completedTask == timeoutTask)
-                    {
-                        // Timeout occurred, but don't throw to prevent hanging the test
-                        // The object will be GC'd eventually
-                    }
-                    else
-                    {
-                        // Ensure any exceptions from the dispose task are observed
-                        await disposeTask.ConfigureAwait(false);
-                    }
+                    // Timeout occurred, but don't throw to prevent hanging the test
+                    // The object will be GC'd eventually
                 }
-                catch
+                else
                 {
-                    // Swallow disposal exceptions to prevent hanging
-                    // The object will be GC'd eventually if disposal fails
+                    // Ensure any exceptions from the dispose task are observed
+                    await disposeTask.ConfigureAwait(false);
                 }
+            }
+            catch
+            {
+                // Swallow disposal exceptions to prevent hanging
+                // The object will be GC'd eventually if disposal fails
             }
         }
     }
@@ -203,15 +195,4 @@ internal static class ObjectTracker
         }
     }
 
-    /// <summary>
-    /// Determines if an object is NOT a shared object (i.e., it should be disposed when reference count reaches zero).
-    /// Returns false for shared objects that are managed by TestDataContainer lifecycle scopes.
-    /// </summary>
-    private static bool IsNonSharedObject(object obj)
-    {
-        // TEMPORARY FIX: Don't dispose any objects automatically in ReleaseObject
-        // This prevents shared objects from being disposed prematurely.
-        // Proper lifecycle management should handle disposal at appropriate boundaries.
-        return false;
-    }
 }
