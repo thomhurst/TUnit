@@ -7,18 +7,18 @@ namespace TUnit.TestProject;
 public class InheritedCategoryTestValidation : Library.BaseTests
 {
     [Test]
-    public void TestInheritedBaseTestHasBaseCategory()
+    public async Task TestInheritedBaseTestHasBaseCategory()
     {
         // This test verifies that when we call the inherited BaseTest method,
         // it retains its BaseCategory attribute
-        // We can't directly check the BaseTest categories from here, but we can
-        // verify our fix by checking the source generator tests
+        await Assert.That(TestContext.Current!.TestDetails.Categories.Contains("BaseCategory"));
     }
     
     [Test]
-    public void TestInheritedMultipleCategoriesMethod()
+    public async Task TestInheritedMultipleCategoriesMethod()
     {
-        // Similar verification for the BaseTestWithMultipleCategories method
-        // The real validation happens in the source generator test
+        // This test verifies that inherited methods with multiple categories retain all of them
+        await Assert.That(TestContext.Current!.TestDetails.Categories.Contains("AnotherBaseCategory"));
+        await Assert.That(TestContext.Current!.TestDetails.Categories.Contains("MultipleCategories"));
     }
 }
