@@ -1,20 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Background with rounded corners -->
+  <!-- Import Orbitron font from Google Fonts -->
   <defs>
-    <!-- Gradient matching the header colors -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&amp;display=swap');
+    </style>
+    <!-- Dark background gradient matching navbar -->
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a1f3a;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0a0e27;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#0a0e27;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1f3a;stop-opacity:1" />
     </linearGradient>
-    <!-- Text gradient -->
+    <!-- Text gradient matching the TUNIT header exactly -->
     <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#2dd4bf;stop-opacity:1" />
       <stop offset="50%" style="stop-color:#14b8a6;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1" />
     </linearGradient>
-    <!-- Glow effect -->
+    <!-- Very subtle glow -->
     <filter id="glow">
-      <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+      <feGaussianBlur stdDeviation="0.3" result="coloredBlur"/>
       <feMerge>
         <feMergeNode in="coloredBlur"/>
         <feMergeNode in="SourceGraphic"/>
@@ -23,18 +26,19 @@
   </defs>
   
   <!-- Dark background -->
-  <rect width="64" height="64" rx="8" fill="url(#bgGrad)"/>
+  <rect width="64" height="64" rx="10" fill="#0f172a"/>
   
-  <!-- Border -->
-  <rect width="62" height="62" x="1" y="1" rx="7" fill="none" stroke="url(#textGrad)" stroke-width="1" opacity="0.3"/>
+  <!-- Very subtle gradient overlay -->
+  <rect width="64" height="64" rx="10" fill="url(#bgGrad)" opacity="0.5"/>
   
-  <!-- TU text using web-safe font with Orbitron-like characteristics -->
-  <text x="32" y="44" 
-        font-family="Impact, Arial Black, sans-serif" 
-        font-size="28" 
-        font-weight="900" 
+  <!-- TU text using Orbitron to match TUNIT header -->
+  <text x="32" y="46" 
+        font-family="'Orbitron', monospace" 
+        font-size="36" 
+        font-weight="800" 
         text-anchor="middle" 
         fill="url(#textGrad)"
         filter="url(#glow)"
-        letter-spacing="2">TU</text>
+        letter-spacing="2"
+        style="text-transform: uppercase;">TU</text>
 </svg>
