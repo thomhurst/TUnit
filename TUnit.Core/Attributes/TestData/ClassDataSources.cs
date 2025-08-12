@@ -40,79 +40,97 @@ internal class ClassDataSources
     public T Get<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)] T>(SharedType sharedType, Type? testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
     {
 #pragma warning disable CS8603 // Possible null reference return.
+        T instance;
+        
         if (sharedType == SharedType.None)
         {
-            return Create<T>(dataGeneratorMetadata);
+            instance = Create<T>(dataGeneratorMetadata);
         }
-
-        if (sharedType == SharedType.PerTestSession)
+        else if (sharedType == SharedType.PerTestSession)
         {
-            return (T) TestDataContainer.GetGlobalInstance(typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
+            instance = (T) TestDataContainer.GetGlobalInstance(typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
         }
-
-        if (sharedType == SharedType.PerClass)
+        else if (sharedType == SharedType.PerClass)
         {
             if (testClassType == null)
             {
                 throw new InvalidOperationException($"Cannot use SharedType.PerClass without a test class type. This may occur during static property initialization.");
             }
-            return (T) TestDataContainer.GetInstanceForClass(testClassType, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
+            instance = (T) TestDataContainer.GetInstanceForClass(testClassType, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
         }
-
-        if (sharedType == SharedType.Keyed)
+        else if (sharedType == SharedType.Keyed)
         {
-            return (T) TestDataContainer.GetInstanceForKey(key, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
+            instance = (T) TestDataContainer.GetInstanceForKey(key, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
         }
-
-        if (sharedType == SharedType.PerAssembly)
+        else if (sharedType == SharedType.PerAssembly)
         {
             if (testClassType == null)
             {
                 throw new InvalidOperationException($"Cannot use SharedType.PerAssembly without a test class type. This may occur during static property initialization.");
             }
-            return (T) TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
+            instance = (T) TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
         }
-#pragma warning restore CS8603 // Possible null reference return.
+        else
+        {
+            throw new ArgumentOutOfRangeException();
+        }
 
-        throw new ArgumentOutOfRangeException();
+        // Track the instance for disposal regardless of whether it was newly created or reused
+        var trackerEvents = dataGeneratorMetadata.TestBuilderContext?.Current.Events;
+        if (trackerEvents != null)
+        {
+            ObjectTracker.TrackObject(trackerEvents, instance);
+        }
+
+        return instance;
+#pragma warning restore CS8603 // Possible null reference return.
     }
 
     public object Get(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)] Type type, Type? testClassType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
     {
+        object instance;
+        
         if (sharedType == SharedType.None)
         {
-            return Create(type, dataGeneratorMetadata);
+            instance = Create(type, dataGeneratorMetadata);
         }
-
-        if (sharedType == SharedType.PerTestSession)
+        else if (sharedType == SharedType.PerTestSession)
         {
-            return TestDataContainer.GetGlobalInstance(type, () => Create(type, dataGeneratorMetadata));
+            instance = TestDataContainer.GetGlobalInstance(type, () => Create(type, dataGeneratorMetadata));
         }
-
-        if (sharedType == SharedType.PerClass)
+        else if (sharedType == SharedType.PerClass)
         {
             if (testClassType == null)
             {
                 throw new InvalidOperationException($"Cannot use SharedType.PerClass without a test class type. This may occur during static property initialization.");
             }
-            return TestDataContainer.GetInstanceForClass(testClassType, type, () => Create(type, dataGeneratorMetadata));
+            instance = TestDataContainer.GetInstanceForClass(testClassType, type, () => Create(type, dataGeneratorMetadata));
         }
-
-        if (sharedType == SharedType.Keyed)
+        else if (sharedType == SharedType.Keyed)
         {
-            return TestDataContainer.GetInstanceForKey(key!, type, () => Create(type, dataGeneratorMetadata));
+            instance = TestDataContainer.GetInstanceForKey(key!, type, () => Create(type, dataGeneratorMetadata));
         }
-
-        if (sharedType == SharedType.PerAssembly)
+        else if (sharedType == SharedType.PerAssembly)
         {
             if (testClassType == null)
             {
                 throw new InvalidOperationException($"Cannot use SharedType.PerAssembly without a test class type. This may occur during static property initialization.");
             }
-            return TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, type, () => Create(type, dataGeneratorMetadata));
+            instance = TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, type, () => Create(type, dataGeneratorMetadata));
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException();
         }
 
-        throw new ArgumentOutOfRangeException();
+        // Track the instance for disposal regardless of whether it was newly created or reused
+        var trackerEvents = dataGeneratorMetadata.TestBuilderContext?.Current.Events;
+        if (trackerEvents != null)
+        {
+            ObjectTracker.TrackObject(trackerEvents, instance);
+        }
+
+        return instance;
     }
 
     [return: NotNull]
@@ -127,13 +145,8 @@ internal class ClassDataSources
         {
             var instance = Activator.CreateInstance(type)!;
 
-            // Track the created object
-            var trackerEvents2 = dataGeneratorMetadata.TestBuilderContext?.Current.Events;
-
-            if (trackerEvents2 != null)
-            {
-                ObjectTracker.TrackObject(trackerEvents2, instance);
-            }
+            // Note: Object tracking is now handled at the higher level in Get() methods
+            // to ensure both new and reused shared objects are tracked properly
 
             return instance;
         }
