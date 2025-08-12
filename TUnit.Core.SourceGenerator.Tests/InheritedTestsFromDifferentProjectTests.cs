@@ -35,5 +35,10 @@ internal class InheritedTestsFromDifferentProjectTests : TestsBase
             // Check that the BaseTestWithMultipleCategories method has both category attributes
             await Assert.That(generatedCode).Contains("new global::TUnit.Core.CategoryAttribute(\"AnotherBaseCategory\")");
             await Assert.That(generatedCode).Contains("new global::TUnit.Core.CategoryAttribute(\"MultipleCategories\")");
+            
+            // Verify that the generated code includes the inherited test methods
+            await Assert.That(generatedCode).Contains("BaseTest");
+            await Assert.That(generatedCode).Contains("BaseTestWithMultipleCategories");
         });
+}
 }
