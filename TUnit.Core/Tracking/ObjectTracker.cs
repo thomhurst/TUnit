@@ -32,12 +32,11 @@ internal static class ObjectTracker
         var handlerKey = (obj, events);
         if (_registeredHandlers.TryAdd(handlerKey, true))
         {
-            events.OnDispose = events.OnDispose + new Func<object, TestContext, ValueTask>((sender, testContext) =>
+            events.OnDispose = events.OnDispose + new Func<object, TestContext, ValueTask>(async (sender, testContext) =>
             {
-                DecrementAndDisposeIfNeeded(obj);
+                await DecrementAndDisposeIfNeededAsync(obj);
                 // Clean up the handler registration tracking
                 _registeredHandlers.TryRemove(handlerKey, out _);
-                return default(ValueTask);
             });
         }
     }
@@ -47,7 +46,7 @@ internal static class ObjectTracker
     /// Pure reference counting: disposal happens immediately when count becomes zero.
     /// </summary>
     /// <param name="obj">The object to decrement and potentially dispose</param>
-    private static void DecrementAndDisposeIfNeeded(object? obj)
+    private static async ValueTask DecrementAndDisposeIfNeededAsync(object? obj)
     {
         if (obj == null)
         {
@@ -66,35 +65,23 @@ internal static class ObjectTracker
         {
             _trackedObjects.TryRemove(obj, out _);
             
-            // Schedule disposal on a background task to avoid blocking the test disposal
-            _ = Task.Run(async () =>
+            // Dispose synchronously to avoid race conditions with test class disposal
+            try
             {
-                try
+                if (obj is IAsyncDisposable asyncDisposable)
                 {
-                    await DisposeObjectAsync(obj);
+                    await asyncDisposable.DisposeAsync();
                 }
-                catch
+                else if (obj is IDisposable disposable)
                 {
-                    // Swallow disposal exceptions to prevent test failures
-                    // The object will be GC'd eventually if disposal fails
+                    disposable.Dispose();
                 }
-            });
-        }
-    }
-
-    /// <summary>
-    /// Disposes an object using the appropriate disposal method.
-    /// </summary>
-    /// <param name="obj">The object to dispose</param>
-    private static async Task DisposeObjectAsync(object obj)
-    {
-        if (obj is IAsyncDisposable asyncDisposable)
-        {
-            await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-        }
-        else if (obj is IDisposable disposable)
-        {
-            disposable.Dispose();
+            }
+            catch
+            {
+                // Swallow disposal exceptions to prevent test failures
+                // The object will be GC'd eventually if disposal fails
+            }
         }
     }
 
