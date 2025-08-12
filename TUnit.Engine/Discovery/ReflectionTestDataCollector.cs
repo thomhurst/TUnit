@@ -15,7 +15,7 @@ namespace TUnit.Engine.Discovery;
 [RequiresUnreferencedCode("Reflection-based test discovery requires unreferenced code")]
 [RequiresDynamicCode("Expression compilation requires dynamic code generation")]
 [SuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The source field does not have matching annotations.")]
-public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreamingTestDataCollector
+public sealed class ReflectionTestDataCollector : ITestDataCollector
 {
     private static readonly HashSet<Assembly> _scannedAssemblies =
     [
@@ -47,19 +47,21 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
 
         // Use async parallel processing with proper task-based approach
         var tasks = new Task<List<TestMetadata>>[assemblies.Count];
-        
+
         for (var i = 0; i < assemblies.Count; i++)
         {
             var assembly = assemblies[i];
             var index = i;
-            
+
             tasks[index] = Task.Run(async () =>
             {
                 lock (_lock)
                 {
                     if (!_scannedAssemblies.Add(assembly))
                     {
-                        return new List<TestMetadata>();
+                        return
+                        [
+                        ];
                     }
                 }
 
@@ -73,7 +75,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                 {
                     // Create a failed test metadata for the assembly that couldn't be scanned
                     var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
-                    return new List<TestMetadata> { failedTest };
+                    return
+                    [
+                        failedTest
+                    ];
                 }
             });
         }
@@ -103,7 +108,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
 
     public async IAsyncEnumerable<TestMetadata> CollectTestsStreamingAsync(
         string testSessionId,
-        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // Get assemblies to scan
         var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -121,7 +126,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         foreach (var assembly in assemblies)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             lock (_lock)
             {
                 if (!_scannedAssemblies.Add(assembly))
@@ -311,7 +316,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                 // Optimize: Manual filtering with ArrayPool for better memory efficiency
                 var loadedTypes = rtle.Types;
                 if (loadedTypes == null) return [];
-                
+
                 // Use ArrayPool for temporary storage to reduce allocations
                 var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
                 try
@@ -324,7 +329,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                             tempArray[validCount++] = type;
                         }
                     }
-                    
+
                     var result = new Type[validCount];
                     Array.Copy(tempArray, result, validCount);
                     return result;
@@ -431,9 +436,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         Justification = "Reflection mode requires dynamic access")]
     private static async IAsyncEnumerable<TestMetadata> DiscoverTestsInAssemblyStreamingAsync(
         Assembly assembly,
-        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        
+
         var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
         {
             try
@@ -448,7 +453,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                 // Optimize: Manual filtering with ArrayPool for better memory efficiency
                 var loadedTypes = rtle.Types;
                 if (loadedTypes == null) return [];
-                
+
                 // Use ArrayPool for temporary storage to reduce allocations
                 var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
                 try
@@ -461,7 +466,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                             tempArray[validCount++] = type;
                         }
                     }
-                    
+
                     var result = new Type[validCount];
                     Array.Copy(tempArray, result, validCount);
                     return result;
@@ -487,7 +492,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         foreach (var type in filteredTypes)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             // Skip abstract types - they can't be instantiated
             if (type.IsAbstract)
             {
@@ -533,10 +538,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             foreach (var method in testMethods)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 TestMetadata? testMetadata = null;
                 TestMetadata? failedMetadata = null;
-                
+
                 try
                 {
                     // Prevent duplicate test metadata for inherited tests
@@ -549,10 +554,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                 }
                 catch (Exception ex)
                 {
-                    // Create a failed test metadata for discovery failures  
+                    // Create a failed test metadata for discovery failures
                     failedMetadata = CreateFailedTestMetadata(type, method, ex);
                 }
-                
+
                 if (testMetadata != null)
                 {
                     yield return testMetadata;
@@ -666,7 +671,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         Justification = "Reflection mode requires dynamic access")]
     private static async IAsyncEnumerable<TestMetadata> DiscoverGenericTestsStreamingAsync(
         Type genericTypeDefinition,
-        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // Extract class-level data sources that will determine the generic type arguments
         var classDataSources = ReflectionAttributeExtractor.ExtractDataSources(genericTypeDefinition);
@@ -700,13 +705,13 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         foreach (var dataSource in classDataSources)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             var dataItems = await GetDataFromSourceAsync(dataSource, null!); // TODO
 
             foreach (var dataRow in dataItems)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 if (dataRow == null || dataRow.Length == 0)
                 {
                     continue;
@@ -721,7 +726,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
 
                 TestMetadata? failedMetadata = null;
                 List<TestMetadata>? successfulTests = null;
-                
+
                 try
                 {
                     // Create concrete type with validation
@@ -743,7 +748,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
 
                             if (successfulTests == null)
                             {
-                                successfulTests = new List<TestMetadata>();
+                                successfulTests =
+                                [
+                                ];
                             }
                             successfulTests.Add(testMetadata);
                         }
@@ -756,7 +763,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                             $"Failed to create concrete type for {genericTypeDefinition.FullName ?? genericTypeDefinition.Name}. " +
                             $"Error: {ex.Message}. " +
                             $"Generic parameter count: {genericTypeDefinition.GetGenericArguments().Length}, " +
-                            $"Type arguments: {string.Join(", ", typeArguments?.Select(t => t.Name) ?? Array.Empty<string>())}", ex),
+                            $"Type arguments: {string.Join(", ", typeArguments?.Select(t => t.Name) ?? [
+                            ])}", ex),
                         $"[GENERIC TYPE CREATION FAILED] {genericTypeDefinition.Name}")
                     {
                         TestName = $"[GENERIC TYPE CREATION FAILED] {genericTypeDefinition.Name}",
@@ -780,7 +788,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                         yield return test;
                     }
                 }
-                
+
                 // Then yield failed metadata if any
                 if (failedMetadata != null)
                 {
@@ -826,11 +834,11 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         {
             return 0;
         }
-        
+
         // Count how many levels up the inheritance chain the method is declared
         int depth = 0;
         Type? currentType = testClass.BaseType;
-        
+
         while (currentType != null && currentType != typeof(object))
         {
             depth++;
@@ -840,16 +848,16 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             }
             currentType = currentType.BaseType;
         }
-        
+
         // This shouldn't happen in normal cases, but return the depth anyway
         return depth;
     }
-    
+
     private static Task<TestMetadata> BuildTestMetadata(Type testClass, MethodInfo testMethod, object?[]? classData = null)
     {
         // Create a base ReflectionTestMetadata instance
         var testName = GenerateTestName(testClass, testMethod);
-        
+
         // Calculate inheritance depth
         int inheritanceDepth = CalculateInheritanceDepth(testClass, testMethod);
 
@@ -896,7 +904,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             // We can't fully process it here because we don't have parameter values yet
             // But we can at least show the template for tests without parameters
             var displayNameField = typeof(DisplayNameAttribute).GetField("displayName",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                BindingFlags.NonPublic | BindingFlags.Instance);
             if (displayNameField != null)
             {
                 var displayNameValue = displayNameField.GetValue(displayNameAttr) as string;
@@ -1162,7 +1170,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
     private static Func<object?[], object> CreateReflectionInstanceFactory(ConstructorInfo ctor)
     {
         var isPrepared = false;
-        
+
         return args =>
         {
             try
@@ -1170,10 +1178,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                 // Pre-JIT on first actual invocation for better performance
                 if (!isPrepared)
                 {
-                    System.Runtime.CompilerServices.RuntimeHelpers.PrepareMethod(ctor.MethodHandle);
+                    RuntimeHelpers.PrepareMethod(ctor.MethodHandle);
                     isPrepared = true;
                 }
-                
+
                 // Cast arguments to the expected parameter types
                 var parameters = ctor.GetParameters();
                 var castedArgs = new object?[parameters.Length];
@@ -1337,7 +1345,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         var argInterfaces = argType.GetInterfaces();
         if (argType.IsInterface)
         {
-            argInterfaces = argInterfaces.Concat(new[] { argType }).ToArray();
+            argInterfaces = argInterfaces.Concat([argType]).ToArray();
         }
 
         foreach (var iface in argInterfaces)
@@ -1364,18 +1372,18 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
     private static Func<object, object?[], Task> CreateReflectionTestInvoker(Type testClass, MethodInfo testMethod)
     {
         var isPrepared = false;
-        
+
         return (instance, args) =>
         {
             try
             {
                 // Get the method to invoke - may need to make it concrete if it's generic
                 var methodToInvoke = testMethod;
-                
+
                 // Pre-JIT on first actual invocation for better performance
                 if (!isPrepared && !testMethod.IsGenericMethodDefinition)
                 {
-                    System.Runtime.CompilerServices.RuntimeHelpers.PrepareMethod(testMethod.MethodHandle);
+                    RuntimeHelpers.PrepareMethod(testMethod.MethodHandle);
                     isPrepared = true;
                 }
 
@@ -1415,9 +1423,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                     }
 
                     methodToInvoke = testMethod.MakeGenericMethod(typeArguments);
-                    
+
                     // Pre-JIT the constructed generic method on first invocation
-                    System.Runtime.CompilerServices.RuntimeHelpers.PrepareMethod(methodToInvoke.MethodHandle);
+                    RuntimeHelpers.PrepareMethod(methodToInvoke.MethodHandle);
                 }
 
                 // Cast arguments to the expected parameter types
@@ -1570,7 +1578,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
 
     private async IAsyncEnumerable<TestMetadata> DiscoverDynamicTestsStreamingAsync(
         string testSessionId,
-        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies()
             .Where(ShouldScanAssembly)
@@ -1579,7 +1587,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         foreach (var assembly in assemblies)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
             {
                 try
@@ -1611,7 +1619,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                 foreach (var method in methods)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    
+
                     // Stream tests from this dynamic builder
                     await foreach (var test in ExecuteDynamicTestBuilderStreamingAsync(type, method, testSessionId, cancellationToken))
                     {
@@ -1641,7 +1649,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
         }
 
         // Execute the builder method
-        builderMethod.Invoke(instance, new object[] { context });
+        builderMethod.Invoke(instance, [context]);
 
         // Convert the dynamic tests to test metadata
         foreach (var dynamicTest in context.Tests)
@@ -1671,11 +1679,11 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
 
     private async IAsyncEnumerable<TestMetadata> ExecuteDynamicTestBuilderStreamingAsync(
         Type testClass, MethodInfo builderMethod, string testSessionId,
-        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         TestMetadata? failedMetadata = null;
         List<TestMetadata>? successfulTests = null;
-        
+
         try
         {
             // Extract file path and line number from the DynamicTestBuilderAttribute if possible
@@ -1693,13 +1701,13 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             }
 
             // Invoke the builder method
-            builderMethod.Invoke(instance, new object[] { context });
+            builderMethod.Invoke(instance, [context]);
 
             // Retrieve the discovered tests
             foreach (var discoveryResult in context.Tests.SelectMany(t => t.GetTests()))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 if (discoveryResult is DynamicDiscoveryResult dynamicResult)
                 {
                     try
@@ -1707,7 +1715,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                         var testMetadata = await CreateMetadataFromDynamicDiscoveryResult(dynamicResult);
                         if (successfulTests == null)
                         {
-                            successfulTests = new List<TestMetadata>();
+                            successfulTests =
+                            [
+                            ];
                         }
                         successfulTests.Add(testMetadata);
                     }
@@ -1717,7 +1727,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                         var failedTest = CreateFailedTestMetadataForDynamicTest(dynamicResult, ex);
                         if (successfulTests == null)
                         {
-                            successfulTests = new List<TestMetadata>();
+                            successfulTests =
+                            [
+                            ];
                         }
                         successfulTests.Add(failedTest);
                     }
@@ -1729,7 +1741,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
             // Create a failed test metadata for this dynamic test builder
             failedMetadata = CreateFailedTestMetadataForDynamicBuilder(testClass, builderMethod, ex);
         }
-        
+
         // Yield successful tests
         if (successfulTests != null)
         {
@@ -1738,7 +1750,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                 yield return test;
             }
         }
-        
+
         // Yield failed metadata if any
         if (failedMetadata != null)
         {
@@ -1846,7 +1858,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector, IStreaming
                 // The expression is already bound to the correct method with arguments
                 // so we just need to invoke it with the instance
                 var invokeMethod = compiledExpression.GetType().GetMethod("Invoke")!;
-                var invokeResult = invokeMethod.Invoke(compiledExpression, new[] { testInstance });
+                var invokeResult = invokeMethod.Invoke(compiledExpression, [testInstance]);
 
                 if (invokeResult is Task task)
                 {

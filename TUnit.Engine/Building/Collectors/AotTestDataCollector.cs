@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using EnumerableAsyncProcessor.Extensions;
 using TUnit.Core;
 using TUnit.Engine.Building.Interfaces;
 
@@ -12,7 +13,7 @@ namespace TUnit.Engine.Building.Collectors;
 /// AOT-compatible test data collector that uses source-generated test metadata.
 /// Operates without reflection by leveraging pre-compiled test sources.
 /// </summary>
-internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestDataCollector
+internal sealed class AotTestDataCollector : ITestDataCollector
 {
     private readonly HashSet<Type>? _filterTypes;
 
@@ -22,40 +23,19 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
     }
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
-        // Compatibility method - collects all from streaming
-        var tests = new List<TestMetadata>();
-        await foreach (var test in CollectTestsStreamingAsync(testSessionId, CancellationToken.None))
-        {
-            tests.Add(test);
-        }
-        return tests;
-    }
-
-    public async IAsyncEnumerable<TestMetadata> CollectTestsStreamingAsync(
-        string testSessionId,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
         // Stream from all test sources
         var testSources = Sources.TestSources
             .Where(kvp => _filterTypes == null || _filterTypes.Contains(kvp.Key))
             .SelectMany(kvp => kvp.Value);
 
-        // Stream tests from each source
-        foreach (var testSource in testSources)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
+        var standardTestMetadatas = await testSources
+            .SelectManyAsync(testSource => testSource.GetTestsAsync(testSessionId))
+            .ProcessInParallel();
 
-            await foreach (var metadata in testSource.GetTestsAsync(testSessionId, cancellationToken))
-            {
-                yield return metadata;
-            }
-        }
+        var dynamicTestMetadatas = await CollectDynamicTestsStreaming(testSessionId)
+            .ProcessInParallel();
 
-        // Also stream dynamic tests
-        await foreach (var metadata in CollectDynamicTestsStreaming(testSessionId, cancellationToken))
-        {
-            yield return metadata;
-        }
+        return [..standardTestMetadatas, ..dynamicTestMetadatas];
     }
 
     private async IAsyncEnumerable<TestMetadata> CollectDynamicTestsStreaming(
@@ -83,7 +63,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
             {
                 // Create a failed test metadata for this dynamic test source
                 failedMetadata = CreateFailedTestMetadataForDynamicSource(source, ex);
-                dynamicTests = Enumerable.Empty<DynamicTest>();
+                dynamicTests = [];
             }
 
             if (failedMetadata != null)
@@ -127,7 +107,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
         }
 
         // Extract method info from the expression
-        System.Reflection.MethodInfo? methodInfo = null;
+        MethodInfo? methodInfo = null;
         var lambdaExpression = result.TestMethod as LambdaExpression;
         if (lambdaExpression?.Body is MethodCallExpression methodCall)
         {
@@ -239,7 +219,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
                 // The expression is already bound to the correct method with arguments
                 // so we just need to invoke it with the instance
                 var invokeMethod = compiledExpression.GetType().GetMethod("Invoke")!;
-                var invokeResult = invokeMethod.Invoke(compiledExpression, new[] { testInstance });
+                var invokeResult = invokeMethod.Invoke(compiledExpression, [testInstance]);
 
                 if (invokeResult is Task task)
                 {
@@ -250,7 +230,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector, IStreamingTestD
                     await valueTask;
                 }
             }
-            catch (System.Reflection.TargetInvocationException tie)
+            catch (TargetInvocationException tie)
             {
                 System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(tie.InnerException ?? tie).Throw();
                 throw;

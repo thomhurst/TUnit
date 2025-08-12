@@ -1,3 +1,4 @@
+using EnumerableAsyncProcessor.Extensions;
 using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
@@ -168,12 +169,6 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
 
-        // If no explicit limit is set, use a sensible default to prevent thread pool exhaustion
-        if (!maxParallelism.HasValue)
-        {
-            maxParallelism = Environment.ProcessorCount;
-        }
-
         var allTestTasks = new List<Task>();
 
         // 1. NotInParallel tests (global) - must run one at a time
@@ -257,7 +252,9 @@ internal sealed class TestScheduler : ITestScheduler
                 allTests.Add(test);
                 if (!testToKeys.TryGetValue(test, out var keys))
                 {
-                    keys = new List<string>();
+                    keys =
+                    [
+                    ];
                     testToKeys[test] = keys;
                 }
                 keys.Add(key);
@@ -373,7 +370,7 @@ internal sealed class TestScheduler : ITestScheduler
         else
         {
             // No limit - just wait for all
-            await Task.WhenAll(tests.Select(t => t.ExecutionTask)).ConfigureAwait(false);
+            await tests.ForEachAsync(async t => await t.ExecutionTask.ConfigureAwait(false)).ProcessInParallel();
         }
     }
 

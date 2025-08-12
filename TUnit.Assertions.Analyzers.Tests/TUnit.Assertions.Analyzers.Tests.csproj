@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  
+
   <Import Project="..\TestProject.props" />
-  
+
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" />
   </ItemGroup>
