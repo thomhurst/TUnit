@@ -35,24 +35,5 @@ internal class ScopedContainer<TKey> where TKey : notnull
                container.TryGetValue(type, out instance);
     }
 
-    /// <summary>
-    /// Checks if the specified instance exists in any container within this scoped container.
-    /// </summary>
-    /// <param name="instance">The instance to check for.</param>
-    /// <returns>True if the instance exists in any container; otherwise, false.</returns>
-    public bool ContainsInstance(object instance)
-    {
-        foreach (var container in _containers.Values)
-        {
-            foreach (var value in container.Values)
-            {
-                if (ReferenceEquals(value, instance))
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 
 }

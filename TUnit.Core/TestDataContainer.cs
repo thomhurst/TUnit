@@ -30,18 +30,5 @@ internal static class TestDataContainer
         return _keyContainer.GetOrCreate(key, type, func);
     }
 
-    /// <summary>
-    /// Checks if the specified object instance is managed by any of the scoped containers.
-    /// Objects managed by scoped containers should not be disposed by individual reference counting.
-    /// </summary>
-    /// <param name="instance">The instance to check</param>
-    /// <returns>True if the object is managed by a scoped container; otherwise, false</returns>
-    public static bool IsObjectManaged(object instance)
-    {
-        return _globalContainer.ContainsInstance(instance) ||
-               _classContainer.ContainsInstance(instance) ||
-               _assemblyContainer.ContainsInstance(instance) ||
-               _keyContainer.ContainsInstance(instance);
-    }
 
 }
