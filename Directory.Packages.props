@@ -75,7 +75,7 @@
         </PackageVersion>
         <PackageVersion Include="StreamJsonRpc" Version="2.22.11" />
         <PackageVersion Include="System.Collections.Immutable" Version="9.0.0" />
-        <PackageVersion Include="System.CommandLine" Version="2.0.0-beta5.25306.1" />
+        <PackageVersion Include="System.CommandLine" Version="2.0.0-beta7.25380.108" />
         <PackageVersion Include="System.Text.Json" Version="9.0.0" />
         <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
         <PackageVersion Include="Testcontainers.Kafka" Version="4.6.0" />
@@ -87,7 +87,7 @@
         <PackageVersion Include="TUnit" Version="0.55.6" />
         <PackageVersion Include="TUnit.Core" Version="0.55.6" />
         <PackageVersion Include="TUnit.Assertions" Version="0.55.6" />
-        <PackageVersion Include="Vogen" Version="7.0.4" />
+        <PackageVersion Include="Vogen" Version="8.0.1" />
         <PackageVersion Include="xunit" Version="2.9.3" />
         <PackageVersion Include="xunit.assert" Version="2.9.3" />
         <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.3" />
