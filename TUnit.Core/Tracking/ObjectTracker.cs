@@ -34,14 +34,7 @@ internal static class ObjectTracker
         {
             events.OnDispose += async (_, _) =>
             {
-                // Simply decrement the reference count without disposing to prevent hanging
-                // Shared objects (PerClass, PerAssembly, PerTestSession) will be disposed
-                // by their own lifecycle management when their scope ends
-                if (_trackedObjects.TryGetValue(obj, out var counter))
-                {
-                    counter.Decrement();
-                }
-                
+                await ReleaseObject(obj);
                 // Clean up the handler registration tracking
                 _registeredHandlers.TryRemove(handlerKey, out _);
             };
@@ -49,12 +42,11 @@ internal static class ObjectTracker
     }
 
     /// <summary>
-    /// Decrements the reference count for an object and optionally disposes it.
-    /// This method is kept for potential future use but is not currently called 
-    /// from OnDispose handlers to prevent hanging issues.
+    /// Decrements the reference count for an object and disposes it when count reaches zero.
+    /// Uses proper disposal pattern with async support and exception handling.
     /// </summary>
     /// <param name="obj">The object to release</param>
-    /// <returns>True if the object has no more references and was removed from tracking</returns>
+    /// <returns>Task representing the disposal operation</returns>
     private static async Task ReleaseObject(object? obj)
     {
         if (obj == null)
@@ -69,20 +61,27 @@ internal static class ObjectTracker
 
         var count = counter.Decrement();
 
+        // Only dispose when reference count reaches zero
         if (count <= 0)
         {
             _trackedObjects.TryRemove(obj, out _);
 
-            // Dispose the object without blocking
+            // Dispose the object with timeout to prevent hanging
             try
             {
-                if (obj is IAsyncDisposable asyncDisposable)
+                var disposeTask = DisposeObjectAsync(obj);
+                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
+                var completedTask = await Task.WhenAny(disposeTask, timeoutTask).ConfigureAwait(false);
+                
+                if (completedTask == timeoutTask)
                 {
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                    // Timeout occurred, but don't throw to prevent hanging the test
+                    // The object will be GC'd eventually
                 }
-                else if (obj is IDisposable disposable)
+                else
                 {
-                    disposable.Dispose();
+                    // Ensure any exceptions from the dispose task are observed
+                    await disposeTask.ConfigureAwait(false);
                 }
             }
             catch
@@ -146,6 +145,22 @@ internal static class ObjectTracker
     public static void Clear()
     {
         _trackedObjects.Clear();
+    }
+
+    /// <summary>
+    /// Disposes an object using the appropriate disposal method.
+    /// </summary>
+    /// <param name="obj">The object to dispose</param>
+    private static async Task DisposeObjectAsync(object obj)
+    {
+        if (obj is IAsyncDisposable asyncDisposable)
+        {
+            await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+        }
+        else if (obj is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
     }
 
     /// <summary>
