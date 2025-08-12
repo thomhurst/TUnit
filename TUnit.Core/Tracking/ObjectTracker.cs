@@ -43,7 +43,8 @@ internal static class ObjectTracker
 
     /// <summary>
     /// Decrements the reference count for an object.
-    /// Disposes objects when count reaches zero.
+    /// Only disposes non-shared objects when count reaches zero.
+    /// Shared objects are disposed by their respective lifecycle managers.
     /// </summary>
     /// <param name="obj">The object to release</param>
     /// <returns>Task representing the disposal operation</returns>
@@ -61,33 +62,38 @@ internal static class ObjectTracker
 
         var count = counter.Decrement();
 
-        // Dispose when reference count reaches zero
+        // Only dispose when reference count reaches zero AND object is not managed by TestDataContainer
         if (count <= 0)
         {
             _trackedObjects.TryRemove(obj, out _);
 
-            // Dispose object with timeout to prevent hanging
-            try
+            // Only dispose objects that are NOT managed by TestDataContainer's scoped containers
+            // Shared objects (PerClass, PerAssembly, PerTestSession, Keyed) are disposed by their lifecycle managers
+            if (ShouldDisposeObject(obj))
             {
-                var disposeTask = DisposeObjectAsync(obj);
-                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
-                var completedTask = await Task.WhenAny(disposeTask, timeoutTask).ConfigureAwait(false);
-                
-                if (completedTask == timeoutTask)
+                // Dispose object with timeout to prevent hanging
+                try
                 {
-                    // Timeout occurred, but don't throw to prevent hanging the test
-                    // The object will be GC'd eventually
+                    var disposeTask = DisposeObjectAsync(obj);
+                    var timeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
+                    var completedTask = await Task.WhenAny(disposeTask, timeoutTask).ConfigureAwait(false);
+                    
+                    if (completedTask == timeoutTask)
+                    {
+                        // Timeout occurred, but don't throw to prevent hanging the test
+                        // The object will be GC'd eventually
+                    }
+                    else
+                    {
+                        // Ensure any exceptions from the dispose task are observed
+                        await disposeTask.ConfigureAwait(false);
+                    }
                 }
-                else
+                catch
                 {
-                    // Ensure any exceptions from the dispose task are observed
-                    await disposeTask.ConfigureAwait(false);
+                    // Swallow disposal exceptions to prevent hanging
+                    // The object will be GC'd eventually if disposal fails
                 }
-            }
-            catch
-            {
-                // Swallow disposal exceptions to prevent hanging
-                // The object will be GC'd eventually if disposal fails
             }
         }
     }
@@ -169,6 +175,23 @@ internal static class ObjectTracker
     private static bool ShouldSkipTracking(object? obj)
     {
         return obj is not IDisposable and not IAsyncDisposable;
+    }
+
+    /// <summary>
+    /// Determines if an object should be disposed by ObjectTracker.
+    /// Returns false for objects managed by TestDataContainer's scoped containers.
+    /// </summary>
+    private static bool ShouldDisposeObject(object? obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+
+        // Check if the object is managed by TestDataContainer
+        // Objects managed by scoped containers should NOT be disposed by ObjectTracker
+        // They will be disposed by their respective lifecycle managers
+        return !TestDataContainer.IsObjectManaged(obj);
     }
 
     /// <summary>
