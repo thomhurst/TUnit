@@ -1,19 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Background -->
+  <!-- Background with rounded corners -->
   <defs>
-    <linearGradient id="gradTU" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
+    <!-- Gradient matching the header colors -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1f3a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0a0e27;stop-opacity:1" />
+    </linearGradient>
+    <!-- Text gradient -->
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2dd4bf;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#14b8a6;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1" />
     </linearGradient>
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <rect width="64" height="64" rx="12" fill="#0f172a"/>
   
-  <!-- TU letters in monospace -->
-  <text x="12" y="42" font-family="Consolas, 'Fira Code', monospace" font-size="32" font-weight="700" fill="url(#gradTU)"  transform="scale(1.5) translate(-10.5, -10)">
-    T
-  </text>
+  <!-- Dark background -->
+  <rect width="64" height="64" rx="8" fill="url(#bgGrad)"/>
   
-  <text x="30" y="42" font-family="Consolas, 'Fira Code', monospace" font-size="32" font-weight="700" fill="url(#gradTU)" transform="scale(1.5) translate(-10.5, -10)">
-    U
-  </text>
+  <!-- Border -->
+  <rect width="62" height="62" x="1" y="1" rx="7" fill="none" stroke="url(#textGrad)" stroke-width="1" opacity="0.3"/>
+  
+  <!-- TU text using web-safe font with Orbitron-like characteristics -->
+  <text x="32" y="44" 
+        font-family="Impact, Arial Black, sans-serif" 
+        font-size="28" 
+        font-weight="900" 
+        text-anchor="middle" 
+        fill="url(#textGrad)"
+        filter="url(#glow)"
+        letter-spacing="2">TU</text>
 </svg>
