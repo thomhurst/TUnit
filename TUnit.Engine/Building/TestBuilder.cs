@@ -26,6 +26,12 @@ internal sealed class TestBuilder : ITestBuilder
 
     private async Task<object> CreateInstance(TestMetadata metadata, Type[] resolvedClassGenericArgs, object?[] classData, TestBuilderContext? builderContext = null)
     {
+        // If no builderContext provided and we're in test execution phase, create one from current TestContext
+        if (builderContext == null && TestContext.Current != null)
+        {
+            builderContext = TestBuilderContext.FromTestContext(TestContext.Current, null);
+        }
+        
         // First try to create instance with ClassConstructor attribute
         var attributes = metadata.AttributeFactory();
 
@@ -287,8 +293,9 @@ internal sealed class TestBuilder : ITestBuilder
                                     var capturedMetadata = metadata;
                                     var capturedClassGenericArgs = resolvedClassGenericArgs;
                                     var capturedClassData = classData;
-                                    var capturedContext = contextAccessor.Current;
-                                    instanceFactory = () => CreateInstance(capturedMetadata, capturedClassGenericArgs, capturedClassData, capturedContext);
+                                    // Pass null for builderContext - CreateInstance will use TestContext.Current during execution
+                                    // This ensures each test gets its own Events object for tracking
+                                    instanceFactory = () => CreateInstance(capturedMetadata, capturedClassGenericArgs, capturedClassData, null);
                                 }
 
                                 var testData = new TestData
@@ -306,6 +313,17 @@ internal sealed class TestBuilder : ITestBuilder
                                     ResolvedMethodGenericArguments = resolvedMethodGenericArgs
                                 };
 
+                                // Update context BEFORE building each test (except the first)
+                                if (i > 0)
+                                {
+                                    contextAccessor.Current = new TestBuilderContext
+                                    {
+                                        TestMetadata = metadata.MethodMetadata,
+                                        Events = new TestContextEvents(),
+                                        ObjectBag = new Dictionary<string, object?>()
+                                    };
+                                }
+
                                 var test = await BuildTestAsync(metadata, testData, contextAccessor.Current);
 
                                 // If we have a basic skip reason, set it immediately
@@ -314,13 +332,6 @@ internal sealed class TestBuilder : ITestBuilder
                                     test.Context.SkipReason = basicSkipReason;
                                 }
                                 tests.Add(test);
-
-                                contextAccessor.Current = new TestBuilderContext
-                                {
-                                    TestMetadata = metadata.MethodMetadata,
-                                    Events = new TestContextEvents(),
-                                    ObjectBag = new Dictionary<string, object?>()
-                                };
                             }
                         }
                     }
@@ -1231,19 +1242,23 @@ internal sealed class TestBuilder : ITestBuilder
                 ResolvedMethodGenericArguments = resolvedMethodGenericArgs
             };
 
+            // Update context BEFORE building the test (for subsequent iterations)
+            if (repeatIndex > 0)
+            {
+                contextAccessor.Current = new TestBuilderContext
+                {
+                    TestMetadata = metadata.MethodMetadata,
+                    Events = new TestContextEvents(),
+                    ObjectBag = new Dictionary<string, object?>()
+                };
+            }
+
             var test = await BuildTestAsync(metadata, testData, contextAccessor.Current);
 
             if (!string.IsNullOrEmpty(basicSkipReason))
             {
                 test.Context.SkipReason = basicSkipReason;
             }
-
-            contextAccessor.Current = new TestBuilderContext
-            {
-                TestMetadata = metadata.MethodMetadata,
-                Events = new TestContextEvents(),
-                ObjectBag = new Dictionary<string, object?>()
-            };
 
             return test;
         }

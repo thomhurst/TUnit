@@ -75,14 +75,15 @@ internal class ClassDataSources
             throw new ArgumentOutOfRangeException();
         }
 
-        // Track the instance for disposal - reference counting ensures proper disposal timing
+        // Track the instance for disposal - pure reference counting
         // Each test that uses an object increments its reference count
         // Object is only disposed when ALL tests using it have completed (count reaches zero)
-        var trackerEvents = dataGeneratorMetadata.TestBuilderContext?.Current.Events;
-        if (trackerEvents != null)
+        var trackerEvents = dataGeneratorMetadata.TestBuilderContext?.Events;
+        if (trackerEvents == null)
         {
-            ObjectTracker.TrackObject(trackerEvents, instance);
+            throw new InvalidOperationException($"TestBuilderContext.Events is null when creating {typeof(T).Name}. This is a framework bug - every test must have an Events object for proper disposal tracking.");
         }
+        ObjectTracker.TrackObject(trackerEvents, instance);
 
         return instance;
 #pragma warning restore CS8603 // Possible null reference return.
@@ -125,14 +126,15 @@ internal class ClassDataSources
             throw new ArgumentOutOfRangeException();
         }
 
-        // Track the instance for disposal - reference counting ensures proper disposal timing
+        // Track the instance for disposal - pure reference counting
         // Each test that uses an object increments its reference count
         // Object is only disposed when ALL tests using it have completed (count reaches zero)
-        var trackerEvents = dataGeneratorMetadata.TestBuilderContext?.Current.Events;
-        if (trackerEvents != null)
+        var trackerEvents = dataGeneratorMetadata.TestBuilderContext?.Events;
+        if (trackerEvents == null)
         {
-            ObjectTracker.TrackObject(trackerEvents, instance);
+            throw new InvalidOperationException($"TestBuilderContext.Events is null when creating {type?.Name}. This is a framework bug - every test must have an Events object for proper disposal tracking.");
         }
+        ObjectTracker.TrackObject(trackerEvents, instance);
 
         return instance;
     }

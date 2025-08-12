@@ -323,8 +323,7 @@ public sealed class PropertyInjectionService
     }
 
     /// <summary>
-    /// Processes a single injected property value: initializes it, sets it on the instance.
-    /// Note: The value is already tracked by its data source, so we don't track it here.
+    /// Processes a single injected property value: tracks it, initializes it, sets it on the instance.
     /// </summary>
     private static async Task ProcessInjectedPropertyValue(object instance, object? propertyValue, Action<object, object?> setProperty, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, HashSet<object> visitedObjects)
     {
@@ -333,8 +332,9 @@ public sealed class PropertyInjectionService
             return;
         }
 
-        // NOTE: We do NOT track the propertyValue here because it's already tracked by the data source that created it.
-        // Tracking it again would cause double-counting and premature disposal of shared instances.
+        // Track the property value for disposal - pure reference counting ensures proper disposal
+        // ObjectTracker's safety mechanism prevents double-tracking within the same context
+        ObjectTracker.TrackObject(events, propertyValue);
 
         // Recursively inject properties and initialize nested objects
         // The visited set prevents infinite loops from circular references
