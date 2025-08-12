@@ -38,6 +38,6 @@ internal class ScopedReference<T> : IDisposableReference
     /// <returns>A task representing the disposal operation.</returns>
     public async Task DisposeAsync()
     {
-        await _scopeManager.TryDisposeAsync(_instance);
+        await _scopeManager.TryDisposeAsync(_instance).ConfigureAwait(false);
     }
 }

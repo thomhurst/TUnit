@@ -68,7 +68,7 @@ internal class DependencyTracker
         if (dependencies != null && hadDependencies)
         {
             // Dispose dependencies in parallel for better performance
-            var disposalTasks = dependencies.Select(dep => dep.DisposeAsync().AsTask());
+            var disposalTasks = dependencies.Select(dep => dep.DisposeAsync());
             await Task.WhenAll(disposalTasks).ConfigureAwait(false);
         }
     }
