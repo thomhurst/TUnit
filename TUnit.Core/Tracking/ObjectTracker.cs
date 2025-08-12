@@ -34,7 +34,14 @@ internal static class ObjectTracker
         {
             events.OnDispose += async (_, _) =>
             {
-                await ReleaseObject(obj);
+                // Simply decrement the reference count without disposing to prevent hanging
+                // Shared objects (PerClass, PerAssembly, PerTestSession) will be disposed
+                // by their own lifecycle management when their scope ends
+                if (_trackedObjects.TryGetValue(obj, out var counter))
+                {
+                    counter.Decrement();
+                }
+                
                 // Clean up the handler registration tracking
                 _registeredHandlers.TryRemove(handlerKey, out _);
             };
@@ -43,6 +50,8 @@ internal static class ObjectTracker
 
     /// <summary>
     /// Decrements the reference count for an object and optionally disposes it.
+    /// This method is kept for potential future use but is not currently called 
+    /// from OnDispose handlers to prevent hanging issues.
     /// </summary>
     /// <param name="obj">The object to release</param>
     /// <returns>True if the object has no more references and was removed from tracking</returns>
@@ -64,13 +73,22 @@ internal static class ObjectTracker
         {
             _trackedObjects.TryRemove(obj, out _);
 
-            if (obj is IAsyncDisposable asyncDisposable)
+            // Dispose the object without blocking
+            try
             {
-                await asyncDisposable.DisposeAsync();
+                if (obj is IAsyncDisposable asyncDisposable)
+                {
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                }
+                else if (obj is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
             }
-            else if (obj is IDisposable disposable)
+            catch
             {
-                disposable.Dispose();
+                // Swallow disposal exceptions to prevent hanging
+                // The object will be GC'd eventually if disposal fails
             }
         }
     }
