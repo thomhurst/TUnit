@@ -10,6 +10,7 @@ namespace TUnit.Core.Tracking;
 internal static class ObjectTracker
 {
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
+    private static readonly ConcurrentDictionary<(object obj, TestContextEvents events), bool> _registeredHandlers = new();
 
     /// <summary>
     /// Tracks an object and increments its reference count.
@@ -25,13 +26,19 @@ internal static class ObjectTracker
         }
 
         var counter = _trackedObjects.GetOrAdd(obj, _ => new Counter());
-
         counter.Increment();
 
-        events.OnDispose += async (_, _) =>
+        // Only register the disposal handler once per object per test context
+        var handlerKey = (obj, events);
+        if (_registeredHandlers.TryAdd(handlerKey, true))
         {
-            await ReleaseObject(obj);
-        };
+            events.OnDispose += async (_, _) =>
+            {
+                await ReleaseObject(obj);
+                // Clean up the handler registration tracking
+                _registeredHandlers.TryRemove(handlerKey, out _);
+            };
+        }
     }
 
     /// <summary>
