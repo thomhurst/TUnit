@@ -35,11 +35,8 @@ public async Task MyTest()
           <div className={styles.heroText}>
             <div className={styles.titleRow}>
               <Heading as="h1" className={styles.heroTitle}>
-                <span className={styles.titleMain}>
-                  <span className={styles.titleLarge}>TU</span>
-                  <span className={styles.titleSmall}>NIT</span>
-                </span>
-                <span className={styles.titleAccent}>Testing Reimagined</span>
+                <span className={styles.titleMain}>TUNIT</span>
+                <span className={styles.titleAccent}>Testing Made Simple</span>
               </Heading>
               <div className={styles.badge}>Modern .NET Testing</div>
             </div>

@@ -61,7 +61,7 @@
 }
 
 /* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@600;700&family=Russo+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@600;700&family=Russo+One&family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 /* Global Enhancements */
 * {
@@ -241,7 +241,16 @@ div[class*="codeScrollWrapper"] > div {
 /* Navbar text colors */
 .navbar__title {
   color: var(--text-primary) !important;
-  font-weight: 600;
+  font-family: 'Orbitron', 'Space Grotesk', monospace !important;
+  font-weight: 700;
+  font-size: 1.5rem !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 50%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
 }
 
 .navbar__link {
@@ -794,9 +803,15 @@ div[class*="codeScrollWrapper"] > div {
   }
   
   .navbar-sidebar .navbar__title {
-    font-size: 1.25rem !important;
+    font-family: 'Orbitron', 'Space Grotesk', monospace !important;
+    font-size: 1.5rem !important;
     font-weight: 700 !important;
-    color: #f1f5f9 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 50%, #0ea5e9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   
   /* Fix dark mode toggle in mobile menu */
