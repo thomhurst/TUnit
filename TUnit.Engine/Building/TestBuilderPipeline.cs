@@ -38,34 +38,20 @@ internal sealed class TestBuilderPipeline
     /// <summary>
     /// Streaming version that yields tests as they're built without buffering
     /// </summary>
-    public async IAsyncEnumerable<AbstractExecutableTest> BuildTestsStreamingAsync(
+    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsStreamingAsync(
         string testSessionId,
         HashSet<Type>? filterTypes,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
     {
         var dataCollector = _dataCollectorFactory(filterTypes);
 
         // Get metadata streaming if supported
-        IAsyncEnumerable<TestMetadata>? streamingMetadata = null;
-        if (dataCollector is IStreamingTestDataCollector streamingCollector)
-        {
-            streamingMetadata = streamingCollector.CollectTestsStreamingAsync(testSessionId, cancellationToken);
-        }
-        else
-        {
-            // Fall back to non-streaming collection
-            var collectedMetadata = await dataCollector.CollectTestsAsync(testSessionId);
-            streamingMetadata = ToAsyncEnumerable(collectedMetadata);
-        }
+        // Fall back to non-streaming collection
+        var collectedMetadata = await dataCollector.CollectTestsAsync(testSessionId);
 
-        await foreach (var metadata in streamingMetadata.WithCancellation(cancellationToken))
-        {
-            // Build and yield tests one at a time
-            await foreach (var test in BuildTestsFromSingleMetadataAsync(metadata))
-            {
-                yield return test;
-            }
-        }
+        return await collectedMetadata
+            .SelectManyAsync(BuildTestsFromSingleMetadataAsync, cancellationToken: cancellationToken)
+            .ProcessInParallel(cancellationToken: cancellationToken);
     }
 
     private async IAsyncEnumerable<TestMetadata> ToAsyncEnumerable(IEnumerable<TestMetadata> metadata)

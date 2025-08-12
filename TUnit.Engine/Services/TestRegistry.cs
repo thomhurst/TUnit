@@ -187,7 +187,7 @@ internal sealed class TestRegistry : ITestRegistry
             var testInstance = instance ?? throw new InvalidOperationException("Test instance is null");
 
             var invokeMethod = compiledExpression.GetType().GetMethod("Invoke")!;
-            var invokeResult = invokeMethod.Invoke(compiledExpression, new[] { testInstance });
+            var invokeResult = invokeMethod.Invoke(compiledExpression, [testInstance]);
 
             if (invokeResult is Task task)
             {
