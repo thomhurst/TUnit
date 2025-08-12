@@ -284,6 +284,11 @@ div[class*="codeScrollWrapper"] > div {
   text-decoration: none !important;
 }
 
+/* Hide the logo image since we have TUNIT text */
+.navbar__logo {
+  display: none !important;
+}
+
 /* Navbar items */
 .navbar__item {
   color: var(--text-body) !important;
@@ -299,176 +304,77 @@ div[class*="codeScrollWrapper"] > div {
   color: #f1f5f9 !important;
 }
 
-/* Mobile Navbar Sidebar Fix */
-.navbar-sidebar {
-  background: linear-gradient(180deg, #1a1f3a 0%, #0f172a 100%) !important;
-  color: #f1f5f9 !important;
-  height: 100vh !important;
-  width: 100% !important;
-  max-width: 100vw !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  z-index: 999 !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
+/* Mobile Navbar Sidebar - Dark theme styling */
+@media (max-width: 996px) {
+  .navbar-sidebar {
+    background: #0f172a !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    overflow-y: auto !important;
+    left: 0 !important;
+    right: auto !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 320px !important;
+  }
+  
+  .navbar-sidebar__brand {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(20, 184, 166, 0.15) !important;
+    padding: 1rem !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 60px !important;
+  }
+  
+  .navbar-sidebar__items {
+    background: transparent !important;
+    height: calc(100vh - 60px) !important;
+    overflow-y: auto !important;
+    position: relative !important;
+    left: 0 !important;
+    transform: translateX(0) !important;
+    margin-left: 0 !important;
+    padding: 0.5rem 0 !important;
+  }
+  
+  /* Ensure consistent spacing for menu items */
+  .navbar-sidebar .menu__list-item {
+    margin: 0 !important;
+  }
+  
+  .navbar-sidebar .menu__link {
+    padding: 0.75rem 1rem !important;
+    border-radius: 0 !important;
+  }
+  
+  /* Force all child elements to be visible */
+  .navbar-sidebar * {
+    transform: none !important;
+    left: auto !important;
+    position: relative !important;
+  }
+  
+  /* Style all links in the sidebar */
+  .navbar-sidebar a {
+    color: #cbd5e1 !important;
+  }
+  
+  .navbar-sidebar a:hover {
+    color: #2dd4bf !important;
+    background: rgba(20, 184, 166, 0.1) !important;
+  }
+  
+  /* Active link styling */
+  .navbar-sidebar .menu__link--active,
+  .navbar-sidebar [aria-current="page"] {
+    color: #2dd4bf !important;
+    background: rgba(20, 184, 166, 0.15) !important;
+  }
 }
 
-.navbar-sidebar__backdrop {
-  background: rgba(0, 0, 0, 0.8) !important;
-}
-
-.navbar-sidebar__brand {
-  background: transparent !important;
-  border-bottom: 1px solid rgba(20, 184, 166, 0.1) !important;
-  padding: 1rem !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-}
-
-.navbar-sidebar__close {
-  color: #f1f5f9 !important;
-  background: transparent !important;
-  border: none !important;
-  font-size: 1.5rem !important;
-  cursor: pointer !important;
-  padding: 0.5rem !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 2.5rem !important;
-  height: 2.5rem !important;
-  position: relative !important;
-  z-index: 10 !important;
-}
-
-.navbar-sidebar__close:hover {
-  background: rgba(20, 184, 166, 0.1) !important;
-  border-radius: 0.5rem !important;
-}
-
-/* Hide the duplicate pseudo-element since SVG is already there */
-.navbar-sidebar__close::after,
-.navbar-sidebar__close::before {
-  content: none !important;
-  display: none !important;
-}
-
-.navbar-sidebar__items {
-  padding: 1rem !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  max-height: calc(100vh - 80px) !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.navbar-sidebar__item {
-  margin: 0.5rem 0 !important;
-}
-
-/* Clean up navbar items in mobile sidebar */
-.navbar-sidebar .navbar__items {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 0.5rem !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  width: 100% !important;
-}
-
-.navbar-sidebar .navbar__items--right {
-  margin-top: 2rem !important;
-  padding-top: 1rem !important;
-  border-top: 1px solid rgba(20, 184, 166, 0.1) !important;
-}
-
-.navbar-sidebar .navbar__item {
-  display: block !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.navbar-sidebar .navbar__link {
-  color: #cbd5e1 !important;
-  text-decoration: none !important;
-  display: flex !important;
-  align-items: center !important;
-  padding: 0.75rem 1rem !important;
-  border-radius: 0.5rem !important;
-  transition: all 0.2s ease !important;
-  font-size: 1rem !important;
-  font-weight: 500 !important;
-  width: 100% !important;
-}
-
-.navbar-sidebar .navbar__link:hover {
-  background: rgba(20, 184, 166, 0.1) !important;
-  color: #2dd4bf !important;
-  text-decoration: none !important;
-}
-
-.navbar-sidebar .navbar__link--active {
-  background: rgba(20, 184, 166, 0.15) !important;
-  color: #2dd4bf !important;
-  font-weight: 600 !important;
-}
-
-/* Hide external link icons but not the close button */
-.navbar-sidebar .navbar__link svg,
-.navbar-sidebar .navbar__link [class*="icon"],
-.navbar-sidebar .iconExternalLink,
-.navbar-sidebar [class*="Icon"]:not(.navbar-sidebar__close),
-.navbar-sidebar img[alt*="external"],
-.navbar-sidebar span[aria-label*="external"] {
-  display: none !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  opacity: 0 !important;
-}
-
-/* Ensure only one close button SVG is visible */
-.navbar-sidebar__close svg {
-  display: block !important;
-  visibility: visible !important;
-  width: 1.25rem !important;
-  height: 1.25rem !important;
-  opacity: 1 !important;
-  fill: #f1f5f9 !important;
-}
-
-/* Hide any duplicate close elements */
-.navbar-sidebar__close > *:not(:first-child) {
-  display: none !important;
-}
-
-/* Hide Docusaurus default external link indicator */
-.navbar-sidebar .navbar__link > span:last-child:not(:first-child) {
-  display: none !important;
-}
-
-/* Clean external link styling without icons */
-.navbar-sidebar .navbar__link[href^="http"] {
-  position: relative !important;
-  padding-right: 2rem !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* Add simple text indicator for external links */
-.navbar-sidebar .navbar__link[href^="http"]::after {
-  content: "↗" !important;
-  position: absolute !important;
-  right: 1rem !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  font-size: 1rem !important;
-  opacity: 0.4 !important;
-  font-weight: normal !important;
-  display: block !important;
-}
 
 /* Search box styling */
 .DocSearch-Button {
@@ -748,6 +654,7 @@ div[class*="codeScrollWrapper"] > div {
 }
 
 /* Mobile Responsive Improvements */
+
 @media screen and (max-width: 996px) {
   /* Hide scrollbar on mobile while keeping scroll functionality */
   html {
@@ -791,10 +698,16 @@ div[class*="codeScrollWrapper"] > div {
     margin-right: 0;
   }
   
-  /* Additional mobile sidebar fixes */
-  .navbar-sidebar {
-    display: block !important;
+  /* Add spacing between TUNIT text and burger menu */
+  .navbar__brand {
+    margin-right: auto !important;
+    padding-right: 1.5rem !important;
   }
+  
+  .navbar__title {
+    margin-left: 0.5rem !important;
+  }
+  
   
   /* Ensure proper logo display */
   .navbar-sidebar .navbar__logo {
@@ -842,6 +755,27 @@ div[class*="codeScrollWrapper"] > div {
     white-space: normal !important;
     word-wrap: break-word !important;
     overflow-wrap: break-word !important;
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Fix the navbar sidebar container width */
+  .navbar-sidebar__items {
+    padding: 1rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .navbar-sidebar .menu__list {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .navbar-sidebar .menu__list-item {
+    width: 100% !important;
+    margin: 0 !important;
   }
   
   /* Ensure code blocks don't overflow and are properly aligned */
