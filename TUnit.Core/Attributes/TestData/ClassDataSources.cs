@@ -75,7 +75,9 @@ internal class ClassDataSources
             throw new ArgumentOutOfRangeException();
         }
 
-        // Track the instance for disposal regardless of whether it was newly created or reused
+        // Track the instance for disposal - reference counting ensures proper disposal timing
+        // Each test that uses an object increments its reference count
+        // Object is only disposed when ALL tests using it have completed (count reaches zero)
         var trackerEvents = dataGeneratorMetadata.TestBuilderContext?.Current.Events;
         if (trackerEvents != null)
         {
@@ -123,7 +125,9 @@ internal class ClassDataSources
             throw new ArgumentOutOfRangeException();
         }
 
-        // Track the instance for disposal regardless of whether it was newly created or reused
+        // Track the instance for disposal - reference counting ensures proper disposal timing
+        // Each test that uses an object increments its reference count
+        // Object is only disposed when ALL tests using it have completed (count reaches zero)
         var trackerEvents = dataGeneratorMetadata.TestBuilderContext?.Current.Events;
         if (trackerEvents != null)
         {

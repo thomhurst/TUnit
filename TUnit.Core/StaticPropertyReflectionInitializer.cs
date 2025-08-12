@@ -98,7 +98,9 @@ public static class StaticPropertyReflectionInitializer
             TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext()
             {
                 DataSourceAttribute = dataSourceAttr,
-                TestMetadata = null!
+                TestMetadata = null!,
+                Events = new TestContextEvents(),
+                ObjectBag = new Dictionary<string, object?>()
             }),
             MembersToGenerate = [],
             TestInformation = null!,

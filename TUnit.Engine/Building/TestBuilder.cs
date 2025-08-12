@@ -101,7 +101,9 @@ internal sealed class TestBuilder : ITestBuilder
 
             var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
             {
-                TestMetadata = metadata.MethodMetadata
+                TestMetadata = metadata.MethodMetadata,
+                Events = new TestContextEvents(),
+                ObjectBag = new Dictionary<string, object?>()
             });
 
             if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
@@ -315,7 +317,9 @@ internal sealed class TestBuilder : ITestBuilder
 
                                 contextAccessor.Current = new TestBuilderContext
                                 {
-                                    TestMetadata = metadata.MethodMetadata
+                                    TestMetadata = metadata.MethodMetadata,
+                                    Events = new TestContextEvents(),
+                                    ObjectBag = new Dictionary<string, object?>()
                                 };
                             }
                         }
@@ -989,7 +993,9 @@ internal sealed class TestBuilder : ITestBuilder
 
         var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
         {
-            TestMetadata = metadata.MethodMetadata
+            TestMetadata = metadata.MethodMetadata,
+            Events = new TestContextEvents(),
+            ObjectBag = new Dictionary<string, object?>()
         });
 
         // Check for circular dependency
@@ -1234,7 +1240,9 @@ internal sealed class TestBuilder : ITestBuilder
 
             contextAccessor.Current = new TestBuilderContext
             {
-                TestMetadata = metadata.MethodMetadata
+                TestMetadata = metadata.MethodMetadata,
+                Events = new TestContextEvents(),
+                ObjectBag = new Dictionary<string, object?>()
             };
 
             return test;

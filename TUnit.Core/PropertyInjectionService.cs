@@ -56,7 +56,7 @@ public sealed class PropertyInjectionService
     }
 
     /// <summary>
-    /// Determines if an object should have properties injected based on its type and whether it has nested data sources.
+    /// Determines if an object should have properties injected based on whether it has properties with data source attributes.
     /// </summary>
     private static bool ShouldInjectProperties(object? obj)
     {
@@ -67,25 +67,11 @@ public sealed class PropertyInjectionService
 
         var type = obj.GetType();
         
-        // Use cached result for better performance
-        return _shouldInjectCache.GetOrAdd(type, _ =>
+        // Use cached result for better performance - check if the type has injectable properties
+        return _shouldInjectCache.GetOrAdd(type, t =>
         {
-            if (type.IsPrimitive || type == typeof(string) || type.IsEnum || type.IsValueType)
-            {
-                return false;
-            }
-
-            if (type.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(type))
-            {
-                return false;
-            }
-
-            if (type.Assembly == typeof(object).Assembly)
-            {
-                return false;
-            }
-
-            return true;
+            var plan = GetOrCreateInjectionPlan(t);
+            return plan.HasProperties;
         });
     }
 
@@ -337,7 +323,8 @@ public sealed class PropertyInjectionService
     }
 
     /// <summary>
-    /// Processes a single injected property value: tracks it, initializes it, sets it on the instance, and handles cleanup.
+    /// Processes a single injected property value: initializes it, sets it on the instance.
+    /// Note: The value is already tracked by its data source, so we don't track it here.
     /// </summary>
     private static async Task ProcessInjectedPropertyValue(object instance, object? propertyValue, Action<object, object?> setProperty, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, HashSet<object> visitedObjects)
     {
@@ -346,8 +333,8 @@ public sealed class PropertyInjectionService
             return;
         }
 
-        // Track this object - the ObjectTracker will prevent duplicate tracking per context
-        ObjectTracker.TrackObject(events, propertyValue);
+        // NOTE: We do NOT track the propertyValue here because it's already tracked by the data source that created it.
+        // Tracking it again would cause double-counting and premature disposal of shared instances.
 
         // Recursively inject properties and initialize nested objects
         // The visited set prevents infinite loops from circular references

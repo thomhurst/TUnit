@@ -43,6 +43,7 @@ internal static class ObjectTracker
         }
 
         // Safety check: Only increment once per context-object pair
+        // This prevents double-tracking within the same context
         var incrementKey = (events, obj);
         if (!_incrementTracker.TryAdd(incrementKey, true))
         {
@@ -55,7 +56,7 @@ internal static class ObjectTracker
         counter.Increment();
 
         // Add to the context's tracked objects or create new tracking
-        // Use a factory delegate to ensure disposal handler is registered only once
+        // Use a factory delegate to ensure disposal handler is registered only once per context
         var contextObjects = _contextTrackedObjects.GetOrAdd(events, e =>
         {
             // Register disposal handler only once when creating the HashSet
