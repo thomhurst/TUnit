@@ -1,34 +1,35 @@
-using System.Collections.Concurrent;
+using EnumerableAsyncProcessor.Extensions;
+using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
+using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Scheduling;
 
-/// <summary>
-/// A clean, simplified test scheduler that uses an execution plan
-/// </summary>
-internal sealed class TestScheduler : ITestScheduler, IDisposable
+internal sealed class TestScheduler : ITestScheduler
 {
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestGroupingService _groupingService;
     private readonly ITUnitMessageBus _messageBus;
-    private readonly SchedulerConfiguration _configuration;
-    private AdaptiveParallelismController? _adaptiveController;
-    private IDisposable? _semaphore;
+    private readonly ICommandLineOptions _commandLineOptions;
+    private readonly ParallelLimitLockProvider _parallelLimitLockProvider;
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
         ITestGroupingService groupingService,
         ITUnitMessageBus messageBus,
-        SchedulerConfiguration configuration)
+        ICommandLineOptions commandLineOptions,
+        ParallelLimitLockProvider parallelLimitLockProvider)
     {
         _logger = logger;
         _groupingService = groupingService;
         _messageBus = messageBus;
-        _configuration = configuration;
+        _commandLineOptions = commandLineOptions;
+        _parallelLimitLockProvider = parallelLimitLockProvider;
     }
 
     public async Task ScheduleAndExecuteAsync(
@@ -39,315 +40,447 @@ internal sealed class TestScheduler : ITestScheduler, IDisposable
         if (tests == null) throw new ArgumentNullException(nameof(tests));
         if (executor == null) throw new ArgumentNullException(nameof(executor));
 
-        // Create execution plan upfront
-        var plan = ExecutionPlan.Create(tests);
-
-
-        if (plan.ExecutableTests.Count == 0)
+        var testList = tests as IList<AbstractExecutableTest> ?? tests.ToList();
+        if (testList.Count == 0)
         {
-            await _logger.LogDebugAsync("No executable tests found");
+            await _logger.LogDebugAsync("No executable tests found").ConfigureAwait(false);
             return;
         }
 
-        // Group tests by constraints
-        var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(plan.ExecutableTests);
+        var circularDependencies = DetectCircularDependencies(testList);
 
-        // Execute tests
-        await ExecuteGroupedTestsAsync(plan, groupedTests, executor, cancellationToken);
+        foreach (var (test, dependencyChain) in circularDependencies)
+        {
+            test.State = TestState.Failed;
+            var exception = new DependencyConflictException(dependencyChain);
+            test.Result = new TestResult
+            {
+                State = TestState.Failed,
+                Exception = exception,
+                ComputerName = Environment.MachineName,
+                Start = DateTimeOffset.UtcNow,
+                End = DateTimeOffset.UtcNow,
+                Duration = TimeSpan.Zero
+            };
+
+            await _messageBus.Failed(test.Context, exception, test.Result.Start ?? DateTimeOffset.UtcNow).ConfigureAwait(false);
+        }
+
+        var executableTests = testList.Where(t => !circularDependencies.Any(cd => cd.test == t)).ToList();
+        if (executableTests.Count == 0)
+        {
+            await _logger.LogDebugAsync("No executable tests found after removing circular dependencies").ConfigureAwait(false);
+            return;
+        }
+
+        foreach (var test in executableTests)
+        {
+            test.ExecutorDelegate = CreateTestExecutor(executor);
+            test.ExecutionCancellationToken = cancellationToken;
+        }
+
+        var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
+
+        await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
+    }
+
+    private Func<AbstractExecutableTest, CancellationToken, Task> CreateTestExecutor(ITestExecutor executor)
+    {
+        return async (test, cancellationToken) =>
+        {
+            // First wait for all dependencies to complete
+            foreach (var dependency in test.Dependencies)
+            {
+                try
+                {
+                    await dependency.Test.ExecutionTask.ConfigureAwait(false);
+
+                    // Check if dependency failed and we should skip
+                    if (dependency.Test.State == TestState.Failed && !dependency.ProceedOnFailure)
+                    {
+                        test.State = TestState.Skipped;
+                        test.Result = new TestResult
+                        {
+                            State = TestState.Skipped,
+                            Exception = new InvalidOperationException($"Skipped due to failed dependency: {dependency.Test.TestId}"),
+                            ComputerName = Environment.MachineName,
+                            Start = DateTimeOffset.UtcNow,
+                            End = DateTimeOffset.UtcNow,
+                            Duration = TimeSpan.Zero
+                        };
+                        await _messageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"Error waiting for dependency {dependency.Test.TestId}: {ex}").ConfigureAwait(false);
+
+                    if (!dependency.ProceedOnFailure)
+                    {
+                        test.State = TestState.Skipped;
+                        test.Result = new TestResult
+                        {
+                            State = TestState.Skipped,
+                            Exception = ex,
+                            ComputerName = Environment.MachineName,
+                            Start = DateTimeOffset.UtcNow,
+                            End = DateTimeOffset.UtcNow,
+                            Duration = TimeSpan.Zero
+                        };
+                        await _messageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
+                        return;
+                    }
+                }
+            }
+
+            // Acquire parallel limit semaphore if needed
+            SemaphoreSlim? parallelLimitSemaphore = null;
+            if (test.Context.ParallelLimiter != null)
+            {
+                parallelLimitSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
+                await parallelLimitSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            try
+            {
+                // Execute the actual test
+                await executor.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                parallelLimitSemaphore?.Release();
+            }
+        };
     }
 
     private async Task ExecuteGroupedTestsAsync(
-        ExecutionPlan plan,
         GroupedTests groupedTests,
-        ITestExecutor executor,
         CancellationToken cancellationToken)
     {
-        var runningTasks = new ConcurrentDictionary<AbstractExecutableTest, Task>();
-        var completedTests = new ConcurrentDictionary<AbstractExecutableTest, bool>();
-
-        // Create appropriate semaphore based on strategy
-        object semaphore;
-        if (_configuration.Strategy == ParallelismStrategy.Adaptive)
+        int? maxParallelism = null;
+        if (_commandLineOptions.TryGetOptionArgumentList(
+                MaximumParallelTestsCommandProvider.MaximumParallelTests,
+                out var args) && args.Length > 0)
         {
-            var initialParallelism = Math.Min(Environment.ProcessorCount * 4, _configuration.AdaptiveMaxParallelism);
-            var adaptiveSemaphore = new AdaptiveSemaphore(initialParallelism, _configuration.AdaptiveMaxParallelism);
-            _adaptiveController = new AdaptiveParallelismController(
-                adaptiveSemaphore,
-                _logger,
-                _configuration.AdaptiveMinParallelism,
-                _configuration.AdaptiveMaxParallelism,
-                initialParallelism,
-                _configuration.EnableAdaptiveMetrics);
-            semaphore = adaptiveSemaphore;
-            _semaphore = adaptiveSemaphore;
-        }
-        else
-        {
-            var maxParallelism = _configuration.MaxParallelism > 0 ? _configuration.MaxParallelism : Environment.ProcessorCount * 4;
-            var fixedSemaphore = new SemaphoreSlim(maxParallelism, maxParallelism);
-            semaphore = fixedSemaphore;
-            _semaphore = fixedSemaphore;
+            if (int.TryParse(args[0], out var maxParallelTests) && maxParallelTests > 0)
+            {
+                maxParallelism = maxParallelTests;
+            }
         }
 
-        // Process all test groups
         var allTestTasks = new List<Task>();
 
         // 1. NotInParallel tests (global) - must run one at a time
-        if (groupedTests.NotInParallel.Count > 0)
+        if (groupedTests.NotInParallel.Length > 0)
         {
             var globalNotInParallelTask = ExecuteNotInParallelTestsAsync(
-                plan,
                 groupedTests.NotInParallel,
-                executor,
-                runningTasks,
-                completedTests,
                 cancellationToken);
             allTestTasks.Add(globalNotInParallelTask);
         }
 
-        // 2. Keyed NotInParallel tests - can run in parallel with other keys
-        foreach (var kvp in groupedTests.KeyedNotInParallel)
+        // 2. Keyed NotInParallel tests
+        if (groupedTests.KeyedNotInParallel.Length > 0)
         {
             var keyedTask = ExecuteKeyedNotInParallelTestsAsync(
-                plan,
-                kvp.Value,
-                executor,
-                runningTasks,
-                completedTests,
+                groupedTests.KeyedNotInParallel,
                 cancellationToken);
             allTestTasks.Add(keyedTask);
         }
 
-        // 3. Parallel groups - can run in parallel within constraints
-        foreach (var group in groupedTests.ParallelGroups)
+        // 3. Parallel groups
+        foreach (var (groupName, orderedTests) in groupedTests.ParallelGroups)
         {
-            var groupTask = ExecuteParallelGroupAsync(group.Value,
-                executor,
-                runningTasks,
-                completedTests,
-                semaphore,
+            var groupTask = ExecuteParallelGroupAsync(
+                orderedTests,
+                maxParallelism,
                 cancellationToken);
             allTestTasks.Add(groupTask);
         }
 
-        // 4. Fully parallel tests
-        var parallelTask = ExecuteParallelTestsAsync(groupedTests.Parallel,
-            executor,
-            runningTasks,
-            completedTests,
-            semaphore,
-            cancellationToken);
-        allTestTasks.Add(parallelTask);
+        // 4. Parallel tests - can all run in parallel
+        if (groupedTests.Parallel.Length > 0)
+        {
+            var parallelTask = ExecuteParallelTestsAsync(
+                groupedTests.Parallel,
+                maxParallelism,
+                cancellationToken);
+            allTestTasks.Add(parallelTask);
+        }
 
-        // Wait for all tests to complete
-        await Task.WhenAll(allTestTasks);
+        await Task.WhenAll(allTestTasks).ConfigureAwait(false);
     }
 
     private async Task ExecuteNotInParallelTestsAsync(
-        ExecutionPlan plan,
-        PriorityQueue<AbstractExecutableTest, TestPriority> queue,
-        ITestExecutor executor,
-        ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
-        ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
+        AbstractExecutableTest[] tests,
         CancellationToken cancellationToken)
     {
-        var testsWithPriority = new List<(AbstractExecutableTest Test, TestPriority Priority)>();
-        while (queue.TryDequeue(out var test, out var priority))
-        {
-            testsWithPriority.Add((test, priority));
-        }
+        var testsByClass = tests
+            .GroupBy(t => t.Context.TestDetails.ClassType)
+            .ToList();
 
-        // Sort by NotInParallel Order first, then by execution order from the plan for dependency resolution
-        testsWithPriority.Sort((a, b) =>
+        foreach (var classGroup in testsByClass)
         {
-            // Primary sort: NotInParallel Order (from TestPriority)
-            var priorityComparison = a.Priority.CompareTo(b.Priority);
-            if (priorityComparison != 0)
-                return priorityComparison;
+            var classTests = classGroup
+                .OrderBy(t =>
+                {
+                    var constraint = t.Context.ParallelConstraint as NotInParallelConstraint;
+                    return constraint?.Order ?? int.MaxValue / 2;
+                })
+                .ToList();
 
-            // Secondary sort: ExecutionPlan order for dependency resolution when NotInParallel orders are equal
-            var aOrder = plan.ExecutionOrder.TryGetValue(a.Test, out var ao) ? ao : int.MaxValue;
-            var bOrder = plan.ExecutionOrder.TryGetValue(b.Test, out var bo) ? bo : int.MaxValue;
-            return aOrder.CompareTo(bOrder);
-        });
-
-        // Execute sequentially
-        foreach (var (test, _) in testsWithPriority)
-        {
-            await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+            foreach (var test in classTests)
+            {
+                await test.ExecutionTask.ConfigureAwait(false);
+            }
         }
     }
 
     private async Task ExecuteKeyedNotInParallelTestsAsync(
-        ExecutionPlan plan,
-        PriorityQueue<AbstractExecutableTest, TestPriority> queue,
-        ITestExecutor executor,
-        ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
-        ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
+        (string Key, AbstractExecutableTest[] Tests)[] keyedTests,
         CancellationToken cancellationToken)
     {
-        var testsWithPriority = new List<(AbstractExecutableTest Test, TestPriority Priority)>();
-        while (queue.TryDequeue(out var test, out var priority))
+        // Get all unique tests
+        var allTests = new HashSet<AbstractExecutableTest>();
+        var testToKeys = new Dictionary<AbstractExecutableTest, List<string>>();
+
+        foreach (var (key, tests) in keyedTests)
         {
-            testsWithPriority.Add((test, priority));
+            foreach (var test in tests)
+            {
+                allTests.Add(test);
+                if (!testToKeys.TryGetValue(test, out var keys))
+                {
+                    keys =
+                    [
+                    ];
+                    testToKeys[test] = keys;
+                }
+                keys.Add(key);
+            }
         }
 
-        // Sort by NotInParallel Order first, then by execution order from the plan for dependency resolution
-        testsWithPriority.Sort((a, b) =>
-        {
-            // Primary sort: NotInParallel Order (from TestPriority)
-            var priorityComparison = a.Priority.CompareTo(b.Priority);
-            if (priorityComparison != 0)
-                return priorityComparison;
+        // Sort tests by priority
+        var sortedTests = allTests
+            .OrderByDescending(t => t.Context.ExecutionPriority)
+            .ThenBy(t => {
+                var constraint = t.Context.ParallelConstraint as NotInParallelConstraint;
+                return constraint?.Order ?? int.MaxValue / 2;
+            })
+            .ToList();
 
-            // Secondary sort: ExecutionPlan order for dependency resolution when NotInParallel orders are equal
-            var aOrder = plan.ExecutionOrder.TryGetValue(a.Test, out var ao) ? ao : int.MaxValue;
-            var bOrder = plan.ExecutionOrder.TryGetValue(b.Test, out var bo) ? bo : int.MaxValue;
-            return aOrder.CompareTo(bOrder);
-        });
+        // Track running tasks by key
+        var runningKeyedTasks = new Dictionary<string, Task>();
 
-        // Execute sequentially within this key
-        foreach (var (test, _) in testsWithPriority)
+        foreach (var test in sortedTests)
         {
-            await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+            var testKeys = testToKeys[test];
+
+            // Wait for any running tests that share any of our constraint keys
+            var conflictingTasks = new List<Task>();
+            foreach (var key in testKeys)
+            {
+                if (runningKeyedTasks.TryGetValue(key, out var runningTask))
+                {
+                    conflictingTasks.Add(runningTask);
+                }
+            }
+
+            if (conflictingTasks.Count > 0)
+            {
+                await Task.WhenAll(conflictingTasks).ConfigureAwait(false);
+            }
+
+            // Start the test execution
+            var task = test.ExecutionTask;
+
+            // Track this task for all its keys
+            foreach (var key in testKeys)
+            {
+                runningKeyedTasks[key] = task;
+            }
         }
+
+        // Wait for all tests to complete
+        await Task.WhenAll(allTests.Select(t => t.ExecutionTask)).ConfigureAwait(false);
     }
 
-    private async Task ExecuteParallelGroupAsync(SortedDictionary<int, List<AbstractExecutableTest>> orderGroups,
-        ITestExecutor executor,
-        ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
-        ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
-        object semaphore,
+    private async Task ExecuteParallelGroupAsync(
+        (int Order, AbstractExecutableTest[] Tests)[] orderedTests,
+        int? maxParallelism,
         CancellationToken cancellationToken)
     {
         // Execute order groups sequentially
-        foreach (var orderGroup in orderGroups.OrderBy(og => og.Key))
+        foreach (var (order, tests) in orderedTests)
         {
-            var tasks = new List<Task>();
-
-            foreach (var test in orderGroup.Value)
+            if (maxParallelism.HasValue)
             {
-                if (semaphore is AdaptiveSemaphore adaptive)
-                    await adaptive.WaitAsync(cancellationToken);
-                else
-                    await ((SemaphoreSlim)semaphore).WaitAsync(cancellationToken);
+                // Use semaphore to limit parallelism
+                using var semaphore = new SemaphoreSlim(maxParallelism.Value, maxParallelism.Value);
 
-                // Create a task that releases semaphore on completion without Task.Run overhead
-                async Task ExecuteWithSemaphoreRelease()
+                var tasks = tests.Select(async test =>
                 {
+                    await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
                     try
                     {
-                        await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+                        await test.ExecutionTask.ConfigureAwait(false);
                     }
                     finally
                     {
-                        if (semaphore is AdaptiveSemaphore adaptive)
-                            adaptive.Release();
-                        else
-                            ((SemaphoreSlim)semaphore).Release();
+                        semaphore.Release();
                     }
-                }
+                });
 
-                tasks.Add(ExecuteWithSemaphoreRelease());
+                await Task.WhenAll(tasks).ConfigureAwait(false);
             }
-
-            // Wait for all tests in this order group to complete
-            await Task.WhenAll(tasks);
+            else
+            {
+                // No limit - start all and wait
+                await Task.WhenAll(tests.Select(t => t.ExecutionTask)).ConfigureAwait(false);
+            }
         }
     }
 
-    private async Task ExecuteParallelTestsAsync(IEnumerable<AbstractExecutableTest> tests,
-        ITestExecutor executor,
-        ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
-        ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
-        object semaphore,
+    private async Task ExecuteParallelTestsAsync(
+        AbstractExecutableTest[] tests,
+        int? maxParallelism,
         CancellationToken cancellationToken)
     {
-        var tasks = new List<Task>();
-
-        foreach (var test in tests)
+        if (maxParallelism.HasValue)
         {
-            if (semaphore is AdaptiveSemaphore adaptive)
-                await adaptive.WaitAsync(cancellationToken);
-            else
-                await ((SemaphoreSlim)semaphore).WaitAsync(cancellationToken);
+            // Use semaphore to limit parallelism
+            using var semaphore = new SemaphoreSlim(maxParallelism.Value, maxParallelism.Value);
 
-            // Create a task that releases semaphore on completion without Task.Run overhead
-            async Task ExecuteWithSemaphoreRelease()
+            var tasks = tests.Select(async test =>
             {
+                await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    await ExecuteTestWhenReadyAsync(test, executor, runningTasks, completedTests, cancellationToken);
+                    await test.ExecutionTask.ConfigureAwait(false);
                 }
                 finally
                 {
-                    if (semaphore is AdaptiveSemaphore adaptive)
-                        adaptive.Release();
-                    else
-                        ((SemaphoreSlim)semaphore).Release();
+                    semaphore.Release();
+                }
+            });
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
+        else
+        {
+            // No limit - just wait for all
+            await tests.ForEachAsync(async t => await t.ExecutionTask.ConfigureAwait(false)).ProcessInParallel();
+        }
+    }
+
+    private List<(AbstractExecutableTest test, List<TestDetails> dependencyChain)> DetectCircularDependencies(IList<AbstractExecutableTest> tests)
+    {
+        var circularDependencies = new List<(AbstractExecutableTest, List<TestDetails>)>();
+        var visitState = new Dictionary<string, VisitState>();
+        var processedCycles = new HashSet<string>();
+
+        // Build test map
+        var testMap = new Dictionary<string, AbstractExecutableTest>();
+        foreach (var test in tests)
+        {
+            if (!testMap.ContainsKey(test.TestId))
+            {
+                testMap[test.TestId] = test;
+            }
+        }
+
+        foreach (var test in tests)
+        {
+            if (!visitState.ContainsKey(test.TestId))
+            {
+                var currentPath = new List<AbstractExecutableTest>();
+                if (HasCycle(test, testMap, visitState, currentPath))
+                {
+                    // Extract the cycle from the path
+                    if (currentPath.Count > 0)
+                    {
+                        // The last element in currentPath is the test that completes the cycle
+                        var lastTest = currentPath[currentPath.Count - 1];
+
+                        // Find where the cycle starts (the first occurrence of the repeated element)
+                        var cycleStartIndex = -1;
+                        for (int i = 0; i < currentPath.Count - 1; i++)
+                        {
+                            if (currentPath[i].TestId == lastTest.TestId)
+                            {
+                                cycleStartIndex = i;
+                                break;
+                            }
+                        }
+
+                        if (cycleStartIndex >= 0)
+                        {
+                            // Build the dependency chain for the cycle (from start to end, inclusive)
+                            var cycleTests = currentPath.Skip(cycleStartIndex).ToList();
+                            var dependencyChain = cycleTests.Select(t => t.Context.TestDetails).ToList();
+
+                            // Create a unique key for this cycle to avoid duplicates
+                            var cycleKey = string.Join("->", cycleTests.Take(cycleTests.Count - 1).Select(t => t.TestId).OrderBy(id => id));
+
+                            if (!processedCycles.Contains(cycleKey))
+                            {
+                                processedCycles.Add(cycleKey);
+
+                                // Add all tests that are part of the cycle (excluding the duplicate at the end)
+                                foreach (var cycleTest in cycleTests.Take(cycleTests.Count - 1))
+                                {
+                                    circularDependencies.Add((cycleTest, dependencyChain));
+                                }
+                            }
+                        }
+                    }
                 }
             }
-
-            tasks.Add(ExecuteWithSemaphoreRelease());
         }
 
-        await Task.WhenAll(tasks);
+        return circularDependencies;
     }
 
-    private async Task ExecuteTestWhenReadyAsync(AbstractExecutableTest test,
-        ITestExecutor executor,
-        ConcurrentDictionary<AbstractExecutableTest, Task> runningTasks,
-        ConcurrentDictionary<AbstractExecutableTest, bool> completedTests,
-        CancellationToken cancellationToken)
+    private bool HasCycle(
+        AbstractExecutableTest test,
+        Dictionary<string, AbstractExecutableTest> testMap,
+        Dictionary<string, VisitState> visitState,
+        List<AbstractExecutableTest> currentPath)
     {
-        // If test is already failed (e.g., due to circular dependencies), report the pre-failure
-        if (test.State == TestState.Failed)
+        visitState[test.TestId] = VisitState.Visiting;
+        currentPath.Add(test);
+
+        foreach (var dependency in test.Dependencies)
         {
-            await _messageBus.Failed(test.Context,
-                    test.Result?.Exception ?? new InvalidOperationException("Test was marked as failed before execution"),
-                    test.StartTime ?? DateTimeOffset.UtcNow);
+            var depTestId = dependency.Test.TestId;
 
-            return;
-        }
+            if (!testMap.ContainsKey(depTestId))
+                continue;
 
-        if (test.State == TestState.Skipped)
-        {
-            await _messageBus.Skipped(test.Context, "Test was skipped");
-            return;
-        }
-
-        await Task.WhenAll(test.Dependencies.Select(x => x.Test.CompletionTask));
-
-        // Execute the test directly without Task.Run wrapper
-        var executionTask = ExecuteTestDirectlyAsync(test, executor, completedTests, cancellationToken);
-        runningTasks[test] = executionTask;
-        await executionTask;
-        runningTasks.TryRemove(test, out _);
-    }
-
-    private async Task ExecuteTestDirectlyAsync(AbstractExecutableTest test, ITestExecutor executor, ConcurrentDictionary<AbstractExecutableTest, bool> completedTests, CancellationToken cancellationToken)
-    {
-        var startTime = DateTime.UtcNow;
-        try
-        {
-            await executor.ExecuteTestAsync(test, cancellationToken);
-        }
-        finally
-        {
-            completedTests[test] = true;
-
-            // Record completion for adaptive metrics
-            if (_adaptiveController != null)
+            if (!visitState.TryGetValue(depTestId, out var state))
             {
-                var executionTime = DateTime.UtcNow - startTime;
-                _adaptiveController.RecordTestCompletion(executionTime);
+                if (HasCycle(testMap[depTestId], testMap, visitState, currentPath))
+                {
+                    return true;
+                }
+            }
+            else if (state == VisitState.Visiting)
+            {
+                // We found a cycle - add the dependency to complete the cycle
+                currentPath.Add(testMap[depTestId]);
+                return true;
             }
         }
+
+        visitState[test.TestId] = VisitState.Visited;
+        currentPath.RemoveAt(currentPath.Count - 1);
+        return false;
     }
 
-    public void Dispose()
+    private enum VisitState
     {
-        _adaptiveController?.Dispose();
-        _semaphore?.Dispose();
+        Visiting,
+        Visited
     }
 }

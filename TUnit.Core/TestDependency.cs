@@ -15,29 +15,40 @@ public sealed class TestDependency : IEquatable<TestDependency>
 
     public int MethodGenericArity { get; init; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether this test should proceed even if its dependencies have failed.
+    /// When set to false (default), the test will be skipped if any of its dependencies failed.
+    /// When set to true, the test will run even if its dependencies failed.
+    /// </summary>
     public bool ProceedOnFailure { get; init; }
 
-    public static TestDependency FromMethodName(string methodName)
-    {
-        return new TestDependency { MethodName = methodName };
-    }
-
-    public static TestDependency FromClass(Type classType)
+    public static TestDependency FromMethodName(string methodName, bool proceedOnFailure = false)
     {
         return new TestDependency
         {
-            ClassType = classType,
-            ClassGenericArity = classType.IsGenericTypeDefinition ? classType.GetGenericArguments().Length : 0
+            MethodName = methodName,
+            ProceedOnFailure = proceedOnFailure
         };
     }
 
-    public static TestDependency FromClassAndMethod(Type classType, string methodName)
+    public static TestDependency FromClass(Type classType, bool proceedOnFailure = false)
     {
         return new TestDependency
         {
             ClassType = classType,
             ClassGenericArity = classType.IsGenericTypeDefinition ? classType.GetGenericArguments().Length : 0,
-            MethodName = methodName
+            ProceedOnFailure = proceedOnFailure
+        };
+    }
+
+    public static TestDependency FromClassAndMethod(Type classType, string methodName, bool proceedOnFailure = false)
+    {
+        return new TestDependency
+        {
+            ClassType = classType,
+            ClassGenericArity = classType.IsGenericTypeDefinition ? classType.GetGenericArguments().Length : 0,
+            MethodName = methodName,
+            ProceedOnFailure = proceedOnFailure
         };
     }
 
@@ -85,7 +96,10 @@ public sealed class TestDependency : IEquatable<TestDependency>
         }
         else if (dependentTest != null)
         {
-            if (test.TestClassType != dependentTest.TestClassType)
+            var testType = test.TestClassType;
+            var dependentType = dependentTest.TestClassType;
+            
+            if (testType != dependentType)
             {
                 return false;
             }
@@ -98,34 +112,26 @@ public sealed class TestDependency : IEquatable<TestDependency>
                 return false;
             }
 
+            if(test.MethodMetadata.GenericTypeCount != MethodGenericArity)
+            {
+                return false;
+            }
+
             if (MethodParameters != null)
             {
-                var testParams = test.TestMethodParameterTypes ?? [
-                ];
-                if (testParams.Length != MethodParameters.Length)
+                var testParams = test.MethodMetadata.Parameters;
+
+                if (testParams.Length != MethodParameters.Length
+                    || !testParams.Select(x => x.Type).SequenceEqual(MethodParameters!))
                 {
                     return false;
                 }
-
-                for (var i = 0; i < MethodParameters.Length; i++)
-                {
-                    if (testParams[i] != MethodParameters[i].FullName)
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            if (MethodGenericArity > 0)
-            {
-                // This would need to be added to TestMetadata if we want to support it
-                // For now, we'll skip this check
             }
         }
 
         if (ClassType != null && string.IsNullOrEmpty(MethodName) && dependentTest != null)
         {
-            if (test.TestClassType == dependentTest.TestClassType && 
+            if (test.TestClassType == dependentTest.TestClassType &&
                 test.TestMethodName == dependentTest.TestMethodName)
             {
                 return false;
@@ -151,8 +157,7 @@ public sealed class TestDependency : IEquatable<TestDependency>
                MethodName == other.MethodName &&
                MethodGenericArity == other.MethodGenericArity &&
                ProceedOnFailure == other.ProceedOnFailure &&
-               (MethodParameters?.SequenceEqual(other.MethodParameters ?? [
-                   ]) ??
+               (MethodParameters?.SequenceEqual(other.MethodParameters ?? []) ??
                 other.MethodParameters == null);
     }
 

@@ -26,7 +26,7 @@ internal static class TestIdentifierService
             methodParameterTypes[i] = methodParameters[i].Type;
         }
 
-        var classTypeWithParameters = BuildTypeWithParameters(metadata.TestClassType.Name, constructorParameterTypes);
+        var classTypeWithParameters = BuildTypeWithParameters(GetTypeNameWithGenerics(metadata.TestClassType), constructorParameterTypes);
         var methodWithParameters = BuildTypeWithParameters(metadata.TestMethodName, methodParameterTypes);
 
         // Use StringBuilder for efficient string concatenation
@@ -46,6 +46,12 @@ internal static class TestIdentifierService
           .Append(combination.MethodDataLoopIndex)
           .Append('.')
           .Append(combination.RepeatIndex);
+        
+        // Add inheritance information to ensure uniqueness
+        if (combination.InheritanceDepth > 0)
+        {
+            sb.Append("_inherited").Append(combination.InheritanceDepth);
+        }
 
         return sb.ToString();
     }
@@ -76,7 +82,7 @@ internal static class TestIdentifierService
             methodParameterTypes[i] = methodParameters[i].Type;
         }
 
-        var classTypeWithParameters = BuildTypeWithParameters(metadata.TestClassType.Name, constructorParameterTypes);
+        var classTypeWithParameters = BuildTypeWithParameters(GetTypeNameWithGenerics(metadata.TestClassType), constructorParameterTypes);
         var methodWithParameters = BuildTypeWithParameters(metadata.TestMethodName, methodParameterTypes);
 
         // Use StringBuilder for efficient string concatenation
@@ -97,6 +103,44 @@ internal static class TestIdentifierService
           .Append('.')
           .Append(combination.RepeatIndex)
           .Append("_DataGenerationError");
+
+        return sb.ToString();
+    }
+
+    private static string GetTypeNameWithGenerics(Type type)
+    {
+        if (!type.IsGenericType)
+        {
+            return type.Name;
+        }
+
+        var sb = new StringBuilder();
+        var name = type.Name;
+        
+        // Remove the `n suffix from generic type names
+        var backtickIndex = name.IndexOf('`');
+        if (backtickIndex > 0)
+        {
+            sb.Append(name.Substring(0, backtickIndex));
+        }
+        else
+        {
+            sb.Append(name);
+        }
+
+        // Add the generic type arguments
+        var genericArgs = type.GetGenericArguments();
+        sb.Append('<');
+        for (var i = 0; i < genericArgs.Length; i++)
+        {
+            if (i > 0)
+            {
+                sb.Append(", ");
+            }
+            // Use the full name for generic arguments to ensure uniqueness
+            sb.Append(genericArgs[i].FullName ?? genericArgs[i].Name);
+        }
+        sb.Append('>');
 
         return sb.ToString();
     }

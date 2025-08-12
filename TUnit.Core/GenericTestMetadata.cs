@@ -134,11 +134,12 @@ public sealed class GenericTestMetadata : TestMetadata
                     }
 
                     // Determine if the test method has a CancellationToken parameter
-                    var hasCancellationToken = ParameterTypes.Any(t => t == typeof(CancellationToken));
+                    var parameterTypes = metadata.MethodMetadata.Parameters.Select(p => p.Type).ToArray();
+                    var hasCancellationToken = parameterTypes.Any(t => t == typeof(CancellationToken));
 
                     if (hasCancellationToken)
                     {
-                        var cancellationTokenIndex = Array.IndexOf(ParameterTypes, typeof(CancellationToken));
+                        var cancellationTokenIndex = Array.IndexOf(parameterTypes, typeof(CancellationToken));
 
                         // Insert CancellationToken at the correct position
                         var argsWithToken = new object?[args.Length + 1];

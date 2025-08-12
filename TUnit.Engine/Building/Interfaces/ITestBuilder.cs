@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using TUnit.Core;
 
 namespace TUnit.Engine.Building.Interfaces;
@@ -23,4 +24,14 @@ internal interface ITestBuilder
     /// <param name="metadata">The test metadata with DataCombinationGenerator</param>
     /// <returns>Collection of executable tests for all data combinations</returns>
     Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata);
+
+    /// <summary>
+    /// Streaming version that yields tests as they're built without buffering
+    /// </summary>
+    /// <param name="metadata">The test metadata with DataCombinationGenerator</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Stream of executable tests for all data combinations</returns>
+    IAsyncEnumerable<AbstractExecutableTest> BuildTestsStreamingAsync(
+        TestMetadata metadata,
+        CancellationToken cancellationToken = default);
 }

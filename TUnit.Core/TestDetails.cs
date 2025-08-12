@@ -20,7 +20,6 @@ public class TestDetails
     public int TestLineNumber { get; set; }
     public required Type ReturnType { get; set; }
     public IDictionary<string, object?> TestClassInjectedPropertyArguments { get; init; } = new Dictionary<string, object?>();
-    public Type[]? TestMethodParameterTypes { get; set; }
     public List<string> Categories { get; } =
     [
     ];

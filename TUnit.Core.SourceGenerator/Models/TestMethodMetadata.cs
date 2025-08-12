@@ -23,4 +23,12 @@ public class TestMethodMetadata
     /// All attributes on the method, stored for later use during data combination generation
     /// </summary>
     public ImmutableArray<AttributeData> MethodAttributes { get; init; } = ImmutableArray<AttributeData>.Empty;
+    
+    /// <summary>
+    /// The inheritance depth of this test method.
+    /// 0 = method is declared directly in the test class
+    /// 1 = method is inherited from immediate base class
+    /// 2 = method is inherited from base's base class, etc.
+    /// </summary>
+    public int InheritanceDepth { get; init; } = 0;
 }

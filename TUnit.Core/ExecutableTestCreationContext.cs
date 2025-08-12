@@ -12,6 +12,11 @@ public sealed class ExecutableTestCreationContext
     public required TestContext Context { get; init; }
     
     /// <summary>
+    /// Factory function to create the test class instance lazily during execution.
+    /// </summary>
+    public Func<Task<object>>? TestClassInstanceFactory { get; init; }
+    
+    /// <summary>
     /// Resolved generic type arguments for the test method.
     /// Will be Type.EmptyTypes if the method is not generic.
     /// </summary>

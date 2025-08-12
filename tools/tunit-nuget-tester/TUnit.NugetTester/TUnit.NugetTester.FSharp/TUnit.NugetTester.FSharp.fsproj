@@ -14,8 +14,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
         <PackageReference Include="TUnit">
-            <VersionOverride Condition="'$(TUnitVersion)' != ''">0.52.30</VersionOverride>
+            <VersionOverride Condition="'$(TUnitVersion)' != ''">$(TUnitVersion)</VersionOverride>
         </PackageReference>
         <PackageReference Include="Polyfill" />
         <PackageReference Include="FSharp.Core" />

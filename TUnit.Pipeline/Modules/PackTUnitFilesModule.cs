@@ -2,6 +2,7 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.Enums;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 
@@ -39,6 +40,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                         ],
                         IncludeSource = project == Sourcy.DotNet.Projects.TUnit_Templates ? false : true,
                         Configuration = Configuration.Release,
+                        CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
                     }, cancellationToken);
 
             packedProjects.Add(new PackedProject(project.NameWithoutExtension, version.SemVer!));

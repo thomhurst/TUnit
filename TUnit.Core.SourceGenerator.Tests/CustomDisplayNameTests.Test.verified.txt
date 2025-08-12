@@ -7,9 +7,8 @@
 namespace TUnit.Generated;
 internal sealed class CustomDisplayNameTests_Test_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
         {
             TestName = "Test",
@@ -34,56 +33,53 @@ internal sealed class CustomDisplayNameTests_Test_TestSource_GUID : global::TUni
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 11,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "Test",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "CustomDisplayNameTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = new global::TUnit.Core.PropertyMetadata[]
-{
-new global::TUnit.Core.PropertyMetadata
-{
-    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
-    Type = typeof(int),
-    Name = "Order",
-    IsStatic = false,
-    IsNullable = false,
-    Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null!,
-    ContainingTypeMetadata = null!
-},
-},
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                Name = "Test",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                        Name = "CustomDisplayNameTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = new global::TUnit.Core.PropertyMetadata[]
+                        {
+                            new global::TUnit.Core.PropertyMetadata
+                            {
+                                ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
+                                Type = typeof(int),
+                                Name = "Order",
+                                IsStatic = false,
+                                IsNullable = false,
+                                Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
+                                ClassMetadata = null!,
+                                ContainingTypeMetadata = null!
+                            }
+                        },
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -97,8 +93,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class CustomDisplayNameTests_Test_ModuleInitializer_GUID
@@ -122,9 +118,8 @@ internal static class CustomDisplayNameTests_Test_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class CustomDisplayNameTests_Test2_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
         {
             TestName = "Test2",
@@ -149,56 +144,53 @@ internal sealed class CustomDisplayNameTests_Test2_TestSource_GUID : global::TUn
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 18,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "Test2",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "CustomDisplayNameTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = new global::TUnit.Core.PropertyMetadata[]
-{
-new global::TUnit.Core.PropertyMetadata
-{
-    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
-    Type = typeof(int),
-    Name = "Order",
-    IsStatic = false,
-    IsNullable = false,
-    Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null!,
-    ContainingTypeMetadata = null!
-},
-},
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                Name = "Test2",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                        Name = "CustomDisplayNameTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = new global::TUnit.Core.PropertyMetadata[]
+                        {
+                            new global::TUnit.Core.PropertyMetadata
+                            {
+                                ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
+                                Type = typeof(int),
+                                Name = "Order",
+                                IsStatic = false,
+                                IsNullable = false,
+                                Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
+                                ClassMetadata = null!,
+                                ContainingTypeMetadata = null!
+                            }
+                        },
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -212,8 +204,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class CustomDisplayNameTests_Test2_ModuleInitializer_GUID
@@ -237,9 +229,8 @@ internal static class CustomDisplayNameTests_Test2_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class CustomDisplayNameTests_Test3_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
         {
             TestName = "Test3",
@@ -268,85 +259,76 @@ internal sealed class CustomDisplayNameTests_Test3_TestSource_GUID : global::TUn
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-                typeof(int),
-                typeof(bool),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
-                "int",
-                "bool",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 25,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "Test3",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(string))
-{
-    Name = "value1",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[0]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "value2",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[1]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(bool))
-{
-    Name = "value3",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[2]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "CustomDisplayNameTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = new global::TUnit.Core.PropertyMetadata[]
-{
-new global::TUnit.Core.PropertyMetadata
-{
-    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
-    Type = typeof(int),
-    Name = "Order",
-    IsStatic = false,
-    IsNullable = false,
-    Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null!,
-    ContainingTypeMetadata = null!
-},
-},
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                Name = "Test3",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(string))
+                    {
+                        Name = "value1",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[0]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "value2",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[1]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(bool))
+                    {
+                        Name = "value3",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[2]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                        Name = "CustomDisplayNameTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = new global::TUnit.Core.PropertyMetadata[]
+                        {
+                            new global::TUnit.Core.PropertyMetadata
+                            {
+                                ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
+                                Type = typeof(int),
+                                Name = "Order",
+                                IsStatic = false,
+                                IsNullable = false,
+                                Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
+                                ClassMetadata = null!,
+                                ContainingTypeMetadata = null!
+                            }
+                        },
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -376,8 +358,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class CustomDisplayNameTests_Test3_ModuleInitializer_GUID
@@ -401,9 +383,8 @@ internal static class CustomDisplayNameTests_Test3_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class CustomDisplayNameTests_MethodDataSourceTest_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
         {
             TestName = "MethodDataSourceTest",
@@ -441,67 +422,62 @@ internal sealed class CustomDisplayNameTests_MethodDataSourceTest_TestSource_GUI
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 37,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "MethodDataSourceTest",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(string))
-{
-    Name = "foo",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("MethodDataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "CustomDisplayNameTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = new global::TUnit.Core.PropertyMetadata[]
-{
-new global::TUnit.Core.PropertyMetadata
-{
-    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
-    Type = typeof(int),
-    Name = "Order",
-    IsStatic = false,
-    IsNullable = false,
-    Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null!,
-    ContainingTypeMetadata = null!
-},
-},
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                Name = "MethodDataSourceTest",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(string))
+                    {
+                        Name = "foo",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("MethodDataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                        Name = "CustomDisplayNameTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = new global::TUnit.Core.PropertyMetadata[]
+                        {
+                            new global::TUnit.Core.PropertyMetadata
+                            {
+                                ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
+                                Type = typeof(int),
+                                Name = "Order",
+                                IsStatic = false,
+                                IsNullable = false,
+                                Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
+                                ClassMetadata = null!,
+                                ContainingTypeMetadata = null!
+                            }
+                        },
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -531,8 +507,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class CustomDisplayNameTests_MethodDataSourceTest_ModuleInitializer_GUID
@@ -556,9 +532,8 @@ internal static class CustomDisplayNameTests_MethodDataSourceTest_ModuleInitiali
 namespace TUnit.Generated;
 internal sealed class CustomDisplayNameTests_PasswordTest_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
         {
             TestName = "PasswordTest",
@@ -584,67 +559,62 @@ internal sealed class CustomDisplayNameTests_PasswordTest_TestSource_GUID : glob
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 45,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "PasswordTest",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(string))
-{
-    Name = "password",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("PasswordTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "CustomDisplayNameTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = new global::TUnit.Core.PropertyMetadata[]
-{
-new global::TUnit.Core.PropertyMetadata
-{
-    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
-    Type = typeof(int),
-    Name = "Order",
-    IsStatic = false,
-    IsNullable = false,
-    Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null!,
-    ContainingTypeMetadata = null!
-},
-},
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                Name = "PasswordTest",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(string))
+                    {
+                        Name = "password",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("PasswordTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                        Name = "CustomDisplayNameTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = new global::TUnit.Core.PropertyMetadata[]
+                        {
+                            new global::TUnit.Core.PropertyMetadata
+                            {
+                                ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
+                                Type = typeof(int),
+                                Name = "Order",
+                                IsStatic = false,
+                                IsNullable = false,
+                                Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
+                                ClassMetadata = null!,
+                                ContainingTypeMetadata = null!
+                            }
+                        },
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -674,8 +644,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class CustomDisplayNameTests_PasswordTest_ModuleInitializer_GUID
@@ -699,9 +669,8 @@ internal static class CustomDisplayNameTests_PasswordTest_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class CustomDisplayNameTests_SameClassConstantTest_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
         {
             TestName = "SameClassConstantTest",
@@ -726,56 +695,53 @@ internal sealed class CustomDisplayNameTests_SameClassConstantTest_TestSource_GU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 52,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "SameClassConstantTest",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "CustomDisplayNameTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = new global::TUnit.Core.PropertyMetadata[]
-{
-new global::TUnit.Core.PropertyMetadata
-{
-    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
-    Type = typeof(int),
-    Name = "Order",
-    IsStatic = false,
-    IsNullable = false,
-    Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null!,
-    ContainingTypeMetadata = null!
-},
-},
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                Name = "SameClassConstantTest",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                        Name = "CustomDisplayNameTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = new global::TUnit.Core.PropertyMetadata[]
+                        {
+                            new global::TUnit.Core.PropertyMetadata
+                            {
+                                ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
+                                Type = typeof(int),
+                                Name = "Order",
+                                IsStatic = false,
+                                IsNullable = false,
+                                Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
+                                ClassMetadata = null!,
+                                ContainingTypeMetadata = null!
+                            }
+                        },
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -789,8 +755,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class CustomDisplayNameTests_SameClassConstantTest_ModuleInitializer_GUID
@@ -814,9 +780,8 @@ internal static class CustomDisplayNameTests_SameClassConstantTest_ModuleInitial
 namespace TUnit.Generated;
 internal sealed class CustomDisplayNameTests_DifferentClassConstantTest_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
         {
             TestName = "DifferentClassConstantTest",
@@ -841,56 +806,53 @@ internal sealed class CustomDisplayNameTests_DifferentClassConstantTest_TestSour
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 59,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "DifferentClassConstantTest",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "CustomDisplayNameTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = new global::TUnit.Core.PropertyMetadata[]
-{
-new global::TUnit.Core.PropertyMetadata
-{
-    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
-    Type = typeof(int),
-    Name = "Order",
-    IsStatic = false,
-    IsNullable = false,
-    Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null!,
-    ContainingTypeMetadata = null!
-},
-},
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                Name = "DifferentClassConstantTest",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                        Name = "CustomDisplayNameTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = new global::TUnit.Core.PropertyMetadata[]
+                        {
+                            new global::TUnit.Core.PropertyMetadata
+                            {
+                                ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
+                                Type = typeof(int),
+                                Name = "Order",
+                                IsStatic = false,
+                                IsNullable = false,
+                                Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
+                                ClassMetadata = null!,
+                                ContainingTypeMetadata = null!
+                            }
+                        },
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -904,8 +866,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class CustomDisplayNameTests_DifferentClassConstantTest_ModuleInitializer_GUID
@@ -929,9 +891,8 @@ internal static class CustomDisplayNameTests_DifferentClassConstantTest_ModuleIn
 namespace TUnit.Generated;
 internal sealed class CustomDisplayNameTests_NestedClassConstantTest_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.CustomDisplayNameTests>
         {
             TestName = "NestedClassConstantTest",
@@ -956,56 +917,53 @@ internal sealed class CustomDisplayNameTests_NestedClassConstantTest_TestSource_
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 66,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "NestedClassConstantTest",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
-Name = "CustomDisplayNameTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = new global::TUnit.Core.PropertyMetadata[]
-{
-new global::TUnit.Core.PropertyMetadata
-{
-    ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
-    Type = typeof(int),
-    Name = "Order",
-    IsStatic = false,
-    IsNullable = false,
-    Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
-    ClassMetadata = null!,
-    ContainingTypeMetadata = null!
-},
-},
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                Name = "NestedClassConstantTest",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.CustomDisplayNameTests, TestsBase`1"),
+                        Name = "CustomDisplayNameTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = new global::TUnit.Core.PropertyMetadata[]
+                        {
+                            new global::TUnit.Core.PropertyMetadata
+                            {
+                                ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
+                                Type = typeof(int),
+                                Name = "Order",
+                                IsStatic = false,
+                                IsNullable = false,
+                                Getter = o => ((global::TUnit.TestProject.CustomDisplayNameTests)o).Order,
+                                ClassMetadata = null!,
+                                ContainingTypeMetadata = null!
+                            }
+                        },
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -1019,8 +977,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class CustomDisplayNameTests_NestedClassConstantTest_ModuleInitializer_GUID

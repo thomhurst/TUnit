@@ -6,25 +6,961 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-color-primary: #14b8a6;
+  --ifm-color-primary-dark: #0d9488;
+  --ifm-color-primary-darker: #0f766e;
+  --ifm-color-primary-darkest: #115e59;
+  --ifm-color-primary-light: #2dd4bf;
+  --ifm-color-primary-lighter: #5eead4;
+  --ifm-color-primary-lightest: #99f6e4;
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --docusaurus-highlighted-code-line-bg: rgba(20, 184, 166, 0.1);
+  
+  /* Custom Design System Variables */
+  --gradient-primary: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
+  --gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  --bg-dark: #0a0e27;
+  --bg-dark-secondary: #1a1f3a;
+  --bg-surface: #1e293b;
+  --bg-code: #0f172a;
+  
+  /* Text Colors */
+  --text-primary: #f1f5f9;
+  --text-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-body: #cbd5e1;
+  
+  /* Borders and Effects */
+  --border-color: rgba(148, 163, 184, 0.1);
+  --shadow-primary: 0 4px 15px rgba(20, 184, 166, 0.3);
+  --shadow-hover: 0 10px 30px rgba(20, 184, 166, 0.2);
+  
+  /* Syntax Highlighting */
+  --syntax-keyword: #e879f9;
+  --syntax-string: #4ade80;
+  --syntax-function: #fcd34d;
+  --syntax-class: #38bdf8;
+  --syntax-number: #fb7185;
+  --syntax-comment: #cbd5e1;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-color-primary: #14b8a6;
+  --ifm-color-primary-dark: #0d9488;
+  --ifm-color-primary-darker: #0f766e;
+  --ifm-color-primary-darkest: #115e59;
+  --ifm-color-primary-light: #2dd4bf;
+  --ifm-color-primary-lighter: #5eead4;
+  --ifm-color-primary-lightest: #99f6e4;
+  --docusaurus-highlighted-code-line-bg: rgba(20, 184, 166, 0.2);
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-color: #1e293b;
+  --ifm-navbar-background-color: transparent;
+  --ifm-footer-background-color: #0a0e27;
+}
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@600;700&family=Russo+One&display=swap');
+
+/* Global Enhancements */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure better text contrast globally */
+[data-theme='dark'] .hero__subtitle {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme='dark'] p {
+  color: var(--text-body);
+}
+
+/* Better code block contrast */
+[data-theme='dark'] code {
+  background: rgba(20, 184, 166, 0.15) !important;
+  color: #67e8f9 !important;
+}
+
+/* Enhanced syntax highlighting for all code blocks */
+[data-theme='dark'] .prism-code {
+  background: #1e293b !important;
+}
+
+/* Global fix for all CodeBlock components */
+[data-theme='dark'] .theme-code-block pre {
+  background: var(--bg-code) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme='dark'] .theme-code-block code {
+  color: var(--text-primary) !important;
+}
+
+[data-theme='dark'] .token.keyword,
+[data-theme='dark'] .token.tag {
+  color: #c084fc !important;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .token.string,
+[data-theme='dark'] .token.attr-value {
+  color: #86efac !important;
+}
+
+[data-theme='dark'] .token.function,
+[data-theme='dark'] .token.method {
+  color: #fbbf24 !important;
+}
+
+[data-theme='dark'] .token.class-name,
+[data-theme='dark'] .token.type,
+[data-theme='dark'] .token.builtin {
+  color: #67e8f9 !important;
+}
+
+[data-theme='dark'] .token.comment,
+[data-theme='dark'] .token.prolog,
+[data-theme='dark'] .token.doctype,
+[data-theme='dark'] .token.cdata {
+  color: #cbd5e1 !important;
+  font-style: italic;
+}
+
+[data-theme='dark'] .token.number,
+[data-theme='dark'] .token.boolean {
+  color: #f87171 !important;
+}
+
+[data-theme='dark'] .token.operator,
+[data-theme='dark'] .token.entity,
+[data-theme='dark'] .token.url {
+  color: #fbbf24 !important;
+}
+
+[data-theme='dark'] .token.punctuation,
+[data-theme='dark'] .token.attr-name {
+  color: #e2e8f0 !important;
+}
+
+/* Ensure variables and plain text are bright */
+[data-theme='dark'] .token.plain,
+[data-theme='dark'] .token.variable,
+[data-theme='dark'] .token.parameter {
+  color: #f1f5f9 !important;
+}
+
+[data-theme='dark'] .token.property,
+[data-theme='dark'] .token.constant {
+  color: #a78bfa !important;
+}
+
+[data-theme='dark'] .token.namespace {
+  color: #f472b6 !important;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better code blocks */
+pre code {
+  background: transparent !important;
+  text-align: left !important;
+}
+
+/* Ensure all code blocks are left-aligned */
+.prism-code,
+.theme-code-block,
+pre,
+code {
+  text-align: left !important;
+}
+
+/* Fix for homepage feature code blocks */
+div[class*="codeScrollWrapper"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Allow inner content to be wider than container for scrolling */
+div[class*="codeScrollWrapper"] > div {
+  width: max-content !important;
+  min-width: 100% !important;
+}
+
+/* Ensure code tokens are properly aligned */
+.token {
+  text-align: left !important;
+}
+
+/* Force all code text to be visible */
+[data-theme='dark'] pre,
+[data-theme='dark'] code {
+  color: #f8fafc !important;
+}
+
+/* Ensure all code block text is readable */
+[data-theme='dark'] pre *,
+[data-theme='dark'] code * {
+  opacity: 1 !important;
+}
+
+/* Fix low contrast text in code blocks */
+[data-theme='dark'] pre span {
+  color: inherit !important;
+  opacity: 1 !important;
+}
+
+/* Navbar enhancements - Dark theme by default */
+.navbar {
+  backdrop-filter: blur(10px);
+  background: linear-gradient(90deg, rgba(10, 14, 39, 0.98) 0%, rgba(26, 31, 58, 0.98) 100%) !important;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Navbar text colors */
+.navbar__title {
+  color: var(--text-primary) !important;
+  font-weight: 600;
+}
+
+.navbar__link {
+  color: var(--text-body) !important;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.navbar__link:hover {
+  color: #2dd4bf !important;
+  text-shadow: 0 0 8px rgba(45, 212, 191, 0.5);
+}
+
+.navbar__link--active {
+  color: #2dd4bf !important;
+  background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Navbar brand/logo text */
+.navbar__brand {
+  color: var(--text-primary) !important;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.navbar__brand:hover {
+  color: #2dd4bf !important;
+  text-decoration: none !important;
+}
+
+/* Navbar items */
+.navbar__item {
+  color: var(--text-body) !important;
+}
+
+/* Mobile menu toggle */
+.navbar__toggle {
+  color: #f1f5f9 !important;
+}
+
+/* Theme toggle button */
+[data-theme='dark'] .navbar__toggle {
+  color: #f1f5f9 !important;
+}
+
+/* Mobile Navbar Sidebar Fix */
+.navbar-sidebar {
+  background: linear-gradient(180deg, #1a1f3a 0%, #0f172a 100%) !important;
+  color: #f1f5f9 !important;
+  height: 100vh !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 999 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.navbar-sidebar__backdrop {
+  background: rgba(0, 0, 0, 0.8) !important;
+}
+
+.navbar-sidebar__brand {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(20, 184, 166, 0.1) !important;
+  padding: 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.navbar-sidebar__close {
+  color: #f1f5f9 !important;
+  background: transparent !important;
+  border: none !important;
+  font-size: 1.5rem !important;
+  cursor: pointer !important;
+  padding: 0.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.navbar-sidebar__close:hover {
+  background: rgba(20, 184, 166, 0.1) !important;
+  border-radius: 0.5rem !important;
+}
+
+/* Hide the duplicate pseudo-element since SVG is already there */
+.navbar-sidebar__close::after,
+.navbar-sidebar__close::before {
+  content: none !important;
+  display: none !important;
+}
+
+.navbar-sidebar__items {
+  padding: 1rem !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  max-height: calc(100vh - 80px) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.navbar-sidebar__item {
+  margin: 0.5rem 0 !important;
+}
+
+/* Clean up navbar items in mobile sidebar */
+.navbar-sidebar .navbar__items {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.navbar-sidebar .navbar__items--right {
+  margin-top: 2rem !important;
+  padding-top: 1rem !important;
+  border-top: 1px solid rgba(20, 184, 166, 0.1) !important;
+}
+
+.navbar-sidebar .navbar__item {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.navbar-sidebar .navbar__link {
+  color: #cbd5e1 !important;
+  text-decoration: none !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 0.5rem !important;
+  transition: all 0.2s ease !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  width: 100% !important;
+}
+
+.navbar-sidebar .navbar__link:hover {
+  background: rgba(20, 184, 166, 0.1) !important;
+  color: #2dd4bf !important;
+  text-decoration: none !important;
+}
+
+.navbar-sidebar .navbar__link--active {
+  background: rgba(20, 184, 166, 0.15) !important;
+  color: #2dd4bf !important;
+  font-weight: 600 !important;
+}
+
+/* Hide external link icons but not the close button */
+.navbar-sidebar .navbar__link svg,
+.navbar-sidebar .navbar__link [class*="icon"],
+.navbar-sidebar .iconExternalLink,
+.navbar-sidebar [class*="Icon"]:not(.navbar-sidebar__close),
+.navbar-sidebar img[alt*="external"],
+.navbar-sidebar span[aria-label*="external"] {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+}
+
+/* Ensure only one close button SVG is visible */
+.navbar-sidebar__close svg {
+  display: block !important;
+  visibility: visible !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  opacity: 1 !important;
+  fill: #f1f5f9 !important;
+}
+
+/* Hide any duplicate close elements */
+.navbar-sidebar__close > *:not(:first-child) {
+  display: none !important;
+}
+
+/* Hide Docusaurus default external link indicator */
+.navbar-sidebar .navbar__link > span:last-child:not(:first-child) {
+  display: none !important;
+}
+
+/* Clean external link styling without icons */
+.navbar-sidebar .navbar__link[href^="http"] {
+  position: relative !important;
+  padding-right: 2rem !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Add simple text indicator for external links */
+.navbar-sidebar .navbar__link[href^="http"]::after {
+  content: "↗" !important;
+  position: absolute !important;
+  right: 1rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-size: 1rem !important;
+  opacity: 0.4 !important;
+  font-weight: normal !important;
+  display: block !important;
+}
+
+/* Search box styling */
+.DocSearch-Button {
+  background: rgba(20, 184, 166, 0.1) !important;
+  border: 1px solid rgba(20, 184, 166, 0.2) !important;
+  color: #cbd5e1 !important;
+}
+
+.DocSearch-Button:hover {
+  background: rgba(20, 184, 166, 0.15) !important;
+  border-color: rgba(20, 184, 166, 0.3) !important;
+}
+
+.DocSearch-Button-Placeholder {
+  color: #94a3b8 !important;
+}
+
+.DocSearch-Button-Key {
+  background: rgba(20, 184, 166, 0.2) !important;
+  border: 1px solid rgba(20, 184, 166, 0.3) !important;
+  color: #cbd5e1 !important;
+  box-shadow: none !important;
+}
+
+/* Ensure all navbar elements inherit the dark theme */
+.navbar * {
+  color: #cbd5e1;
+}
+
+/* Light/dark mode toggle button styling */
+.navbar__items--right button[class*="toggle"] {
+  color: #cbd5e1 !important;
+}
+
+.navbar__items--right button[class*="toggle"]:hover {
+  background: rgba(20, 184, 166, 0.1) !important;
+}
+
+/* Footer enhancements */
+.footer {
+  background: linear-gradient(180deg, #0f172a 0%, #0a0e27 100%) !important;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Documentation page styling */
+[data-theme='dark'] {
+  /* Main content area */
+  --ifm-background-color: #0f172a !important;
+  --ifm-background-surface-color: #1e293b !important;
+  
+  /* Sidebar */
+  --ifm-sidebar-background: linear-gradient(180deg, #1a1f3a 0%, #0f172a 100%) !important;
+  --ifm-menu-color: #cbd5e1 !important;
+  --ifm-menu-color-active: #2dd4bf !important;
+  --ifm-menu-color-background-active: rgba(20, 184, 166, 0.1) !important;
+  --ifm-menu-color-background-hover: rgba(20, 184, 166, 0.05) !important;
+  
+  /* Breadcrumbs */
+  --ifm-breadcrumb-color-active: #2dd4bf !important;
+  --ifm-breadcrumb-item-background-active: transparent !important;
+  
+  /* Table of contents */
+  --ifm-toc-border-color: rgba(20, 184, 166, 0.1) !important;
+  --ifm-toc-link-color: #94a3b8 !important;
+  
+  /* Links */
+  --ifm-link-color: #2dd4bf !important;
+  --ifm-link-hover-color: #5eead4 !important;
+  
+  /* Cards and surfaces */
+  --ifm-card-background-color: #1e293b !important;
+  --ifm-card-border-radius: 0.75rem !important;
+  
+  /* Headings */
+  --ifm-heading-color: #f1f5f9 !important;
+  --ifm-heading-font-weight: 600 !important;
+  
+  /* Pagination */
+  --ifm-pagination-nav-color-hover: rgba(20, 184, 166, 0.1) !important;
+}
+
+/* Sidebar styling */
+[data-theme='dark'] .theme-doc-sidebar-container {
+  background: linear-gradient(180deg, #1a1f3a 0%, #0f172a 100%) !important;
+  border-right: 1px solid rgba(20, 184, 166, 0.1) !important;
+}
+
+[data-theme='dark'] .menu__link {
+  color: #cbd5e1 !important;
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .menu__link:hover {
+  color: #f1f5f9 !important;
+  background: rgba(20, 184, 166, 0.05) !important;
+}
+
+[data-theme='dark'] .menu__link--active {
+  color: #2dd4bf !important;
+  background: rgba(20, 184, 166, 0.1) !important;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .menu__link--sublist-caret:after {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="%23cbd5e1" d="M6 4l4 4-4 4z"/></svg>') !important;
+}
+
+/* Breadcrumbs styling */
+[data-theme='dark'] .breadcrumbs__link {
+  color: #94a3b8 !important;
+  transition: color 0.2s ease;
+}
+
+[data-theme='dark'] .breadcrumbs__link:hover {
+  color: #2dd4bf !important;
+}
+
+[data-theme='dark'] .breadcrumbs__item--active .breadcrumbs__link {
+  color: #2dd4bf !important;
+  background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Main content area */
+[data-theme='dark'] .theme-doc-markdown {
+  background: transparent !important;
+}
+
+[data-theme='dark'] article {
+  color: #cbd5e1 !important;
+}
+
+[data-theme='dark'] article h1 {
+  color: #f1f5f9 !important;
+  font-size: 2.5rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+[data-theme='dark'] article h2 {
+  color: #e2e8f0 !important;
+  font-size: 1.875rem !important;
+  font-weight: 600 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+  padding-bottom: 0.5rem !important;
+  border-bottom: 1px solid rgba(20, 184, 166, 0.1) !important;
+}
+
+[data-theme='dark'] article h3 {
+  color: #e2e8f0 !important;
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+}
+
+/* Table of contents on the right */
+[data-theme='dark'] .table-of-contents {
+  border-left: 1px solid rgba(20, 184, 166, 0.1) !important;
+}
+
+[data-theme='dark'] .table-of-contents__link {
+  color: #94a3b8 !important;
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .table-of-contents__link:hover {
+  color: #cbd5e1 !important;
+}
+
+[data-theme='dark'] .table-of-contents__link--active {
+  color: #2dd4bf !important;
+  font-weight: 600;
+}
+
+/* Pagination (Next/Previous) */
+[data-theme='dark'] .pagination-nav__link {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%) !important;
+  border: 1px solid rgba(20, 184, 166, 0.1) !important;
+  transition: all 0.3s ease;
+}
+
+[data-theme='dark'] .pagination-nav__link:hover {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%) !important;
+  border-color: #14b8a6 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2);
+}
+
+[data-theme='dark'] .pagination-nav__label {
+  color: #94a3b8 !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+[data-theme='dark'] .pagination-nav__sublabel {
+  color: #e2e8f0 !important;
+  font-weight: 600 !important;
+}
+
+/* Code blocks in docs */
+[data-theme='dark'] article pre {
+  background: #1e293b !important;
+  border: 1px solid rgba(20, 184, 166, 0.1) !important;
+}
+
+/* Inline code */
+[data-theme='dark'] article code {
+  background: rgba(20, 184, 166, 0.15) !important;
+  color: #a5f3fc !important;
+  padding: 0.2rem 0.4rem !important;
+  border-radius: 0.25rem !important;
+  font-weight: 500 !important;
+}
+
+/* Blockquotes */
+[data-theme='dark'] blockquote {
+  background: linear-gradient(90deg, rgba(20, 184, 166, 0.1) 0%, transparent 100%) !important;
+  border-left: 4px solid #14b8a6 !important;
+  color: #cbd5e1 !important;
+}
+
+/* Tables */
+[data-theme='dark'] table {
+  border: 1px solid rgba(20, 184, 166, 0.1) !important;
+}
+
+[data-theme='dark'] table thead {
+  background: rgba(20, 184, 166, 0.05) !important;
+}
+
+[data-theme='dark'] table th {
+  border-color: rgba(20, 184, 166, 0.1) !important;
+  color: #e2e8f0 !important;
+  font-weight: 600 !important;
+}
+
+[data-theme='dark'] table td {
+  border-color: rgba(20, 184, 166, 0.1) !important;
+  color: #cbd5e1 !important;
+}
+
+/* Button hover and focus effects */
+.button {
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+}
+
+.button:focus-visible {
+  outline: 3px solid #14b8a6;
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ifm-background-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ifm-color-primary);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ifm-color-primary-dark);
+}
+
+/* Mobile Responsive Improvements */
+@media screen and (max-width: 996px) {
+  /* Hide scrollbar on mobile while keeping scroll functionality */
+  html {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  /* Fix viewport overflow */
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+  
+  /* Ensure proper container padding on mobile */
+  .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Fix main wrapper */
+  main {
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+  
+  /* Fix navbar on mobile */
+  .navbar {
+    padding: 0.5rem 1rem;
+    width: 100% !important;
+  }
+  
+  .navbar__toggle {
+    margin-right: 0;
+  }
+  
+  /* Additional mobile sidebar fixes */
+  .navbar-sidebar {
+    display: block !important;
+  }
+  
+  /* Ensure proper logo display */
+  .navbar-sidebar .navbar__logo {
+    height: 2rem !important;
+    width: auto !important;
+  }
+  
+  .navbar-sidebar .navbar__title {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: #f1f5f9 !important;
+  }
+  
+  /* Fix dark mode toggle in mobile menu */
+  .navbar-sidebar [class*="colorModeToggle"] {
+    margin: 1rem 0 !important;
+  }
+  
+  /* Handle back navigation / breadcrumbs in mobile */
+  .navbar-sidebar .menu__list-item--collapsed .menu__link--sublist-caret:after,
+  .navbar-sidebar .menu__link--sublist-caret:after {
+    display: none !important;
+  }
+  
+  /* Hide the "Back" arrow and text in the upper right */
+  .navbar-sidebar [class*="collapseSidebarButton"],
+  .navbar-sidebar [aria-label*="collapse"],
+  .navbar-sidebar button[class*="back"] {
+    display: none !important;
+  }
+  
+  /* Ensure Tutorial link is visible */
+  .navbar-sidebar .navbar__link[href*="docs"] {
+    display: flex !important;
+  }
+  
+  /* Ensure text doesn't get cut off */
+  .navbar-sidebar .navbar__link {
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+  
+  /* Ensure code blocks don't overflow and are properly aligned */
+  pre {
+    overflow-x: auto !important;
+    max-width: calc(100vw - 2rem) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    text-align: left !important;
+  }
+  
+  pre code {
+    text-align: left !important;
+    display: block !important;
+  }
+  
+  /* Fix code blocks in containers */
+  .theme-code-block {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+  
+  /* Fix table overflow on mobile */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: calc(100vw - 2rem) !important;
+  }
+  
+  /* Improve readability on mobile */
+  article {
+    padding: 0 1rem;
+    max-width: 100% !important;
+  }
+  
+  /* Fix sidebar on mobile */
+  .theme-doc-sidebar-container {
+    padding: 1rem;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  /* Force feature code blocks to behave on mobile */
+  div[class*="featureCode"] {
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+  
+  div[class*="featureCode"] pre {
+    width: 100% !important;
+    overflow-x: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  div[class*="featureCode"] code {
+    width: max-content !important;
+    min-width: 0 !important;
+  }
+  
+  /* Ensure scrollbar remains hidden on smaller mobile devices */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  /* Fix Docusaurus layout wrapper */
+  #__docusaurus {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  /* Further mobile adjustments for smaller screens */
+  .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Prevent horizontal scroll */
+  html {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  body {
+    font-size: 14px;
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  h3 {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Ensure navbar items wrap properly */
+  .navbar__items {
+    flex-wrap: wrap;
+  }
+  
+  /* Fix search box on mobile */
+  .DocSearch-Button {
+    width: 40px;
+    padding: 0;
+  }
+  
+  .DocSearch-Button-Placeholder {
+    display: none;
+  }
+  
+  /* Improve code block display */
+  pre code {
+    font-size: 0.85rem !important;
+  }
+  
+  /* Fix pagination buttons */
+  .pagination-nav__link {
+    padding: 0.75rem;
+  }
 }
