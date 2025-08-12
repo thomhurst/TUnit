@@ -11,18 +11,26 @@ public class AttributeWriter
     public static void WriteAttributes(ICodeWriter sourceCodeWriter, Compilation compilation,
         ImmutableArray<AttributeData> attributeDatas)
     {
-        for (var index = 0; index < attributeDatas.Length; index++)
+        var attributesToWrite = new List<AttributeData>();
+        
+        // Filter out attributes that we can write
+        foreach (var attributeData in attributeDatas)
         {
-            var attributeData = attributeDatas[index];
-
-            if (attributeData.ApplicationSyntaxReference is null)
+            // Include attributes with syntax reference (from current compilation)
+            // Include attributes without syntax reference (from other assemblies) as long as they have an AttributeClass
+            if (attributeData.ApplicationSyntaxReference is not null || attributeData.AttributeClass is not null)
             {
-                continue;
+                attributesToWrite.Add(attributeData);
             }
+        }
+
+        for (var index = 0; index < attributesToWrite.Count; index++)
+        {
+            var attributeData = attributesToWrite[index];
 
             WriteAttribute(sourceCodeWriter, compilation, attributeData);
 
-            if (index != attributeDatas.Length - 1)
+            if (index != attributesToWrite.Count - 1)
             {
                 sourceCodeWriter.AppendLine(",");
             }
@@ -32,7 +40,17 @@ public class AttributeWriter
     public static void WriteAttribute(ICodeWriter sourceCodeWriter, Compilation compilation,
         AttributeData attributeData)
     {
-        sourceCodeWriter.Append(GetAttributeObjectInitializer(compilation, attributeData));
+        if (attributeData.ApplicationSyntaxReference is null)
+        {
+            // For attributes from other assemblies (like inherited methods), 
+            // use the WriteAttributeWithoutSyntax approach
+            WriteAttributeWithoutSyntax(sourceCodeWriter, attributeData);
+        }
+        else
+        {
+            // For attributes from the current compilation, use the syntax-based approach
+            sourceCodeWriter.Append(GetAttributeObjectInitializer(compilation, attributeData));
+        }
     }
 
     public static void WriteAttributeMetadata(ICodeWriter sourceCodeWriter, Compilation compilation,
@@ -212,14 +230,68 @@ public class AttributeWriter
 
         sourceCodeWriter.Append($"new {attributeName}({formattedConstructorArgs})");
 
-        if (string.IsNullOrEmpty(formattedNamedArgs))
+        // Check if we need to add properties (named arguments or data generator properties)
+        var hasNamedArgs = !string.IsNullOrEmpty(formattedNamedArgs);
+        var hasDataGeneratorProperties = HasNestedDataGeneratorProperties(attributeData);
+        
+        if (!hasNamedArgs && !hasDataGeneratorProperties)
         {
             return;
         }
 
         sourceCodeWriter.AppendLine();
         sourceCodeWriter.Append("{");
-        sourceCodeWriter.Append($"{formattedNamedArgs}");
+        
+        if (hasNamedArgs)
+        {
+            sourceCodeWriter.Append($"{formattedNamedArgs}");
+            if (hasDataGeneratorProperties)
+            {
+                sourceCodeWriter.Append(",");
+            }
+        }
+        
+        if (hasDataGeneratorProperties)
+        {
+            // For attributes without syntax, we still need to handle data generator properties
+            // but we can't rely on syntax analysis, so we'll use a simpler approach
+            WriteDataSourceGeneratorPropertiesWithoutSyntax(sourceCodeWriter, attributeData);
+        }
+        
         sourceCodeWriter.Append("}");
+    }
+
+    private static void WriteDataSourceGeneratorPropertiesWithoutSyntax(ICodeWriter sourceCodeWriter, AttributeData attributeData)
+    {
+        foreach (var propertySymbol in attributeData.AttributeClass?.GetMembers().OfType<IPropertySymbol>() ?? [])
+        {
+            if (propertySymbol.DeclaredAccessibility != Accessibility.Public)
+            {
+                continue;
+            }
+
+            if (propertySymbol.GetAttributes().FirstOrDefault(x => x.IsDataSourceAttribute()) is not { } dataSourceAttribute)
+            {
+                continue;
+            }
+
+            sourceCodeWriter.Append($"{propertySymbol.Name} = ");
+
+            var propertyType = propertySymbol.Type.GloballyQualified();
+            var isNullable = propertySymbol.Type.NullableAnnotation == NullableAnnotation.Annotated;
+            
+            if (propertySymbol.Type.IsReferenceType && !isNullable)
+            {
+                sourceCodeWriter.Append("null!,");
+            }
+            else if (propertySymbol.Type.IsValueType && !isNullable)
+            {
+                sourceCodeWriter.Append($"default({propertyType}),");
+            }
+            else
+            {
+                sourceCodeWriter.Append("null,");
+            }
+        }
     }
 }
