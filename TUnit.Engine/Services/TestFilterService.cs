@@ -179,7 +179,15 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
     private bool IsExplicitTest(AbstractExecutableTest test)
     {
         // Check if the test or its class has the ExplicitAttribute
-        return test.Context.TestDetails.Attributes.OfType<ExplicitAttribute>().Any();
+        // First check the aggregated attributes (should contain both method and class attributes)
+        if (test.Context.TestDetails.Attributes.OfType<ExplicitAttribute>().Any())
+        {
+            return true;
+        }
+
+        // Also check the class type directly as a fallback
+        var testClassType = test.Context.TestDetails.ClassType;
+        return testClassType.GetCustomAttributes(typeof(ExplicitAttribute), true).Length > 0;
     }
 
     private IReadOnlyCollection<AbstractExecutableTest> FilterOutExplicitTests(IReadOnlyCollection<AbstractExecutableTest> testNodes)
