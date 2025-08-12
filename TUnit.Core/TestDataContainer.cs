@@ -29,4 +29,14 @@ internal static class TestDataContainer
     {
         return _keyContainer.GetOrCreate(key, type, func);
     }
+
+    public static async Task CleanupClassAsync(Type testClass)
+    {
+        await _classContainer.DisposeAndRemoveAsync(testClass);
+    }
+
+    public static async Task CleanupAssemblyAsync(Assembly assembly)
+    {
+        await _assemblyContainer.DisposeAndRemoveAsync(assembly);
+    }
 }

@@ -458,6 +458,9 @@ internal sealed class HookOrchestrator
                 : new HookFailedException("Multiple AfterAssembly hooks failed", new AggregateException(exceptions));
         }
 
+        // Clean up SharedType.PerAssembly instances
+        await TestDataContainer.CleanupAssemblyAsync(assembly);
+
         // Return the context's ExecutionContext if user called AddAsyncLocalValues, otherwise null
 #if NET
         return assemblyContext.ExecutionContext;
@@ -556,6 +559,9 @@ internal sealed class HookOrchestrator
                 ? new HookFailedException(exceptions[0])
                 : new HookFailedException("Multiple AfterClass hooks failed", new AggregateException(exceptions));
         }
+
+        // Clean up SharedType.PerClass instances
+        await TestDataContainer.CleanupClassAsync(testClassType);
 
         // Return the context's ExecutionContext if user called AddAsyncLocalValues, otherwise null
 #if NET

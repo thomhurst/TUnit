@@ -50,6 +50,18 @@ public class GetOnlyDictionary<TKey,
         return default(TValue?);
     }
 
+    public bool TryRemove(TKey key, [NotNullWhen(true)] out TValue? value)
+    {
+        if (_innerDictionary.TryRemove(key, out var lazy))
+        {
+            value = lazy.Value!;
+            return true;
+        }
+
+        value = default!;
+        return false;
+    }
+
     public TValue this[TKey key] => _innerDictionary.TryGetValue(key, out var lazy) 
         ? lazy.Value 
         : throw new KeyNotFoundException($"Key '{key}' not found in dictionary");

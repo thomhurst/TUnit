@@ -34,4 +34,26 @@ internal class ScopedContainer<TKey> where TKey : notnull
         return _containers.TryGetValue(key, out var container) &&
                container.TryGetValue(type, out instance);
     }
+
+    /// <summary>
+    /// Disposes and removes all instances for the specified key.
+    /// </summary>
+    /// <param name="key">The scoping key.</param>
+    public async Task DisposeAndRemoveAsync(TKey key)
+    {
+        if (_containers.TryRemove(key, out var container))
+        {
+            foreach (var instance in container.Values)
+            {
+                if (instance is IAsyncDisposable asyncDisposable)
+                {
+                    await asyncDisposable.DisposeAsync();
+                }
+                else if (instance is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            }
+        }
+    }
 }
