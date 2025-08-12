@@ -10,7 +10,7 @@ internal class Disposer(ILogger logger)
         {
             if (obj is IAsyncDisposable asyncDisposable)
             {
-                await asyncDisposable.DisposeAsync();
+                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
             }
             else if (obj is IDisposable disposable)
             {

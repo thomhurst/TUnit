@@ -34,7 +34,7 @@ internal static class ObjectTracker
         {
             events.OnDispose = events.OnDispose + new Func<object, TestContext, ValueTask>(async (sender, testContext) =>
             {
-                await DecrementAndDisposeIfNeededAsync(obj);
+                await DecrementAndDisposeIfNeededAsync(obj).ConfigureAwait(false);
                 // Clean up the handler registration tracking
                 _registeredHandlers.TryRemove(handlerKey, out _);
             });
@@ -70,7 +70,7 @@ internal static class ObjectTracker
             {
                 if (obj is IAsyncDisposable asyncDisposable)
                 {
-                    await asyncDisposable.DisposeAsync();
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
                 }
                 else if (obj is IDisposable disposable)
                 {

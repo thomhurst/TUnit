@@ -89,7 +89,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         if (_serviceProvidersPerSession.TryRemove(context.SessionUid.Value, out var serviceProvider))
         {
-            await serviceProvider.DisposeAsync();
+            await serviceProvider.DisposeAsync().ConfigureAwait(false);
         }
 
         return new CloseTestSessionResult { IsSuccess = true };
