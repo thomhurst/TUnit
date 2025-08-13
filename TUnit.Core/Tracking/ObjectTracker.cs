@@ -7,7 +7,7 @@ namespace TUnit.Core.Tracking;
 /// Pure reference counting object tracker for disposable objects.
 /// Objects are disposed when their reference count reaches zero, regardless of sharing type.
 /// </summary>
-internal static class ObjectTracker
+public static class ObjectTracker
 {
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
 
@@ -17,7 +17,7 @@ internal static class ObjectTracker
     /// </summary>
     /// <param name="events">Events for the test instance</param>
     /// <param name="objects">The objects to track (constructor args, method args, injected properties)</param>
-    public static void TrackObjectsForContext(TestContextEvents events, IEnumerable<object?> objects)
+    internal static void TrackObjectsForContext(TestContextEvents events, IEnumerable<object?> objects)
     {
         // Simply delegate to TrackObject for each object
         // The safety mechanism in TrackObject will prevent duplicates
@@ -33,7 +33,7 @@ internal static class ObjectTracker
     /// </summary>
     /// <param name="events">Events for the test instance</param>
     /// <param name="obj">The object to track</param>
-    public static void TrackObject(TestContextEvents events, object? obj)
+    internal static void TrackObject(TestContextEvents events, object? obj)
     {
         if (obj == null || ShouldSkipTracking(obj))
         {
