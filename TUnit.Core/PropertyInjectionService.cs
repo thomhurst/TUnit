@@ -134,6 +134,7 @@ public sealed class PropertyInjectionService
                                 if (propertyValue != null)
                                 {
                                     ObjectTracker.TrackObject(events, propertyValue);
+                                    ObjectTracker.TrackOwnership(instance, propertyValue);
                                     
                                     if (ShouldInjectProperties(propertyValue))
                                     {
@@ -151,6 +152,7 @@ public sealed class PropertyInjectionService
                             if (propertyValue != null)
                             {
                                 ObjectTracker.TrackObject(events, propertyValue);
+                                ObjectTracker.TrackOwnership(instance, propertyValue);
                                 
                                 if (ShouldInjectProperties(propertyValue))
                                 {
@@ -385,6 +387,7 @@ public sealed class PropertyInjectionService
         }
 
         ObjectTracker.TrackObject(events, propertyValue);
+        ObjectTracker.TrackOwnership(instance, propertyValue);
 
         if (ShouldInjectProperties(propertyValue))
         {

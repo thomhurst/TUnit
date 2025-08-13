@@ -10,6 +10,7 @@ namespace TUnit.Core.Tracking;
 public static class ObjectTracker
 {
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
+    private static readonly ConcurrentDictionary<object, HashSet<object>> _ownedObjects = new();
 
     /// <summary>
     /// Tracks multiple objects for a test context and registers a single disposal handler.
@@ -83,5 +84,54 @@ public static class ObjectTracker
                 action();
             }
         };
+    }
+    
+    /// <summary>
+    /// Tracks that an owner object owns another object.
+    /// This increments the owned object's reference count.
+    /// When the owner is disposed, it will decrement the owned object's reference count.
+    /// </summary>
+    public static void TrackOwnership(object owner, object owned)
+    {
+        if (owner == null || owned == null || ShouldSkipTracking(owned))
+        {
+            return;
+        }
+        
+        var ownedSet = _ownedObjects.GetOrAdd(owner, _ => new HashSet<object>());
+        lock (ownedSet)
+        {
+            if (ownedSet.Add(owned))
+            {
+                var counter = _trackedObjects.GetOrAdd(owned, _ => new Counter());
+                counter.Increment();
+                
+                OnDisposed(owner, () =>
+                {
+                    ReleaseOwnedObjects(owner);
+                });
+            }
+        }
+    }
+    
+    private static void ReleaseOwnedObjects(object owner)
+    {
+        if (_ownedObjects.TryRemove(owner, out var ownedSet))
+        {
+            lock (ownedSet)
+            {
+                foreach (var owned in ownedSet)
+                {
+                    if (_trackedObjects.TryGetValue(owned, out var counter))
+                    {
+                        var count = counter.Decrement();
+                        if (count == 0)
+                        {
+                            _ = GlobalContext.Current.Disposer.DisposeAsync(owned);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
