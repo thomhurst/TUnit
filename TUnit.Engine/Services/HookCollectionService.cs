@@ -28,7 +28,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
     }
 
-    private async Task ProcessHookRegistrationAsync(object hookMethod, CancellationToken cancellationToken = default)
+    private async Task ProcessHookRegistrationAsync(HookMethod hookMethod, CancellationToken cancellationToken = default)
     {
         // Only process each hook once
         if (!_processedHooks.TryAdd(hookMethod, true))
@@ -38,20 +38,7 @@ internal sealed class HookCollectionService : IHookCollectionService
 
         try
         {
-            HookRegisteredContext context;
-            
-            if (hookMethod is StaticHookMethod staticHook)
-            {
-                context = new HookRegisteredContext(staticHook);
-            }
-            else if (hookMethod is InstanceHookMethod instanceHook)
-            {
-                context = new HookRegisteredContext(instanceHook);
-            }
-            else
-            {
-                return; // Unknown hook type
-            }
+            var context = new HookRegisteredContext(hookMethod);
 
             await _eventReceiverOrchestrator.InvokeHookRegistrationEventReceiversAsync(context, cancellationToken);
         }

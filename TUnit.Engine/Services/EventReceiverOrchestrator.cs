@@ -200,22 +200,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     public async ValueTask InvokeHookRegistrationEventReceiversAsync(HookRegisteredContext hookContext, CancellationToken cancellationToken)
     {
         // Get event receivers from the hook method's attributes
-        IEnumerable<Attribute> attributes;
-        
-        if (hookContext.StaticHookMethod != null)
-        {
-            attributes = hookContext.StaticHookMethod.Attributes;
-        }
-        else if (hookContext.InstanceHookMethod != null)
-        {
-            attributes = hookContext.InstanceHookMethod.Attributes;
-        }
-        else
-        {
-            return; // No hook method to process
-        }
-
-        var eventReceivers = attributes
+        var eventReceivers = hookContext.HookMethod.Attributes
             .OfType<IHookRegisteredEventReceiver>()
             .OrderBy(r => r.Order)
             .ToList();
