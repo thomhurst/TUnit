@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.8" />
-    <PackageReference Include="TUnit" Version="0.55.6" />
+    <PackageReference Include="TUnit" Version="0.55.21" />
   </ItemGroup>
 
   <ItemGroup>
