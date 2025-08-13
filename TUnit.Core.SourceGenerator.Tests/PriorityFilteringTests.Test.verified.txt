@@ -7,9 +7,8 @@
 namespace TUnit.Generated;
 internal sealed class PriorityFilteringTests_High_1_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
         {
             TestName = "High_1",
@@ -33,43 +32,40 @@ internal sealed class PriorityFilteringTests_High_1_TestSource_GUID : global::TU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 12,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
-Name = "High_1",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
-Name = "PriorityFilteringTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
+                Name = "High_1",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
+                        Name = "PriorityFilteringTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -83,8 +79,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class PriorityFilteringTests_High_1_ModuleInitializer_GUID
@@ -108,9 +104,8 @@ internal static class PriorityFilteringTests_High_1_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class PriorityFilteringTests_High_2_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
         {
             TestName = "High_2",
@@ -134,43 +129,40 @@ internal sealed class PriorityFilteringTests_High_2_TestSource_GUID : global::TU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 18,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
-Name = "High_2",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
-Name = "PriorityFilteringTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
+                Name = "High_2",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
+                        Name = "PriorityFilteringTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -184,8 +176,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class PriorityFilteringTests_High_2_ModuleInitializer_GUID
@@ -209,9 +201,8 @@ internal static class PriorityFilteringTests_High_2_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class PriorityFilteringTests_High_3_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
         {
             TestName = "High_3",
@@ -235,43 +226,40 @@ internal sealed class PriorityFilteringTests_High_3_TestSource_GUID : global::TU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 24,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
-Name = "High_3",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
-Name = "PriorityFilteringTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
+                Name = "High_3",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
+                        Name = "PriorityFilteringTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -285,8 +273,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class PriorityFilteringTests_High_3_ModuleInitializer_GUID
@@ -310,9 +298,8 @@ internal static class PriorityFilteringTests_High_3_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class PriorityFilteringTests_Medium_1_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
         {
             TestName = "Medium_1",
@@ -336,43 +323,40 @@ internal sealed class PriorityFilteringTests_Medium_1_TestSource_GUID : global::
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 30,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
-Name = "Medium_1",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
-Name = "PriorityFilteringTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
+                Name = "Medium_1",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
+                        Name = "PriorityFilteringTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -386,8 +370,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class PriorityFilteringTests_Medium_1_ModuleInitializer_GUID
@@ -411,9 +395,8 @@ internal static class PriorityFilteringTests_Medium_1_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class PriorityFilteringTests_Medium_2_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
         {
             TestName = "Medium_2",
@@ -437,43 +420,40 @@ internal sealed class PriorityFilteringTests_Medium_2_TestSource_GUID : global::
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 36,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
-Name = "Medium_2",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
-Name = "PriorityFilteringTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
+                Name = "Medium_2",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
+                        Name = "PriorityFilteringTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -487,8 +467,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class PriorityFilteringTests_Medium_2_ModuleInitializer_GUID
@@ -512,9 +492,8 @@ internal static class PriorityFilteringTests_Medium_2_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class PriorityFilteringTests_Low_1_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.PriorityFilteringTests>
         {
             TestName = "Low_1",
@@ -538,43 +517,40 @@ internal sealed class PriorityFilteringTests_Low_1_TestSource_GUID : global::TUn
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 42,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
-Name = "Low_1",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
-Name = "PriorityFilteringTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
+                Name = "Low_1",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.PriorityFilteringTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.PriorityFilteringTests, TestsBase`1"),
+                        Name = "PriorityFilteringTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -588,8 +564,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class PriorityFilteringTests_Low_1_ModuleInitializer_GUID

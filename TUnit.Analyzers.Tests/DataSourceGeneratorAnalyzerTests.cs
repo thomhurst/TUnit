@@ -29,4 +29,93 @@ public class DataSourceGeneratorAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task Custom_DataSourceGenerator_With_Wrapper_Type_No_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                namespace TUnit;
+
+                // This reproduces the issue from GitHub issue #2801
+                // Custom data source generator that wraps the target type
+                public sealed class ApplicationFixtureGeneratorAttribute<T> : DataSourceGeneratorAttribute<ApplicationFixture<T>>
+                    where T : notnull
+                { 
+                   protected override IEnumerable<Func<ApplicationFixture<T>>> GenerateDataSources(
+                            DataGeneratorMetadata dataGeneratorMetadata)
+                    {
+                        yield return () => new ApplicationFixture<T>();
+                    }
+                }
+
+                public class ApplicationFixture<T>
+                {
+                    // Some implementation
+                }
+
+                public interface IGantryMethods
+                {
+                    // Some interface
+                }
+
+                // This should not produce TUnit0001 error since types match:
+                // Attribute produces: ApplicationFixture<IGantryMethods>
+                // Constructor expects: ApplicationFixture<IGantryMethods>
+                [ApplicationFixtureGenerator<IGantryMethods>]
+                public class MethodCallingTest(ApplicationFixture<IGantryMethods> appFixture)
+                {
+                    [Test]
+                    public void SomeTest()
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Custom_DataSourceGenerator_With_Type_Mismatch_Shows_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                namespace TUnit;
+
+                // Custom data source generator that produces different type than expected
+                public sealed class WrongTypeGeneratorAttribute<T> : DataSourceGeneratorAttribute<string>
+                { 
+                   protected override IEnumerable<Func<string>> GenerateDataSources(
+                            DataGeneratorMetadata dataGeneratorMetadata)
+                    {
+                        yield return () => "test";
+                    }
+                }
+
+                // This should produce TUnit0001 error since types don't match:
+                // Attribute produces: string
+                // Constructor expects: int
+                [{|#0:WrongTypeGenerator<int>|}]
+                public class TypeMismatchTest(int value)
+                {
+                    [Test]
+                    public void SomeTest()
+                    {
+                    }
+                }
+                """,
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("string", "int")
+            );
+    }
 }

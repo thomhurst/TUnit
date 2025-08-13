@@ -7,9 +7,8 @@
 namespace TUnit.Generated;
 internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
         {
             TestName = "Params",
@@ -34,54 +33,49 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string[]),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string[]",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 5,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
-Name = "Params",
-GenericTypeCount = 0,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(string[]))
-{
-    Name = "arguments",
-    TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"), 1),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
-Name = "ArgsAsArrayTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
+                Name = "Params",
+                GenericTypeCount = 0,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(string[]))
+                    {
+                        Name = "arguments",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"), 1),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
+                        Name = "ArgsAsArrayTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgsAsArrayTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -90,6 +84,9 @@ return classMetadata;
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
+                    case 0:
+                        typedInstance.Params(new string[0]);
+                        break;
                     case 1:
                         typedInstance.Params(TUnit.Core.Helpers.CastHelper.Cast<string[]>(args[0]));
                         break;
@@ -109,7 +106,7 @@ return classMetadata;
                         typedInstance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]) });
                         break;
                     default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                        throw new global::System.ArgumentException($"Expected between 0 and 1 arguments, but got {args.Length}");
                 }
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -118,6 +115,9 @@ return classMetadata;
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
+                    case 0:
+                        instance.Params(new string[0]);
+                        break;
                     case 1:
                         instance.Params(TUnit.Core.Helpers.CastHelper.Cast<string[]>(args[0]));
                         break;
@@ -137,14 +137,14 @@ return classMetadata;
                         instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]) });
                         break;
                     default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                        throw new global::System.ArgumentException($"Expected between 0 and 1 arguments, but got {args.Length}");
                 }
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ArgsAsArrayTests_Params_ModuleInitializer_GUID
@@ -168,9 +168,8 @@ internal static class ArgsAsArrayTests_Params_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class ArgsAsArrayTests_NonParams_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
         {
             TestName = "NonParams",
@@ -195,54 +194,49 @@ internal sealed class ArgsAsArrayTests_NonParams_TestSource_GUID : global::TUnit
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string[]),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string[]",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 15,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
-Name = "NonParams",
-GenericTypeCount = 0,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(string[]))
-{
-    Name = "arguments",
-    TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"), 1),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("NonParams", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
-Name = "ArgsAsArrayTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
+                Name = "NonParams",
+                GenericTypeCount = 0,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(string[]))
+                    {
+                        Name = "arguments",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"), 1),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("NonParams", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
+                        Name = "ArgsAsArrayTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgsAsArrayTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -274,8 +268,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ArgsAsArrayTests_NonParams_ModuleInitializer_GUID
@@ -299,9 +293,8 @@ internal static class ArgsAsArrayTests_NonParams_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class ArgsAsArrayTests_ParamsEnumerable_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
         {
             TestName = "ParamsEnumerable",
@@ -326,54 +319,49 @@ internal sealed class ArgsAsArrayTests_ParamsEnumerable_TestSource_GUID : global
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::System.Collections.Generic.IEnumerable<string>),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::System.Collections.Generic.IEnumerable<string>",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 25,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
-Name = "ParamsEnumerable",
-GenericTypeCount = 0,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Generic.IEnumerable<string>))
-{
-    Name = "arguments",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("ParamsEnumerable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
-Name = "ArgsAsArrayTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
+                Name = "ParamsEnumerable",
+                GenericTypeCount = 0,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Generic.IEnumerable<string>))
+                    {
+                        Name = "arguments",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib")),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("ParamsEnumerable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
+                        Name = "ArgsAsArrayTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgsAsArrayTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -382,6 +370,9 @@ return classMetadata;
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
+                    case 0:
+                        typedInstance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
+                        break;
                     case 1:
                         typedInstance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
                         break;
@@ -401,7 +392,7 @@ return classMetadata;
                         typedInstance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
                         break;
                     default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                        throw new global::System.ArgumentException($"Expected between 0 and 1 arguments, but got {args.Length}");
                 }
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -410,6 +401,9 @@ return classMetadata;
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
+                    case 0:
+                        instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
+                        break;
                     case 1:
                         instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
                         break;
@@ -429,14 +423,14 @@ return classMetadata;
                         instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
                         break;
                     default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                        throw new global::System.ArgumentException($"Expected between 0 and 1 arguments, but got {args.Length}");
                 }
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ArgsAsArrayTests_ParamsEnumerable_ModuleInitializer_GUID
@@ -460,9 +454,8 @@ internal static class ArgsAsArrayTests_ParamsEnumerable_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class ArgsAsArrayTests_Enumerable_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
         {
             TestName = "Enumerable",
@@ -487,54 +480,49 @@ internal sealed class ArgsAsArrayTests_Enumerable_TestSource_GUID : global::TUni
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::System.Collections.Generic.IEnumerable<string>),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::System.Collections.Generic.IEnumerable<string>",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 35,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
-Name = "Enumerable",
-GenericTypeCount = 0,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Generic.IEnumerable<string>))
-{
-    Name = "arguments",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Enumerable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
-Name = "ArgsAsArrayTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
+                Name = "Enumerable",
+                GenericTypeCount = 0,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Generic.IEnumerable<string>))
+                    {
+                        Name = "arguments",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib")),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Enumerable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
+                        Name = "ArgsAsArrayTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgsAsArrayTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -566,8 +554,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ArgsAsArrayTests_Enumerable_ModuleInitializer_GUID
@@ -591,9 +579,8 @@ internal static class ArgsAsArrayTests_Enumerable_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class ArgsAsArrayTests_Following_Non_Params_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ArgsAsArrayTests>
         {
             TestName = "Following_Non_Params",
@@ -618,63 +605,56 @@ internal sealed class ArgsAsArrayTests_Following_Non_Params_TestSource_GUID : gl
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(global::System.Collections.Generic.IEnumerable<string>),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "global::System.Collections.Generic.IEnumerable<string>",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 45,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
-Name = "Following_Non_Params",
-GenericTypeCount = 0,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "i",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Generic.IEnumerable<string>))
-{
-    Name = "arguments",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib")),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[1]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
-Name = "ArgsAsArrayTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
+                Name = "Following_Non_Params",
+                GenericTypeCount = 0,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "i",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[0]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(global::System.Collections.Generic.IEnumerable<string>))
+                    {
+                        Name = "arguments",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("System.Collections.Generic.IEnumerable<>, System.Private.CoreLib", global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib")),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ArgsAsArrayTests).GetMethod("Following_Non_Params", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Collections.Generic.IEnumerable<string>) }, null)!.GetParameters()[1]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgsAsArrayTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ArgsAsArrayTests, TestsBase`1"),
+                        Name = "ArgsAsArrayTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgsAsArrayTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -706,8 +686,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ArgsAsArrayTests_Following_Non_Params_ModuleInitializer_GUID

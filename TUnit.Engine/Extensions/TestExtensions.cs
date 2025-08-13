@@ -22,12 +22,12 @@ internal static class TestExtensions
                     new LinePosition(testDetails.TestLineNumber, 0)
                 )),
                 new TestMethodIdentifierProperty(
-                    Namespace: testDetails.MethodMetadata.Class.Type.Namespace ?? testDetails.ClassType?.Namespace ?? "GlobalNamespace",
-                    AssemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.GetName().FullName!,
+                    Namespace: testDetails.MethodMetadata.Class.Type.Namespace ?? "",
+                    AssemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.GetName().FullName,
                     TypeName: testContext.GetClassTypeName(),
-                    MethodName: testDetails.TestName,
-                    ParameterTypeFullNames: CreateParameterTypeArray(testDetails.TestMethodParameterTypes),
-                    ReturnTypeFullName: testDetails.ReturnType.FullName ?? "void",
+                    MethodName: testDetails.MethodName,
+                    ParameterTypeFullNames: CreateParameterTypeArray(testDetails.MethodMetadata.Parameters.Select(p => p.Type).ToArray()),
+                    ReturnTypeFullName: testDetails.ReturnType.FullName ?? typeof(void).FullName!,
                     MethodArity: testDetails.MethodMetadata.GenericTypeCount
                     ),
 
@@ -47,13 +47,13 @@ internal static class TestExtensions
         return testNode;
     }
 
-    public static IEnumerable<KeyValuePairStringProperty> ExtractProperties(this TestDetails testDetails)
+    public static IEnumerable<TestMetadataProperty> ExtractProperties(this TestDetails testDetails)
     {
         foreach (var propertyGroup in testDetails.CustomProperties)
         {
             foreach (var propertyValue in propertyGroup.Value)
             {
-                yield return new KeyValuePairStringProperty(propertyGroup.Key, propertyValue);
+                yield return new TestMetadataProperty(propertyGroup.Key, propertyValue);
             }
         }
     }

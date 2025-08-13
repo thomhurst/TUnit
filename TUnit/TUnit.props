@@ -8,6 +8,8 @@
         <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
         <OutputType>Exe</OutputType>
+        <UseTestingPlatformProtocol>true</UseTestingPlatformProtocol>
+        <IsTestingPlatformEnabled>true</IsTestingPlatformEnabled>
     </PropertyGroup>
 
     <PropertyGroup>

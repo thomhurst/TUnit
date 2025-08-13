@@ -1,12 +1,305 @@
 .features {
   display: flex;
   align-items: center;
-  padding: 2rem 0;
+  padding: 3rem 1rem;
   width: 100%;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.featuresHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.featuresTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.featuresSubtitle {
+  color: #cbd5e1;
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.featureRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.featureColumn {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.featureBox {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 1rem;
+  padding: 2rem;
+  height: 100%;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Don't apply max-width to code elements */
+.featureBox > *:not(.featureCode) {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.featureBox::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #14b8a6 0%, #0ea5e9 100%);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  z-index: 1;
+}
+
+.featureBox:hover::before {
+  transform: scaleX(1);
+}
+
+.featureBox:hover {
+  transform: translateY(-4px);
+  border-color: #14b8a6;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+  box-shadow: 0 10px 30px rgba(20, 184, 166, 0.2);
+}
+
+.featureHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.featureIcon {
+  font-size: 2.5rem;
+  display: inline-block;
+  line-height: 1;
+}
+
+.featureTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #f1f5f9;
+  flex: 1;
+}
+
+.featureDescription {
+  color: #cbd5e1;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  white-space: normal;
+}
+
+.featureCode {
+  margin-top: auto;
+  width: 100%;
+  position: relative;
+}
+
+.codeScrollWrapper {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Reset all inner widths */
+.codeScrollWrapper * {
+  max-width: none !important;
+}
+
+.codeScrollWrapper > div {
+  display: table !important;
+  width: auto !important;
+  min-width: 100% !important;
+}
+
+.codeBlock {
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  display: block !important;
+  width: max-content !important;
+  min-width: 100% !important;
+}
+
+.codeScrollWrapper :global(.theme-code-block) {
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  width: max-content !important;
+  min-width: 100% !important;
+}
+
+.codeScrollWrapper :global(pre) {
+  margin: 0 !important;
+  padding: 1rem !important;
+  background: transparent !important;
+  border: none !important;
+  overflow: visible !important;
+  text-align: left !important;
+  width: max-content !important;
+  min-width: 100% !important;
+}
+
+.codeScrollWrapper :global(code) {
+  text-align: left !important;
+  font-size: 0.875rem !important;
+  white-space: pre !important;
+  display: inline-block !important;
+}
+
+/* Bright syntax highlighting for feature code blocks */
+.featureCode :global(.token.comment) {
+  color: #cbd5e1 !important;
+  font-style: italic !important;
+}
+
+.featureCode :global(.token.keyword) {
+  color: #e879f9 !important;
+  font-weight: 600 !important;
+}
+
+.featureCode :global(.token.string) {
+  color: #4ade80 !important;
+}
+
+.featureCode :global(.token.function) {
+  color: #fcd34d !important;
+}
+
+.featureCode :global(.token.class-name) {
+  color: #38bdf8 !important;
+}
+
+.featureCode :global(.token.number) {
+  color: #fb7185 !important;
+}
+
+.featureCode :global(.token.operator) {
+  color: #fcd34d !important;
+}
+
+.featureCode :global(.token.punctuation) {
+  color: #e2e8f0 !important;
+}
+
+.featureCode :global(.token.plain),
+.featureCode :global(.plain) {
+  color: #f8fafc !important;
+}
+
+/* Ensure all text is visible */
+.featureCode span {
+  color: #f8fafc !important;
 }
 
 .featureSvg {
-  height: 200px;
-  width: 200px;
-  fill: #333;
+  height: 100px;
+  width: 100px;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 4px 6px rgba(20, 184, 166, 0.1));
+  transition: all 0.3s ease;
+}
+
+.featureBox:hover .featureSvg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 6px 8px rgba(20, 184, 166, 0.2));
+}
+
+@media screen and (max-width: 996px) {
+  .features {
+    padding: 2rem 0;
+  }
+
+  .featureRow {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .featureBox {
+    margin-bottom: 0;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .features {
+    padding: 2rem 1rem;
+  }
+
+  .featuresTitle {
+    font-size: 2rem;
+  }
+
+  .featuresSubtitle {
+    font-size: 1rem;
+  }
+
+  .featureRow {
+    gap: 1.25rem;
+    margin-top: 2rem;
+  }
+
+  .featureHeader {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .featureTitle {
+    text-align: center;
+  }
+  
+  .featureBox {
+    padding: 1.5rem;
+  }
+  
+  /* Ensure code blocks remain left-aligned on mobile */
+  .featureCode pre,
+  .featureCode code {
+    text-align: left !important;
+  }
 }

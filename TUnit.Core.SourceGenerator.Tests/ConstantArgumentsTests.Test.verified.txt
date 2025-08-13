@@ -7,9 +7,8 @@
 namespace TUnit.Generated;
 internal sealed class ConstantArgumentsTests_String1_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
         {
             TestName = "String1",
@@ -35,54 +34,49 @@ internal sealed class ConstantArgumentsTests_String1_TestSource_GUID : global::T
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(string),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "string",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 16,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "String1",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(string))
-{
-    Name = "dummy",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("String1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "ConstantArgumentsTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                Name = "String1",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(string))
+                    {
+                        Name = "dummy",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("String1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        Name = "ConstantArgumentsTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -112,8 +106,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ConstantArgumentsTests_String1_ModuleInitializer_GUID
@@ -137,9 +131,8 @@ internal static class ConstantArgumentsTests_String1_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class ConstantArgumentsTests_Int_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
         {
             TestName = "Int",
@@ -165,54 +158,49 @@ internal sealed class ConstantArgumentsTests_Int_TestSource_GUID : global::TUnit
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 23,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "Int",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "dummy",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Int", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "ConstantArgumentsTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                Name = "Int",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "dummy",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Int", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        Name = "ConstantArgumentsTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -242,8 +230,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ConstantArgumentsTests_Int_ModuleInitializer_GUID
@@ -267,9 +255,8 @@ internal static class ConstantArgumentsTests_Int_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class ConstantArgumentsTests_Double_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
         {
             TestName = "Double",
@@ -295,54 +282,49 @@ internal sealed class ConstantArgumentsTests_Double_TestSource_GUID : global::TU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(double),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "double",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 30,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "Double",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(double))
-{
-    Name = "dummy",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("double, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Double", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "ConstantArgumentsTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                Name = "Double",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(double))
+                    {
+                        Name = "dummy",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("double, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Double", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        Name = "ConstantArgumentsTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -372,8 +354,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ConstantArgumentsTests_Double_ModuleInitializer_GUID
@@ -397,9 +379,8 @@ internal static class ConstantArgumentsTests_Double_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class ConstantArgumentsTests_Float_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
         {
             TestName = "Float",
@@ -425,54 +406,49 @@ internal sealed class ConstantArgumentsTests_Float_TestSource_GUID : global::TUn
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(float),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "float",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 37,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "Float",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(float))
-{
-    Name = "dummy",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("float, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Float", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "ConstantArgumentsTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                Name = "Float",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(float))
+                    {
+                        Name = "dummy",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("float, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Float", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        Name = "ConstantArgumentsTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -502,8 +478,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ConstantArgumentsTests_Float_ModuleInitializer_GUID
@@ -527,9 +503,8 @@ internal static class ConstantArgumentsTests_Float_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class ConstantArgumentsTests_Long_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
         {
             TestName = "Long",
@@ -555,54 +530,49 @@ internal sealed class ConstantArgumentsTests_Long_TestSource_GUID : global::TUni
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(long),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "long",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 44,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "Long",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(long))
-{
-    Name = "dummy",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("long, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Long", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "ConstantArgumentsTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                Name = "Long",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(long))
+                    {
+                        Name = "dummy",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("long, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Long", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        Name = "ConstantArgumentsTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -632,8 +602,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ConstantArgumentsTests_Long_ModuleInitializer_GUID
@@ -657,9 +627,8 @@ internal static class ConstantArgumentsTests_Long_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class ConstantArgumentsTests_UInt_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
         {
             TestName = "UInt",
@@ -685,54 +654,49 @@ internal sealed class ConstantArgumentsTests_UInt_TestSource_GUID : global::TUni
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(uint),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "uint",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 51,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "UInt",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(uint))
-{
-    Name = "dummy",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("uint, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("UInt", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(uint) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "ConstantArgumentsTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                Name = "UInt",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(uint))
+                    {
+                        Name = "dummy",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("uint, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("UInt", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(uint) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        Name = "ConstantArgumentsTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -762,8 +726,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ConstantArgumentsTests_UInt_ModuleInitializer_GUID
@@ -787,9 +751,8 @@ internal static class ConstantArgumentsTests_UInt_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class ConstantArgumentsTests_ULong_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ConstantArgumentsTests>
         {
             TestName = "ULong",
@@ -815,54 +778,49 @@ internal sealed class ConstantArgumentsTests_ULong_TestSource_GUID : global::TUn
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(ulong),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "ulong",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 58,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "ULong",
-GenericTypeCount = 0,
-ReturnType = typeof(global::System.Threading.Tasks.Task),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(ulong))
-{
-    Name = "dummy",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("ulong, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("ULong", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(ulong) }, null)!.GetParameters()[0]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
-Name = "ConstantArgumentsTests",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                Name = "ULong",
+                GenericTypeCount = 0,
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(ulong))
+                    {
+                        Name = "dummy",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("ulong, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("ULong", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(ulong) }, null)!.GetParameters()[0]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ConstantArgumentsTests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        Name = "ConstantArgumentsTests",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
             TestInvoker = async (instance, args) =>
             {
@@ -892,8 +850,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ConstantArgumentsTests_ULong_ModuleInitializer_GUID

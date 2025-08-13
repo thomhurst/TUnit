@@ -12,10 +12,10 @@ public static class TestClassTypeHelper
     /// </summary>
     /// <param name="dataGeneratorMetadata">The data generator metadata</param>
     /// <returns>The test class type, or null if it cannot be determined</returns>
-    public static Type? GetTestClassType(DataGeneratorMetadata dataGeneratorMetadata)
+    public static Type GetTestClassType(DataGeneratorMetadata dataGeneratorMetadata)
     {
         // Try to get from TestInformation first (primary)
-        if (dataGeneratorMetadata.TestInformation?.Class?.Type != null)
+        if (dataGeneratorMetadata.TestInformation?.Class.Type != null)
         {
             return dataGeneratorMetadata.TestInformation.Class.Type;
         }
@@ -29,6 +29,6 @@ public static class TestClassTypeHelper
             }
         }
 
-        return null;
+        return typeof(object);
     }
 }

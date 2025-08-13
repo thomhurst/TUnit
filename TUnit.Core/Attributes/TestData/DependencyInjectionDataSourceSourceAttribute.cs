@@ -16,7 +16,7 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
             {
                 if (scope is IAsyncDisposable asyncDisposable)
                 {
-                    await asyncDisposable.DisposeAsync();
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
                 }
                 else if (scope is IDisposable disposable)
                 {

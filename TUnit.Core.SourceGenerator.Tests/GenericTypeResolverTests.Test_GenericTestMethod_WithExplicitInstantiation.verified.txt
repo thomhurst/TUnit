@@ -7,9 +7,8 @@
 namespace TUnit.Generated;
 internal sealed class TestClass_GenericTestMethod_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         // Create generic metadata with concrete type registrations
         var genericMetadata = new global::TUnit.Core.GenericTestMetadata
         {
@@ -29,43 +28,40 @@ internal sealed class TestClass_GenericTestMethod_TestSource_GUID : global::TUni
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 7,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.TestClass),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestClass, GenericTypeResolverTests"),
-Name = "GenericTestMethod",
-GenericTypeCount = 1,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.TestClass", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.TestClass),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestClass, GenericTypeResolverTests"),
-Name = "TestClass",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.TestClass),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestClass, GenericTypeResolverTests"),
+                Name = "GenericTestMethod",
+                GenericTypeCount = 1,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.TestClass", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.TestClass),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestClass, GenericTypeResolverTests"),
+                        Name = "TestClass",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.TestClass();
@@ -132,43 +128,41 @@ return classMetadata;
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
                     {
                     },
-                    ParameterTypes = new global::System.Type[]
-                    {
-                    },
                     FilePath = @"",
                     LineNumber = 7,
+                    InheritanceDepth = 0,
                     TestSessionId = testSessionId,
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.TestClass),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestClass, GenericTypeResolverTests"),
-Name = "GenericTestMethod",
-GenericTypeCount = 1,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.TestClass", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.TestClass),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestClass, GenericTypeResolverTests"),
-Name = "TestClass",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+                    {
+                        Type = typeof(global::TUnit.TestProject.TestClass),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestClass, GenericTypeResolverTests"),
+                        Name = "GenericTestMethod",
+                        GenericTypeCount = 1,
+                        ReturnType = typeof(void),
+                        ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.TestClass", () => 
+                        {
+                            var classMetadata = new global::TUnit.Core.ClassMetadata
+                            {
+                                Type = typeof(global::TUnit.TestProject.TestClass),
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestClass, GenericTypeResolverTests"),
+                                Name = "TestClass",
+                                Namespace = "TUnit.TestProject",
+                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
+                                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                                Parent = null
+                            };
+                            // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                            foreach (var prop in classMetadata.Properties)
+                            {
+                                prop.ClassMetadata = classMetadata;
+                                prop.ContainingTypeMetadata = classMetadata;
+                            }
+                            return classMetadata;
+                        })
+                    },
                     InstanceFactory = (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.TestClass();
@@ -204,43 +198,41 @@ return classMetadata;
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
                     {
                     },
-                    ParameterTypes = new global::System.Type[]
-                    {
-                    },
                     FilePath = @"",
                     LineNumber = 7,
+                    InheritanceDepth = 0,
                     TestSessionId = testSessionId,
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.TestClass),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestClass, GenericTypeResolverTests"),
-Name = "GenericTestMethod",
-GenericTypeCount = 1,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.TestClass", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.TestClass),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestClass, GenericTypeResolverTests"),
-Name = "TestClass",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+                    {
+                        Type = typeof(global::TUnit.TestProject.TestClass),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestClass, GenericTypeResolverTests"),
+                        Name = "GenericTestMethod",
+                        GenericTypeCount = 1,
+                        ReturnType = typeof(void),
+                        ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.TestClass", () => 
+                        {
+                            var classMetadata = new global::TUnit.Core.ClassMetadata
+                            {
+                                Type = typeof(global::TUnit.TestProject.TestClass),
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.TestClass, GenericTypeResolverTests"),
+                                Name = "TestClass",
+                                Namespace = "TUnit.TestProject",
+                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
+                                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                                Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                                Parent = null
+                            };
+                            // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                            foreach (var prop in classMetadata.Properties)
+                            {
+                                prop.ClassMetadata = classMetadata;
+                                prop.ContainingTypeMetadata = classMetadata;
+                            }
+                            return classMetadata;
+                        })
+                    },
                     InstanceFactory = (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.TestClass();
@@ -255,8 +247,8 @@ return classMetadata;
             }
         };
         genericMetadata.TestSessionId = testSessionId;
-        tests.Add(genericMetadata);
-        return tests;
+        yield return genericMetadata;
+        yield break;
     }
 }
 internal static class TestClass_GenericTestMethod_ModuleInitializer_GUID

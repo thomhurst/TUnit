@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <DefineConstants Condition="$(RoslynVersion) >= 4.7">$(DefineConstants);ROSLYN4_7_OR_GREATER</DefineConstants>
-    <DefineConstants Condition="$(RoslynVersion) >= 4.14">$(DefineConstants);ROSLYN4_14_OR_GREATER</DefineConstants>
+    <DefineConstants Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(RoslynVersion)', '4.7'))">$(DefineConstants);ROSLYN4_7_OR_GREATER</DefineConstants>
+    <DefineConstants Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(RoslynVersion)', '4.14'))">$(DefineConstants);ROSLYN4_14_OR_GREATER</DefineConstants>
   </PropertyGroup>
 </Project>

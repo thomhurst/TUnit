@@ -114,7 +114,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         }
 
         var typeSymbol = methodSymbol.ContainingType;
-        if (typeSymbol == null || typeSymbol is not { })
+        if (typeSymbol is not { })
         {
             return null;
         }
@@ -125,6 +125,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         }
 
         var hookAttribute = context.Attributes[0];
+
         var hookType = GetHookType(hookAttribute);
 
         if (!IsValidHookMethod(methodSymbol, hookType))
@@ -133,7 +134,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         }
 
         var location = context.TargetNode.GetLocation();
-        var filePath = location.SourceTree?.FilePath ?? "";
+        var filePath = location.SourceTree?.FilePath ?? hookAttribute.ConstructorArguments.ElementAtOrDefault(1).Value?.ToString() ?? "";
         var lineNumber = location.GetLineSpan().StartLinePosition.Line + 1;
 
         var order = GetHookOrder(hookAttribute);
@@ -243,8 +244,8 @@ public class HookMetadataGenerator : IIncrementalGenerator
     private static string? GetHookExecutorType(IMethodSymbol methodSymbol)
     {
         var hookExecutorAttribute = methodSymbol.GetAttributes()
-            .FirstOrDefault(a => a.AttributeClass?.Name == "HookExecutorAttribute" || 
-                                 (a.AttributeClass?.IsGenericType == true && 
+            .FirstOrDefault(a => a.AttributeClass?.Name == "HookExecutorAttribute" ||
+                                 (a.AttributeClass?.IsGenericType == true &&
                                   a.AttributeClass?.ConstructedFrom?.Name == "HookExecutorAttribute"));
 
         if (hookExecutorAttribute == null)
@@ -617,7 +618,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
                     }
 
                     writer.AppendLine($"var result = method.Invoke({(isStatic ? "null" : "instance")}, methodArgs);");
-                    
+
                     if (!hook.MethodSymbol.ReturnsVoid)
                     {
                         writer.AppendLine("if (result != null)");
@@ -802,7 +803,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
         if (isInstance)
         {
-            writer.AppendLine($"ClassType = typeof({hook.TypeSymbol.GloballyQualified()}),");
+            writer.AppendLine($"InitClassType = typeof({hook.TypeSymbol.GloballyQualified()}),");
         }
 
         writer.Append("MethodInfo = ");
@@ -916,7 +917,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         var prefix = hook.HookKind == "Before" || hook.HookKind == "BeforeEvery" ? "Before" : "After";
         var suffix = hook.HookKind.Contains("Every") && hook.HookType != "TestSession" && hook.HookType != "TestDiscovery" ? "Every" : "";
         var hookType = hook.HookType;
-        
+
         return $"{prefix}{suffix}{hookType}HookIndex()";
     }
 }

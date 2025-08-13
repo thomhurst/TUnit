@@ -489,6 +489,12 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
 
     private static void GenerateGenericTypeCombination(CodeWriter writer, GenericTypeCombination combination)
     {
+        // Ensure the generic definition is actually a generic type definition
+        if (!IsGenericTypeDefinition(combination.GenericDefinition))
+        {
+            return;
+        }
+        
         var conditions = new List<string>();
         
         // Only generate combinations for concrete types, not generic type parameters
@@ -549,11 +555,15 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
                 var genericDef = typeRef.ReferencedTypes[0];
                 var typeArgs = typeRef.ReferencedTypes.Skip(1).ToImmutableArray();
                 
-                combinations.Add(new GenericTypeCombination
+                // Only create combinations for actual generic type definitions
+                if (IsGenericTypeDefinition(genericDef))
                 {
-                    GenericDefinition = genericDef,
-                    TypeArguments = typeArgs
-                });
+                    combinations.Add(new GenericTypeCombination
+                    {
+                        GenericDefinition = genericDef,
+                        TypeArguments = typeArgs
+                    });
+                }
             }
         }
         
@@ -618,6 +628,18 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         }
         
         return true;
+    }
+
+    private static bool IsGenericTypeDefinition(ITypeSymbol type)
+    {
+        // Check if this is a generic type with unbound type parameters (a generic type definition)
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
+        {
+            // A generic type definition has type parameters (not type arguments)
+            return namedType.TypeParameters.Length > 0 && namedType.IsUnboundGenericType;
+        }
+        
+        return false;
     }
 
     private sealed class TypeReferenceInfo

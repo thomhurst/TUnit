@@ -14,6 +14,7 @@ namespace
         public .ResolvedDependency[] Dependencies { get; set; }
         public ? Duration { get; }
         public ? EndTime { get; set; }
+        public . ExecutionTask { get; }
         public virtual .TestMetadata Metadata { get; init; }
         public .TestResult? Result { get; set; }
         public ? StartTime { get; set; }
@@ -366,7 +367,7 @@ namespace
         public DataGeneratorMetadata() { }
         public required object?[]? ClassInstanceArguments { get; init; }
         public required .MemberMetadata[] MembersToGenerate { get; init; }
-        public required .TestBuilderContextAccessor? TestBuilderContext { get; init; }
+        public required .TestBuilderContextAccessor TestBuilderContext { get; init; }
         public required object? TestClassInstance { get; init; }
         public required .MethodMetadata? TestInformation { get; init; }
         public required string TestSessionId { get; init; }
@@ -526,7 +527,7 @@ namespace
         public DiscoveryResult() { }
         public static .DiscoveryResult Empty { get; }
     }
-    [(.Method, Inherited=false)]
+    [(.Class | .Method, Inherited=false)]
     public sealed class DisplayNameAttribute : .DisplayNameFormatterAttribute, .IScopedAttribute, .IScopedAttribute<.DisplayNameAttribute>
     {
         public DisplayNameAttribute(string displayName) { }
@@ -544,6 +545,8 @@ namespace
     {
         public DynamicDiscoveryResult() { }
         public .<> Attributes { get; set; }
+        public string? CreatorFilePath { get; set; }
+        public int? CreatorLineNumber { get; set; }
         public object?[]? TestClassArguments { get; set; }
         public ? TestClassType { get; set; }
         public .? TestMethod { get; set; }
@@ -570,11 +573,13 @@ namespace
     {
         public static T Argument<T>() { }
     }
-    public class DynamicTestInstance<T> : .DynamicTest<T>
+    public class DynamicTestInstance<T> : .DynamicTest<T>, .IDynamicTestCreatorLocation
         where T :  class
     {
         public DynamicTestInstance() { }
         public .<> Attributes { get; set; }
+        public string? CreatorFilePath { get; set; }
+        public int? CreatorLineNumber { get; set; }
         public object?[]? TestClassArguments { get; set; }
         public .<<T>>? TestMethod { get; set; }
         public object?[]? TestMethodArguments { get; set; }
@@ -611,6 +616,7 @@ namespace
         public required string DisplayName { get; init; }
         public [] ResolvedClassGenericArguments { get; init; }
         public [] ResolvedMethodGenericArguments { get; init; }
+        public <.<object>>? TestClassInstanceFactory { get; init; }
         public required string TestId { get; init; }
     }
     [(.Assembly | .Class | .Method)]
@@ -727,6 +733,13 @@ namespace
         public int Line { get; }
         public int Order { get; init; }
     }
+    public class HookRegisteredContext
+    {
+        public HookRegisteredContext(. hookMethod) { }
+        public . HookMethod { get; }
+        public string HookName { get; }
+        public ? Timeout { get; set; }
+    }
     public static class HookRegistrationIndices
     {
         public static int GetNextAfterAssemblyHookIndex() { }
@@ -758,6 +771,11 @@ namespace
     public interface IDataSourceAttribute
     {
         .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
+    }
+    public interface IDynamicTestCreatorLocation
+    {
+        string? CreatorFilePath { get; set; }
+        int? CreatorLineNumber { get; set; }
     }
     public interface IDynamicTestMetadata { }
     public interface IDynamicTestSource
@@ -1216,7 +1234,7 @@ namespace
         public void WriteError(string message) { }
         public void WriteLine(string message) { }
     }
-    public class TestContextEvents : <.TestContextEvents>
+    public class TestContextEvents
     {
         public TestContextEvents() { }
         public .AsyncEvent<.TestContext>? OnDispose { get; set; }
@@ -1267,9 +1285,9 @@ namespace
         public override int GetHashCode() { }
         public bool Matches(.TestMetadata test, .TestMetadata? dependentTest = null) { }
         public override string ToString() { }
-        public static .TestDependency FromClass( classType) { }
-        public static .TestDependency FromClassAndMethod( classType, string methodName) { }
-        public static .TestDependency FromMethodName(string methodName) { }
+        public static .TestDependency FromClass( classType, bool proceedOnFailure = false) { }
+        public static .TestDependency FromClassAndMethod( classType, string methodName, bool proceedOnFailure = false) { }
+        public static .TestDependency FromMethodName(string methodName, bool proceedOnFailure = false) { }
     }
     public class TestDetails
     {
@@ -1293,7 +1311,6 @@ namespace
         public required string TestId { get; init; }
         public int TestLineNumber { get; set; }
         public required object?[] TestMethodArguments { get; set; }
-        public []? TestMethodParameterTypes { get; set; }
         public required string TestName { get; init; }
         public ? Timeout { get; set; }
     }
@@ -1326,21 +1343,19 @@ namespace
         public abstract <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
         public required .IDataSourceAttribute[] DataSources { get; init; }
         public .TestDependency[] Dependencies { get; init; }
-        public string? FilePath { get; init; }
+        public required string FilePath { get; init; }
         public .GenericMethodInfo? GenericMethodInfo { get; init; }
         public []? GenericMethodTypeArguments { get; init; }
         public .GenericTypeInfo? GenericTypeInfo { get; init; }
+        public int InheritanceDepth { get; set; }
         public <[], object?[], object> InstanceFactory { get; init; }
-        public int? LineNumber { get; init; }
+        public required int LineNumber { get; init; }
         public required .MethodMetadata MethodMetadata { get; init; }
-        public int ParameterCount { get; init; }
-        public [] ParameterTypes { get; init; }
         public required .PropertyDataSource[] PropertyDataSources { get; init; }
         public .PropertyInjectionData[] PropertyInjections { get; init; }
         public required  TestClassType { get; init; }
         public <object, object?[], .>? TestInvoker { get; init; }
         public required string TestMethodName { get; init; }
-        public string[] TestMethodParameterTypes { get; init; }
         public required string TestName { get; init; }
         public string TestSessionId { get; set; }
     }
@@ -1396,6 +1411,7 @@ namespace
         public .BeforeTestDiscoveryContext TestDiscoveryContext { get; }
         public required string? TestFilter { get; init; }
         public new static .TestSessionContext? Current { get; }
+        public static .TestBuilderContext GlobalStaticPropertyContext { get; }
         public void AddArtifact(.Artifact artifact) { }
         public void AddAssembly(.AssemblyHookContext assemblyHookContext) { }
     }
@@ -1419,11 +1435,12 @@ namespace
         public static bool IsTransient(this .TestState state) { }
     }
     [(.Assembly | .Class | .Method)]
-    public class TimeoutAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.TimeoutAttribute>, ., .
+    public class TimeoutAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.TimeoutAttribute>, ., ., .
     {
         public TimeoutAttribute(int timeoutInMilliseconds) { }
         public int Order { get; }
         public  Timeout { get; }
+        public . OnHookRegistered(.HookRegisteredContext context) { }
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
     }
     public class Timing : <.Timing>
@@ -1536,6 +1553,13 @@ namespace .Data
         public TValue GetOrAdd(TKey key, <TKey, TValue> func) { }
         public TValue? Remove(TKey key) { }
         public bool TryGetValue(TKey key, [.(true)] out TValue? value) { }
+    }
+    public class ScopedDictionary<TScope>
+        where TScope :  notnull
+    {
+        public ScopedDictionary() { }
+        public object? GetOrCreate(TScope scope,  type, <, object?> factory) { }
+        public void RemoveValue(object valueToRemove) { }
     }
 }
 namespace .DataSources
@@ -1683,6 +1707,12 @@ namespace .Exceptions
         public TUnitException(string? message) { }
         public TUnitException(string? message, ? innerException) { }
     }
+    public class TestDependencyException : .
+    {
+        public TestDependencyException(string dependencyName, bool proceedOnFailure) { }
+        public string DependencyName { get; }
+        public bool ProceedOnFailure { get; }
+    }
     public class TestFailedInitializationException : 
     {
         public TestFailedInitializationException(string? message, ? innerException) { }
@@ -1801,6 +1831,7 @@ namespace .Helpers
         public <int>? OnCountChanged;
         public Counter() { }
         public int CurrentCount { get; }
+        public int Add(int value) { }
         public int Decrement() { }
         public int Increment() { }
     }
@@ -1846,7 +1877,10 @@ namespace .Helpers
         public static .<object?> ResolveDataSourceForPropertyAsync( containingType, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static .<object?> ResolveDataSourcePropertyAsync(object instance, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static object?[] ToObjectArray(this object? item) { }
-        public static bool TryCreateWithInitializer( type, .MethodMetadata testInformation, string testSessionId, out object createdInstance) { }
+        [return: .(new string[] {
+                "success",
+                "createdInstance"})]
+        public static .<<bool, object?>> TryCreateWithInitializerAsync( type, .MethodMetadata testInformation, string testSessionId) { }
         public static object?[] UnwrapTuple<T1>(<T1> tuple) { }
         public static object?[] UnwrapTuple<T1, T2>(<T1, T2> tuple) { }
         public static object?[] UnwrapTuple<T1, T2, T3>(<T1, T2, T3> tuple) { }
@@ -1875,7 +1909,7 @@ namespace .Helpers
     }
     public static class TestClassTypeHelper
     {
-        public static ? GetTestClassType(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public static  GetTestClassType(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     public static class TestNameGenerator
     {
@@ -1949,14 +1983,20 @@ namespace .Hooks
         public BeforeTestSessionHookMethod() { }
         public override . ExecuteAsync(.TestSessionContext context, .CancellationToken cancellationToken) { }
     }
-    public class HookMethod
+    public abstract class HookMethod : <.>
     {
-        public HookMethod(. instanceHookMethod) { }
-        public HookMethod(. staticHookMethod) { }
-        public .? InstanceHookMethod { get; }
-        public .? StaticHookMethod { get; }
-        public static . op_Implicit(. instanceHookMethod) { }
-        public static . op_Implicit(. staticHookMethod) { }
+        protected HookMethod() { }
+        public virtual .Assembly? Assembly { get; }
+        public .<> Attributes { get; }
+        public abstract  ClassType { get; }
+        public required . HookExecutor { get; init; }
+        public required .MethodMetadata MethodInfo { get; init; }
+        public string Name { get; }
+        public required int Order { get; init; }
+        public required int RegistrationIndex { get; init; }
+        public ? Timeout { get; }
+        public TAttribute? GetAttribute<TAttribute>()
+            where TAttribute :  { }
     }
     public interface IExecutableHook<in T>
     {
@@ -1970,22 +2010,13 @@ namespace .Hooks
         . Discover(string sessionId, string displayName, . hookMethod);
         . Push(string sessionId, string displayName, . hookMethod, <.> func);
     }
-    public class InstanceHookMethod : <.>, .<.TestContext>
+    public class InstanceHookMethod : ., <.>, .<.TestContext>
     {
         public InstanceHookMethod() { }
-        public .Assembly Assembly { get; }
-        public .<> Attributes { get; }
         public <object, .TestContext, .CancellationToken, .>? Body { get; init; }
-        public required  ClassType { get; init; }
-        public required . HookExecutor { get; init; }
-        public required .MethodMetadata MethodInfo { get; init; }
-        public string Name { get; }
-        public required int Order { get; init; }
-        public required int RegistrationIndex { get; init; }
-        public ? Timeout { get; }
+        public override  ClassType { get; }
+        public required  InitClassType { init; }
         public . ExecuteAsync(.TestContext context, .CancellationToken cancellationToken) { }
-        public TAttribute? GetAttribute<TAttribute>()
-            where TAttribute :  { }
     }
     public class LastTestInAssemblyAdapter : .<.AssemblyHookContext>
     {
@@ -2005,22 +2036,12 @@ namespace .Hooks
         public bool Execute(.ClassHookContext context, .CancellationToken cancellationToken) { }
         public . ExecuteAsync(.ClassHookContext context, .CancellationToken cancellationToken) { }
     }
-    public abstract class StaticHookMethod : <.>
+    public abstract class StaticHookMethod : ., <.>
     {
         protected StaticHookMethod() { }
-        public .Assembly? Assembly { get; }
-        public .<> Attributes { get; }
-        public  ClassType { get; }
+        public override  ClassType { get; }
         public required string FilePath { get; init; }
-        public required . HookExecutor { get; init; }
         public required int LineNumber { get; init; }
-        public required .MethodMetadata MethodInfo { get; init; }
-        public string Name { get; }
-        public required int Order { get; init; }
-        public required int RegistrationIndex { get; init; }
-        public ? Timeout { get; }
-        public TAttribute? GetAttribute<TAttribute>()
-            where TAttribute :  { }
     }
     public abstract class StaticHookMethod<T> : ., <.<T>>, .<T>
     {
@@ -2117,6 +2138,10 @@ namespace .Interfaces
         . ExecuteBeforeTestHook(.MethodMetadata hookMethodInfo, .TestContext context, <.> action);
         . ExecuteBeforeTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action);
     }
+    public interface IHookRegisteredEventReceiver : .
+    {
+        . OnHookRegistered(.HookRegisteredContext context);
+    }
     public interface IInfersType<T> { }
     public interface ILastTestInAssemblyEventReceiver : .
     {
@@ -2204,7 +2229,7 @@ namespace .
     }
     public interface ITestSource
     {
-        .<.<.TestMetadata>> GetTestsAsync(string testSessionId);
+        .<.TestMetadata> GetTestsAsync(string testSessionId, .CancellationToken cancellationToken = default);
     }
     public sealed class PropertyInjectionMetadata
     {
@@ -2284,15 +2309,6 @@ namespace .Models
         public bool HasStronglyTypedDelegates { get; }
         public <.<object?[]>>? MethodDataResolver { get; set; }
         public ? MethodInvoker { get; set; }
-    }
-}
-namespace .ReferenceTracking
-{
-    public static class DataSourceReferenceExtensions
-    {
-        public static void TrackClassArguments(this .TestContext context) { }
-        public static void TrackMethodArguments(this .TestContext context) { }
-        public static void TrackPropertyArguments(this .TestContext context) { }
     }
 }
 namespace .Services
@@ -2384,5 +2400,13 @@ namespace .Services
         public . AddTransient<T>(<T> factory)
             where T :  class { }
         public object? GetService( serviceType) { }
+    }
+}
+namespace .Tracking
+{
+    public static class ObjectTracker
+    {
+        public static void OnDisposed(object? o,  action) { }
+        public static void TrackOwnership(object owner, object owned) { }
     }
 }

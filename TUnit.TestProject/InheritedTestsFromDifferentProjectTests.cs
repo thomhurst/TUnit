@@ -22,4 +22,11 @@ public class InheritedTestsFromDifferentProjectTests : Library.BaseTests
     public void NonGenericMethodDataSource(string value)
     {
     }
+
+    [Test]
+    public async Task VerifyInheritedCategoriesAreAvailable()
+    {
+        var categories = TestContext.Current?.TestDetails.Categories;
+        await Assert.That(categories).Contains("BaseCategoriesOnClass");
+    }
 }

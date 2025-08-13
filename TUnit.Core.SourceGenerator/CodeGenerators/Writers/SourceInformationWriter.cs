@@ -11,9 +11,43 @@ public static class SourceInformationWriter
     public static void GenerateClassInformation(ICodeWriter sourceCodeWriter, Compilation compilation, INamedTypeSymbol namedTypeSymbol)
     {
         var parent = namedTypeSymbol.ContainingType;
-        var parentExpression = parent != null ? MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(parent) : null;
-        var classMetadata = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(namedTypeSymbol, parentExpression);
-        sourceCodeWriter.Append(classMetadata);
+        var parentExpression = parent != null ? MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(parent, null, sourceCodeWriter.IndentLevel) : null;
+        var classMetadata = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(namedTypeSymbol, parentExpression, sourceCodeWriter.IndentLevel);
+        
+        // Handle multi-line class metadata similar to method metadata
+        var lines = classMetadata.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+        
+        if (lines.Length > 0)
+        {
+            sourceCodeWriter.Append(lines[0].TrimStart());
+            
+            if (lines.Length > 1)
+            {
+                var secondLine = lines[1];
+                var baseIndentSpaces = secondLine.Length - secondLine.TrimStart().Length;
+                
+                for (int i = 1; i < lines.Length; i++)
+                {
+                    if (!string.IsNullOrWhiteSpace(lines[i]) || i < lines.Length - 1)
+                    {
+                        sourceCodeWriter.AppendLine();
+                        
+                        var line = lines[i];
+                        var lineIndentSpaces = line.Length - line.TrimStart().Length;
+                        var relativeIndent = Math.Max(0, lineIndentSpaces - baseIndentSpaces);
+                        var extraIndentLevels = relativeIndent / 4;
+                        
+                        var trimmedLine = line.TrimStart();
+                        for (int j = 0; j < extraIndentLevels; j++)
+                        {
+                            sourceCodeWriter.Append("    ");
+                        }
+                        sourceCodeWriter.Append(trimmedLine);
+                    }
+                }
+            }
+        }
+        
         sourceCodeWriter.Append(",");
     }
 
@@ -28,9 +62,7 @@ public static class SourceInformationWriter
         Compilation compilation, INamedTypeSymbol namedTypeSymbol, IMethodSymbol methodSymbol,
         IDictionary<string, string>? genericSubstitutions, char suffix)
     {
-        var classMetadataExpression = MetadataGenerationHelper.GenerateClassMetadataGetOrAdd(namedTypeSymbol);
-        var methodMetadata = MetadataGenerationHelper.GenerateMethodMetadata(methodSymbol, classMetadataExpression);
-        sourceCodeWriter.Append(methodMetadata);
+        MetadataGenerationHelper.WriteMethodMetadata(sourceCodeWriter, methodSymbol, namedTypeSymbol);
         sourceCodeWriter.Append($"{suffix}");
         sourceCodeWriter.AppendLine();
     }
@@ -61,8 +93,7 @@ public static class SourceInformationWriter
     public static void GeneratePropertyInformation(ICodeWriter sourceCodeWriter,
         Compilation compilation, IPropertySymbol property, INamedTypeSymbol namedTypeSymbol)
     {
-        var propertyMetadata = MetadataGenerationHelper.GeneratePropertyMetadata(property, namedTypeSymbol);
-        sourceCodeWriter.Append(propertyMetadata);
+        MetadataGenerationHelper.WritePropertyMetadata(sourceCodeWriter, property, namedTypeSymbol);
         sourceCodeWriter.Append(",");
     }
 
@@ -72,8 +103,7 @@ public static class SourceInformationWriter
         IDictionary<string, string>? genericSubstitutions)
     {
         // For now, use the generic version since it's what the existing code was doing
-        var parameterMetadata = MetadataGenerationHelper.GenerateParameterMetadataGeneric(parameter);
-        sourceCodeWriter.Append(parameterMetadata);
+        MetadataGenerationHelper.WriteParameterMetadataGeneric(sourceCodeWriter, parameter);
         sourceCodeWriter.Append(",");
     }
 }

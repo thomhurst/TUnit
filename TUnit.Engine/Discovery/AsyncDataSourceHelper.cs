@@ -154,7 +154,7 @@ internal static class AsyncDataSourceHelper
         else if (item != null)
         {
             // Try tuple parsing
-            if (global::TUnit.Engine.Helpers.TupleHelper.TryParseTupleToObjectArray(item, out var tupleValues))
+            if (Helpers.TupleHelper.TryParseTupleToObjectArray(item, out var tupleValues))
             {
                 items.Add(tupleValues!);
             }

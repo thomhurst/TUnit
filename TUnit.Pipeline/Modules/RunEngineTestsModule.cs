@@ -2,6 +2,7 @@
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.Enums;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
@@ -37,14 +38,15 @@ public class RunEngineTestsModule : Module<CommandResult>
             Framework = "net9.0",
             WorkingDirectory = project.Folder!,
             Arguments = [
-                "--hangdump", "--hangdump-filename", "hangdump.engine-tests.txt", "--hangdump-timeout", "20m",
-                "--maximum-parallel-tests", $"{Environment.ProcessorCount}",
+                "--hangdump", "--hangdump-filename", $"hangdump.{Environment.OSVersion.Platform}.engine-tests.dmp", "--hangdump-timeout", "15m",
+                "--timeout", "16m",
                 "--fail-fast"
             ],
             EnvironmentVariables = new Dictionary<string, string?>
             {
-                ["DISABLE_GITHUB_REPORTER"] = "true",
-            }
+                ["TUNIT_DISABLE_GITHUB_REPORTER"] = "true",
+            },
+            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
         }, cancellationToken);
     }
 }

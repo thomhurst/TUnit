@@ -5,7 +5,7 @@ namespace TUnit.Core;
 
 public record DataGeneratorMetadata
 {
-    public required TestBuilderContextAccessor? TestBuilderContext { get; init; }
+    public required TestBuilderContextAccessor TestBuilderContext { get; init; }
     public required MemberMetadata[] MembersToGenerate { get; init; }
     public required MethodMetadata? TestInformation { get; init; }
     public required DataGeneratorType Type { get; init; }

@@ -7,9 +7,8 @@
 namespace TUnit.Generated;
 internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._2112.Tests>
         {
             TestName = "Test",
@@ -37,63 +36,56 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(long[]),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "long[]",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 8,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.Bugs._2112.Tests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2112.Tests, TestsBase`1"),
-Name = "Test",
-GenericTypeCount = 0,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "a",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[0]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(long[]))
-{
-    Name = "arr",
-    TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("long, System.Private.CoreLib"), 1),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[1]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2112.Tests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.Bugs._2112.Tests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2112.Tests, TestsBase`1"),
-Name = "Tests",
-Namespace = "TUnit.TestProject.Bugs._2112",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.Bugs._2112.Tests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2112.Tests, TestsBase`1"),
+                Name = "Test",
+                GenericTypeCount = 0,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "a",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[0]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(long[]))
+                    {
+                        Name = "arr",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("long, System.Private.CoreLib"), 1),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[1]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2112.Tests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.Bugs._2112.Tests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2112.Tests, TestsBase`1"),
+                        Name = "Tests",
+                        Namespace = "TUnit.TestProject.Bugs._2112",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2112.Tests(),
             TestInvoker = async (instance, args) =>
             {
@@ -102,6 +94,9 @@ return classMetadata;
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
+                    case 1:
+                        typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
+                        break;
                     case 2:
                         typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<long[]>(args[1]));
                         break;
@@ -121,7 +116,7 @@ return classMetadata;
                         typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[6]) });
                         break;
                     default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                        throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
                 }
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -130,6 +125,9 @@ return classMetadata;
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
+                    case 1:
+                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
+                        break;
                     case 2:
                         instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<long[]>(args[1]));
                         break;
@@ -149,14 +147,14 @@ return classMetadata;
                         instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[6]) });
                         break;
                     default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                        throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
                 }
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class Tests_Test_ModuleInitializer_GUID
@@ -180,9 +178,8 @@ internal static class Tests_Test_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class Tests_Test2_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._2112.Tests>
         {
             TestName = "Test2",
@@ -210,63 +207,56 @@ internal sealed class Tests_Test2_TestSource_GUID : global::TUnit.Core.Interface
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(long[]),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "long[]",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 15,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.Bugs._2112.Tests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2112.Tests, TestsBase`1"),
-Name = "Test2",
-GenericTypeCount = 0,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(int))
-{
-    Name = "a",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[0]
-},
-new global::TUnit.Core.ParameterMetadata(typeof(long[]))
-{
-    Name = "arr",
-    TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("long, System.Private.CoreLib"), 1),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[1]
-},
-},
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2112.Tests", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.Bugs._2112.Tests),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2112.Tests, TestsBase`1"),
-Name = "Tests",
-Namespace = "TUnit.TestProject.Bugs._2112",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.Bugs._2112.Tests),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2112.Tests, TestsBase`1"),
+                Name = "Test2",
+                GenericTypeCount = 0,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = new global::TUnit.Core.ParameterMetadata[]
+                {
+                    new global::TUnit.Core.ParameterMetadata(typeof(int))
+                    {
+                        Name = "a",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[0]
+                    },
+                    new global::TUnit.Core.ParameterMetadata(typeof(long[]))
+                    {
+                        Name = "arr",
+                        TypeReference = global::TUnit.Core.TypeReference.CreateArray(global::TUnit.Core.TypeReference.CreateConcrete("long, System.Private.CoreLib"), 1),
+                        IsNullable = false,
+                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2112.Tests).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(long[]) }, null)!.GetParameters()[1]
+                    }
+                },
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2112.Tests", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.Bugs._2112.Tests),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2112.Tests, TestsBase`1"),
+                        Name = "Tests",
+                        Namespace = "TUnit.TestProject.Bugs._2112",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2112.Tests(),
             TestInvoker = async (instance, args) =>
             {
@@ -275,6 +265,9 @@ return classMetadata;
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
+                    case 1:
+                        typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
+                        break;
                     case 2:
                         typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<long[]>(args[1]));
                         break;
@@ -294,7 +287,7 @@ return classMetadata;
                         typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[6]) });
                         break;
                     default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                        throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
                 }
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -303,6 +296,9 @@ return classMetadata;
                 // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
+                    case 1:
+                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
+                        break;
                     case 2:
                         instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<long[]>(args[1]));
                         break;
@@ -322,14 +318,14 @@ return classMetadata;
                         instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[6]) });
                         break;
                     default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                        throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
                 }
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class Tests_Test2_ModuleInitializer_GUID
