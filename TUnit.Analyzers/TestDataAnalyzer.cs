@@ -758,16 +758,17 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             type = genericType.TypeArguments[0];
         }
 
-        if (testParameterTypes.Length == 1
-            && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
-        {
-            return ImmutableArray.Create(type);
-        }
-
+        // Check for tuple types first before doing conversion checks
         if (type is INamedTypeSymbol { IsTupleType: true } tupleType)
         {
             isTuples = true;
             return ImmutableArray.CreateRange(tupleType.TupleElements.Select(x => x.Type));
+        }
+
+        if (testParameterTypes.Length == 1
+            && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
+        {
+            return ImmutableArray.Create(type);
         }
 
         // Handle array cases - when a data source returns IEnumerable<T[]> or IAsyncEnumerable<T[]>,
