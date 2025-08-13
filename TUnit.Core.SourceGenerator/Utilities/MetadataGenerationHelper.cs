@@ -146,7 +146,11 @@ internal static class MetadataGenerationHelper
         writer.AppendLine($"Namespace = \"{typeSymbol.ContainingNamespace?.ToDisplayString() ?? ""}\",");
         writer.AppendLine($"Assembly = {GenerateAssemblyMetadataGetOrAdd(typeSymbol.ContainingAssembly)},");
         
-        var constructor = typeSymbol.InstanceConstructors.FirstOrDefault();
+        // For abstract classes, skip constructor processing since they cannot be instantiated directly
+        // For concrete classes, only consider public constructors
+        var constructor = typeSymbol.IsAbstract 
+            ? null 
+            : typeSymbol.InstanceConstructors.FirstOrDefault(c => c.DeclaredAccessibility == Accessibility.Public);
         var constructorParams = constructor?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
         if (constructor != null && constructorParams.Length > 0)
         {
@@ -210,7 +214,11 @@ internal static class MetadataGenerationHelper
         writer.AppendLine($"Name = \"{typeSymbol.Name}\",");
         writer.AppendLine($"Namespace = \"{typeSymbol.ContainingNamespace?.ToDisplayString() ?? ""}\",");
         writer.AppendLine($"Assembly = {GenerateAssemblyMetadataGetOrAdd(typeSymbol.ContainingAssembly)},");
-        var constructor = typeSymbol.InstanceConstructors.FirstOrDefault();
+        // For abstract classes, skip constructor processing since they cannot be instantiated directly
+        // For concrete classes, only consider public constructors
+        var constructor = typeSymbol.IsAbstract 
+            ? null 
+            : typeSymbol.InstanceConstructors.FirstOrDefault(c => c.DeclaredAccessibility == Accessibility.Public);
         var constructorParams = constructor?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
         if (constructor != null && constructorParams.Length > 0)
         {
