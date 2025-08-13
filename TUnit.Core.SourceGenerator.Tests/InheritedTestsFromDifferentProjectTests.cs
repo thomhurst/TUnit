@@ -41,4 +41,3 @@ internal class InheritedTestsFromDifferentProjectTests : TestsBase
             await Assert.That(generatedCode).Contains("BaseTestWithMultipleCategories");
         });
 }
-}
