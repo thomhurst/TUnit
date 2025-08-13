@@ -11,7 +11,16 @@ namespace TUnit.Core.Hooks;
 public record InstanceHookMethod : HookMethod, IExecutableHook<TestContext>
 {
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
-    public override Type ClassType { get; init; }
+    private readonly Type _classType = null!;
+    
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
+    public override Type ClassType => _classType;
+    
+    public required Type InitClassType 
+    { 
+        [param: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
+        init { _classType = value; } 
+    }
 
     public Func<object, TestContext, CancellationToken, ValueTask>? Body { get; init; }
 

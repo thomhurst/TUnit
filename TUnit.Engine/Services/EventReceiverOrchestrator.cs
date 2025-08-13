@@ -221,16 +221,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
 
         // Apply the timeout from the context back to the hook method
-        if (hookContext.Timeout.HasValue)
+        if (hookContext.Timeout.HasValue && hookContext.HookMethod != null)
         {
-            if (hookContext.StaticHookMethod != null)
-            {
-                hookContext.StaticHookMethod.Timeout = hookContext.Timeout;
-            }
-            else if (hookContext.InstanceHookMethod != null)
-            {
-                hookContext.InstanceHookMethod.Timeout = hookContext.Timeout;
-            }
+            hookContext.HookMethod.Timeout = hookContext.Timeout;
         }
     }
 

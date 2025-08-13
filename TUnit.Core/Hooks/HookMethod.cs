@@ -15,6 +15,7 @@ public abstract record HookMethod
     [field: AllowNull, MaybeNull]
     public string Name => field ??= $"{ClassType.Name}.{MethodInfo.Name}({string.Join(", ", MethodInfo.Parameters.Select(x => x.Name))})";
 
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
     public abstract Type ClassType { get; }
     public virtual Assembly? Assembly => ClassType?.Assembly;
 

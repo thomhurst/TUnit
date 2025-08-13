@@ -19,6 +19,7 @@ public abstract record StaticHookMethod<T> : StaticHookMethod, IExecutableHook<T
 #endif
 public abstract record StaticHookMethod : HookMethod
 {
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
     public override Type ClassType => MethodInfo.Class.Type;
 
     public required string FilePath { get; init; }
