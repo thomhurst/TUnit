@@ -22,6 +22,13 @@ public class DynamicTestBuilderContext
 
     public void AddTest(DynamicTest test)
     {
+        // Set creator location if the test implements IDynamicTestCreatorLocation
+        if (test is IDynamicTestCreatorLocation testWithLocation)
+        {
+            testWithLocation.CreatorFilePath = FilePath;
+            testWithLocation.CreatorLineNumber = LineNumber;
+        }
+        
         _tests.Add(test);
     }
 }

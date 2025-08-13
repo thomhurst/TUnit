@@ -15,6 +15,9 @@ public class DisplayFormats
         SymbolDisplayPropertyStyle.NameOnly,
         SymbolDisplayLocalOptions.IncludeType,
         miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes
+#if ROSLYN4_7_OR_GREATER
+        | SymbolDisplayMiscellaneousOptions.ExpandValueTuple
+#endif
     );
 
     public static readonly SymbolDisplayFormat FullyQualifiedGenericWithGlobalPrefix = new(
@@ -28,6 +31,9 @@ public class DisplayFormats
         SymbolDisplayPropertyStyle.NameOnly,
         SymbolDisplayLocalOptions.IncludeType,
         miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes
+#if ROSLYN4_7_OR_GREATER
+        | SymbolDisplayMiscellaneousOptions.ExpandValueTuple
+#endif
     );
 
     public static readonly SymbolDisplayFormat FullyQualifiedNonGeneric = new(
@@ -41,6 +47,9 @@ public class DisplayFormats
         SymbolDisplayPropertyStyle.NameOnly,
         SymbolDisplayLocalOptions.IncludeType,
         miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes
+#if ROSLYN4_7_OR_GREATER
+        | SymbolDisplayMiscellaneousOptions.ExpandValueTuple
+#endif
     );
 
     public static readonly SymbolDisplayFormat FullyQualifiedGenericWithoutGlobalPrefix = new(
@@ -54,10 +63,13 @@ public class DisplayFormats
         SymbolDisplayPropertyStyle.NameOnly,
         SymbolDisplayLocalOptions.IncludeType,
         miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes
+#if ROSLYN4_7_OR_GREATER
+        | SymbolDisplayMiscellaneousOptions.ExpandValueTuple
+#endif
     );
 
     public static readonly SymbolDisplayFormat NameOnly = new(miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
-    
+
     public static readonly SymbolDisplayFormat FullyQualifiedGenericTypeOnly = new(
         SymbolDisplayGlobalNamespaceStyle.Included,
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
@@ -69,5 +81,8 @@ public class DisplayFormats
         SymbolDisplayPropertyStyle.NameOnly,
         SymbolDisplayLocalOptions.None,
         miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes
+#if ROSLYN4_7_OR_GREATER
+        | SymbolDisplayMiscellaneousOptions.ExpandValueTuple
+#endif
     );
 }

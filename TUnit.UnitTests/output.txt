@@ -1,0 +1,702 @@
+
+████████╗██╗   ██╗███╗   ██╗██╗████████╗
+╚══██╔══╝██║   ██║████╗  ██║██║╚══██╔══╝
+   ██║   ██║   ██║██╔██╗ ██║██║   ██║
+   ██║   ██║   ██║██║╚██╗██║██║   ██║
+   ██║   ╚██████╔╝██║ ╚████║██║   ██║
+   ╚═╝    ╚═════╝ ╚═╝  ╚═══╝╚═╝   ╚═╝
+
+   TUnit v1.0.0.0 | 64-bit | Microsoft Windows 10.0.26100 | win-x64 | .NET 9.0.8 | Microsoft Testing Platform v1.8.1
+
+   Engine Mode: SourceGenerated
+
+[DEBUG RESOLVE] Resolving dependencies for TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingDependency.1.1.0 (has 1 metadata dependencies)
+[DEBUG RESOLVE] No matches found for dependency TestDependency(Method=NonExistentTest) of test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingDependency.1.1.0
+[DEBUG RESOLVE] Failed to resolve all dependencies for TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingDependency.1.1.0
+[DEBUG RESOLVE] Resolving dependencies for TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestDependingOnFailedDependencyResolution.1.1.0 (has 1 metadata dependencies)
+[DEBUG MATCH] Checking if test DependencyResolutionFailureTests.TestWithMissingDependency matches dependency TestWithMissingDependency for dependent DependencyResolutionFailureTests.TestDependingOnFailedDependencyResolution
+[DEBUG MATCH]   Test class: TUnit.UnitTests.DependencyResolutionFailureTests, Dependent class: TUnit.UnitTests.DependencyResolutionFailureTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   Class match: DependencyResolutionFailureTests == DependencyResolutionFailureTests
+[DEBUG MATCH]   Method match: TestWithMissingDependency == TestWithMissingDependency
+[DEBUG RESOLVE] Found 1 matches for dependency TestDependency(Method=TestWithMissingDependency) of test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestDependingOnFailedDependencyResolution.1.1.0
+[DEBUG RESOLVE]   - Adding dependency: TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingDependency.1.1.0
+[DEBUG RESOLVE] Successfully resolved 1 dependencies for TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestDependingOnFailedDependencyResolution.1.1.0
+[DEBUG RESOLVE] Resolving dependencies for TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingOverloadDependency.1.1.0 (has 1 metadata dependencies)
+[DEBUG RESOLVE] No matches found for dependency TestDependency(Method=TestMethod, Params=[String, Int32]) of test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingOverloadDependency.1.1.0
+[DEBUG RESOLVE] Failed to resolve all dependencies for TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingOverloadDependency.1.1.0
+[DEBUG RESOLVE] Resolving dependencies for TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0 (has 1 metadata dependencies)
+[DEBUG MATCH] Checking if test ProductRepositoryTests.InitializeDatabase matches dependency InitializeDatabase for dependent ProductRepositoryTests.CanCreateProduct
+[DEBUG MATCH]   Test class: TUnit.UnitTests.ProductRepositoryTests, Dependent class: TUnit.UnitTests.ProductRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   Class match: ProductRepositoryTests == ProductRepositoryTests
+[DEBUG MATCH]   Method match: InitializeDatabase == InitializeDatabase
+[DEBUG MATCH] Checking if test UserRepositoryTests.InitializeDatabase matches dependency InitializeDatabase for dependent ProductRepositoryTests.CanCreateProduct
+[DEBUG MATCH]   Test class: TUnit.UnitTests.UserRepositoryTests, Dependent class: TUnit.UnitTests.ProductRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   REJECTED: Class mismatch - test class UserRepositoryTests != dependent class ProductRepositoryTests
+[DEBUG RESOLVE] Found 1 matches for dependency TestDependency(Method=InitializeDatabase) of test TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG RESOLVE]   - Adding dependency: TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG RESOLVE] Successfully resolved 1 dependencies for TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG RESOLVE] Resolving dependencies for TUnit.UnitTests.ProductRepositoryTests.1.1.CreateSchema.1.1.0 (has 1 metadata dependencies)
+[DEBUG MATCH] Checking if test ProductRepositoryTests.InitializeDatabase matches dependency InitializeDatabase for dependent ProductRepositoryTests.CreateSchema
+[DEBUG MATCH]   Test class: TUnit.UnitTests.ProductRepositoryTests, Dependent class: TUnit.UnitTests.ProductRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   Class match: ProductRepositoryTests == ProductRepositoryTests
+[DEBUG MATCH]   Method match: InitializeDatabase == InitializeDatabase
+[DEBUG MATCH] Checking if test UserRepositoryTests.InitializeDatabase matches dependency InitializeDatabase for dependent ProductRepositoryTests.CreateSchema
+[DEBUG MATCH]   Test class: TUnit.UnitTests.UserRepositoryTests, Dependent class: TUnit.UnitTests.ProductRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   REJECTED: Class mismatch - test class UserRepositoryTests != dependent class ProductRepositoryTests
+[DEBUG RESOLVE] Found 1 matches for dependency TestDependency(Method=InitializeDatabase) of test TUnit.UnitTests.ProductRepositoryTests.1.1.CreateSchema.1.1.0
+[DEBUG RESOLVE]   - Adding dependency: TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG RESOLVE] Successfully resolved 1 dependencies for TUnit.UnitTests.ProductRepositoryTests.1.1.CreateSchema.1.1.0
+[DEBUG RESOLVE] Resolving dependencies for TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0 (has 1 metadata dependencies)
+[DEBUG MATCH] Checking if test ProductRepositoryTests.InitializeDatabase matches dependency InitializeDatabase for dependent ProductRepositoryTests.CanCreateProduct
+[DEBUG MATCH]   Test class: TUnit.UnitTests.ProductRepositoryTests, Dependent class: TUnit.UnitTests.ProductRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   Class match: ProductRepositoryTests == ProductRepositoryTests
+[DEBUG MATCH]   Method match: InitializeDatabase == InitializeDatabase
+[DEBUG MATCH] Checking if test UserRepositoryTests.InitializeDatabase matches dependency InitializeDatabase for dependent ProductRepositoryTests.CanCreateProduct
+[DEBUG MATCH]   Test class: TUnit.UnitTests.UserRepositoryTests, Dependent class: TUnit.UnitTests.ProductRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   REJECTED: Class mismatch - test class UserRepositoryTests != dependent class ProductRepositoryTests
+[DEBUG RESOLVE] Found 1 matches for dependency TestDependency(Method=InitializeDatabase) of test TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG RESOLVE]   - Adding dependency: TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG RESOLVE] Successfully resolved 1 dependencies for TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG RESOLVE] Resolving dependencies for TUnit.UnitTests.UserRepositoryTests.1.1.CanCreateUser.1.1.0 (has 1 metadata dependencies)
+[DEBUG MATCH] Checking if test ProductRepositoryTests.CreateSchema matches dependency CreateSchema for dependent UserRepositoryTests.CanCreateUser
+[DEBUG MATCH]   Test class: TUnit.UnitTests.ProductRepositoryTests, Dependent class: TUnit.UnitTests.UserRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   REJECTED: Class mismatch - test class ProductRepositoryTests != dependent class UserRepositoryTests
+[DEBUG MATCH] Checking if test UserRepositoryTests.CreateSchema matches dependency CreateSchema for dependent UserRepositoryTests.CanCreateUser
+[DEBUG MATCH]   Test class: TUnit.UnitTests.UserRepositoryTests, Dependent class: TUnit.UnitTests.UserRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   Class match: UserRepositoryTests == UserRepositoryTests
+[DEBUG MATCH]   Method match: CreateSchema == CreateSchema
+[DEBUG RESOLVE] Found 1 matches for dependency TestDependency(Method=CreateSchema) of test TUnit.UnitTests.UserRepositoryTests.1.1.CanCreateUser.1.1.0
+[DEBUG RESOLVE]   - Adding dependency: TUnit.UnitTests.UserRepositoryTests.1.1.CreateSchema.1.1.0
+[DEBUG RESOLVE] Successfully resolved 1 dependencies for TUnit.UnitTests.UserRepositoryTests.1.1.CanCreateUser.1.1.0
+[DEBUG RESOLVE] Resolving dependencies for TUnit.UnitTests.UserRepositoryTests.1.1.CreateSchema.1.1.0 (has 1 metadata dependencies)
+[DEBUG MATCH] Checking if test ProductRepositoryTests.InitializeDatabase matches dependency InitializeDatabase for dependent UserRepositoryTests.CreateSchema
+[DEBUG MATCH]   Test class: TUnit.UnitTests.ProductRepositoryTests, Dependent class: TUnit.UnitTests.UserRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   REJECTED: Class mismatch - test class ProductRepositoryTests != dependent class UserRepositoryTests
+[DEBUG MATCH] Checking if test UserRepositoryTests.InitializeDatabase matches dependency InitializeDatabase for dependent UserRepositoryTests.CreateSchema
+[DEBUG MATCH]   Test class: TUnit.UnitTests.UserRepositoryTests, Dependent class: TUnit.UnitTests.UserRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   Class match: UserRepositoryTests == UserRepositoryTests
+[DEBUG MATCH]   Method match: InitializeDatabase == InitializeDatabase
+[DEBUG RESOLVE] Found 1 matches for dependency TestDependency(Method=InitializeDatabase) of test TUnit.UnitTests.UserRepositoryTests.1.1.CreateSchema.1.1.0
+[DEBUG RESOLVE]   - Adding dependency: TUnit.UnitTests.UserRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG RESOLVE] Successfully resolved 1 dependencies for TUnit.UnitTests.UserRepositoryTests.1.1.CreateSchema.1.1.0
+[DEBUG RESOLVE] Resolving dependencies for TUnit.UnitTests.UserRepositoryTests.1.1.CanCreateUser.1.1.0 (has 1 metadata dependencies)
+[DEBUG MATCH] Checking if test ProductRepositoryTests.CreateSchema matches dependency CreateSchema for dependent UserRepositoryTests.CanCreateUser
+[DEBUG MATCH]   Test class: TUnit.UnitTests.ProductRepositoryTests, Dependent class: TUnit.UnitTests.UserRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   REJECTED: Class mismatch - test class ProductRepositoryTests != dependent class UserRepositoryTests
+[DEBUG MATCH] Checking if test UserRepositoryTests.CreateSchema matches dependency CreateSchema for dependent UserRepositoryTests.CanCreateUser
+[DEBUG MATCH]   Test class: TUnit.UnitTests.UserRepositoryTests, Dependent class: TUnit.UnitTests.UserRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   Class match: UserRepositoryTests == UserRepositoryTests
+[DEBUG MATCH]   Method match: CreateSchema == CreateSchema
+[DEBUG RESOLVE] Found 1 matches for dependency TestDependency(Method=CreateSchema) of test TUnit.UnitTests.UserRepositoryTests.1.1.CanCreateUser.1.1.0
+[DEBUG RESOLVE]   - Adding dependency: TUnit.UnitTests.UserRepositoryTests.1.1.CreateSchema.1.1.0
+[DEBUG RESOLVE] Successfully resolved 1 dependencies for TUnit.UnitTests.UserRepositoryTests.1.1.CanCreateUser.1.1.0
+[DEBUG RESOLVE] Resolving dependencies for TUnit.UnitTests.CustomerRepositoryTests.1.1.CanSetCustomerName.1.1.0 (has 1 metadata dependencies)
+[DEBUG MATCH] Checking if test CustomerRepositoryTests.InitializeEntity matches dependency InitializeEntity for dependent CustomerRepositoryTests.CanSetCustomerName
+[DEBUG MATCH]   Test class: TUnit.UnitTests.CustomerRepositoryTests, Dependent class: TUnit.UnitTests.CustomerRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   Class match: CustomerRepositoryTests == CustomerRepositoryTests
+[DEBUG MATCH]   Method match: InitializeEntity == InitializeEntity
+[DEBUG RESOLVE] Found 1 matches for dependency TestDependency(Method=InitializeEntity) of test TUnit.UnitTests.CustomerRepositoryTests.1.1.CanSetCustomerName.1.1.0
+[DEBUG RESOLVE]   - Adding dependency: TUnit.UnitTests.CustomerRepositoryTests.1.1.InitializeEntity.1.1.0
+[DEBUG RESOLVE] Successfully resolved 1 dependencies for TUnit.UnitTests.CustomerRepositoryTests.1.1.CanSetCustomerName.1.1.0
+[DEBUG RESOLVE] Resolving dependencies for TUnit.UnitTests.CustomerRepositoryTests.1.1.CanSetCustomerName.1.1.0 (has 1 metadata dependencies)
+[DEBUG MATCH] Checking if test CustomerRepositoryTests.InitializeEntity matches dependency InitializeEntity for dependent CustomerRepositoryTests.CanSetCustomerName
+[DEBUG MATCH]   Test class: TUnit.UnitTests.CustomerRepositoryTests, Dependent class: TUnit.UnitTests.CustomerRepositoryTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   Class match: CustomerRepositoryTests == CustomerRepositoryTests
+[DEBUG MATCH]   Method match: InitializeEntity == InitializeEntity
+[DEBUG RESOLVE] Found 1 matches for dependency TestDependency(Method=InitializeEntity) of test TUnit.UnitTests.CustomerRepositoryTests.1.1.CanSetCustomerName.1.1.0
+[DEBUG RESOLVE]   - Adding dependency: TUnit.UnitTests.CustomerRepositoryTests.1.1.InitializeEntity.1.1.0
+[DEBUG RESOLVE] Successfully resolved 1 dependencies for TUnit.UnitTests.CustomerRepositoryTests.1.1.CanSetCustomerName.1.1.0
+[DEBUG 01:24:41.767] TestScheduler.ScheduleAndExecuteAsync: Starting
+[DEBUG 01:24:41.779] TestScheduler: Starting ExecuteGroupedTestsAsync
+[DEBUG 01:24:41.781] TestScheduler: Creating NotInParallel task for 11 tests
+[DEBUG 01:24:41.782] TestScheduler.ExecuteNotInParallelTestsAsync: Starting with 11 tests
+[DEBUG 01:24:41.782] TestScheduler.ExecuteNotInParallelTestsAsync: Grouped into 3 classes
+[DEBUG 01:24:41.782] TestScheduler.ExecuteNotInParallelTestsAsync: Executing class 1/3 (TUnit.UnitTests.ProductRepositoryTests) with 4 tests
+[DEBUG 01:24:41.782] TestScheduler.ExecuteNotInParallelTestsAsync: Executing test 1/4: TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0 (Dependencies: 0)
+[DEBUG 01:24:41.784] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG 01:24:41.784] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0 starting execution
+[DEBUG 01:24:41.789] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG 01:24:41.800] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG 01:24:41.818] TestScheduler: Creating Parallel task for 71 tests
+[DEBUG 01:24:41.819] TestScheduler.ExecuteParallelTestsAsync: Starting with 71 tests
+[DEBUG 01:24:41.825] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.GenericTestClass_Bool.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.825] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_Bool.1.1.TestGenericValue.1.1.0 starting execution
+[DEBUG 01:24:41.825] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.GenericTestClass_Bool.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.826] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.GenericTestClass_Bool.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.837] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.GenericTestClass_Bool.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.837] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG 01:24:41.838] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.GenericTestClass_Bool.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.838] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG 01:24:41.842] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_Bool.1.1.TestGenericValue.1.1.0 completed
+[DEBUG 01:24:41.842] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.843] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).1.1.0 starting execution
+[DEBUG 01:24:41.843] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0 completed
+[DEBUG 01:24:41.843] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.843] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.843] TestScheduler.ExecuteNotInParallelTestsAsync: Completed test 1/4: TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG 01:24:41.843] TestScheduler.ExecuteNotInParallelTestsAsync: Executing test 2/4: TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0 (Dependencies: 1)
+[DEBUG 01:24:41.843] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG 01:24:41.843] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0 waiting for 1 dependencies
+[DEBUG 01:24:41.843]   - Dependency: TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0, State: Passed, Completed: True
+[DEBUG 01:24:41.843] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0 starting execution
+[DEBUG 01:24:41.843] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG 01:24:41.843] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG 01:24:41.848] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.848] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.848] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).1.1.0 completed
+[DEBUG 01:24:41.848] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.848] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).2.1.0 starting execution
+[DEBUG 01:24:41.848] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.848] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.848] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.848] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.850] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_Bool.1.1.TestWithParameter(System.Object).2.1.0 completed
+[DEBUG 01:24:41.850] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithValidDependency.1.1.0
+[DEBUG 01:24:41.850] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithValidDependency.1.1.0 starting execution
+[DEBUG 01:24:41.850] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithValidDependency.1.1.0
+[DEBUG 01:24:41.850] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithValidDependency.1.1.0
+[DEBUG 01:24:41.853] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithValidDependency.1.1.0
+[DEBUG 01:24:41.853] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithValidDependency.1.1.0
+[DEBUG 01:24:41.853] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithValidDependency.1.1.0 completed
+[DEBUG 01:24:41.853] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.AnotherIndependentTest.1.1.0
+[DEBUG 01:24:41.854] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.AnotherIndependentTest.1.1.0 starting execution
+[DEBUG 01:24:41.854] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependencyResolutionFailureTests.1.1.AnotherIndependentTest.1.1.0
+[DEBUG 01:24:41.854] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependencyResolutionFailureTests.1.1.AnotherIndependentTest.1.1.0
+[DEBUG 01:24:41.855] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependencyResolutionFailureTests.1.1.AnotherIndependentTest.1.1.0
+[DEBUG 01:24:41.855] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependencyResolutionFailureTests.1.1.AnotherIndependentTest.1.1.0
+[DEBUG 01:24:41.855] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.AnotherIndependentTest.1.1.0 completed
+[DEBUG 01:24:41.855] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.855] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.1.0 starting execution
+[DEBUG 01:24:41.855] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.855] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.855] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG 01:24:41.855] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG 01:24:41.855] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0 completed
+[DEBUG 01:24:41.855] TestScheduler.ExecuteNotInParallelTestsAsync: Completed test 2/4: TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG 01:24:41.855] TestScheduler.ExecuteNotInParallelTestsAsync: Executing test 3/4: TUnit.UnitTests.ProductRepositoryTests.1.1.CreateSchema.1.1.0 (Dependencies: 1)
+[DEBUG 01:24:41.855] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.ProductRepositoryTests.1.1.CreateSchema.1.1.0
+[DEBUG 01:24:41.855] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ProductRepositoryTests.1.1.CreateSchema.1.1.0 waiting for 1 dependencies
+[DEBUG 01:24:41.855]   - Dependency: TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0, State: Passed, Completed: True
+[DEBUG 01:24:41.855] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ProductRepositoryTests.1.1.CreateSchema.1.1.0 starting execution
+[DEBUG 01:24:41.855] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.ProductRepositoryTests.1.1.CreateSchema.1.1.0
+[DEBUG 01:24:41.855] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.ProductRepositoryTests.1.1.CreateSchema.1.1.0
+[DEBUG 01:24:41.857] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.857] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.857] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.1.0 completed
+[DEBUG 01:24:41.857] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.857] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.2.0 starting execution
+[DEBUG 01:24:41.857] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.857] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.857] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.857] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.857] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.2.0 completed
+[DEBUG 01:24:41.858] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.3.0
+[DEBUG 01:24:41.858] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.3.0 starting execution
+[DEBUG 01:24:41.858] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.3.0
+[DEBUG 01:24:41.858] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.3.0
+[DEBUG 01:24:41.858] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.3.0
+[DEBUG 01:24:41.858] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.3.0
+[DEBUG 01:24:41.858] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithSyncDataSource(System.Int32, System.String).1.3.0 completed
+[DEBUG 01:24:41.858] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.858] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.1.0 starting execution
+[DEBUG 01:24:41.858] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.858] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.860] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.860] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.860] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.1.0 completed
+[DEBUG 01:24:41.860] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.860] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.2.0 starting execution
+[DEBUG 01:24:41.860] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.860] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.860] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.860] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.860] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.2.0 completed
+[DEBUG 01:24:41.860] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.3.0
+[DEBUG 01:24:41.860] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.3.0 starting execution
+[DEBUG 01:24:41.860] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.3.0
+[DEBUG 01:24:41.860] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.3.0
+[DEBUG 01:24:41.860] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.3.0
+[DEBUG 01:24:41.860] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.3.0
+[DEBUG 01:24:41.860] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncTaskDataSource(System.Int32, System.String).1.3.0 completed
+[DEBUG 01:24:41.860] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.860] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.1.0 starting execution
+[DEBUG 01:24:41.861] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.861] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.862] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.862] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.1.0
+[DEBUG 01:24:41.862] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.1.0 completed
+[DEBUG 01:24:41.862] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.862] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.2.0 starting execution
+[DEBUG 01:24:41.862] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.862] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.862] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.862] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.2.0
+[DEBUG 01:24:41.862] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.AsyncDataSourceTests.1.1.TestWithAsyncValueTaskDataSource(System.Int32, System.String).1.2.0 completed
+[DEBUG 01:24:41.862] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0
+[DEBUG 01:24:41.862] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0 starting execution
+[DEBUG 01:24:41.862] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0
+[DEBUG 01:24:41.862] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0
+[DEBUG 01:24:41.863] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0
+[DEBUG 01:24:41.863] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0
+[DEBUG 01:24:41.863] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0 completed
+[DEBUG 01:24:41.863] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0
+[DEBUG 01:24:41.863] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0 starting execution
+[DEBUG 01:24:41.863] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0
+[DEBUG 01:24:41.863] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0
+[DEBUG 01:24:41.863] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0
+[DEBUG 01:24:41.863] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0
+[DEBUG 01:24:41.863] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedFromGenericClass.1.1.Test.1.1.0 completed
+[DEBUG 01:24:41.863] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.BaseTestClass.1.1.BaseMethod.1.1.0
+[DEBUG 01:24:41.863] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.BaseTestClass.1.1.BaseMethod.1.1.0 starting execution
+[DEBUG 01:24:41.863] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.BaseTestClass.1.1.BaseMethod.1.1.0
+[DEBUG 01:24:41.863] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.BaseTestClass.1.1.BaseMethod.1.1.0
+[DEBUG 01:24:41.864] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.BaseTestClass.1.1.BaseMethod.1.1.0
+[DEBUG 01:24:41.864] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.BaseTestClass.1.1.BaseMethod.1.1.0
+[DEBUG 01:24:41.864] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.BaseTestClass.1.1.BaseMethod.1.1.0 completed
+[DEBUG 01:24:41.864] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.GenericTestClass_String.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.864] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_String.1.1.TestGenericValue.1.1.0 starting execution
+[DEBUG 01:24:41.864] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.GenericTestClass_String.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.864] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.GenericTestClass_String.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.865] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.GenericTestClass_String.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.865] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.GenericTestClass_String.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.865] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_String.1.1.TestGenericValue.1.1.0 completed
+[DEBUG 01:24:41.865] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.865] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).1.1.0 starting execution
+[DEBUG 01:24:41.865] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.865] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.866] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.866] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.866] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).1.1.0 completed
+[DEBUG 01:24:41.866] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.866] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).2.1.0 starting execution
+[DEBUG 01:24:41.866] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.866] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.866] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.866] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.866] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_String.1.1.TestWithParameter(System.Object).2.1.0 completed
+[DEBUG 01:24:41.866] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DerivedPropertyInjectionTests.1.1.PropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0
+[DEBUG 01:24:41.866] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedPropertyInjectionTests.1.1.PropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0 starting execution
+[DEBUG 01:24:41.866] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DerivedPropertyInjectionTests.1.1.PropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0
+[DEBUG 01:24:41.866] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DerivedPropertyInjectionTests.1.1.PropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0
+[DEBUG 01:24:41.871] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.ProductRepositoryTests.1.1.CreateSchema.1.1.0
+[DEBUG 01:24:41.871] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.ProductRepositoryTests.1.1.CreateSchema.1.1.0
+[DEBUG 01:24:41.871] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ProductRepositoryTests.1.1.CreateSchema.1.1.0 completed
+[DEBUG 01:24:41.871] TestScheduler.ExecuteNotInParallelTestsAsync: Completed test 3/4: TUnit.UnitTests.ProductRepositoryTests.1.1.CreateSchema.1.1.0
+[DEBUG 01:24:41.871] TestScheduler.ExecuteNotInParallelTestsAsync: Executing test 4/4: TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0 (Dependencies: 1)
+[DEBUG 01:24:41.871] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG 01:24:41.871] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0 waiting for 1 dependencies
+[DEBUG 01:24:41.871]   - Dependency: TUnit.UnitTests.ProductRepositoryTests.1.1.InitializeDatabase.1.1.0, State: Passed, Completed: True
+[DEBUG 01:24:41.871] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0 starting execution
+[DEBUG 01:24:41.871] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG 01:24:41.871] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG 01:24:41.871] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DerivedPropertyInjectionTests.1.1.PropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0
+[DEBUG 01:24:41.871] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DerivedPropertyInjectionTests.1.1.PropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0
+[DEBUG 01:24:41.871] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedPropertyInjectionTests.1.1.PropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0 completed
+[DEBUG 01:24:41.872] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0
+[DEBUG 01:24:41.872] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0 starting execution
+[DEBUG 01:24:41.872] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0
+[DEBUG 01:24:41.872] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0
+[DEBUG 01:24:41.873] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0
+[DEBUG 01:24:41.873] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0
+[DEBUG 01:24:41.873] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0 completed
+[DEBUG 01:24:41.873] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0
+[DEBUG 01:24:41.873] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0 starting execution
+[DEBUG 01:24:41.873] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0
+[DEBUG 01:24:41.873] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0
+[DEBUG 01:24:41.874] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0
+[DEBUG 01:24:41.874] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0
+[DEBUG 01:24:41.874] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestGenerationTests.1.1.GenericTestWithData(System.Object).1.1.0 completed
+[DEBUG 01:24:41.874] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WorksWithGenericApproach.1.1.0
+[DEBUG 01:24:41.874] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WorksWithGenericApproach.1.1.0 starting execution
+[DEBUG 01:24:41.874] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WorksWithGenericApproach.1.1.0
+[DEBUG 01:24:41.874] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WorksWithGenericApproach.1.1.0
+[DEBUG 01:24:41.880] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG 01:24:41.880] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG 01:24:41.880] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0 completed
+[DEBUG 01:24:41.880] TestScheduler.ExecuteNotInParallelTestsAsync: Completed test 4/4: TUnit.UnitTests.ProductRepositoryTests.1.1.CanCreateProduct.1.1.0
+[DEBUG 01:24:41.880] TestScheduler.ExecuteNotInParallelTestsAsync: Completed class 1/3 (TUnit.UnitTests.ProductRepositoryTests)
+[DEBUG 01:24:41.880] TestScheduler.ExecuteNotInParallelTestsAsync: Executing class 2/3 (TUnit.UnitTests.UserRepositoryTests) with 4 tests
+[DEBUG 01:24:41.881] TestScheduler.ExecuteNotInParallelTestsAsync: Executing test 1/4: TUnit.UnitTests.UserRepositoryTests.1.1.InitializeDatabase.1.1.0 (Dependencies: 0)
+[DEBUG 01:24:41.881] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.UserRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG 01:24:41.881] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.UserRepositoryTests.1.1.InitializeDatabase.1.1.0 starting execution
+[DEBUG 01:24:41.881] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.UserRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG 01:24:41.881] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.UserRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG 01:24:41.882] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WithNestedProperties_InjectsAndInitializesRecursively.1.1.0
+[DEBUG 01:24:41.882] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WithNestedProperties_InjectsAndInitializesRecursively.1.1.0 starting execution
+[DEBUG 01:24:41.882] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WithNestedProperties_InjectsAndInitializesRecursively.1.1.0
+[DEBUG 01:24:41.882] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WithNestedProperties_InjectsAndInitializesRecursively.1.1.0
+[DEBUG 01:24:41.883] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0
+[DEBUG 01:24:41.883] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0 starting execution
+[DEBUG 01:24:41.883] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.UserRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG 01:24:41.883] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0
+[DEBUG 01:24:41.883] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0
+[DEBUG 01:24:41.883] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.UserRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG 01:24:41.883] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.UserRepositoryTests.1.1.InitializeDatabase.1.1.0 completed
+[DEBUG 01:24:41.883] TestScheduler.ExecuteNotInParallelTestsAsync: Completed test 1/4: TUnit.UnitTests.UserRepositoryTests.1.1.InitializeDatabase.1.1.0
+[DEBUG 01:24:41.883] TestScheduler.ExecuteNotInParallelTestsAsync: Executing test 2/4: TUnit.UnitTests.UserRepositoryTests.1.1.CanCreateUser.1.1.0 (Dependencies: 1)
+[DEBUG 01:24:41.883] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.UserRepositoryTests.1.1.CanCreateUser.1.1.0
+[DEBUG 01:24:41.883] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.UserRepositoryTests.1.1.CanCreateUser.1.1.0 waiting for 1 dependencies
+[DEBUG 01:24:41.883]   - Dependency: TUnit.UnitTests.UserRepositoryTests.1.1.CreateSchema.1.1.0, State: NotStarted, Completed: False
+[DEBUG 01:24:41.884] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0
+[DEBUG 01:24:41.884] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0
+[DEBUG 01:24:41.884] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0 completed
+[DEBUG 01:24:41.884] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DerivedTestClass.1.1.BaseMethod.1.1.0
+[DEBUG 01:24:41.884] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedTestClass.1.1.BaseMethod.1.1.0 starting execution
+[DEBUG 01:24:41.884] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DerivedTestClass.1.1.BaseMethod.1.1.0
+[DEBUG 01:24:41.884] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DerivedTestClass.1.1.BaseMethod.1.1.0
+[DEBUG 01:24:41.884] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DerivedTestClass.1.1.BaseMethod.1.1.0
+[DEBUG 01:24:41.884] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DerivedTestClass.1.1.BaseMethod.1.1.0
+[DEBUG 01:24:41.885] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedTestClass.1.1.BaseMethod.1.1.0 completed
+[DEBUG 01:24:41.885] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0
+[DEBUG 01:24:41.885] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0 starting execution
+[DEBUG 01:24:41.885] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0
+[DEBUG 01:24:41.885] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0
+[DEBUG 01:24:41.885] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0
+[DEBUG 01:24:41.885] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0
+[DEBUG 01:24:41.885] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedTestClass.1.1.InheritedTest.1.1.0 completed
+[DEBUG 01:24:41.885] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_MatchesSameClass.1.1.0
+[DEBUG 01:24:41.885] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_MatchesSameClass.1.1.0 starting execution
+[DEBUG 01:24:41.885] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_MatchesSameClass.1.1.0
+[DEBUG 01:24:41.885] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_MatchesSameClass.1.1.0
+[DEBUG MATCH] Checking if test DependsOnTests.TestMethod matches dependency TestMethod for dependent DependsOnTests.DependentTest
+[DEBUG MATCH]   Test class: TUnit.UnitTests.DependsOnTests, Dependent class: TUnit.UnitTests.DependsOnTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   Class match: DependsOnTests == DependsOnTests
+[DEBUG MATCH]   Method match: TestMethod == TestMethod
+[DEBUG 01:24:41.887] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_MatchesSameClass.1.1.0
+[DEBUG 01:24:41.887] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_MatchesSameClass.1.1.0
+[DEBUG 01:24:41.888] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_MatchesSameClass.1.1.0 completed
+[DEBUG 01:24:41.888] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_DoesNotMatchDifferentClass.1.1.0
+[DEBUG 01:24:41.888] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_DoesNotMatchDifferentClass.1.1.0 starting execution
+[DEBUG 01:24:41.888] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_DoesNotMatchDifferentClass.1.1.0
+[DEBUG 01:24:41.888] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_DoesNotMatchDifferentClass.1.1.0
+[DEBUG 01:24:41.888] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WorksWithGenericApproach.1.1.0
+[DEBUG 01:24:41.888] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WorksWithGenericApproach.1.1.0
+[DEBUG 01:24:41.888] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WorksWithGenericApproach.1.1.0 completed
+[DEBUG 01:24:41.888] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WithNestedProperties_InjectsAndInitializesRecursively.1.1.0
+[DEBUG 01:24:41.888] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WithNestedProperties_InjectsAndInitializesRecursively.1.1.0
+[DEBUG 01:24:41.888] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.CustomPropertyDataSourceTests.1.1.PropertyInjection_CustomDataSource_WithNestedProperties_InjectsAndInitializesRecursively.1.1.0 completed
+[DEBUG MATCH] Checking if test String.TestMethod matches dependency TestMethod for dependent DependsOnTests.DependentTest
+[DEBUG MATCH]   Test class: System.String, Dependent class: TUnit.UnitTests.DependsOnTests
+[DEBUG MATCH]   ClassType specified in dependency: null
+[DEBUG MATCH]   REJECTED: Class mismatch - test class String != dependent class DependsOnTests
+[DEBUG 01:24:41.889] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_DoesNotMatchDifferentClass.1.1.0
+[DEBUG 01:24:41.889] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_DoesNotMatchDifferentClass.1.1.0
+[DEBUG 01:24:41.889] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromMethodName_DoesNotMatchDifferentClass.1.1.0 completed
+[DEBUG 01:24:41.889] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesAllTestsInClass.1.1.0
+[DEBUG 01:24:41.889] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesAllTestsInClass.1.1.0 starting execution
+[DEBUG 01:24:41.889] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesAllTestsInClass.1.1.0
+[DEBUG 01:24:41.889] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesAllTestsInClass.1.1.0
+[DEBUG 01:24:41.890] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesAllTestsInClass.1.1.0
+[DEBUG 01:24:41.890] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesAllTestsInClass.1.1.0
+[DEBUG 01:24:41.890] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesAllTestsInClass.1.1.0 completed
+[DEBUG 01:24:41.890] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_DoesNotMatchSelf.1.1.0
+[DEBUG 01:24:41.890] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_DoesNotMatchSelf.1.1.0 starting execution
+[DEBUG 01:24:41.890] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_DoesNotMatchSelf.1.1.0
+[DEBUG 01:24:41.890] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_DoesNotMatchSelf.1.1.0
+[DEBUG 01:24:41.891] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_DoesNotMatchSelf.1.1.0
+[DEBUG 01:24:41.891] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_DoesNotMatchSelf.1.1.0
+[DEBUG 01:24:41.891] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_DoesNotMatchSelf.1.1.0 completed
+[DEBUG 01:24:41.891] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesSpecificTest.1.1.0
+[DEBUG 01:24:41.891] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesSpecificTest.1.1.0 starting execution
+[DEBUG 01:24:41.891] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesSpecificTest.1.1.0
+[DEBUG 01:24:41.891] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesSpecificTest.1.1.0
+[DEBUG MATCH]   Method match: SpecificMethod == SpecificMethod
+[DEBUG 01:24:41.892] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesSpecificTest.1.1.0
+[DEBUG 01:24:41.892] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesSpecificTest.1.1.0
+[DEBUG 01:24:41.892] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesSpecificTest.1.1.0 completed
+[DEBUG 01:24:41.892] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_MatchesCorrectOverload.1.1.0
+[DEBUG 01:24:41.892] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_MatchesCorrectOverload.1.1.0 starting execution
+[DEBUG 01:24:41.892] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_MatchesCorrectOverload.1.1.0
+[DEBUG 01:24:41.892] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_MatchesCorrectOverload.1.1.0
+[DEBUG MATCH]   Method match: OverloadedMethod == OverloadedMethod
+[DEBUG 01:24:41.894] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_MatchesCorrectOverload.1.1.0
+[DEBUG 01:24:41.894] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_MatchesCorrectOverload.1.1.0
+[DEBUG 01:24:41.894] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_MatchesCorrectOverload.1.1.0 completed
+[DEBUG 01:24:41.894] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_DoesNotMatchWrongOverload.1.1.0
+[DEBUG 01:24:41.894] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_DoesNotMatchWrongOverload.1.1.0 starting execution
+[DEBUG 01:24:41.894] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_DoesNotMatchWrongOverload.1.1.0
+[DEBUG 01:24:41.894] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_DoesNotMatchWrongOverload.1.1.0
+[DEBUG MATCH]   Method match: OverloadedMethod == OverloadedMethod
+[DEBUG 01:24:41.894] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_DoesNotMatchWrongOverload.1.1.0
+[DEBUG 01:24:41.894] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_DoesNotMatchWrongOverload.1.1.0
+[DEBUG 01:24:41.894] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithParameters_DoesNotMatchWrongOverload.1.1.0 completed
+[DEBUG 01:24:41.894] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependsOnTests.1.1.DependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0
+[DEBUG 01:24:41.894] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.DependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0 starting execution
+[DEBUG 01:24:41.894] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.DependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0
+[DEBUG 01:24:41.894] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependsOnTests.1.1.DependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0
+[DEBUG 01:24:41.896] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependsOnTests.1.1.DependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0
+[DEBUG 01:24:41.896] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.DependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0
+[DEBUG 01:24:41.896] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.DependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0 completed
+[DEBUG 01:24:41.896] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependsOnTests.1.1.GenericDependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0
+[DEBUG 01:24:41.896] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.GenericDependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0 starting execution
+[DEBUG 01:24:41.896] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.GenericDependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0
+[DEBUG 01:24:41.896] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependsOnTests.1.1.GenericDependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0
+[DEBUG 01:24:41.897] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependsOnTests.1.1.GenericDependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0
+[DEBUG 01:24:41.897] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.GenericDependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0
+[DEBUG 01:24:41.897] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.GenericDependsOnAttribute_ToTestDependency_CreatesCorrectDependency.1.1.0 completed
+[DEBUG 01:24:41.897] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesInheritedTests.1.1.0
+[DEBUG 01:24:41.897] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesInheritedTests.1.1.0 starting execution
+[DEBUG 01:24:41.897] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesInheritedTests.1.1.0
+[DEBUG 01:24:41.897] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesInheritedTests.1.1.0
+[DEBUG 01:24:41.897] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesInheritedTests.1.1.0
+[DEBUG 01:24:41.897] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesInheritedTests.1.1.0
+[DEBUG 01:24:41.897] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClass_MatchesInheritedTests.1.1.0 completed
+[DEBUG 01:24:41.897] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithGenericBase_MatchesInheritedTests.1.1.0
+[DEBUG 01:24:41.897] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithGenericBase_MatchesInheritedTests.1.1.0 starting execution
+[DEBUG 01:24:41.897] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithGenericBase_MatchesInheritedTests.1.1.0
+[DEBUG 01:24:41.897] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithGenericBase_MatchesInheritedTests.1.1.0
+[DEBUG 01:24:41.898] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithGenericBase_MatchesInheritedTests.1.1.0
+[DEBUG 01:24:41.898] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithGenericBase_MatchesInheritedTests.1.1.0
+[DEBUG 01:24:41.898] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_WithGenericBase_MatchesInheritedTests.1.1.0 completed
+[DEBUG 01:24:41.898] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesInheritedMethod.1.1.0
+[DEBUG 01:24:41.898] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesInheritedMethod.1.1.0 starting execution
+[DEBUG 01:24:41.898] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesInheritedMethod.1.1.0
+[DEBUG 01:24:41.898] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesInheritedMethod.1.1.0
+[DEBUG MATCH]   Method match: BaseMethod == BaseMethod
+[DEBUG 01:24:41.899] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesInheritedMethod.1.1.0
+[DEBUG 01:24:41.899] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesInheritedMethod.1.1.0
+[DEBUG 01:24:41.899] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependsOnTests.1.1.TestDependency_FromClassAndMethod_MatchesInheritedMethod.1.1.0 completed
+[DEBUG 01:24:41.899] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0
+[DEBUG 01:24:41.899] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0 starting execution
+[DEBUG 01:24:41.899] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0
+[DEBUG 01:24:41.899] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0
+[DEBUG 01:24:41.900] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0
+[DEBUG 01:24:41.900] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0
+[DEBUG 01:24:41.900] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0 completed
+[DEBUG 01:24:41.900] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_MethodDataSource_InjectsValue.1.1.0
+[DEBUG 01:24:41.900] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_MethodDataSource_InjectsValue.1.1.0 starting execution
+[DEBUG 01:24:41.900] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_MethodDataSource_InjectsValue.1.1.0
+[DEBUG 01:24:41.900] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_MethodDataSource_InjectsValue.1.1.0
+[DEBUG 01:24:41.901] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_MethodDataSource_InjectsValue.1.1.0
+[DEBUG 01:24:41.901] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_MethodDataSource_InjectsValue.1.1.0
+[DEBUG 01:24:41.901] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.StaticPropertyDataSourceTests.1.1.StaticPropertyInjection_MethodDataSource_InjectsValue.1.1.0 completed
+[DEBUG 01:24:41.901] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterAndResolveService.1.1.0
+[DEBUG 01:24:41.901] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterAndResolveService.1.1.0 starting execution
+[DEBUG 01:24:41.901] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterAndResolveService.1.1.0
+[DEBUG 01:24:41.901] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterAndResolveService.1.1.0
+[DEBUG 01:24:41.902] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterAndResolveService.1.1.0
+[DEBUG 01:24:41.902] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterAndResolveService.1.1.0
+[DEBUG 01:24:41.902] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterAndResolveService.1.1.0 completed
+[DEBUG 01:24:41.902] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterFactory.1.1.0
+[DEBUG 01:24:41.902] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterFactory.1.1.0 starting execution
+[DEBUG 01:24:41.902] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterFactory.1.1.0
+[DEBUG 01:24:41.903] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterFactory.1.1.0
+[DEBUG 01:24:41.904] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterFactory.1.1.0
+[DEBUG 01:24:41.904] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterFactory.1.1.0
+[DEBUG 01:24:41.904] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanRegisterFactory.1.1.0 completed
+[DEBUG 01:24:41.904] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetRequiredService_ThrowsWhenNotRegistered.1.1.0
+[DEBUG 01:24:41.904] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetRequiredService_ThrowsWhenNotRegistered.1.1.0 starting execution
+[DEBUG 01:24:41.904] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetRequiredService_ThrowsWhenNotRegistered.1.1.0
+[DEBUG 01:24:41.904] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetRequiredService_ThrowsWhenNotRegistered.1.1.0
+[DEBUG 01:24:41.910] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetRequiredService_ThrowsWhenNotRegistered.1.1.0
+[DEBUG 01:24:41.910] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetRequiredService_ThrowsWhenNotRegistered.1.1.0
+[DEBUG 01:24:41.910] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetRequiredService_ThrowsWhenNotRegistered.1.1.0 completed
+[DEBUG 01:24:41.910] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetService_ReturnsNullWhenNotRegistered.1.1.0
+[DEBUG 01:24:41.910] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetService_ReturnsNullWhenNotRegistered.1.1.0 starting execution
+[DEBUG 01:24:41.910] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetService_ReturnsNullWhenNotRegistered.1.1.0
+[DEBUG 01:24:41.910] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetService_ReturnsNullWhenNotRegistered.1.1.0
+[DEBUG 01:24:41.911] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetService_ReturnsNullWhenNotRegistered.1.1.0
+[DEBUG 01:24:41.911] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetService_ReturnsNullWhenNotRegistered.1.1.0
+[DEBUG 01:24:41.911] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_GetService_ReturnsNullWhenNotRegistered.1.1.0 completed
+[DEBUG 01:24:41.911] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_SupportsInterfaceAndConcreteTypes.1.1.0
+[DEBUG 01:24:41.911] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_SupportsInterfaceAndConcreteTypes.1.1.0 starting execution
+[DEBUG 01:24:41.911] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_SupportsInterfaceAndConcreteTypes.1.1.0
+[DEBUG 01:24:41.911] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_SupportsInterfaceAndConcreteTypes.1.1.0
+[DEBUG 01:24:41.912] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_SupportsInterfaceAndConcreteTypes.1.1.0
+[DEBUG 01:24:41.912] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_SupportsInterfaceAndConcreteTypes.1.1.0
+[DEBUG 01:24:41.912] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_SupportsInterfaceAndConcreteTypes.1.1.0 completed
+[DEBUG 01:24:41.912] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestContext_HasWorkingServiceProvider.1.1.0
+[DEBUG 01:24:41.912] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestContext_HasWorkingServiceProvider.1.1.0 starting execution
+[DEBUG 01:24:41.913] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestContext_HasWorkingServiceProvider.1.1.0
+[DEBUG 01:24:41.913] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestContext_HasWorkingServiceProvider.1.1.0
+[DEBUG 01:24:41.914] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestContext_HasWorkingServiceProvider.1.1.0
+[DEBUG 01:24:41.914] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestContext_HasWorkingServiceProvider.1.1.0
+[DEBUG 01:24:41.914] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestContext_HasWorkingServiceProvider.1.1.0 completed
+[DEBUG 01:24:41.914] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanOverrideRegistration.1.1.0
+[DEBUG 01:24:41.914] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanOverrideRegistration.1.1.0 starting execution
+[DEBUG 01:24:41.914] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanOverrideRegistration.1.1.0
+[DEBUG 01:24:41.914] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanOverrideRegistration.1.1.0
+[DEBUG 01:24:41.914] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanOverrideRegistration.1.1.0
+[DEBUG 01:24:41.914] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanOverrideRegistration.1.1.0
+[DEBUG 01:24:41.915] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_CanOverrideRegistration.1.1.0 completed
+[DEBUG 01:24:41.915] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_HandlesMultipleServiceTypes.1.1.0
+[DEBUG 01:24:41.915] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_HandlesMultipleServiceTypes.1.1.0 starting execution
+[DEBUG 01:24:41.915] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_HandlesMultipleServiceTypes.1.1.0
+[DEBUG 01:24:41.915] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_HandlesMultipleServiceTypes.1.1.0
+[DEBUG 01:24:41.916] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_HandlesMultipleServiceTypes.1.1.0
+[DEBUG 01:24:41.916] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_HandlesMultipleServiceTypes.1.1.0
+[DEBUG 01:24:41.916] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ServiceProviderInfrastructureTests.1.1.TestServiceProvider_HandlesMultipleServiceTypes.1.1.0 completed
+[DEBUG 01:24:41.916] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.TestConstructorTests.SingleConstructorTest.1.1.SimpleTest.1.1.0
+[DEBUG 01:24:41.916] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TestConstructorTests.SingleConstructorTest.1.1.SimpleTest.1.1.0 starting execution
+[DEBUG 01:24:41.916] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.TestConstructorTests.SingleConstructorTest.1.1.SimpleTest.1.1.0
+[DEBUG 01:24:41.916] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.TestConstructorTests.SingleConstructorTest.1.1.SimpleTest.1.1.0
+[DEBUG 01:24:41.917] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.TestConstructorTests.SingleConstructorTest.1.1.SimpleTest.1.1.0
+[DEBUG 01:24:41.917] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.TestConstructorTests.SingleConstructorTest.1.1.SimpleTest.1.1.0
+[DEBUG 01:24:41.917] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TestConstructorTests.SingleConstructorTest.1.1.SimpleTest.1.1.0 completed
+[DEBUG 01:24:41.917] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DerivedStaticPropertyTests.1.1.StaticPropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0
+[DEBUG 01:24:41.917] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedStaticPropertyTests.1.1.StaticPropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0 starting execution
+[DEBUG 01:24:41.917] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DerivedStaticPropertyTests.1.1.StaticPropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0
+[DEBUG 01:24:41.917] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DerivedStaticPropertyTests.1.1.StaticPropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0
+[DEBUG 01:24:41.917] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DerivedStaticPropertyTests.1.1.StaticPropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0
+[DEBUG 01:24:41.918] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DerivedStaticPropertyTests.1.1.StaticPropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0
+[DEBUG 01:24:41.918] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DerivedStaticPropertyTests.1.1.StaticPropertyInjection_Inheritance_InjectsBaseAndDerivedProperties.1.1.0 completed
+[DEBUG 01:24:41.918] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EqualArrays_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.918] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EqualArrays_ReturnsTrue.1.1.0 starting execution
+[DEBUG 01:24:41.918] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EqualArrays_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.918] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EqualArrays_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.919] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EqualArrays_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.919] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EqualArrays_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.919] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EqualArrays_ReturnsTrue.1.1.0 completed
+[DEBUG 01:24:41.919] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentArrays_ReturnsFalse.1.1.0
+[DEBUG 01:24:41.919] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentArrays_ReturnsFalse.1.1.0 starting execution
+[DEBUG 01:24:41.919] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentArrays_ReturnsFalse.1.1.0
+[DEBUG 01:24:41.919] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentArrays_ReturnsFalse.1.1.0
+[DEBUG 01:24:41.919] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentArrays_ReturnsFalse.1.1.0
+[DEBUG 01:24:41.919] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentArrays_ReturnsFalse.1.1.0
+[DEBUG 01:24:41.919] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentArrays_ReturnsFalse.1.1.0 completed
+[DEBUG 01:24:41.919] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentLengthArrays_ReturnsFalse.1.1.0
+[DEBUG 01:24:41.919] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentLengthArrays_ReturnsFalse.1.1.0 starting execution
+[DEBUG 01:24:41.919] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentLengthArrays_ReturnsFalse.1.1.0
+[DEBUG 01:24:41.919] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentLengthArrays_ReturnsFalse.1.1.0
+[DEBUG 01:24:41.920] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentLengthArrays_ReturnsFalse.1.1.0
+[DEBUG 01:24:41.920] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentLengthArrays_ReturnsFalse.1.1.0
+[DEBUG 01:24:41.920] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_DifferentLengthArrays_ReturnsFalse.1.1.0 completed
+[DEBUG 01:24:41.920] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_NullArrays_HandledCorrectly.1.1.0
+[DEBUG 01:24:41.920] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_NullArrays_HandledCorrectly.1.1.0 starting execution
+[DEBUG 01:24:41.920] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_NullArrays_HandledCorrectly.1.1.0
+[DEBUG 01:24:41.920] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_NullArrays_HandledCorrectly.1.1.0
+[DEBUG 01:24:41.921] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_NullArrays_HandledCorrectly.1.1.0
+[DEBUG 01:24:41.921] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_NullArrays_HandledCorrectly.1.1.0
+[DEBUG 01:24:41.921] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_NullArrays_HandledCorrectly.1.1.0 completed
+[DEBUG 01:24:41.921] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_SameReference_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.921] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_SameReference_ReturnsTrue.1.1.0 starting execution
+[DEBUG 01:24:41.921] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_SameReference_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.921] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_SameReference_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.922] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_SameReference_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.922] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_SameReference_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.922] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_SameReference_ReturnsTrue.1.1.0 completed
+[DEBUG 01:24:41.922] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EmptyArrays_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.922] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EmptyArrays_ReturnsTrue.1.1.0 starting execution
+[DEBUG 01:24:41.922] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EmptyArrays_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.922] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EmptyArrays_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.923] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EmptyArrays_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.923] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EmptyArrays_ReturnsTrue.1.1.0
+[DEBUG 01:24:41.923] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_EmptyArrays_ReturnsTrue.1.1.0 completed
+[DEBUG 01:24:41.923] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_ConsistentForEqualArrays.1.1.0
+[DEBUG 01:24:41.923] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_ConsistentForEqualArrays.1.1.0 starting execution
+[DEBUG 01:24:41.923] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_ConsistentForEqualArrays.1.1.0
+[DEBUG 01:24:41.923] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_ConsistentForEqualArrays.1.1.0
+[DEBUG 01:24:41.924] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_ConsistentForEqualArrays.1.1.0
+[DEBUG 01:24:41.924] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_ConsistentForEqualArrays.1.1.0
+[DEBUG 01:24:41.924] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_ConsistentForEqualArrays.1.1.0 completed
+[DEBUG 01:24:41.924] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_DifferentForDifferentArrays.1.1.0
+[DEBUG 01:24:41.924] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_DifferentForDifferentArrays.1.1.0 starting execution
+[DEBUG 01:24:41.924] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_DifferentForDifferentArrays.1.1.0
+[DEBUG 01:24:41.924] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_DifferentForDifferentArrays.1.1.0
+[DEBUG 01:24:41.925] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_DifferentForDifferentArrays.1.1.0
+[DEBUG 01:24:41.925] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_DifferentForDifferentArrays.1.1.0
+[DEBUG 01:24:41.925] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_GetHashCode_DifferentForDifferentArrays.1.1.0 completed
+[DEBUG 01:24:41.925] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_ComplexGenericTypes_HandledCorrectly.1.1.0
+[DEBUG 01:24:41.925] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_ComplexGenericTypes_HandledCorrectly.1.1.0 starting execution
+[DEBUG 01:24:41.925] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_ComplexGenericTypes_HandledCorrectly.1.1.0
+[DEBUG 01:24:41.925] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_ComplexGenericTypes_HandledCorrectly.1.1.0
+[DEBUG 01:24:41.926] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_ComplexGenericTypes_HandledCorrectly.1.1.0
+[DEBUG 01:24:41.926] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_ComplexGenericTypes_HandledCorrectly.1.1.0
+[DEBUG 01:24:41.927] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.TypeArrayComparerTests.1.1.TypeArrayComparer_ComplexGenericTypes_HandledCorrectly.1.1.0 completed
+[DEBUG 01:24:41.927] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.ContextThreadSafetyTests.1.1.GetStandardOutput_WithConcurrentAccess_ShouldNotThrowException.1.1.0
+[DEBUG 01:24:41.927] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ContextThreadSafetyTests.1.1.GetStandardOutput_WithConcurrentAccess_ShouldNotThrowException.1.1.0 starting execution
+[DEBUG 01:24:41.927] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.ContextThreadSafetyTests.1.1.GetStandardOutput_WithConcurrentAccess_ShouldNotThrowException.1.1.0
+[DEBUG 01:24:41.927] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.ContextThreadSafetyTests.1.1.GetStandardOutput_WithConcurrentAccess_ShouldNotThrowException.1.1.0
+[DEBUG 01:24:41.929] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0
+[DEBUG 01:24:41.929] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0 starting execution
+[DEBUG 01:24:41.929] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0
+[DEBUG 01:24:41.929] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0
+[DEBUG 01:24:41.931] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_MethodDataSource_InjectsValue.1.1.0
+[DEBUG 01:24:41.931] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_MethodDataSource_InjectsValue.1.1.0 starting execution
+[DEBUG 01:24:41.931] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_MethodDataSource_InjectsValue.1.1.0
+[DEBUG 01:24:41.931] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_MethodDataSource_InjectsValue.1.1.0
+[DEBUG 01:24:41.932] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ClassDataSource_InjectsAndInitializes.1.1.0
+[DEBUG 01:24:41.932] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ClassDataSource_InjectsAndInitializes.1.1.0 starting execution
+[DEBUG 01:24:41.932] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ClassDataSource_InjectsAndInitializes.1.1.0
+[DEBUG 01:24:41.932] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ClassDataSource_InjectsAndInitializes.1.1.0
+[DEBUG 01:24:41.933] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0
+[DEBUG 01:24:41.933] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_ComplexType.1.1.0
+[DEBUG 01:24:41.933] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_ComplexType.1.1.0 starting execution
+[DEBUG 01:24:41.933] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0
+[DEBUG 01:24:41.933] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_ComplexType.1.1.0
+[DEBUG 01:24:41.933] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_ComplexType.1.1.0
+[DEBUG 01:24:41.933] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_InjectsValue.1.1.0 completed
+[DEBUG 01:24:41.934] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.GenericTestClass_Int.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.934] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_Int.1.1.TestGenericValue.1.1.0 starting execution
+[DEBUG 01:24:41.934] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_MethodDataSource_InjectsValue.1.1.0
+[DEBUG 01:24:41.934] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_MethodDataSource_InjectsValue.1.1.0
+[DEBUG 01:24:41.934] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.GenericTestClass_Int.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.934] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_MethodDataSource_InjectsValue.1.1.0 completed
+[DEBUG 01:24:41.934] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.GenericTestClass_Int.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.935] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.GenericTestClass_Int.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.935] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.GenericTestClass_Int.1.1.TestGenericValue.1.1.0
+[DEBUG 01:24:41.935] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_Int.1.1.TestGenericValue.1.1.0 completed
+[DEBUG 01:24:41.935] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.935] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).1.1.0 starting execution
+[DEBUG 01:24:41.935] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.935] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.936] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.936] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).1.1.0
+[DEBUG 01:24:41.936] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).1.1.0 completed
+[DEBUG 01:24:41.936] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.936] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).2.1.0 starting execution
+[DEBUG 01:24:41.936] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.936] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.936] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.936] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).2.1.0
+[DEBUG 01:24:41.936] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.GenericTestClass_Int.1.1.TestWithParameter(System.Object).2.1.0 completed
+[DEBUG 01:24:41.936] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingDependency.1.1.0
+[DEBUG 01:24:41.936] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingDependency.1.1.0 starting execution
+[DEBUG 01:24:41.936] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingDependency.1.1.0
+[DEBUG 01:24:41.936] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingDependency.1.1.0
+[DEBUG 01:24:41.937] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingDependency.1.1.0
+[DEBUG 01:24:41.937] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingDependency.1.1.0
+[DEBUG 01:24:41.937] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingDependency.1.1.0 completed
+[DEBUG 01:24:41.937] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestDependingOnFailedDependencyResolution.1.1.0
+[DEBUG 01:24:41.937] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestDependingOnFailedDependencyResolution.1.1.0 waiting for 1 dependencies
+[DEBUG 01:24:41.937]   - Dependency: TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingDependency.1.1.0, State: Passed, Completed: True
+[DEBUG 01:24:41.937] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestDependingOnFailedDependencyResolution.1.1.0 starting execution
+[DEBUG 01:24:41.937] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestDependingOnFailedDependencyResolution.1.1.0
+[DEBUG 01:24:41.937] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestDependingOnFailedDependencyResolution.1.1.0
+[DEBUG 01:24:41.937] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestDependingOnFailedDependencyResolution.1.1.0
+[DEBUG 01:24:41.937] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestDependingOnFailedDependencyResolution.1.1.0
+[DEBUG 01:24:41.937] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestDependingOnFailedDependencyResolution.1.1.0 completed
+[DEBUG 01:24:41.937] TestScheduler.ExecuteTestWhenReadyAsync: Starting test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingOverloadDependency.1.1.0
+[DEBUG 01:24:41.937] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingOverloadDependency.1.1.0 starting execution
+[DEBUG 01:24:41.937] HookOrchestrator.OnTestStartingAsync: Test=TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingOverloadDependency.1.1.0
+[DEBUG 01:24:41.937] SingleTestExecutor.ExecuteTestAsync: Starting TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingOverloadDependency.1.1.0
+[DEBUG 01:24:41.938] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingOverloadDependency.1.1.0
+[DEBUG 01:24:41.938] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingOverloadDependency.1.1.0
+[DEBUG 01:24:41.938] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.DependencyResolutionFailureTests.1.1.TestWithMissingOverloadDependency.1.1.0 completed
+[DEBUG 01:24:41.940] TestScheduler: Waiting for 2 test group tasks: NotInParallel(11), Parallel(71)
+[DEBUG 01:24:41.948] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_ComplexType.1.1.0
+[DEBUG 01:24:41.948] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_ComplexType.1.1.0
+[DEBUG 01:24:41.948] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ArgumentsAttribute_ComplexType.1.1.0 completed
+[DEBUG 01:24:41.949] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ClassDataSource_InjectsAndInitializes.1.1.0
+[DEBUG 01:24:41.949] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ClassDataSource_InjectsAndInitializes.1.1.0
+[DEBUG 01:24:41.949] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.PropertyDataSourceInjectionTests.1.1.PropertyInjection_ClassDataSource_InjectsAndInitializes.1.1.0 completed
+[DEBUG 01:24:42.658] SingleTestExecutor.ExecuteTestAsync: Completed TUnit.UnitTests.ContextThreadSafetyTests.1.1.GetStandardOutput_WithConcurrentAccess_ShouldNotThrowException.1.1.0
+[DEBUG 01:24:42.658] HookOrchestrator.OnTestCompletedAsync: Test=TUnit.UnitTests.ContextThreadSafetyTests.1.1.GetStandardOutput_WithConcurrentAccess_ShouldNotThrowException.1.1.0
+[DEBUG 01:24:42.658] TestScheduler.ExecuteTestWhenReadyAsync: Test TUnit.UnitTests.ContextThreadSafetyTests.1.1.GetStandardOutput_WithConcurrentAccess_ShouldNotThrowException.1.1.0 completed
+[DEBUG 01:24:42.658] TestScheduler.ExecuteParallelTestsAsync: Completed all 71 tests

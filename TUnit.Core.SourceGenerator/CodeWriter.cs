@@ -24,6 +24,10 @@ public class CodeWriter : ICodeWriter
             _builder.AppendLine();
             _isNewLine = true;
         }
+        else
+        {
+            _isNewLine = true; // Fix: Always start at new line state for proper indentation
+        }
     }
 
     /// <summary>

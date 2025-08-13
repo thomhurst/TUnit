@@ -1,6 +1,9 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using EnumerableAsyncProcessor.Extensions;
 using TUnit.Core;
 using TUnit.Engine.Building.Interfaces;
 
@@ -20,147 +23,80 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     }
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
-        // Get all test sources as a list to enable indexed parallel processing
-        var testSourcesList = Sources.TestSources
+        // Stream from all test sources
+        var testSources = Sources.TestSources
             .Where(kvp => _filterTypes == null || _filterTypes.Contains(kvp.Key))
-            .SelectMany(kvp => kvp.Value)
-            .ToList();
+            .SelectMany(kvp => kvp.Value);
 
-        if (testSourcesList.Count == 0)
-        {
-            return [];
-        }
+        var standardTestMetadatas = await testSources
+            .SelectManyAsync(testSource => testSource.GetTestsAsync(testSessionId))
+            .ProcessInParallel();
 
-        // Use indexed collection to maintain order and prevent race conditions
-        var resultsByIndex = new ConcurrentDictionary<int, IEnumerable<TestMetadata>>();
+        var dynamicTestMetadatas = await CollectDynamicTestsStreaming(testSessionId)
+            .ProcessInParallel();
 
-        // Use true parallel processing with optimal concurrency
-        var parallelOptions = new ParallelOptions
-        {
-            MaxDegreeOfParallelism = Environment.ProcessorCount
-        };
-
-        await Task.Run(() =>
-        {
-            Parallel.ForEach(testSourcesList.Select((source, index) => new { source, index }),
-                parallelOptions, item =>
-                {
-                    var index = item.index;
-                    var testSource = item.source;
-
-                    try
-                    {
-                        // Run async method synchronously since we're already on thread pool
-                        var tests = testSource.GetTestsAsync(testSessionId).GetAwaiter().GetResult();
-                        resultsByIndex[index] = tests;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidOperationException(
-                            $"Failed to collect tests from source {testSource.GetType().Name}: {ex.Message}", ex);
-                    }
-                });
-        });
-
-        // Reassemble results in original order
-        var allTests = new List<TestMetadata>();
-        for (var i = 0; i < testSourcesList.Count; i++)
-        {
-            if (resultsByIndex.TryGetValue(i, out var tests))
-            {
-                allTests.AddRange(tests);
-            }
-        }
-
-        // Also collect dynamic tests from registered dynamic test sources
-        var dynamicTests = await CollectDynamicTests(testSessionId);
-        allTests.AddRange(dynamicTests);
-
-        if (allTests.Count == 0)
-        {
-            // No generated tests found
-            return [
-            ];
-        }
-
-        return allTests;
+        return [..standardTestMetadatas, ..dynamicTestMetadatas];
     }
 
-    private async Task<List<TestMetadata>> CollectDynamicTests(string testSessionId)
+    private async IAsyncEnumerable<TestMetadata> CollectDynamicTestsStreaming(
+        string testSessionId,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var dynamicTestMetadata = new List<TestMetadata>();
-
         if (Sources.DynamicTestSources.Count == 0)
         {
-            return dynamicTestMetadata;
+            yield break;
         }
 
-        // Convert dynamic test sources to list for parallel processing
-        var dynamicSourcesList = Sources.DynamicTestSources.ToList();
-
-        // Use indexed collection to maintain order
-        var resultsByIndex = new ConcurrentDictionary<int, List<TestMetadata>>();
-
-        var parallelOptions = new ParallelOptions
+        // Stream from each dynamic test source
+        foreach (var source in Sources.DynamicTestSources)
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount
-        };
+            cancellationToken.ThrowIfCancellationRequested();
 
-        await Task.Run(() =>
-        {
-            Parallel.ForEach(dynamicSourcesList.Select((source, index) => new { source, index }),
-                parallelOptions, item =>
-                {
-                    var index = item.index;
-                    var source = item.source;
-                    var testsForSource = new List<TestMetadata>();
+            IEnumerable<DynamicTest> dynamicTests;
+            TestMetadata? failedMetadata = null;
 
-                    try
-                    {
-                        var dynamicTests = source.CollectDynamicTests(testSessionId);
-                        foreach (var dynamicTest in dynamicTests)
-                        {
-                            // Convert each dynamic test to test metadata
-                            var metadataList = ConvertDynamicTestToMetadata(dynamicTest).GetAwaiter().GetResult();
-                            testsForSource.AddRange(metadataList);
-                        }
-                        resultsByIndex[index] = testsForSource;
-                    }
-                    catch (Exception ex)
-                    {
-                        // Create a failed test metadata for this dynamic test source
-                        var failedTest = CreateFailedTestMetadataForDynamicSource(source, ex);
-                        resultsByIndex[index] = [failedTest];
-                    }
-                });
-        });
-
-        // Reassemble results in original order
-        for (var i = 0; i < dynamicSourcesList.Count; i++)
-        {
-            if (resultsByIndex.TryGetValue(i, out var tests))
+            try
             {
-                dynamicTestMetadata.AddRange(tests);
+                dynamicTests = source.CollectDynamicTests(testSessionId);
+            }
+            catch (Exception ex)
+            {
+                // Create a failed test metadata for this dynamic test source
+                failedMetadata = CreateFailedTestMetadataForDynamicSource(source, ex);
+                dynamicTests = [];
+            }
+
+            if (failedMetadata != null)
+            {
+                yield return failedMetadata;
+                continue;
+            }
+
+            foreach (var dynamicTest in dynamicTests)
+            {
+                // Convert each dynamic test to test metadata and stream
+                await foreach (var metadata in ConvertDynamicTestToMetadataStreaming(dynamicTest, cancellationToken))
+                {
+                    yield return metadata;
+                }
             }
         }
-
-        return dynamicTestMetadata;
     }
 
-    private async Task<List<TestMetadata>> ConvertDynamicTestToMetadata(DynamicTest dynamicTest)
+    private async IAsyncEnumerable<TestMetadata> ConvertDynamicTestToMetadataStreaming(
+        DynamicTest dynamicTest,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var testMetadataList = new List<TestMetadata>();
-
         foreach (var discoveryResult in dynamicTest.GetTests())
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (discoveryResult is DynamicDiscoveryResult { TestMethod: not null } dynamicResult)
             {
                 var testMetadata = await CreateMetadataFromDynamicDiscoveryResult(dynamicResult);
-                testMetadataList.Add(testMetadata);
+                yield return testMetadata;
             }
         }
-
-        return testMetadataList;
     }
 
     private Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
@@ -171,7 +107,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
 
         // Extract method info from the expression
-        System.Reflection.MethodInfo? methodInfo = null;
+        MethodInfo? methodInfo = null;
         var lambdaExpression = result.TestMethod as LambdaExpression;
         if (lambdaExpression?.Body is MethodCallExpression methodCall)
         {
@@ -202,11 +138,8 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             PropertyDataSources = [],
             InstanceFactory = CreateAotDynamicInstanceFactory(result.TestClassType, result.TestClassArguments)!,
             TestInvoker = CreateAotDynamicTestInvoker(result),
-            ParameterCount = result.TestMethodArguments?.Length ?? 0,
-            ParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType).ToArray(),
-            TestMethodParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
-            FilePath = null,
-            LineNumber = null,
+            FilePath = result.CreatorFilePath ?? "Unknown",
+            LineNumber = result.CreatorLineNumber ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(result.TestClassType, methodInfo),
             GenericTypeInfo = null,
             GenericMethodInfo = null,
@@ -235,27 +168,29 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         Justification = "Dynamic tests require dynamic code generation")]
     private static Func<Type[], object?[], object>? CreateAotDynamicInstanceFactory(Type testClass, object?[]? predefinedClassArgs)
     {
-        // For dynamic tests, we always use the predefined args (or empty array if null)
-        var classArgs = predefinedClassArgs ?? [];
+        // Check if we have predefined args to use as defaults
+        var hasPredefinedArgs = predefinedClassArgs != null && predefinedClassArgs.Length > 0;
 
         return (typeArgs, args) =>
         {
-            // Always use the predefined class args, ignoring the args parameter
+            // Use provided args if available, otherwise fall back to predefined args
+            var effectiveArgs = (args != null && args.Length > 0) ? args : (predefinedClassArgs ?? []);
+
             if (testClass.IsGenericTypeDefinition && typeArgs.Length > 0)
             {
                 var closedType = testClass.MakeGenericType(typeArgs);
-                if (classArgs.Length == 0)
+                if (effectiveArgs.Length == 0)
                 {
                     return Activator.CreateInstance(closedType)!;
                 }
-                return Activator.CreateInstance(closedType, classArgs)!;
+                return Activator.CreateInstance(closedType, effectiveArgs)!;
             }
 
-            if (classArgs.Length == 0)
+            if (effectiveArgs.Length == 0)
             {
                 return Activator.CreateInstance(testClass)!;
             }
-            return Activator.CreateInstance(testClass, classArgs)!;
+            return Activator.CreateInstance(testClass, effectiveArgs)!;
         };
     }
 
@@ -284,7 +219,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 // The expression is already bound to the correct method with arguments
                 // so we just need to invoke it with the instance
                 var invokeMethod = compiledExpression.GetType().GetMethod("Invoke")!;
-                var invokeResult = invokeMethod.Invoke(compiledExpression, new[] { testInstance });
+                var invokeResult = invokeMethod.Invoke(compiledExpression, [testInstance]);
 
                 if (invokeResult is Task task)
                 {
@@ -295,7 +230,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                     await valueTask;
                 }
             }
-            catch (System.Reflection.TargetInvocationException tie)
+            catch (TargetInvocationException tie)
             {
                 System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(tie.InnerException ?? tie).Throw();
                 throw;
@@ -314,6 +249,8 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             TestName = testName,
             TestClassType = source.GetType(),
             TestMethodName = "CollectDynamicTests",
+            FilePath = "Unknown",
+            LineNumber = 0,
             MethodMetadata = CreateDummyMethodMetadata(source.GetType(), "CollectDynamicTests"),
             AttributeFactory = () => [],
             DataSources = [],

@@ -50,6 +50,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             serviceProvider.Initializer.Initialize(context);
 
             GlobalContext.Current = serviceProvider.ContextProvider.GlobalContext;
+            GlobalContext.Current.GlobalLogger = serviceProvider.Logger;
             BeforeTestDiscoveryContext.Current = serviceProvider.ContextProvider.BeforeTestDiscoveryContext;
             TestDiscoveryContext.Current = serviceProvider.ContextProvider.TestDiscoveryContext;
             TestSessionContext.Current = serviceProvider.ContextProvider.TestSessionContext;
@@ -89,7 +90,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     {
         if (_serviceProvidersPerSession.TryRemove(context.SessionUid.Value, out var serviceProvider))
         {
-            await serviceProvider.DisposeAsync();
+            await serviceProvider.DisposeAsync().ConfigureAwait(false);
         }
 
         return new CloseTestSessionResult { IsSuccess = true };

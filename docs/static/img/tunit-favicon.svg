@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Import Orbitron font from Google Fonts -->
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&amp;display=swap');
+    </style>
+    <!-- Dark background gradient matching navbar -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e27;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1f3a;stop-opacity:1" />
+    </linearGradient>
+    <!-- Text gradient matching the TUNIT header exactly -->
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2dd4bf;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#14b8a6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1" />
+    </linearGradient>
+    <!-- Very subtle glow -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="0.3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Dark background -->
+  <rect width="64" height="64" rx="10" fill="#0f172a"/>
+  
+  <!-- Very subtle gradient overlay -->
+  <rect width="64" height="64" rx="10" fill="url(#bgGrad)" opacity="0.5"/>
+  
+  <!-- TU text using Orbitron to match TUNIT header -->
+  <text x="32" y="46" 
+        font-family="'Orbitron', monospace" 
+        font-size="36" 
+        font-weight="800" 
+        text-anchor="middle" 
+        fill="url(#textGrad)"
+        filter="url(#glow)"
+        letter-spacing="2"
+        style="text-transform: uppercase;">TU</text>
+</svg>

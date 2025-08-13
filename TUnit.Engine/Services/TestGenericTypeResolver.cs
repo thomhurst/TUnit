@@ -45,7 +45,7 @@ internal sealed class TestGenericTypeResolver
                     metadata.MethodMetadata,
                     metadata.GenericMethodInfo,
                     testData.MethodData,
-                    metadata.ParameterTypes);
+                    metadata.MethodMetadata.Parameters.Select(p => p.Type).ToArray());
             }
         }
 

@@ -22,12 +22,12 @@ internal static class TestExtensions
                     new LinePosition(testDetails.TestLineNumber, 0)
                 )),
                 new TestMethodIdentifierProperty(
-                    Namespace: testDetails.MethodMetadata.Class.Type.Namespace ?? testDetails.ClassType?.Namespace ?? "GlobalNamespace",
-                    AssemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.GetName().FullName!,
+                    Namespace: testDetails.MethodMetadata.Class.Type.Namespace ?? "",
+                    AssemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.GetName().FullName,
                     TypeName: testContext.GetClassTypeName(),
-                    MethodName: testDetails.TestName,
-                    ParameterTypeFullNames: CreateParameterTypeArray(testDetails.TestMethodParameterTypes),
-                    ReturnTypeFullName: testDetails.ReturnType.FullName ?? "void",
+                    MethodName: testDetails.MethodName,
+                    ParameterTypeFullNames: CreateParameterTypeArray(testDetails.MethodMetadata.Parameters.Select(p => p.Type).ToArray()),
+                    ReturnTypeFullName: testDetails.ReturnType.FullName ?? typeof(void).FullName!,
                     MethodArity: testDetails.MethodMetadata.GenericTypeCount
                     ),
 

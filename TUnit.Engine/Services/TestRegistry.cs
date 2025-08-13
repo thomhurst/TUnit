@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
@@ -46,7 +47,9 @@ internal sealed class TestRegistry : ITestRegistry
             TestClassArguments = dynamicTest.TestClassArguments,
             TestMethodArguments = dynamicTest.TestMethodArguments,
             TestMethod = dynamicTest.TestMethod,
-            Attributes = dynamicTest.Attributes
+            Attributes = dynamicTest.Attributes,
+            CreatorFilePath = dynamicTest.CreatorFilePath,
+            CreatorLineNumber = dynamicTest.CreatorLineNumber
         };
 
         // Queue the test for processing
@@ -128,22 +131,19 @@ internal sealed class TestRegistry : ITestRegistry
             TestName = testName,
             TestClassType = result.TestClassType,
             TestMethodName = methodInfo.Name,
-            Dependencies = result.Attributes.OfType<DependsOnAttribute>().Select(a => a.ToTestDependency()).ToArray(),
+            Dependencies = GetDependenciesOptimized(result.Attributes),
             DataSources = [],
             ClassDataSources = [],
             PropertyDataSources = [],
             InstanceFactory = CreateRuntimeInstanceFactory(result.TestClassType, result.TestClassArguments)!,
             TestInvoker = CreateRuntimeTestInvoker(result),
-            ParameterCount = result.TestMethodArguments?.Length ?? 0,
-            ParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType).ToArray(),
-            TestMethodParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
-            FilePath = null,
-            LineNumber = null,
+            FilePath = result.CreatorFilePath ?? "Unknown",
+            LineNumber = result.CreatorLineNumber ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(result.TestClassType, methodInfo),
             GenericTypeInfo = null,
             GenericMethodInfo = null,
             GenericMethodTypeArguments = null,
-            AttributeFactory = () => result.Attributes.ToArray(),
+            AttributeFactory = () => GetAttributesOptimized(result.Attributes),
             PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(result.TestClassType)
         });
     }
@@ -187,7 +187,7 @@ internal sealed class TestRegistry : ITestRegistry
             var testInstance = instance ?? throw new InvalidOperationException("Test instance is null");
 
             var invokeMethod = compiledExpression.GetType().GetMethod("Invoke")!;
-            var invokeResult = invokeMethod.Invoke(compiledExpression, new[] { testInstance });
+            var invokeResult = invokeMethod.Invoke(compiledExpression, [testInstance]);
 
             if (invokeResult is Task task)
             {
@@ -263,5 +263,37 @@ internal sealed class TestRegistry : ITestRegistry
                 };
             };
         }
+    }
+
+    /// <summary>
+    /// Optimized method to get dependencies without LINQ allocations
+    /// </summary>
+    private static TestDependency[] GetDependenciesOptimized(ICollection<Attribute> attributes)
+    {
+        var dependencies = new List<TestDependency>(attributes.Count);
+        foreach (var attr in attributes)
+        {
+            if (attr is DependsOnAttribute dependsOn)
+            {
+                dependencies.Add(dependsOn.ToTestDependency());
+            }
+        }
+        return dependencies.ToArray();
+    }
+
+
+
+    /// <summary>
+    /// Optimized method to convert attributes to array without LINQ allocations
+    /// </summary>
+    private static Attribute[] GetAttributesOptimized(ICollection<Attribute> attributes)
+    {
+        var result = new Attribute[attributes.Count];
+        var index = 0;
+        foreach (var attr in attributes)
+        {
+            result[index++] = attr;
+        }
+        return result;
     }
 }

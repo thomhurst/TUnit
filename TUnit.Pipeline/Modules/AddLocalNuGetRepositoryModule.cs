@@ -1,6 +1,7 @@
 ﻿using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.Enums;
 using ModularPipelines.FileSystem;
 using ModularPipelines.Modules;
 
@@ -11,7 +12,10 @@ public class AddLocalNuGetRepositoryModule : Module<Folder>
     protected override async Task<Folder?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var folder = context.FileSystem.GetFolder(Environment.SpecialFolder.LocalApplicationData).GetFolder("LocalNuget").Create();
-        await context.DotNet().Nuget.Add.Source(new DotNetNugetAddSourceOptions(folder), cancellationToken);
+        await context.DotNet().Nuget.Add.Source(new DotNetNugetAddSourceOptions(folder)
+        {
+            CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
+        }, cancellationToken);
         return folder;
     }
 }

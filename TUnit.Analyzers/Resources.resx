@@ -19,16 +19,16 @@
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
     <data name="TUnit0001Description" xml:space="preserve">
-        <value>The arguments for this test don't match the method argument types.</value>
+        <value>Test data argument types don't match the method parameter types. Ensure the types specified in [Arguments] attributes match the method signature.</value>
     </data>
     <data name="TUnit0001MessageFormat" xml:space="preserve">
         <value>Attribute argument types '{0}' don't match method parameter types '{1}'</value>
     </data>
     <data name="TUnit0001Title" xml:space="preserve">
-        <value>Invalid Data for Tests</value>
+        <value>Test argument types don't match method parameters</value>
     </data>
     <data name="TUnit0002Description" xml:space="preserve">
-        <value>No data provided for test.</value>
+        <value>Test method requires data but none was provided. Add [Arguments] or data source attributes to provide test data.</value>
     </data>
     <data name="TUnit0002MessageFormat" xml:space="preserve">
         <value>No data provided for test</value>
@@ -36,50 +36,34 @@
     <data name="TUnit0002Title" xml:space="preserve">
         <value>No data provided for test</value>
     </data>
-    <data name="TUnit0003Description" xml:space="preserve">
-        <value>No data provided for test.</value>
-    </data>
-    <data name="TUnit0003MessageFormat" xml:space="preserve">
-        <value>No data provided for test</value>
-    </data>
-    <data name="TUnit0003Title" xml:space="preserve">
-        <value>No data provided for test</value>
-    </data>
+
     <data name="TUnit0004Description" xml:space="preserve">
-        <value>No method found.</value>
+        <value>Data source method not found. Ensure the method name is correct, accessible, and follows the required signature.</value>
     </data>
     <data name="TUnit0004MessageFormat" xml:space="preserve">
-        <value>No method found</value>
+        <value>Data source method not found</value>
     </data>
     <data name="TUnit0004Title" xml:space="preserve">
-        <value>No method found</value>
+        <value>Data source method not found</value>
     </data>
     <data name="TUnit0005Description" xml:space="preserve">
-        <value>The parameter is not defined as nullable.</value>
+        <value>Nullable parameter has non-nullable argument. Consider making the argument nullable or the parameter non-nullable to match.</value>
     </data>
     <data name="TUnit0005MessageFormat" xml:space="preserve">
         <value>The parameter '{0}' is not defined as nullable</value>
     </data>
     <data name="TUnit0005Title" xml:space="preserve">
-        <value>The parameter is not defined as nullable</value>
+        <value>Nullable parameter has non-nullable argument</value>
     </data>
-    <data name="TUnit0006Description" xml:space="preserve">
-        <value>Data source doesn't match method argument type.</value>
-    </data>
-    <data name="TUnit0006MessageFormat" xml:space="preserve">
-        <value>The data source type `{0}` doesn't match the parameter type `{1}`</value>
-    </data>
-    <data name="TUnit0006Title" xml:space="preserve">
-        <value>Data source doesn't match method argument type</value>
-    </data>
+
     <data name="TUnit0007Description" xml:space="preserve">
-        <value>Method must be static.</value>
+        <value>Data source method must be static. Change the method to static or use [InstanceMethodDataSource] for instance methods.</value>
     </data>
     <data name="TUnit0007MessageFormat" xml:space="preserve">
-        <value>Method must be static</value>
+        <value>Data source method must be static</value>
     </data>
     <data name="TUnit0007Title" xml:space="preserve">
-        <value>Method must be static</value>
+        <value>Data source method must be static</value>
     </data>
     <data name="TUnit0008Description" xml:space="preserve">
         <value>Method must be public.</value>
@@ -109,23 +93,15 @@
         <value>Method should be parameterless</value>
     </data>
     <data name="TUnit0011Description" xml:space="preserve">
-        <value>Method returns void.</value>
+        <value>Data source method must return data. Method should return IEnumerable or Task&lt;IEnumerable&gt; to provide test data.</value>
     </data>
     <data name="TUnit0011MessageFormat" xml:space="preserve">
-        <value>Method returns void</value>
+        <value>Data source method must return data (IEnumerable or Task&lt;IEnumerable&gt;)</value>
     </data>
     <data name="TUnit0011Title" xml:space="preserve">
-        <value>Method returns void</value>
+        <value>Data source method must return data</value>
     </data>
-    <data name="TUnit0012Description" xml:space="preserve">
-        <value>There is no argument for the data source.</value>
-    </data>
-    <data name="TUnit0012MessageFormat" xml:space="preserve">
-        <value>There is no argument for the data source</value>
-    </data>
-    <data name="TUnit0012Title" xml:space="preserve">
-        <value>There is no argument for the data source</value>
-    </data>
+
     <data name="TUnit0013Description" xml:space="preserve">
         <value>A data source method must only have 1 matching parameter.</value>
     </data>
@@ -136,13 +112,13 @@
         <value>A data source method must only have 1 matching parameter</value>
     </data>
     <data name="TUnit0014Description" xml:space="preserve">
-        <value>Method should have a `Test` attribute or be made `private` or `protected`.</value>
+        <value>Public method in test class should have [Test] attribute or be made private/protected. Test methods must be explicitly marked with [Test].</value>
     </data>
     <data name="TUnit0014MessageFormat" xml:space="preserve">
-        <value>Method should have a `Test` attribute or be made `private` or `protected`</value>
+        <value>Public method missing [Test] attribute - add attribute or make method private/protected</value>
     </data>
     <data name="TUnit0014Title" xml:space="preserve">
-        <value>Method should have a `Test` attribute or be made `private` or `protected`</value>
+        <value>Public method missing [Test] attribute</value>
     </data>
     <data name="TUnit0015Description" xml:space="preserve">
         <value>Missing TimeoutAttribute cancellation token parameter.</value>
@@ -189,33 +165,9 @@
     <data name="TUnit0019Title" xml:space="preserve">
         <value>Missing `Test` Attribute</value>
     </data>
-    <data name="TUnit0020Description" xml:space="preserve">
-        <value>`DataDrivenTest` must have an `Arguments` attribute, or vice versa.</value>
-    </data>
-    <data name="TUnit0020MessageFormat" xml:space="preserve">
-        <value>`DataDrivenTest` must have an `Arguments` attribute, or vice versa.</value>
-    </data>
-    <data name="TUnit0020Title" xml:space="preserve">
-        <value>`DataDrivenTest` must be paired with `Arguments` attributes.</value>
-    </data>
-    <data name="TUnit0021Description" xml:space="preserve">
-        <value>`DataSourceDrivenTest` must have a `MethodDataSource`, `MethodDataSource` or `ClassDataSource` attribute, or vice versa.</value>
-    </data>
-    <data name="TUnit0021MessageFormat" xml:space="preserve">
-        <value>`DataSourceDrivenTest` must have a `MethodDataSource`, `MethodDataSource` or `ClassDataSource` attribute, or vice versa.</value>
-    </data>
-    <data name="TUnit0021Title" xml:space="preserve">
-        <value>`DataSourceDrivenTest` must be paired with either `MethodDataSource`, `MethodDataSource` or `ClassDataSource` attributes.</value>
-    </data>
-    <data name="TUnit0022Description" xml:space="preserve">
-        <value>`MatrixTest` parameters must have `Matrix` attributes on them, or vice versa.</value>
-    </data>
-    <data name="TUnit0022MessageFormat" xml:space="preserve">
-        <value>`MatrixTest` parameters must have `Matrix` attributes on them, or vice versa.</value>
-    </data>
-    <data name="TUnit0022Title" xml:space="preserve">
-        <value>`MatrixTest` must be paired with `Matrix` attributes.</value>
-    </data>
+
+
+
     <data name="TUnit0023Description" xml:space="preserve">
         <value>Member should be disposed within a clean up method</value>
     </data>
@@ -225,33 +177,9 @@
     <data name="TUnit0023Title" xml:space="preserve">
         <value>Member should be disposed within a clean up method</value>
     </data>
-    <data name="TUnit0024Description" xml:space="preserve">
-        <value>Test methods should use `TUnit.Core.CategoryAttribute` instead of `System.ComponentModel.CategoryAttribute`</value>
-    </data>
-    <data name="TUnit0024MessageFormat" xml:space="preserve">
-        <value>Test methods should use `TUnit.Core.CategoryAttribute` instead of `System.ComponentModel.CategoryAttribute`</value>
-    </data>
-    <data name="TUnit0024Title" xml:space="preserve">
-        <value>Wrong `Category` attribute</value>
-    </data>
-    <data name="TUnit0025Description" xml:space="preserve">
-        <value>The number of arguments doesn't match the number of parameters</value>
-    </data>
-    <data name="TUnit0025MessageFormat" xml:space="preserve">
-        <value>The number of arguments `{0}` doesn't match the number of parameters `{1}`</value>
-    </data>
-    <data name="TUnit0025Title" xml:space="preserve">
-        <value>Invalid arguments count</value>
-    </data>
-    <data name="TUnit0026Description" xml:space="preserve">
-        <value>Not an IEnumerable</value>
-    </data>
-    <data name="TUnit0026MessageFormat" xml:space="preserve">
-        <value>`{0}` should be an IEnumerable</value>
-    </data>
-    <data name="TUnit0026Title" xml:space="preserve">
-        <value>Not an IEnumerable</value>
-    </data>
+
+
+
     <data name="TUnit0027Description" xml:space="preserve">
         <value>The specified parameters aren't allowed for this method.</value>
     </data>
@@ -324,33 +252,9 @@
     <data name="TUnit0034Title" xml:space="preserve">
         <value>Do not declare a main method</value>
     </data>
-    <data name="TUnit0035Description" xml:space="preserve">
-        <value>ClassDataSource expects a matching parameter.</value>
-    </data>
-    <data name="TUnit0035MessageFormat" xml:space="preserve">
-        <value>ClassDataSource expects a matching parameter</value>
-    </data>
-    <data name="TUnit0035Title" xml:space="preserve">
-        <value>ClassDataSource expects a matching parameter</value>
-    </data>
-    <data name="TUnit0036Description" xml:space="preserve">
-        <value>Type must be public..</value>
-    </data>
-    <data name="TUnit0036MessageFormat" xml:space="preserve">
-        <value>Type must be public</value>
-    </data>
-    <data name="TUnit0036Title" xml:space="preserve">
-        <value>Type must be public</value>
-    </data>
-    <data name="TUnit0037Description" xml:space="preserve">
-        <value>Constructor should be parameterless.</value>
-    </data>
-    <data name="TUnit0037MessageFormat" xml:space="preserve">
-        <value>Constructor should be parameterless</value>
-    </data>
-    <data name="TUnit0037Title" xml:space="preserve">
-        <value>Constructor should be parameterless</value>
-    </data>
+
+
+
     <data name="TUnit0038Description" xml:space="preserve">
         <value>No data source provided.</value>
     </data>

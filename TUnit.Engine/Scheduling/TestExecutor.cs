@@ -9,7 +9,7 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Scheduling;
 
-/// Test executor adapter with hook orchestration, fail-fast support, and class/assembly lifecycle management
+
 internal sealed class TestExecutor : ITestExecutor, IDataProducer
 {
     private readonly ISingleTestExecutor _innerExecutor;
@@ -20,8 +20,9 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
     private readonly CancellationTokenSource _failFastCancellationSource;
     private readonly TUnitFrameworkLogger _logger;
     private readonly HookOrchestrator _hookOrchestrator;
+    private readonly ParallelLimitLockProvider _parallelLimitLockProvider;
 
-    // IDataProducer implementation
+
     public string Uid => "TUnit.TestExecutor";
     public string Version => "1.0.0";
     public string DisplayName => "Hook Orchestrating Test Executor Adapter";
@@ -37,7 +38,8 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
         bool isFailFastEnabled,
         CancellationTokenSource failFastCancellationSource,
         TUnitFrameworkLogger logger,
-        HookOrchestrator hookOrchestrator)
+        HookOrchestrator hookOrchestrator,
+        ParallelLimitLockProvider parallelLimitLockProvider)
     {
         _innerExecutor = innerExecutor;
         _messageBus = messageBus;
@@ -47,14 +49,15 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
         _failFastCancellationSource = failFastCancellationSource;
         _logger = logger;
         _hookOrchestrator = hookOrchestrator;
+        _parallelLimitLockProvider = parallelLimitLockProvider;
     }
 
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        // Check if any dependencies failed without ProceedOnFailure flag
+
         if (test.Dependencies.Any(dep => dep.Test.State == TestState.Failed && !dep.ProceedOnFailure))
         {
-            // If any dependencies have failed without ProceedOnFailure, skip this test
+
             test.State = TestState.Skipped;
             test.Result = new TestResult
             {
@@ -66,47 +69,81 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
                 Exception = new SkipTestException("Skipped due to failed dependencies")
             };
 
-            // Report the skipped state
-            await _tunitMessageBus.Skipped(test.Context, "Skipped due to failed dependencies");
+
+            await _tunitMessageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
 
             return;
         }
 
-        // Simple state management - scheduler ensures we only get here for executable tests
+
+        
+
         test.State = TestState.Running;
         test.StartTime = DateTimeOffset.UtcNow;
 
-        // Report test started
-        await _tunitMessageBus.InProgress(test.Context);
+
+        await _tunitMessageBus.InProgress(test.Context).ConfigureAwait(false);
+
+        bool hookStarted = false;
         try
         {
-            // Execute class/assembly hooks on first test
-            var executionContext = await _hookOrchestrator.OnTestStartingAsync(test, cancellationToken);
+            if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
+            {
+                var instance = await test.CreateInstanceAsync().ConfigureAwait(false);
+                test.Context.TestDetails.ClassInstance = instance;
+            }
+
+
+            var executionContext = await _hookOrchestrator.OnTestStartingAsync(test, cancellationToken).ConfigureAwait(false);
+            hookStarted = true;
 
 #if NET
-            // Restore the accumulated context from all hooks to flow AsyncLocal values to the test
+
             if (executionContext != null)
             {
                 ExecutionContext.Restore(executionContext);
             }
 #endif
 
-            // Execute the test and get the result message
-            var updateMessage = await _innerExecutor.ExecuteTestAsync(test, cancellationToken);
 
-            // Route the result to the appropriate ITUnitMessageBus method
-            await RouteTestResult(test, updateMessage);
+            var updateMessage = await _innerExecutor.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
 
-            // Check if we should trigger fail-fast
+            try
+            {
+
+                await _hookOrchestrator.OnTestCompletedAsync(test, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+
+
+                await RouteTestResult(test, updateMessage).ConfigureAwait(false);
+            }
+
+
             if (_isFailFastEnabled && test.Result?.State == TestState.Failed)
             {
-                await _logger.LogErrorAsync($"Test {test.TestId} failed. Triggering fail-fast cancellation.");
+                await _logger.LogErrorAsync($"Test {test.TestId} failed. Triggering fail-fast cancellation.").ConfigureAwait(false);
                 _failFastCancellationSource.Cancel();
             }
         }
         catch (Exception ex)
         {
-            // Set test state
+
+            if (hookStarted)
+            {
+                try
+                {
+                    await _hookOrchestrator.OnTestCompletedAsync(test, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception hookEx)
+                {
+
+                    await _logger.LogErrorAsync($"Error executing cleanup hooks for test {test.TestId}: {hookEx}").ConfigureAwait(false);
+                }
+            }
+
+
             test.State = TestState.Failed;
             test.Result = new TestResult
             {
@@ -118,80 +155,80 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
                 ComputerName = Environment.MachineName
             };
 
-            // Report the failure
-            await _tunitMessageBus.Failed(test.Context, ex, test.StartTime.GetValueOrDefault());
 
-            // Log the exception
-            await _logger.LogErrorAsync($"Unhandled exception in test {test.TestId}: {ex}");
+            await _tunitMessageBus.Failed(test.Context, ex, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
 
-            // If fail-fast is enabled, cancel all remaining tests
+
+            await _logger.LogErrorAsync($"Unhandled exception in test {test.TestId}: {ex}").ConfigureAwait(false);
+
+
             if (_isFailFastEnabled)
             {
-                await _logger.LogErrorAsync("Unhandled exception occurred. Triggering fail-fast cancellation.");
+                await _logger.LogErrorAsync("Unhandled exception occurred. Triggering fail-fast cancellation.").ConfigureAwait(false);
                 _failFastCancellationSource.Cancel();
             }
 
-            // Re-throw to maintain existing behavior
+
             throw;
         }
         finally
         {
             test.EndTime = DateTimeOffset.UtcNow;
+
         }
     }
 
     private async Task RouteTestResult(AbstractExecutableTest test, TestNodeUpdateMessage updateMessage)
     {
-        // Find the state property to determine which ITUnitMessageBus method to call
-        IProperty? stateProperty = null;
-        foreach (var property in updateMessage.TestNode.Properties)
+        try
         {
-            if (property is PassedTestNodeStateProperty or
-                FailedTestNodeStateProperty or
-                ErrorTestNodeStateProperty or
-                TimeoutTestNodeStateProperty or
-                CancelledTestNodeStateProperty or
-                SkippedTestNodeStateProperty)
+
+            var testState = test.State;
+            var startTime = test.StartTime.GetValueOrDefault();
+
+            switch (testState)
             {
-                stateProperty = property;
-                break;
+                case TestState.Passed:
+                    await _tunitMessageBus.Passed(test.Context, startTime).ConfigureAwait(false);
+                    break;
+
+                case TestState.Failed when test.Result?.Exception != null:
+                    await _tunitMessageBus.Failed(test.Context, test.Result.Exception, startTime).ConfigureAwait(false);
+                    break;
+
+                case TestState.Timeout:
+                    var timeoutException = test.Result?.Exception ?? new System.TimeoutException("Test timed out");
+                    await _tunitMessageBus.Failed(test.Context, timeoutException, startTime).ConfigureAwait(false);
+                    break;
+
+                case TestState.Cancelled:
+                    await _tunitMessageBus.Cancelled(test.Context, startTime).ConfigureAwait(false);
+                    break;
+
+                case TestState.Skipped:
+                    var skipReason = test.Result?.OverrideReason ?? test.Context.SkipReason ?? "Test skipped";
+                    await _tunitMessageBus.Skipped(test.Context, skipReason).ConfigureAwait(false);
+                    break;
+
+                default:
+
+                    await _logger.LogErrorAsync($"Unexpected test state '{testState}' for test '{test.TestId}'. Marking as failed .").ConfigureAwait(false);
+
+                    var unexpectedStateException = new InvalidOperationException($"Test ended in unexpected state: {testState}");
+                    await _tunitMessageBus.Failed(test.Context, unexpectedStateException, startTime).ConfigureAwait(false);
+
+
+                    await _messageBus.PublishAsync(this, updateMessage).ConfigureAwait(false);
+                    break;
             }
         }
-
-        switch (stateProperty)
+        catch (Exception ex)
         {
-            case PassedTestNodeStateProperty:
-                await _tunitMessageBus.Passed(test.Context, test.StartTime.GetValueOrDefault());
-                break;
+            await _logger.LogErrorAsync($"Error routing test result for test {test.TestId}: {ex}").ConfigureAwait(false);
+        }
+        finally
+        {
 
-            case FailedTestNodeStateProperty failedProperty:
-                var failedException = failedProperty.Exception ?? new InvalidOperationException("Test failed but no exception was provided");
-                await _tunitMessageBus.Failed(test.Context, failedException, test.StartTime.GetValueOrDefault());
-                break;
-
-            case ErrorTestNodeStateProperty errorProperty:
-                var errorException = errorProperty.Exception ?? new InvalidOperationException("Test errored but no exception was provided");
-                await _tunitMessageBus.Failed(test.Context, errorException, test.StartTime.GetValueOrDefault());
-                break;
-
-            case TimeoutTestNodeStateProperty timeoutProperty:
-                var timeoutException = new System.TimeoutException(timeoutProperty.Explanation ?? "Test timed out");
-                await _tunitMessageBus.Failed(test.Context, timeoutException, test.StartTime.GetValueOrDefault());
-                break;
-
-            case CancelledTestNodeStateProperty:
-                await _tunitMessageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault());
-                break;
-
-            case SkippedTestNodeStateProperty:
-                var skipReason = test.Result?.OverrideReason ?? test.Context.SkipReason ?? "Test skipped";
-                await _tunitMessageBus.Skipped(test.Context, skipReason);
-                break;
-
-            default:
-                // Fallback: publish the raw message if we can't route it
-                await _messageBus.PublishAsync(this, updateMessage);
-                break;
         }
     }
 }

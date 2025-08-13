@@ -16,11 +16,9 @@ internal static class Timings
         finally
         {
             var end = DateTimeOffset.Now;
-
-            lock (context.Lock)
-            {
-                context.Timings.Add(new Timing(name, start, end));
-            }
+            
+            // ConcurrentBag is lock-free and thread-safe
+            context.Timings.Add(new Timing(name, start, end));
         }
     }
 
@@ -40,11 +38,9 @@ internal static class Timings
         finally
         {
             var end = DateTimeOffset.Now;
-
-            lock (context.Lock)
-            {
-                context.Timings.Add(new Timing(name, start, end));
-            }
+            
+            // ConcurrentBag is lock-free and thread-safe
+            context.Timings.Add(new Timing(name, start, end));
         }
     }
 
@@ -52,12 +48,10 @@ internal static class Timings
     {
         var end = DateTimeOffset.Now;
 
-        lock (testContext.Lock)
-        {
-            var stepTimings = testContext.Timings.Select(x =>
-                new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
+        // ConcurrentBag enumeration is thread-safe without explicit locking
+        var stepTimings = testContext.Timings.Select(x =>
+            new StepTimingInfo(x.StepName, string.Empty, new TimingInfo(x.Start, x.End, x.Duration)));
 
-            return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), stepTimings.ToArray());
-        }
+        return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), stepTimings.ToArray());
     }
 }

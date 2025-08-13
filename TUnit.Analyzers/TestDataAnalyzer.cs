@@ -615,6 +615,20 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (isTuples)
             {
+                // Check if any test method parameters are tuple types when data source returns tuples
+                // This causes a runtime mismatch: data source provides separate arguments, but method expects tuple parameter
+                var tupleParameters = testParameterTypes.Where(p => p is INamedTypeSymbol { IsTupleType: true }).ToArray();
+                if (tupleParameters.Any())
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        Rules.WrongArgumentTypeTestData,
+                        attribute.GetLocation(),
+                        string.Join(", ", unwrappedTypes),
+                        string.Join(", ", testParameterTypes))
+                    );
+                    return;
+                }
+
                 if (unwrappedTypes.Length != testParameterTypes.Length)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
@@ -744,16 +758,17 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             type = genericType.TypeArguments[0];
         }
 
-        if (testParameterTypes.Length == 1
-            && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
-        {
-            return ImmutableArray.Create(type);
-        }
-
+        // Check for tuple types first before doing conversion checks
         if (type is INamedTypeSymbol { IsTupleType: true } tupleType)
         {
             isTuples = true;
             return ImmutableArray.CreateRange(tupleType.TupleElements.Select(x => x.Type));
+        }
+
+        if (testParameterTypes.Length == 1
+            && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
+        {
+            return ImmutableArray.Create(type);
         }
 
         // Handle array cases - when a data source returns IEnumerable<T[]> or IAsyncEnumerable<T[]>,
@@ -811,21 +826,48 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         // Get type arguments from the attribute or its base types
         var typeArguments = ImmutableArray<ITypeSymbol>.Empty;
         
-        // First check if the attribute itself has type arguments
-        if (attribute.AttributeClass?.TypeArguments.IsEmpty == false)
+        // First, try the same approach as the source generator: look for ITypedDataSourceAttribute<T> interface
+        var typedInterface = attribute.AttributeClass?.AllInterfaces
+            .FirstOrDefault(i => i.IsGenericType && 
+                i.ConstructedFrom.GloballyQualified() == WellKnown.AttributeFullyQualifiedClasses.ITypedDataSourceAttribute.WithGlobalPrefix + "`1");
+                
+        if (typedInterface != null)
         {
-            typeArguments = attribute.AttributeClass.TypeArguments;
+            // If the type is a tuple, extract its elements
+            if (typedInterface.TypeArguments.Length == 1 && 
+                typedInterface.TypeArguments[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+            {
+                typeArguments = ImmutableArray.CreateRange(tupleType.TupleElements.Select(x => x.Type));
+            }
+            else
+            {
+                typeArguments = typedInterface.TypeArguments;
+            }
         }
         else
         {
-            // Otherwise, look for type arguments in base types (e.g., DataSourceGeneratorAttribute<T>)
+            // Fallback: Look specifically for DataSourceGeneratorAttribute or AsyncDataSourceGeneratorAttribute base types
+            // which contain the actual data type arguments, not the custom attribute's type parameters
             foreach (var baseType in selfAndBaseTypes)
             {
-                if (!baseType.TypeArguments.IsEmpty)
+                if (baseType.IsGenericType && !baseType.TypeArguments.IsEmpty)
                 {
-                    typeArguments = baseType.TypeArguments;
-                    break;
+                    var originalDef = baseType.OriginalDefinition;
+                    var metadataName = originalDef?.ToDisplayString();
+                    
+                    if (metadataName?.Contains("DataSourceGeneratorAttribute") == true ||
+                        metadataName?.Contains("AsyncDataSourceGeneratorAttribute") == true)
+                    {
+                        typeArguments = baseType.TypeArguments;
+                        break;
+                    }
                 }
+            }
+            
+            // Final fallback: if no specific data source generator base type found, use the attribute's own type arguments
+            if (typeArguments.IsEmpty && attribute.AttributeClass?.TypeArguments.IsEmpty == false)
+            {
+                typeArguments = attribute.AttributeClass.TypeArguments;
             }
         }
 
