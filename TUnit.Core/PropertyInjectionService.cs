@@ -83,7 +83,11 @@ public sealed class PropertyInjectionService
     public static Task InjectPropertiesIntoObjectAsync(object instance, Dictionary<string, object?>? objectBag, MethodMetadata? methodMetadata, TestContextEvents? events)
     {
         // Start with an empty visited set for cycle detection
+#if NETSTANDARD2_0
+        var visitedObjects = new HashSet<object>();
+#else
         var visitedObjects = new HashSet<object>(System.Collections.Generic.ReferenceEqualityComparer.Instance);
+#endif
         return InjectPropertiesIntoObjectAsyncCore(instance, objectBag, methodMetadata, events, visitedObjects);
     }
     
@@ -543,7 +547,11 @@ public sealed class PropertyInjectionService
                     {
                         // Use the modern service for recursive injection and initialization
                         // Create a new visited set for this legacy call
+#if NETSTANDARD2_0
+                        var visitedObjects = new HashSet<object>();
+#else
                         var visitedObjects = new HashSet<object>(System.Collections.Generic.ReferenceEqualityComparer.Instance);
+#endif
                         visitedObjects.Add(instance); // Add the current instance to prevent re-processing
                         await ProcessInjectedPropertyValue(instance, value, propertyInjection.Setter, objectBag, testInformation, testContext.Events, visitedObjects);
                         // Add to TestClassInjectedPropertyArguments for tracking

@@ -105,19 +105,20 @@ internal sealed class TestBuilder : ITestBuilder
             var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
             var repeatCount = repeatAttr?.Times ?? 0;
 
-            var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
-            {
-                TestMetadata = metadata.MethodMetadata,
-                Events = new TestContextEvents(),
-                ObjectBag = new Dictionary<string, object?>()
-            });
-
             if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
             {
                 var failedTest = await CreateFailedTestForClassDataSourceCircularDependency(metadata);
                 tests.Add(failedTest);
                 return tests;
             }
+
+            // Create a single context accessor that we'll reuse, updating its Current property for each test
+            var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
+            {
+                TestMetadata = metadata.MethodMetadata,
+                Events = new TestContextEvents(),
+                ObjectBag = new Dictionary<string, object?>()
+            });
 
             var classDataAttributeIndex = 0;
             foreach (var classDataSource in GetDataSources(metadata.ClassDataSources))
@@ -211,6 +212,14 @@ internal sealed class TestBuilder : ITestBuilder
 
                             for (var i = 0; i < repeatCount + 1; i++)
                             {
+                                // Update context BEFORE calling data factories so they track objects in the right context
+                                contextAccessor.Current = new TestBuilderContext
+                                {
+                                    TestMetadata = metadata.MethodMetadata,
+                                    Events = new TestContextEvents(),
+                                    ObjectBag = new Dictionary<string, object?>()
+                                };
+                                
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
                                 var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
 
@@ -294,7 +303,6 @@ internal sealed class TestBuilder : ITestBuilder
                                     var capturedClassGenericArgs = resolvedClassGenericArgs;
                                     var capturedClassData = classData;
                                     // Pass null for builderContext - CreateInstance will use TestContext.Current during execution
-                                    // This ensures each test gets its own Events object for tracking
                                     instanceFactory = () => CreateInstance(capturedMetadata, capturedClassGenericArgs, capturedClassData, null);
                                 }
 
@@ -313,17 +321,6 @@ internal sealed class TestBuilder : ITestBuilder
                                     ResolvedMethodGenericArguments = resolvedMethodGenericArgs
                                 };
 
-                                // Update context BEFORE building each test (except the first)
-                                if (i > 0)
-                                {
-                                    contextAccessor.Current = new TestBuilderContext
-                                    {
-                                        TestMetadata = metadata.MethodMetadata,
-                                        Events = new TestContextEvents(),
-                                        ObjectBag = new Dictionary<string, object?>()
-                                    };
-                                }
-
                                 var test = await BuildTestAsync(metadata, testData, contextAccessor.Current);
 
                                 // If we have a basic skip reason, set it immediately
@@ -332,6 +329,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     test.Context.SkipReason = basicSkipReason;
                                 }
                                 tests.Add(test);
+                                
+                                // Context already updated at the beginning of the loop before calling factories
                             }
                         }
                     }

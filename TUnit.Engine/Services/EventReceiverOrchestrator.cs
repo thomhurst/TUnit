@@ -348,6 +348,22 @@ internal sealed class EventReceiverOrchestrator : IDisposable
                 await _logger.LogErrorAsync($"Error in last test in session event receiver: {ex.Message}");
             }
         }
+        
+        // Dispose the global static property context after all tests complete
+        if (TestSessionContext.GlobalStaticPropertyContext.Events.OnDispose != null)
+        {
+            try
+            {
+                foreach (var invocation in TestSessionContext.GlobalStaticPropertyContext.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                {
+                    await invocation.InvokeAsync(TestSessionContext.GlobalStaticPropertyContext, context);
+                }
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error disposing global static property context: {ex.Message}");
+            }
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

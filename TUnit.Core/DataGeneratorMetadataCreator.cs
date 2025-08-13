@@ -191,11 +191,11 @@ internal static class DataGeneratorMetadataCreator
                     DataSourceAttribute = dataSource,
                     ObjectBag = objectBag ?? []
                 }
-                : null;
+                : TestSessionContext.GlobalStaticPropertyContext;
 
         return new DataGeneratorMetadata
         {
-            TestBuilderContext = testBuilderContext != null ? new TestBuilderContextAccessor(testBuilderContext) : null,
+            TestBuilderContext = new TestBuilderContextAccessor(testBuilderContext),
             MembersToGenerate = [propertyMetadata],
             TestInformation = methodMetadata,
             Type = DataGeneratorType.Property,

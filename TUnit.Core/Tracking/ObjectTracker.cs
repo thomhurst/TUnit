@@ -171,6 +171,22 @@ internal static class ObjectTracker
     /// Gets the count of currently tracked objects.
     /// </summary>
     public static int TrackedObjectCount => _trackedObjects.Count;
+    
+    /// <summary>
+    /// Checks if an object is already being tracked (has a reference count > 0).
+    /// This is used to identify shared objects that shouldn't be re-tracked in test contexts.
+    /// </summary>
+    /// <param name="obj">The object to check</param>
+    /// <returns>True if the object is already tracked, false otherwise</returns>
+    public static bool IsAlreadyTracked(object? obj)
+    {
+        if (obj == null || ShouldSkipTracking(obj))
+        {
+            return false;
+        }
+        
+        return _trackedObjects.TryGetValue(obj, out var counter) && counter.CurrentCount > 0;
+    }
 
     /// <summary>
     /// Clears all tracked references. Use with caution!

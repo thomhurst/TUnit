@@ -296,7 +296,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         finally
         {
-            // Dispose test instance first so it can interact with injected objects during disposal
+            // First, dispose the test instance so it can interact with injected objects during its disposal
             if (instance is IAsyncDisposable asyncDisposableInstance)
             {
                 await asyncDisposableInstance.DisposeAsync().ConfigureAwait(false);
@@ -306,7 +306,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 disposableInstance.Dispose();
             }
             
-            // Then trigger disposal of tracked objects (injected properties) after test instance disposal
+            // Then trigger disposal of tracked objects (injected properties and constructor args)
+            // This happens AFTER test instance disposal to ensure the test class can use
+            // these objects in its Dispose/DisposeAsync method
             if (test.Context.Events.OnDispose != null)
             {
                 foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
