@@ -43,6 +43,26 @@ public class CustomDisplayNameTests
     }
 
     [Test]
+    [DisplayName("Test this($someValue, $someValueType)")]
+    [Arguments(100, "Type1")]
+    [Arguments(200, "Type2")]
+    [Arguments(300, "Type1")]
+    public async Task TestParameterNamePrefixBug(int someValue, string someValueType)
+    {
+        var displayName = TestContext.Current!.GetDisplayName();
+        // This should produce:
+        // Test this(100, Type1), Test this(200, Type2), Test this(300, Type1)
+        // But currently produces:
+        // Test this(100, 100Type), Test this(200, 200Type), Test this(300, 300Type)
+        await Assert.That(displayName)
+            .IsEqualTo("Test this(100, Type1)")
+            .Or
+            .IsEqualTo("Test this(200, Type2)")
+            .Or
+            .IsEqualTo("Test this(300, Type1)");
+    }
+
+    [Test]
     [MyGenerator]
     public async Task PasswordTest(string password)
     {
