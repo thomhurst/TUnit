@@ -10,8 +10,6 @@ namespace TUnit.Core.Tracking;
 internal static class ObjectTracker
 {
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
-    private static readonly ConcurrentDictionary<TestContextEvents, HashSet<object>> _contextTrackedObjects = new();
-    private static readonly ConcurrentDictionary<(TestContextEvents context, object obj), bool> _incrementTracker = new();
 
     /// <summary>
     /// Tracks multiple objects for a test context and registers a single disposal handler.
@@ -42,211 +40,25 @@ internal static class ObjectTracker
             return;
         }
 
-        // Safety check: Only increment once per context-object pair
-        // This prevents double-tracking within the same context
-        var incrementKey = (events, obj);
-        if (!_incrementTracker.TryAdd(incrementKey, true))
-        {
-            // Already incremented for this context-object pair
-            return;
-        }
-
         // Increment the reference count
         var counter = _trackedObjects.GetOrAdd(obj, _ => new Counter());
-        var newCount = counter.Increment();
-        
-        // Debug logging for shared objects
-        if (obj.GetType().Name.Contains("SomeClass"))
-        {
-            Console.WriteLine($"[ObjectTracker] Incremented {obj.GetType().Name} to {newCount} (context: {events.GetHashCode()})");
-        }
 
-        // Add to the context's tracked objects or create new tracking
-        // Use a factory delegate to ensure disposal handler is registered only once per context
-        var contextObjects = _contextTrackedObjects.GetOrAdd(events, e =>
+        counter.Increment();
+
+        events.OnDispose += async (_, _) =>
         {
-            // Debug logging for context creation
-            Console.WriteLine($"[ObjectTracker] Creating new context tracking for events object {e.GetHashCode()} (identity: {System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(e)})");
-            
-            // Count existing handlers before adding
-            var handlerCountBefore = e.OnDispose?.InvocationList?.Count ?? 0;
-            
-            // Register disposal handler only once when creating the HashSet
-            e.OnDispose = e.OnDispose + new Func<object, TestContext, ValueTask>(async (sender, testContext) =>
+            var count = counter.Decrement();
+
+            if (count < 0)
             {
-                // Log every time the disposal event is triggered
-                Console.WriteLine($"[ObjectTracker] OnDispose event triggered for context {e.GetHashCode()} (identity: {System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(e)})");
-                
-                // TryRemove is atomic - if it succeeds, we proceed with disposal
-                // If it fails, another thread already handled disposal for this context
-                if (_contextTrackedObjects.TryRemove(e, out var trackedObjects))
-                {
-                    // Debug logging for context disposal
-                    Console.WriteLine($"[ObjectTracker] Context {e.GetHashCode()} disposing {trackedObjects.Count} objects");
-                    
-                    foreach (var trackedObj in trackedObjects)
-                    {
-                        if (trackedObj.GetType().Name.Contains("SomeClass"))
-                        {
-                            Console.WriteLine($"[ObjectTracker] Context {e.GetHashCode()} decrementing {trackedObj.GetType().Name} (hash: {trackedObj.GetHashCode()})");
-                        }
-                        await DecrementAndDisposeIfNeededAsync(trackedObj).ConfigureAwait(false);
-                        // Clean up the increment tracker
-                        _incrementTracker.TryRemove((e, trackedObj), out _);
-                    }
-                }
-                else
-                {
-                    // Context was already disposed by another call
-                    Console.WriteLine($"[ObjectTracker] Context {e.GetHashCode()} already disposed, skipping");
-                }
-            });
-            
-            // Log handler count after adding
-            var handlerCountAfter = e.OnDispose?.InvocationList?.Count ?? 0;
-            Console.WriteLine($"[ObjectTracker] Context {e.GetHashCode()} handler count: {handlerCountBefore} -> {handlerCountAfter}");
-            
-            return new HashSet<object>();
-        });
-
-        lock (contextObjects)
-        {
-            contextObjects.Add(obj);
-        }
-    }
-
-    /// <summary>
-    /// Decrements the reference count for an object and disposes it if count reaches zero.
-    /// Pure reference counting: disposal happens immediately when count becomes zero.
-    /// </summary>
-    /// <param name="obj">The object to decrement and potentially dispose</param>
-    private static async ValueTask DecrementAndDisposeIfNeededAsync(object? obj)
-    {
-        if (obj == null)
-        {
-            return;
-        }
-
-        if (!_trackedObjects.TryGetValue(obj, out var counter))
-        {
-            return;
-        }
-
-        var count = counter.Decrement();
-        
-        // Debug logging for shared objects
-        if (obj.GetType().Name.Contains("SomeClass"))
-        {
-            Console.WriteLine($"[ObjectTracker] Decremented {obj.GetType().Name} to {count} (hash: {obj.GetHashCode()})");
-        }
-
-        if (count < 0)
-        {
-            throw new InvalidOperationException($"Reference count for object {obj.GetType().Name} went below zero. This indicates a bug in the reference counting logic.");
-        }
-
-        // Dispose ANY object when reference count reaches zero - pure reference counting
-        if (count == 0)
-        {
-            _trackedObjects.TryRemove(obj, out _);
-            
-            // Debug logging for shared objects
-            if (obj.GetType().Name.Contains("SomeClass"))
-            {
-                Console.WriteLine($"[ObjectTracker] Disposing {obj.GetType().Name} (hash: {obj.GetHashCode()})");
+                throw new InvalidOperationException($"Reference count for object {obj.GetType().Name} went below zero. This indicates a bug in the reference counting logic.");
             }
 
-            // Dispose synchronously to avoid race conditions with test class disposal
-            try
+            if (count == 0)
             {
-                if (obj is IAsyncDisposable asyncDisposable)
-                {
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                }
-                else if (obj is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
+                await GlobalContext.Current.Disposer.DisposeAsync(obj);
             }
-            catch
-            {
-                // Swallow disposal exceptions to prevent test failures
-                // The object will be GC'd eventually if disposal fails
-            }
-        }
-    }
-
-    /// <summary>
-    /// Gets the reference counter for a tracked object.
-    /// </summary>
-    /// <param name="obj">The object to get counter for</param>
-    /// <returns>Counter or null if not tracked</returns>
-    public static Counter? GetReferenceInfo(object? obj)
-    {
-        return obj != null && _trackedObjects.TryGetValue(obj, out var counter) ? counter : null;
-    }
-
-    /// <summary>
-    /// Tries to get the reference counter for an object.
-    /// </summary>
-    /// <param name="obj">The object to check</param>
-    /// <param name="counter">The reference counter if found</param>
-    /// <returns>True if the object is tracked</returns>
-    public static bool TryGetReference(object? obj, out Counter? counter)
-    {
-        counter = null;
-        if (obj == null || ShouldSkipTracking(obj))
-        {
-            return false;
-        }
-
-        return _trackedObjects.TryGetValue(obj, out counter);
-    }
-
-    /// <summary>
-    /// Removes an object from tracking without decrementing its count.
-    /// </summary>
-    /// <param name="obj">The object to remove</param>
-    /// <returns>True if the object was removed</returns>
-    public static bool RemoveObject(object? obj)
-    {
-        if (obj == null)
-        {
-            return false;
-        }
-
-        return _trackedObjects.TryRemove(obj, out _);
-    }
-
-    /// <summary>
-    /// Gets the count of currently tracked objects.
-    /// </summary>
-    public static int TrackedObjectCount => _trackedObjects.Count;
-
-    /// <summary>
-    /// Checks if an object is already being tracked (has a reference count > 0).
-    /// This is used to identify shared objects that shouldn't be re-tracked in test contexts.
-    /// </summary>
-    /// <param name="obj">The object to check</param>
-    /// <returns>True if the object is already tracked, false otherwise</returns>
-    public static bool IsAlreadyTracked(object? obj)
-    {
-        if (obj == null || ShouldSkipTracking(obj))
-        {
-            return false;
-        }
-
-        return _trackedObjects.TryGetValue(obj, out var counter) && counter.CurrentCount > 0;
-    }
-
-    /// <summary>
-    /// Clears all tracked references. Use with caution!
-    /// </summary>
-    public static void Clear()
-    {
-        _trackedObjects.Clear();
-        _contextTrackedObjects.Clear();
-        _incrementTracker.Clear();
+        };
     }
 
     /// <summary>

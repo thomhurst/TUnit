@@ -50,6 +50,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             serviceProvider.Initializer.Initialize(context);
 
             GlobalContext.Current = serviceProvider.ContextProvider.GlobalContext;
+            GlobalContext.Current.GlobalLogger = serviceProvider.Logger;
             BeforeTestDiscoveryContext.Current = serviceProvider.ContextProvider.BeforeTestDiscoveryContext;
             TestDiscoveryContext.Current = serviceProvider.ContextProvider.TestDiscoveryContext;
             TestSessionContext.Current = serviceProvider.ContextProvider.TestSessionContext;
