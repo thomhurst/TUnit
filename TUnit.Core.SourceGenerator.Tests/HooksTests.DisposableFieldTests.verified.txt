@@ -35,7 +35,7 @@ public sealed class GeneratedHookRegistry
         global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.DisposableFieldTests)].Add(
             new InstanceHookMethod
             {
-                ClassType = typeof(global::TUnit.TestProject.DisposableFieldTests),
+                InitClassType = typeof(global::TUnit.TestProject.DisposableFieldTests),
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.DisposableFieldTests),
@@ -77,7 +77,7 @@ public sealed class GeneratedHookRegistry
         global::TUnit.Core.Sources.AfterTestHooks[typeof(global::TUnit.TestProject.DisposableFieldTests)].Add(
             new InstanceHookMethod
             {
-                ClassType = typeof(global::TUnit.TestProject.DisposableFieldTests),
+                InitClassType = typeof(global::TUnit.TestProject.DisposableFieldTests),
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.DisposableFieldTests),
