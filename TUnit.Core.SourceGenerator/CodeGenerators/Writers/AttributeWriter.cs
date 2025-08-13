@@ -28,7 +28,6 @@ public class AttributeWriter
                 }
 
                 // Skip attributes with compiler-generated type arguments
-                // These types have angle brackets in their names and cannot be represented in source code
                 bool hasCompilerGeneratedType = false;
                 foreach (var arg in attributeData.ConstructorArguments)
                 {
@@ -250,15 +249,13 @@ public class AttributeWriter
         var attributeName = attributeData.AttributeClass!.GloballyQualified();
 
         // Check if any constructor arguments contain compiler-generated types
-        // These types have angle brackets in their names and cannot be represented in source code
         foreach (var arg in attributeData.ConstructorArguments)
         {
             if (arg.Kind == TypedConstantKind.Type && arg.Value is ITypeSymbol typeSymbol)
             {
                 if (typeSymbol.IsCompilerGeneratedType())
                 {
-                    // Skip attributes with compiler-generated type arguments
-                    // These cannot be represented in source code using typeof()
+                    // Skip this attribute as it cannot be represented in source code
                     return;
                 }
             }
