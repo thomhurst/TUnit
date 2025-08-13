@@ -88,7 +88,7 @@
 .badge {
   display: inline-block;
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
   color: white;
   border-radius: 2rem;
   font-size: 0.875rem;
@@ -111,38 +111,27 @@
 }
 
 .titleMain {
-  display: inline-block;
+  display: block;
   position: relative;
-  font-weight: 700;
-  font-family: 'Oswald', 'Bebas Neue', sans-serif;
-  margin-bottom: 0.25rem;
+  font-weight: 800;
+  font-family: 'Orbitron', 'Space Grotesk', 'Rajdhani', monospace;
+  margin-bottom: 0.5rem;
   line-height: 0.9;
+  font-size: 5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   background: linear-gradient(90deg,
-    #667eea 0%,
-    #a78bfa 25%,
-    #764ba2 50%,
-    #a78bfa 75%,
-    #667eea 100%);
+    #14b8a6 0%,
+    #2dd4bf 25%,
+    #0ea5e9 50%,
+    #2dd4bf 75%,
+    #14b8a6 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 0 40px rgba(102, 126, 234, 0.5);
+  text-shadow: 0 0 40px rgba(20, 184, 166, 0.5);
   animation: shimmer 4s linear infinite;
-}
-
-.titleLarge {
-  font-size: 6rem;
-  letter-spacing: -0.03em;
-  text-transform: uppercase;
-}
-
-.titleSmall {
-  font-size: 4rem;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-  margin-left: 0;
-  vertical-align: baseline;
 }
 
 @keyframes shimmer {
@@ -157,8 +146,8 @@
 .titleAccent {
   display: block;
   font-size: 1.75rem;
-  font-weight: 300;
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-weight: 500;
+  font-family: 'Rajdhani', 'Space Grotesk', sans-serif;
   color: #cbd5e1;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -213,23 +202,23 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
   color: white !important;
   border-radius: 0.5rem;
   font-weight: 600;
   text-decoration: none !important;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4);
 }
 
 .primaryButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  box-shadow: 0 6px 20px rgba(20, 184, 166, 0.6);
   color: white !important;
 }
 
 .primaryButton:focus-visible {
-  outline: 3px solid #a78bfa;
+  outline: 3px solid #5eead4;
   outline-offset: 3px;
 }
 
@@ -238,9 +227,9 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 2rem;
-  background: rgba(99, 102, 241, 0.1);
-  color: #667eea !important;
-  border: 2px solid #667eea;
+  background: rgba(20, 184, 166, 0.1);
+  color: #14b8a6 !important;
+  border: 2px solid #14b8a6;
   border-radius: 0.5rem;
   font-weight: 600;
   text-decoration: none !important;
@@ -248,13 +237,13 @@
 }
 
 .secondaryButton:hover {
-  background: rgba(99, 102, 241, 0.2);
+  background: rgba(20, 184, 166, 0.2);
   transform: translateY(-2px);
-  color: #667eea !important;
+  color: #14b8a6 !important;
 }
 
 .secondaryButton:focus-visible {
-  outline: 3px solid #667eea;
+  outline: 3px solid #14b8a6;
   outline-offset: 3px;
 }
 
@@ -564,7 +553,7 @@
 .sectionTitle {
   font-size: 2.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -599,8 +588,8 @@
 
 .step:hover {
   transform: translateY(-4px);
-  border-color: #667eea;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+  border-color: #14b8a6;
+  box-shadow: 0 10px 30px rgba(20, 184, 166, 0.2);
 }
 
 .stepNumber {
@@ -609,7 +598,7 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
   color: white;
   border-radius: 50%;
   font-weight: 700;
@@ -717,7 +706,7 @@
 }
 
 .featureCard {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%);
   padding: 2rem;
   border-radius: 1rem;
   border: 1px solid rgba(148, 163, 184, 0.1);
@@ -727,9 +716,9 @@
 
 .featureCard:hover {
   transform: translateY(-4px);
-  border-color: #667eea;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+  border-color: #14b8a6;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+  box-shadow: 0 10px 30px rgba(20, 184, 166, 0.2);
 }
 
 .featureIcon {
@@ -796,12 +785,8 @@
     max-width: 100%;
   }
 
-  .titleLarge {
-    font-size: 4.5rem;
-  }
-
-  .titleSmall {
-    font-size: 3rem;
+  .titleMain {
+    font-size: 3.5rem;
   }
 
   .titleAccent {
@@ -994,12 +979,9 @@
     padding: 0 1rem;
   }
 
-  .titleLarge {
+  .titleMain {
     font-size: 2.5rem;
-  }
-
-  .titleSmall {
-    font-size: 1.75rem;
+    letter-spacing: 0.05em;
   }
 
   .titleAccent {

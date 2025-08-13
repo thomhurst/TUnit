@@ -35,6 +35,9 @@ internal sealed class ClassAndMethodArgumentsTests_Simple_TestSource_GUID : glob
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 8,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
@@ -148,6 +151,9 @@ internal sealed class ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_GU
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 11,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
@@ -286,6 +292,9 @@ internal sealed class ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_G
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 16,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),

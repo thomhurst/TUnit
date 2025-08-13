@@ -23,6 +23,8 @@ public class DependsOnTests
             TestClassType = typeof(T),
             TestMethodName = methodName,
             TestName = methodName,
+            FilePath = "Unknown",
+            LineNumber = 0,
             AttributeFactory = () =>
             [
             ],

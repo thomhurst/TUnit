@@ -197,6 +197,36 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
     }
 
+    public async ValueTask InvokeHookRegistrationEventReceiversAsync(HookRegisteredContext hookContext, CancellationToken cancellationToken)
+    {
+        // Get event receivers from the hook method's attributes
+        var eventReceivers = hookContext.HookMethod.Attributes
+            .OfType<IHookRegisteredEventReceiver>()
+            .OrderBy(r => r.Order)
+            .ToList();
+
+        // Filter scoped attributes to ensure only the highest priority one of each type is invoked
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);
+
+        foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
+        {
+            try
+            {
+                await receiver.OnHookRegistered(hookContext);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in hook registration event receiver: {ex.Message}");
+            }
+        }
+
+        // Apply the timeout from the context back to the hook method
+        if (hookContext.Timeout.HasValue && hookContext.HookMethod != null)
+        {
+            hookContext.HookMethod.Timeout = hookContext.Timeout;
+        }
+    }
+
 
     // First/Last event methods with fast-path checks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -346,6 +376,22 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"Error in last test in session event receiver: {ex.Message}");
+            }
+        }
+        
+        // Dispose the global static property context after all tests complete
+        if (TestSessionContext.GlobalStaticPropertyContext.Events.OnDispose != null)
+        {
+            try
+            {
+                foreach (var invocation in TestSessionContext.GlobalStaticPropertyContext.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                {
+                    await invocation.InvokeAsync(TestSessionContext.GlobalStaticPropertyContext, context);
+                }
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error disposing global static property context: {ex.Message}");
             }
         }
     }

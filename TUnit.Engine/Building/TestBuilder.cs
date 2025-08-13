@@ -26,6 +26,12 @@ internal sealed class TestBuilder : ITestBuilder
 
     private async Task<object> CreateInstance(TestMetadata metadata, Type[] resolvedClassGenericArgs, object?[] classData, TestBuilderContext? builderContext = null)
     {
+        // If no builderContext provided and we're in test execution phase, create one from current TestContext
+        if (builderContext == null && TestContext.Current != null)
+        {
+            builderContext = TestBuilderContext.FromTestContext(TestContext.Current, null);
+        }
+        
         // First try to create instance with ClassConstructor attribute
         var attributes = metadata.AttributeFactory();
 
@@ -99,17 +105,20 @@ internal sealed class TestBuilder : ITestBuilder
             var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
             var repeatCount = repeatAttr?.Times ?? 0;
 
-            var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
-            {
-                TestMetadata = metadata.MethodMetadata
-            });
-
             if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
             {
                 var failedTest = await CreateFailedTestForClassDataSourceCircularDependency(metadata);
                 tests.Add(failedTest);
                 return tests;
             }
+
+            // Create a single context accessor that we'll reuse, updating its Current property for each test
+            var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
+            {
+                TestMetadata = metadata.MethodMetadata,
+                Events = new TestContextEvents(),
+                ObjectBag = new Dictionary<string, object?>()
+            });
 
             var classDataAttributeIndex = 0;
             foreach (var classDataSource in GetDataSources(metadata.ClassDataSources))
@@ -152,7 +161,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     MethodDataSourceAttributeIndex = 0,
                                     MethodDataLoopIndex = 0,
                                     MethodData = [],
-                                    RepeatIndex = 0
+                                    RepeatIndex = 0,
+                                    InheritanceDepth = metadata.InheritanceDepth
                                 };
 
                                 try
@@ -202,6 +212,14 @@ internal sealed class TestBuilder : ITestBuilder
 
                             for (var i = 0; i < repeatCount + 1; i++)
                             {
+                                // Update context BEFORE calling data factories so they track objects in the right context
+                                contextAccessor.Current = new TestBuilderContext
+                                {
+                                    TestMetadata = metadata.MethodMetadata,
+                                    Events = new TestContextEvents(),
+                                    ObjectBag = new Dictionary<string, object?>()
+                                };
+                                
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
                                 var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
 
@@ -225,7 +243,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     MethodDataSourceAttributeIndex = methodDataAttributeIndex,
                                     MethodDataLoopIndex = methodDataLoopIndex,
                                     MethodData = methodData,
-                                    RepeatIndex = i
+                                    RepeatIndex = i,
+                                    InheritanceDepth = metadata.InheritanceDepth
                                 };
 
                                 Type[] resolvedClassGenericArgs;
@@ -283,8 +302,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     var capturedMetadata = metadata;
                                     var capturedClassGenericArgs = resolvedClassGenericArgs;
                                     var capturedClassData = classData;
-                                    var capturedContext = contextAccessor.Current;
-                                    instanceFactory = () => CreateInstance(capturedMetadata, capturedClassGenericArgs, capturedClassData, capturedContext);
+                                    // Pass null for builderContext - CreateInstance will use TestContext.Current during execution
+                                    instanceFactory = () => CreateInstance(capturedMetadata, capturedClassGenericArgs, capturedClassData, null);
                                 }
 
                                 var testData = new TestData
@@ -297,6 +316,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     MethodDataLoopIndex = methodDataLoopIndex,
                                     MethodData = methodData,
                                     RepeatIndex = i,
+                                    InheritanceDepth = metadata.InheritanceDepth,
                                     ResolvedClassGenericArguments = resolvedClassGenericArgs,
                                     ResolvedMethodGenericArguments = resolvedMethodGenericArgs
                                 };
@@ -309,11 +329,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     test.Context.SkipReason = basicSkipReason;
                                 }
                                 tests.Add(test);
-
-                                contextAccessor.Current = new TestBuilderContext
-                                {
-                                    TestMetadata = metadata.MethodMetadata
-                                };
+                                
+                                // Context already updated at the beginning of the loop before calling factories
                             }
                         }
                     }
@@ -618,14 +635,15 @@ internal sealed class TestBuilder : ITestBuilder
             ClassInstance = PlaceholderInstance.Instance,
             TestMethodArguments = testData.MethodData,
             TestClassArguments = testData.ClassData,
-            TestFilePath = metadata.FilePath ?? "Unknown",
-            TestLineNumber = metadata.LineNumber ?? 0,
+            TestFilePath = metadata.FilePath,
+            TestLineNumber = metadata.LineNumber,
             ReturnType = metadata.MethodMetadata.ReturnType ?? typeof(void),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = attributes,
             MethodGenericArguments = testData.ResolvedMethodGenericArguments,
-            ClassGenericArguments = testData.ResolvedClassGenericArguments
-            // Don't set Timeout and RetryLimit here - let discovery event receivers set them
+            ClassGenericArguments = testData.ResolvedClassGenericArguments,
+            Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
+            // Don't set RetryLimit here - let discovery event receivers set it
         };
 
         var context = _contextProvider.CreateTestContext(
@@ -687,10 +705,11 @@ internal sealed class TestBuilder : ITestBuilder
             TestMethodArguments = [],
             TestClassArguments = [],
             TestFilePath = metadata.FilePath ?? "Unknown",
-            TestLineNumber = metadata.LineNumber ?? 0,
+            TestLineNumber = metadata.LineNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = metadata.AttributeFactory.Invoke(),
+            Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
         };
     }
 
@@ -712,15 +731,9 @@ internal sealed class TestBuilder : ITestBuilder
 
     private static void TrackDataSourceObjects(TestContext context, object?[] classArguments, object?[] methodArguments)
     {
-        foreach (var arg in classArguments)
-        {
-            ObjectTracker.TrackObject(context.Events, arg);
-        }
-
-        foreach (var arg in methodArguments)
-        {
-            ObjectTracker.TrackObject(context.Events, arg);
-        }
+        // Track all objects at once with a single disposal handler
+        var allObjects = classArguments.Concat(methodArguments);
+        ObjectTracker.TrackObjectsForContext(context.Events, allObjects);
     }
 
     private async Task<AbstractExecutableTest> CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
@@ -944,6 +957,14 @@ internal sealed class TestBuilder : ITestBuilder
         public required int RepeatIndex { get; init; }
 
         /// <summary>
+        /// The depth of inheritance for this test method.
+        /// 0 = method is defined directly in the test class
+        /// 1 = method is inherited from immediate base class
+        /// 2 = method is inherited from base's base class, etc.
+        /// </summary>
+        public int InheritanceDepth { get; set; } = 0;
+
+        /// <summary>
         /// Resolved generic type arguments for the test class.
         /// Will be Type.EmptyTypes if the class is not generic.
         /// </summary>
@@ -982,7 +1003,9 @@ internal sealed class TestBuilder : ITestBuilder
 
         var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
         {
-            TestMetadata = metadata.MethodMetadata
+            TestMetadata = metadata.MethodMetadata,
+            Events = new TestContextEvents(),
+            ObjectBag = new Dictionary<string, object?>()
         });
 
         // Check for circular dependency
@@ -1086,7 +1109,8 @@ internal sealed class TestBuilder : ITestBuilder
                     MethodDataSourceAttributeIndex = 0,
                     MethodDataLoopIndex = 0,
                     MethodData = [],
-                    RepeatIndex = 0
+                    RepeatIndex = 0,
+                    InheritanceDepth = metadata.InheritanceDepth
                 };
 
                 try
@@ -1145,7 +1169,8 @@ internal sealed class TestBuilder : ITestBuilder
                 MethodDataSourceAttributeIndex = methodDataAttributeIndex,
                 MethodDataLoopIndex = methodDataLoopIndex,
                 MethodData = methodData,
-                RepeatIndex = repeatIndex
+                RepeatIndex = repeatIndex,
+                InheritanceDepth = metadata.InheritanceDepth
             };
 
             // Resolve generic types
@@ -1211,9 +1236,21 @@ internal sealed class TestBuilder : ITestBuilder
                 MethodDataLoopIndex = methodDataLoopIndex,
                 MethodData = methodData,
                 RepeatIndex = repeatIndex,
+                InheritanceDepth = metadata.InheritanceDepth,
                 ResolvedClassGenericArguments = resolvedClassGenericArgs,
                 ResolvedMethodGenericArguments = resolvedMethodGenericArgs
             };
+
+            // Update context BEFORE building the test (for subsequent iterations)
+            if (repeatIndex > 0)
+            {
+                contextAccessor.Current = new TestBuilderContext
+                {
+                    TestMetadata = metadata.MethodMetadata,
+                    Events = new TestContextEvents(),
+                    ObjectBag = new Dictionary<string, object?>()
+                };
+            }
 
             var test = await BuildTestAsync(metadata, testData, contextAccessor.Current);
 
@@ -1221,11 +1258,6 @@ internal sealed class TestBuilder : ITestBuilder
             {
                 test.Context.SkipReason = basicSkipReason;
             }
-
-            contextAccessor.Current = new TestBuilderContext
-            {
-                TestMetadata = metadata.MethodMetadata
-            };
 
             return test;
         }

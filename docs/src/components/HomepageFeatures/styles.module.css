@@ -16,7 +16,7 @@
 .featuresTitle {
   font-size: 2.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -45,7 +45,7 @@
 }
 
 .featureBox {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%);
   border: 1px solid rgba(148, 163, 184, 0.1);
   border-radius: 1rem;
   padding: 2rem;
@@ -73,7 +73,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, #14b8a6 0%, #0ea5e9 100%);
   transform: scaleX(0);
   transition: transform 0.3s ease;
   z-index: 1;
@@ -85,9 +85,9 @@
 
 .featureBox:hover {
   transform: translateY(-4px);
-  border-color: #667eea;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+  border-color: #14b8a6;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+  box-shadow: 0 10px 30px rgba(20, 184, 166, 0.2);
 }
 
 .featureHeader {
@@ -242,13 +242,13 @@
   height: 100px;
   width: 100px;
   margin-bottom: 1rem;
-  filter: drop-shadow(0 4px 6px rgba(102, 126, 234, 0.1));
+  filter: drop-shadow(0 4px 6px rgba(20, 184, 166, 0.1));
   transition: all 0.3s ease;
 }
 
 .featureBox:hover .featureSvg {
   transform: scale(1.1);
-  filter: drop-shadow(0 6px 8px rgba(102, 126, 234, 0.2));
+  filter: drop-shadow(0 6px 8px rgba(20, 184, 166, 0.2));
 }
 
 @media screen and (max-width: 996px) {

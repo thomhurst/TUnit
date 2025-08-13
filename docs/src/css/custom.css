@@ -6,19 +6,19 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #667eea;
-  --ifm-color-primary-dark: #5469e8;
-  --ifm-color-primary-darker: #4a5fe6;
-  --ifm-color-primary-darkest: #2d42d4;
-  --ifm-color-primary-light: #7891ed;
-  --ifm-color-primary-lighter: #829aef;
-  --ifm-color-primary-lightest: #a4b5f3;
+  --ifm-color-primary: #14b8a6;
+  --ifm-color-primary-dark: #0d9488;
+  --ifm-color-primary-darker: #0f766e;
+  --ifm-color-primary-darkest: #115e59;
+  --ifm-color-primary-light: #2dd4bf;
+  --ifm-color-primary-lighter: #5eead4;
+  --ifm-color-primary-lightest: #99f6e4;
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(102, 126, 234, 0.1);
+  --docusaurus-highlighted-code-line-bg: rgba(20, 184, 166, 0.1);
   
   /* Custom Design System Variables */
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-secondary: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  --gradient-primary: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
+  --gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
   --bg-dark: #0a0e27;
   --bg-dark-secondary: #1a1f3a;
   --bg-surface: #1e293b;
@@ -32,8 +32,8 @@
   
   /* Borders and Effects */
   --border-color: rgba(148, 163, 184, 0.1);
-  --shadow-primary: 0 4px 15px rgba(102, 126, 234, 0.3);
-  --shadow-hover: 0 10px 30px rgba(102, 126, 234, 0.2);
+  --shadow-primary: 0 4px 15px rgba(20, 184, 166, 0.3);
+  --shadow-hover: 0 10px 30px rgba(20, 184, 166, 0.2);
   
   /* Syntax Highlighting */
   --syntax-keyword: #e879f9;
@@ -46,14 +46,14 @@
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #667eea;
-  --ifm-color-primary-dark: #5469e8;
-  --ifm-color-primary-darker: #4a5fe6;
-  --ifm-color-primary-darkest: #2d42d4;
-  --ifm-color-primary-light: #7891ed;
-  --ifm-color-primary-lighter: #829aef;
-  --ifm-color-primary-lightest: #a4b5f3;
-  --docusaurus-highlighted-code-line-bg: rgba(102, 126, 234, 0.2);
+  --ifm-color-primary: #14b8a6;
+  --ifm-color-primary-dark: #0d9488;
+  --ifm-color-primary-darker: #0f766e;
+  --ifm-color-primary-darkest: #115e59;
+  --ifm-color-primary-light: #2dd4bf;
+  --ifm-color-primary-lighter: #5eead4;
+  --ifm-color-primary-lightest: #99f6e4;
+  --docusaurus-highlighted-code-line-bg: rgba(20, 184, 166, 0.2);
   --ifm-background-color: #0f172a;
   --ifm-background-surface-color: #1e293b;
   --ifm-navbar-background-color: transparent;
@@ -61,7 +61,7 @@
 }
 
 /* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@600;700&family=Russo+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@600;700&family=Russo+One&family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 /* Global Enhancements */
 * {
@@ -92,7 +92,7 @@ body {
 
 /* Better code block contrast */
 [data-theme='dark'] code {
-  background: rgba(99, 102, 241, 0.15) !important;
+  background: rgba(20, 184, 166, 0.15) !important;
   color: #67e8f9 !important;
 }
 
@@ -241,7 +241,16 @@ div[class*="codeScrollWrapper"] > div {
 /* Navbar text colors */
 .navbar__title {
   color: var(--text-primary) !important;
-  font-weight: 600;
+  font-family: 'Orbitron', 'Space Grotesk', monospace !important;
+  font-weight: 700;
+  font-size: 1.5rem !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 50%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
 }
 
 .navbar__link {
@@ -251,13 +260,13 @@ div[class*="codeScrollWrapper"] > div {
 }
 
 .navbar__link:hover {
-  color: #818cf8 !important;
-  text-shadow: 0 0 8px rgba(129, 140, 248, 0.5);
+  color: #2dd4bf !important;
+  text-shadow: 0 0 8px rgba(45, 212, 191, 0.5);
 }
 
 .navbar__link--active {
-  color: #818cf8 !important;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #2dd4bf !important;
+  background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -271,8 +280,13 @@ div[class*="codeScrollWrapper"] > div {
 }
 
 .navbar__brand:hover {
-  color: #818cf8 !important;
+  color: #2dd4bf !important;
   text-decoration: none !important;
+}
+
+/* Hide the logo image since we have TUNIT text */
+.navbar__logo {
+  display: none !important;
 }
 
 /* Navbar items */
@@ -290,187 +304,54 @@ div[class*="codeScrollWrapper"] > div {
   color: #f1f5f9 !important;
 }
 
-/* Mobile Navbar Sidebar Fix */
-.navbar-sidebar {
-  background: linear-gradient(180deg, #1a1f3a 0%, #0f172a 100%) !important;
-  color: #f1f5f9 !important;
-  height: 100vh !important;
-  width: 100% !important;
-  max-width: 100vw !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  z-index: 999 !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
+/* Mobile Navbar Sidebar - Visual styling only */
+@media (max-width: 996px) {
+  .navbar-sidebar {
+    background: #0f172a !important;
+    height: 100vh !important;
+    height: 100dvh !important; /* For better mobile support */
+  }
+  
+  .navbar-sidebar__brand {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(20, 184, 166, 0.15) !important;
+  }
+  
+  .navbar-sidebar__items {
+    background: transparent !important;
+  }
+  
+  /* Link colors and hover effects */
+  .navbar-sidebar .menu__link,
+  .navbar-sidebar a {
+    color: #cbd5e1 !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  .navbar-sidebar a:hover {
+    color: #2dd4bf !important;
+    background: rgba(20, 184, 166, 0.1) !important;
+  }
+  
+  /* Active link styling */
+  .navbar-sidebar .menu__link--active,
+  .navbar-sidebar [aria-current="page"] {
+    color: #2dd4bf !important;
+    background: rgba(20, 184, 166, 0.15) !important;
+  }
 }
 
-.navbar-sidebar__backdrop {
-  background: rgba(0, 0, 0, 0.8) !important;
-}
-
-.navbar-sidebar__brand {
-  background: transparent !important;
-  border-bottom: 1px solid rgba(102, 126, 234, 0.1) !important;
-  padding: 1rem !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-}
-
-.navbar-sidebar__close {
-  color: #f1f5f9 !important;
-  background: transparent !important;
-  border: none !important;
-  font-size: 1.5rem !important;
-  cursor: pointer !important;
-  padding: 0.5rem !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 2.5rem !important;
-  height: 2.5rem !important;
-  position: relative !important;
-  z-index: 10 !important;
-}
-
-.navbar-sidebar__close:hover {
-  background: rgba(99, 102, 241, 0.1) !important;
-  border-radius: 0.5rem !important;
-}
-
-/* Hide the duplicate pseudo-element since SVG is already there */
-.navbar-sidebar__close::after,
-.navbar-sidebar__close::before {
-  content: none !important;
-  display: none !important;
-}
-
-.navbar-sidebar__items {
-  padding: 1rem !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  max-height: calc(100vh - 80px) !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.navbar-sidebar__item {
-  margin: 0.5rem 0 !important;
-}
-
-/* Clean up navbar items in mobile sidebar */
-.navbar-sidebar .navbar__items {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 0.5rem !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  width: 100% !important;
-}
-
-.navbar-sidebar .navbar__items--right {
-  margin-top: 2rem !important;
-  padding-top: 1rem !important;
-  border-top: 1px solid rgba(102, 126, 234, 0.1) !important;
-}
-
-.navbar-sidebar .navbar__item {
-  display: block !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.navbar-sidebar .navbar__link {
-  color: #cbd5e1 !important;
-  text-decoration: none !important;
-  display: flex !important;
-  align-items: center !important;
-  padding: 0.75rem 1rem !important;
-  border-radius: 0.5rem !important;
-  transition: all 0.2s ease !important;
-  font-size: 1rem !important;
-  font-weight: 500 !important;
-  width: 100% !important;
-}
-
-.navbar-sidebar .navbar__link:hover {
-  background: rgba(99, 102, 241, 0.1) !important;
-  color: #818cf8 !important;
-  text-decoration: none !important;
-}
-
-.navbar-sidebar .navbar__link--active {
-  background: rgba(99, 102, 241, 0.15) !important;
-  color: #818cf8 !important;
-  font-weight: 600 !important;
-}
-
-/* Hide external link icons but not the close button */
-.navbar-sidebar .navbar__link svg,
-.navbar-sidebar .navbar__link [class*="icon"],
-.navbar-sidebar .iconExternalLink,
-.navbar-sidebar [class*="Icon"]:not(.navbar-sidebar__close),
-.navbar-sidebar img[alt*="external"],
-.navbar-sidebar span[aria-label*="external"] {
-  display: none !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  opacity: 0 !important;
-}
-
-/* Ensure only one close button SVG is visible */
-.navbar-sidebar__close svg {
-  display: block !important;
-  visibility: visible !important;
-  width: 1.25rem !important;
-  height: 1.25rem !important;
-  opacity: 1 !important;
-  fill: #f1f5f9 !important;
-}
-
-/* Hide any duplicate close elements */
-.navbar-sidebar__close > *:not(:first-child) {
-  display: none !important;
-}
-
-/* Hide Docusaurus default external link indicator */
-.navbar-sidebar .navbar__link > span:last-child:not(:first-child) {
-  display: none !important;
-}
-
-/* Clean external link styling without icons */
-.navbar-sidebar .navbar__link[href^="http"] {
-  position: relative !important;
-  padding-right: 2rem !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* Add simple text indicator for external links */
-.navbar-sidebar .navbar__link[href^="http"]::after {
-  content: "↗" !important;
-  position: absolute !important;
-  right: 1rem !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  font-size: 1rem !important;
-  opacity: 0.4 !important;
-  font-weight: normal !important;
-  display: block !important;
-}
 
 /* Search box styling */
 .DocSearch-Button {
-  background: rgba(99, 102, 241, 0.1) !important;
-  border: 1px solid rgba(99, 102, 241, 0.2) !important;
+  background: rgba(20, 184, 166, 0.1) !important;
+  border: 1px solid rgba(20, 184, 166, 0.2) !important;
   color: #cbd5e1 !important;
 }
 
 .DocSearch-Button:hover {
-  background: rgba(99, 102, 241, 0.15) !important;
-  border-color: rgba(99, 102, 241, 0.3) !important;
+  background: rgba(20, 184, 166, 0.15) !important;
+  border-color: rgba(20, 184, 166, 0.3) !important;
 }
 
 .DocSearch-Button-Placeholder {
@@ -478,8 +359,8 @@ div[class*="codeScrollWrapper"] > div {
 }
 
 .DocSearch-Button-Key {
-  background: rgba(99, 102, 241, 0.2) !important;
-  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  background: rgba(20, 184, 166, 0.2) !important;
+  border: 1px solid rgba(20, 184, 166, 0.3) !important;
   color: #cbd5e1 !important;
   box-shadow: none !important;
 }
@@ -495,7 +376,7 @@ div[class*="codeScrollWrapper"] > div {
 }
 
 .navbar__items--right button[class*="toggle"]:hover {
-  background: rgba(99, 102, 241, 0.1) !important;
+  background: rgba(20, 184, 166, 0.1) !important;
 }
 
 /* Footer enhancements */
@@ -513,21 +394,21 @@ div[class*="codeScrollWrapper"] > div {
   /* Sidebar */
   --ifm-sidebar-background: linear-gradient(180deg, #1a1f3a 0%, #0f172a 100%) !important;
   --ifm-menu-color: #cbd5e1 !important;
-  --ifm-menu-color-active: #818cf8 !important;
-  --ifm-menu-color-background-active: rgba(99, 102, 241, 0.1) !important;
-  --ifm-menu-color-background-hover: rgba(99, 102, 241, 0.05) !important;
+  --ifm-menu-color-active: #2dd4bf !important;
+  --ifm-menu-color-background-active: rgba(20, 184, 166, 0.1) !important;
+  --ifm-menu-color-background-hover: rgba(20, 184, 166, 0.05) !important;
   
   /* Breadcrumbs */
-  --ifm-breadcrumb-color-active: #818cf8 !important;
+  --ifm-breadcrumb-color-active: #2dd4bf !important;
   --ifm-breadcrumb-item-background-active: transparent !important;
   
   /* Table of contents */
-  --ifm-toc-border-color: rgba(99, 102, 241, 0.1) !important;
+  --ifm-toc-border-color: rgba(20, 184, 166, 0.1) !important;
   --ifm-toc-link-color: #94a3b8 !important;
   
   /* Links */
-  --ifm-link-color: #818cf8 !important;
-  --ifm-link-hover-color: #a78bfa !important;
+  --ifm-link-color: #2dd4bf !important;
+  --ifm-link-hover-color: #5eead4 !important;
   
   /* Cards and surfaces */
   --ifm-card-background-color: #1e293b !important;
@@ -538,13 +419,13 @@ div[class*="codeScrollWrapper"] > div {
   --ifm-heading-font-weight: 600 !important;
   
   /* Pagination */
-  --ifm-pagination-nav-color-hover: rgba(99, 102, 241, 0.1) !important;
+  --ifm-pagination-nav-color-hover: rgba(20, 184, 166, 0.1) !important;
 }
 
 /* Sidebar styling */
 [data-theme='dark'] .theme-doc-sidebar-container {
   background: linear-gradient(180deg, #1a1f3a 0%, #0f172a 100%) !important;
-  border-right: 1px solid rgba(99, 102, 241, 0.1) !important;
+  border-right: 1px solid rgba(20, 184, 166, 0.1) !important;
 }
 
 [data-theme='dark'] .menu__link {
@@ -554,12 +435,12 @@ div[class*="codeScrollWrapper"] > div {
 
 [data-theme='dark'] .menu__link:hover {
   color: #f1f5f9 !important;
-  background: rgba(99, 102, 241, 0.05) !important;
+  background: rgba(20, 184, 166, 0.05) !important;
 }
 
 [data-theme='dark'] .menu__link--active {
-  color: #818cf8 !important;
-  background: rgba(99, 102, 241, 0.1) !important;
+  color: #2dd4bf !important;
+  background: rgba(20, 184, 166, 0.1) !important;
   font-weight: 600;
 }
 
@@ -574,12 +455,12 @@ div[class*="codeScrollWrapper"] > div {
 }
 
 [data-theme='dark'] .breadcrumbs__link:hover {
-  color: #818cf8 !important;
+  color: #2dd4bf !important;
 }
 
 [data-theme='dark'] .breadcrumbs__item--active .breadcrumbs__link {
-  color: #818cf8 !important;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #2dd4bf !important;
+  background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -608,7 +489,7 @@ div[class*="codeScrollWrapper"] > div {
   margin-top: 2rem !important;
   margin-bottom: 1rem !important;
   padding-bottom: 0.5rem !important;
-  border-bottom: 1px solid rgba(99, 102, 241, 0.1) !important;
+  border-bottom: 1px solid rgba(20, 184, 166, 0.1) !important;
 }
 
 [data-theme='dark'] article h3 {
@@ -619,7 +500,7 @@ div[class*="codeScrollWrapper"] > div {
 
 /* Table of contents on the right */
 [data-theme='dark'] .table-of-contents {
-  border-left: 1px solid rgba(99, 102, 241, 0.1) !important;
+  border-left: 1px solid rgba(20, 184, 166, 0.1) !important;
 }
 
 [data-theme='dark'] .table-of-contents__link {
@@ -632,22 +513,22 @@ div[class*="codeScrollWrapper"] > div {
 }
 
 [data-theme='dark'] .table-of-contents__link--active {
-  color: #818cf8 !important;
+  color: #2dd4bf !important;
   font-weight: 600;
 }
 
 /* Pagination (Next/Previous) */
 [data-theme='dark'] .pagination-nav__link {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%) !important;
-  border: 1px solid rgba(99, 102, 241, 0.1) !important;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%) !important;
+  border: 1px solid rgba(20, 184, 166, 0.1) !important;
   transition: all 0.3s ease;
 }
 
 [data-theme='dark'] .pagination-nav__link:hover {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
-  border-color: #667eea !important;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%) !important;
+  border-color: #14b8a6 !important;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2);
 }
 
 [data-theme='dark'] .pagination-nav__label {
@@ -665,12 +546,12 @@ div[class*="codeScrollWrapper"] > div {
 /* Code blocks in docs */
 [data-theme='dark'] article pre {
   background: #1e293b !important;
-  border: 1px solid rgba(99, 102, 241, 0.1) !important;
+  border: 1px solid rgba(20, 184, 166, 0.1) !important;
 }
 
 /* Inline code */
 [data-theme='dark'] article code {
-  background: rgba(99, 102, 241, 0.15) !important;
+  background: rgba(20, 184, 166, 0.15) !important;
   color: #a5f3fc !important;
   padding: 0.2rem 0.4rem !important;
   border-radius: 0.25rem !important;
@@ -679,28 +560,28 @@ div[class*="codeScrollWrapper"] > div {
 
 /* Blockquotes */
 [data-theme='dark'] blockquote {
-  background: linear-gradient(90deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%) !important;
-  border-left: 4px solid #667eea !important;
+  background: linear-gradient(90deg, rgba(20, 184, 166, 0.1) 0%, transparent 100%) !important;
+  border-left: 4px solid #14b8a6 !important;
   color: #cbd5e1 !important;
 }
 
 /* Tables */
 [data-theme='dark'] table {
-  border: 1px solid rgba(99, 102, 241, 0.1) !important;
+  border: 1px solid rgba(20, 184, 166, 0.1) !important;
 }
 
 [data-theme='dark'] table thead {
-  background: rgba(99, 102, 241, 0.05) !important;
+  background: rgba(20, 184, 166, 0.05) !important;
 }
 
 [data-theme='dark'] table th {
-  border-color: rgba(99, 102, 241, 0.1) !important;
+  border-color: rgba(20, 184, 166, 0.1) !important;
   color: #e2e8f0 !important;
   font-weight: 600 !important;
 }
 
 [data-theme='dark'] table td {
-  border-color: rgba(99, 102, 241, 0.1) !important;
+  border-color: rgba(20, 184, 166, 0.1) !important;
   color: #cbd5e1 !important;
 }
 
@@ -711,11 +592,11 @@ div[class*="codeScrollWrapper"] > div {
 
 .button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
 }
 
 .button:focus-visible {
-  outline: 3px solid #667eea;
+  outline: 3px solid #14b8a6;
   outline-offset: 2px;
 }
 
@@ -739,6 +620,7 @@ div[class*="codeScrollWrapper"] > div {
 }
 
 /* Mobile Responsive Improvements */
+
 @media screen and (max-width: 996px) {
   /* Hide scrollbar on mobile while keeping scroll functionality */
   html {
@@ -782,10 +664,16 @@ div[class*="codeScrollWrapper"] > div {
     margin-right: 0;
   }
   
-  /* Additional mobile sidebar fixes */
-  .navbar-sidebar {
-    display: block !important;
+  /* Add spacing between TUNIT text and burger menu */
+  .navbar__brand {
+    margin-right: auto !important;
+    padding-right: 1.5rem !important;
   }
+  
+  .navbar__title {
+    margin-left: 0.5rem !important;
+  }
+  
   
   /* Ensure proper logo display */
   .navbar-sidebar .navbar__logo {
@@ -794,9 +682,15 @@ div[class*="codeScrollWrapper"] > div {
   }
   
   .navbar-sidebar .navbar__title {
-    font-size: 1.25rem !important;
+    font-family: 'Orbitron', 'Space Grotesk', monospace !important;
+    font-size: 1.5rem !important;
     font-weight: 700 !important;
-    color: #f1f5f9 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 50%, #0ea5e9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   
   /* Fix dark mode toggle in mobile menu */
@@ -804,30 +698,9 @@ div[class*="codeScrollWrapper"] > div {
     margin: 1rem 0 !important;
   }
   
-  /* Handle back navigation / breadcrumbs in mobile */
-  .navbar-sidebar .menu__list-item--collapsed .menu__link--sublist-caret:after,
-  .navbar-sidebar .menu__link--sublist-caret:after {
-    display: none !important;
-  }
   
-  /* Hide the "Back" arrow and text in the upper right */
-  .navbar-sidebar [class*="collapseSidebarButton"],
-  .navbar-sidebar [aria-label*="collapse"],
-  .navbar-sidebar button[class*="back"] {
-    display: none !important;
-  }
   
-  /* Ensure Tutorial link is visible */
-  .navbar-sidebar .navbar__link[href*="docs"] {
-    display: flex !important;
-  }
   
-  /* Ensure text doesn't get cut off */
-  .navbar-sidebar .navbar__link {
-    white-space: normal !important;
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
-  }
   
   /* Ensure code blocks don't overflow and are properly aligned */
   pre {

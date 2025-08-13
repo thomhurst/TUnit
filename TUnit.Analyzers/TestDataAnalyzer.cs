@@ -615,6 +615,20 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (isTuples)
             {
+                // Check if any test method parameters are tuple types when data source returns tuples
+                // This causes a runtime mismatch: data source provides separate arguments, but method expects tuple parameter
+                var tupleParameters = testParameterTypes.Where(p => p is INamedTypeSymbol { IsTupleType: true }).ToArray();
+                if (tupleParameters.Any())
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        Rules.WrongArgumentTypeTestData,
+                        attribute.GetLocation(),
+                        string.Join(", ", unwrappedTypes),
+                        string.Join(", ", testParameterTypes))
+                    );
+                    return;
+                }
+
                 if (unwrappedTypes.Length != testParameterTypes.Length)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
@@ -744,16 +758,17 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             type = genericType.TypeArguments[0];
         }
 
-        if (testParameterTypes.Length == 1
-            && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
-        {
-            return ImmutableArray.Create(type);
-        }
-
+        // Check for tuple types first before doing conversion checks
         if (type is INamedTypeSymbol { IsTupleType: true } tupleType)
         {
             isTuples = true;
             return ImmutableArray.CreateRange(tupleType.TupleElements.Select(x => x.Type));
+        }
+
+        if (testParameterTypes.Length == 1
+            && context.Compilation.HasImplicitConversionOrGenericParameter(type, testParameterTypes[0]))
+        {
+            return ImmutableArray.Create(type);
         }
 
         // Handle array cases - when a data source returns IEnumerable<T[]> or IAsyncEnumerable<T[]>,

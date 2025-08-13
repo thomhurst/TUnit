@@ -34,6 +34,9 @@ internal sealed class Tests_Casted_Integer_To_Short_Converts_TestSource_GUID : g
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 8,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1603.Tests),
@@ -155,6 +158,9 @@ internal sealed class Tests_Integer_To_Short_Converts_TestSource_GUID : global::
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 15,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1603.Tests),

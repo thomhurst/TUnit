@@ -158,9 +158,10 @@ public class CustomDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAc
         yield return async () =>
         {
             // Use the DataSourceHelpers to create objects with init-only properties properly
-            if (DataSourceHelpers.TryCreateWithInitializer(typeof(T), dataGeneratorMetadata.TestInformation, dataGeneratorMetadata.TestSessionId, out var createdInstance))
+            var (success, createdInstance) = await DataSourceHelpers.TryCreateWithInitializerAsync(typeof(T), dataGeneratorMetadata.TestInformation, dataGeneratorMetadata.TestSessionId);
+            if (success)
             {
-                return (T)createdInstance;
+                return (T)createdInstance!;
             }
             
             // Fallback to regular Activator if no specialized creator is available

@@ -151,6 +151,9 @@ internal sealed class MethodDataSourceDrivenWithCancellationTokenTests_MyTest_Te
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 12,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),

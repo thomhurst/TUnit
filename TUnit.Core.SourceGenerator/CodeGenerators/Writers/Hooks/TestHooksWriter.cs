@@ -39,7 +39,7 @@ public class TestHooksWriter : BaseHookWriter
 
         sourceBuilder.Append("new global::TUnit.Core.Hooks.InstanceHookMethod");
         sourceBuilder.Append("{");
-        sourceBuilder.Append($"ClassType = typeof({model.FullyQualifiedTypeName}),");
+        sourceBuilder.Append($"InitClassType = typeof({model.FullyQualifiedTypeName}),");
         sourceBuilder.Append("MethodInfo = ");
         SourceInformationWriter.GenerateMethodInformation(sourceBuilder, model.Context.SemanticModel.Compilation, model.ClassType, model.Method, null, ',');
 

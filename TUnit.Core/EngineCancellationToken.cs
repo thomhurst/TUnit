@@ -14,6 +14,9 @@ public class EngineCancellationToken : IDisposable
     /// Gets the cancellation token.
     /// </summary>
     public CancellationToken Token { get; private set; }
+    
+    private CancellationTokenSource? _forcefulExitCts;
+    private volatile bool _forcefulExitStarted;
 
     /// <summary>
     /// Initializes the cancellation token with a linked token source.
@@ -24,19 +27,40 @@ public class EngineCancellationToken : IDisposable
         CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         Token = CancellationTokenSource.Token;
 
-        Console.CancelKeyPress += (sender, e) =>
+        Console.CancelKeyPress += OnCancelKeyPress;
+    }
+    
+    private void OnCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+    {
+        // Cancel the test execution
+        if (!CancellationTokenSource.IsCancellationRequested)
         {
-            if (!CancellationTokenSource.IsCancellationRequested)
-            {
-                CancellationTokenSource.Cancel();
-            }
+            CancellationTokenSource.Cancel();
+        }
 
-            _ = Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(_ =>
+        // Only start the forceful exit timer once
+        if (!_forcefulExitStarted)
+        {
+            _forcefulExitStarted = true;
+            
+            // Cancel any previous forceful exit timer
+            _forcefulExitCts?.Cancel();
+            _forcefulExitCts?.Dispose();
+            _forcefulExitCts = new CancellationTokenSource();
+            
+            // Start a new forceful exit timer
+            _ = Task.Delay(TimeSpan.FromSeconds(10), _forcefulExitCts.Token).ContinueWith(t =>
             {
-                Console.WriteLine("Forcefully terminating the process due to cancellation request.");
-                Environment.Exit(1);
-            });
-        };
+                if (!t.IsCanceled)
+                {
+                    Console.WriteLine("Forcefully terminating the process due to cancellation request.");
+                    Environment.Exit(1);
+                }
+            }, TaskScheduler.Default);
+        }
+        
+        // Prevent the default behavior (immediate termination)
+        e.Cancel = true;
     }
 
     /// <summary>
@@ -44,6 +68,9 @@ public class EngineCancellationToken : IDisposable
     /// </summary>
     public void Dispose()
     {
+        Console.CancelKeyPress -= OnCancelKeyPress;
+        _forcefulExitCts?.Cancel();
+        _forcefulExitCts?.Dispose();
         CancellationTokenSource.Dispose();
     }
 }

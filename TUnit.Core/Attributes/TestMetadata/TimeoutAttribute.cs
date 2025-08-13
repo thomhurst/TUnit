@@ -32,7 +32,7 @@ namespace TUnit.Core;
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class TimeoutAttribute(int timeoutInMilliseconds) : TUnitAttribute, ITestDiscoveryEventReceiver, IScopedAttribute<TimeoutAttribute>
+public class TimeoutAttribute(int timeoutInMilliseconds) : TUnitAttribute, ITestDiscoveryEventReceiver, IHookRegisteredEventReceiver, IScopedAttribute<TimeoutAttribute>
 {
     /// <inheritdoc />
     public int Order => 0;
@@ -47,6 +47,13 @@ public class TimeoutAttribute(int timeoutInMilliseconds) : TUnitAttribute, ITest
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
         context.TestDetails.Timeout = Timeout;
+        return default(ValueTask);
+    }
+
+    /// <inheritdoc />
+    public ValueTask OnHookRegistered(HookRegisteredContext context)
+    {
+        context.Timeout = Timeout;
         return default(ValueTask);
     }
 }
