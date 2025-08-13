@@ -803,7 +803,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
         if (isInstance)
         {
-            writer.AppendLine($"ClassType = typeof({hook.TypeSymbol.GloballyQualified()}),");
+            writer.AppendLine($"InitClassType = typeof({hook.TypeSymbol.GloballyQualified()}),");
         }
 
         writer.Append("MethodInfo = ");
