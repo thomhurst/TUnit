@@ -16,6 +16,7 @@ using TUnit.Engine.Discovery;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
@@ -44,6 +45,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public ITestFinder TestFinder { get; }
     public TUnitInitializer Initializer { get; }
     public CancellationTokenSource FailFastCancellationSource { get; }
+    public ParallelLimitLockProvider ParallelLimitLockProvider { get; }
 
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
@@ -59,7 +61,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var outputDevice = frameworkServiceProvider.GetOutputDevice();
         CommandLineOptions = frameworkServiceProvider.GetCommandLineOptions();
         var configuration = frameworkServiceProvider.GetConfiguration();
-        
+
         TestContext.Configuration = new ConfigurationAdapter(configuration);
 
         VerbosityService = Register(new VerbosityService(CommandLineOptions));
@@ -78,12 +80,15 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         MessageBus = Register(new TUnitMessageBus(
             extension,
             CommandLineOptions,
+            VerbosityService,
             frameworkServiceProvider,
             context));
 
         CancellationToken = Register(new EngineCancellationToken());
 
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
+
+        ParallelLimitLockProvider = Register(new ParallelLimitLockProvider());
 
         ContextProvider = Register(new ContextProvider(this, TestSessionId, Filter?.ToString()));
 
@@ -128,7 +133,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // Create single test executor with ExecutionContext support
         var singleTestExecutor = Register<ISingleTestExecutor>(
-            new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService, context.Request.Session.SessionUid));
+            new SingleTestExecutor(Logger, EventReceiverOrchestrator, HookCollectionService, CancellationToken, context.Request.Session.SessionUid));
 
         // Create the HookOrchestratingTestExecutorAdapter
         // Note: We'll need to update this to handle dynamic dependencies properly
@@ -145,14 +150,24 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 isFailFastEnabled,
                 FailFastCancellationSource,
                 Logger,
-                HookOrchestrator));
+                HookOrchestrator,
+                ParallelLimitLockProvider));
+
+        // Create scheduler configuration from command line options
+        var testGroupingService = Register<ITestGroupingService>(new TestGroupingService());
+        var testScheduler = Register<ITestScheduler>(new TestScheduler(
+            Logger,
+            testGroupingService,
+            MessageBus,
+            CommandLineOptions,
+            ParallelLimitLockProvider));
 
         TestExecutor = Register(new TestExecutor(
             singleTestExecutor,
             CommandLineOptions,
             Logger,
             loggerFactory,
-            testScheduler: null,
+            testScheduler,
             serviceProvider: this,
             hookOrchestratingTestExecutorAdapter,
             ContextProvider,
@@ -192,7 +207,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     private static bool GetUseSourceGeneration(ICommandLineOptions commandLineOptions)
     {
-        if (commandLineOptions.TryGetOptionArgumentList(CommandLineProviders.ReflectionModeCommandProvider.ReflectionMode, out _))
+        if (commandLineOptions.TryGetOptionArgumentList(ReflectionModeCommandProvider.ReflectionMode, out _))
         {
             return false; // Reflection mode explicitly requested
         }
@@ -212,10 +227,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         }
 
         // Check environment variable
-        var envMode = Environment.GetEnvironmentVariable("TUNIT_EXECUTION_MODE");
+        var envMode = EnvironmentVariableCache.Get("TUNIT_EXECUTION_MODE");
         if (!string.IsNullOrEmpty(envMode))
         {
-            var mode = envMode.ToLowerInvariant();
+            var mode = envMode!.ToLowerInvariant();
             if (mode == "sourcegeneration" || mode == "aot")
             {
                 return true;
@@ -235,7 +250,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         {
             if (service is IAsyncDisposable asyncDisposable)
             {
-                await asyncDisposable.DisposeAsync();
+                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
             }
             else if (service is IDisposable disposable)
             {

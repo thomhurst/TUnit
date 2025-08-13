@@ -13,6 +13,7 @@
     <ItemGroup>
         <PackageReference Include="CliWrap" />
         <PackageReference Include="MessagePack" />
+        <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
         <PackageReference Include="Microsoft.Testing.Platform" />
         <PackageReference Include="Sourcy.DotNet">
           <PrivateAssets>all</PrivateAssets>

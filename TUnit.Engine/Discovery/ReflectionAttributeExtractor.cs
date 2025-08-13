@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
@@ -10,26 +11,76 @@ namespace TUnit.Engine.Discovery;
 internal static class ReflectionAttributeExtractor
 {
     /// <summary>
+    /// Cache for attribute lookups to avoid repeated reflection calls
+    /// </summary>
+    private static readonly ConcurrentDictionary<AttributeCacheKey, Attribute?> _attributeCache = new();
+
+    /// <summary>
+    /// Composite cache key combining type, method, and attribute type information
+    /// </summary>
+    private readonly struct AttributeCacheKey : IEquatable<AttributeCacheKey>
+    {
+        public readonly Type TestClass;
+        public readonly MethodInfo? TestMethod;
+        public readonly Type AttributeType;
+
+        public AttributeCacheKey(Type testClass, MethodInfo? testMethod, Type attributeType)
+        {
+            TestClass = testClass;
+            TestMethod = testMethod;
+            AttributeType = attributeType;
+        }
+
+        public bool Equals(AttributeCacheKey other)
+        {
+            return TestClass == other.TestClass &&
+                   TestMethod == other.TestMethod &&
+                   AttributeType == other.AttributeType;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is AttributeCacheKey other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hash = TestClass.GetHashCode();
+                hash = (hash * 397) ^ (TestMethod?.GetHashCode() ?? 0);
+                hash = (hash * 397) ^ AttributeType.GetHashCode();
+                return hash;
+            }
+        }
+    }
+    /// <summary>
     /// Extracts attributes from method, class, and assembly levels with proper precedence
     /// </summary>
     public static T? GetAttribute<T>(Type testClass, MethodInfo? testMethod = null) where T : Attribute
     {
-        if (testMethod != null)
+        var cacheKey = new AttributeCacheKey(testClass, testMethod, typeof(T));
+        
+        return (T?)_attributeCache.GetOrAdd(cacheKey, key =>
         {
-            var methodAttr = testMethod.GetCustomAttribute<T>();
-            if (methodAttr != null)
+            // Original lookup logic preserved
+            if (key.TestMethod != null)
             {
-                return methodAttr;
+                var methodAttr = key.TestMethod.GetCustomAttribute<T>();
+                if (methodAttr != null)
+                {
+                    return methodAttr;
+                }
             }
-        }
 
-        var classAttr = testClass.GetCustomAttribute<T>();
-        if (classAttr != null)
-        {
-            return classAttr;
-        }
+            var classAttr = key.TestClass.GetCustomAttribute<T>();
+            if (classAttr != null)
+            {
+                return classAttr;
+            }
 
-        return testClass.Assembly.GetCustomAttribute<T>();
+            return key.TestClass.Assembly.GetCustomAttribute<T>();
+        });
     }
 
     /// <summary>
@@ -67,24 +118,6 @@ internal static class ReflectionAttributeExtractor
         var skipAttr = GetAttribute<SkipAttribute>(testClass, testMethod);
         skipReason = skipAttr?.Reason;
         return skipAttr != null;
-    }
-
-    public static int? ExtractTimeout(Type testClass, MethodInfo testMethod)
-    {
-        var timeoutAttr = GetAttribute<TimeoutAttribute>(testClass, testMethod);
-        return timeoutAttr != null ? (int)timeoutAttr.Timeout.TotalMilliseconds : null;
-    }
-
-    public static int ExtractRetryCount(Type testClass, MethodInfo testMethod)
-    {
-        var retryAttr = GetAttribute<RetryAttribute>(testClass, testMethod);
-        return retryAttr?.Times ?? 0;
-    }
-
-    public static int ExtractRepeatCount(Type testClass, MethodInfo testMethod)
-    {
-        var repeatAttr = GetAttribute<RepeatAttribute>(testClass, testMethod);
-        return repeatAttr?.Times ?? 0;
     }
 
     public static bool CanRunInParallel(Type testClass, MethodInfo testMethod)

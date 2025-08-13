@@ -29,6 +29,16 @@ public class Counter
         }
     }
 
+    public int Add(int value)
+    {
+        lock (_locker)
+        {
+            _count += value;
+            OnCountChanged?.Invoke(this, _count);
+            return _count;
+        }
+    }
+
     public int CurrentCount
     {
         get

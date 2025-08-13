@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -24,75 +25,72 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     ];
     private static readonly Lock _lock = new();
     private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
+    private static readonly ConcurrentDictionary<Type, MethodInfo[]> _typeMethodsCache = new();
 
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
         // Disable assembly loading event handler to prevent recursive issues
         // This was causing problems when assemblies were loaded during scanning
 
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(ShouldScanAssembly)
-            .ToList();
-
-        Console.WriteLine($"Scanning {assemblies.Count} assemblies for tests...");
-
-        // Use indexed collection to maintain order
-        var resultsByIndex = new ConcurrentDictionary<int, List<TestMetadata>>();
-
-        // Use true parallel processing with thread pool threads
-        var parallelOptions = new ParallelOptions
+        // Optimize: Pre-filter and allocate array instead of LINQ ToList()
+        var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var assembliesList = new List<Assembly>(allAssemblies.Length);
+        foreach (var assembly in allAssemblies)
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount
-        };
+            if (ShouldScanAssembly(assembly))
+            {
+                assembliesList.Add(assembly);
+            }
+        }
+        var assemblies = assembliesList;
 
-        await Task.Run(() =>
+
+        // Use async parallel processing with proper task-based approach
+        var tasks = new Task<List<TestMetadata>>[assemblies.Count];
+
+        for (var i = 0; i < assemblies.Count; i++)
         {
-            Parallel.ForEach(assemblies.Select((assembly, index) => new
-            {
-                assembly, index
-            }), parallelOptions, item =>
-            {
-                var assembly = item.assembly;
-                var index = item.index;
+            var assembly = assemblies[i];
+            var index = i;
 
+            tasks[index] = Task.Run(async () =>
+            {
                 lock (_lock)
                 {
                     if (!_scannedAssemblies.Add(assembly))
                     {
-                        resultsByIndex[index] =
+                        return
                         [
                         ];
-                        return;
                     }
                 }
 
                 try
                 {
-                    Console.WriteLine($"Scanning assembly: {assembly.GetName().Name}");
-                    // Run async method synchronously since we're already on thread pool
-                    var testsInAssembly = DiscoverTestsInAssembly(assembly).GetAwaiter().GetResult();
-                    resultsByIndex[index] = testsInAssembly.ToList();
+                    // Now we can properly await the async method
+                    var testsInAssembly = await DiscoverTestsInAssembly(assembly).ConfigureAwait(false);
+                    return testsInAssembly;
                 }
                 catch (Exception ex)
                 {
                     // Create a failed test metadata for the assembly that couldn't be scanned
                     var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
-                    resultsByIndex[index] =
+                    return
                     [
                         failedTest
                     ];
                 }
             });
-        });
+        }
+
+        // Wait for all tasks to complete
+        var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
         // Reassemble results in original order
         var newTests = new List<TestMetadata>();
-        for (var i = 0; i < assemblies.Count; i++)
+        foreach (var tests in results)
         {
-            if (resultsByIndex.TryGetValue(i, out var tests))
-            {
-                newTests.AddRange(tests);
-            }
+            newTests.AddRange(tests);
         }
 
         // Discover dynamic tests from DynamicTestBuilderAttribute methods
@@ -108,18 +106,72 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
-    private static IEnumerable<MethodInfo> GetAllTestMethods(Type type)
+    public async IAsyncEnumerable<TestMetadata> CollectTestsStreamingAsync(
+        string testSessionId,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var methods = new List<MethodInfo>();
-        var currentType = type;
-
-        while (currentType != null && currentType != typeof(object))
+        // Get assemblies to scan
+        var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var assemblies = new List<Assembly>(allAssemblies.Length);
+        foreach (var assembly in allAssemblies)
         {
-            methods.AddRange(currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly));
-            currentType = currentType.BaseType;
+            if (ShouldScanAssembly(assembly))
+            {
+                assemblies.Add(assembly);
+            }
         }
 
-        return methods;
+
+        // Stream tests from each assembly
+        foreach (var assembly in assemblies)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            lock (_lock)
+            {
+                if (!_scannedAssemblies.Add(assembly))
+                {
+                    continue;
+                }
+            }
+
+            // Stream tests from this assembly
+            await foreach (var test in DiscoverTestsInAssemblyStreamingAsync(assembly, cancellationToken))
+            {
+                lock (_lock)
+                {
+                    _discoveredTests.Add(test);
+                }
+                yield return test;
+            }
+        }
+
+        // Stream dynamic tests
+        await foreach (var dynamicTest in DiscoverDynamicTestsStreamingAsync(testSessionId, cancellationToken))
+        {
+            lock (_lock)
+            {
+                _discoveredTests.Add(dynamicTest);
+            }
+            yield return dynamicTest;
+        }
+    }
+
+    private static IEnumerable<MethodInfo> GetAllTestMethods(Type type)
+    {
+        return _typeMethodsCache.GetOrAdd(type, static t =>
+        {
+            var methods = new List<MethodInfo>();
+            var currentType = t;
+
+            while (currentType != null && currentType != typeof(object))
+            {
+                methods.AddRange(currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly));
+                currentType = currentType.BaseType;
+            }
+
+            return methods.ToArray();
+        });
     }
 
     private static readonly HashSet<string> ExcludedAssemblyNames =
@@ -261,12 +313,34 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             catch (ReflectionTypeLoadException rtle)
             {
                 // Some types might fail to load, but we can still use the ones that loaded successfully
-                Console.WriteLine($"Warning: Some types failed to load from assembly {asm.FullName}: {rtle.Message}");
-                return rtle.Types?.Where(t => t != null).Cast<Type>().ToArray() ?? [];
+                // Optimize: Manual filtering with ArrayPool for better memory efficiency
+                var loadedTypes = rtle.Types;
+                if (loadedTypes == null) return [];
+
+                // Use ArrayPool for temporary storage to reduce allocations
+                var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
+                try
+                {
+                    var validCount = 0;
+                    foreach (var type in loadedTypes)
+                    {
+                        if (type != null)
+                        {
+                            tempArray[validCount++] = type;
+                        }
+                    }
+
+                    var result = new Type[validCount];
+                    Array.Copy(tempArray, result, validCount);
+                    return result;
+                }
+                finally
+                {
+                    ArrayPool<Type>.Shared.Return(tempArray);
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Warning: Failed to get types from assembly {asm.FullName}: {ex.Message}");
                 return [];
             }
         });
@@ -303,21 +377,36 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 if (inheritsTests)
                 {
                     // Get all methods including inherited ones
-                    testMethods = GetAllTestMethods(type)
-                        .Where(m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
-                        .ToArray();
+                    // Optimize: Manual filtering instead of LINQ Where().ToArray()
+                    var allMethods = GetAllTestMethods(type);
+                    var testMethodsList = new List<MethodInfo>();
+                    foreach (var method in allMethods)
+                    {
+                        if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+                        {
+                            testMethodsList.Add(method);
+                        }
+                    }
+                    testMethods = testMethodsList.ToArray();
                 }
                 else
                 {
                     // Only get declared methods
-                    testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
-                        .Where(m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
-                        .ToArray();
+                    // Optimize: Manual filtering instead of LINQ Where().ToArray()
+                    var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                    var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
+                    foreach (var method in declaredMethods)
+                    {
+                        if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+                        {
+                            testMethodsList.Add(method);
+                        }
+                    }
+                    testMethods = testMethodsList.ToArray();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Warning: Failed to get methods from type {type.FullName}: {ex.Message}");
                 continue;
             }
 
@@ -337,6 +426,148 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return discoveredTests;
+    }
+
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+        Justification = "Reflection mode cannot support trimming")]
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'",
+        Justification = "Reflection mode requires dynamic access")]
+    private static async IAsyncEnumerable<TestMetadata> DiscoverTestsInAssemblyStreamingAsync(
+        Assembly assembly,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+
+        var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
+        {
+            try
+            {
+                // In single file mode, GetExportedTypes might miss some types
+                // Use GetTypes() instead which gets all types including nested ones
+                return asm.GetTypes();
+            }
+            catch (ReflectionTypeLoadException rtle)
+            {
+                // Some types might fail to load, but we can still use the ones that loaded successfully
+                // Optimize: Manual filtering with ArrayPool for better memory efficiency
+                var loadedTypes = rtle.Types;
+                if (loadedTypes == null) return [];
+
+                // Use ArrayPool for temporary storage to reduce allocations
+                var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
+                try
+                {
+                    var validCount = 0;
+                    foreach (var type in loadedTypes)
+                    {
+                        if (type != null)
+                        {
+                            tempArray[validCount++] = type;
+                        }
+                    }
+
+                    var result = new Type[validCount];
+                    Array.Copy(tempArray, result, validCount);
+                    return result;
+                }
+                finally
+                {
+                    ArrayPool<Type>.Shared.Return(tempArray);
+                }
+            }
+            catch (Exception)
+            {
+                return [];
+            }
+        });
+
+        if (types.Length == 0)
+        {
+            yield break;
+        }
+
+        var filteredTypes = types.Where(t => t.IsClass && !IsCompilerGenerated(t));
+
+        foreach (var type in filteredTypes)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Skip abstract types - they can't be instantiated
+            if (type.IsAbstract)
+            {
+                continue;
+            }
+
+            // Handle generic type definitions specially
+            if (type.IsGenericTypeDefinition)
+            {
+                await foreach (var genericTest in DiscoverGenericTestsStreamingAsync(type, cancellationToken))
+                {
+                    yield return genericTest;
+                }
+                continue;
+            }
+
+            MethodInfo[] testMethods;
+            try
+            {
+                // Check if this class inherits tests from base classes
+                var inheritsTests = type.IsDefined(typeof(InheritsTestsAttribute), inherit: false);
+
+                if (inheritsTests)
+                {
+                    // Get all test methods including inherited ones
+                    testMethods = GetAllTestMethods(type)
+                        .Where(m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
+                        .ToArray();
+                }
+                else
+                {
+                    // Only get declared test methods
+                    testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                        .Where(m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
+                        .ToArray();
+                }
+            }
+            catch (Exception)
+            {
+                continue;
+            }
+
+            foreach (var method in testMethods)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                TestMetadata? testMetadata = null;
+                TestMetadata? failedMetadata = null;
+
+                try
+                {
+                    // Prevent duplicate test metadata for inherited tests
+                    if (method.DeclaringType != type && !type.IsDefined(typeof(InheritsTestsAttribute), inherit: false))
+                    {
+                        continue;
+                    }
+
+                    testMetadata = await BuildTestMetadata(type, method);
+                }
+                catch (Exception ex)
+                {
+                    // Create a failed test metadata for discovery failures
+                    failedMetadata = CreateFailedTestMetadata(type, method, ex);
+                }
+
+                if (testMetadata != null)
+                {
+                    yield return testMetadata;
+                }
+                else if (failedMetadata != null)
+                {
+                    yield return failedMetadata;
+                }
+            }
+        }
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2055:Call to 'System.Type.MakeGenericType' can not be statically analyzed",
@@ -359,9 +590,17 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         // Get test methods from the generic type definition
-        var testMethods = genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
-            .Where(m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
-            .ToArray();
+        // Optimize: Manual filtering instead of LINQ Where().ToArray()
+        var declaredMethods = genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+        var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
+        foreach (var method in declaredMethods)
+        {
+            if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+            {
+                testMethodsList.Add(method);
+            }
+        }
+        var testMethods = testMethodsList.ToArray();
 
         if (testMethods.Length == 0)
         {
@@ -425,6 +664,140 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return discoveredTests;
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2055:Call to 'System.Type.MakeGenericType' can not be statically analyzed",
+        Justification = "Reflection mode requires dynamic access")]
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2067:'type' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicParameterlessConstructor' in call to 'System.Activator.CreateInstance(Type)'",
+        Justification = "Reflection mode requires dynamic access")]
+    private static async IAsyncEnumerable<TestMetadata> DiscoverGenericTestsStreamingAsync(
+        Type genericTypeDefinition,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        // Extract class-level data sources that will determine the generic type arguments
+        var classDataSources = ReflectionAttributeExtractor.ExtractDataSources(genericTypeDefinition);
+
+        if (classDataSources.Length == 0)
+        {
+            // This is expected for generic test classes in reflection mode
+            // They need data sources to determine concrete types
+            yield break;
+        }
+
+        // Get test methods from the generic type definition
+        // Optimize: Manual filtering instead of LINQ Where().ToArray()
+        var declaredMethods = genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+        var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
+        foreach (var method in declaredMethods)
+        {
+            if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
+            {
+                testMethodsList.Add(method);
+            }
+        }
+        var testMethods = testMethodsList.ToArray();
+
+        if (testMethods.Length == 0)
+        {
+            yield break;
+        }
+
+        // For each data source combination, create a concrete generic type
+        foreach (var dataSource in classDataSources)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var dataItems = await GetDataFromSourceAsync(dataSource, null!); // TODO
+
+            foreach (var dataRow in dataItems)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (dataRow == null || dataRow.Length == 0)
+                {
+                    continue;
+                }
+
+                // Determine generic type arguments from the data
+                var typeArguments = ReflectionGenericTypeResolver.DetermineGenericTypeArguments(genericTypeDefinition, dataRow);
+                if (typeArguments == null || typeArguments.Length == 0)
+                {
+                    continue;
+                }
+
+                TestMetadata? failedMetadata = null;
+                List<TestMetadata>? successfulTests = null;
+
+                try
+                {
+                    // Create concrete type with validation
+                    var concreteType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, typeArguments);
+
+                    // Build tests for each method in the concrete type
+                    foreach (var genericMethod in testMethods)
+                    {
+                        var concreteMethod = concreteType.GetMethod(genericMethod.Name,
+                            BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+
+                        if (concreteMethod != null)
+                        {
+                            // Build test metadata for the concrete type
+                            // The concrete type already has its generic arguments resolved
+                            // For generic types with primary constructors that were resolved from class-level data sources,
+                            // we need to ensure the class data sources contain the specific data for this instantiation
+                            var testMetadata = await BuildTestMetadata(concreteType, concreteMethod, dataRow);
+
+                            if (successfulTests == null)
+                            {
+                                successfulTests =
+                                [
+                                ];
+                            }
+                            successfulTests.Add(testMetadata);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    failedMetadata = new FailedTestMetadata(
+                        new InvalidOperationException(
+                            $"Failed to create concrete type for {genericTypeDefinition.FullName ?? genericTypeDefinition.Name}. " +
+                            $"Error: {ex.Message}. " +
+                            $"Generic parameter count: {genericTypeDefinition.GetGenericArguments().Length}, " +
+                            $"Type arguments: {string.Join(", ", typeArguments?.Select(t => t.Name) ?? [
+                            ])}", ex),
+                        $"[GENERIC TYPE CREATION FAILED] {genericTypeDefinition.Name}")
+                    {
+                        TestName = $"[GENERIC TYPE CREATION FAILED] {genericTypeDefinition.Name}",
+                        TestClassType = genericTypeDefinition,
+                        TestMethodName = "GenericTypeCreationFailed",
+                        FilePath = "Unknown",
+                        LineNumber = 0,
+                        MethodMetadata = CreateDummyMethodMetadata(genericTypeDefinition, "GenericTypeCreationFailed"),
+                        AttributeFactory = () => [],
+                        DataSources = [],
+                        ClassDataSources = [],
+                        PropertyDataSources = []
+                    };
+                }
+
+                // Yield successful tests first
+                if (successfulTests != null)
+                {
+                    foreach (var test in successfulTests)
+                    {
+                        yield return test;
+                    }
+                }
+
+                // Then yield failed metadata if any
+                if (failedMetadata != null)
+                {
+                    yield return failedMetadata;
+                }
+            }
+        }
+    }
+
 
     private static async Task<List<object?[]>> GetDataFromSourceAsync(IDataSourceAttribute dataSource, MethodMetadata methodMetadata)
     {
@@ -454,10 +827,39 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return await Task.FromResult(data);
     }
 
+    private static int CalculateInheritanceDepth(Type testClass, MethodInfo testMethod)
+    {
+        // If the method is declared directly in the test class, depth is 0
+        if (testMethod.DeclaringType == testClass)
+        {
+            return 0;
+        }
+
+        // Count how many levels up the inheritance chain the method is declared
+        int depth = 0;
+        Type? currentType = testClass.BaseType;
+
+        while (currentType != null && currentType != typeof(object))
+        {
+            depth++;
+            if (testMethod.DeclaringType == currentType)
+            {
+                return depth;
+            }
+            currentType = currentType.BaseType;
+        }
+
+        // This shouldn't happen in normal cases, but return the depth anyway
+        return depth;
+    }
+
     private static Task<TestMetadata> BuildTestMetadata(Type testClass, MethodInfo testMethod, object?[]? classData = null)
     {
         // Create a base ReflectionTestMetadata instance
         var testName = GenerateTestName(testClass, testMethod);
+
+        // Calculate inheritance depth
+        int inheritanceDepth = CalculateInheritanceDepth(testClass, testMethod);
 
         try
         {
@@ -474,17 +876,15 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 PropertyDataSources = ReflectionAttributeExtractor.ExtractPropertyDataSources(testClass),
                 InstanceFactory = CreateInstanceFactory(testClass)!,
                 TestInvoker = CreateTestInvoker(testClass, testMethod),
-                ParameterCount = GetParametersWithoutCancellationToken(testMethod).Length,
-                ParameterTypes = GetParametersWithoutCancellationToken(testMethod).Select(p => p.ParameterType).ToArray(),
-                TestMethodParameterTypes = GetParametersWithoutCancellationToken(testMethod).Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
-                FilePath = ExtractFilePath(testMethod),
-                LineNumber = ExtractLineNumber(testMethod),
+                FilePath = ExtractFilePath(testMethod) ?? "Unknown",
+                LineNumber = ExtractLineNumber(testMethod) ?? 0,
                 MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(testClass, testMethod),
                 GenericTypeInfo = ReflectionGenericTypeResolver.ExtractGenericTypeInfo(testClass),
                 GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(testMethod),
                 GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
                 AttributeFactory = () => ReflectionAttributeExtractor.GetAllAttributes(testClass, testMethod),
-                PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(testClass)
+                PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(testClass),
+                InheritanceDepth = inheritanceDepth
             });
         }
         catch (Exception ex)
@@ -504,7 +904,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             // We can't fully process it here because we don't have parameter values yet
             // But we can at least show the template for tests without parameters
             var displayNameField = typeof(DisplayNameAttribute).GetField("displayName",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                BindingFlags.NonPublic | BindingFlags.Instance);
             if (displayNameField != null)
             {
                 var displayNameValue = displayNameField.GetValue(displayNameAttr) as string;
@@ -615,11 +1015,18 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         // Check if last parameter is CancellationToken and exclude it
         if (parameters.Length > 0 && parameters[^1].ParameterType == typeof(CancellationToken))
         {
-            return parameters.Take(parameters.Length - 1).ToArray();
+            // Optimize: Manual array copy instead of LINQ Take().ToArray()
+            var result = new ParameterInfo[parameters.Length - 1];
+            Array.Copy(parameters, result, parameters.Length - 1);
+            return result;
         }
 
         return parameters;
     }
+
+
+
+
 
     private static string? ExtractFilePath(MethodInfo method)
     {
@@ -649,6 +1056,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             TestName = testName,
             TestClassType = testClass,
             TestMethodName = "AssemblyScanFailed",
+            FilePath = "Unknown",
+            LineNumber = 0,
             MethodMetadata = CreateDummyMethodMetadata(testClass,
                 "AssemblyScanFailed"),
             AttributeFactory = () =>
@@ -677,6 +1086,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             TestName = testName,
             TestClassType = type,
             TestMethodName = method.Name,
+            FilePath = ExtractFilePath(method) ?? "Unknown",
+            LineNumber = ExtractLineNumber(method) ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
             AttributeFactory = () => method.GetCustomAttributes()
                 .ToArray(),
@@ -758,10 +1169,19 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
     private static Func<object?[], object> CreateReflectionInstanceFactory(ConstructorInfo ctor)
     {
+        var isPrepared = false;
+
         return args =>
         {
             try
             {
+                // Pre-JIT on first actual invocation for better performance
+                if (!isPrepared)
+                {
+                    RuntimeHelpers.PrepareMethod(ctor.MethodHandle);
+                    isPrepared = true;
+                }
+
                 // Cast arguments to the expected parameter types
                 var parameters = ctor.GetParameters();
                 var castedArgs = new object?[parameters.Length];
@@ -925,7 +1345,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         var argInterfaces = argType.GetInterfaces();
         if (argType.IsInterface)
         {
-            argInterfaces = argInterfaces.Concat(new[] { argType }).ToArray();
+            argInterfaces = argInterfaces.Concat([argType]).ToArray();
         }
 
         foreach (var iface in argInterfaces)
@@ -951,12 +1371,21 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "Reflection mode cannot support AOT")]
     private static Func<object, object?[], Task> CreateReflectionTestInvoker(Type testClass, MethodInfo testMethod)
     {
+        var isPrepared = false;
+
         return (instance, args) =>
         {
             try
             {
                 // Get the method to invoke - may need to make it concrete if it's generic
                 var methodToInvoke = testMethod;
+
+                // Pre-JIT on first actual invocation for better performance
+                if (!isPrepared && !testMethod.IsGenericMethodDefinition)
+                {
+                    RuntimeHelpers.PrepareMethod(testMethod.MethodHandle);
+                    isPrepared = true;
+                }
 
                 // If the method is a generic method definition, we need to make it concrete
                 if (testMethod.IsGenericMethodDefinition)
@@ -994,6 +1423,9 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     }
 
                     methodToInvoke = testMethod.MakeGenericMethod(typeArguments);
+
+                    // Pre-JIT the constructed generic method on first invocation
+                    RuntimeHelpers.PrepareMethod(methodToInvoke.MethodHandle);
                 }
 
                 // Cast arguments to the expected parameter types
@@ -1082,9 +1514,17 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         // Also discover dynamic test builder methods via reflection
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(ShouldScanAssembly)
-            .ToList();
+        // Optimize: Pre-filter and allocate array instead of LINQ ToList()
+        var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var assembliesList = new List<Assembly>(allAssemblies.Length);
+        foreach (var assembly in allAssemblies)
+        {
+            if (ShouldScanAssembly(assembly))
+            {
+                assembliesList.Add(assembly);
+            }
+        }
+        var assemblies = assembliesList;
 
         foreach (var assembly in assemblies)
         {
@@ -1102,11 +1542,19 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
             foreach (var type in types.Where(t => t.IsClass && !IsCompilerGenerated(t)))
             {
-                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                // Optimize: Manual filtering instead of LINQ Where().ToArray()
+                var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                var methodsList = new List<MethodInfo>(declaredMethods.Length);
+                foreach (var method in declaredMethods)
+                {
 #pragma warning disable TUnitWIP0001
-                    .Where(m => m.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) && !m.IsAbstract)
+                    if (method.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) && !method.IsAbstract)
 #pragma warning restore TUnitWIP0001
-                    .ToArray();
+                    {
+                        methodsList.Add(method);
+                    }
+                }
+                var methods = methodsList.ToArray();
 
                 foreach (var method in methods)
                 {
@@ -1128,6 +1576,60 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return dynamicTests;
     }
 
+    private async IAsyncEnumerable<TestMetadata> DiscoverDynamicTestsStreamingAsync(
+        string testSessionId,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(ShouldScanAssembly)
+            .ToList();
+
+        foreach (var assembly in assemblies)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
+            {
+                try
+                {
+                    return asm.GetExportedTypes();
+                }
+                catch
+                {
+                    return [];
+                }
+            });
+
+            foreach (var type in types.Where(t => t.IsClass && !IsCompilerGenerated(t)))
+            {
+                // Optimize: Manual filtering instead of LINQ Where().ToArray()
+                var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                var methodsList = new List<MethodInfo>(declaredMethods.Length);
+                foreach (var method in declaredMethods)
+                {
+#pragma warning disable TUnitWIP0001
+                    if (method.IsDefined(typeof(DynamicTestBuilderAttribute), inherit: false) && !method.IsAbstract)
+#pragma warning restore TUnitWIP0001
+                    {
+                        methodsList.Add(method);
+                    }
+                }
+                var methods = methodsList.ToArray();
+
+                foreach (var method in methods)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    // Stream tests from this dynamic builder
+                    await foreach (var test in ExecuteDynamicTestBuilderStreamingAsync(type, method, testSessionId, cancellationToken))
+                    {
+                        yield return test;
+                    }
+                }
+            }
+        }
+    }
+
     private async Task<List<TestMetadata>> ExecuteDynamicTestBuilder(Type testClass, MethodInfo builderMethod, string testSessionId)
     {
         var dynamicTests = new List<TestMetadata>();
@@ -1147,7 +1649,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         // Execute the builder method
-        builderMethod.Invoke(instance, new object[] { context });
+        builderMethod.Invoke(instance, [context]);
 
         // Convert the dynamic tests to test metadata
         foreach (var dynamicTest in context.Tests)
@@ -1173,6 +1675,87 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         return testMetadataList;
+    }
+
+    private async IAsyncEnumerable<TestMetadata> ExecuteDynamicTestBuilderStreamingAsync(
+        Type testClass, MethodInfo builderMethod, string testSessionId,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        TestMetadata? failedMetadata = null;
+        List<TestMetadata>? successfulTests = null;
+
+        try
+        {
+            // Extract file path and line number from the DynamicTestBuilderAttribute if possible
+            var filePath = ExtractFilePath(builderMethod) ?? "Unknown";
+            var lineNumber = ExtractLineNumber(builderMethod) ?? 0;
+
+            // Create context
+            var context = new DynamicTestBuilderContext(filePath, lineNumber);
+
+            // Create instance if needed
+            object? instance = null;
+            if (!builderMethod.IsStatic)
+            {
+                instance = Activator.CreateInstance(testClass);
+            }
+
+            // Invoke the builder method
+            builderMethod.Invoke(instance, [context]);
+
+            // Retrieve the discovered tests
+            foreach (var discoveryResult in context.Tests.SelectMany(t => t.GetTests()))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (discoveryResult is DynamicDiscoveryResult dynamicResult)
+                {
+                    try
+                    {
+                        var testMetadata = await CreateMetadataFromDynamicDiscoveryResult(dynamicResult);
+                        if (successfulTests == null)
+                        {
+                            successfulTests =
+                            [
+                            ];
+                        }
+                        successfulTests.Add(testMetadata);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Create a failed test metadata for this specific test
+                        var failedTest = CreateFailedTestMetadataForDynamicTest(dynamicResult, ex);
+                        if (successfulTests == null)
+                        {
+                            successfulTests =
+                            [
+                            ];
+                        }
+                        successfulTests.Add(failedTest);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Create a failed test metadata for this dynamic test builder
+            failedMetadata = CreateFailedTestMetadataForDynamicBuilder(testClass, builderMethod, ex);
+        }
+
+        // Yield successful tests
+        if (successfulTests != null)
+        {
+            foreach (var test in successfulTests)
+            {
+                yield return test;
+            }
+        }
+
+        // Yield failed metadata if any
+        if (failedMetadata != null)
+        {
+            yield return failedMetadata;
+        }
     }
 
     private Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
@@ -1212,11 +1795,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             PropertyDataSources = [],
             InstanceFactory = CreateDynamicInstanceFactory(result.TestClassType, result.TestClassArguments)!,
             TestInvoker = CreateDynamicTestInvoker(result),
-            ParameterCount = result.TestMethodArguments?.Length ?? 0,
-            ParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType).ToArray(),
-            TestMethodParameterTypes = methodInfo.GetParameters().Select(p => p.ParameterType.FullName ?? p.ParameterType.Name).ToArray(),
-            FilePath = null,
-            LineNumber = null,
+            FilePath = result.CreatorFilePath ?? "Unknown",
+            LineNumber = result.CreatorLineNumber ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(result.TestClassType, methodInfo),
             GenericTypeInfo = ReflectionGenericTypeResolver.ExtractGenericTypeInfo(result.TestClassType),
             GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(methodInfo),
@@ -1278,7 +1858,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 // The expression is already bound to the correct method with arguments
                 // so we just need to invoke it with the instance
                 var invokeMethod = compiledExpression.GetType().GetMethod("Invoke")!;
-                var invokeResult = invokeMethod.Invoke(compiledExpression, new[] { testInstance });
+                var invokeResult = invokeMethod.Invoke(compiledExpression, [testInstance]);
 
                 if (invokeResult is Task task)
                 {
@@ -1307,6 +1887,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             TestName = testName,
             TestClassType = source.GetType(),
             TestMethodName = "CollectDynamicTests",
+            FilePath = "Unknown",
+            LineNumber = 0,
             MethodMetadata = CreateDummyMethodMetadata(source.GetType(), "CollectDynamicTests"),
             AttributeFactory = () => [],
             DataSources = [],
@@ -1325,8 +1907,30 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             TestName = testName,
             TestClassType = type,
             TestMethodName = method.Name,
+            FilePath = ExtractFilePath(method) ?? "Unknown",
+            LineNumber = ExtractLineNumber(method) ?? 0,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
             AttributeFactory = () => method.GetCustomAttributes().ToArray(),
+            DataSources = [],
+            ClassDataSources = [],
+            PropertyDataSources = []
+        };
+    }
+
+    private static TestMetadata CreateFailedTestMetadataForDynamicTest(DynamicDiscoveryResult result, Exception ex)
+    {
+        var testName = $"[DYNAMIC TEST FAILED] {result.TestClassType?.Name ?? "Unknown"}";
+        var displayName = $"{testName} - {ex.Message}";
+
+        return new FailedTestMetadata(ex, displayName)
+        {
+            TestName = testName,
+            TestClassType = result.TestClassType ?? typeof(object),
+            TestMethodName = "DynamicTestFailed",
+            FilePath = result.CreatorFilePath ?? "Unknown",
+            LineNumber = result.CreatorLineNumber ?? 0,
+            MethodMetadata = CreateDummyMethodMetadata(result.TestClassType ?? typeof(object), "DynamicTestFailed"),
+            AttributeFactory = () => result.Attributes?.ToArray() ?? [],
             DataSources = [],
             ClassDataSources = [],
             PropertyDataSources = []

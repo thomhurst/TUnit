@@ -7,6 +7,7 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using TUnit.Engine.Framework;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Reporters;
 
@@ -17,17 +18,18 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     public async Task<bool> IsEnabledAsync()
     {
-        if (Environment.GetEnvironmentVariable("DISABLE_GITHUB_REPORTER") is not null)
+        if (EnvironmentVariableCache.Get("TUNIT_DISABLE_GITHUB_REPORTER") is not null ||
+            EnvironmentVariableCache.Get("DISABLE_GITHUB_REPORTER") is not null)
         {
             return false;
         }
 
-        if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") is null)
+        if (EnvironmentVariableCache.Get("GITHUB_ACTIONS") is null)
         {
             return false;
         }
 
-        if (Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY") is not { } fileName
+        if (EnvironmentVariableCache.Get("GITHUB_STEP_SUMMARY") is not { } fileName
             || !File.Exists(fileName))
         {
             return false;

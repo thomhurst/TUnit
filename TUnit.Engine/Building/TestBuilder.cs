@@ -26,6 +26,12 @@ internal sealed class TestBuilder : ITestBuilder
 
     private async Task<object> CreateInstance(TestMetadata metadata, Type[] resolvedClassGenericArgs, object?[] classData, TestBuilderContext? builderContext = null)
     {
+        // If no builderContext provided and we're in test execution phase, create one from current TestContext
+        if (builderContext == null && TestContext.Current != null)
+        {
+            builderContext = TestBuilderContext.FromTestContext(TestContext.Current, null);
+        }
+        
         // First try to create instance with ClassConstructor attribute
         var attributes = metadata.AttributeFactory();
 
@@ -99,17 +105,20 @@ internal sealed class TestBuilder : ITestBuilder
             var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
             var repeatCount = repeatAttr?.Times ?? 0;
 
-            var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
-            {
-                TestMetadata = metadata.MethodMetadata
-            });
-
             if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
             {
                 var failedTest = await CreateFailedTestForClassDataSourceCircularDependency(metadata);
                 tests.Add(failedTest);
                 return tests;
             }
+
+            // Create a single context accessor that we'll reuse, updating its Current property for each test
+            var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
+            {
+                TestMetadata = metadata.MethodMetadata,
+                Events = new TestContextEvents(),
+                ObjectBag = new Dictionary<string, object?>()
+            });
 
             var classDataAttributeIndex = 0;
             foreach (var classDataSource in GetDataSources(metadata.ClassDataSources))
@@ -145,14 +154,15 @@ internal sealed class TestBuilder : ITestBuilder
                             {
                                 var tempTestData = new TestData
                                 {
-                                    TestClassInstance = null!,
+                                    TestClassInstanceFactory = () => Task.FromResult<object>(null!),
                                     ClassDataSourceAttributeIndex = classDataAttributeIndex,
                                     ClassDataLoopIndex = classDataLoopIndex,
                                     ClassData = classData,
                                     MethodDataSourceAttributeIndex = 0,
                                     MethodDataLoopIndex = 0,
                                     MethodData = [],
-                                    RepeatIndex = 0
+                                    RepeatIndex = 0,
+                                    InheritanceDepth = metadata.InheritanceDepth
                                 };
 
                                 try
@@ -202,6 +212,14 @@ internal sealed class TestBuilder : ITestBuilder
 
                             for (var i = 0; i < repeatCount + 1; i++)
                             {
+                                // Update context BEFORE calling data factories so they track objects in the right context
+                                contextAccessor.Current = new TestBuilderContext
+                                {
+                                    TestMetadata = metadata.MethodMetadata,
+                                    Events = new TestContextEvents(),
+                                    ObjectBag = new Dictionary<string, object?>()
+                                };
+                                
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
                                 var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
 
@@ -218,14 +236,15 @@ internal sealed class TestBuilder : ITestBuilder
 
                                 var tempTestData = new TestData
                                 {
-                                    TestClassInstance = null!, // Temporary placeholder
+                                    TestClassInstanceFactory = () => Task.FromResult<object>(null!), // Temporary placeholder
                                     ClassDataSourceAttributeIndex = classDataAttributeIndex,
                                     ClassDataLoopIndex = classDataLoopIndex,
                                     ClassData = classData,
                                     MethodDataSourceAttributeIndex = methodDataAttributeIndex,
                                     MethodDataLoopIndex = methodDataLoopIndex,
                                     MethodData = methodData,
-                                    RepeatIndex = i
+                                    RepeatIndex = i,
+                                    InheritanceDepth = metadata.InheritanceDepth
                                 };
 
                                 Type[] resolvedClassGenericArgs;
@@ -271,24 +290,25 @@ internal sealed class TestBuilder : ITestBuilder
                                     throw new InvalidOperationException($"Cannot create instance of generic type {metadata.TestClassType.Name} with empty type arguments");
                                 }
 
-                                // Check for basic skip attributes that can be evaluated at discovery time
                                 var basicSkipReason = GetBasicSkipReason(metadata);
-                                object instance;
 
-                                if (!string.IsNullOrEmpty(basicSkipReason))
+                                Func<Task<object>> instanceFactory;
+                                if (basicSkipReason != null && basicSkipReason.Length > 0)
                                 {
-                                    // Use placeholder instance for basic skip attributes to avoid calling constructor
-                                    instance = SkippedTestInstance.Instance;
+                                    instanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance);
                                 }
                                 else
                                 {
-                                    // No skip attributes or custom skip attributes - create instance normally
-                                    instance = await CreateInstance(metadata, resolvedClassGenericArgs, classData, contextAccessor.Current);
+                                    var capturedMetadata = metadata;
+                                    var capturedClassGenericArgs = resolvedClassGenericArgs;
+                                    var capturedClassData = classData;
+                                    // Pass null for builderContext - CreateInstance will use TestContext.Current during execution
+                                    instanceFactory = () => CreateInstance(capturedMetadata, capturedClassGenericArgs, capturedClassData, null);
                                 }
 
                                 var testData = new TestData
                                 {
-                                    TestClassInstance = instance,
+                                    TestClassInstanceFactory = instanceFactory,
                                     ClassDataSourceAttributeIndex = classDataAttributeIndex,
                                     ClassDataLoopIndex = classDataLoopIndex,
                                     ClassData = classData,
@@ -296,6 +316,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     MethodDataLoopIndex = methodDataLoopIndex,
                                     MethodData = methodData,
                                     RepeatIndex = i,
+                                    InheritanceDepth = metadata.InheritanceDepth,
                                     ResolvedClassGenericArguments = resolvedClassGenericArgs,
                                     ResolvedMethodGenericArguments = resolvedMethodGenericArgs
                                 };
@@ -308,11 +329,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     test.Context.SkipReason = basicSkipReason;
                                 }
                                 tests.Add(test);
-
-                                contextAccessor.Current = new TestBuilderContext
-                                {
-                                    TestMetadata = metadata.MethodMetadata
-                                };
+                                
+                                // Context already updated at the beginning of the loop before calling factories
                             }
                         }
                     }
@@ -336,9 +354,11 @@ internal sealed class TestBuilder : ITestBuilder
         var typeMapping = new Dictionary<Type, Type>();
 
         // Try to match method parameter types with actual data types
-        for (var i = 0; i < Math.Min(metadata.ParameterTypes.Length, methodData.Length); i++)
+        var methodParameters = metadata.MethodMetadata.Parameters;
+        for (var i = 0; i < Math.Min(methodParameters.Length, methodData.Length); i++)
         {
-            var paramType = metadata.ParameterTypes[i];
+            var methodParam = methodParameters[i];
+            var paramType = methodParam.Type;
             var argValue = methodData[i];
 
             if (argValue != null)
@@ -351,7 +371,6 @@ internal sealed class TestBuilder : ITestBuilder
                 {
                     // Check if this corresponds to a class generic parameter
                     // by looking at the method metadata
-                    var methodParam = metadata.MethodMetadata.Parameters[i];
 
                     if (methodParam.TypeReference is { IsGenericParameter: true, IsMethodGenericParameter: false })
                     {
@@ -428,30 +447,27 @@ internal sealed class TestBuilder : ITestBuilder
             // Look at the test method parameters to find attributes that can help with generic type inference
             foreach (var param in metadata.MethodMetadata.Parameters)
             {
-                if (param.ReflectionInfo != null)
+                // Get the actual parameter type from reflection
+                var actualParamType = param.Type;
+
+                // Check if the actual parameter type is a generic parameter of the class
+                if (actualParamType.IsGenericParameter &&
+                    genericParameters.Contains(actualParamType))
                 {
-                    // Get the actual parameter type from reflection
-                    var actualParamType = param.ReflectionInfo.ParameterType;
+                    // Check for Matrix attributes using reflection
+                    var attrs = param.ReflectionInfo.GetCustomAttributes(false);
 
-                    // Check if the actual parameter type is a generic parameter of the class
-                    if (actualParamType.IsGenericParameter &&
-                        genericParameters.Contains(actualParamType))
+                    foreach (var attr in attrs)
                     {
-                        // Check for Matrix attributes using reflection
-                        var attrs = param.ReflectionInfo.GetCustomAttributes(false);
+                        var attrType = attr.GetType();
 
-                        foreach (var attr in attrs)
+                        // Check if it's a generic Matrix attribute
+                        if (attrType.IsGenericType &&
+                            attrType.GetGenericTypeDefinition().Name.StartsWith("Matrix"))
                         {
-                            var attrType = attr.GetType();
-
-                            // Check if it's a generic Matrix attribute
-                            if (attrType.IsGenericType &&
-                                attrType.GetGenericTypeDefinition().Name.StartsWith("Matrix"))
-                            {
-                                var matrixTypeArg = attrType.GetGenericArguments()[0];
-                                typeMapping[actualParamType] = matrixTypeArg;
-                                break;
-                            }
+                            var matrixTypeArg = attrType.GetGenericArguments()[0];
+                            typeMapping[actualParamType] = matrixTypeArg;
+                            break;
                         }
                     }
                 }
@@ -499,9 +515,9 @@ internal sealed class TestBuilder : ITestBuilder
 
                             // Now try to match this element type with method parameters
                             // that use the class generic parameter
-                            for (var i = 0; i < metadata.ParameterTypes.Length; i++)
+                            for (var i = 0; i < metadata.MethodMetadata.Parameters.Length; i++)
                             {
-                                var paramType = metadata.ParameterTypes[i];
+                                var paramType = metadata.MethodMetadata.Parameters[i].Type;
                                 if (paramType == typeof(object)) // Placeholder for generic parameter
                                 {
                                     var methodParam = metadata.MethodMetadata.Parameters[i];
@@ -553,7 +569,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         var context = await CreateTestContextAsync(testId, metadata, testData, testBuilderContext);
 
-        context.TestDetails.ClassInstance = testData.TestClassInstance;
+        context.TestDetails.ClassInstance = PlaceholderInstance.Instance;
 
         TrackDataSourceObjects(context, testData.ClassData, testData.MethodData);
 
@@ -566,6 +582,7 @@ internal sealed class TestBuilder : ITestBuilder
             Arguments = testData.MethodData,
             ClassArguments = testData.ClassData,
             Context = context,
+            TestClassInstanceFactory = testData.TestClassInstanceFactory,
             ResolvedMethodGenericArguments = testData.ResolvedMethodGenericArguments,
             ResolvedClassGenericArguments = testData.ResolvedClassGenericArguments
         };
@@ -615,18 +632,18 @@ internal sealed class TestBuilder : ITestBuilder
             TestName = metadata.TestName,
             ClassType = metadata.TestClassType,
             MethodName = metadata.TestMethodName,
-            ClassInstance = testData.TestClassInstance,
+            ClassInstance = PlaceholderInstance.Instance,
             TestMethodArguments = testData.MethodData,
             TestClassArguments = testData.ClassData,
-            TestFilePath = metadata.FilePath ?? "Unknown",
-            TestLineNumber = metadata.LineNumber ?? 0,
-            TestMethodParameterTypes = metadata.ParameterTypes,
+            TestFilePath = metadata.FilePath,
+            TestLineNumber = metadata.LineNumber,
             ReturnType = metadata.MethodMetadata.ReturnType ?? typeof(void),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = attributes,
             MethodGenericArguments = testData.ResolvedMethodGenericArguments,
-            ClassGenericArguments = testData.ResolvedClassGenericArguments
-            // Don't set Timeout and RetryLimit here - let discovery event receivers set them
+            ClassGenericArguments = testData.ResolvedClassGenericArguments,
+            Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
+            // Don't set RetryLimit here - let discovery event receivers set it
         };
 
         var context = _contextProvider.CreateTestContext(
@@ -688,11 +705,11 @@ internal sealed class TestBuilder : ITestBuilder
             TestMethodArguments = [],
             TestClassArguments = [],
             TestFilePath = metadata.FilePath ?? "Unknown",
-            TestLineNumber = metadata.LineNumber ?? 0,
-            TestMethodParameterTypes = metadata.ParameterTypes,
+            TestLineNumber = metadata.LineNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             Attributes = metadata.AttributeFactory.Invoke(),
+            Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
         };
     }
 
@@ -714,15 +731,9 @@ internal sealed class TestBuilder : ITestBuilder
 
     private static void TrackDataSourceObjects(TestContext context, object?[] classArguments, object?[] methodArguments)
     {
-        foreach (var arg in classArguments)
-        {
-            ObjectTracker.TrackObject(context.Events, arg);
-        }
-
-        foreach (var arg in methodArguments)
-        {
-            ObjectTracker.TrackObject(context.Events, arg);
-        }
+        // Track all objects at once with a single disposal handler
+        var allObjects = classArguments.Concat(methodArguments);
+        ObjectTracker.TrackObjectsForContext(context.Events, allObjects);
     }
 
     private async Task<AbstractExecutableTest> CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
@@ -934,7 +945,7 @@ internal sealed class TestBuilder : ITestBuilder
 
     internal class TestData
     {
-        public required object TestClassInstance { get; init; }
+        public required Func<Task<object>> TestClassInstanceFactory { get; init; }
 
         public required int ClassDataSourceAttributeIndex { get; init; }
         public required int ClassDataLoopIndex { get; init; }
@@ -944,6 +955,14 @@ internal sealed class TestBuilder : ITestBuilder
         public required int MethodDataLoopIndex { get; init; }
         public required object?[] MethodData { get; init; }
         public required int RepeatIndex { get; init; }
+
+        /// <summary>
+        /// The depth of inheritance for this test method.
+        /// 0 = method is defined directly in the test class
+        /// 1 = method is inherited from immediate base class
+        /// 2 = method is inherited from base's base class, etc.
+        /// </summary>
+        public int InheritanceDepth { get; set; } = 0;
 
         /// <summary>
         /// Resolved generic type arguments for the test class.
@@ -956,5 +975,295 @@ internal sealed class TestBuilder : ITestBuilder
         /// Will be Type.EmptyTypes if the method is not generic.
         /// </summary>
         public Type[] ResolvedMethodGenericArguments { get; set; } = Type.EmptyTypes;
+    }
+
+    public async IAsyncEnumerable<AbstractExecutableTest> BuildTestsStreamingAsync(
+        TestMetadata metadata,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        // Handle GenericTestMetadata with ConcreteInstantiations
+        if (metadata is GenericTestMetadata { ConcreteInstantiations.Count: > 0 } genericMetadata)
+        {
+            // Stream tests from each concrete instantiation
+            foreach (var concreteMetadata in genericMetadata.ConcreteInstantiations.Values)
+            {
+                await foreach (var test in BuildTestsStreamingAsync(concreteMetadata, cancellationToken))
+                {
+                    yield return test;
+                }
+            }
+            yield break;
+        }
+
+        // Extract repeat count from attributes
+        var attributes = metadata.AttributeFactory.Invoke();
+        var filteredAttributes = ScopedAttributeFilter.FilterScopedAttributes(attributes);
+        var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
+        var repeatCount = repeatAttr?.Times ?? 0;
+
+        var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
+        {
+            TestMetadata = metadata.MethodMetadata,
+            Events = new TestContextEvents(),
+            ObjectBag = new Dictionary<string, object?>()
+        });
+
+        // Check for circular dependency
+        if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
+        {
+            yield return await CreateFailedTestForClassDataSourceCircularDependency(metadata);
+            yield break;
+        }
+
+        // Stream through all data source combinations
+        var classDataAttributeIndex = 0;
+        foreach (var classDataSource in GetDataSources(metadata.ClassDataSources))
+        {
+            classDataAttributeIndex++;
+            var classDataLoopIndex = 0;
+
+            await foreach (var classDataFactory in classDataSource.GetDataRowsAsync(
+                DataGeneratorMetadataCreator.CreateDataGeneratorMetadata(
+                    testMetadata: metadata,
+                    testSessionId: _sessionId,
+                    generatorType: DataGeneratorType.ClassParameters,
+                    testClassInstance: null,
+                    classInstanceArguments: null,
+                    contextAccessor)))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                classDataLoopIndex++;
+
+                var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+
+                // Handle instance creation for method data sources
+                var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
+                object? instanceForMethodDataSources = null;
+
+                if (needsInstanceForMethodDataSources)
+                {
+                    instanceForMethodDataSources = await CreateInstanceForMethodDataSources(
+                        metadata, classDataAttributeIndex, classDataLoopIndex, classData);
+
+                    if (instanceForMethodDataSources == null)
+                    {
+                        continue; // Skip if instance creation failed
+                    }
+                }
+
+                // Stream through method data sources
+                var methodDataAttributeIndex = 0;
+                foreach (var methodDataSource in GetDataSources(metadata.DataSources))
+                {
+                    methodDataAttributeIndex++;
+                    var methodDataLoopIndex = 0;
+
+                    await foreach (var methodDataFactory in methodDataSource.GetDataRowsAsync(
+                        DataGeneratorMetadataCreator.CreateDataGeneratorMetadata(
+                            testMetadata: metadata,
+                            testSessionId: _sessionId,
+                            generatorType: DataGeneratorType.TestParameters,
+                            testClassInstance: methodDataSource is IAccessesInstanceData ? instanceForMethodDataSources : null,
+                            classInstanceArguments: classData,
+                            contextAccessor)))
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        methodDataLoopIndex++;
+
+                        // Stream through repeat count
+                        for (var i = 0; i < repeatCount + 1; i++)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+
+                            // Build and yield single test
+                            var test = await BuildSingleTestAsync(
+                                metadata, classDataFactory, methodDataFactory,
+                                classDataAttributeIndex, classDataLoopIndex,
+                                methodDataAttributeIndex, methodDataLoopIndex,
+                                i, contextAccessor);
+
+                            if (test != null)
+                            {
+                                yield return test;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private Task<object?> CreateInstanceForMethodDataSources(
+        TestMetadata metadata, int classDataAttributeIndex, int classDataLoopIndex, object?[] classData)
+    {
+        try
+        {
+            if (metadata.TestClassType.IsGenericTypeDefinition)
+            {
+                var tempTestData = new TestData
+                {
+                    TestClassInstanceFactory = () => Task.FromResult<object>(null!),
+                    ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                    ClassDataLoopIndex = classDataLoopIndex,
+                    ClassData = classData,
+                    MethodDataSourceAttributeIndex = 0,
+                    MethodDataLoopIndex = 0,
+                    MethodData = [],
+                    RepeatIndex = 0,
+                    InheritanceDepth = metadata.InheritanceDepth
+                };
+
+                try
+                {
+                    var resolution = TestGenericTypeResolver.Resolve(metadata, tempTestData);
+                    return Task.FromResult<object?>(metadata.InstanceFactory(resolution.ResolvedClassGenericArguments, classData));
+                }
+                catch (GenericTypeResolutionException) when (classData.Length == 0)
+                {
+                    var resolvedTypes = TryInferClassGenericsFromDataSources(metadata);
+                    return Task.FromResult<object?>(metadata.InstanceFactory(resolvedTypes, classData));
+                }
+            }
+            else
+            {
+                return Task.FromResult<object?>(metadata.InstanceFactory([], classData));
+            }
+        }
+        catch
+        {
+            return Task.FromResult<object?>(null);
+        }
+    }
+
+    private async Task<AbstractExecutableTest?> BuildSingleTestAsync(
+        TestMetadata metadata,
+        Func<Task<object?[]?>> classDataFactory,
+        Func<Task<object?[]?>> methodDataFactory,
+        int classDataAttributeIndex,
+        int classDataLoopIndex,
+        int methodDataAttributeIndex,
+        int methodDataLoopIndex,
+        int repeatIndex,
+        TestBuilderContextAccessor contextAccessor)
+    {
+        try
+        {
+            var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+            var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
+
+            // Check data compatibility for generic methods
+            if (metadata.GenericMethodTypeArguments is { Length: > 0 })
+            {
+                if (!IsDataCompatibleWithExpectedTypes(metadata, methodData))
+                {
+                    return null; // Skip incompatible data
+                }
+            }
+
+            var tempTestData = new TestData
+            {
+                TestClassInstanceFactory = () => Task.FromResult<object>(null!),
+                ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                ClassDataLoopIndex = classDataLoopIndex,
+                ClassData = classData,
+                MethodDataSourceAttributeIndex = methodDataAttributeIndex,
+                MethodDataLoopIndex = methodDataLoopIndex,
+                MethodData = methodData,
+                RepeatIndex = repeatIndex,
+                InheritanceDepth = metadata.InheritanceDepth
+            };
+
+            // Resolve generic types
+            Type[] resolvedClassGenericArgs;
+            Type[] resolvedMethodGenericArgs;
+
+            try
+            {
+                var resolution = TestGenericTypeResolver.Resolve(metadata, tempTestData);
+                resolvedClassGenericArgs = resolution.ResolvedClassGenericArguments;
+                resolvedMethodGenericArgs = resolution.ResolvedMethodGenericArguments;
+            }
+            catch (GenericTypeResolutionException) when (
+                metadata.TestClassType.IsGenericTypeDefinition &&
+                classData.Length == 0 &&
+                methodData.Length > 0)
+            {
+                try
+                {
+                    resolvedClassGenericArgs = TryInferClassGenericsFromMethodData(metadata, methodData);
+                    resolvedMethodGenericArgs = Type.EmptyTypes;
+                }
+                catch (Exception ex)
+                {
+                    return await CreateFailedTestForDataGenerationError(metadata, ex);
+                }
+            }
+            catch (Exception ex)
+            {
+                return await CreateFailedTestForDataGenerationError(metadata, ex);
+            }
+
+            if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
+            {
+                throw new InvalidOperationException($"Cannot create instance of generic type {metadata.TestClassType.Name} with empty type arguments");
+            }
+
+            // Create instance factory
+            var basicSkipReason = GetBasicSkipReason(metadata);
+            Func<Task<object>> instanceFactory;
+
+            if (basicSkipReason != null && basicSkipReason.Length > 0)
+            {
+                instanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance);
+            }
+            else
+            {
+                var capturedMetadata = metadata;
+                var capturedClassGenericArgs = resolvedClassGenericArgs;
+                var capturedClassData = classData;
+                var capturedContext = contextAccessor.Current;
+                instanceFactory = () => CreateInstance(capturedMetadata, capturedClassGenericArgs, capturedClassData, capturedContext);
+            }
+
+            // Build final test data
+            var testData = new TestData
+            {
+                TestClassInstanceFactory = instanceFactory,
+                ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                ClassDataLoopIndex = classDataLoopIndex,
+                ClassData = classData,
+                MethodDataSourceAttributeIndex = methodDataAttributeIndex,
+                MethodDataLoopIndex = methodDataLoopIndex,
+                MethodData = methodData,
+                RepeatIndex = repeatIndex,
+                InheritanceDepth = metadata.InheritanceDepth,
+                ResolvedClassGenericArguments = resolvedClassGenericArgs,
+                ResolvedMethodGenericArguments = resolvedMethodGenericArgs
+            };
+
+            // Update context BEFORE building the test (for subsequent iterations)
+            if (repeatIndex > 0)
+            {
+                contextAccessor.Current = new TestBuilderContext
+                {
+                    TestMetadata = metadata.MethodMetadata,
+                    Events = new TestContextEvents(),
+                    ObjectBag = new Dictionary<string, object?>()
+                };
+            }
+
+            var test = await BuildTestAsync(metadata, testData, contextAccessor.Current);
+
+            if (!string.IsNullOrEmpty(basicSkipReason))
+            {
+                test.Context.SkipReason = basicSkipReason;
+            }
+
+            return test;
+        }
+        catch (Exception ex)
+        {
+            return await CreateFailedTestForDataGenerationError(metadata, ex);
+        }
     }
 }

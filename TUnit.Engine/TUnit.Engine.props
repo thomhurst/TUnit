@@ -9,6 +9,8 @@
         <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
         <OutputType>Exe</OutputType>
         <GenerateProgramFile>false</GenerateProgramFile>
+        <UseTestingPlatformProtocol>true</UseTestingPlatformProtocol>
+        <IsTestingPlatformEnabled>true</IsTestingPlatformEnabled>
     </PropertyGroup>
 
     <PropertyGroup>

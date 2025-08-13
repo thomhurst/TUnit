@@ -9,12 +9,13 @@ using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
+using TUnit.Engine.Services;
 
 #pragma warning disable TPEXP
 
 namespace TUnit.Engine;
 
-internal class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLineOptions, IServiceProvider serviceProvider, ExecuteRequestContext context) : ITUnitMessageBus, IDataProducer
+internal class TUnitMessageBus(IExtension extension, ICommandLineOptions commandLineOptions, VerbosityService verbosityService, IServiceProvider serviceProvider, ExecuteRequestContext context) : ITUnitMessageBus, IDataProducer
 {
     private readonly SessionUid _sessionSessionUid = context.Request.Session.SessionUid;
 
@@ -43,7 +44,6 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
     {
         if (!testContext.ReportResult)
         {
-            testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
             return;
         }
 
@@ -61,15 +61,12 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
                 .WithProperty(GetTimingProperty(testContext, start))
                 .WithProperty(new TrxMessagesProperty(trxMessages))
         ));
-
-        testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
     }
 
     public async ValueTask Failed(TestContext testContext, Exception exception, DateTimeOffset start)
     {
         if (!testContext.ReportResult)
         {
-            testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
             return;
         }
 
@@ -95,13 +92,13 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
                 .WithProperty(new TrxExceptionProperty(exception.Message, exception.StackTrace))
                 .WithProperty(new TrxMessagesProperty(trxMessages))
         ));
-
-        testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
     }
 
     private Exception SimplifyStacktrace(Exception exception)
     {
-        if (commandLineOptions.IsOptionSet(DetailedStacktraceCommandProvider.DetailedStackTrace))
+        // Check both the legacy --detailed-stacktrace flag and the new verbosity system
+        if (commandLineOptions.IsOptionSet(DetailedStacktraceCommandProvider.DetailedStackTrace) || 
+            (verbosityService?.ShowDetailedStackTrace == true))
         {
             return exception;
         }
@@ -131,8 +128,6 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
                 .WithProperty(new StandardErrorProperty(standardError))
                 .WithProperty(new TrxMessagesProperty(trxMessages))
         ));
-
-        testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
     }
 
     public async ValueTask Cancelled(TestContext testContext, DateTimeOffset start)
@@ -153,8 +148,6 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
                 .WithProperty(new StandardErrorProperty(standardError))
                 .WithProperty(new TrxMessagesProperty(trxMessages))
         ));
-
-        testContext.InternalExecutableTest._taskCompletionSource.TrySetResult();
     }
 
     public async ValueTask SessionArtifact(Artifact artifact)

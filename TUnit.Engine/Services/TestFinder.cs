@@ -48,7 +48,7 @@ internal class TestFinder : ITestFinder
         return allTests.Where(t =>
             t.TestName == testName &&
             t.TestDetails?.ClassType == classType &&
-            ParameterTypesMatch(t.TestDetails.TestMethodParameterTypes, paramTypes) &&
+            ParameterTypesMatch(t.TestDetails.MethodMetadata.Parameters.Select(p => p.Type).ToArray(), paramTypes) &&
             ClassParametersMatch(t, classParamTypes, classArguments)).ToArray();
     }
 

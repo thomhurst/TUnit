@@ -7,9 +7,8 @@
 namespace TUnit.Generated;
 internal sealed class ClassDataSourceDrivenTests2_Base_Derived1_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
         {
             TestName = "Base_Derived1",
@@ -37,52 +36,49 @@ internal sealed class ClassDataSourceDrivenTests2_Base_Derived1_TestSource_GUID 
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 12,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2, TestsBase`1"),
-Name = "Base_Derived1",
-GenericTypeCount = 0,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2, TestsBase`1"),
-Name = "ClassDataSourceDrivenTests2",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base))
-{
-    Name = "base",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2.Base, TestsBase`1"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base) })!.GetParameters()[0]
-},
-},
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2, TestsBase`1"),
+                Name = "Base_Derived1",
+                GenericTypeCount = 0,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2, TestsBase`1"),
+                        Name = "ClassDataSourceDrivenTests2",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = new global::TUnit.Core.ParameterMetadata[]
+                        {
+                            new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base))
+                            {
+                                Name = "base",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2.Base, TestsBase`1"),
+                                IsNullable = false,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base) })!.GetParameters()[0]
+                            }
+                        },
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>(args[0]));
@@ -101,8 +97,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ClassDataSourceDrivenTests2_Base_Derived1_ModuleInitializer_GUID
@@ -126,9 +122,8 @@ internal static class ClassDataSourceDrivenTests2_Base_Derived1_ModuleInitialize
 namespace TUnit.Generated;
 internal sealed class ClassDataSourceDrivenTests2_Base_Derived2_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
         {
             TestName = "Base_Derived2",
@@ -156,52 +151,49 @@ internal sealed class ClassDataSourceDrivenTests2_Base_Derived2_TestSource_GUID 
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 18,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
-{
-Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2, TestsBase`1"),
-Name = "Base_Derived2",
-GenericTypeCount = 0,
-ReturnType = typeof(void),
-ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
-Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => 
-{
-var classMetadata = new global::TUnit.Core.ClassMetadata
-{
-Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
-TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2, TestsBase`1"),
-Name = "ClassDataSourceDrivenTests2",
-Namespace = "TUnit.TestProject",
-Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
-Parameters = new global::TUnit.Core.ParameterMetadata[]
-{
-new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base))
-{
-    Name = "base",
-    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2.Base, TestsBase`1"),
-    IsNullable = false,
-    ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base) })!.GetParameters()[0]
-},
-},
-Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
-Parent = null
-};
-// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
-foreach (var prop in classMetadata.Properties)
-{
-prop.ClassMetadata = classMetadata;
-prop.ContainingTypeMetadata = classMetadata;
-}
-return classMetadata;
-})
-},
+            {
+                Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
+                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2, TestsBase`1"),
+                Name = "Base_Derived2",
+                GenericTypeCount = 0,
+                ReturnType = typeof(void),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => 
+                {
+                    var classMetadata = new global::TUnit.Core.ClassMetadata
+                    {
+                        Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2),
+                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2, TestsBase`1"),
+                        Name = "ClassDataSourceDrivenTests2",
+                        Namespace = "TUnit.TestProject",
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Parameters = new global::TUnit.Core.ParameterMetadata[]
+                        {
+                            new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base))
+                            {
+                                Name = "base",
+                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests2.Base, TestsBase`1"),
+                                IsNullable = false,
+                                ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base) })!.GetParameters()[0]
+                            }
+                        },
+                        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+                        Parent = null
+                    };
+                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
+                    foreach (var prop in classMetadata.Properties)
+                    {
+                        prop.ClassMetadata = classMetadata;
+                        prop.ContainingTypeMetadata = classMetadata;
+                    }
+                    return classMetadata;
+                })
+            },
             InstanceFactory = (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>(args[0]));
@@ -220,8 +212,8 @@ return classMetadata;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ClassDataSourceDrivenTests2_Base_Derived2_ModuleInitializer_GUID

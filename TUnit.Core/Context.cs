@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using System.Threading;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 
@@ -20,17 +21,17 @@ public abstract class Context : IContext, IDisposable
         ?? BeforeTestDiscoveryContext.Current as Context
         ?? GlobalContext.Current;
 
-    private StringBuilder? _outputStringBuilder;
-    private StringBuilder? _errorOutputStringBuilder;
+    private readonly StringBuilder _outputBuilder = new();
+    private readonly StringBuilder _errorOutputBuilder = new();
+    private readonly ReaderWriterLockSlim _outputLock = new(LockRecursionPolicy.NoRecursion);
+    private readonly ReaderWriterLockSlim _errorOutputLock = new(LockRecursionPolicy.NoRecursion);
     private DefaultLogger? _defaultLogger;
-    private readonly Lock _outputLock = new();
-    private readonly Lock _errorLock = new();
 
     [field: AllowNull, MaybeNull]
-    public TextWriter OutputWriter => field ??= new SynchronizedStringWriter(_outputStringBuilder ??= new StringBuilder(), _outputLock);
+    public TextWriter OutputWriter => field ??= new ConcurrentStringWriter(_outputBuilder, _outputLock);
 
     [field: AllowNull, MaybeNull]
-    public TextWriter ErrorOutputWriter => field ??= new SynchronizedStringWriter(_errorOutputStringBuilder ??= new StringBuilder(), _errorLock);
+    public TextWriter ErrorOutputWriter => field ??= new ConcurrentStringWriter(_errorOutputBuilder, _errorOutputLock);
 
     internal Context(Context? parent)
     {
@@ -69,17 +70,27 @@ public abstract class Context : IContext, IDisposable
 
     public string GetStandardOutput()
     {
-        lock (_outputLock)
+        _outputLock.EnterReadLock();
+        try
         {
-            return _outputStringBuilder?.ToString().Trim() ?? string.Empty;
+            return _outputBuilder.ToString().Trim();
+        }
+        finally
+        {
+            _outputLock.ExitReadLock();
         }
     }
 
     public string GetErrorOutput()
     {
-        lock (_errorLock)
+        _errorOutputLock.EnterReadLock();
+        try
         {
-            return _errorOutputStringBuilder?.ToString().Trim() ?? string.Empty;
+            return _errorOutputBuilder.ToString().Trim();
+        }
+        finally
+        {
+            _errorOutputLock.ExitReadLock();
         }
     }
 
@@ -93,30 +104,37 @@ public abstract class Context : IContext, IDisposable
 #if NET
         ExecutionContext?.Dispose();
 #endif
+        _outputLock?.Dispose();
+        _errorOutputLock?.Dispose();
     }
 }
 
 /// <summary>
-/// A TextWriter wrapper that provides thread-safe access to a StringBuilder
+/// A concurrent TextWriter implementation that provides thread-safe access to a StringBuilder
 /// </summary>
-internal sealed class SynchronizedStringWriter : TextWriter
+internal sealed class ConcurrentStringWriter : TextWriter
 {
-    private readonly StringBuilder _stringBuilder;
-    private readonly Lock _lock;
+    private readonly StringBuilder _builder;
+    private readonly ReaderWriterLockSlim _lock;
 
-    public SynchronizedStringWriter(StringBuilder stringBuilder, Lock lockObject)
+    public ConcurrentStringWriter(StringBuilder builder, ReaderWriterLockSlim lockSlim)
     {
-        _stringBuilder = stringBuilder;
-        _lock = lockObject;
+        _builder = builder;
+        _lock = lockSlim;
     }
 
     public override Encoding Encoding => Encoding.UTF8;
 
     public override void Write(char value)
     {
-        lock (_lock)
+        _lock.EnterWriteLock();
+        try
         {
-            _stringBuilder.Append(value);
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
         }
     }
 
@@ -124,48 +142,204 @@ internal sealed class SynchronizedStringWriter : TextWriter
     {
         if (value != null)
         {
-            lock (_lock)
+            _lock.EnterWriteLock();
+            try
             {
-                _stringBuilder.Append(value);
+                _builder.Append(value);
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
             }
         }
     }
 
     public override void Write(char[] buffer, int index, int count)
     {
-        lock (_lock)
+        if (buffer != null && count > 0)
         {
-            _stringBuilder.Append(buffer, index, count);
+            _lock.EnterWriteLock();
+            try
+            {
+                _builder.Append(buffer, index, count);
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
     }
 
     public override void WriteLine()
     {
-        lock (_lock)
+        _lock.EnterWriteLock();
+        try
         {
-            _stringBuilder.AppendLine();
+            _builder.AppendLine();
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
         }
     }
 
     public override void WriteLine(string? value)
     {
-        lock (_lock)
+        _lock.EnterWriteLock();
+        try
         {
-            _stringBuilder.AppendLine(value);
+            _builder.AppendLine(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
         }
     }
 
-    public override string ToString()
+    public override void Write(char[]? buffer)
     {
-        lock (_lock)
+        if (buffer != null)
         {
-            return _stringBuilder.ToString();
+            _lock.EnterWriteLock();
+            try
+            {
+                _builder.Append(buffer);
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
+    }
+
+    public override void Write(bool value)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public override void Write(int value)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public override void Write(uint value)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public override void Write(long value)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public override void Write(ulong value)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public override void Write(float value)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public override void Write(double value)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public override void Write(decimal value)
+    {
+        _lock.EnterWriteLock();
+        try
+        {
+            _builder.Append(value);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+    }
+
+    public override void Write(object? value)
+    {
+        if (value != null)
+        {
+            _lock.EnterWriteLock();
+            try
+            {
+                _builder.Append(value);
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
+    }
+
+    public override void Flush()
+    {
+        // StringBuilder doesn't need flushing
     }
 
     protected override void Dispose(bool disposing)
     {
-        // Nothing to dispose, StringBuilder doesn't implement IDisposable
+        // Don't dispose the lock or builder - they're owned by Context
         base.Dispose(disposing);
     }
 }

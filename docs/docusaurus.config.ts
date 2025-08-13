@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'TUnit',
   tagline: 'Welcome to TUnit Testing',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/tunit-favicon.svg',
 
   // Set the production url of your site here
   url: 'https://tunit.dev',
@@ -67,7 +67,7 @@ const config: Config = {
       title: 'TUnit',
       logo: {
         alt: 'TUnit Logo',
-        src: 'img/lab.svg',
+        src: 'img/tunit-favicon.svg',
       },
       items: [
         {
