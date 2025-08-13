@@ -28,20 +28,9 @@ public class AttributeWriter
                 }
 
                 // Skip attributes with compiler-generated type arguments
-                bool hasCompilerGeneratedType = false;
-                foreach (var arg in attributeData.ConstructorArguments)
-                {
-                    if (arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol })
-                    {
-                        if (typeSymbol.IsCompilerGeneratedType())
-                        {
-                            hasCompilerGeneratedType = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (hasCompilerGeneratedType)
+                if (attributeData.ConstructorArguments.Any(arg => 
+                    arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol } && 
+                    typeSymbol.IsCompilerGeneratedType()))
                 {
                     continue;
                 }
@@ -248,17 +237,13 @@ public class AttributeWriter
     {
         var attributeName = attributeData.AttributeClass!.GloballyQualified();
 
-        // Check if any constructor arguments contain compiler-generated types
-        foreach (var arg in attributeData.ConstructorArguments)
+        // Skip if any constructor arguments contain compiler-generated types
+        if (attributeData.ConstructorArguments.Any(arg => 
+            arg.Kind == TypedConstantKind.Type && 
+            arg.Value is ITypeSymbol typeSymbol && 
+            typeSymbol.IsCompilerGeneratedType()))
         {
-            if (arg.Kind == TypedConstantKind.Type && arg.Value is ITypeSymbol typeSymbol)
-            {
-                if (typeSymbol.IsCompilerGeneratedType())
-                {
-                    // Skip this attribute as it cannot be represented in source code
-                    return;
-                }
-            }
+            return;
         }
 
         var constructorArgs = attributeData.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue);
