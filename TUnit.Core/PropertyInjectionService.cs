@@ -114,29 +114,77 @@ public sealed class PropertyInjectionService
 
         try
         {
-            await _injectionTasks.GetOrAdd(instance, async _ =>
+            bool alreadyProcessed = _injectionTasks.TryGetValue(instance, out var existingTask);
+            
+            if (alreadyProcessed && existingTask != null)
             {
+                await existingTask;
+                
                 var plan = GetOrCreateInjectionPlan(instance.GetType());
-                
-                // Fast path: skip if no properties to inject
-                if (!plan.HasProperties)
+                if (plan.HasProperties)
                 {
+                    if (SourceRegistrar.IsEnabled)
+                    {
+                        foreach (var metadata in plan.SourceGeneratedProperties)
+                        {
+                            var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
+                            if (property != null && property.CanRead)
+                            {
+                                var propertyValue = property.GetValue(instance);
+                                if (propertyValue != null)
+                                {
+                                    ObjectTracker.TrackObject(events, propertyValue);
+                                    
+                                    if (ShouldInjectProperties(propertyValue))
+                                    {
+                                        await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var (property, _) in plan.ReflectionProperties)
+                        {
+                            var propertyValue = property.GetValue(instance);
+                            if (propertyValue != null)
+                            {
+                                ObjectTracker.TrackObject(events, propertyValue);
+                                
+                                if (ShouldInjectProperties(propertyValue))
+                                {
+                                    await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                await _injectionTasks.GetOrAdd(instance, async _ =>
+                {
+                    var plan = GetOrCreateInjectionPlan(instance.GetType());
+                    
+                    if (!plan.HasProperties)
+                    {
+                        await ObjectInitializer.InitializeAsync(instance);
+                        return;
+                    }
+                    
+                    if (SourceRegistrar.IsEnabled)
+                    {
+                        await InjectPropertiesUsingPlanAsync(instance, plan.SourceGeneratedProperties, objectBag, methodMetadata, events, visitedObjects);
+                    }
+                    else
+                    {
+                        await InjectPropertiesUsingReflectionPlanAsync(instance, plan.ReflectionProperties, objectBag, methodMetadata, events, visitedObjects);
+                    }
+                    
                     await ObjectInitializer.InitializeAsync(instance);
-                    return;
-                }
-                
-                if (SourceRegistrar.IsEnabled)
-                {
-                    await InjectPropertiesUsingPlanAsync(instance, plan.SourceGeneratedProperties, objectBag, methodMetadata, events, visitedObjects);
-                }
-                else
-                {
-                    await InjectPropertiesUsingReflectionPlanAsync(instance, plan.ReflectionProperties, objectBag, methodMetadata, events, visitedObjects);
-                }
-                
-                // Initialize the object AFTER all its properties have been injected and initialized
-                await ObjectInitializer.InitializeAsync(instance);
-            });
+                });
+            }
         }
         catch (Exception ex)
         {
@@ -336,23 +384,17 @@ public sealed class PropertyInjectionService
             return;
         }
 
-        // Track the property value for disposal - pure reference counting ensures proper disposal
-        // ObjectTracker's safety mechanism prevents double-tracking within the same context
         ObjectTracker.TrackObject(events, propertyValue);
 
-        // Recursively inject properties and initialize nested objects
-        // The visited set prevents infinite loops from circular references
         if (ShouldInjectProperties(propertyValue))
         {
             await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
         }
         else
         {
-            // For objects that don't need property injection, just initialize them
             await ObjectInitializer.InitializeAsync(propertyValue);
         }
         
-        // Finally, set the fully initialized property on the parent
         setProperty(instance, propertyValue);
     }
 

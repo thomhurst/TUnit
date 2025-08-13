@@ -19,8 +19,6 @@ public static class ObjectTracker
     /// <param name="objects">The objects to track (constructor args, method args, injected properties)</param>
     internal static void TrackObjectsForContext(TestContextEvents events, IEnumerable<object?> objects)
     {
-        // Simply delegate to TrackObject for each object
-        // The safety mechanism in TrackObject will prevent duplicates
         foreach (var obj in objects)
         {
             TrackObject(events, obj);
@@ -40,7 +38,6 @@ public static class ObjectTracker
             return;
         }
 
-        // Increment the reference count
         var counter = _trackedObjects.GetOrAdd(obj, _ => new Counter());
 
         counter.Increment();
