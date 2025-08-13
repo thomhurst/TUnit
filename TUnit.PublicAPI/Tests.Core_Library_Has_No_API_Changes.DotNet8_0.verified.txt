@@ -781,6 +781,13 @@ namespace
         public int Line { get; }
         public int Order { get; init; }
     }
+    public class HookRegisteredContext
+    {
+        public HookRegisteredContext(. hookMethod) { }
+        public . HookMethod { get; }
+        public string HookName { get; }
+        public ? Timeout { get; set; }
+    }
     public static class HookRegistrationIndices
     {
         public static int GetNextAfterAssemblyHookIndex() { }
@@ -1506,11 +1513,12 @@ namespace
         public static bool IsTransient(this .TestState state) { }
     }
     [(.Assembly | .Class | .Method)]
-    public class TimeoutAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.TimeoutAttribute>, ., .
+    public class TimeoutAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.TimeoutAttribute>, ., ., .
     {
         public TimeoutAttribute(int timeoutInMilliseconds) { }
         public int Order { get; }
         public  Timeout { get; }
+        public . OnHookRegistered(.HookRegisteredContext context) { }
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
     }
     public class Timing : <.Timing>
@@ -2080,14 +2088,21 @@ namespace .Hooks
         public BeforeTestSessionHookMethod() { }
         public override . ExecuteAsync(.TestSessionContext context, .CancellationToken cancellationToken) { }
     }
-    public class HookMethod
+    public abstract class HookMethod : <.>
     {
-        public HookMethod(. instanceHookMethod) { }
-        public HookMethod(. staticHookMethod) { }
-        public .? InstanceHookMethod { get; }
-        public .? StaticHookMethod { get; }
-        public static . op_Implicit(. instanceHookMethod) { }
-        public static . op_Implicit(. staticHookMethod) { }
+        protected HookMethod() { }
+        public virtual .Assembly? Assembly { get; }
+        public .<> Attributes { get; }
+        [.(..PublicMethods)]
+        public abstract  ClassType { get; }
+        public required . HookExecutor { get; init; }
+        public required .MethodMetadata MethodInfo { get; init; }
+        public string Name { get; }
+        public required int Order { get; init; }
+        public required int RegistrationIndex { get; init; }
+        public ? Timeout { get; }
+        public TAttribute? GetAttribute<TAttribute>()
+            where TAttribute :  { }
     }
     public interface IExecutableHook<in T>
     {
@@ -2101,23 +2116,14 @@ namespace .Hooks
         . Discover(string sessionId, string displayName, . hookMethod);
         . Push(string sessionId, string displayName, . hookMethod, <.> func);
     }
-    public class InstanceHookMethod : <.>, .<.TestContext>
+    public class InstanceHookMethod : ., <.>, .<.TestContext>
     {
         public InstanceHookMethod() { }
-        public .Assembly Assembly { get; }
-        public .<> Attributes { get; }
         public <object, .TestContext, .CancellationToken, .>? Body { get; init; }
         [.(..PublicMethods)]
-        public required  ClassType { get; init; }
-        public required . HookExecutor { get; init; }
-        public required .MethodMetadata MethodInfo { get; init; }
-        public string Name { get; }
-        public required int Order { get; init; }
-        public required int RegistrationIndex { get; init; }
-        public ? Timeout { get; }
+        public override  ClassType { get; }
+        public required  InitClassType { init; }
         public . ExecuteAsync(.TestContext context, .CancellationToken cancellationToken) { }
-        public TAttribute? GetAttribute<TAttribute>()
-            where TAttribute :  { }
     }
     public class LastTestInAssemblyAdapter : .<.AssemblyHookContext>
     {
@@ -2140,22 +2146,13 @@ namespace .Hooks
         public bool Execute(.ClassHookContext context, .CancellationToken cancellationToken) { }
         public . ExecuteAsync(.ClassHookContext context, .CancellationToken cancellationToken) { }
     }
-    public abstract class StaticHookMethod : <.>
+    public abstract class StaticHookMethod : ., <.>
     {
         protected StaticHookMethod() { }
-        public .Assembly? Assembly { get; }
-        public .<> Attributes { get; }
-        public  ClassType { get; }
+        [.(..PublicMethods)]
+        public override  ClassType { get; }
         public required string FilePath { get; init; }
-        public required . HookExecutor { get; init; }
         public required int LineNumber { get; init; }
-        public required .MethodMetadata MethodInfo { get; init; }
-        public string Name { get; }
-        public required int Order { get; init; }
-        public required int RegistrationIndex { get; init; }
-        public ? Timeout { get; }
-        public TAttribute? GetAttribute<TAttribute>()
-            where TAttribute :  { }
     }
     public abstract class StaticHookMethod<T> : ., <.<T>>, .<T>
     {
@@ -2251,6 +2248,10 @@ namespace .Interfaces
         . ExecuteBeforeTestDiscoveryHook(.MethodMetadata hookMethodInfo, .BeforeTestDiscoveryContext context, <.> action);
         . ExecuteBeforeTestHook(.MethodMetadata hookMethodInfo, .TestContext context, <.> action);
         . ExecuteBeforeTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action);
+    }
+    public interface IHookRegisteredEventReceiver : .
+    {
+        . OnHookRegistered(.HookRegisteredContext context);
     }
     public interface IInfersType<T> { }
     public interface ILastTestInAssemblyEventReceiver : .
