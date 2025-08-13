@@ -17,13 +17,11 @@ internal static class TestDataContainer
 
     public static object? GetInstanceForAssembly(Assembly assembly, Type type, Func<Type, object> func)
     {
-        Console.WriteLine($"[TestDataContainer] GetInstanceForAssembly called for type {type.Name}, assembly {assembly.GetName().Name}");
         return _assemblyContainer.GetOrCreate(assembly, type, func);
     }
 
     public static object? GetGlobalInstance(Type type, Func<Type, object> func)
     {
-        Console.WriteLine($"[TestDataContainer] GetGlobalInstance called for type {type.Name}");
         return _globalContainer.GetOrCreate(typeof(object).FullName!, type, func);
     }
 

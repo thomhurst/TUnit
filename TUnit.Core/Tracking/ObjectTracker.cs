@@ -45,13 +45,15 @@ internal static class ObjectTracker
 
         counter.Increment();
 
+        var objType = obj.GetType().Name;
+
         events.OnDispose += async (_, _) =>
         {
             var count = counter.Decrement();
 
             if (count < 0)
             {
-                throw new InvalidOperationException($"Reference count for object {obj.GetType().Name} went below zero. This indicates a bug in the reference counting logic.");
+                throw new InvalidOperationException($"Reference count for object {objType} went below zero. This indicates a bug in the reference counting logic.");
             }
 
             if (count == 0)
@@ -67,5 +69,22 @@ internal static class ObjectTracker
     private static bool ShouldSkipTracking(object? obj)
     {
         return obj is not IDisposable and not IAsyncDisposable;
+    }
+
+    public static void OnDisposed(object? o, Action action)
+    {
+        if(o is not IDisposable and not IAsyncDisposable)
+        {
+            return;
+        }
+
+        _trackedObjects.GetOrAdd(o, _ => new Counter())
+            .OnCountChanged += (_, count) =>
+        {
+            if (count == 0)
+            {
+                action();
+            }
+        };
     }
 }

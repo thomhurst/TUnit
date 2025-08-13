@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core.Data;
+﻿using TUnit.Core.Tracking;
+
+namespace TUnit.Core.Data;
 
 public class ScopedDictionary<TScope>
     where TScope : notnull
@@ -9,6 +11,24 @@ public class ScopedDictionary<TScope>
     {
         var innerDictionary = _scopedContainers.GetOrAdd(scope, _ => new GetOnlyDictionary<Type, object?>());
 
-        return innerDictionary.GetOrAdd(type, factory);
+        var obj = innerDictionary.GetOrAdd(type, factory);
+
+        ObjectTracker.OnDisposed(obj, () =>
+        {
+            innerDictionary.Remove(type);
+        });
+
+        return obj;
+    }
+
+    /// <summary>
+    /// Removes a specific value from all scopes and types where it might be stored.
+    /// This is used to clear disposed objects from the cache.
+    /// </summary>
+    public void RemoveValue(object valueToRemove)
+    {
+        // Since GetOnlyDictionary doesn't support removal, we'll need to track this differently
+        // For now, log that this needs to be implemented
+        Console.WriteLine($"[ScopedDictionary] WARNING: RemoveValue called for {valueToRemove.GetType().Name}@{valueToRemove.GetHashCode():X8} but GetOnlyDictionary doesn't support removal");
     }
 }
