@@ -120,24 +120,6 @@ internal static class ReflectionAttributeExtractor
         return skipAttr != null;
     }
 
-    public static int? ExtractTimeout(Type testClass, MethodInfo testMethod)
-    {
-        var timeoutAttr = GetAttribute<TimeoutAttribute>(testClass, testMethod);
-        return timeoutAttr != null ? (int)timeoutAttr.Timeout.TotalMilliseconds : null;
-    }
-
-    public static int ExtractRetryCount(Type testClass, MethodInfo testMethod)
-    {
-        var retryAttr = GetAttribute<RetryAttribute>(testClass, testMethod);
-        return retryAttr?.Times ?? 0;
-    }
-
-    public static int ExtractRepeatCount(Type testClass, MethodInfo testMethod)
-    {
-        var repeatAttr = GetAttribute<RepeatAttribute>(testClass, testMethod);
-        return repeatAttr?.Times ?? 0;
-    }
-
     public static bool CanRunInParallel(Type testClass, MethodInfo testMethod)
     {
         return GetAttribute<NotInParallelAttribute>(testClass, testMethod) == null;

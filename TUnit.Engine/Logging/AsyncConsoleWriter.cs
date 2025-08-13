@@ -318,7 +318,7 @@ internal sealed class AsyncConsoleWriter : TextWriter
         }
         
         _shutdownCts.Dispose();
-        await base.DisposeAsync();
+        await base.DisposeAsync().ConfigureAwait(false);
     }
 #endif
 }

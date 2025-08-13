@@ -367,7 +367,7 @@ namespace
         public DataGeneratorMetadata() { }
         public required object?[]? ClassInstanceArguments { get; init; }
         public required .MemberMetadata[] MembersToGenerate { get; init; }
-        public required .TestBuilderContextAccessor? TestBuilderContext { get; init; }
+        public required .TestBuilderContextAccessor TestBuilderContext { get; init; }
         public required object? TestClassInstance { get; init; }
         public required .MethodMetadata? TestInformation { get; init; }
         public required string TestSessionId { get; init; }
@@ -1227,7 +1227,7 @@ namespace
         public void WriteError(string message) { }
         public void WriteLine(string message) { }
     }
-    public class TestContextEvents : <.TestContextEvents>
+    public class TestContextEvents
     {
         public TestContextEvents() { }
         public .AsyncEvent<.TestContext>? OnDispose { get; set; }
@@ -1404,6 +1404,7 @@ namespace
         public .BeforeTestDiscoveryContext TestDiscoveryContext { get; }
         public required string? TestFilter { get; init; }
         public new static .TestSessionContext? Current { get; }
+        public static .TestBuilderContext GlobalStaticPropertyContext { get; }
         public void AddArtifact(.Artifact artifact) { }
         public void AddAssembly(.AssemblyHookContext assemblyHookContext) { }
     }
@@ -1544,6 +1545,13 @@ namespace .Data
         public TValue GetOrAdd(TKey key, <TKey, TValue> func) { }
         public TValue? Remove(TKey key) { }
         public bool TryGetValue(TKey key, [.(true)] out TValue? value) { }
+    }
+    public class ScopedDictionary<TScope>
+        where TScope :  notnull
+    {
+        public ScopedDictionary() { }
+        public object? GetOrCreate(TScope scope,  type, <, object?> factory) { }
+        public void RemoveValue(object valueToRemove) { }
     }
 }
 namespace .DataSources
@@ -1893,7 +1901,7 @@ namespace .Helpers
     }
     public static class TestClassTypeHelper
     {
-        public static ? GetTestClassType(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public static  GetTestClassType(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     public static class TestNameGenerator
     {
@@ -2304,15 +2312,6 @@ namespace .Models
         public ? MethodInvoker { get; set; }
     }
 }
-namespace .ReferenceTracking
-{
-    public static class DataSourceReferenceExtensions
-    {
-        public static void TrackClassArguments(this .TestContext context) { }
-        public static void TrackMethodArguments(this .TestContext context) { }
-        public static void TrackPropertyArguments(this .TestContext context) { }
-    }
-}
 namespace .Services
 {
     public class GenericTypeResolver : .
@@ -2402,5 +2401,13 @@ namespace .Services
         public . AddTransient<T>(<T> factory)
             where T :  class { }
         public object? GetService( serviceType) { }
+    }
+}
+namespace .Tracking
+{
+    public static class ObjectTracker
+    {
+        public static void OnDisposed(object? o,  action) { }
+        public static void TrackOwnership(object owner, object owned) { }
     }
 }

@@ -56,7 +56,7 @@ public sealed class PropertyInjectionService
     }
 
     /// <summary>
-    /// Determines if an object should have properties injected based on its type and whether it has nested data sources.
+    /// Determines if an object should have properties injected based on whether it has properties with data source attributes.
     /// </summary>
     private static bool ShouldInjectProperties(object? obj)
     {
@@ -67,25 +67,11 @@ public sealed class PropertyInjectionService
 
         var type = obj.GetType();
         
-        // Use cached result for better performance
-        return _shouldInjectCache.GetOrAdd(type, _ =>
+        // Use cached result for better performance - check if the type has injectable properties
+        return _shouldInjectCache.GetOrAdd(type, t =>
         {
-            if (type.IsPrimitive || type == typeof(string) || type.IsEnum || type.IsValueType)
-            {
-                return false;
-            }
-
-            if (type.IsArray || typeof(System.Collections.IEnumerable).IsAssignableFrom(type))
-            {
-                return false;
-            }
-
-            if (type.Assembly == typeof(object).Assembly)
-            {
-                return false;
-            }
-
-            return true;
+            var plan = GetOrCreateInjectionPlan(t);
+            return plan.HasProperties;
         });
     }
 
@@ -94,9 +80,26 @@ public sealed class PropertyInjectionService
     /// Uses source generation mode when available, falls back to reflection mode.
     /// After injection, handles tracking, initialization, and recursive injection.
     /// </summary>
-    public static async Task InjectPropertiesIntoObjectAsync(object instance, Dictionary<string, object?>? objectBag, MethodMetadata? methodMetadata, TestContextEvents? events)
+    public static Task InjectPropertiesIntoObjectAsync(object instance, Dictionary<string, object?>? objectBag, MethodMetadata? methodMetadata, TestContextEvents? events)
+    {
+        // Start with an empty visited set for cycle detection
+#if NETSTANDARD2_0
+        var visitedObjects = new HashSet<object>();
+#else
+        var visitedObjects = new HashSet<object>(System.Collections.Generic.ReferenceEqualityComparer.Instance);
+#endif
+        return InjectPropertiesIntoObjectAsyncCore(instance, objectBag, methodMetadata, events, visitedObjects);
+    }
+    
+    private static async Task InjectPropertiesIntoObjectAsyncCore(object instance, Dictionary<string, object?>? objectBag, MethodMetadata? methodMetadata, TestContextEvents? events, HashSet<object> visitedObjects)
     {
         if (instance == null)
+        {
+            return;
+        }
+
+        // Prevent cycles - if we're already processing this object, skip it
+        if (!visitedObjects.Add(instance))
         {
             return;
         }
@@ -111,29 +114,79 @@ public sealed class PropertyInjectionService
 
         try
         {
-            await _injectionTasks.GetOrAdd(instance, async _ =>
+            bool alreadyProcessed = _injectionTasks.TryGetValue(instance, out var existingTask);
+            
+            if (alreadyProcessed && existingTask != null)
             {
+                await existingTask;
+                
                 var plan = GetOrCreateInjectionPlan(instance.GetType());
-                
-                // Fast path: skip if no properties to inject
-                if (!plan.HasProperties)
+                if (plan.HasProperties)
                 {
+                    if (SourceRegistrar.IsEnabled)
+                    {
+                        foreach (var metadata in plan.SourceGeneratedProperties)
+                        {
+                            var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
+                            if (property != null && property.CanRead)
+                            {
+                                var propertyValue = property.GetValue(instance);
+                                if (propertyValue != null)
+                                {
+                                    ObjectTracker.TrackObject(events, propertyValue);
+                                    ObjectTracker.TrackOwnership(instance, propertyValue);
+                                    
+                                    if (ShouldInjectProperties(propertyValue))
+                                    {
+                                        await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var (property, _) in plan.ReflectionProperties)
+                        {
+                            var propertyValue = property.GetValue(instance);
+                            if (propertyValue != null)
+                            {
+                                ObjectTracker.TrackObject(events, propertyValue);
+                                ObjectTracker.TrackOwnership(instance, propertyValue);
+                                
+                                if (ShouldInjectProperties(propertyValue))
+                                {
+                                    await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                await _injectionTasks.GetOrAdd(instance, async _ =>
+                {
+                    var plan = GetOrCreateInjectionPlan(instance.GetType());
+                    
+                    if (!plan.HasProperties)
+                    {
+                        await ObjectInitializer.InitializeAsync(instance);
+                        return;
+                    }
+                    
+                    if (SourceRegistrar.IsEnabled)
+                    {
+                        await InjectPropertiesUsingPlanAsync(instance, plan.SourceGeneratedProperties, objectBag, methodMetadata, events, visitedObjects);
+                    }
+                    else
+                    {
+                        await InjectPropertiesUsingReflectionPlanAsync(instance, plan.ReflectionProperties, objectBag, methodMetadata, events, visitedObjects);
+                    }
+                    
                     await ObjectInitializer.InitializeAsync(instance);
-                    return;
-                }
-                
-                if (SourceRegistrar.IsEnabled)
-                {
-                    await InjectPropertiesUsingPlanAsync(instance, plan.SourceGeneratedProperties, objectBag, methodMetadata, events);
-                }
-                else
-                {
-                    await InjectPropertiesUsingReflectionPlanAsync(instance, plan.ReflectionProperties, objectBag, methodMetadata, events);
-                }
-                
-                // Initialize the object AFTER all its properties have been injected and initialized
-                await ObjectInitializer.InitializeAsync(instance);
-            });
+                });
+            }
         }
         catch (Exception ex)
         {
@@ -196,7 +249,7 @@ public sealed class PropertyInjectionService
     /// <summary>
     /// Injects properties using a cached source-generated plan.
     /// </summary>
-    private static async Task InjectPropertiesUsingPlanAsync(object instance, PropertyInjectionMetadata[] properties, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
+    private static async Task InjectPropertiesUsingPlanAsync(object instance, PropertyInjectionMetadata[] properties, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, HashSet<object> visitedObjects)
     {
         if (properties.Length == 0)
         {
@@ -205,7 +258,7 @@ public sealed class PropertyInjectionService
 
         // Process all properties at the same level in parallel
         var propertyTasks = properties.Select(metadata => 
-            ProcessPropertyMetadata(instance, metadata, objectBag, methodMetadata, events, TestContext.Current)
+            ProcessPropertyMetadata(instance, metadata, objectBag, methodMetadata, events, visitedObjects, TestContext.Current)
         ).ToArray();
 
         await Task.WhenAll(propertyTasks);
@@ -215,7 +268,7 @@ public sealed class PropertyInjectionService
     /// Injects properties using a cached reflection plan.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static async Task InjectPropertiesUsingReflectionPlanAsync(object instance, (PropertyInfo Property, IDataSourceAttribute DataSource)[] properties, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
+    private static async Task InjectPropertiesUsingReflectionPlanAsync(object instance, (PropertyInfo Property, IDataSourceAttribute DataSource)[] properties, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, HashSet<object> visitedObjects)
     {
         if (properties.Length == 0)
         {
@@ -224,7 +277,7 @@ public sealed class PropertyInjectionService
 
         // Process all properties in parallel
         var propertyTasks = properties.Select(pair => 
-            ProcessReflectionPropertyDataSource(instance, pair.Property, pair.DataSource, objectBag, methodMetadata, events, TestContext.Current)
+            ProcessReflectionPropertyDataSource(instance, pair.Property, pair.DataSource, objectBag, methodMetadata, events, visitedObjects, TestContext.Current)
         ).ToArray();
 
         await Task.WhenAll(propertyTasks);
@@ -235,7 +288,7 @@ public sealed class PropertyInjectionService
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
     private static async Task ProcessPropertyMetadata(object instance, PropertyInjectionMetadata metadata, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata,
-        TestContextEvents events, TestContext? testContext = null)
+        TestContextEvents events, HashSet<object> visitedObjects, TestContext? testContext = null)
     {
         var dataSource = metadata.CreateDataSource();
         var propertyMetadata = new PropertyMetadata
@@ -271,7 +324,12 @@ public sealed class PropertyInjectionService
 
             if (value != null)
             {
-                await ProcessInjectedPropertyValue(instance, value, metadata.SetProperty, objectBag, methodMetadata, events);
+                await ProcessInjectedPropertyValue(instance, value, metadata.SetProperty, objectBag, methodMetadata, events, visitedObjects);
+                // Add to TestClassInjectedPropertyArguments for tracking
+                if (testContext != null)
+                {
+                    testContext.TestDetails.TestClassInjectedPropertyArguments[metadata.PropertyName] = value;
+                }
                 break; // Only use first value
             }
         }
@@ -281,7 +339,7 @@ public sealed class PropertyInjectionService
     /// Processes a property data source using reflection mode.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static async Task ProcessReflectionPropertyDataSource(object instance, PropertyInfo property, IDataSourceAttribute dataSource, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, TestContext? testContext = null)
+    private static async Task ProcessReflectionPropertyDataSource(object instance, PropertyInfo property, IDataSourceAttribute dataSource, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, HashSet<object> visitedObjects, TestContext? testContext = null)
     {
         // Use centralized factory for reflection mode
         var dataGeneratorMetadata = DataGeneratorMetadataCreator.CreateForPropertyInjection(
@@ -307,16 +365,21 @@ public sealed class PropertyInjectionService
             if (value != null)
             {
                 var setter = CreatePropertySetter(property);
-                await ProcessInjectedPropertyValue(instance, value, setter, objectBag, methodMetadata, events);
+                await ProcessInjectedPropertyValue(instance, value, setter, objectBag, methodMetadata, events, visitedObjects);
+                // Add to TestClassInjectedPropertyArguments for tracking
+                if (testContext != null)
+                {
+                    testContext.TestDetails.TestClassInjectedPropertyArguments[property.Name] = value;
+                }
                 break; // Only use first value
             }
         }
     }
 
     /// <summary>
-    /// Processes a single injected property value: tracks it, initializes it, sets it on the instance, and handles cleanup.
+    /// Processes a single injected property value: tracks it, initializes it, sets it on the instance.
     /// </summary>
-    private static async Task ProcessInjectedPropertyValue(object instance, object? propertyValue, Action<object, object?> setProperty, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
+    private static async Task ProcessInjectedPropertyValue(object instance, object? propertyValue, Action<object, object?> setProperty, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, HashSet<object> visitedObjects)
     {
         if (propertyValue == null)
         {
@@ -324,20 +387,17 @@ public sealed class PropertyInjectionService
         }
 
         ObjectTracker.TrackObject(events, propertyValue);
+        ObjectTracker.TrackOwnership(instance, propertyValue);
 
-        // First, recursively inject and initialize all descendants of this property value
         if (ShouldInjectProperties(propertyValue))
         {
-            // This will recursively inject properties and initialize the object
-            await InjectPropertiesIntoObjectAsync(propertyValue, objectBag, methodMetadata, events);
+            await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
         }
         else
         {
-            // For objects that don't need property injection, still initialize them
             await ObjectInitializer.InitializeAsync(propertyValue);
         }
         
-        // Finally, set the fully initialized property on the parent
         setProperty(instance, propertyValue);
     }
 
@@ -531,7 +591,16 @@ public sealed class PropertyInjectionService
                     if (value != null)
                     {
                         // Use the modern service for recursive injection and initialization
-                        await ProcessInjectedPropertyValue(instance, value, propertyInjection.Setter, objectBag, testInformation, testContext.Events);
+                        // Create a new visited set for this legacy call
+#if NETSTANDARD2_0
+                        var visitedObjects = new HashSet<object>();
+#else
+                        var visitedObjects = new HashSet<object>(System.Collections.Generic.ReferenceEqualityComparer.Instance);
+#endif
+                        visitedObjects.Add(instance); // Add the current instance to prevent re-processing
+                        await ProcessInjectedPropertyValue(instance, value, propertyInjection.Setter, objectBag, testInformation, testContext.Events, visitedObjects);
+                        // Add to TestClassInjectedPropertyArguments for tracking
+                        testContext.TestDetails.TestClassInjectedPropertyArguments[propertyInjection.PropertyName] = value;
                         break; // Only use first value
                     }
                 }

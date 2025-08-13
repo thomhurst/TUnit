@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Helpers;
 using TUnit.Core.Logging;
 
 namespace TUnit.Core;
@@ -23,6 +25,13 @@ public class GlobalContext : Context
     public string? TestFilter { get; internal set; }
     public TextWriter OriginalConsoleOut { get; set; } = Console.Out;
     public TextWriter OriginalConsoleError { get; set; } = Console.Error;
+
+    [field: AllowNull, MaybeNull]
+    internal Disposer Disposer
+    {
+        get => field ??= new Disposer(GlobalLogger);
+        set;
+    }
 
     internal override void RestoreContextAsyncLocal()
     {

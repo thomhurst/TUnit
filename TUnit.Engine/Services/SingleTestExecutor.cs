@@ -126,6 +126,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 test.Metadata.MethodMetadata,
                 test.Context.TestDetails.TestId).ConfigureAwait(false);
 
+            // Note: Property-injected values are already tracked within PropertyInjectionService
+            // No need to track them again here
+
             await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken).ConfigureAwait(false);
 
             PopulateTestContextDependencies(test);
@@ -293,6 +296,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         finally
         {
+            // First, dispose the test instance so it can interact with injected objects during its disposal
             if (instance is IAsyncDisposable asyncDisposableInstance)
             {
                 await asyncDisposableInstance.DisposeAsync().ConfigureAwait(false);
@@ -300,6 +304,25 @@ internal class SingleTestExecutor : ISingleTestExecutor
             else if (instance is IDisposable disposableInstance)
             {
                 disposableInstance.Dispose();
+            }
+            
+            // Then trigger disposal of tracked objects (injected properties and constructor args)
+            // This happens AFTER test instance disposal to ensure the test class can use
+            // these objects in its Dispose/DisposeAsync method
+            if (test.Context.Events.OnDispose != null)
+            {
+                foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                {
+                    try
+                    {
+                        await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log but don't throw - we still need to dispose other objects
+                        await _logger.LogErrorAsync($"Error during OnDispose event: {ex.Message}").ConfigureAwait(false);
+                    }
+                }
             }
         }
 

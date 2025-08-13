@@ -65,7 +65,7 @@ public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMembe
 
     public virtual async ValueTask ResetLazy()
     {
-        await DisposeAsync();
+        await DisposeAsync().ConfigureAwait(false);
 
         _lazy = new Lazy<Task<T>>(_factory);
     }
@@ -74,8 +74,8 @@ public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMembe
     {
         if (_lazy.IsValueCreated)
         {
-            var instance = await _lazy.Value;
-            await DisposeAsync(instance);
+            var instance = await _lazy.Value.ConfigureAwait(false);
+            await DisposeAsync(instance).ConfigureAwait(false);
         }
     }
 
@@ -83,7 +83,7 @@ public class ResettableLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMembe
     {
         if (obj is IAsyncDisposable asyncDisposable)
         {
-            await asyncDisposable.DisposeAsync();
+            await asyncDisposable.DisposeAsync().ConfigureAwait(false);
         }
         else if (obj is IDisposable disposable)
         {

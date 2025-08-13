@@ -49,7 +49,8 @@ public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormat
         var methodParameters = testDetails
             .MethodMetadata
             .Parameters
-            .Zip(testDetails.TestMethodArguments, (parameterInfo, testArgument) => (ParameterInfo: parameterInfo, TestArgument: testArgument));
+            .Zip(testDetails.TestMethodArguments, (parameterInfo, testArgument) => (ParameterInfo: parameterInfo, TestArgument: testArgument))
+            .OrderByDescending(p => p.ParameterInfo.Name?.Length ?? 0); // Sort by name length descending to avoid prefix issues
 
         foreach (var parameter in methodParameters)
         {
@@ -64,7 +65,8 @@ public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormat
                 .MethodMetadata
                 .Class
                 .Parameters
-                .Zip(testDetails.TestClassArguments, (parameterInfo, testArgument) => (ParameterInfo: parameterInfo, TestArgument: testArgument));
+                .Zip(testDetails.TestClassArguments, (parameterInfo, testArgument) => (ParameterInfo: parameterInfo, TestArgument: testArgument))
+                .OrderByDescending(p => p.ParameterInfo.Name?.Length ?? 0); // Sort by name length descending to avoid prefix issues
 
             foreach (var parameter in classParameters)
             {

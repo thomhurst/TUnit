@@ -446,7 +446,7 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
             _threadLocalBuffer?.Dispose();
             _lock?.Dispose();
         }
-        await base.DisposeAsync();
+        await base.DisposeAsync().ConfigureAwait(false);
     }
 #endif
 }
