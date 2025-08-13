@@ -22,7 +22,11 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
 
     public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => Attributes.OfType<TAttribute>().FirstOrDefault();
 
-    public TimeSpan? Timeout => GetAttribute<TimeoutAttribute>()?.Timeout ?? TimeSpan.FromMinutes(5);
+    /// <summary>
+    /// Gets or sets the timeout for this hook method. This will be set during hook registration
+    /// by the event receiver infrastructure, falling back to the default 5-minute timeout.
+    /// </summary>
+    public TimeSpan? Timeout { get; internal set; } = TimeSpan.FromMinutes(5);
 
     public required IHookExecutor HookExecutor { get; init; }
 

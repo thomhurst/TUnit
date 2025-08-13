@@ -197,6 +197,58 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
     }
 
+    public async ValueTask InvokeHookRegistrationEventReceiversAsync(HookRegisteredContext hookContext, CancellationToken cancellationToken)
+    {
+        // Get event receivers from the hook method's attributes
+        IEnumerable<Attribute> attributes;
+        
+        if (hookContext.StaticHookMethod != null)
+        {
+            attributes = hookContext.StaticHookMethod.Attributes;
+        }
+        else if (hookContext.InstanceHookMethod != null)
+        {
+            attributes = hookContext.InstanceHookMethod.Attributes;
+        }
+        else
+        {
+            return; // No hook method to process
+        }
+
+        var eventReceivers = attributes
+            .OfType<IHookRegisteredEventReceiver>()
+            .OrderBy(r => r.Order)
+            .ToList();
+
+        // Filter scoped attributes to ensure only the highest priority one of each type is invoked
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);
+
+        foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
+        {
+            try
+            {
+                await receiver.OnHookRegistered(hookContext);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in hook registration event receiver: {ex.Message}");
+            }
+        }
+
+        // Apply the timeout from the context back to the hook method
+        if (hookContext.Timeout.HasValue)
+        {
+            if (hookContext.StaticHookMethod != null)
+            {
+                hookContext.StaticHookMethod.Timeout = hookContext.Timeout;
+            }
+            else if (hookContext.InstanceHookMethod != null)
+            {
+                hookContext.InstanceHookMethod.Timeout = hookContext.Timeout;
+            }
+        }
+    }
+
 
     // First/Last event methods with fast-path checks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

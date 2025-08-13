@@ -86,14 +86,14 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         CancellationToken = Register(new EngineCancellationToken());
 
-        HookCollectionService = Register<IHookCollectionService>(new HookCollectionService());
+        EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
+        HookCollectionService = Register<IHookCollectionService>(new HookCollectionService(EventReceiverOrchestrator));
 
         ParallelLimitLockProvider = Register(new ParallelLimitLockProvider());
 
         ContextProvider = Register(new ContextProvider(this, TestSessionId, Filter?.ToString()));
 
         HookOrchestrator = Register(new HookOrchestrator(HookCollectionService, Logger, ContextProvider, this));
-        EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
 
         // Detect execution mode from command line or environment
         var useSourceGeneration = GetUseSourceGeneration(CommandLineOptions);

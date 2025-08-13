@@ -53,8 +53,7 @@ public class TimeoutAttribute(int timeoutInMilliseconds) : TUnitAttribute, ITest
     /// <inheritdoc />
     public ValueTask OnHookRegistered(HookRegisteredContext context)
     {
-        // Apply timeout to the hook method
-        // This will be used by the hook execution infrastructure
+        context.Timeout = Timeout;
         return default(ValueTask);
     }
 }
