@@ -22,7 +22,7 @@ public record InstanceHookMethod : IExecutableHook<TestContext>
 
     public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => Attributes.OfType<TAttribute>().FirstOrDefault();
 
-    public TimeSpan? Timeout => GetAttribute<TimeoutAttribute>()?.Timeout;
+    public TimeSpan? Timeout => GetAttribute<TimeoutAttribute>()?.Timeout ?? TimeSpan.FromMinutes(5);
 
     public required IHookExecutor HookExecutor { get; init; }
 

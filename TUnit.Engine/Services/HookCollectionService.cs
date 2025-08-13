@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Hooks;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 
 namespace TUnit.Engine.Services;
@@ -516,7 +517,14 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            await hook.ExecuteAsync(context, cancellationToken);
+            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+                (ctx, ct) => hook.ExecuteAsync(ctx, ct),
+                context,
+                hook.Timeout,
+                hook.Name,
+                cancellationToken);
+            
+            await timeoutAction();
         };
     }
 
@@ -524,7 +532,12 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            await hook.ExecuteAsync(context, cancellationToken);
+            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+                hook,
+                context,
+                cancellationToken);
+            
+            await timeoutAction();
         };
     }
 
@@ -532,7 +545,12 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            await hook.ExecuteAsync(context, cancellationToken);
+            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+                hook,
+                context,
+                cancellationToken);
+            
+            await timeoutAction();
         };
     }
 
@@ -540,7 +558,12 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            await hook.ExecuteAsync(context, cancellationToken);
+            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+                hook,
+                context,
+                cancellationToken);
+            
+            await timeoutAction();
         };
     }
 
@@ -548,7 +571,12 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            await hook.ExecuteAsync(context, cancellationToken);
+            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+                hook,
+                context,
+                cancellationToken);
+            
+            await timeoutAction();
         };
     }
 
@@ -556,7 +584,12 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            await hook.ExecuteAsync(context, cancellationToken);
+            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+                hook,
+                context,
+                cancellationToken);
+            
+            await timeoutAction();
         };
     }
 
@@ -564,7 +597,12 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
-            await hook.ExecuteAsync(context, cancellationToken);
+            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+                hook,
+                context,
+                cancellationToken);
+            
+            await timeoutAction();
         };
     }
 
