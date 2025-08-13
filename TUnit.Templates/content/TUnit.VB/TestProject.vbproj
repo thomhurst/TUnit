@@ -8,6 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="TUnit" Version="0.55.21" />
+	  <PackageReference Include="TUnit" Version="0.55.23" />
   </ItemGroup>
 </Project>
