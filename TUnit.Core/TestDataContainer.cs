@@ -17,11 +17,13 @@ internal static class TestDataContainer
 
     public static object GetInstanceForAssembly(Assembly assembly, Type type, Func<object> func)
     {
+        Console.WriteLine($"[TestDataContainer] GetInstanceForAssembly called for type {type.Name}, assembly {assembly.GetName().Name}");
         return _assemblyContainer.GetOrCreate(assembly, type, func);
     }
 
     public static object GetGlobalInstance(Type type, Func<object> func)
     {
+        Console.WriteLine($"[TestDataContainer] GetGlobalInstance called for type {type.Name}");
         return _globalContainer.GetOrCreate(typeof(object).FullName!, type, func);
     }
 
@@ -30,5 +32,23 @@ internal static class TestDataContainer
         return _keyContainer.GetOrCreate(key, type, func);
     }
 
+    public static bool RemoveInstanceForClass(Type testClass, Type type, object instance)
+    {
+        return _classContainer.Remove(testClass, type, instance);
+    }
 
+    public static bool RemoveInstanceForAssembly(Assembly assembly, Type type, object instance)
+    {
+        return _assemblyContainer.Remove(assembly, type, instance);
+    }
+
+    public static bool RemoveGlobalInstance(Type type, object instance)
+    {
+        return _globalContainer.Remove(typeof(object).FullName!, type, instance);
+    }
+
+    public static bool RemoveInstanceForKey(string key, Type type, object instance)
+    {
+        return _keyContainer.Remove(key, type, instance);
+    }
 }

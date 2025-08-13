@@ -18,7 +18,19 @@ internal class ScopedContainer<TKey> where TKey : notnull
     public object GetOrCreate(TKey key, Type type, Func<object> factory)
     {
         var container = _containers.GetOrAdd(key, _ => new GetOnlyDictionary<Type, object>());
-        return container.GetOrAdd(type, _ => factory());
+        
+        // Check if the type already exists before calling GetOrAdd
+        bool alreadyExists = container.TryGetValue(type, out var existing);
+        
+        var result = alreadyExists ? existing! : container.GetOrAdd(type, _ => factory());
+        
+        // Debug logging for shared objects
+        if (type.Name.Contains("SomeClass"))
+        {
+            Console.WriteLine($"[ScopedContainer<{typeof(TKey).Name}>] {(alreadyExists ? "Retrieved existing" : "Created new")} {type.Name} for key {key} (hash: {result.GetHashCode()}, container: {this.GetHashCode()})");
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -35,5 +47,21 @@ internal class ScopedContainer<TKey> where TKey : notnull
                container.TryGetValue(type, out instance);
     }
 
+    /// <summary>
+    /// Removes an instance from the cache.
+    /// </summary>
+    /// <param name="key">The scoping key.</param>
+    /// <param name="type">The type of object to remove.</param>
+    /// <param name="instance">The instance to remove (for verification).</param>
+    /// <returns>True if the instance was removed; otherwise, false.</returns>
+    public bool Remove(TKey key, Type type, object instance)
+    {
+        if (_containers.TryGetValue(key, out var container))
+        {
+            var removed = container.Remove(type);
+            return removed != null && ReferenceEquals(removed, instance);
+        }
+        return false;
+    }
 
 }

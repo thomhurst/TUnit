@@ -14,7 +14,22 @@ internal class ClassDataSources
 
     public static readonly GetOnlyDictionary<string, ClassDataSources> SourcesPerSession = new();
 
-    public static ClassDataSources Get(string sessionId) => SourcesPerSession.GetOrAdd(sessionId, _ => new());
+    public static ClassDataSources Get(string sessionId)
+    {
+        var isNew = false;
+        var result = SourcesPerSession.GetOrAdd(sessionId, _ =>
+        {
+            isNew = true;
+            return new ClassDataSources();
+        });
+        
+        if (isNew)
+        {
+            Console.WriteLine($"[ClassDataSources] Created new ClassDataSources for session {sessionId}");
+        }
+        
+        return result;
+    }
 
     public (T, SharedType, string) GetItemForIndexAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)] T>(int index, Type? testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()
     {
@@ -68,7 +83,18 @@ internal class ClassDataSources
             {
                 throw new InvalidOperationException($"Cannot use SharedType.PerAssembly without a test class type. This may occur during static property initialization.");
             }
-            instance = (T) TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () => Create(typeof(T), dataGeneratorMetadata));
+            var isNew = false;
+            instance = (T) TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), () =>
+            {
+                isNew = true;
+                return Create(typeof(T), dataGeneratorMetadata);
+            });
+            
+            // Debug logging for shared objects
+            if (typeof(T).Name.Contains("SomeClass"))
+            {
+                Console.WriteLine($"[ClassDataSources] {(isNew ? "Created new" : "Retrieved existing")} {typeof(T).Name} from PerAssembly cache (hash: {instance.GetHashCode()}, testClassType: {testClassType.Name}, assembly: {testClassType.Assembly.GetName().Name})");
+            }
         }
         else
         {

@@ -53,25 +53,59 @@ internal static class ObjectTracker
 
         // Increment the reference count
         var counter = _trackedObjects.GetOrAdd(obj, _ => new Counter());
-        counter.Increment();
+        var newCount = counter.Increment();
+        
+        // Debug logging for shared objects
+        if (obj.GetType().Name.Contains("SomeClass"))
+        {
+            Console.WriteLine($"[ObjectTracker] Incremented {obj.GetType().Name} to {newCount} (context: {events.GetHashCode()})");
+        }
 
         // Add to the context's tracked objects or create new tracking
         // Use a factory delegate to ensure disposal handler is registered only once per context
         var contextObjects = _contextTrackedObjects.GetOrAdd(events, e =>
         {
+            // Debug logging for context creation
+            Console.WriteLine($"[ObjectTracker] Creating new context tracking for events object {e.GetHashCode()} (identity: {System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(e)})");
+            
+            // Count existing handlers before adding
+            var handlerCountBefore = e.OnDispose?.InvocationList?.Count ?? 0;
+            
             // Register disposal handler only once when creating the HashSet
             e.OnDispose = e.OnDispose + new Func<object, TestContext, ValueTask>(async (sender, testContext) =>
             {
+                // Log every time the disposal event is triggered
+                Console.WriteLine($"[ObjectTracker] OnDispose event triggered for context {e.GetHashCode()} (identity: {System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(e)})");
+                
+                // TryRemove is atomic - if it succeeds, we proceed with disposal
+                // If it fails, another thread already handled disposal for this context
                 if (_contextTrackedObjects.TryRemove(e, out var trackedObjects))
                 {
+                    // Debug logging for context disposal
+                    Console.WriteLine($"[ObjectTracker] Context {e.GetHashCode()} disposing {trackedObjects.Count} objects");
+                    
                     foreach (var trackedObj in trackedObjects)
                     {
+                        if (trackedObj.GetType().Name.Contains("SomeClass"))
+                        {
+                            Console.WriteLine($"[ObjectTracker] Context {e.GetHashCode()} decrementing {trackedObj.GetType().Name} (hash: {trackedObj.GetHashCode()})");
+                        }
                         await DecrementAndDisposeIfNeededAsync(trackedObj).ConfigureAwait(false);
                         // Clean up the increment tracker
                         _incrementTracker.TryRemove((e, trackedObj), out _);
                     }
                 }
+                else
+                {
+                    // Context was already disposed by another call
+                    Console.WriteLine($"[ObjectTracker] Context {e.GetHashCode()} already disposed, skipping");
+                }
             });
+            
+            // Log handler count after adding
+            var handlerCountAfter = e.OnDispose?.InvocationList?.Count ?? 0;
+            Console.WriteLine($"[ObjectTracker] Context {e.GetHashCode()} handler count: {handlerCountBefore} -> {handlerCountAfter}");
+            
             return new HashSet<object>();
         });
 
@@ -99,6 +133,12 @@ internal static class ObjectTracker
         }
 
         var count = counter.Decrement();
+        
+        // Debug logging for shared objects
+        if (obj.GetType().Name.Contains("SomeClass"))
+        {
+            Console.WriteLine($"[ObjectTracker] Decremented {obj.GetType().Name} to {count} (hash: {obj.GetHashCode()})");
+        }
 
         if (count < 0)
         {
@@ -109,6 +149,12 @@ internal static class ObjectTracker
         if (count == 0)
         {
             _trackedObjects.TryRemove(obj, out _);
+            
+            // Debug logging for shared objects
+            if (obj.GetType().Name.Contains("SomeClass"))
+            {
+                Console.WriteLine($"[ObjectTracker] Disposing {obj.GetType().Name} (hash: {obj.GetHashCode()})");
+            }
 
             // Dispose synchronously to avoid race conditions with test class disposal
             try

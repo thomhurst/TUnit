@@ -3,7 +3,7 @@ namespace TUnit.Core;
 /// <summary>
 /// Simplified test context events
 /// </summary>
-public record TestContextEvents
+public class TestContextEvents
 {
     public AsyncEvent<TestContext>? OnDispose { get; set; }
     public AsyncEvent<TestContext>? OnTestRegistered { get; set; }
