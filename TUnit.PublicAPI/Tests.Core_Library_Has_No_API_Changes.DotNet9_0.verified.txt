@@ -781,6 +781,12 @@ namespace
         public int Line { get; }
         public int Order { get; init; }
     }
+    public class HookRegisteredContext
+    {
+        public HookRegisteredContext(. hookMethod) { }
+        public . HookMethod { get; }
+        public string HookName { get; }
+    }
     public static class HookRegistrationIndices
     {
         public static int GetNextAfterAssemblyHookIndex() { }
@@ -1506,11 +1512,12 @@ namespace
         public static bool IsTransient(this .TestState state) { }
     }
     [(.Assembly | .Class | .Method)]
-    public class TimeoutAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.TimeoutAttribute>, ., .
+    public class TimeoutAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.TimeoutAttribute>, ., ., .
     {
         public TimeoutAttribute(int timeoutInMilliseconds) { }
         public int Order { get; }
         public  Timeout { get; }
+        public . OnHookRegistered(.HookRegisteredContext context) { }
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
     }
     public class Timing : <.Timing>
@@ -2251,6 +2258,10 @@ namespace .Interfaces
         . ExecuteBeforeTestDiscoveryHook(.MethodMetadata hookMethodInfo, .BeforeTestDiscoveryContext context, <.> action);
         . ExecuteBeforeTestHook(.MethodMetadata hookMethodInfo, .TestContext context, <.> action);
         . ExecuteBeforeTestSessionHook(.MethodMetadata hookMethodInfo, .TestSessionContext context, <.> action);
+    }
+    public interface IHookRegisteredEventReceiver : .
+    {
+        . OnHookRegistered(.HookRegisteredContext context);
     }
     public interface IInfersType<T> { }
     public interface ILastTestInAssemblyEventReceiver : .
