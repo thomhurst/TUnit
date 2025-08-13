@@ -250,7 +250,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         {
             if (service is IAsyncDisposable asyncDisposable)
             {
-                await asyncDisposable.DisposeAsync();
+                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
             }
             else if (service is IDisposable disposable)
             {

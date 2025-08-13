@@ -146,7 +146,9 @@ internal sealed class TestBuilderPipeline
                 metadata.TestClassType,
                 new TestBuilderContext
                 {
-                    TestMetadata = metadata.MethodMetadata
+                    TestMetadata = metadata.MethodMetadata,
+                    Events = new TestContextEvents(),
+                    ObjectBag = new Dictionary<string, object?>()
                 },
                 CancellationToken.None);
 
@@ -262,7 +264,12 @@ internal sealed class TestBuilderPipeline
                     var context = _contextProvider.CreateTestContext(
                         resolvedMetadata.TestName,
                         resolvedMetadata.TestClassType,
-                        new TestBuilderContext { TestMetadata = resolvedMetadata.MethodMetadata },
+                        new TestBuilderContext 
+                        { 
+                            TestMetadata = resolvedMetadata.MethodMetadata,
+                            Events = new TestContextEvents(),
+                            ObjectBag = new Dictionary<string, object?>()
+                        },
                         CancellationToken.None);
 
                     // Set the TestDetails on the context
@@ -337,7 +344,9 @@ internal sealed class TestBuilderPipeline
             metadata.TestClassType,
             new TestBuilderContext
             {
-                TestMetadata = metadata.MethodMetadata
+                TestMetadata = metadata.MethodMetadata,
+                Events = new TestContextEvents(),
+                ObjectBag = new Dictionary<string, object?>()
             },
             CancellationToken.None);
 
@@ -392,7 +401,9 @@ internal sealed class TestBuilderPipeline
             metadata.TestClassType,
             new TestBuilderContext
             {
-                TestMetadata = metadata.MethodMetadata
+                TestMetadata = metadata.MethodMetadata,
+                Events = new TestContextEvents(),
+                ObjectBag = new Dictionary<string, object?>()
             },
             CancellationToken.None);
 

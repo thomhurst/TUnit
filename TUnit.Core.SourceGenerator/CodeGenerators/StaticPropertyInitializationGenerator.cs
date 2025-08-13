@@ -314,11 +314,13 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
     {
         var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
         writer.AppendLine($"var generator = {generatorCode};");
+        writer.AppendLine("// Use the global static property context for disposal tracking");
+        writer.AppendLine("var globalContext = global::TUnit.Core.TestSessionContext.GlobalStaticPropertyContext;");
         writer.AppendLine("var metadata = new global::TUnit.Core.DataGeneratorMetadata");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine("Type = global::TUnit.Core.Enums.DataGeneratorType.Property,");
-        writer.AppendLine("TestBuilderContext = null,");
+        writer.AppendLine("TestBuilderContext = new global::TUnit.Core.TestBuilderContextAccessor(globalContext),");
         writer.AppendLine("MembersToGenerate = new global::TUnit.Core.MemberMetadata[] { propertyMetadata },");
         writer.AppendLine("TestInformation = null,");
         writer.AppendLine("TestSessionId = global::TUnit.Core.TestSessionContext.Current?.Id ?? \"static-property-init\",");

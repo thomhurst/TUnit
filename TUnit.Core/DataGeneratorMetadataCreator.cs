@@ -101,7 +101,9 @@ internal static class DataGeneratorMetadataCreator
         {
             TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
             {
-                TestMetadata = null! // Not available during discovery
+                TestMetadata = null!, // Not available during discovery
+                Events = new TestContextEvents(),
+                ObjectBag = new Dictionary<string, object?>()
             }),
             MembersToGenerate = membersToGenerate,
             TestInformation = methodMetadata,
@@ -154,7 +156,9 @@ internal static class DataGeneratorMetadataCreator
             TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
             {
                 TestMetadata = discoveryMethodMetadata,
-                DataSourceAttribute = dataSource
+                DataSourceAttribute = dataSource,
+                Events = new TestContextEvents(),
+                ObjectBag = new Dictionary<string, object?>()
             }),
             MembersToGenerate = [dummyParameter],
             TestInformation = discoveryMethodMetadata,
@@ -187,11 +191,11 @@ internal static class DataGeneratorMetadataCreator
                     DataSourceAttribute = dataSource,
                     ObjectBag = objectBag ?? []
                 }
-                : null;
+                : TestSessionContext.GlobalStaticPropertyContext;
 
         return new DataGeneratorMetadata
         {
-            TestBuilderContext = testBuilderContext != null ? new TestBuilderContextAccessor(testBuilderContext) : null,
+            TestBuilderContext = new TestBuilderContextAccessor(testBuilderContext),
             MembersToGenerate = [propertyMetadata],
             TestInformation = methodMetadata,
             Type = DataGeneratorType.Property,
