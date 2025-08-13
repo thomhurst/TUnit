@@ -1620,12 +1620,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
+        writer.AppendLine($"var typedInstance = ({className})instance;");
 
         if (parametersFromArgs.Length == 0)
         {
             var typedMethodCall = hasCancellationToken
-                ? $"instance.{methodName}(cancellationToken)"
-                : $"instance.{methodName}()";
+                ? $"typedInstance.{methodName}(cancellationToken)"
+                : $"typedInstance.{methodName}()";
             if (isAsync)
             {
                 writer.AppendLine($"await {typedMethodCall};");
@@ -1670,7 +1671,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     argsToPass.Add("cancellationToken");
                 }
 
-                var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";
+                var typedMethodCall = $"typedInstance.{methodName}({string.Join(", ", argsToPass)})";
 
                 if (isAsync)
                 {
