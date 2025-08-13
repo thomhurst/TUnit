@@ -11,14 +11,14 @@ public class InheritedCategoryTestValidation : Library.BaseTests
     {
         // This test verifies that when we call the inherited BaseTest method,
         // it retains its BaseCategory attribute
-        await Assert.That(TestContext.Current!.TestDetails.Categories.Contains("BaseCategory"));
+        await Assert.That(TestContext.Current!.TestDetails.Categories).Contains("BaseCategory");
     }
-    
+
     [Test]
     public async Task TestInheritedMultipleCategoriesMethod()
     {
         // This test verifies that inherited methods with multiple categories retain all of them
-        await Assert.That(TestContext.Current!.TestDetails.Categories.Contains("AnotherBaseCategory"));
-        await Assert.That(TestContext.Current!.TestDetails.Categories.Contains("MultipleCategories"));
+        await Assert.That(TestContext.Current!.TestDetails.Categories).Contains("AnotherBaseCategory");
+        await Assert.That(TestContext.Current!.TestDetails.Categories).Contains("MultipleCategories");
     }
 }
