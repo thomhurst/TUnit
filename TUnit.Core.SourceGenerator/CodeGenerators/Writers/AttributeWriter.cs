@@ -20,6 +20,13 @@ public class AttributeWriter
             // Include attributes without syntax reference (from other assemblies) as long as they have an AttributeClass
             if (attributeData.ApplicationSyntaxReference is not null || attributeData.AttributeClass is not null)
             {
+                // Skip framework-specific attributes when targeting older frameworks
+                // We determine this by checking if we can compile the attribute
+                if (ShouldSkipFrameworkSpecificAttribute(compilation, attributeData))
+                {
+                    continue;
+                }
+                
                 attributesToWrite.Add(attributeData);
             }
         }
@@ -294,4 +301,55 @@ public class AttributeWriter
             }
         }
     }
+
+    private static bool ShouldSkipFrameworkSpecificAttribute(Compilation compilation, AttributeData attributeData)
+    {
+        if (attributeData.AttributeClass == null)
+        {
+            return false;
+        }
+
+        // Generic approach: Check if the attribute type is actually available in the target compilation
+        // This works by seeing if we can resolve the type from the compilation's references
+        var fullyQualifiedName = attributeData.AttributeClass.ToDisplayString();
+        
+        // Check if this is a system/runtime attribute that might not exist on all frameworks
+        if (fullyQualifiedName.StartsWith("System.") || fullyQualifiedName.StartsWith("Microsoft."))
+        {
+            // Try to get the type from the compilation
+            // If it doesn't exist in the compilation's references, we should skip it
+            var typeSymbol = compilation.GetTypeByMetadataName(fullyQualifiedName);
+            
+            // If the type doesn't exist in the compilation, skip it
+            if (typeSymbol == null)
+            {
+                return true;
+            }
+            
+            // Special handling for attributes that exist but may not be usable
+            // For example, nullable attributes exist in the reference assemblies but not at runtime for .NET Framework
+            if (IsNullableAttribute(fullyQualifiedName))
+            {
+                // Check if we're targeting .NET Framework by looking at references
+                var isNetFramework = compilation.References.Any(r => 
+                    r.Display?.Contains("mscorlib") == true && 
+                    !r.Display.Contains("System.Runtime"));
+                
+                if (isNetFramework)
+                {
+                    return true; // Skip nullable attributes on .NET Framework
+                }
+            }
+        }
+
+        return false;
+    }
+    
+    private static bool IsNullableAttribute(string fullyQualifiedName)
+    {
+        return fullyQualifiedName.Contains("NullableAttribute") ||
+               fullyQualifiedName.Contains("NullableContextAttribute") ||
+               fullyQualifiedName.Contains("NullablePublicOnlyAttribute");
+    }
+
 }

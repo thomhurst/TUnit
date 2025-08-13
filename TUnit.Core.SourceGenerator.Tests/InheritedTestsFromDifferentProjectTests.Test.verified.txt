@@ -19,7 +19,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_Test_TestSource_GU
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
-                new global::TUnit.Core.InheritsTestsAttribute()
+                new global::TUnit.Core.InheritsTestsAttribute(),
+                new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -120,7 +121,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>("Foo"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
-                new global::TUnit.Core.InheritsTestsAttribute()
+                new global::TUnit.Core.InheritsTestsAttribute(),
+                new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -247,7 +249,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.TestData), "Foo"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
-                new global::TUnit.Core.InheritsTestsAttribute()
+                new global::TUnit.Core.InheritsTestsAttribute(),
+                new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -384,7 +387,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
-                new global::TUnit.Core.InheritsTestsAttribute()
+                new global::TUnit.Core.InheritsTestsAttribute(),
+                new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -407,8 +411,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
                 TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.InheritedTestsFromDifferentProjectTests, TestsBase`1"),
                 Name = "VerifyInheritedCategoriesAreAvailable",
                 GenericTypeCount = 0,
-                ReturnType = typeof(void),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => 
                 {
@@ -437,13 +441,11 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                typedInstance.VerifyInheritedCategoriesAreAvailable();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                await typedInstance.VerifyInheritedCategoriesAreAvailable();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                instance.VerifyInheritedCategoriesAreAvailable();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                await instance.VerifyInheritedCategoriesAreAvailable();
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -485,7 +487,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTest_TestSourc
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.CategoryAttribute("BaseCategory"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
-                new global::TUnit.Core.InheritsTestsAttribute()
+                new global::TUnit.Core.InheritsTestsAttribute(),
+                new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -587,7 +590,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTestWithMultip
                 new global::TUnit.Core.CategoryAttribute("AnotherBaseCategory"),
                 new global::TUnit.Core.CategoryAttribute("MultipleCategories"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
-                new global::TUnit.Core.InheritsTestsAttribute()
+                new global::TUnit.Core.InheritsTestsAttribute(),
+                new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -687,7 +691,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_Test_TestSource_GU
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
-                new global::TUnit.Core.InheritsTestsAttribute()
+                new global::TUnit.Core.InheritsTestsAttribute(),
+                new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -788,7 +793,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>("Foo"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
-                new global::TUnit.Core.InheritsTestsAttribute()
+                new global::TUnit.Core.InheritsTestsAttribute(),
+                new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -915,7 +921,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.TestData), "Foo"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
-                new global::TUnit.Core.InheritsTestsAttribute()
+                new global::TUnit.Core.InheritsTestsAttribute(),
+                new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -1052,7 +1059,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
-                new global::TUnit.Core.InheritsTestsAttribute()
+                new global::TUnit.Core.InheritsTestsAttribute(),
+                new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -1075,8 +1083,8 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
                 TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.InheritedTestsFromDifferentProjectTests, TestsBase`1"),
                 Name = "VerifyInheritedCategoriesAreAvailable",
                 GenericTypeCount = 0,
-                ReturnType = typeof(void),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                ReturnType = typeof(global::System.Threading.Tasks.Task),
+                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests", () => 
                 {
@@ -1105,13 +1113,11 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                typedInstance.VerifyInheritedCategoriesAreAvailable();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                await typedInstance.VerifyInheritedCategoriesAreAvailable();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                instance.VerifyInheritedCategoriesAreAvailable();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                await instance.VerifyInheritedCategoriesAreAvailable();
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
