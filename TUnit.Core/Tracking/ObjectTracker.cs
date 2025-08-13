@@ -30,7 +30,7 @@ internal static class ObjectTracker
     }
 
     /// <summary>
-    /// Tracks a single object for a test context. 
+    /// Tracks a single object for a test context.
     /// For backward compatibility - adds to existing tracked objects for the context.
     /// </summary>
     /// <param name="events">Events for the test instance</param>
@@ -100,11 +100,16 @@ internal static class ObjectTracker
 
         var count = counter.Decrement();
 
+        if (count < 0)
+        {
+            throw new InvalidOperationException($"Reference count for object {obj.GetType().Name} went below zero. This indicates a bug in the reference counting logic.");
+        }
+
         // Dispose ANY object when reference count reaches zero - pure reference counting
-        if (count <= 0)
+        if (count == 0)
         {
             _trackedObjects.TryRemove(obj, out _);
-            
+
             // Dispose synchronously to avoid race conditions with test class disposal
             try
             {
@@ -171,7 +176,7 @@ internal static class ObjectTracker
     /// Gets the count of currently tracked objects.
     /// </summary>
     public static int TrackedObjectCount => _trackedObjects.Count;
-    
+
     /// <summary>
     /// Checks if an object is already being tracked (has a reference count > 0).
     /// This is used to identify shared objects that shouldn't be re-tracked in test contexts.
@@ -184,7 +189,7 @@ internal static class ObjectTracker
         {
             return false;
         }
-        
+
         return _trackedObjects.TryGetValue(obj, out var counter) && counter.CurrentCount > 0;
     }
 
