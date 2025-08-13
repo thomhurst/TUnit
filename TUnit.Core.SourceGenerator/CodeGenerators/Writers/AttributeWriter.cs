@@ -12,7 +12,7 @@ public class AttributeWriter
         ImmutableArray<AttributeData> attributeDatas)
     {
         var attributesToWrite = new List<AttributeData>();
-        
+
         // Filter out attributes that we can write
         foreach (var attributeData in attributeDatas)
         {
@@ -26,7 +26,27 @@ public class AttributeWriter
                 {
                     continue;
                 }
-                
+
+                // Skip attributes with compiler-generated type arguments
+                // These types have angle brackets in their names and cannot be represented in source code
+                bool hasCompilerGeneratedType = false;
+                foreach (var arg in attributeData.ConstructorArguments)
+                {
+                    if (arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol })
+                    {
+                        if (typeSymbol.IsCompilerGeneratedType())
+                        {
+                            hasCompilerGeneratedType = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (hasCompilerGeneratedType)
+                {
+                    continue;
+                }
+
                 attributesToWrite.Add(attributeData);
             }
         }
@@ -49,7 +69,7 @@ public class AttributeWriter
     {
         if (attributeData.ApplicationSyntaxReference is null)
         {
-            // For attributes from other assemblies (like inherited methods), 
+            // For attributes from other assemblies (like inherited methods),
             // use the WriteAttributeWithoutSyntax approach
             WriteAttributeWithoutSyntax(sourceCodeWriter, attributeData);
         }
@@ -194,7 +214,7 @@ public class AttributeWriter
 
             var propertyType = propertySymbol.Type.GloballyQualified();
             var isNullable = propertySymbol.Type.NullableAnnotation == NullableAnnotation.Annotated;
-            
+
             if (propertySymbol.Type.IsReferenceType && !isNullable)
             {
                 sourceCodeWriter.Append("null!,");
@@ -229,6 +249,21 @@ public class AttributeWriter
     {
         var attributeName = attributeData.AttributeClass!.GloballyQualified();
 
+        // Check if any constructor arguments contain compiler-generated types
+        // These types have angle brackets in their names and cannot be represented in source code
+        foreach (var arg in attributeData.ConstructorArguments)
+        {
+            if (arg.Kind == TypedConstantKind.Type && arg.Value is ITypeSymbol typeSymbol)
+            {
+                if (typeSymbol.IsCompilerGeneratedType())
+                {
+                    // Skip attributes with compiler-generated type arguments
+                    // These cannot be represented in source code using typeof()
+                    return;
+                }
+            }
+        }
+
         var constructorArgs = attributeData.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue);
         var formattedConstructorArgs = string.Join(", ", constructorArgs);
 
@@ -240,7 +275,7 @@ public class AttributeWriter
         // Check if we need to add properties (named arguments or data generator properties)
         var hasNamedArgs = !string.IsNullOrEmpty(formattedNamedArgs);
         var hasDataGeneratorProperties = HasNestedDataGeneratorProperties(attributeData);
-        
+
         if (!hasNamedArgs && !hasDataGeneratorProperties)
         {
             return;
@@ -248,7 +283,7 @@ public class AttributeWriter
 
         sourceCodeWriter.AppendLine();
         sourceCodeWriter.Append("{");
-        
+
         if (hasNamedArgs)
         {
             sourceCodeWriter.Append($"{formattedNamedArgs}");
@@ -257,14 +292,14 @@ public class AttributeWriter
                 sourceCodeWriter.Append(",");
             }
         }
-        
+
         if (hasDataGeneratorProperties)
         {
             // For attributes without syntax, we still need to handle data generator properties
             // but we can't rely on syntax analysis, so we'll use a simpler approach
             WriteDataSourceGeneratorPropertiesWithoutSyntax(sourceCodeWriter, attributeData);
         }
-        
+
         sourceCodeWriter.Append("}");
     }
 
@@ -286,7 +321,7 @@ public class AttributeWriter
 
             var propertyType = propertySymbol.Type.GloballyQualified();
             var isNullable = propertySymbol.Type.NullableAnnotation == NullableAnnotation.Annotated;
-            
+
             if (propertySymbol.Type.IsReferenceType && !isNullable)
             {
                 sourceCodeWriter.Append("null!,");
@@ -312,29 +347,29 @@ public class AttributeWriter
         // Generic approach: Check if the attribute type is actually available in the target compilation
         // This works by seeing if we can resolve the type from the compilation's references
         var fullyQualifiedName = attributeData.AttributeClass.ToDisplayString();
-        
+
         // Check if this is a system/runtime attribute that might not exist on all frameworks
         if (fullyQualifiedName.StartsWith("System.") || fullyQualifiedName.StartsWith("Microsoft."))
         {
             // Try to get the type from the compilation
             // If it doesn't exist in the compilation's references, we should skip it
             var typeSymbol = compilation.GetTypeByMetadataName(fullyQualifiedName);
-            
+
             // If the type doesn't exist in the compilation, skip it
             if (typeSymbol == null)
             {
                 return true;
             }
-            
+
             // Special handling for attributes that exist but may not be usable
             // For example, nullable attributes exist in the reference assemblies but not at runtime for .NET Framework
             if (IsNullableAttribute(fullyQualifiedName))
             {
                 // Check if we're targeting .NET Framework by looking at references
-                var isNetFramework = compilation.References.Any(r => 
-                    r.Display?.Contains("mscorlib") == true && 
+                var isNetFramework = compilation.References.Any(r =>
+                    r.Display?.Contains("mscorlib") == true &&
                     !r.Display.Contains("System.Runtime"));
-                
+
                 if (isNetFramework)
                 {
                     return true; // Skip nullable attributes on .NET Framework
@@ -344,7 +379,7 @@ public class AttributeWriter
 
         return false;
     }
-    
+
     private static bool IsNullableAttribute(string fullyQualifiedName)
     {
         return fullyQualifiedName.Contains("NullableAttribute") ||

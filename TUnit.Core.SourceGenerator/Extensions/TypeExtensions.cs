@@ -223,6 +223,29 @@ public static class TypeExtensions
 
         return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
     }
+    
+    /// <summary>
+    /// Determines if a type is compiler-generated (e.g., async state machines, lambda closures).
+    /// These types typically contain angle brackets in their names and cannot be represented in source code.
+    /// </summary>
+    public static bool IsCompilerGeneratedType(this ITypeSymbol? typeSymbol)
+    {
+        if (typeSymbol == null)
+        {
+            return false;
+        }
+        
+        // Check the type name directly, not the display string
+        // Compiler-generated types have names that start with '<' or contain '<>'
+        // Examples: <BaseAsyncTest>d__0, <>c__DisplayClass0_0, <>f__AnonymousType0
+        var typeName = typeSymbol.Name;
+        
+        // Compiler-generated types typically:
+        // 1. Start with '<' (like <MethodName>d__0 for async state machines)
+        // 2. Contain '<>' (like <>c for compiler-generated classes)
+        // This won't match normal generic types like List<T> because those don't have '<' in the type name itself
+        return typeName.StartsWith("<") || typeName.Contains("<>");
+    }
 
     public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
         typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
