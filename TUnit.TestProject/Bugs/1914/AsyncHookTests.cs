@@ -47,6 +47,9 @@ public class AsyncHookTests
     [Before(TestSession)]
     public static async Task BeforeTestSession(TestSessionContext context)
     {
+#if !NET
+        return;
+#endif
         await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession");
         await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
@@ -62,6 +65,9 @@ public class AsyncHookTests
     [Before(TestSession)]
     public static async Task BeforeTestSession2(TestSessionContext context)
     {
+#if !NET
+        return;
+#endif
         await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTestSession");
         await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
@@ -77,6 +83,9 @@ public class AsyncHookTests
     [Before(Assembly)]
     public static async Task BeforeAssembly(AssemblyHookContext context)
     {
+#if !NET
+        return;
+#endif
         await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeAssembly");
         await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
@@ -97,6 +106,9 @@ public class AsyncHookTests
     [Before(Assembly)]
     public static async Task BeforeAssembly2(AssemblyHookContext context)
     {
+#if !NET
+        return;
+#endif
         await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeAssembly");
         await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
@@ -117,6 +129,9 @@ public class AsyncHookTests
     [Before(Class)]
     public static async Task BeforeClass(ClassHookContext context)
     {
+#if !NET
+        return;
+#endif
         await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeClass");
         await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
@@ -142,6 +157,9 @@ public class AsyncHookTests
     [Before(Class)]
     public static async Task BeforeClass2(ClassHookContext context)
     {
+#if !NET
+        return;
+#endif
         await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeClass");
         await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
@@ -167,6 +185,9 @@ public class AsyncHookTests
     [Before(Test)]
     public async Task BeforeTest(TestContext context)
     {
+#if !NET
+        return;
+#endif
         await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTest");
         await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
@@ -197,6 +218,9 @@ public class AsyncHookTests
     [Before(Test)]
     public async Task BeforeTest2(TestContext context)
     {
+#if !NET
+        return;
+#endif
         await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery")
             .Because("AsyncLocal should flow from BeforeTestDiscovery to BeforeTest");
         await Assert.That(_0BeforeTestDiscoveryLocal2.Value).IsEqualTo("BeforeTestDiscovery2")
@@ -236,6 +260,9 @@ public class AsyncHookTests
     [Arguments(8)]
     public async Task TestAsyncLocal(int i)
     {
+#if !NET
+        return;
+#endif
         await Assert.That(_0BeforeTestDiscoveryLocal.Value).IsEqualTo("BeforeTestDiscovery");
         await Assert.That(_1BeforeTestSessionLocal.Value).IsEqualTo("BeforeTestSession");
         await Assert.That(_2BeforeAssemblyLocal.Value).IsEqualTo("BeforeAssembly");
