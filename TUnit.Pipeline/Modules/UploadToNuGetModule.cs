@@ -4,6 +4,7 @@ using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
+using ModularPipelines.Enums;
 using ModularPipelines.Git.Attributes;
 using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
@@ -43,7 +44,8 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
                 context.DotNet().Nuget.Push(new DotNetNugetPushOptions(file)
                 {
                     Source = "https://api.nuget.org/v3/index.json",
-                    ApiKey = options.Value.ApiKey
+                    ApiKey = options.Value.ApiKey,
+                    CommandLogging = CommandLogging.Input | CommandLogging.Error | CommandLogging.Duration | CommandLogging.ExitCode
                 }, cancellationToken), cancellationToken: cancellationToken)
             .ProcessOneAtATime();
     }

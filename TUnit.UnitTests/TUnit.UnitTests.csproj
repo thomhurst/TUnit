@@ -10,6 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="AutoFixture" />
+        <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
         <PackageReference Include="NSubstitute" />
     </ItemGroup>
 

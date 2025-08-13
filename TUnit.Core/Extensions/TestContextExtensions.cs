@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Extensions;
@@ -13,7 +14,14 @@ public static class TestContextExtensions
 
     public static string GetClassTypeName(this TestContext context)
     {
-        return context.TestDetails.ClassType.Name;
+        var parameters = context.TestDetails.MethodMetadata.Class.Parameters;
+
+        if (parameters.Length == 0)
+        {
+            return context.TestDetails.ClassType.Name;
+        }
+
+        return $"{context.TestDetails.ClassType.Name}({string.Join(", ", context.TestDetails.TestClassArguments.Select(a => ArgumentFormatter.Format(a, context.ArgumentDisplayFormatters)))})";
     }
 
     public static async Task AddDynamicTest<[DynamicallyAccessedMembers(

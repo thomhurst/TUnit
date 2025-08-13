@@ -41,7 +41,9 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
             
             if (!TestContext.InternalParametersDictionary.TryGetValue(key, out var list))
             {
-                list = new List<string>();
+                list =
+                [
+                ];
                 TestContext.InternalParametersDictionary[key] = list;
             }
             list.Add(value);

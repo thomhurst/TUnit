@@ -7,9 +7,8 @@
 namespace TUnit.Generated;
 internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         // Create generic metadata with concrete type registrations
         var genericMetadata = new global::TUnit.Core.GenericTestMetadata
         {
@@ -28,24 +27,9 @@ internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSourc
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(global::System.Object),
-                typeof(global::System.Object),
-                typeof(global::System.Object),
-                typeof(global::System.Object),
-                typeof(global::System.Object),
-                typeof(global::System.Object),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "global::System.Object",
-                "global::System.Object",
-                "global::System.Object",
-                "global::System.Object",
-                "global::System.Object",
-                "global::System.Object",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 8,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.GenericMethodTests),
@@ -232,17 +216,9 @@ internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSourc
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
                     {
                     },
-                    ParameterTypes = new global::System.Type[]
-                    {
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                    },
                     FilePath = @"",
                     LineNumber = 8,
+                    InheritanceDepth = 0,
                     TestSessionId = testSessionId,
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
                     {
@@ -399,17 +375,9 @@ internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSourc
                     PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
                     {
                     },
-                    ParameterTypes = new global::System.Type[]
-                    {
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                        typeof(global::System.Object),
-                    },
                     FilePath = @"",
                     LineNumber = 8,
+                    InheritanceDepth = 0,
                     TestSessionId = testSessionId,
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
                     {
@@ -500,8 +468,8 @@ internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSourc
             }
         };
         genericMetadata.TestSessionId = testSessionId;
-        tests.Add(genericMetadata);
-        return tests;
+        yield return genericMetadata;
+        yield break;
     }
 }
 internal static class GenericMethodTests_AggregateBy_HasExpectedOutput_ModuleInitializer_GUID

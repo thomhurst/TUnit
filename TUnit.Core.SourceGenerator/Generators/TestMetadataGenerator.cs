@@ -129,6 +129,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Find the concrete implementation of this method in the derived class
             var concreteMethod = FindConcreteMethodImplementation(classInfo.TypeSymbol, method);
+            
+            // Calculate inheritance depth for this test
+            int inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
 
             var testMethodMetadata = new TestMethodMetadata
             {
@@ -142,10 +145,37 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 IsGenericType = classInfo.TypeSymbol.IsGenericType,
                 IsGenericMethod = (concreteMethod ?? method).IsGenericMethod,
                 MethodAttributes = (concreteMethod ?? method).GetAttributes(), // Use concrete method attributes
+                InheritanceDepth = inheritanceDepth
             };
 
             GenerateTestMethodSource(context, compilation, testMethodMetadata);
         }
+    }
+
+    private static int CalculateInheritanceDepth(INamedTypeSymbol testClass, IMethodSymbol testMethod)
+    {
+        // If the method is declared directly in the test class, depth is 0
+        if (testMethod.ContainingType.Equals(testClass, SymbolEqualityComparer.Default))
+        {
+            return 0;
+        }
+        
+        // Count how many levels up the inheritance chain the method is declared
+        int depth = 0;
+        INamedTypeSymbol? currentType = testClass.BaseType;
+        
+        while (currentType != null)
+        {
+            depth++;
+            if (testMethod.ContainingType.Equals(currentType, SymbolEqualityComparer.Default))
+            {
+                return depth;
+            }
+            currentType = currentType.BaseType;
+        }
+        
+        // This shouldn't happen in normal cases, but return the depth anyway
+        return depth;
     }
 
     private static void GenerateTestMethodSource(SourceProductionContext context, Compilation compilation, TestMethodMetadata? testMethod)
@@ -210,11 +240,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate reflection-based field accessors for init-only properties with data source attributes
         GenerateReflectionFieldAccessors(writer, testMethod.TypeSymbol, className);
 
-        writer.AppendLine("public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)");
+        writer.AppendLine("public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)");
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();");
         writer.AppendLine();
 
         // Check if we have generic types or methods
@@ -269,7 +298,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
         }
 
-        writer.AppendLine("return tests;");
+        writer.AppendLine("yield break;");
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -332,12 +361,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate AOT-friendly invokers that use the specific types
         GenerateAotFriendlyInvokers(writer, testMethod, className, typeArguments);
+        
+        // Add file location metadata
+        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         writer.Unindent();
         writer.AppendLine("};");
 
         writer.AppendLine("metadata.TestSessionId = testSessionId;");
-        writer.AppendLine("tests.Add(metadata);");
+        writer.AppendLine("yield return metadata;");
 
         writer.Unindent();
         writer.AppendLine("}");
@@ -496,7 +529,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("metadata.TestSessionId = testSessionId;");
         }
 
-        writer.AppendLine("tests.Add(metadata);");
+        writer.AppendLine("yield return metadata;");
     }
 
     private static void GenerateMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
@@ -527,59 +560,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate property injections
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
 
-        // Parameter types
-        writer.AppendLine("ParameterTypes = new global::System.Type[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // For generic methods, always use placeholders
-        if (methodSymbol.IsGenericMethod)
-        {
-            foreach (var param in methodSymbol.Parameters)
-            {
-                writer.AppendLine("typeof(global::System.Object),");
-            }
-        }
-        else
-        {
-            foreach (var param in methodSymbol.Parameters)
-            {
-                var paramType = param.Type;
-                if (IsGenericTypeParameter(paramType) || ContainsGenericTypeParameter(paramType))
-                {
-                    // Use object as placeholder for generic type parameters
-                    writer.AppendLine("typeof(global::System.Object),");
-                }
-                else
-                {
-                    writer.AppendLine($"typeof({paramType.GloballyQualified()}),");
-                }
-            }
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        // String parameter types
-        writer.AppendLine("TestMethodParameterTypes = new string[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var param in methodSymbol.Parameters)
-        {
-            // For generic types or when we have generic method, use placeholder
-            if (methodSymbol.IsGenericMethod ||
-                IsGenericTypeParameter(param.Type) ||
-                ContainsGenericTypeParameter(param.Type))
-            {
-                writer.AppendLine("\"global::System.Object\",");
-            }
-            else
-            {
-                var paramType = param.Type.GloballyQualified();
-                writer.AppendLine($"\"{paramType}\",");
-            }
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
+        // Inheritance depth
+        writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
+        
+        // File location metadata
+        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         // Method metadata
         writer.Append("MethodMetadata = ");
@@ -618,59 +604,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate property injections
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
 
-        // Parameter types
-        writer.AppendLine("ParameterTypes = new global::System.Type[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // For generic methods, always use placeholders
-        if (methodSymbol.IsGenericMethod)
-        {
-            foreach (var param in methodSymbol.Parameters)
-            {
-                writer.AppendLine("typeof(global::System.Object),");
-            }
-        }
-        else
-        {
-            foreach (var param in methodSymbol.Parameters)
-            {
-                var paramType = param.Type;
-                if (IsGenericTypeParameter(paramType) || ContainsGenericTypeParameter(paramType))
-                {
-                    // Use object as placeholder for generic type parameters
-                    writer.AppendLine("typeof(global::System.Object),");
-                }
-                else
-                {
-                    writer.AppendLine($"typeof({paramType.GloballyQualified()}),");
-                }
-            }
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        // String parameter types
-        writer.AppendLine("TestMethodParameterTypes = new string[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var param in methodSymbol.Parameters)
-        {
-            // For generic types or when we have generic method, use placeholder
-            if (methodSymbol.IsGenericMethod ||
-                IsGenericTypeParameter(param.Type) ||
-                ContainsGenericTypeParameter(param.Type))
-            {
-                writer.AppendLine("\"global::System.Object\",");
-            }
-            else
-            {
-                var paramType = param.Type.GloballyQualified();
-                writer.AppendLine($"\"{paramType}\",");
-            }
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
+        // Inheritance depth
+        writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
+        
+        // File location metadata
+        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         // Method metadata
         writer.Append("MethodMetadata = ");
@@ -2934,7 +2873,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("};");
 
         writer.AppendLine("genericMetadata.TestSessionId = testSessionId;");
-        writer.AppendLine("tests.Add(genericMetadata);");
+        writer.AppendLine("yield return genericMetadata;");
     }
 
     private static bool ValidateClassTypeConstraints(INamedTypeSymbol classSymbol, ITypeSymbol[] typeArguments)
@@ -4016,42 +3955,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate property injections
         GeneratePropertyInjections(writer, typeSymbol, typeSymbol.GloballyQualified());
 
-        // Parameter types
-        writer.AppendLine("ParameterTypes = new global::System.Type[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // For generic methods, always use placeholders
-        if (methodSymbol.IsGenericMethod)
-        {
-            foreach (var param in methodSymbol.Parameters)
-            {
-                writer.AppendLine("typeof(global::System.Object),");
-            }
-        }
-        else
-        {
-            foreach (var param in methodSymbol.Parameters)
-            {
-                var paramType = param.Type;
-                if (IsGenericTypeParameter(paramType) || ContainsGenericTypeParameter(paramType))
-                {
-                    // Use object as placeholder for generic type parameters
-                    writer.AppendLine("typeof(global::System.Object),");
-                }
-                else
-                {
-                    writer.AppendLine($"typeof({paramType.GloballyQualified()}),");
-                }
-            }
-        }
-
-        writer.Unindent();
-        writer.AppendLine("},");
-
         // Other metadata
         writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
+        writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
         writer.AppendLine($"TestSessionId = testSessionId,");
 
         // Method metadata
@@ -4307,28 +4214,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GeneratePropertyDataSources(writer, compilation, testMethod);
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, className);
 
-        // Parameter types
-        writer.AppendLine("ParameterTypes = new global::System.Type[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var param in testMethod.MethodSymbol.Parameters)
-        {
-            writer.AppendLine($"typeof({param.Type.GloballyQualified()}),");
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        // String parameter types
-        writer.AppendLine("TestMethodParameterTypes = new string[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var param in testMethod.MethodSymbol.Parameters)
-        {
-            var paramType = param.Type.GloballyQualified();
-            writer.AppendLine($"\"{paramType}\",");
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
 
         // Method metadata
         writer.Append("MethodMetadata = ");
@@ -4404,11 +4289,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate typed invoker
         GenerateTypedInvokers(writer, testMethod, className);
+        
+        // Add file location metadata
+        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         writer.Unindent();
         writer.AppendLine("};");
 
-        writer.AppendLine("tests.Add(metadata);");
+        writer.AppendLine("yield return metadata;");
     }
 }
 

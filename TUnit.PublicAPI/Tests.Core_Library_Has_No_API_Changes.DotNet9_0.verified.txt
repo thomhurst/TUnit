@@ -14,6 +14,7 @@ namespace
         public .ResolvedDependency[] Dependencies { get; set; }
         public ? Duration { get; }
         public ? EndTime { get; set; }
+        public . ExecutionTask { get; }
         public virtual .TestMetadata Metadata { get; init; }
         public .TestResult? Result { get; set; }
         public ? StartTime { get; set; }
@@ -406,7 +407,7 @@ namespace
         public DataGeneratorMetadata() { }
         public required object?[]? ClassInstanceArguments { get; init; }
         public required .MemberMetadata[] MembersToGenerate { get; init; }
-        public required .TestBuilderContextAccessor? TestBuilderContext { get; init; }
+        public required .TestBuilderContextAccessor TestBuilderContext { get; init; }
         public required object? TestClassInstance { get; init; }
         public required .MethodMetadata? TestInformation { get; init; }
         public required string TestSessionId { get; init; }
@@ -590,6 +591,8 @@ namespace
     {
         public DynamicDiscoveryResult() { }
         public .<> Attributes { get; set; }
+        public string? CreatorFilePath { get; set; }
+        public int? CreatorLineNumber { get; set; }
         public object?[]? TestClassArguments { get; set; }
         [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]
         public ? TestClassType { get; set; }
@@ -618,11 +621,13 @@ namespace
     {
         public static T Argument<T>() { }
     }
-    public class DynamicTestInstance<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T> : .DynamicTest<T>
+    public class DynamicTestInstance<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T> : .DynamicTest<T>, .IDynamicTestCreatorLocation
         where T :  class
     {
         public DynamicTestInstance() { }
         public .<> Attributes { get; set; }
+        public string? CreatorFilePath { get; set; }
+        public int? CreatorLineNumber { get; set; }
         public object?[]? TestClassArguments { get; set; }
         public .<<T>>? TestMethod { get; set; }
         public object?[]? TestMethodArguments { get; set; }
@@ -807,6 +812,11 @@ namespace
     public interface IDataSourceAttribute
     {
         .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
+    }
+    public interface IDynamicTestCreatorLocation
+    {
+        string? CreatorFilePath { get; set; }
+        int? CreatorLineNumber { get; set; }
     }
     public interface IDynamicTestMetadata { }
     public interface IDynamicTestSource
@@ -1294,7 +1304,7 @@ namespace
         public void WriteError(string message) { }
         public void WriteLine(string message) { }
     }
-    public class TestContextEvents : <.TestContextEvents>
+    public class TestContextEvents
     {
         public TestContextEvents() { }
         public .AsyncEvent<.TestContext>? OnDispose { get; set; }
@@ -1371,7 +1381,6 @@ namespace
         public required string TestId { get; init; }
         public int TestLineNumber { get; set; }
         public required object?[] TestMethodArguments { get; set; }
-        public []? TestMethodParameterTypes { get; set; }
         public required string TestName { get; init; }
         public ? Timeout { get; set; }
     }
@@ -1404,22 +1413,20 @@ namespace
         public abstract <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
         public required .IDataSourceAttribute[] DataSources { get; init; }
         public .TestDependency[] Dependencies { get; init; }
-        public string? FilePath { get; init; }
+        public required string FilePath { get; init; }
         public .GenericMethodInfo? GenericMethodInfo { get; init; }
         public []? GenericMethodTypeArguments { get; init; }
         public .GenericTypeInfo? GenericTypeInfo { get; init; }
+        public int InheritanceDepth { get; set; }
         public <[], object?[], object> InstanceFactory { get; init; }
-        public int? LineNumber { get; init; }
+        public required int LineNumber { get; init; }
         public required .MethodMetadata MethodMetadata { get; init; }
-        public int ParameterCount { get; init; }
-        public [] ParameterTypes { get; init; }
         public required .PropertyDataSource[] PropertyDataSources { get; init; }
         public .PropertyInjectionData[] PropertyInjections { get; init; }
         [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]
         public required  TestClassType { get; init; }
         public <object, object?[], .>? TestInvoker { get; init; }
         public required string TestMethodName { get; init; }
-        public string[] TestMethodParameterTypes { get; init; }
         public required string TestName { get; init; }
         public string TestSessionId { get; set; }
     }
@@ -1475,6 +1482,7 @@ namespace
         public .BeforeTestDiscoveryContext TestDiscoveryContext { get; }
         public required string? TestFilter { get; init; }
         public new static .TestSessionContext? Current { get; }
+        public static .TestBuilderContext GlobalStaticPropertyContext { get; }
         public void AddArtifact(.Artifact artifact) { }
         public void AddAssembly(.AssemblyHookContext assemblyHookContext) { }
     }
@@ -1611,7 +1619,7 @@ namespace .Converters
 }
 namespace .Data
 {
-    public class GetOnlyDictionary<TKey, TValue>
+    public class GetOnlyDictionary<TKey, [.(..PublicParameterlessConstructor)]  TValue>
         where TKey :  notnull
     {
         public GetOnlyDictionary() { }
@@ -1621,6 +1629,13 @@ namespace .Data
         public TValue GetOrAdd(TKey key, <TKey, TValue> func) { }
         public TValue? Remove(TKey key) { }
         public bool TryGetValue(TKey key, [.(true)] out TValue? value) { }
+    }
+    public class ScopedDictionary<TScope>
+        where TScope :  notnull
+    {
+        public ScopedDictionary() { }
+        public object? GetOrCreate(TScope scope,  type, <, object?> factory) { }
+        public void RemoveValue(object valueToRemove) { }
     }
 }
 namespace .DataSources
@@ -1906,6 +1921,7 @@ namespace .Helpers
         public <int>? OnCountChanged;
         public Counter() { }
         public int CurrentCount { get; }
+        public int Add(int value) { }
         public int Decrement() { }
         public int Increment() { }
     }
@@ -1952,7 +1968,10 @@ namespace .Helpers
         public static .<object?> ResolveDataSourceForPropertyAsync([.(..None | ..PublicParameterlessConstructor | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  containingType, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static .<object?> ResolveDataSourcePropertyAsync(object instance, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static object?[] ToObjectArray(this object? item) { }
-        public static bool TryCreateWithInitializer( type, .MethodMetadata testInformation, string testSessionId, out object createdInstance) { }
+        [return: .(new string[] {
+                "success",
+                "createdInstance"})]
+        public static .<<bool, object?>> TryCreateWithInitializerAsync( type, .MethodMetadata testInformation, string testSessionId) { }
         public static object?[] UnwrapTuple<T1>(<T1> tuple) { }
         public static object?[] UnwrapTuple<T1, T2>(<T1, T2> tuple) { }
         public static object?[] UnwrapTuple<T1, T2, T3>(<T1, T2, T3> tuple) { }
@@ -1985,7 +2004,7 @@ namespace .Helpers
     }
     public static class TestClassTypeHelper
     {
-        public static ? GetTestClassType(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public static  GetTestClassType(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     public static class TestNameGenerator
     {
@@ -2321,7 +2340,7 @@ namespace .
     }
     public interface ITestSource
     {
-        .<.<.TestMetadata>> GetTestsAsync(string testSessionId);
+        .<.TestMetadata> GetTestsAsync(string testSessionId, .CancellationToken cancellationToken = default);
     }
     public sealed class PropertyInjectionMetadata
     {
@@ -2403,15 +2422,6 @@ namespace .Models
         public bool HasStronglyTypedDelegates { get; }
         public <.<object?[]>>? MethodDataResolver { get; set; }
         public ? MethodInvoker { get; set; }
-    }
-}
-namespace .ReferenceTracking
-{
-    public static class DataSourceReferenceExtensions
-    {
-        public static void TrackClassArguments(this .TestContext context) { }
-        public static void TrackMethodArguments(this .TestContext context) { }
-        public static void TrackPropertyArguments(this .TestContext context) { }
     }
 }
 namespace .Services
@@ -2505,5 +2515,13 @@ namespace .Services
         public . AddTransient<T>(<T> factory)
             where T :  class { }
         public object? GetService( serviceType) { }
+    }
+}
+namespace .Tracking
+{
+    public static class ObjectTracker
+    {
+        public static void OnDisposed(object? o,  action) { }
+        public static void TrackOwnership(object owner, object owned) { }
     }
 }

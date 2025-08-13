@@ -17,9 +17,8 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property4>k__BackingField")]
     private static extern ref global::System.ValueTuple<int, string, bool> GetProperty4BackingField(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests instance);
     #endif
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>
         {
             TestName = "DataSource_TupleMethod",
@@ -235,18 +234,9 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                     }
                 },
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(int),
-                typeof(string),
-                typeof(bool),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "int",
-                "string",
-                "bool",
-            },
+            InheritanceDepth = 0,
+            FilePath = @"",
+            LineNumber = 27,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests),
@@ -410,8 +400,8 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_ModuleInitializer_GUID

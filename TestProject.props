@@ -20,6 +20,9 @@
 
         <IsTestProject>true</IsTestProject>
 
+        <UseTestingPlatformProtocol>true</UseTestingPlatformProtocol>
+        <IsTestingPlatformEnabled>true</IsTestingPlatformEnabled>
+
     </PropertyGroup>
 
     <Target Name="CleanSourceGeneratedViewer" BeforeTargets="BeforeBuild">
@@ -38,6 +41,11 @@
     <ItemGroup>
         <Compile Remove="SourceGeneratedViewer\**" />
         <None Include="SourceGeneratedViewer\**" />
+    </ItemGroup>
+
+    <!-- Enable VSCode test discovery integration -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
     </ItemGroup>
 
 </Project>

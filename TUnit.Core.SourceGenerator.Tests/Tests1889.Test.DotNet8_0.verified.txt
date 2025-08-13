@@ -7,9 +7,8 @@
 namespace TUnit.Generated;
 internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
         {
             TestName = "Test1",
@@ -34,12 +33,9 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-            },
-            TestMethodParameterTypes = new string[]
-            {
-            },
+            InheritanceDepth = 1,
+            FilePath = @"",
+            LineNumber = 6,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
@@ -86,8 +82,8 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class DerivedTest_Test1_ModuleInitializer_GUID
@@ -111,9 +107,8 @@ internal static class DerivedTest_Test1_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
         {
             TestName = "Test2",
@@ -140,14 +135,9 @@ internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Int
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(bool),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "bool",
-            },
+            InheritanceDepth = 1,
+            FilePath = @"",
+            LineNumber = 6,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
@@ -219,8 +209,8 @@ internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Int
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class DerivedTest_Test2_ModuleInitializer_GUID
@@ -244,9 +234,8 @@ internal static class DerivedTest_Test2_ModuleInitializer_GUID
 namespace TUnit.Generated;
 internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
-    public async global::System.Threading.Tasks.ValueTask<global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>> GetTestsAsync(string testSessionId)
+    public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
-        var tests = new global::System.Collections.Generic.List<global::TUnit.Core.TestMetadata>();
         var metadata = new global::TUnit.Core.TestMetadata<global::TUnit.TestProject.Bugs._1889.DerivedTest>
         {
             TestName = "Test3",
@@ -275,14 +264,9 @@ internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Int
             PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
             {
             },
-            ParameterTypes = new global::System.Type[]
-            {
-                typeof(bool),
-            },
-            TestMethodParameterTypes = new string[]
-            {
-                "bool",
-            },
+            InheritanceDepth = 1,
+            FilePath = @"",
+            LineNumber = 6,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
@@ -354,8 +338,8 @@ internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Int
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
-        tests.Add(metadata);
-        return tests;
+        yield return metadata;
+        yield break;
     }
 }
 internal static class DerivedTest_Test3_ModuleInitializer_GUID

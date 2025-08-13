@@ -11,4 +11,5 @@ internal interface ITestResultFactory
     TestResult CreateFailedResult(DateTimeOffset startTime, Exception exception);
     TestResult CreateSkippedResult(DateTimeOffset startTime, string reason);
     TestResult CreateTimeoutResult(DateTimeOffset startTime, int timeoutMs);
+    TestResult? CreateCancelledResult(DateTimeOffset testStartTime);
 }

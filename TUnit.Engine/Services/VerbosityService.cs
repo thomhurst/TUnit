@@ -1,5 +1,6 @@
 using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Services;
@@ -77,8 +78,7 @@ public sealed class VerbosityService
                $"Discovery diagnostics: {EnableDiscoveryDiagnostics})";
     }
 
-    // Cache environment variables at startup to avoid repeated lookups
-    private static readonly string? _cachedDiscoveryDiagnosticsEnvVar = Environment.GetEnvironmentVariable("TUNIT_DISCOVERY_DIAGNOSTICS");
+    // Use centralized environment variable cache
     
     private static TUnitVerbosity GetVerbosityFromCommandLine(ICommandLineOptions commandLineOptions)
     {
@@ -88,7 +88,7 @@ public sealed class VerbosityService
         }
 
         // Check cached legacy environment variable for backwards compatibility
-        if (_cachedDiscoveryDiagnosticsEnvVar == "1")
+        if (EnvironmentVariableCache.Get("TUNIT_DISCOVERY_DIAGNOSTICS") == "1")
         {
             return TUnitVerbosity.Debug;
         }
