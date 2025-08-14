@@ -11,6 +11,7 @@ public class BenchmarkBase
     protected static readonly string UnitPath = GetProjectPath("TUnitTimer");
     protected static readonly string NUnitPath = GetProjectPath("NUnitTimer");
     protected static readonly string XUnitPath = GetProjectPath("xUnitTimer");
+    protected static readonly string XUnitV3Path = GetProjectPath("xUnitTimerV3");
     protected static readonly string MsTestPath = GetProjectPath("MSTestTimer");
     
     protected static readonly string Framework = GetFramework();

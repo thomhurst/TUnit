@@ -1,6 +1,6 @@
 # TUnit Speed Comparison Benchmarks
 
-This directory contains realistic benchmarks comparing TUnit, xUnit, NUnit, and MSTest frameworks.
+This directory contains realistic benchmarks comparing TUnit, xUnit v2, xUnit v3, NUnit, and MSTest frameworks.
 
 ## Test Categories
 
